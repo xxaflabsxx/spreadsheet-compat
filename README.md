@@ -53,7 +53,7 @@ site/                        Static site generator consuming data/ + results/
 engine runners (what actually happens) → results (raw truth) → site
 (presentation layer, Phase 2+).
 
-## Phase 1 status
+## Status (Phase 1 + Phase-2 corpus expansion)
 
 - `data/functions.json`: 600 distinct function names inventoried from live
   official docs. Excel: 522 documented, Google Sheets: 515, LibreOffice: 469,
@@ -63,13 +63,26 @@ engine runners (what actually happens) → results (raw truth) → site
   anti-bot wall and is recorded honestly as `fetched: false` — LibreOffice
   coverage instead comes from `help.libreoffice.org`'s category pages (18
   pages fetched), which gave full, real coverage anyway.
-- `data/tests/`: 31 functions, 125 hand-authored test cases (see the Phase-1
-  task's exact function list — a couple of "X/Y" pairs like TEXTBEFORE/AFTER
-  were split into two full function files each, so 31 files instead of a
-  literal 30).
+- `data/tests/`: 148 functions, 604 hand-authored test cases. Phase 1
+  covered 31 functions (125 cases); the Phase-2 batch added 117 more
+  workhorse/compat-interesting functions (479 cases) spanning math
+  (CEILING/FLOOR + .MATH variants, MROUND, INT-vs-TRUNC...), statistics
+  (STDEV/RANK/PERCENTILE families), text (TEXT format codes, FIND/SEARCH,
+  TRIM/CLEAN, CHAR/CODE/UNICHAR/UNICODE...), date/time (WEEKDAY return
+  types, YEARFRAC bases, WEEKNUM vs ISOWEEKNUM, DAYS360 US/EU...),
+  lookup/reference (SUMIF/COUNTIF families, INDIRECT, OFFSET, HLOOKUP,
+  LOOKUP, TRANSPOSE...), and information/logical (IS* family, TYPE,
+  ERROR.TYPE, XOR...). Edge-case expectations cite official
+  Microsoft/LibreOffice/Google doc URLs inline in each case's
+  description/expected_note field.
 - `harness/run_lo.py` executed against LibreOffice 24.2.7.2, results
   committed at `results/libreoffice-24.2.json`. **Recalculation is proven
-  genuine** — see "How the LO runner forces recalculation" below.
+  genuine** — see "How the LO runner forces recalculation" below. Of the
+  604 cases: 513 matched their documented expectation, 86 diverged
+  (preserved as `matched_expected: false` — divergences are the product,
+  never "fixed" to match the engine), and 5 are intentionally
+  non-deterministic existence probes (TODAY/RAND family). See "Phase-2
+  headline quirks" below for the most interesting new divergences.
 
 ## How the LO runner forces recalculation (and how we know it's real)
 
@@ -196,6 +209,68 @@ Of the 31 functions tested (125 total cases):
 All 45 `#NAME?` results plus the `#VALUE!`/other-error cases above are
 recorded with matched engine version, formula (display + literal .xlsx
 storage form), and full notes in `results/libreoffice-24.2.json`.
+
+## Phase-2 headline quirks — LibreOffice Calc 24.2.7.2 vs documented Excel behavior
+
+The full list is every `matched_expected: false` entry in
+`results/libreoffice-24.2.json` (86 of them) and on the generated
+`docs/quirks.html` page; these are the most interesting families:
+
+1. **Booleans are numbers in LO.** `=ISNUMBER(TRUE)` → `TRUE` (Excel docs:
+   FALSE — booleans are their own type); `=TYPE(TRUE)` → `1` (Excel: 4);
+   `=COUNT()` over a range containing a boolean cell counts it (Excel:
+   excluded). One consistent LO design decision that flips three functions'
+   documented results.
+2. **Error-CODE divergence family: LO surfaces `#VALUE!` where Microsoft
+   documents `#NUM!` (or `#REF!`).** Reproduced across SQRT(-16), LN(0)/
+   LN(-5), LOG(0)/LOG(-10), LOG10(0)/LOG10(-5), SMALL/LARGE with k out of
+   range, PERCENTILE.INC/EXC and QUARTILE.INC out-of-range k/quart,
+   WEEKDAY invalid return_type, YEARFRAC invalid basis, FLOOR mismatched
+   signs, MODE with no duplicate (`#VALUE!` instead of documented `#N/A`),
+   OFFSET off-sheet and HLOOKUP row_index out of range (`#VALUE!` instead
+   of `#REF!`). Both engines agree these are errors; the *code* differs,
+   which breaks error-code-sniffing formulas ported from Excel. (LO's
+   internal Err:502 "invalid argument" maps to `#VALUE!` on xlsx export.)
+3. **`=MROUND(5,-2)` → `6`.** Microsoft documents mixed-sign arguments as a
+   hard `#NUM!` error; LibreOffice happily computes a value instead. A
+   ported sheet relying on that error will silently produce numbers.
+4. **`=POWER(-8,1/3)` → `-2`.** Excel documents/returns `#NUM!` for any
+   negative base with non-integer exponent; LO computes the real odd root.
+5. **Serial-number epoch offset below March 1900.** `=YEAR(1)` → `1899`,
+   `=MONTH(1)` → `12`, `=DAY(1)` → `31`: LO maps serial 1 to Dec 31 1899,
+   Excel maps it to Jan 1 1900 (a knock-on of Excel's fictitious
+   Feb 29 1900). All dates from Mar 1 1900 onward agree.
+6. **`=CHAR(0)` and `=UNICHAR(0)` return a NUL character** (stored in xlsx
+   as the `_x0000_` escape) instead of Microsoft's documented `#VALUE!`.
+7. **`=SUM(1,"2",3)` → `#VALUE!`.** Excel documents that numeric-looking
+   text *literals* typed directly as arguments are coerced (result 6); LO
+   refuses and errors even for direct literals.
+8. **`=TRIM(CHAR(160)&"Hello"&CHAR(160))`**: LO's `CHAR(160)` does not
+   produce a non-breaking space at all — the round-tripped result contains
+   U+FFFD replacement characters, so the classic "TRIM doesn't strip
+   nbsp" Excel behavior can't even be expressed the same way in LO.
+9. **`=ERROR.TYPE(...)` on LO-internal errors**: for `OFFSET(A1,-1,0)` and
+   `SQRT(-1)` inputs LO returns `#N/A` rather than the documented codes 4
+   and 6 — consistent with quirk family 2 (the inner errors aren't the
+   error codes Excel would produce, and LO's ERROR.TYPE doesn't map them).
+10. **Where LO deliberately matches Excel:** the CEILING/FLOOR negative-
+   number default-Mode divergence that LibreOffice's own documentation
+   describes for ODF context does NOT appear via .xlsx —
+   `=CEILING(-45.67,-2)` → `-46` and `=FLOOR(-45.67,-2)` → `-44`, exactly
+   the Microsoft-documented defaults. LO applies Excel-compatible
+   semantics when the formula arrives via an Excel-format file. Verified
+   correct, not a quirk, but exactly the kind of context-dependent
+   behavior this database exists to pin down.
+
+Also verified as matching documentation (worth calling out because the
+opposite is often assumed): `INT(-8.9)=-9` vs `TRUNC(-8.9)=-8`, XOR's
+odd-count-of-TRUE rule, RANK.AVG tie-averaging (3.5), PERCENTILE.EXC's
+exclusive k-bounds errors (as `#VALUE!`, see family 2), WEEKNUM
+return_type 1 vs 2 divergence (10 vs 11 on Microsoft's own example date),
+ISOWEEKNUM year-boundary behavior (Jan 1 2023 → ISO week 52 of 2022),
+DAYS360 US-vs-European method (30 vs 29 on the same date pair), ISBLANK
+FALSE on an `=""` formula result, COUNTBLANK counting that same cell as
+blank, and TIME(27,0,0)=0.125 hour wrap-around.
 
 ## How to add a function
 
