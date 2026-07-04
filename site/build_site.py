@@ -805,6 +805,15 @@ def common_ctx(rel):
     }
 
 
+def copy_static_extras():
+    """Files that must survive every rebuild (CNAME, search-engine verification)."""
+    static_dir = ROOT / "site" / "static"
+    if static_dir.exists():
+        for f in static_dir.iterdir():
+            if f.is_file():
+                shutil.copy2(f, OUT_DIR / f.name)
+
+
 def main():
     functions_doc = load_functions()
     tests_by_fn = load_tests()
@@ -921,6 +930,7 @@ def main():
     (OUT_DIR / "sitemap.xml").write_text(sitemap_xml)
     (OUT_DIR / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}sitemap.xml\n")
     (OUT_DIR / ".nojekyll").write_text("")
+    copy_static_extras()
 
     print(f"Built {len(records)} function pages.")
     print(f"Stats: {json.dumps(stats, indent=2)}")
