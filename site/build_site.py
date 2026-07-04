@@ -465,6 +465,30 @@ table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
 .quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
 .quirk-grid dd { margin: 0 0 0.5rem; }
 
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
 footer.site-footer {
   border-top: 1px solid var(--border);
   padding: 1.5rem 0 3rem;
@@ -527,6 +551,15 @@ BASE_TMPL = """<!doctype html>
 </header>
 <main class="container">
 {% block content %}{% endblock %}
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets.</p>
+  </div>
+  <a class="promo-btn" href="https://aflabs.gumroad.com" rel="sponsored">Browse AF Labs templates</a>
+</aside>
 </main>
 <footer class="site-footer">
   <div class="container">
@@ -535,10 +568,7 @@ BASE_TMPL = """<!doctype html>
     Functions without an executed-result badge are documentation-only inventory,
     clearly marked as not yet live-tested.</p>
     <p>Data and test harness on <a href="{{ github_url }}">GitHub</a>.</p>
-    <p class="footer-promo">Built by AF Labs. If this site saved you a debugging session,
-    we also make <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates
-    that do the formulas for you</a>: budgets, debt payoff, invoicing, and a complete
-    freelance business hub for Excel &amp; Google Sheets.</p>
+    <p>Built by AF Labs — <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates</a>.</p>
   </div>
 </footer>
 </body>
@@ -569,7 +599,7 @@ INDEX_TMPL = """{% extends "base.html" %}
 </div>
 
 <div class="methodology">
-  <strong>Methodology, honestly stated:</strong> every result badge on this site
+  <strong>Methodology:</strong> every result badge on this site
   traces back to a formula that was actually written into a real workbook and
   recalculated by that engine, proven with deterministic and volatile canary
   formulas on every run (see the <a href="{{ github_url }}">test harness</a>).
