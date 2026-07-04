@@ -1,0 +1,47 @@
+{
+  "function": "TYPE",
+  "cases": [
+    {
+      "id": "TYPE_number",
+      "formula": "=TYPE(A1)",
+      "description": "A number -> code 1",
+      "setup_cells": {
+        "A1": 5
+      },
+      "expected": 1
+    },
+    {
+      "id": "TYPE_text",
+      "formula": "=TYPE(A1)",
+      "description": "Text -> code 2",
+      "setup_cells": {
+        "A1": "abc"
+      },
+      "expected": 2
+    },
+    {
+      "id": "TYPE_logical",
+      "formula": "=TYPE(TRUE)",
+      "description": "A logical/boolean value -> code 4",
+      "expected": 4
+    },
+    {
+      "id": "TYPE_error",
+      "formula": "=TYPE(1/0)",
+      "description": "An error value -> code 16. TYPE classifies the error's TYPE rather than propagating the error itself, matching ISERROR-style special-casing",
+      "expected": 16,
+      "expected_note": "Full 5-code table (1/2/4/16/64) confirmed via https://support.microsoft.com/en-us/office/type-function-45b4e688-4bc3-48b3-a105-ffa892995899"
+    },
+    {
+      "id": "TYPE_array",
+      "formula": "=TYPE(A1:A3)",
+      "description": "A multi-cell array/range reference -> code 64",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": 64
+    }
+  ]
+}

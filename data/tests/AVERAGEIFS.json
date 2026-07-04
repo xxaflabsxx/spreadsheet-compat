@@ -1,0 +1,77 @@
+{
+  "function": "AVERAGEIFS",
+  "cases": [
+    {
+      "id": "AVERAGEIFS_basic",
+      "formula": "=AVERAGEIFS(A1:A5,B1:B5,\">2\")",
+      "description": "Average of A where paired B > 2",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 30,
+        "A4": 40,
+        "A5": 50,
+        "B1": 1,
+        "B2": 2,
+        "B3": 3,
+        "B4": 4,
+        "B5": 5
+      },
+      "expected": 40,
+      "expected_note": "Average of 30,40,50 = 40"
+    },
+    {
+      "id": "AVERAGEIFS_multi_criteria",
+      "formula": "=AVERAGEIFS(A1:A5,B1:B5,\">1\",C1:C5,\"<5\")",
+      "description": "Two AND-ed criteria ranges",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 30,
+        "A4": 40,
+        "A5": 50,
+        "B1": 1,
+        "B2": 2,
+        "B3": 3,
+        "B4": 4,
+        "B5": 5,
+        "C1": 1,
+        "C2": 2,
+        "C3": 3,
+        "C4": 9,
+        "C5": 9
+      },
+      "expected": 25,
+      "expected_note": "Only rows 2,3 satisfy B>1 AND C<5; average of 20,30 = 25"
+    },
+    {
+      "id": "AVERAGEIFS_no_match_div0",
+      "formula": "=AVERAGEIFS(A1:A3,B1:B3,\">100\")",
+      "description": "No rows satisfy the criteria -> #DIV/0!",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "B1": 1,
+        "B2": 2,
+        "B3": 3
+      },
+      "expected": "#DIV/0!"
+    },
+    {
+      "id": "AVERAGEIFS_wildcard",
+      "formula": "=AVERAGEIFS(A1:A3,B1:B3,\"a*\")",
+      "description": "Wildcard text criteria",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 30,
+        "B1": "apple",
+        "B2": "banana",
+        "B3": "avocado"
+      },
+      "expected": 20,
+      "expected_note": "apple and avocado match a*; average of 10,30 = 20"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "function": "SUM",
+  "cases": [
+    {
+      "id": "SUM_basic_range",
+      "formula": "=SUM(A1:A5)",
+      "description": "Basic sum of a contiguous numeric range",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5
+      },
+      "expected": 15
+    },
+    {
+      "id": "SUM_text_in_cell_reference_ignored",
+      "formula": "=SUM(A1:A3)",
+      "description": "A text value stored in a referenced cell is IGNORED by SUM, not coerced to a number, even though it looks numeric",
+      "setup_cells": {
+        "A1": 1,
+        "A2": "2",
+        "A3": 3
+      },
+      "expected": 4,
+      "expected_note": "A2 holds the text string '2' (not the number 2); SUM over a range skips text cells entirely, so the total is 1+3=4, not 6"
+    },
+    {
+      "id": "SUM_literal_numeric_string_argument_coerced",
+      "formula": "=SUM(1,\"2\",3)",
+      "description": "A numeric-looking TEXT LITERAL passed directly as a function argument (not via a cell reference) IS coerced to a number, unlike the same text sitting in a referenced cell",
+      "expected": 6,
+      "expected_note": "Contrast with SUM_text_in_cell_reference_ignored: Excel coerces literal string arguments that look like numbers when they are typed directly into the formula, but does not do so for text found inside a range reference"
+    },
+    {
+      "id": "SUM_empty_range",
+      "formula": "=SUM(A1:A3)",
+      "description": "Summing an entirely empty range returns 0, not an error",
+      "setup_cells": {},
+      "expected": 0
+    }
+  ]
+}

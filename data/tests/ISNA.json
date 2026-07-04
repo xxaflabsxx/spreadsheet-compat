@@ -1,0 +1,29 @@
+{
+  "function": "ISNA",
+  "cases": [
+    {
+      "id": "ISNA_div0",
+      "formula": "=ISNA(1/0)",
+      "description": "Key distinguishing case: ISNA is FALSE for #DIV/0! -- it only recognizes #N/A specifically, per https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665 ('ISNA: Value refers to the #N/A error value')",
+      "expected": false
+    },
+    {
+      "id": "ISNA_na",
+      "formula": "=ISNA(NA())",
+      "description": "ISNA is TRUE only for #N/A, the one case where ISERR disagrees with ISERROR/ISNA",
+      "expected": true
+    },
+    {
+      "id": "ISNA_value_error",
+      "formula": "=ISNA(\"a\"+1)",
+      "description": "ISNA is FALSE for a #VALUE! error (not #N/A)",
+      "expected": false
+    },
+    {
+      "id": "ISNA_no_error",
+      "formula": "=ISNA(5)",
+      "description": "A plain non-error number -> FALSE",
+      "expected": false
+    }
+  ]
+}

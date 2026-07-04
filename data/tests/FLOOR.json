@@ -1,0 +1,43 @@
+{
+  "function": "FLOOR",
+  "cases": [
+    {
+      "id": "FLOOR_basic",
+      "formula": "=FLOOR(3.7,2)",
+      "description": "Basic case, rounds 3.7 down to the nearest multiple of 2. Source: https://support.microsoft.com/en-us/office/floor-function-14bb497c-24f2-4e04-b327-b0b4de5a8886 (worked example table)",
+      "expected": 2
+    },
+    {
+      "id": "FLOOR_fractional_significance",
+      "formula": "=FLOOR(0.234,0.01)",
+      "description": "Rounds 0.234 down to the nearest multiple of 0.01. Source: Microsoft FLOOR docs worked example table.",
+      "expected": 0.23
+    },
+    {
+      "id": "FLOOR_both_negative_toward_zero",
+      "formula": "=FLOOR(-2.5,-2)",
+      "description": "Number and significance both negative -> Microsoft's own worked example rounds this TOWARD zero (-2), which is the opposite direction CEILING takes for the same-signed case.",
+      "expected": -2,
+      "expected_note": "Microsoft's worked example table gives FLOOR(-2.5,-2) = -2 exactly (https://support.microsoft.com/en-us/office/floor-function-14bb497c-24f2-4e04-b327-b0b4de5a8886). Note this is the OPPOSITE rounding direction of CEILING(-2.5,-2)=-4 for the identical arguments -- FLOOR and CEILING deliberately diverge on both-negative inputs, not a bug."
+    },
+    {
+      "id": "FLOOR_mismatched_sign_error",
+      "formula": "=FLOOR(2.5,-2)",
+      "description": "Number positive, significance negative (opposite signs) -> #NUM!, explicitly documented by Microsoft: 'If Number is positive and Significance is negative, FLOOR returns the #NUM! error value.'",
+      "expected": "#NUM!"
+    },
+    {
+      "id": "FLOOR_libreoffice_default_mode_divergence",
+      "formula": "=FLOOR(-45.67,-2)",
+      "description": "GOLD QUIRK CANDIDATE: mirror image of the CEILING default-Mode divergence. Both Number and significance negative, Mode omitted.",
+      "expected": -44,
+      "expected_note": "Derived from Microsoft's own worked FLOOR(-2.5,-2)=-2 example (both-negative case rounds TOWARD zero): ratio -45.67/-2=22.835, truncating toward zero gives 22, 22*-2=-44. LibreOffice's own FLOOR docs (https://help.libreoffice.org/latest/en-US/text/scalc/01/func_floor.html) define an optional 3rd Mode argument that only applies when both Number and Significance are negative, stating 'Mode = 0 or omitted: negative numbers are rounded down (away from zero)' with LO's own worked example FLOOR(-45.67;-2;0) = -46. So the identical 2-arg formula (Mode omitted) is documented to resolve to -46 under LibreOffice's default vs -44 under Microsoft's documented behavior -- a genuine divergence, and the exact mirror image of the CEILING case above (there Excel defaults away-from-zero and LO defaults toward-zero; here Excel defaults toward-zero and LO defaults away-from-zero). If LO's executed result is -46, matched_expected:false is the correct, intended signal -- do not 'fix' this expectation to match LO."
+    },
+    {
+      "id": "FLOOR_nonnumeric_error",
+      "formula": "=FLOOR(\"abc\",1)",
+      "description": "Nonnumeric first argument -> #VALUE!, per Microsoft docs: 'If either argument is nonnumeric, FLOOR returns the #VALUE! error value.'",
+      "expected": "#VALUE!"
+    }
+  ]
+}

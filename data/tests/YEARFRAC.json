@@ -1,0 +1,46 @@
+{
+  "function": "YEARFRAC",
+  "cases": [
+    {
+      "id": "YEARFRAC_basis0_us_nasd_default",
+      "formula": "=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30))",
+      "description": "Default basis 0 (US/NASD 30/360): treats every month as 30 days. Days = 6*30+29 = 209, over a 360-day year -> 209/360. Source: https://support.microsoft.com/en-us/office/yearfrac-function-3844141e-c76d-4143-82b6-208454ddc6a8 (worked example rounds to 0.58055556)",
+      "expected": 0.5805555555555556
+    },
+    {
+      "id": "YEARFRAC_basis1_actual_actual",
+      "formula": "=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),1)",
+      "description": "basis 1 (Actual/actual): actual 211 calendar days between the two dates, divided by 366 since the enclosing 1-year span (Jan 2012-Jan 2013) is a leap year. Source: Microsoft YEARFRAC docs worked example rounds to 0.57650273.",
+      "expected": 0.5765027322404372,
+      "expected_note": "211/366 = 0.5765027322404372, matching Microsoft's documented rounded example (0.57650273) to 8 decimal places. Actual/actual leap-year-boundary handling is a documented high-divergence area across spreadsheet engines."
+    },
+    {
+      "id": "YEARFRAC_basis2_actual_360",
+      "formula": "=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),2)",
+      "description": "basis 2 (Actual/360): actual 211 calendar days divided by a fixed 360-day year. Source: Microsoft YEARFRAC docs basis table.",
+      "expected": 0.5861111111111111,
+      "expected_note": "211/360 = 0.5861111111111111."
+    },
+    {
+      "id": "YEARFRAC_basis3_actual_365",
+      "formula": "=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),3)",
+      "description": "basis 3 (Actual/365): actual 211 calendar days divided by a fixed 365-day year. Source: Microsoft YEARFRAC docs worked example rounds to 0.57808219.",
+      "expected": 0.5780821917808219,
+      "expected_note": "211/365 = 0.5780821917808219, matches Microsoft's documented rounded example exactly."
+    },
+    {
+      "id": "YEARFRAC_basis4_european_30_360",
+      "formula": "=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),4)",
+      "description": "basis 4 (European 30/360). For this particular date pair neither day-of-month is the 31st, so the European day-count adjustment never triggers and the result equals basis 0's 209/360.",
+      "expected": 0.5805555555555556,
+      "expected_note": "European 30/360 only differs from US 30/360 when a start/end day-of-month is 31; with day 1 and day 30 as here, both conventions compute 209/360 identically."
+    },
+    {
+      "id": "YEARFRAC_invalid_basis_error",
+      "formula": "=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),9)",
+      "description": "basis values outside 0-4 are documented as invalid.",
+      "expected": "#NUM!",
+      "expected_note": "Microsoft docs: 'invalid basis values (< 0 or > 4) return a #NUM! error.'"
+    }
+  ]
+}

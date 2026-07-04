@@ -1,0 +1,46 @@
+{
+  "function": "RANK.AVG",
+  "cases": [
+    {
+      "id": "RANK.AVG_tie_averages_ranks",
+      "formula": "=RANK.AVG(20,A1:A5)",
+      "description": "Documented divergence from RANK.EQ: tied values get the AVERAGE of the ranks they would occupy, not the top rank. Per Microsoft's RANK.AVG docs (https://support.microsoft.com/en-us/office/rank-avg-function-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a): \"If more than one value has the same rank, the average rank is returned.\"",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 20,
+        "A4": 30,
+        "A5": 40
+      },
+      "expected": 3.5,
+      "expected_note": "The two tied 20s would occupy ranks 3 and 4 (descending); average = (3+4)/2 = 3.5, vs RANK.EQ's 3 on identical data"
+    },
+    {
+      "id": "RANK.AVG_no_tie_matches_RANK_EQ",
+      "formula": "=RANK.AVG(30,A1:A5)",
+      "description": "With no ties, RANK.AVG matches RANK.EQ exactly",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 20,
+        "A4": 30,
+        "A5": 40
+      },
+      "expected": 2
+    },
+    {
+      "id": "RANK.AVG_tie_ascending_order",
+      "formula": "=RANK.AVG(20,A1:A5,1)",
+      "description": "Tie-averaging also applies with the ascending order argument",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 20,
+        "A4": 30,
+        "A5": 40
+      },
+      "expected": 2.5,
+      "expected_note": "Ascending, the two tied 20s would occupy ranks 2 and 3 (only 10 is smaller); average = 2.5"
+    }
+  ]
+}

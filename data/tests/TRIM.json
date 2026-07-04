@@ -1,0 +1,31 @@
+{
+  "function": "TRIM",
+  "cases": [
+    {
+      "id": "TRIM_collapse_and_strip",
+      "formula": "=TRIM(\"  Hello   World  \")",
+      "description": "Leading/trailing spaces are stripped and multiple interior spaces collapse to a single space",
+      "expected": "Hello World"
+    },
+    {
+      "id": "TRIM_tab_not_removed",
+      "formula": "=TRIM(CHAR(9)&\"Hello\")",
+      "description": "TRIM only removes the regular ASCII space character (decimal 32); it does NOT remove other whitespace such as a tab (CHAR(9)), so the leading tab survives untouched",
+      "expected": "\tHello",
+      "expected_note": "Microsoft docs: \"the TRIM function was designed to trim the 7-bit ASCII space character (value 32) from text\" -- it does not generalize to other whitespace. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_nonbreaking_space_not_removed",
+      "formula": "=TRIM(CHAR(160)&\"Hello\"&CHAR(160))",
+      "description": "TRIM does not remove the non-breaking space character (CHAR(160), HTML &nbsp;) even though it renders as whitespace -- a real, documented, and easy-to-miss cross-engine divergence point since data pasted from web pages is full of CHAR(160)",
+      "expected": "\u00a0Hello\u00a0",
+      "expected_note": "Microsoft docs state explicitly: \"by itself, the TRIM function does not remove the nonbreaking space character (which has a decimal value of 160 and is commonly used in web pages as the HTML entity  ).\" Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_single_spaces_untouched",
+      "formula": "=TRIM(\"No Extra Spaces\")",
+      "description": "A string with only single spaces between words passes through unchanged",
+      "expected": "No Extra Spaces"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "function": "WORKDAY",
+  "cases": [
+    {
+      "id": "WORKDAY_basic_no_holidays",
+      "formula": "=WORKDAY(DATE(2024,1,1),5)",
+      "description": "5 working days after Mon Jan 1, 2024, no holidays supplied",
+      "expected": 45299,
+      "expected_note": "Jan 1, 2024 (Mon) + 5 workdays, skipping the Jan 6-7 weekend, = Jan 8, 2024 = serial 45299"
+    },
+    {
+      "id": "WORKDAY_with_single_holiday",
+      "formula": "=WORKDAY(DATE(2024,1,1),5,DATE(2024,1,3))",
+      "description": "Same start/offset as WORKDAY_basic_no_holidays but with Jan 3 excluded as a holiday, pushing the result one calendar day later",
+      "expected": 45300,
+      "expected_note": "With Jan 3 excluded, the 5th workday becomes Jan 9, 2024 = serial 45300"
+    },
+    {
+      "id": "WORKDAY_multiple_holidays_via_range",
+      "formula": "=WORKDAY(DATE(2024,1,1),5,A2:A3)",
+      "description": "holidays argument as a multi-cell range (Jan 3 and Jan 4 both excluded)",
+      "setup_cells": {
+        "A2": "=DATE(2024,1,3)",
+        "A3": "=DATE(2024,1,4)"
+      },
+      "expected": 45301,
+      "expected_note": "With both Jan 3 and Jan 4 excluded, the 5th workday becomes Jan 10, 2024 = serial 45301"
+    },
+    {
+      "id": "WORKDAY_negative_days_goes_backward",
+      "formula": "=WORKDAY(DATE(2024,1,10),-5)",
+      "description": "Negative days argument counts backward from start_date instead of forward. Verified via https://support.microsoft.com/en-us/office/workday-function-f764a5b7-05fc-4494-9486-60d494efbf33 (\"A positive value for days yields a future date; a negative value yields a past date\")",
+      "expected": 45294,
+      "expected_note": "Jan 10, 2024 (Wed) - 5 workdays, skipping the Jan 6-7 weekend, = Jan 3, 2024 = serial 45294"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "function": "HLOOKUP",
+  "cases": [
+    {
+      "id": "HLOOKUP_exact_match",
+      "formula": "=HLOOKUP(\"b\",A1:C2,2,FALSE)",
+      "description": "Exact match (range_lookup=FALSE) on a horizontal lookup table",
+      "setup_cells": {
+        "A1": "a",
+        "B1": "b",
+        "C1": "c",
+        "A2": 1,
+        "B2": 2,
+        "C2": 3
+      },
+      "expected": 2
+    },
+    {
+      "id": "HLOOKUP_approximate_match",
+      "formula": "=HLOOKUP(6,A1:E2,2,TRUE)",
+      "description": "Approximate match (TRUE) requires the first row sorted ascending; returns the largest header <= lookup_value",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 3,
+        "C1": 5,
+        "D1": 7,
+        "E1": 9,
+        "A2": 10,
+        "B2": 30,
+        "C2": 50,
+        "D2": 70,
+        "E2": 90
+      },
+      "expected": 50,
+      "expected_note": "https://support.microsoft.com/en-us/office/hlookup-function-a3034eec-b719-4ba3-bb65-e1ad662ed95f -- approximate match finds the next largest value that is <= lookup_value; 6 falls between 5 and 7, so it matches 5 -> 50"
+    },
+    {
+      "id": "HLOOKUP_not_found_exact_na",
+      "formula": "=HLOOKUP(\"z\",A1:C2,2,FALSE)",
+      "description": "Exact match with no match found -> #N/A",
+      "setup_cells": {
+        "A1": "a",
+        "B1": "b",
+        "C1": "c",
+        "A2": 1,
+        "B2": 2,
+        "C2": 3
+      },
+      "expected": "#N/A"
+    },
+    {
+      "id": "HLOOKUP_row_index_out_of_range",
+      "formula": "=HLOOKUP(\"a\",A1:C2,5,FALSE)",
+      "description": "row_index_num greater than the number of rows in table_array -> #REF!",
+      "setup_cells": {
+        "A1": "a",
+        "B1": "b",
+        "C1": "c",
+        "A2": 1,
+        "B2": 2,
+        "C2": 3
+      },
+      "expected": "#REF!"
+    }
+  ]
+}

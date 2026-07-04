@@ -1,0 +1,31 @@
+{
+  "function": "ISBLANK",
+  "cases": [
+    {
+      "id": "ISBLANK_true_for_genuinely_empty_cell",
+      "formula": "=ISBLANK(A1)",
+      "description": "A1 is never written to at all (no setup_cells entry) -- a genuinely empty cell",
+      "setup_cells": {},
+      "expected": true
+    },
+    {
+      "id": "ISBLANK_false_for_formula_returning_empty_string",
+      "formula": "=ISBLANK(A1)",
+      "description": "A1 contains the formula =\"\" which displays as nothing but is NOT considered blank -- a classic documented divergence between 'looks empty' and 'is blank'. Verified via https://support.microsoft.com/en-us/help/823838/the-result-is-false-when-you-use-the-isblank-function-in-an-excel-spre (\"the result is FALSE even though the cell appears to be empty ... when the cell contains a zero-length string\")",
+      "setup_cells": {
+        "A1": "=\"\""
+      },
+      "expected": false,
+      "expected_note": "A1 displays as blank but holds a zero-length-string formula result, not a true blank -- ISBLANK must return FALSE"
+    },
+    {
+      "id": "ISBLANK_false_for_cell_with_value",
+      "formula": "=ISBLANK(A1)",
+      "description": "A1 explicitly contains the value 0 -- clearly not blank",
+      "setup_cells": {
+        "A1": 0
+      },
+      "expected": false
+    }
+  ]
+}

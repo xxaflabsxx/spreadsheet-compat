@@ -1,0 +1,37 @@
+{
+  "function": "POWER",
+  "cases": [
+    {
+      "id": "POWER_basic",
+      "formula": "=POWER(2,3)",
+      "description": "2 raised to the 3rd power",
+      "expected": 8
+    },
+    {
+      "id": "POWER_negative_exponent",
+      "formula": "=POWER(2,-2)",
+      "description": "Negative exponent gives a reciprocal power",
+      "expected": 0.25
+    },
+    {
+      "id": "POWER_fractional_exponent_positive_base",
+      "formula": "=POWER(9,0.5)",
+      "description": "Fractional exponent on a positive base is a well-defined real root (square root here)",
+      "expected": 3
+    },
+    {
+      "id": "POWER_negative_base_fractional_exponent",
+      "formula": "=POWER(-8,1/3)",
+      "description": "A negative base raised to a non-integer exponent has no real-number result in general (would require complex numbers), so Excel errors",
+      "expected": "#NUM!",
+      "expected_note": "Confirmed via Microsoft's own community support: entering =(-8)^(2/3) (equivalent power semantics to POWER) returns #NUM! in Excel -- https://answers.microsoft.com/en-us/msoffice/forum/all/excel-calculating-exponential-of-negative-number/5c67eae2-5682-4daf-b3d6-50b22e9919c2 -- note that -8^(1/3) is mathematically -2 as a real cube root, but Excel's POWER/^ implementation does not special-case rational exponents with odd integer denominators and returns #NUM! for any negative base with a non-integer exponent"
+    },
+    {
+      "id": "POWER_zero_to_zero",
+      "formula": "=POWER(0,0)",
+      "description": "0 raised to the 0th power; by the near-universal 'empty product' convention this is 1 (matches VBA's own '0^0', Python, C#, and LibreOffice/OpenOffice Calc)",
+      "expected": 1,
+      "expected_note": "Real Excel (the worksheet function, and even the '^' operator) has a long-standing, Microsoft-acknowledged bug -- reproduced in Excel 2007 and 2010 and still reported unresolved -- where both '=0^0' and '=POWER(0,0)' incorrectly return #NUM! instead of 1, even though VBA's own 'x = 0 ^ 0' correctly evaluates to 1 in the same product. Recording the spec/cross-engine-consensus value (1) as 'expected' here so this exact Excel quirk shows up as a flagged divergence rather than being silently baked in as 'correct' -- https://learn.microsoft.com/en-us/answers/questions/4850441/excel-formula-bug-00-gives-num"
+    }
+  ]
+}

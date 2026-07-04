@@ -1,0 +1,41 @@
+{
+  "function": "STDEV.S",
+  "cases": [
+    {
+      "id": "STDEV.S_basic_two_points",
+      "formula": "=STDEV.S(A1:A2)",
+      "description": "Sample standard deviation of two hand-verifiable values, identical formula/data to STDEV_basic_two_points in the STDEV file",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20
+      },
+      "expected": 7.0710678118654755,
+      "expected_note": "Mean=15; sample variance=((10-15)^2+(20-15)^2)/(2-1)=50; sqrt(50)=7.0710678118654755"
+    },
+    {
+      "id": "STDEV.S_matches_STDEV_same_data",
+      "formula": "=STDEV.S(A1:A8)",
+      "description": "STDEV.S on the classic Wikipedia sample dataset {2,4,4,4,5,5,7,9} - must match STDEV_matches_STDEV_S_same_data exactly, since STDEV.S is simply the Excel-2010+ modern name for the legacy STDEV calculation (same n-1 sample formula)",
+      "setup_cells": {
+        "A1": 2,
+        "A2": 4,
+        "A3": 4,
+        "A4": 4,
+        "A5": 5,
+        "A6": 5,
+        "A7": 7,
+        "A8": 9
+      },
+      "expected": 2.138089935299395
+    },
+    {
+      "id": "STDEV.S_single_value_div0",
+      "formula": "=STDEV.S(A1:A1)",
+      "description": "Sample stdev needs n>=2 (divides by n-1); one value -> #DIV/0!, confirmed against Microsoft's STDEV.S documentation of the n-1 method (https://support.microsoft.com/en-us/office/stdev-s-function-7d69cf97-0c1f-4acf-be27-f3e83904cc23)",
+      "setup_cells": {
+        "A1": 2
+      },
+      "expected": "#DIV/0!"
+    }
+  ]
+}

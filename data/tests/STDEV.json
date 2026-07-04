@@ -1,0 +1,43 @@
+{
+  "function": "STDEV",
+  "cases": [
+    {
+      "id": "STDEV_basic_two_points",
+      "formula": "=STDEV(A1:A2)",
+      "description": "Sample standard deviation of two hand-verifiable values",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20
+      },
+      "expected": 7.0710678118654755,
+      "expected_note": "Mean=15; sample variance=((10-15)^2+(20-15)^2)/(2-1)=50; sqrt(50)=7.0710678118654755"
+    },
+    {
+      "id": "STDEV_matches_STDEV_S_same_data",
+      "formula": "=STDEV(A1:A8)",
+      "description": "Legacy STDEV on the classic Wikipedia sample dataset {2,4,4,4,5,5,7,9}; compare to STDEV.S_matches_STDEV_same_data on identical data in the STDEV.S file - both must return exactly the same value since STDEV.S is just the modern name for the same sample-stdev calculation",
+      "setup_cells": {
+        "A1": 2,
+        "A2": 4,
+        "A3": 4,
+        "A4": 4,
+        "A5": 5,
+        "A6": 5,
+        "A7": 7,
+        "A8": 9
+      },
+      "expected": 2.138089935299395,
+      "expected_note": "Sample variance=32/7=4.571428571428571; sqrt of that = 2.138089935299395"
+    },
+    {
+      "id": "STDEV_single_value_div0",
+      "formula": "=STDEV(A1:A1)",
+      "description": "Sample stdev needs at least 2 data points (divides by n-1); a single value -> #DIV/0!",
+      "setup_cells": {
+        "A1": 2
+      },
+      "expected": "#DIV/0!",
+      "expected_note": "n-1=0 with a single supplied value, causing division by zero"
+    }
+  ]
+}

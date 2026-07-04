@@ -1,0 +1,47 @@
+{
+  "function": "RANK",
+  "cases": [
+    {
+      "id": "RANK_basic_descending",
+      "formula": "=RANK(30,A1:A5)",
+      "description": "Default/omitted order ranks descending (largest=1)",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 20,
+        "A4": 30,
+        "A5": 40
+      },
+      "expected": 2,
+      "expected_note": "Only 40 is greater than 30, so 30 is rank 2"
+    },
+    {
+      "id": "RANK_ascending_order",
+      "formula": "=RANK(30,A1:A5,1)",
+      "description": "Nonzero order argument ranks ascending (smallest=1)",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 20,
+        "A4": 30,
+        "A5": 40
+      },
+      "expected": 4,
+      "expected_note": "10,20,20 are all less than 30, so 30 is rank 4 ascending"
+    },
+    {
+      "id": "RANK_tie_shares_top_rank",
+      "formula": "=RANK(20,A1:A5)",
+      "description": "Tied values share the same (best/top) rank",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 20,
+        "A4": 30,
+        "A5": 40
+      },
+      "expected": 3,
+      "expected_note": "Two values (30,40) exceed 20, so both 20s tie for rank 3; rank 4 is skipped entirely"
+    }
+  ]
+}

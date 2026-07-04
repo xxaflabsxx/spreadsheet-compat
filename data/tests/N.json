@@ -1,0 +1,43 @@
+{
+  "function": "N",
+  "cases": [
+    {
+      "id": "N_number",
+      "formula": "=N(A1)",
+      "description": "A number passed through unchanged -> the number itself",
+      "setup_cells": {
+        "A1": 7
+      },
+      "expected": 7
+    },
+    {
+      "id": "N_true",
+      "formula": "=N(TRUE)",
+      "description": "TRUE -> 1, per Microsoft's N doc example table",
+      "expected": 1,
+      "expected_note": "Confirmed via https://support.microsoft.com/en-us/office/n-function-a624cad1-3635-4208-b54a-29733d1278c9"
+    },
+    {
+      "id": "N_false",
+      "formula": "=N(FALSE)",
+      "description": "FALSE -> 0, per the same doc's TRUE/FALSE convention",
+      "expected": 0
+    },
+    {
+      "id": "N_text",
+      "formula": "=N(A1)",
+      "description": "Text (even numeric-looking text like \"7\") -> 0, per doc example N(\"7\") = 0 and N(\"Even\") = 0: 'anything else' converts to 0",
+      "setup_cells": {
+        "A1": "hello"
+      },
+      "expected": 0
+    },
+    {
+      "id": "N_date",
+      "formula": "=N(DATE(2024,1,1))",
+      "description": "A date -> its underlying serial number, per doc example N(4/17/2011)=40650",
+      "expected": 45292,
+      "expected_note": "2024-01-01 is Excel serial day 45292 under the 1900 date system."
+    }
+  ]
+}

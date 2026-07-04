@@ -1,0 +1,31 @@
+{
+  "function": "CEILING.MATH",
+  "cases": [
+    {
+      "id": "CEILING.MATH_basic_significance",
+      "formula": "=CEILING.MATH(24.3,5)",
+      "description": "Rounds 24.3 up to the nearest multiple of 5. Source: https://support.microsoft.com/en-us/office/ceiling-math-function-80f95d2f-b499-4eee-9f16-f795a8e306c8 (worked example table)",
+      "expected": 25
+    },
+    {
+      "id": "CEILING.MATH_default_significance_1",
+      "formula": "=CEILING.MATH(6.7)",
+      "description": "Significance and mode both omitted -> defaults to nearest integer (significance 1). Source: Microsoft CEILING.MATH docs.",
+      "expected": 7
+    },
+    {
+      "id": "CEILING.MATH_negative_default_mode_toward_zero",
+      "formula": "=CEILING.MATH(-8.1,2)",
+      "description": "Negative number, mode omitted -> unlike the modeless legacy CEILING function, CEILING.MATH's default for negative numbers rounds TOWARD zero.",
+      "expected": -8,
+      "expected_note": "Microsoft worked example: CEILING.MATH(-8.1,2) = -8 ('rounds -8.1 up (toward 0) to the nearest multiple of 2'). This is the modern, explicit-mode successor to legacy CEILING and was designed to match LibreOffice/ODF's CEILING(...,...,Mode) semantics for the default case."
+    },
+    {
+      "id": "CEILING.MATH_negative_mode_nonzero_away_from_zero",
+      "formula": "=CEILING.MATH(-5.5,2,-1)",
+      "description": "Negative number with a nonzero mode argument -> rounds away from zero instead of the toward-zero default.",
+      "expected": -6,
+      "expected_note": "Microsoft worked example: CEILING.MATH(-5.5,2,-1) = -6 ('rounds -5.5 down (away from 0) ... with a mode of -1'). Mode only affects negative numbers; any nonzero mode reverses the default direction."
+    }
+  ]
+}

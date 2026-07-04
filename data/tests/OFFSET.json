@@ -1,0 +1,41 @@
+{
+  "function": "OFFSET",
+  "cases": [
+    {
+      "id": "OFFSET_basic_single_cell",
+      "formula": "=OFFSET(A1,2,1)",
+      "description": "Move 2 rows down and 1 column right from A1, landing on B3",
+      "setup_cells": {
+        "B3": 99
+      },
+      "expected": 99
+    },
+    {
+      "id": "OFFSET_range_with_height_width",
+      "formula": "=SUM(OFFSET(A1,1,0,3,1))",
+      "description": "height=3, width=1 builds a 3-row-tall range starting 1 row below A1 (A2:A4), then sums it",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 20,
+        "A4": 30
+      },
+      "expected": 60
+    },
+    {
+      "id": "OFFSET_negative_out_of_bounds_error",
+      "formula": "=OFFSET(A1,-1,0)",
+      "description": "Offsetting above row 1 (off the top edge of the worksheet) -> #REF!",
+      "expected": "#REF!",
+      "expected_note": "https://support.microsoft.com/en-us/office/offset-function-c8de19ae-dd79-4b9b-a14e-b4d906d11b66 -- 'If rows and cols offset reference over the edge of the worksheet, OFFSET returns the #REF! error value.'"
+    },
+    {
+      "id": "OFFSET_zero_offset_returns_same_cell",
+      "formula": "=OFFSET(B2,0,0)",
+      "description": "rows=0, cols=0 returns a reference to the exact starting cell",
+      "setup_cells": {
+        "B2": 5
+      },
+      "expected": 5
+    }
+  ]
+}

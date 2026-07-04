@@ -61,6 +61,17 @@ _XLFN_FUNCTIONS = {
     "EXPAND", "CHOOSEROWS", "CHOOSECOLS", "ISOMITTED",
     "IFS", "SWITCH", "MAXIFS", "MINIFS", "TEXTJOIN", "CONCAT",
     "IFNA", "NUMBERVALUE",
+    # Excel 2010+ statistical ".INC"/".EQ"/".AVG"/".S"/".P" renames, plus a
+    # handful of Excel 2013 additions, needed for the Phase-2 test batch.
+    # Source: XlsxWriter's "Working with Formulas" future-function table.
+    "STDEV.S", "STDEV.P", "VAR.S",
+    "RANK.EQ", "RANK.AVG",
+    "PERCENTILE.INC", "PERCENTILE.EXC", "QUARTILE.INC",
+    "UNICHAR", "UNICODE",
+    "FORMULATEXT",
+    "ISOWEEKNUM",
+    "DAYS",
+    "CEILING.MATH", "FLOOR.MATH",
 }
 
 

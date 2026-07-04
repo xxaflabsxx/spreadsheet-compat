@@ -1,0 +1,30 @@
+{
+  "function": "CLEAN",
+  "cases": [
+    {
+      "id": "CLEAN_removes_control_char",
+      "formula": "=CLEAN(\"Hello\"&CHAR(7)&\"World\")",
+      "description": "CHAR(7) (BEL, a non-printable 7-bit ASCII control character) is stripped out",
+      "expected": "HelloWorld"
+    },
+    {
+      "id": "CLEAN_removes_tab_leaves_text",
+      "formula": "=CLEAN(CHAR(9)&\"Hello\")",
+      "description": "CLEAN removes CHAR(9) (tab) because it's one of the first 32 non-printable ASCII codes -- contrast with TRIM, which leaves tabs completely untouched since TRIM only targets the space character (32), not control characters",
+      "expected": "Hello",
+      "expected_note": "Source: https://support.microsoft.com/en-us/office/clean-function-26f3d7c5-475f-4a9c-90e5-4b8ba987ba41 - CLEAN \"removes nonprintable characters from ASCII codes 0 through 31\"; its own documented example uses CHAR(9)&\"Monthly report\"&CHAR(10) -> \"Monthly report\""
+    },
+    {
+      "id": "CLEAN_leaves_spaces_alone",
+      "formula": "=CLEAN(\"  Hello  \")",
+      "description": "Regular space characters (code 32) are left alone by CLEAN -- only non-printable control characters (codes 0-31) are removed",
+      "expected": "  Hello  "
+    },
+    {
+      "id": "CLEAN_no_op_on_clean_text",
+      "formula": "=CLEAN(\"Hello\")",
+      "description": "Text with no non-printable characters passes through unchanged",
+      "expected": "Hello"
+    }
+  ]
+}

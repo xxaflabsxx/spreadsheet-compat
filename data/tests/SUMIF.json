@@ -1,0 +1,76 @@
+{
+  "function": "SUMIF",
+  "cases": [
+    {
+      "id": "SUMIF_basic",
+      "formula": "=SUMIF(A1:A5,\">10\")",
+      "description": "Sum of cells in the range itself that satisfy the criteria (no sum_range)",
+      "setup_cells": {
+        "A1": 5,
+        "A2": 10,
+        "A3": 15,
+        "A4": 20,
+        "A5": 25
+      },
+      "expected": 60,
+      "expected_note": "15+20+25=60; 5 and 10 fail the >10 test"
+    },
+    {
+      "id": "SUMIF_separate_sum_range",
+      "formula": "=SUMIF(A1:A5,\">2\",B1:B5)",
+      "description": "Criteria evaluated against A but the matching B cells are summed",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30,
+        "B4": 40,
+        "B5": 50
+      },
+      "expected": 120,
+      "expected_note": "Rows 3,4,5 satisfy A>2; sum of paired B = 30+40+50"
+    },
+    {
+      "id": "SUMIF_wildcard_text",
+      "formula": "=SUMIF(B1:B3,\"a*\",A1:A3)",
+      "description": "Wildcard text criteria matches cells starting with 'a'",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "B1": "apple",
+        "B2": "banana",
+        "B3": "avocado"
+      },
+      "expected": 4,
+      "expected_note": "apple(1)+avocado(3)=4; banana excluded"
+    },
+    {
+      "id": "SUMIF_no_match",
+      "formula": "=SUMIF(A1:A3,\">100\")",
+      "description": "No cells satisfy the criteria -> 0",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": 0
+    },
+    {
+      "id": "SUMIF_blank_cells_ignored",
+      "formula": "=SUMIF(A1:A5,\">0\")",
+      "description": "Blank cells interspersed in the range are simply skipped, not treated as matching or as errors",
+      "setup_cells": {
+        "A1": 5,
+        "A3": 10,
+        "A5": 15
+      },
+      "expected": 30,
+      "expected_note": "A2 and A4 are blank (unset); only A1,A3,A5 exist and all satisfy >0"
+    }
+  ]
+}

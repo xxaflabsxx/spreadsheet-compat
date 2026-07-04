@@ -1,0 +1,78 @@
+{
+  "function": "PERCENTILE.EXC",
+  "cases": [
+    {
+      "id": "PERCENTILE.EXC_k_zero_error",
+      "formula": "=PERCENTILE.EXC(A1:A10,0)",
+      "description": "Documented divergence from PERCENTILE.INC: PERCENTILE.EXC requires k strictly between 0 and 1 (and more precisely between 1/(n+1) and n/(n+1)); k=0 -> #NUM!. Confirmed via Microsoft's PERCENTILE.EXC docs (https://support.microsoft.com/en-us/office/percentile-exc-function-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba): \"If k is <=0 or if k >=1, PERCENTILE.EXC returns the #NUM! error value.\" PERCENTILE.INC_k_zero on identical data returns 1, not an error.",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "A6": 6,
+        "A7": 7,
+        "A8": 8,
+        "A9": 9,
+        "A10": 10
+      },
+      "expected": "#NUM!"
+    },
+    {
+      "id": "PERCENTILE.EXC_k_one_error",
+      "formula": "=PERCENTILE.EXC(A1:A10,1)",
+      "description": "k=1 is likewise out of PERCENTILE.EXC's exclusive valid range -> #NUM!, whereas PERCENTILE.INC_k_one on identical data returns 10",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "A6": 6,
+        "A7": 7,
+        "A8": 8,
+        "A9": 9,
+        "A10": 10
+      },
+      "expected": "#NUM!"
+    },
+    {
+      "id": "PERCENTILE.EXC_k_half",
+      "formula": "=PERCENTILE.EXC(A1:A10,0.5)",
+      "description": "k=0.5 is within the valid range for n=10 (1/11 < 0.5 < 10/11) and matches PERCENTILE.INC's result at the median",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "A6": 6,
+        "A7": 7,
+        "A8": 8,
+        "A9": 9,
+        "A10": 10
+      },
+      "expected": 5.5
+    },
+    {
+      "id": "PERCENTILE.EXC_k_near_lower_bound",
+      "formula": "=PERCENTILE.EXC(A1:A10,0.1)",
+      "description": "k=0.1 is valid since 1/(n+1)=1/11=0.0909 < 0.1 < 10/11=0.9091 for n=10",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "A6": 6,
+        "A7": 7,
+        "A8": 8,
+        "A9": 9,
+        "A10": 10
+      },
+      "expected": 1.1,
+      "expected_note": "pos=k*(n+1)=0.1*11=1.1 -> interpolate 10% of the way from data[0]=1 to data[1]=2 -> 1.1"
+    }
+  ]
+}

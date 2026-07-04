@@ -1,0 +1,32 @@
+{
+  "function": "NUMBERVALUE",
+  "cases": [
+    {
+      "id": "NUMBERVALUE_basic",
+      "formula": "=NUMBERVALUE(\"1234.56\",\".\",\",\")",
+      "description": "Basic numeric text conversion with explicit US-style decimal_separator and group_separator arguments",
+      "expected": 1234.56
+    },
+    {
+      "id": "NUMBERVALUE_european_separators",
+      "formula": "=NUMBERVALUE(\"2.500,27\",\",\",\".\")",
+      "description": "European-style formatted number: ',' is passed as decimal_separator and '.' as group_separator, letting NUMBERVALUE parse locale-formatted text regardless of the engine's own locale settings",
+      "expected": 2500.27,
+      "expected_note": "Matches Microsoft's own documented example. Source: https://support.microsoft.com/en-us/office/numbervalue-function-1b05c8cf-2bfa-4437-af70-596c7ea7d879"
+    },
+    {
+      "id": "NUMBERVALUE_malformed_text",
+      "formula": "=NUMBERVALUE(\"abc\",\".\",\",\")",
+      "description": "Text that cannot be parsed as a number at all -> #VALUE!",
+      "expected": "#VALUE!",
+      "expected_note": "Source: https://support.microsoft.com/en-us/office/numbervalue-function-1b05c8cf-2bfa-4437-af70-596c7ea7d879 - 'If any of the arguments are not valid, NUMBERVALUE returns the #VALUE! error value'"
+    },
+    {
+      "id": "NUMBERVALUE_decimal_separator_used_twice",
+      "formula": "=NUMBERVALUE(\"12.34.56\",\".\",\",\")",
+      "description": "A decimal separator appearing more than once in the text is documented as invalid input -> #VALUE!",
+      "expected": "#VALUE!",
+      "expected_note": "Source: https://support.microsoft.com/en-us/office/numbervalue-function-1b05c8cf-2bfa-4437-af70-596c7ea7d879 - decimal separator used multiple times is explicitly called out as an error condition"
+    }
+  ]
+}

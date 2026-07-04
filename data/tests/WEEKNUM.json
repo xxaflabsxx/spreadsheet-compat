@@ -1,0 +1,39 @@
+{
+  "function": "WEEKNUM",
+  "cases": [
+    {
+      "id": "WEEKNUM_us_default_return_type_1",
+      "formula": "=WEEKNUM(DATE(2024,1,1),1)",
+      "description": "return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340",
+      "expected": 1
+    },
+    {
+      "id": "WEEKNUM_monday_start_return_type_2",
+      "formula": "=WEEKNUM(DATE(2024,1,1),2)",
+      "description": "return_type 2 = same 'week containing Jan 1 is week 1' system, but weeks start Monday",
+      "expected": 1,
+      "expected_note": "Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)"
+    },
+    {
+      "id": "WEEKNUM_doc_example_default",
+      "formula": "=WEEKNUM(DATE(2012,3,9))",
+      "description": "Microsoft's own documented example date/result for the default return_type (1)",
+      "expected": 10,
+      "expected_note": "Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type"
+    },
+    {
+      "id": "WEEKNUM_doc_example_monday_start_diverges",
+      "formula": "=WEEKNUM(DATE(2012,3,9),2)",
+      "description": "Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft's own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence",
+      "expected": 11,
+      "expected_note": "Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10"
+    },
+    {
+      "id": "WEEKNUM_return_type_21_is_iso_system",
+      "formula": "=WEEKNUM(DATE(2023,1,1),21)",
+      "description": "return_type 21 uses 'System 2': the week containing the year's first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use 'week containing Jan 1 = week 1'). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json",
+      "expected": 52,
+      "expected_note": "Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023"
+    }
+  ]
+}

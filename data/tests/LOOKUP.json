@@ -1,0 +1,76 @@
+{
+  "function": "LOOKUP",
+  "cases": [
+    {
+      "id": "LOOKUP_vector_exact_match",
+      "formula": "=LOOKUP(3,A1:A5,B1:B5)",
+      "description": "Vector form exact match against an ascending-sorted lookup_vector",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30,
+        "B4": 40,
+        "B5": 50
+      },
+      "expected": 30,
+      "expected_note": "https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb -- lookup_vector must be in ascending order for LOOKUP to work correctly; this vector is sorted"
+    },
+    {
+      "id": "LOOKUP_vector_approximate_between_values",
+      "formula": "=LOOKUP(3.5,A1:A5,B1:B5)",
+      "description": "No exact match; LOOKUP uses the largest lookup_vector value that is <= lookup_value",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30,
+        "B4": 40,
+        "B5": 50
+      },
+      "expected": 30,
+      "expected_note": "3.5 has no exact match; largest value <=3.5 is 3 -> paired result 30"
+    },
+    {
+      "id": "LOOKUP_below_range_na",
+      "formula": "=LOOKUP(0,A1:A5,B1:B5)",
+      "description": "lookup_value smaller than every entry in lookup_vector -> #N/A",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30,
+        "B4": 40,
+        "B5": 50
+      },
+      "expected": "#N/A"
+    },
+    {
+      "id": "LOOKUP_array_form_more_rows_than_cols",
+      "formula": "=LOOKUP(2,A1:B3)",
+      "description": "Array form (single 2-D argument, no separate result_vector): since A1:B3 has more rows than columns, LOOKUP searches the FIRST column and returns from the LAST column",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "B1": 100,
+        "B2": 200,
+        "B3": 300
+      },
+      "expected": 200,
+      "expected_note": "Per Microsoft docs' array-form rule (searches first row/col depending on which is longer): match on A2=2 returns paired last-column value 200"
+    }
+  ]
+}

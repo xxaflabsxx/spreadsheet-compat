@@ -1,0 +1,31 @@
+{
+  "function": "DAYS360",
+  "cases": [
+    {
+      "id": "DAYS360_doc_example_basic",
+      "formula": "=DAYS360(DATE(2011,1,30),DATE(2011,2,1))",
+      "description": "Microsoft's own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a",
+      "expected": 1
+    },
+    {
+      "id": "DAYS360_doc_example_full_year",
+      "formula": "=DAYS360(DATE(2011,1,1),DATE(2011,12,31))",
+      "description": "A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention",
+      "expected": 360
+    },
+    {
+      "id": "DAYS360_us_method_month_end_shift",
+      "formula": "=DAYS360(DATE(2024,1,1),DATE(2024,1,31))",
+      "description": "US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation's description of the US method's end-of-month handling",
+      "expected": 30,
+      "expected_note": "Effective dates become Jan 1 -> Feb 1 -> (2-1)*30 + (1-1) = 30"
+    },
+    {
+      "id": "DAYS360_european_method_month_end_no_shift",
+      "formula": "=DAYS360(DATE(2024,1,1),DATE(2024,1,31),TRUE)",
+      "description": "Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method's 'shift end_date to next month' logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence",
+      "expected": 29,
+      "expected_note": "Effective dates become Jan 1 -> Jan 30 (31 clamped to 30, no next-month shift) -> (1-1)*30 + (30-1) = 29"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "function": "MROUND",
+  "cases": [
+    {
+      "id": "MROUND_basic",
+      "formula": "=MROUND(10,3)",
+      "description": "Rounds 10 to the nearest multiple of 3. Source: https://support.microsoft.com/en-us/office/mround-function-c299c3b0-15a5-426d-aa4b-d2d5b3baf427 (worked example)",
+      "expected": 9
+    },
+    {
+      "id": "MROUND_both_negative",
+      "formula": "=MROUND(-10,-3)",
+      "description": "Both arguments negative (same sign, as required) -> rounds to nearest multiple, sign preserved. Source: Microsoft MROUND docs worked example.",
+      "expected": -9
+    },
+    {
+      "id": "MROUND_fractional_multiple",
+      "formula": "=MROUND(1.3,0.2)",
+      "description": "Rounds 1.3 to the nearest multiple of the fractional value 0.2. Source: Microsoft MROUND docs worked example.",
+      "expected": 1.4000000000000001,
+      "expected_note": "Microsoft's documented example rounds this to 1.4; true IEEE-754 double nearest value is 1.4000000000000001 (0.2*7), same well-known binary-float representation issue as ROUND(1.005,2) elsewhere in this corpus."
+    },
+    {
+      "id": "MROUND_mismatched_signs_error",
+      "formula": "=MROUND(5,-2)",
+      "description": "Number and multiple must have the same sign, per Microsoft docs: 'The Number and Multiple arguments must have the same sign. If not, a #NUM error is returned.'",
+      "expected": "#NUM!"
+    },
+    {
+      "id": "MROUND_zero",
+      "formula": "=MROUND(0,5)",
+      "description": "Zero rounds to zero regardless of the multiple.",
+      "expected": 0
+    }
+  ]
+}

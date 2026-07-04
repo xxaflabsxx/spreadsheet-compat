@@ -1,0 +1,30 @@
+{
+  "function": "INT",
+  "cases": [
+    {
+      "id": "INT_basic_positive",
+      "formula": "=INT(8.9)",
+      "description": "Positive fractional number truncates its decimal part",
+      "expected": 8
+    },
+    {
+      "id": "INT_negative_rounds_toward_negative_infinity",
+      "formula": "=INT(-8.9)",
+      "description": "Documented classic divergence from TRUNC: INT always rounds DOWN to the nearest integer (toward negative infinity), so a negative fractional number rounds AWAY from zero",
+      "expected": -9,
+      "expected_note": "Per Microsoft's INT function docs, INT(-8.9) = -9 because INT rounds down toward negative infinity, unlike TRUNC(-8.9) = -8 which truncates toward zero -- see the paired TRUNC_negative_truncates_toward_zero case in TRUNC.json for the direct comparison"
+    },
+    {
+      "id": "INT_already_integer",
+      "formula": "=INT(5)",
+      "description": "A whole number is returned unchanged",
+      "expected": 5
+    },
+    {
+      "id": "INT_negative_integer",
+      "formula": "=INT(-5)",
+      "description": "A whole negative number is returned unchanged (no fractional part to drop)",
+      "expected": -5
+    }
+  ]
+}

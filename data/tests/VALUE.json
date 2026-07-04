@@ -1,0 +1,29 @@
+{
+  "function": "VALUE",
+  "cases": [
+    {
+      "id": "VALUE_numeric_string",
+      "formula": "=VALUE(\"123\")",
+      "description": "Basic numeric-looking text string converts to a number",
+      "expected": 123
+    },
+    {
+      "id": "VALUE_percentage_string",
+      "formula": "=VALUE(\"50%\")",
+      "description": "A percentage-formatted text string converts to its underlying decimal, since Excel stores percentages internally as decimals (50% == 0.5)",
+      "expected": 0.5
+    },
+    {
+      "id": "VALUE_currency_string",
+      "formula": "=VALUE(\"$1,000\")",
+      "description": "Currency formatting (symbol + thousands separator) is stripped during conversion; matches Microsoft's own VALUE documentation example",
+      "expected": 1000
+    },
+    {
+      "id": "VALUE_non_numeric_string_error",
+      "formula": "=VALUE(\"abc\")",
+      "description": "A string that isn't a recognized number/date/time format -> #VALUE!",
+      "expected": "#VALUE!"
+    }
+  ]
+}

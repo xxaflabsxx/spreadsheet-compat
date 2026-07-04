@@ -1,0 +1,43 @@
+{
+  "function": "COUNT",
+  "cases": [
+    {
+      "id": "COUNT_mixed_types_range",
+      "formula": "=COUNT(A1:A6)",
+      "description": "COUNT only counts numeric cells in a range; text, blanks, and booleans (when referenced via a range) are all excluded",
+      "setup_cells": {
+        "A1": 10,
+        "A2": "hello",
+        "A4": true,
+        "A5": 20
+      },
+      "expected": 2,
+      "expected_note": "A3 and A6 are blank, A2 is text, A4 is a boolean cell; only A1=10 and A5=20 are counted"
+    },
+    {
+      "id": "COUNT_boolean_in_range_excluded",
+      "formula": "=COUNT(A1:A1)",
+      "description": "A boolean value referenced through a cell range is NOT counted by COUNT",
+      "setup_cells": {
+        "A1": true
+      },
+      "expected": 0,
+      "expected_note": "Per Microsoft's COUNT documentation, booleans in a referenced range are excluded from COUNT, unlike booleans typed directly as literal arguments"
+    },
+    {
+      "id": "COUNT_boolean_literal_argument_counted",
+      "formula": "=COUNT(1,TRUE)",
+      "description": "Contrast with COUNT_boolean_in_range_excluded: a logical value typed directly into the argument list IS counted",
+      "setup_cells": {},
+      "expected": 2,
+      "expected_note": "Microsoft's COUNT docs: \"Logical values and text representations of numbers that you type directly into the list of arguments are counted\" - this differs from the same boolean sitting in a cell reference"
+    },
+    {
+      "id": "COUNT_all_blank_range",
+      "formula": "=COUNT(A1:A5)",
+      "description": "A range with no values at all counts as 0",
+      "setup_cells": {},
+      "expected": 0
+    }
+  ]
+}

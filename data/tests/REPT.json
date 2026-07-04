@@ -1,0 +1,32 @@
+{
+  "function": "REPT",
+  "cases": [
+    {
+      "id": "REPT_basic",
+      "formula": "=REPT(\"ab\",3)",
+      "description": "Basic repetition",
+      "expected": "ababab"
+    },
+    {
+      "id": "REPT_zero_times",
+      "formula": "=REPT(\"ab\",0)",
+      "description": "number_times=0 returns an empty string, not an error",
+      "expected": "",
+      "expected_note": "Microsoft docs: \"If number_times is 0 (zero), REPT returns \\\"\\\" (empty text).\" Source: https://support.microsoft.com/en-us/office/rept-function-04c4d778-e712-43b4-9c15-d656582bb061"
+    },
+    {
+      "id": "REPT_negative_times",
+      "formula": "=REPT(\"ab\",-1)",
+      "description": "A negative number_times is invalid -> #VALUE!",
+      "expected": "#VALUE!",
+      "expected_note": "Documented behavior: REPT does not accept negative number_times and returns #VALUE! (per Microsoft's REPT reference and its documented remarks on the number_times argument)"
+    },
+    {
+      "id": "REPT_fractional_truncated",
+      "formula": "=REPT(\"ab\",2.9)",
+      "description": "A non-integer number_times is truncated toward zero before repeating",
+      "expected": "abab",
+      "expected_note": "Documented: \"If number_times is not an integer, it is truncated.\""
+    }
+  ]
+}

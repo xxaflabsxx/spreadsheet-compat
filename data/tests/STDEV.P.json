@@ -1,0 +1,43 @@
+{
+  "function": "STDEV.P",
+  "cases": [
+    {
+      "id": "STDEV.P_diverges_from_sample_same_data",
+      "formula": "=STDEV.P(A1:A8)",
+      "description": "Population standard deviation on the SAME dataset {2,4,4,4,5,5,7,9} used for STDEV/STDEV.S - divides by n instead of n-1, giving a smaller, exact result (2) vs the sample stdev's 2.138089935299395",
+      "setup_cells": {
+        "A1": 2,
+        "A2": 4,
+        "A3": 4,
+        "A4": 4,
+        "A5": 5,
+        "A6": 5,
+        "A7": 7,
+        "A8": 9
+      },
+      "expected": 2,
+      "expected_note": "Population variance=32/8=4 exactly; sqrt(4)=2"
+    },
+    {
+      "id": "STDEV.P_two_points_diverges",
+      "formula": "=STDEV.P(A1:A2)",
+      "description": "Same two-point data as the sample-stdev cases (10,20) but population formula divides by n=2 instead of n-1=1, giving a much smaller result",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20
+      },
+      "expected": 5,
+      "expected_note": "Population variance=((10-15)^2+(20-15)^2)/2=25; sqrt(25)=5, vs sample stdev's 7.0710678118654755 on identical data"
+    },
+    {
+      "id": "STDEV.P_single_value_no_error",
+      "formula": "=STDEV.P(A1:A1)",
+      "description": "Unlike STDEV.S/STDEV, a single value does NOT error for the population formula, since it divides by n (=1), not n-1",
+      "setup_cells": {
+        "A1": 2
+      },
+      "expected": 0,
+      "expected_note": "Population variance of one point = 0/1 = 0, a valid result - genuine divergence from STDEV.S's #DIV/0! on the same single-cell input"
+    }
+  ]
+}

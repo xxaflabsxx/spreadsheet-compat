@@ -1,0 +1,61 @@
+{
+  "function": "MODE",
+  "cases": [
+    {
+      "id": "MODE_basic_repeated_value",
+      "formula": "=MODE(A1:A6)",
+      "description": "Basic case with one clearly most-frequent value",
+      "setup_cells": {
+        "A1": 5.6,
+        "A2": 4,
+        "A3": 4,
+        "A4": 3,
+        "A5": 2,
+        "A6": 4
+      },
+      "expected": 4,
+      "expected_note": "This is Microsoft's own documented MODE example data set -- https://support.microsoft.com/en-us/office/mode-function-e45192ce-9122-4980-82ed-4bdc34973120 -- 4 appears 3 times, more than any other value"
+    },
+    {
+      "id": "MODE_no_repeated_value_na",
+      "formula": "=MODE(A1:A4)",
+      "description": "When every value in the data set is unique (no duplicates at all), MODE has nothing to return",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4
+      },
+      "expected": "#N/A",
+      "expected_note": "Microsoft's MODE docs state verbatim: 'If the data set contains no duplicate data points, MODE returns the #N/A error value' -- https://support.microsoft.com/en-us/office/mode-function-e45192ce-9122-4980-82ed-4bdc34973120"
+    },
+    {
+      "id": "MODE_negative_numbers_repeated",
+      "formula": "=MODE(A1:A5)",
+      "description": "MODE works the same way on negative numbers",
+      "setup_cells": {
+        "A1": -3,
+        "A2": -3,
+        "A3": -1,
+        "A4": 0,
+        "A5": 2
+      },
+      "expected": -3
+    },
+    {
+      "id": "MODE_ignores_text_and_blanks",
+      "formula": "=MODE(A1:A6)",
+      "description": "Text values and blank cells in the range are ignored when finding the mode",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 1,
+        "A3": "x",
+        "A4": null,
+        "A5": 2,
+        "A6": 3
+      },
+      "expected": 1,
+      "expected_note": "Only the numeric cells 1,1,2,3 participate; 1 is the most frequent among them"
+    }
+  ]
+}

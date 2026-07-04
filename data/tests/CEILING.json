@@ -1,0 +1,44 @@
+{
+  "function": "CEILING",
+  "cases": [
+    {
+      "id": "CEILING_basic",
+      "formula": "=CEILING(2.5,1)",
+      "description": "Basic case, rounds 2.5 up to the nearest multiple of 1. Source: https://support.microsoft.com/en-us/office/ceiling-function-0a5cd7c8-0720-4f0a-bd2c-c943e510899f (worked example table)",
+      "expected": 3
+    },
+    {
+      "id": "CEILING_fractional_significance",
+      "formula": "=CEILING(0.234,0.01)",
+      "description": "Rounds 0.234 up to the nearest multiple of 0.01. Source: Microsoft CEILING docs worked example table.",
+      "expected": 0.24
+    },
+    {
+      "id": "CEILING_both_negative_away_from_zero",
+      "formula": "=CEILING(-2.5,-2)",
+      "description": "Number and significance both negative -> rounds away from zero (more negative), per Microsoft's documented rule and worked example.",
+      "expected": -4,
+      "expected_note": "Microsoft: 'If number is negative, and significance is negative, the value is rounded down, away from zero.' Worked example CEILING(-2.5,-2)=-4 at https://support.microsoft.com/en-us/office/ceiling-function-0a5cd7c8-0720-4f0a-bd2c-c943e510899f"
+    },
+    {
+      "id": "CEILING_negative_number_positive_significance",
+      "formula": "=CEILING(-2.5,2)",
+      "description": "Number negative, significance positive -> rounds up toward zero (less negative), per Microsoft's documented rule and worked example.",
+      "expected": -2,
+      "expected_note": "Microsoft: 'If number is negative, and significance is positive, the value is rounded up towards zero.' Worked example CEILING(-2.5,2)=-2 at the same doc page."
+    },
+    {
+      "id": "CEILING_libreoffice_default_mode_divergence",
+      "formula": "=CEILING(-45.67,-2)",
+      "description": "GOLD QUIRK CANDIDATE: identical 2-argument call (Mode omitted) with number and significance both negative. Per Microsoft's documented CEILING rule this must round AWAY from zero.",
+      "expected": -46,
+      "expected_note": "Microsoft (https://support.microsoft.com/en-us/office/ceiling-function-0a5cd7c8-0720-4f0a-bd2c-c943e510899f): both-negative case rounds away from zero, so CEILING(-45.67,-2) -> -46 (ratio -45.67/-2=22.835, ceiling(22.835)=23, 23*-2=-46). LibreOffice's own CEILING docs (https://help.libreoffice.org/latest/en-US/text/scalc/01/func_ceiling.html) define a 3rd optional Mode argument that ONLY applies when both Number and Significance are negative, and state: 'if Mode is equal to zero or not given, negative numbers are rounded up (towards zero)' -- with LO's own worked example CEILING(-45.67;-2;0) = -44. That means the identical 2-arg formula (Mode omitted) is documented to resolve to -44 under LibreOffice's own default, vs -46 under Microsoft's documented default -- a genuine cross-engine default-behavior divergence for the exact same formula text, not just a wording difference. If LO's executed result is -44, matched_expected:false here is the intended, correct signal of that divergence -- do not 'fix' this expectation to match LO."
+    },
+    {
+      "id": "CEILING_nonnumeric_error",
+      "formula": "=CEILING(\"abc\",1)",
+      "description": "Nonnumeric first argument -> #VALUE!, per Microsoft docs: 'If either argument is nonnumeric, CEILING returns the #VALUE! error value.'",
+      "expected": "#VALUE!"
+    }
+  ]
+}

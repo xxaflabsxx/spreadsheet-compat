@@ -1,0 +1,26 @@
+{
+  "function": "TIME",
+  "cases": [
+    {
+      "id": "TIME_basic",
+      "formula": "=TIME(13,30,0)",
+      "description": "Ordinary in-range h/m/s construction returns the fraction-of-a-day serial",
+      "expected": 0.5625,
+      "expected_note": "13:30 = 13.5/24 of a day = 0.5625"
+    },
+    {
+      "id": "TIME_hour_wraps_modulo_24",
+      "formula": "=TIME(25,0,0)",
+      "description": "Documented behavior: an hour argument greater than 23 wraps modulo 24 instead of erroring or accumulating past a single day. Verified via https://support.microsoft.com/en-us/office/time-function-9a5aff99-8f7d-4611-845e-747d0b8d5457 (\"Any value greater than 23 will be divided by 24 and the remainder will be treated as the hour value\")",
+      "expected": 0.041666666666666664,
+      "expected_note": "25 mod 24 = 1 -> TIME(1,0,0) = 1/24 of a day"
+    },
+    {
+      "id": "TIME_doc_example_27_hours",
+      "formula": "=TIME(27,0,0)",
+      "description": "The exact example given in Microsoft's own TIME documentation (\"TIME(27,0,0) = TIME(3,0,0) = .125 or 3:00 AM\")",
+      "expected": 0.125,
+      "expected_note": "27 mod 24 = 3 -> TIME(3,0,0) = 3/24 = 0.125, matching the cited doc example verbatim"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "function": "UNICHAR",
+  "cases": [
+    {
+      "id": "UNICHAR_accented_char",
+      "formula": "=UNICHAR(233)",
+      "description": "Basic code point beyond the 7-bit ASCII/basic-Latin range (U+00E9 'e with acute')",
+      "expected": "\u00e9",
+      "expected_note": "U+00E9 = 233 decimal = accented lowercase e (e-acute)"
+    },
+    {
+      "id": "UNICHAR_roundtrip_via_unicode",
+      "formula": "=UNICHAR(UNICODE(\"\u00e9\"))",
+      "description": "Round trip: UNICODE() extracts the code point of an accented character, UNICHAR() converts it straight back",
+      "expected": "\u00e9",
+      "expected_note": "UNICODE(char) then UNICHAR(that number) must reproduce the original character exactly"
+    },
+    {
+      "id": "UNICHAR_astral_emoji",
+      "formula": "=UNICHAR(128512)",
+      "description": "Code point beyond the Basic Multilingual Plane (U+1F600 GRINNING FACE emoji), requiring a UTF-16 surrogate pair internally",
+      "expected": "\ud83d\ude00",
+      "expected_note": "128512 decimal = U+1F600, the grinning-face emoji; modern Excel supports supplementary-plane code points via surrogate pairs"
+    },
+    {
+      "id": "UNICHAR_zero_error",
+      "formula": "=UNICHAR(0)",
+      "description": "UNICHAR(0) is documented to raise #VALUE! (0 is not a valid character code point). Verified via https://support.microsoft.com/en-us/office/unichar-function-ffeb64f5-f131-44c6-b332-5cd72f0659b8 (\"Number: ... Numbers <=0 ... UNICHAR returns the #VALUE! error value\")",
+      "expected": "#VALUE!"
+    },
+    {
+      "id": "UNICHAR_negative_error",
+      "formula": "=UNICHAR(-1)",
+      "description": "Negative code point is out of range -> #VALUE! per the same UNICHAR documentation as UNICHAR_zero_error",
+      "expected": "#VALUE!"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "function": "ISERR",
+  "cases": [
+    {
+      "id": "ISERR_div0",
+      "formula": "=ISERR(1/0)",
+      "description": "ISERR is TRUE for a #DIV/0! error (any error except #N/A)",
+      "expected": true
+    },
+    {
+      "id": "ISERR_na",
+      "formula": "=ISERR(NA())",
+      "description": "Key distinguishing case: ISERR is documented to return FALSE specifically for #N/A, unlike ISERROR (TRUE) -- 'ISERR: Value refers to any error value except #N/A' per https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665",
+      "expected": false,
+      "expected_note": "This is the whole point of ISERR existing separately from ISERROR: it deliberately excludes #N/A."
+    },
+    {
+      "id": "ISERR_value_error",
+      "formula": "=ISERR(\"a\"+1)",
+      "description": "ISERR is TRUE for a #VALUE! error (not #N/A, so it counts)",
+      "expected": true
+    },
+    {
+      "id": "ISERR_no_error",
+      "formula": "=ISERR(5)",
+      "description": "A plain non-error number -> FALSE",
+      "expected": false
+    }
+  ]
+}

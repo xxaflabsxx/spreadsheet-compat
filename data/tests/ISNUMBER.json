@@ -1,0 +1,37 @@
+{
+  "function": "ISNUMBER",
+  "cases": [
+    {
+      "id": "ISNUMBER_number",
+      "formula": "=ISNUMBER(A1)",
+      "description": "A genuine number -> TRUE",
+      "setup_cells": {
+        "A1": 5
+      },
+      "expected": true
+    },
+    {
+      "id": "ISNUMBER_text",
+      "formula": "=ISNUMBER(A1)",
+      "description": "A text string -> FALSE",
+      "setup_cells": {
+        "A1": "hello"
+      },
+      "expected": false
+    },
+    {
+      "id": "ISNUMBER_boolean",
+      "formula": "=ISNUMBER(TRUE)",
+      "description": "Documented divergence/point of confusion: a logical TRUE/FALSE value is its own distinct type in Excel's IS-function type system and is NOT considered a number, even though it participates in arithmetic as 1/0. Microsoft's IS-functions page (https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665) states value arguments 'are not converted' and gives ISLOGICAL as the dedicated test for booleans, distinct from ISNUMBER -- the docs do not give an explicit ISNUMBER(TRUE) example, but this is the well-established, widely verified real Excel result.",
+      "expected": false,
+      "expected_note": "ISNUMBER(TRUE) = FALSE; use ISLOGICAL to detect booleans instead."
+    },
+    {
+      "id": "ISNUMBER_blank",
+      "formula": "=ISNUMBER(A1)",
+      "description": "A blank cell -> FALSE",
+      "setup_cells": {},
+      "expected": false
+    }
+  ]
+}

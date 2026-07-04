@@ -1,0 +1,49 @@
+{
+  "function": "AVERAGE",
+  "cases": [
+    {
+      "id": "AVERAGE_basic",
+      "formula": "=AVERAGE(A1:A4)",
+      "description": "Basic average of 4 numbers",
+      "setup_cells": {
+        "A1": 2,
+        "A2": 4,
+        "A3": 6,
+        "A4": 8
+      },
+      "expected": 5
+    },
+    {
+      "id": "AVERAGE_ignores_text_and_blanks",
+      "formula": "=AVERAGE(A1:A5)",
+      "description": "Text values and blank cells in the range are excluded from both the sum and the count, rather than being treated as 0",
+      "setup_cells": {
+        "A1": 10,
+        "A2": "skip me",
+        "A3": 20,
+        "A4": null,
+        "A5": 30
+      },
+      "expected": 20,
+      "expected_note": "Only A1, A3, A5 (10, 20, 30) are numeric; average = 60/3 = 20. If blanks/text counted as 0 the result would be 12"
+    },
+    {
+      "id": "AVERAGE_all_text_div0",
+      "formula": "=AVERAGE(A1:A3)",
+      "description": "A range containing only text has zero numeric values to average -> #DIV/0!",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "c"
+      },
+      "expected": "#DIV/0!"
+    },
+    {
+      "id": "AVERAGE_empty_range_div0",
+      "formula": "=AVERAGE(A1:A3)",
+      "description": "A fully empty range also has zero numeric values -> #DIV/0!",
+      "setup_cells": {},
+      "expected": "#DIV/0!"
+    }
+  ]
+}

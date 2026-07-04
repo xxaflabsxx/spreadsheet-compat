@@ -1,0 +1,33 @@
+{
+  "function": "DAYS",
+  "cases": [
+    {
+      "id": "DAYS_basic_end_first_argument_order",
+      "formula": "=DAYS(DATE(2024,3,15),DATE(2024,3,1))",
+      "description": "DAYS takes END_DATE FIRST, then start_date -- the opposite argument order from DAYS360/YEARFRAC. Verified via https://support.microsoft.com/en-us/office/days-function-57740535-d549-4395-8728-0f07bff0b9df (\"DAYS(end_date, start_date)\")",
+      "expected": 14,
+      "expected_note": "2024-03-15 minus 2024-03-01 = 14 days"
+    },
+    {
+      "id": "DAYS_reversed_arguments_flip_sign",
+      "formula": "=DAYS(DATE(2024,3,1),DATE(2024,3,15))",
+      "description": "Swapping which date is passed first (now the earlier date is 'end_date') flips the sign -- reinforcing that argument order is significant and not auto-corrected",
+      "expected": -14,
+      "expected_note": "Same two dates as DAYS_basic_end_first_argument_order but with roles swapped -> -14"
+    },
+    {
+      "id": "DAYS_doc_example_text_dates",
+      "formula": "=DAYS(\"15-MAR-2021\",\"1-FEB-2021\")",
+      "description": "Microsoft's own documented example, using text dates parsed as if by DATEVALUE",
+      "expected": 42,
+      "expected_note": "Exact example from the DAYS function documentation"
+    },
+    {
+      "id": "DAYS_doc_example_full_year",
+      "formula": "=DAYS(DATE(2021,12,31),DATE(2021,1,1))",
+      "description": "A second literal example from the same Microsoft documentation page",
+      "expected": 364,
+      "expected_note": "Dec 31, 2021 minus Jan 1, 2021 = 364 days"
+    }
+  ]
+}

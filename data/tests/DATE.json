@@ -1,0 +1,26 @@
+{
+  "function": "DATE",
+  "cases": [
+    {
+      "id": "DATE_basic",
+      "formula": "=DATE(2024,3,15)",
+      "description": "Ordinary in-range y/m/d construction",
+      "expected": 45366,
+      "expected_note": "2024-03-15 = serial 45366 (1900 date system; Dec 31 2023 = 45291, Jan 1 2024 = 45292)"
+    },
+    {
+      "id": "DATE_month_rollover_above_12",
+      "formula": "=DATE(2024,13,1)",
+      "description": "Documented rollover: month=13 adds 13 months worth of offset from January, landing in January of the FOLLOWING year rather than raising an error. Verified via https://support.microsoft.com/en-us/office/date-function-e36c0c8c-4104-49da-ab83-82328b832349 (\"If month is greater than 12 ... DATE(2008,14,2) returns ... February 2, 2009\")",
+      "expected": 45658,
+      "expected_note": "month 13 = 12 months past January 2024 -> January 2025; 2025-01-01 = serial 45658 (2024 is a leap year, 366 days after 45292)"
+    },
+    {
+      "id": "DATE_month_rollback_below_1",
+      "formula": "=DATE(2008,-3,2)",
+      "description": "Documented rollback: month<=0 subtracts months backward across a year boundary. Verified via the same DATE documentation (\"If month is less than 1 ... DATE(2008,-3,2) returns ... September 2, 2007\")",
+      "expected": 39327,
+      "expected_note": "2007-09-02 = serial 39327"
+    }
+  ]
+}

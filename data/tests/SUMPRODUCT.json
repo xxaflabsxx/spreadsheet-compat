@@ -1,0 +1,78 @@
+{
+  "function": "SUMPRODUCT",
+  "cases": [
+    {
+      "id": "SUMPRODUCT_basic",
+      "formula": "=SUMPRODUCT(A1:A3,B1:B3)",
+      "description": "Sum of pairwise products across two equal-sized arrays",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30
+      },
+      "expected": 140,
+      "expected_note": "1*10+2*20+3*30 = 10+40+90 = 140"
+    },
+    {
+      "id": "SUMPRODUCT_single_array_acts_like_sum",
+      "formula": "=SUMPRODUCT(A1:A3)",
+      "description": "With only one array argument, SUMPRODUCT just sums its elements",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": 6
+    },
+    {
+      "id": "SUMPRODUCT_boolean_double_negative_count",
+      "formula": "=SUMPRODUCT(--(A1:A5>2))",
+      "description": "Classic double-unary-minus idiom coerces a boolean array to 1/0 to count matches without an extra helper column",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5
+      },
+      "expected": 3,
+      "expected_note": "A3,A4,A5 satisfy >2; --(...) turns TRUE/FALSE into 1/0 and SUMPRODUCT sums them"
+    },
+    {
+      "id": "SUMPRODUCT_condition_times_values_sumif_replacement",
+      "formula": "=SUMPRODUCT((A1:A5>2)*B1:B5)",
+      "description": "Multiplying a boolean condition array by a value array replicates SUMIF without a separate criteria function",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30,
+        "B4": 40,
+        "B5": 50
+      },
+      "expected": 120,
+      "expected_note": "Rows where A>2 (rows 3,4,5) contribute their B value: 30+40+50=120"
+    },
+    {
+      "id": "SUMPRODUCT_mismatched_array_sizes_error",
+      "formula": "=SUMPRODUCT(A1:A3,B1:B2)",
+      "description": "Arrays of different dimensions cannot be multiplied element-wise -> #VALUE!",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "B1": 10,
+        "B2": 20
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft docs: array arguments must have the same dimensions, otherwise SUMPRODUCT returns #VALUE!"
+    }
+  ]
+}

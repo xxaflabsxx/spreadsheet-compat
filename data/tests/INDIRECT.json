@@ -1,0 +1,45 @@
+{
+  "function": "INDIRECT",
+  "cases": [
+    {
+      "id": "INDIRECT_basic_cell_text",
+      "formula": "=INDIRECT(\"A1\")",
+      "description": "Basic ref_text naming a cell literally",
+      "setup_cells": {
+        "A1": 42
+      },
+      "expected": 42
+    },
+    {
+      "id": "INDIRECT_concatenated_ref",
+      "formula": "=INDIRECT(\"A\"&2)",
+      "description": "ref_text built dynamically by concatenating column letter and a row number",
+      "setup_cells": {
+        "A2": 99
+      },
+      "expected": 99
+    },
+    {
+      "id": "INDIRECT_malformed_ref_error",
+      "formula": "=INDIRECT(\"NotACell!!\")",
+      "description": "A ref_text string that isn't a valid cell reference in either A1 or R1C1 style -> #REF!",
+      "expected": "#REF!",
+      "expected_note": "https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value"
+    },
+    {
+      "id": "INDIRECT_r1c1_style",
+      "formula": "=INDIRECT(\"R2C1\",FALSE)",
+      "description": "a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2",
+      "setup_cells": {
+        "A2": 7
+      },
+      "expected": 7
+    },
+    {
+      "id": "INDIRECT_ref_to_blank_cell",
+      "formula": "=INDIRECT(\"Z50\")",
+      "description": "Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context",
+      "expected": 0
+    }
+  ]
+}

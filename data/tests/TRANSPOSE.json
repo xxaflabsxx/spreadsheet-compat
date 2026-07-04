@@ -1,0 +1,87 @@
+{
+  "function": "TRANSPOSE",
+  "cases": [
+    {
+      "id": "TRANSPOSE_row_to_column",
+      "formula": "=TRANSPOSE(A1:C1)",
+      "description": "1x3 horizontal row transposed into a 3x1 vertical column",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "C1": 3
+      },
+      "expected": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ]
+      ],
+      "check_range": "A30:A32"
+    },
+    {
+      "id": "TRANSPOSE_2x3_to_3x2",
+      "formula": "=TRANSPOSE(A1:C2)",
+      "description": "2 rows x 3 columns transposed into 3 rows x 2 columns",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "C1": 3,
+        "A2": 4,
+        "B2": 5,
+        "C2": 6
+      },
+      "expected": [
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          3,
+          6
+        ]
+      ],
+      "check_range": "A30:B32"
+    },
+    {
+      "id": "TRANSPOSE_single_cell_degenerate",
+      "formula": "=TRANSPOSE(A1)",
+      "description": "Degenerate 1x1 case: transposing a single cell yields the same single value",
+      "setup_cells": {
+        "A1": 5
+      },
+      "expected": [
+        [
+          5
+        ]
+      ],
+      "check_range": "A30:A30"
+    },
+    {
+      "id": "TRANSPOSE_blank_cell_becomes_zero",
+      "formula": "=TRANSPOSE(A1:B1)",
+      "description": "A blank source cell transposes to 0, not an empty string, matching normal blank-cell-in-formula behavior",
+      "setup_cells": {
+        "A1": 5
+      },
+      "expected": [
+        [
+          5
+        ],
+        [
+          0
+        ]
+      ],
+      "expected_note": "B1 is left unset (blank); its transposed position reads back as 0",
+      "check_range": "A30:A31"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "function": "ERROR.TYPE",
+  "cases": [
+    {
+      "id": "ERROR.TYPE_null",
+      "formula": "=ERROR.TYPE(A1:A2 C1:C2)",
+      "description": "Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -> ERROR.TYPE code 1",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "C1": 3,
+        "C2": 4
+      },
+      "expected": 1,
+      "expected_note": "#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa"
+    },
+    {
+      "id": "ERROR.TYPE_div0",
+      "formula": "=ERROR.TYPE(1/0)",
+      "description": "#DIV/0! -> code 2",
+      "expected": 2
+    },
+    {
+      "id": "ERROR.TYPE_value",
+      "formula": "=ERROR.TYPE(\"a\"+1)",
+      "description": "#VALUE! -> code 3",
+      "expected": 3
+    },
+    {
+      "id": "ERROR.TYPE_ref",
+      "formula": "=ERROR.TYPE(OFFSET(A1,-1,0))",
+      "description": "Offsetting above row 1 produces a genuine #REF! error -> code 4",
+      "expected": 4
+    },
+    {
+      "id": "ERROR.TYPE_name",
+      "formula": "=ERROR.TYPE(qwertyzz)",
+      "description": "An undefined name reference produces #NAME? -> code 5",
+      "expected": 5
+    },
+    {
+      "id": "ERROR.TYPE_num",
+      "formula": "=ERROR.TYPE(SQRT(-1))",
+      "description": "Square root of a negative number produces #NUM! -> code 6",
+      "expected": 6
+    },
+    {
+      "id": "ERROR.TYPE_na",
+      "formula": "=ERROR.TYPE(NA())",
+      "description": "#N/A -> code 7",
+      "expected": 7,
+      "expected_note": "Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa"
+    },
+    {
+      "id": "ERROR.TYPE_non_error",
+      "formula": "=ERROR.TYPE(5)",
+      "description": "Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error",
+      "expected": "#N/A",
+      "expected_note": "Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: 'returns the #N/A error' for non-error input."
+    }
+  ]
+}

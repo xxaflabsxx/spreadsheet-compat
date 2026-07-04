@@ -1,0 +1,39 @@
+{
+  "function": "FORMULATEXT",
+  "cases": [
+    {
+      "id": "FORMULATEXT_basic_arithmetic",
+      "formula": "=FORMULATEXT(A1)",
+      "description": "A cell holding a plain arithmetic formula -> FORMULATEXT returns the exact formula text as typed",
+      "setup_cells": {
+        "A1": "=1+2"
+      },
+      "expected": "=1+2"
+    },
+    {
+      "id": "FORMULATEXT_preserves_exact_text",
+      "formula": "=FORMULATEXT(A1)",
+      "description": "Formula text with nested string literals is returned verbatim, including quotes",
+      "setup_cells": {
+        "A1": "=CONCATENATE(\"a\",\"b\")"
+      },
+      "expected": "=CONCATENATE(\"a\",\"b\")"
+    },
+    {
+      "id": "FORMULATEXT_non_formula_cell",
+      "formula": "=FORMULATEXT(A1)",
+      "description": "A cell containing a plain (non-formula) value -> #N/A, per docs: 'The cell used as the Reference argument does not contain a formula.' Confirmed via https://support.microsoft.com/en-us/office/formulatext-function-0a786771-54fd-4ae2-96ee-09cda35439c8",
+      "setup_cells": {
+        "A1": 5
+      },
+      "expected": "#N/A"
+    },
+    {
+      "id": "FORMULATEXT_blank_cell",
+      "formula": "=FORMULATEXT(A1)",
+      "description": "A blank cell has no formula either -> #N/A",
+      "setup_cells": {},
+      "expected": "#N/A"
+    }
+  ]
+}

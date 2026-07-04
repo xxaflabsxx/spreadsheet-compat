@@ -1,0 +1,31 @@
+{
+  "function": "SEARCH",
+  "cases": [
+    {
+      "id": "SEARCH_case_insensitive_match",
+      "formula": "=SEARCH(\"a\",\"Apple\")",
+      "description": "SEARCH is case-insensitive: lowercase 'a' matches the leading uppercase 'A' -> position 1 (contrast with FIND on this exact same input, which is case-sensitive and returns #VALUE!)",
+      "expected": 1,
+      "expected_note": "Source: https://support.microsoft.com/en-us/office/search-function-9ab04538-0e55-4719-a72e-b6f54513b495 - SEARCH is not case-sensitive"
+    },
+    {
+      "id": "SEARCH_wildcard_asterisk",
+      "formula": "=SEARCH(\"p*e\",\"Apple\")",
+      "description": "SEARCH supports wildcards unlike FIND: '*' matches any sequence of characters, so \"p*e\" matches the substring \"pple\" starting at position 2",
+      "expected": 2,
+      "expected_note": "Source: https://support.microsoft.com/en-us/office/search-function-9ab04538-0e55-4719-a72e-b6f54513b495 - SEARCH allows the wildcard characters '?' and '*' in find_text; FIND does not support wildcards at all"
+    },
+    {
+      "id": "SEARCH_wildcard_question_mark",
+      "formula": "=SEARCH(\"?pple\",\"Apple\")",
+      "description": "'?' wildcard matches exactly one character, so \"?pple\" matches \"Apple\" starting at position 1",
+      "expected": 1
+    },
+    {
+      "id": "SEARCH_not_found",
+      "formula": "=SEARCH(\"z\",\"Apple\")",
+      "description": "find_text not present anywhere in within_text -> #VALUE!",
+      "expected": "#VALUE!"
+    }
+  ]
+}

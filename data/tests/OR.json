@@ -1,0 +1,51 @@
+{
+  "function": "OR",
+  "cases": [
+    {
+      "id": "OR_basic_true",
+      "formula": "=OR(FALSE,TRUE)",
+      "description": "One argument TRUE -> TRUE",
+      "expected": true
+    },
+    {
+      "id": "OR_basic_false",
+      "formula": "=OR(FALSE,FALSE)",
+      "description": "Both arguments FALSE -> FALSE",
+      "expected": false
+    },
+    {
+      "id": "OR_range_numeric_with_nonzero",
+      "formula": "=OR(A1:A3)",
+      "description": "A range of numbers is coerced to logical (0=FALSE, nonzero=TRUE); one nonzero value makes the whole OR TRUE",
+      "setup_cells": {
+        "A1": 0,
+        "A2": 0,
+        "A3": 3
+      },
+      "expected": true,
+      "expected_note": "Numeric coercion confirmed via https://www.ablebits.com/office-addins-blog/excel-and-or-xor-not-functions/"
+    },
+    {
+      "id": "OR_range_numeric_all_zero",
+      "formula": "=OR(A1:A3)",
+      "description": "A range of all-zero numbers coerces to all-FALSE -> FALSE",
+      "setup_cells": {
+        "A1": 0,
+        "A2": 0,
+        "A3": 0
+      },
+      "expected": false
+    },
+    {
+      "id": "OR_range_text_ignored",
+      "formula": "=OR(A1:A3)",
+      "description": "Text within a range argument is ignored (not coerced, not an error), per https://support.microsoft.com/en-us/office/or-function-7d17ad14-8700-4281-b308-00b131e22af0: 'If an array or reference argument contains text or empty cells, those values are ignored.'",
+      "setup_cells": {
+        "A1": "text",
+        "A2": false,
+        "A3": false
+      },
+      "expected": false
+    }
+  ]
+}

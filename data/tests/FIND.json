@@ -1,0 +1,30 @@
+{
+  "function": "FIND",
+  "cases": [
+    {
+      "id": "FIND_basic",
+      "formula": "=FIND(\"e\",\"spreadsheet\")",
+      "description": "Basic case-sensitive positional search for the first occurrence",
+      "expected": 4
+    },
+    {
+      "id": "FIND_case_sensitive_no_match",
+      "formula": "=FIND(\"a\",\"Apple\")",
+      "description": "FIND is case-sensitive: lowercase 'a' does not match the uppercase 'A' in \"Apple\", and there is no other 'a' -> #VALUE! (contrast with SEARCH, which is case-insensitive and would find it)",
+      "expected": "#VALUE!",
+      "expected_note": "Source: https://support.microsoft.com/en-gb/office/find-function-06213f91-b5be-4544-8b0b-2fd5a775436f and https://support.microsoft.com/en-us/office/how-to-correct-a-value-error-in-find-findb-and-search-searchb-functions-0d1299aa-6234-4253-bc5e-50881b575fc6 - FIND is case-sensitive and does not support wildcard characters"
+    },
+    {
+      "id": "FIND_not_found",
+      "formula": "=FIND(\"z\",\"Apple\")",
+      "description": "find_text not present anywhere in within_text -> #VALUE!",
+      "expected": "#VALUE!"
+    },
+    {
+      "id": "FIND_start_num_skips_earlier_match",
+      "formula": "=FIND(\"p\",\"Apple\",3)",
+      "description": "start_num=3 begins the search at position 3, skipping the earlier match of 'p' at position 2",
+      "expected": 3
+    }
+  ]
+}

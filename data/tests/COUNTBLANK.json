@@ -1,0 +1,50 @@
+{
+  "function": "COUNTBLANK",
+  "cases": [
+    {
+      "id": "COUNTBLANK_basic",
+      "formula": "=COUNTBLANK(A1:A5)",
+      "description": "Counts genuinely empty cells in a range",
+      "setup_cells": {
+        "A1": 1,
+        "A3": 2,
+        "A5": 3
+      },
+      "expected": 2,
+      "expected_note": "A2 and A4 are the blank cells"
+    },
+    {
+      "id": "COUNTBLANK_mixed_types_range",
+      "formula": "=COUNTBLANK(A1:A6)",
+      "description": "Same mixed range as COUNT/COUNTA: only the genuinely empty cells count, not the text/number/boolean cells",
+      "setup_cells": {
+        "A1": 10,
+        "A2": "hello",
+        "A4": true,
+        "A5": 20
+      },
+      "expected": 2,
+      "expected_note": "A3 and A6 are blank"
+    },
+    {
+      "id": "COUNTBLANK_empty_string_formula_counted_as_blank",
+      "formula": "=COUNTBLANK(A1:A3)",
+      "description": "Documented cross-engine-relevant edge case: a cell containing a formula that returns \"\" is counted as blank by COUNTBLANK, same as a truly empty cell - even though that identical cell would be counted as non-blank by COUNTA (see COUNTA_empty_string_formula_counts). Confirmed via Microsoft's COUNTBLANK docs (https://support.microsoft.com/en-us/office/countblank-function-6a92d772-675c-4bee-b346-24af6bd3ac22): \"Cells with formulas that return \"\" (empty text) are also counted.\"",
+      "setup_cells": {
+        "A2": "=\"\"",
+        "A3": 5
+      },
+      "expected": 2,
+      "expected_note": "A1 is truly blank (not set at all) and A2's formula result of \"\" is ALSO counted as blank -> 2 total; only A3=5 is excluded"
+    },
+    {
+      "id": "COUNTBLANK_zero_not_blank",
+      "formula": "=COUNTBLANK(A1:A1)",
+      "description": "A cell containing the number 0 is NOT counted as blank",
+      "setup_cells": {
+        "A1": 0
+      },
+      "expected": 0
+    }
+  ]
+}

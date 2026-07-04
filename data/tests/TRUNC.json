@@ -1,0 +1,32 @@
+{
+  "function": "TRUNC",
+  "cases": [
+    {
+      "id": "TRUNC_basic_positive",
+      "formula": "=TRUNC(8.9)",
+      "description": "Positive fractional number truncates its decimal part (same result as INT here)",
+      "expected": 8
+    },
+    {
+      "id": "TRUNC_negative_truncates_toward_zero",
+      "formula": "=TRUNC(-8.9)",
+      "description": "Documented classic divergence from INT: TRUNC simply removes the fractional part with no rounding, i.e. truncates TOWARD zero",
+      "expected": -8,
+      "expected_note": "Per Microsoft's TRUNC function docs, TRUNC(-8.9) = -8 (fractional part discarded, toward zero), whereas INT(-8.9) = -9 (rounds down, away from zero) -- see the paired INT_negative_rounds_toward_negative_infinity case in INT.json"
+    },
+    {
+      "id": "TRUNC_num_digits_positive",
+      "formula": "=TRUNC(3.14159,2)",
+      "description": "num_digits=2 keeps two decimal places, discarding the rest without rounding",
+      "expected": 3.14,
+      "expected_note": "3.14159 truncated (not rounded) at 2 decimals is 3.14; if it were ROUND instead, 3.14159 would still round to 3.14 here, but TRUNC(3.145,2) vs ROUND(3.145,2) would diverge -- this case isolates the num_digits mechanic, not the rounding-vs-truncating distinction"
+    },
+    {
+      "id": "TRUNC_negative_num_digits",
+      "formula": "=TRUNC(12345,-2)",
+      "description": "Negative num_digits truncates digits to the LEFT of the decimal point",
+      "expected": 12300,
+      "expected_note": "Negative num_digits zeroes out the last 2 digits of the integer part without any rounding"
+    }
+  ]
+}

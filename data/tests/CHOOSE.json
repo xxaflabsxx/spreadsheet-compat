@@ -1,0 +1,46 @@
+{
+  "function": "CHOOSE",
+  "cases": [
+    {
+      "id": "CHOOSE_basic_second_value",
+      "formula": "=CHOOSE(2,\"a\",\"b\",\"c\")",
+      "description": "index_num=2 selects the second value in the list",
+      "expected": "b"
+    },
+    {
+      "id": "CHOOSE_index_1",
+      "formula": "=CHOOSE(1,10,20,30)",
+      "description": "index_num=1 selects the first value",
+      "expected": 10
+    },
+    {
+      "id": "CHOOSE_out_of_range_error",
+      "formula": "=CHOOSE(5,\"a\",\"b\",\"c\")",
+      "description": "index_num beyond the number of supplied values -> #VALUE!",
+      "expected": "#VALUE!",
+      "expected_note": "https://support.microsoft.com/en-us/office/choose-function-fc5c184f-cb62-4ec7-a46e-38653b98f5bc -- 'If index_num is less than 1 or greater than the number of the last value in the list, CHOOSE returns the #VALUE! error value.'"
+    },
+    {
+      "id": "CHOOSE_fractional_index_truncated",
+      "formula": "=CHOOSE(2.9,\"a\",\"b\",\"c\")",
+      "description": "Non-integer index_num is truncated toward the lowest integer before use, not rounded",
+      "expected": "b",
+      "expected_note": "Same doc as above: 'If index_num is a fraction, it is truncated to the lowest integer before being used.' 2.9 truncates to 2, not rounded to 3"
+    },
+    {
+      "id": "CHOOSE_selects_a_range_then_summed",
+      "formula": "=SUM(CHOOSE(2,A1:A3,B1:B3))",
+      "description": "CHOOSE can select an entire range as its 'value', which is then fed to SUM",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30
+      },
+      "expected": 60,
+      "expected_note": "index_num=2 selects the B1:B3 range; SUM of 10+20+30=60"
+    }
+  ]
+}

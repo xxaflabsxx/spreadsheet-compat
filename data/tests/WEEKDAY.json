@@ -1,0 +1,45 @@
+{
+  "function": "WEEKDAY",
+  "cases": [
+    {
+      "id": "WEEKDAY_default_type1",
+      "formula": "=WEEKDAY(DATE(2008,2,14))",
+      "description": "Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)",
+      "expected": 5
+    },
+    {
+      "id": "WEEKDAY_type2_monday_start",
+      "formula": "=WEEKDAY(DATE(2008,2,14),2)",
+      "description": "return_type 2: Monday=1..Sunday=7. Source: Microsoft WEEKDAY docs worked example, WEEKDAY(A2,2)=4.",
+      "expected": 4
+    },
+    {
+      "id": "WEEKDAY_type3_zero_based",
+      "formula": "=WEEKDAY(DATE(2008,2,14),3)",
+      "description": "return_type 3: Monday=0..Sunday=6 (zero-based). Thursday is 3 in this scheme.",
+      "expected": 3,
+      "expected_note": "Per Microsoft's return_type table, mode 3 maps Monday..Sunday to 0..6; Thursday (the 4th weekday counting Monday=0) = 3."
+    },
+    {
+      "id": "WEEKDAY_type12_tuesday_start",
+      "formula": "=WEEKDAY(DATE(2008,2,14),12)",
+      "description": "return_type 12: Tuesday=1..Monday=7 (ISO-style variant start day). Thursday is the 3rd day in this scheme.",
+      "expected": 3,
+      "expected_note": "Per Microsoft's return_type table, mode 12 maps Tuesday=1,Wed=2,Thu=3,...,Monday=7."
+    },
+    {
+      "id": "WEEKDAY_type16_saturday_start",
+      "formula": "=WEEKDAY(DATE(2008,2,14),16)",
+      "description": "return_type 16: Saturday=1..Friday=7. Thursday is the 6th day in this scheme.",
+      "expected": 6,
+      "expected_note": "Per Microsoft's return_type table, mode 16 maps Saturday=1,Sun=2,Mon=3,Tue=4,Wed=5,Thu=6,Fri=7."
+    },
+    {
+      "id": "WEEKDAY_invalid_return_type",
+      "formula": "=WEEKDAY(DATE(2008,2,14),99)",
+      "description": "An out-of-range return_type (not one of the documented 1,2,3,11-17 values) is a documented error condition.",
+      "expected": "#NUM!",
+      "expected_note": "Microsoft docs: an invalid return_type raises #NUM!."
+    }
+  ]
+}

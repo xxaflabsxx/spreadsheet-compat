@@ -1,0 +1,36 @@
+{
+  "function": "COUNTA",
+  "cases": [
+    {
+      "id": "COUNTA_mixed_types_range",
+      "formula": "=COUNTA(A1:A6)",
+      "description": "COUNTA counts every non-blank cell regardless of type: numbers, text, and booleans all count, unlike COUNT which only counts numbers (same setup as COUNT_mixed_types_range)",
+      "setup_cells": {
+        "A1": 10,
+        "A2": "hello",
+        "A4": true,
+        "A5": 20
+      },
+      "expected": 4,
+      "expected_note": "A1, A2, A4, A5 are all non-blank (A3, A6 are genuinely blank and excluded)"
+    },
+    {
+      "id": "COUNTA_empty_string_formula_counts",
+      "formula": "=COUNTA(A1:A2)",
+      "description": "A cell holding a formula that returns \"\" is still counted by COUNTA, because it contains content (a formula), even though it displays as empty. Confirmed via Microsoft's COUNTA docs (https://support.microsoft.com/en-us/office/counta-function-7dc98875-d5c1-46f1-9a82-53f3219e2509): \"if the range contains a formula that returns an empty string, the COUNTA function counts that value.\"",
+      "setup_cells": {
+        "A1": "=\"\"",
+        "A2": 5
+      },
+      "expected": 2,
+      "expected_note": "Both A1 (formula returning \"\") and A2 (5) are counted; this same A1 cell is ALSO counted as blank by COUNTBLANK - see COUNTBLANK_empty_string_formula_counted_as_blank"
+    },
+    {
+      "id": "COUNTA_all_blank_range",
+      "formula": "=COUNTA(A1:A5)",
+      "description": "A range with no content at all counts as 0",
+      "setup_cells": {},
+      "expected": 0
+    }
+  ]
+}

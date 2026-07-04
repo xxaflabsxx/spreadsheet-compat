@@ -1,0 +1,46 @@
+{
+  "function": "AND",
+  "cases": [
+    {
+      "id": "AND_basic_true",
+      "formula": "=AND(TRUE,TRUE)",
+      "description": "Both arguments TRUE -> TRUE",
+      "expected": true
+    },
+    {
+      "id": "AND_basic_false",
+      "formula": "=AND(TRUE,FALSE)",
+      "description": "One argument FALSE -> FALSE",
+      "expected": false
+    },
+    {
+      "id": "AND_range_numeric_with_zero",
+      "formula": "=AND(A1:A3)",
+      "description": "A range of numbers is coerced to logical values (0=FALSE, nonzero=TRUE); one zero makes the whole AND FALSE",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 0
+      },
+      "expected": false,
+      "expected_note": "Numeric coercion in ranges confirmed via https://www.ablebits.com/office-addins-blog/excel-and-or-xor-not-functions/ since Microsoft's own AND page doesn't give an explicit numeric example."
+    },
+    {
+      "id": "AND_range_numeric_all_nonzero",
+      "formula": "=AND(A1:A3)",
+      "description": "A range of all-nonzero numbers coerces to all-TRUE -> TRUE",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 5,
+        "A3": 3
+      },
+      "expected": true
+    },
+    {
+      "id": "AND_literal_text_error",
+      "formula": "=AND(TRUE,\"abc\")",
+      "description": "An arbitrary text literal (not a range) does not evaluate to a logical value -> #VALUE!, per doc: 'arguments must evaluate to logical values'",
+      "expected": "#VALUE!"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "function": "TODAY",
+  "cases": [
+    {
+      "id": "TODAY_exists_and_plausible",
+      "formula": "=TODAY()",
+      "description": "Existence probe only: TODAY() is non-deterministic (changes daily), so there is no fixed 'expected' value",
+      "expected": null,
+      "expected_note": "Non-deterministic by design; harness/human should only check the engine recognizes the function (not #NAME?/#VALUE!) and returns a plausible large positive integer serial"
+    },
+    {
+      "id": "TODAY_year_is_plausible",
+      "formula": "=YEAR(TODAY())",
+      "description": "Wrapping TODAY() in YEAR() gives a coarser but still non-deterministic probe",
+      "expected": null,
+      "expected_note": "Non-deterministic; harness/human should only check the result is a plausible 4-digit year (>= 2026 as of this test's authoring)"
+    },
+    {
+      "id": "TODAY_self_difference_is_deterministic",
+      "formula": "=TODAY()-TODAY()",
+      "description": "Even though TODAY() itself is volatile, two calls within the SAME recalculation pass must return the identical value, so their difference is always exactly 0 -- a genuinely deterministic assertion about a volatile function",
+      "expected": 0,
+      "expected_note": "Both TODAY() calls are evaluated as part of one recalculation of one cell, so they cannot differ"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "function": "AVERAGEIF",
+  "cases": [
+    {
+      "id": "AVERAGEIF_basic",
+      "formula": "=AVERAGEIF(A1:A5,\">10\")",
+      "description": "Average of cells in the range itself that satisfy the criteria",
+      "setup_cells": {
+        "A1": 5,
+        "A2": 10,
+        "A3": 15,
+        "A4": 20,
+        "A5": 25
+      },
+      "expected": 20,
+      "expected_note": "Average of 15,20,25 = 20"
+    },
+    {
+      "id": "AVERAGEIF_separate_average_range",
+      "formula": "=AVERAGEIF(A1:A5,\">2\",B1:B5)",
+      "description": "Criteria evaluated against A but matching B cells are averaged",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30,
+        "B4": 40,
+        "B5": 50
+      },
+      "expected": 40,
+      "expected_note": "Rows 3,4,5 satisfy A>2; average of paired B = (30+40+50)/3"
+    },
+    {
+      "id": "AVERAGEIF_no_match_div0",
+      "formula": "=AVERAGEIF(A1:A3,\">100\")",
+      "description": "No cells satisfy the criteria -> #DIV/0! per Microsoft docs (same as AVERAGE of an empty set)",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": "#DIV/0!"
+    },
+    {
+      "id": "AVERAGEIF_blank_average_range_cells_excluded",
+      "formula": "=AVERAGEIF(A1:A3,\">0\",B1:B3)",
+      "description": "Blank cells in average_range are excluded from both the sum and the count, not treated as 0",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "B1": 10,
+        "B3": 30
+      },
+      "expected": 20,
+      "expected_note": "A1:A3 all satisfy >0, but B2 is blank; average is (10+30)/2=20, not (10+0+30)/3"
+    }
+  ]
+}

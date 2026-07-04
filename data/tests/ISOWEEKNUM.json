@@ -1,0 +1,32 @@
+{
+  "function": "ISOWEEKNUM",
+  "cases": [
+    {
+      "id": "ISOWEEKNUM_doc_example",
+      "formula": "=ISOWEEKNUM(DATE(2012,3,9))",
+      "description": "Microsoft's own documented example date/result. Verified via https://support.microsoft.com/en-us/office/isoweeknum-function-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e",
+      "expected": 10
+    },
+    {
+      "id": "ISOWEEKNUM_prior_iso_year_boundary",
+      "formula": "=ISOWEEKNUM(DATE(2023,1,1))",
+      "description": "Genuine algorithmic divergence from plain WEEKNUM: ISO 8601 week 1 is defined as the week containing the year's first Thursday (Monday-start weeks), NOT the week containing Jan 1. Jan 1, 2023 is a Sunday, so it belongs to the week Dec 26, 2022 - Jan 1, 2023, whose Thursday (Dec 29, 2022) is in 2022 -- so this date is ISO week 52 of 2022, even though plain WEEKNUM would call it week 1 of 2023",
+      "expected": 52,
+      "expected_note": "Cross-checked against Python's datetime.date(2023,1,1).isocalendar() -> (2022, 52, 7), which implements ISO 8601"
+    },
+    {
+      "id": "ISOWEEKNUM_same_calendar_date_different_year_no_boundary_issue",
+      "formula": "=ISOWEEKNUM(DATE(2024,1,1))",
+      "description": "Contrast case: Jan 1, 2024 is a Monday, so (unlike the 2023 case above) it DOES start ISO week 1 of 2024 -- showing the year-boundary quirk depends entirely on which weekday Jan 1 falls on",
+      "expected": 1,
+      "expected_note": "Cross-checked against Python's datetime.date(2024,1,1).isocalendar() -> (2024, 1, 1)"
+    },
+    {
+      "id": "ISOWEEKNUM_next_iso_year_boundary",
+      "formula": "=ISOWEEKNUM(DATE(2024,12,31))",
+      "description": "The same phenomenon at the OTHER end of the year: Dec 31, 2024 is a Tuesday, and the Monday-start week containing it (Dec 30, 2024 - Jan 5, 2025) has its Thursday (Jan 2, 2025) in the following calendar year, so this December date is actually ISO week 1 of 2025",
+      "expected": 1,
+      "expected_note": "Cross-checked against Python's datetime.date(2024,12,31).isocalendar() -> (2025, 1, 2)"
+    }
+  ]
+}
