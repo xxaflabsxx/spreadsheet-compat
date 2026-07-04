@@ -1,0 +1,89 @@
+{
+  "function": "XLOOKUP",
+  "cases": [
+    {
+      "id": "XLOOKUP_exact_match",
+      "formula": "=XLOOKUP(\"b\",A1:A3,B1:B3)",
+      "description": "Basic exact-match lookup returns the corresponding value",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "c",
+        "B1": 1,
+        "B2": 2,
+        "B3": 3
+      },
+      "expected": 2
+    },
+    {
+      "id": "XLOOKUP_not_found_default_na",
+      "formula": "=XLOOKUP(\"z\",A1:A3,B1:B3)",
+      "description": "No if_not_found arg and no match -> #N/A",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "c",
+        "B1": 1,
+        "B2": 2,
+        "B3": 3
+      },
+      "expected": "#N/A"
+    },
+    {
+      "id": "XLOOKUP_not_found_custom",
+      "formula": "=XLOOKUP(\"z\",A1:A3,B1:B3,\"missing\")",
+      "description": "Custom if_not_found value is returned when no match",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "c",
+        "B1": 1,
+        "B2": 2,
+        "B3": 3
+      },
+      "expected": "missing"
+    },
+    {
+      "id": "XLOOKUP_match_mode_next_smaller",
+      "formula": "=XLOOKUP(2.5,A1:A4,B1:B4,\"none\",-1)",
+      "description": "match_mode -1 (exact or next smaller item) with no exact match",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "B1": 10,
+        "B2": 20,
+        "B3": 30,
+        "B4": 40
+      },
+      "expected": 20,
+      "expected_note": "2.5 has no exact match; next-smaller is 2 -> 20"
+    },
+    {
+      "id": "XLOOKUP_search_mode_last_to_first",
+      "formula": "=XLOOKUP(\"x\",A1:A4,B1:B4,\"none\",0,-1)",
+      "description": "search_mode -1 finds the LAST occurrence of a duplicated key",
+      "setup_cells": {
+        "A1": "x",
+        "A2": "y",
+        "A3": "x",
+        "A4": "z",
+        "B1": 1,
+        "B2": 2,
+        "B3": 3,
+        "B4": 4
+      },
+      "expected": 3,
+      "expected_note": "Two rows match 'x' (1 and 3); reverse search returns the later one"
+    },
+    {
+      "id": "XLOOKUP_empty_lookup_array",
+      "formula": "=XLOOKUP(\"a\",A1:A1,B1:B1)",
+      "description": "Degenerate 1-cell lookup/return arrays where the cell is blank",
+      "setup_cells": {},
+      "expected": "#N/A",
+      "expected_note": "A1 and B1 are blank; lookup value 'a' is not found"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "function": "VLOOKUP",
+  "cases": [
+    {
+      "id": "VLOOKUP_exact_match",
+      "formula": "=VLOOKUP(\"b\",A1:B3,2,FALSE)",
+      "description": "Exact match mode (range_lookup=FALSE)",
+      "setup_cells": {
+        "A1": "a",
+        "B1": 1,
+        "A2": "b",
+        "B2": 2,
+        "A3": "c",
+        "B3": 3
+      },
+      "expected": 2
+    },
+    {
+      "id": "VLOOKUP_approximate_match",
+      "formula": "=VLOOKUP(3,A1:B5,2,TRUE)",
+      "description": "Approximate match requires ascending sorted first column",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 10,
+        "A2": 2,
+        "B2": 20,
+        "A3": 4,
+        "B3": 40,
+        "A4": 6,
+        "B4": 60,
+        "A5": 8,
+        "B5": 80
+      },
+      "expected": 20,
+      "expected_note": "3 is between 2 and 4; approx match returns the row for the largest value <= lookup (2 -> 20)"
+    },
+    {
+      "id": "VLOOKUP_not_found_exact",
+      "formula": "=VLOOKUP(\"z\",A1:B3,2,FALSE)",
+      "description": "Exact match with no match -> #N/A",
+      "setup_cells": {
+        "A1": "a",
+        "B1": 1,
+        "A2": "b",
+        "B2": 2,
+        "A3": "c",
+        "B3": 3
+      },
+      "expected": "#N/A"
+    },
+    {
+      "id": "VLOOKUP_col_index_out_of_range",
+      "formula": "=VLOOKUP(\"a\",A1:B3,5,FALSE)",
+      "description": "col_index_num beyond the table width -> #REF! per Microsoft docs",
+      "setup_cells": {
+        "A1": "a",
+        "B1": 1,
+        "A2": "b",
+        "B2": 2,
+        "A3": "c",
+        "B3": 3
+      },
+      "expected": "#REF!",
+      "expected_note": "Microsoft docs specify #REF! for out-of-range col_index_num; record engines' ACTUAL error code here since this is a known point of cross-engine divergence"
+    },
+    {
+      "id": "VLOOKUP_wildcard_exact_mode",
+      "formula": "=VLOOKUP(\"a*\",A1:B3,2,FALSE)",
+      "description": "Wildcards are honored even in exact-match mode",
+      "setup_cells": {
+        "A1": "apple",
+        "B1": 1,
+        "A2": "banana",
+        "B2": 2,
+        "A3": "avocado",
+        "B3": 3
+      },
+      "expected": 1,
+      "expected_note": "First row matching the a* wildcard pattern is 'apple'"
+    }
+  ]
+}

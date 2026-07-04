@@ -1,0 +1,42 @@
+{
+  "function": "IFS",
+  "cases": [
+    {
+      "id": "IFS_basic",
+      "formula": "=IFS(A1>90,\"A\",A1>80,\"B\",TRUE,\"C\")",
+      "description": "First TRUE condition wins; TRUE literal acts as catch-all",
+      "setup_cells": {
+        "A1": 85
+      },
+      "expected": "B"
+    },
+    {
+      "id": "IFS_no_match_no_catchall",
+      "formula": "=IFS(A1>90,\"A\",A1>95,\"B\")",
+      "description": "No condition true and no catch-all -> #N/A",
+      "setup_cells": {
+        "A1": 50
+      },
+      "expected": "#N/A"
+    },
+    {
+      "id": "IFS_order_matters",
+      "formula": "=IFS(A1>0,\"pos\",A1>10,\"big\")",
+      "description": "Conditions evaluated left-to-right; first match short-circuits",
+      "setup_cells": {
+        "A1": 50
+      },
+      "expected": "pos",
+      "expected_note": "A1>10 is also true but never reached"
+    },
+    {
+      "id": "IFS_catchall_first_value",
+      "formula": "=IFS(TRUE,\"always\",A1>0,\"pos\")",
+      "description": "TRUE as the first condition always wins regardless of position",
+      "setup_cells": {
+        "A1": 50
+      },
+      "expected": "always"
+    }
+  ]
+}

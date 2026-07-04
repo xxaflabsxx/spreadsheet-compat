@@ -1,0 +1,42 @@
+{
+  "function": "IFERROR",
+  "cases": [
+    {
+      "id": "IFERROR_no_error_passthrough",
+      "formula": "=IFERROR(10/2,\"err\")",
+      "description": "No error: original value passes through unchanged",
+      "expected": 5
+    },
+    {
+      "id": "IFERROR_catches_div0",
+      "formula": "=IFERROR(10/0,\"err\")",
+      "description": "#DIV/0! is caught and replaced",
+      "expected": "err"
+    },
+    {
+      "id": "IFERROR_nested_vlookup",
+      "formula": "=IFERROR(VLOOKUP(\"z\",A1:B3,2,FALSE),\"not found\")",
+      "description": "Catches #N/A bubbling up from a failed VLOOKUP",
+      "setup_cells": {
+        "A1": "a",
+        "B1": 1,
+        "A2": "b",
+        "B2": 2,
+        "A3": "c",
+        "B3": 3
+      },
+      "expected": "not found"
+    },
+    {
+      "id": "IFERROR_catches_ref_error",
+      "formula": "=IFERROR(INDEX(A1:A3,10),\"bad index\")",
+      "description": "Catches #REF! from an out-of-bounds INDEX",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": "bad index"
+    }
+  ]
+}

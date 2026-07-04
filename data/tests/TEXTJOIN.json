@@ -1,0 +1,40 @@
+{
+  "function": "TEXTJOIN",
+  "cases": [
+    {
+      "id": "TEXTJOIN_ignore_empty_true",
+      "formula": "=TEXTJOIN(\",\",TRUE,\"a\",\"\",\"b\")",
+      "description": "ignore_empty=TRUE skips blank/empty-string args",
+      "expected": "a,b"
+    },
+    {
+      "id": "TEXTJOIN_ignore_empty_false",
+      "formula": "=TEXTJOIN(\",\",FALSE,\"a\",\"\",\"b\")",
+      "description": "ignore_empty=FALSE keeps the empty string as a segment",
+      "expected": "a,,b"
+    },
+    {
+      "id": "TEXTJOIN_range",
+      "formula": "=TEXTJOIN(\"-\",TRUE,A1:A3)",
+      "description": "Joining a cell range with a delimiter",
+      "setup_cells": {
+        "A1": "x",
+        "A2": "y",
+        "A3": "z"
+      },
+      "expected": "x-y-z"
+    },
+    {
+      "id": "TEXTJOIN_multiple_ranges",
+      "formula": "=TEXTJOIN(\",\",TRUE,A1:A2,B1:B2)",
+      "description": "Multiple ranges are flattened and joined in order",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "B1": "c",
+        "B2": "d"
+      },
+      "expected": "a,b,c,d"
+    }
+  ]
+}

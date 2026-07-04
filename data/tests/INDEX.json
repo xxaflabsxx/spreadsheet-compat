@@ -1,0 +1,82 @@
+{
+  "function": "INDEX",
+  "cases": [
+    {
+      "id": "INDEX_1d_basic",
+      "formula": "=INDEX(A1:A5,3)",
+      "description": "1-D array, single row-number argument",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 30,
+        "A4": 40,
+        "A5": 50
+      },
+      "expected": 30
+    },
+    {
+      "id": "INDEX_2d_row_col",
+      "formula": "=INDEX(A1:C3,2,2)",
+      "description": "2-D range, row+column arguments",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "C1": 3,
+        "A2": 4,
+        "B2": 5,
+        "C2": 6,
+        "A3": 7,
+        "B3": 8,
+        "C3": 9
+      },
+      "expected": 5
+    },
+    {
+      "id": "INDEX_whole_column_spill",
+      "formula": "=INDEX(A1:C3,0,2)",
+      "description": "row_num=0 returns the entire column as a spilled array",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "C1": 3,
+        "A2": 4,
+        "B2": 5,
+        "C2": 6,
+        "A3": 7,
+        "B3": 8,
+        "C3": 9
+      },
+      "expected": [
+        2,
+        5,
+        8
+      ],
+      "check_range": "A30:A32"
+    },
+    {
+      "id": "INDEX_out_of_range",
+      "formula": "=INDEX(A1:A3,10)",
+      "description": "Row number beyond the range -> #REF!",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": "#REF!"
+    },
+    {
+      "id": "INDEX_MATCH_combo",
+      "formula": "=INDEX(B1:B3,MATCH(\"b\",A1:A3,0))",
+      "description": "Classic INDEX/MATCH pattern used as a VLOOKUP replacement",
+      "setup_cells": {
+        "A1": "a",
+        "B1": 1,
+        "A2": "b",
+        "B2": 2,
+        "A3": "c",
+        "B3": 3
+      },
+      "expected": 2
+    }
+  ]
+}

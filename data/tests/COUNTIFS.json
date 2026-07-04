@@ -1,0 +1,59 @@
+{
+  "function": "COUNTIFS",
+  "cases": [
+    {
+      "id": "COUNTIFS_basic",
+      "formula": "=COUNTIFS(A1:A5,\">20\")",
+      "description": "Count of cells > 20",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 30,
+        "A4": 40,
+        "A5": 50
+      },
+      "expected": 3
+    },
+    {
+      "id": "COUNTIFS_multi_range",
+      "formula": "=COUNTIFS(A1:A5,\">10\",B1:B5,\"<5\")",
+      "description": "Two AND-ed criteria ranges",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 30,
+        "A4": 40,
+        "A5": 50,
+        "B1": 1,
+        "B2": 2,
+        "B3": 3,
+        "B4": 9,
+        "B5": 9
+      },
+      "expected": 2,
+      "expected_note": "Rows 2,3 satisfy A>10 AND B<5 (rows 4,5 fail B<5); rows matching: (20,2),(30,3)"
+    },
+    {
+      "id": "COUNTIFS_no_match",
+      "formula": "=COUNTIFS(A1:A3,\">100\")",
+      "description": "No matches -> 0",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": 0
+    },
+    {
+      "id": "COUNTIFS_wildcard",
+      "formula": "=COUNTIFS(A1:A3,\"a*\")",
+      "description": "Wildcard text criteria",
+      "setup_cells": {
+        "A1": "apple",
+        "A2": "banana",
+        "A3": "avocado"
+      },
+      "expected": 2
+    }
+  ]
+}

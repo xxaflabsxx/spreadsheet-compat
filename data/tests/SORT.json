@@ -1,0 +1,81 @@
+{
+  "function": "SORT",
+  "cases": [
+    {
+      "id": "SORT_default_ascending",
+      "formula": "=SORT(A1:A5)",
+      "description": "Default sort_index=1, ascending",
+      "setup_cells": {
+        "A1": 3,
+        "A2": 1,
+        "A3": 4,
+        "A4": 1,
+        "A5": 5
+      },
+      "expected": [
+        1,
+        1,
+        3,
+        4,
+        5
+      ],
+      "check_range": "A30:A34"
+    },
+    {
+      "id": "SORT_descending",
+      "formula": "=SORT(A1:A5,1,-1)",
+      "description": "Explicit descending sort order",
+      "setup_cells": {
+        "A1": 3,
+        "A2": 1,
+        "A3": 4,
+        "A4": 1,
+        "A5": 5
+      },
+      "expected": [
+        5,
+        4,
+        3,
+        1,
+        1
+      ],
+      "check_range": "A30:A34"
+    },
+    {
+      "id": "SORT_by_second_column",
+      "formula": "=SORT(A1:B3,2,1)",
+      "description": "2D range sorted by its second column ascending",
+      "setup_cells": {
+        "A1": "x",
+        "B1": 30,
+        "A2": "y",
+        "B2": 10,
+        "A3": "z",
+        "B3": 20
+      },
+      "expected": [
+        [
+          "y",
+          10
+        ],
+        [
+          "z",
+          20
+        ],
+        [
+          "x",
+          30
+        ]
+      ],
+      "check_range": "A30:B32"
+    },
+    {
+      "id": "SORT_empty_range_error",
+      "formula": "=SORT(A1:A1)",
+      "description": "Sorting a single blank cell (degenerate case)",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "Blank cell sorts as 0 in numeric context; no error expected"
+    }
+  ]
+}

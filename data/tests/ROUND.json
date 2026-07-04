@@ -1,0 +1,31 @@
+{
+  "function": "ROUND",
+  "cases": [
+    {
+      "id": "ROUND_half_away_from_zero",
+      "formula": "=ROUND(2.5,0)",
+      "description": "Excel/LO ROUND uses arithmetic rounding (half away from zero), NOT banker's rounding (round-half-to-even)",
+      "expected": 3,
+      "expected_note": "Banker's rounding would give 2; correct spreadsheet behavior is 3"
+    },
+    {
+      "id": "ROUND_negative_half_away_from_zero",
+      "formula": "=ROUND(-2.5,0)",
+      "description": "Negative half-values also round away from zero",
+      "expected": -3
+    },
+    {
+      "id": "ROUND_negative_digits",
+      "formula": "=ROUND(12345,-2)",
+      "description": "Negative num_digits rounds to the left of the decimal point",
+      "expected": 12300
+    },
+    {
+      "id": "ROUND_float_representation_quirk",
+      "formula": "=ROUND(1.005,2)",
+      "description": "Tests whether the engine falls into the naive-binary-float trap: the IEEE-754 double closest to 1.005 is actually ~1.00499999999999989, so a naive floor(x*100+0.5)/100 implementation would round DOWN to 1.00",
+      "expected": 1.01,
+      "expected_note": "Both Excel and LibreOffice correctly return 1.01, not 1.0 -- they normalize to ~15 significant decimal digits before rounding, specifically to avoid this well-known binary-float pitfall"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "function": "UNIQUE",
+  "cases": [
+    {
+      "id": "UNIQUE_basic",
+      "formula": "=UNIQUE(A1:A5)",
+      "description": "Basic unique list preserving first-occurrence order",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 2,
+        "A4": 3,
+        "A5": 1
+      },
+      "expected": [
+        1,
+        2,
+        3
+      ],
+      "check_range": "A30:A32"
+    },
+    {
+      "id": "UNIQUE_exactly_once",
+      "formula": "=UNIQUE(A1:A5,FALSE,TRUE)",
+      "description": "exactly_once=TRUE returns only items that appear exactly once",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 2,
+        "A4": 3,
+        "A5": 1
+      },
+      "expected": [
+        3
+      ],
+      "check_range": "A30:A30"
+    },
+    {
+      "id": "UNIQUE_by_column",
+      "formula": "=UNIQUE(A1:C2,TRUE)",
+      "description": "by_col=TRUE compares whole columns instead of rows",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "C1": 1,
+        "A2": 1,
+        "B2": 2,
+        "C2": 1
+      },
+      "expected": [
+        1,
+        2
+      ],
+      "expected_note": "Column A and column C are identical (1,1); unique columns are {1,2} and {1,1} but by_col dedups the repeated column, leaving 2 columns: [1,2] and [1,1] -> flatten to first row [1,2]",
+      "check_range": "A30:B30"
+    },
+    {
+      "id": "UNIQUE_no_duplicates",
+      "formula": "=UNIQUE(A1:A3)",
+      "description": "Input with no duplicates returns the input unchanged",
+      "setup_cells": {
+        "A1": 5,
+        "A2": 6,
+        "A3": 7
+      },
+      "expected": [
+        5,
+        6,
+        7
+      ],
+      "check_range": "A30:A32"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "function": "TEXTSPLIT",
+  "cases": [
+    {
+      "id": "TEXTSPLIT_basic",
+      "formula": "=TEXTSPLIT(\"a,b,c\",\",\")",
+      "description": "Basic column split on a single delimiter",
+      "expected": [
+        "a",
+        "b",
+        "c"
+      ],
+      "check_range": "A30:C30"
+    },
+    {
+      "id": "TEXTSPLIT_row_and_col_delims",
+      "formula": "=TEXTSPLIT(\"a,b;c,d\",\",\",\";\")",
+      "description": "col_delimiter=\",\" and row_delimiter=\";\" produce a 2x2 grid",
+      "expected": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "c",
+          "d"
+        ]
+      ],
+      "check_range": "A30:B31"
+    },
+    {
+      "id": "TEXTSPLIT_ignore_empty",
+      "formula": "=TEXTSPLIT(\"a,,b\",\",\",,TRUE)",
+      "description": "ignore_empty=TRUE collapses consecutive delimiters",
+      "expected": [
+        "a",
+        "b"
+      ],
+      "check_range": "A30:B30"
+    },
+    {
+      "id": "TEXTSPLIT_pad_with",
+      "formula": "=TEXTSPLIT(\"a,b,c;d\",\",\",\";\",FALSE,0,\"-\")",
+      "description": "Uneven row lengths are padded with pad_with instead of #N/A",
+      "expected": [
+        [
+          "a",
+          "b",
+          "c"
+        ],
+        [
+          "d",
+          "-",
+          "-"
+        ]
+      ],
+      "check_range": "A30:C31"
+    }
+  ]
+}

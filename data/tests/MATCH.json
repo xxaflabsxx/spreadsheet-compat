@@ -1,0 +1,55 @@
+{
+  "function": "MATCH",
+  "cases": [
+    {
+      "id": "MATCH_exact",
+      "formula": "=MATCH(\"b\",A1:A3,0)",
+      "description": "match_type 0: exact match, returns 1-based position",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "c"
+      },
+      "expected": 2
+    },
+    {
+      "id": "MATCH_approx_ascending",
+      "formula": "=MATCH(3,A1:A5,1)",
+      "description": "match_type 1 (default): largest value <= lookup, ascending sorted data",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 4,
+        "A4": 6,
+        "A5": 8
+      },
+      "expected": 2,
+      "expected_note": "Position 2 holds value 2, the largest value <= 3"
+    },
+    {
+      "id": "MATCH_approx_descending",
+      "formula": "=MATCH(3,A1:A5,-1)",
+      "description": "match_type -1: smallest value >= lookup, descending sorted data",
+      "setup_cells": {
+        "A1": 8,
+        "A2": 6,
+        "A3": 4,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": 3,
+      "expected_note": "Position 3 holds value 4, the smallest value >= 3 in descending data"
+    },
+    {
+      "id": "MATCH_not_found",
+      "formula": "=MATCH(\"z\",A1:A3,0)",
+      "description": "Exact match with no match -> #N/A",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "c"
+      },
+      "expected": "#N/A"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "function": "IFNA",
+  "cases": [
+    {
+      "id": "IFNA_catches_na",
+      "formula": "=IFNA(MATCH(\"z\",A1:A3,0),\"not found\")",
+      "description": "#N/A from a failed MATCH is caught",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "c"
+      },
+      "expected": "not found"
+    },
+    {
+      "id": "IFNA_does_not_catch_other_errors",
+      "formula": "=IFNA(10/0,\"na\")",
+      "description": "IFNA only catches #N/A; #DIV/0! must pass through unchanged",
+      "expected": "#DIV/0!",
+      "expected_note": "Common compat pitfall: IFNA is NOT a general error trap like IFERROR"
+    },
+    {
+      "id": "IFNA_no_error_passthrough",
+      "formula": "=IFNA(10/2,\"na\")",
+      "description": "No error: original value passes through",
+      "expected": 5
+    }
+  ]
+}

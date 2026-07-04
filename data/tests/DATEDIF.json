@@ -1,0 +1,37 @@
+{
+  "function": "DATEDIF",
+  "cases": [
+    {
+      "id": "DATEDIF_years",
+      "formula": "=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),\"Y\")",
+      "description": "Whole years between two dates",
+      "expected": 3
+    },
+    {
+      "id": "DATEDIF_months",
+      "formula": "=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),\"M\")",
+      "description": "Whole months between two dates",
+      "expected": 41
+    },
+    {
+      "id": "DATEDIF_days",
+      "formula": "=DATEDIF(DATE(2024,1,1),DATE(2024,1,10),\"D\")",
+      "description": "Whole days between two dates",
+      "expected": 9
+    },
+    {
+      "id": "DATEDIF_md_known_quirk",
+      "formula": "=DATEDIF(DATE(2024,1,31),DATE(2024,3,1),\"MD\")",
+      "description": "\"MD\" (days ignoring months and years) is documented by Microsoft as unreliable/buggy for some date combos",
+      "expected": -1,
+      "expected_note": "Textbook-naive expectation might be ~1, but MD has a well-known Microsoft-acknowledged bug around month-end dates; recording the ACTUAL engine output is the point of this test"
+    },
+    {
+      "id": "DATEDIF_end_before_start",
+      "formula": "=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),\"D\")",
+      "description": "End date before start date -> #NUM! per Microsoft's documented DATEDIF behavior",
+      "expected": "#NUM!",
+      "expected_note": "Microsoft docs state end<start raises #NUM!; record engines' ACTUAL error code here since this is a known point of cross-engine divergence"
+    }
+  ]
+}

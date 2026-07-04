@@ -1,0 +1,30 @@
+{
+  "function": "LET",
+  "cases": [
+    {
+      "id": "LET_basic",
+      "formula": "=LET(x,5,x*2)",
+      "description": "Single binding used in the calculation",
+      "expected": 10
+    },
+    {
+      "id": "LET_chained_bindings",
+      "formula": "=LET(a,2,b,a*3,a+b)",
+      "description": "Later bindings can reference earlier ones in the same LET",
+      "expected": 8
+    },
+    {
+      "id": "LET_array_binding",
+      "formula": "=LET(rng,{1,2,3},SUM(rng))",
+      "description": "LET can bind an array literal and pass it to another function",
+      "expected": 6
+    },
+    {
+      "id": "LET_odd_arg_count_error",
+      "formula": "=LET(x,5,y,x*2)",
+      "description": "Odd total arg count (missing final calculation expression) is a syntax/value error",
+      "expected": "#VALUE!",
+      "expected_note": "LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call"
+    }
+  ]
+}

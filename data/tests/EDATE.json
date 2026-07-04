@@ -1,0 +1,31 @@
+{
+  "function": "EDATE",
+  "cases": [
+    {
+      "id": "EDATE_leap_year_clamp",
+      "formula": "=EDATE(DATE(2024,1,31),1)",
+      "description": "Jan 31 + 1 month clamps to the last day of February in a leap year (2024-02-29); result is the underlying date serial number",
+      "expected": 45351,
+      "expected_note": "2024 is a leap year; Feb has no 31st so EDATE clamps to Feb 29 = serial 45351"
+    },
+    {
+      "id": "EDATE_negative_months",
+      "formula": "=EDATE(DATE(2024,3,15),-2)",
+      "description": "Negative months argument goes backward (2024-01-15 = serial 45306)",
+      "expected": 45306
+    },
+    {
+      "id": "EDATE_year_boundary",
+      "formula": "=EDATE(DATE(2023,11,15),3)",
+      "description": "Crossing a year boundary (2024-02-15 = serial 45337)",
+      "expected": 45337
+    },
+    {
+      "id": "EDATE_fractional_months_truncated",
+      "formula": "=EDATE(DATE(2024,1,1),1.9)",
+      "description": "Non-integer months argument is truncated toward zero, not rounded (2024-02-01 = serial 45323)",
+      "expected": 45323,
+      "expected_note": "1.9 truncates to 1, not rounded to 2"
+    }
+  ]
+}
