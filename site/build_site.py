@@ -534,6 +534,10 @@ BASE_TMPL = """<!doctype html>
     Functions without an executed-result badge are documentation-only inventory,
     clearly marked as not yet live-tested.</p>
     <p>Data and test harness on <a href="{{ github_url }}">GitHub</a>.</p>
+    <p class="footer-promo">Built by AF Labs. If this site saved you a debugging session,
+    we also make <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates
+    that do the formulas for you</a> — budgets, debt payoff, invoicing, and a complete
+    freelance business hub for Excel &amp; Google Sheets.</p>
   </div>
 </footer>
 </body>
