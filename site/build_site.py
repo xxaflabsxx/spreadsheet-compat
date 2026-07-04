@@ -38,7 +38,7 @@ from jinja2 import Environment, DictLoader, select_autoescape
 
 SITE_NAME = "Can I Spreadsheet?"
 SITE_TAGLINE = "caniuse.com for spreadsheet functions"
-BASE_URL = "https://xxaflabsxx.github.io/spreadsheet-compat/"
+BASE_URL = "https://canispreadsheet.com/"
 ACCENT = "#4F46E5"
 GITHUB_URL = "https://github.com/xxAFLabsxx/spreadsheet-compat"
 
