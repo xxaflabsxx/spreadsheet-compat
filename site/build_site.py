@@ -57,7 +57,7 @@ ENGINE_LABELS = {
 
 VERDICT_LABELS = {
     "supported": "Supported, behaves as documented",
-    "quirky": "Supported, with a discovered quirk",
+    "quirky": "Quirk found",
     "unsupported": "Unsupported (not recognized)",
 }
 VERDICT_BADGE_CLASS = {
@@ -304,7 +304,10 @@ nav.site-nav a:hover { color: var(--accent); }
 main { padding: 2rem 0 4rem; }
 
 .hero { padding: 1.5rem 0 2rem; }
-.hero h1 { font-size: 2rem; margin: 0 0 0.5rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
 .hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
 
 .search-box { position: relative; margin-bottom: 0.5rem; }
@@ -320,7 +323,7 @@ main { padding: 2rem 0 4rem; }
   outline: none;
   border-color: var(--accent);
 }
-.search-hint { color: var(--text-muted); font-size: 0.85rem; margin: 0.4rem 0 1.5rem; }
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
 
 .stats-grid {
   display: grid;
@@ -343,7 +346,7 @@ main { padding: 2rem 0 4rem; }
 
 .methodology {
   background: var(--bg-alt);
-  border-left: 4px solid var(--accent);
+  border: 1px solid var(--border); background: var(--bg-alt);
   border-radius: 6px;
   padding: 1rem 1.25rem;
   margin: 1.5rem 0 2rem;
@@ -365,14 +368,12 @@ h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
   padding: 0.6rem 0.9rem;
 }
 .top-list .fname { font-weight: 600; }
-.top-list .meta { color: var(--text-muted); font-size: 0.85rem; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
 
 .badge {
   display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-size: 0.8rem;
+  font-weight: 600;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   white-space: nowrap;
@@ -394,7 +395,7 @@ h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
 }
 #fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 #fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
-#fn-count { color: var(--text-muted); font-size: 0.85rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
 
 table.matrix, table.cases {
   width: 100%;
@@ -420,7 +421,7 @@ table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
 .quirk-box {
   background: var(--quirk-bg);
   border: 1px solid #F1D48A;
-  border-left: 5px solid var(--quirk);
+  border: 1px solid var(--quirk); 
   border-radius: 8px;
   padding: 1rem 1.25rem;
   margin: 1.25rem 0;
@@ -431,7 +432,7 @@ table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
 
 .not-live-tested {
   background: var(--unknown-bg);
-  border-left: 4px solid var(--text-muted);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.9rem 1.15rem;
   margin: 1rem 0 1.5rem;
@@ -461,14 +462,14 @@ table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
 @media (min-width: 640px) {
   .quirk-grid { grid-template-columns: repeat(2, 1fr); }
 }
-.quirk-grid dt { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
 .quirk-grid dd { margin: 0 0 0.5rem; }
 
 footer.site-footer {
   border-top: 1px solid var(--border);
   padding: 1.5rem 0 3rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
 
@@ -511,7 +512,7 @@ BASE_TMPL = """<!doctype html>
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ canonical }}">
 <meta name="twitter:card" content="summary">
-<style>{{ css }}</style>
+<style>{{ css | safe }}</style>
 </head>
 <body>
 <header class="site-header">
@@ -529,14 +530,14 @@ BASE_TMPL = """<!doctype html>
 </main>
 <footer class="site-footer">
   <div class="container">
-    <p>{{ site_name }} — every result on this site was executed by a real spreadsheet
+    <p>{{ site_name }}: every result on this site was executed by a real spreadsheet
     engine and recalculation-proven, never scraped from documentation alone.
     Functions without an executed-result badge are documentation-only inventory,
     clearly marked as not yet live-tested.</p>
     <p>Data and test harness on <a href="{{ github_url }}">GitHub</a>.</p>
     <p class="footer-promo">Built by AF Labs. If this site saved you a debugging session,
     we also make <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates
-    that do the formulas for you</a> — budgets, debt payoff, invoicing, and a complete
+    that do the formulas for you</a>: budgets, debt payoff, invoicing, and a complete
     freelance business hub for Excel &amp; Google Sheets.</p>
   </div>
 </footer>
@@ -548,7 +549,7 @@ INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <section class="hero">
   <h1>{{ site_name }}</h1>
-  <p class="tagline">{{ site_tagline }} — search any function to see whether it's
+  <p class="tagline">{{ site_tagline }}. Search any function to see whether it's
   documented, tested, and how Excel, Google Sheets, and LibreOffice Calc actually
   behave.</p>
 
@@ -557,7 +558,7 @@ INDEX_TMPL = """{% extends "base.html" %}
   </div>
   <p class="search-hint" id="fn-count">{{ functions|length }} of {{ functions|length }} functions</p>
   <noscript><p>Search needs JavaScript. Every function is still listed below and
-  fully linked — use your browser's find-in-page instead.</p></noscript>
+  fully linked; use your browser's find-in-page instead.</p></noscript>
 </section>
 
 <div class="stats-grid">
@@ -570,7 +571,7 @@ INDEX_TMPL = """{% extends "base.html" %}
 <div class="methodology">
   <strong>Methodology, honestly stated:</strong> every result badge on this site
   traces back to a formula that was actually written into a real workbook and
-  recalculated by that engine — proven with deterministic and volatile canary
+  recalculated by that engine, proven with deterministic and volatile canary
   formulas on every run (see the <a href="{{ github_url }}">test harness</a>).
   Nothing here is scraped from vendor docs and presented as tested. Functions
   we haven't run through an engine yet are labeled <span class="badge badge-unknown">not yet live-tested</span> and show inventory data only.
@@ -628,7 +629,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 <div class="not-live-tested">
   <strong>Not yet live-tested.</strong> No engine has executed real test cases
   for {{ r.name }} yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
+  official documentation lists this function; it is inventory data, not a
   tested result. Check back as the test corpus grows, or see the
   <a href="{{ github_url }}">project repo</a> to contribute a test file.
 </div>
@@ -724,15 +725,15 @@ QUIRKS_TMPL = """{% extends "base.html" %}
 <h1>Discovered quirks</h1>
 <p class="tagline">Every case below is a real, executed formula whose result did
 not match documented/expected behavior. This is the flagship content of
-{{ site_name }} — cross-engine divergence that only shows up when you actually
+{{ site_name }}: cross-engine divergence that only shows up when you actually
 run the formula.</p>
 <p class="search-hint">{{ quirks|length }} quirks found across {{ quirk_fn_count }} functions.</p>
 
 <ul class="quirks-list">
 {% for q in quirks %}
 <li class="quirk-entry">
-  <h3><a href="{{ rel }}functions/{{ q.name_lower }}.html">{{ q.function }}</a>
-  <span class="badge badge-quirk">{{ q.engine_label }}</span></h3>
+  <h2 class="quirk-h"><a href="{{ rel }}functions/{{ q.name_lower }}.html">{{ q.function }}</a>
+  <span class="badge badge-quirk">{{ q.engine_label }}</span></h2>
   <div class="formula mono">{{ q.case.formula_display or q.case.formula }}</div>
   <dl class="quirk-grid">
     <dt>Actual result</dt><dd class="mono">{{ (q.case.range_values if q.case.range_values else q.case.value)|fmtval }}</dd>
@@ -939,3 +940,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
