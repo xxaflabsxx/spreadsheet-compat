@@ -66,7 +66,7 @@ import time
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
-from xlfn_map import to_storage_formula  # noqa: E402
+from xlfn_map import to_storage_formula_all  # noqa: E402
 
 import openpyxl  # noqa: E402
 from openpyxl.worksheet.formula import ArrayFormula  # noqa: E402
@@ -135,7 +135,10 @@ def build_workbook(cases_flat):
         for addr, val in (c.get("setup_cells") or {}).items():
             ws[addr] = val
 
-        storage_formula = to_storage_formula(c["formula"], c["function"])
+        # Prefix EVERY known future-function call site (not just the function
+        # under test): nested modern calls like UNICHAR(UNICODE(...)) need
+        # both names prefixed or the whole formula is #NAME? on all engines.
+        storage_formula = to_storage_formula_all(c["formula"])
         anchor = c["anchor"]
         if c.get("check_range"):
             # Functions expected to return a multi-cell array (spill/dynamic
@@ -190,9 +193,50 @@ def is_error_value(v):
     return isinstance(v, str) and v in KNOWN_ERROR_STRINGS
 
 
+EXCEL_EPOCH = datetime(1899, 12, 30)  # serial 0 in the 1900 date system
+
+
+def normalize_readback_value(v):
+    """
+    Normalize a value read back from the recalculated .xlsx into the same
+    domain the test corpus's `expected` values live in.
+
+    - datetime/date/time objects -> Excel serial numbers. LibreOffice
+      applies a date/time NUMBER FORMAT to the result cells of DATE()/
+      TIME()-style formulas; openpyxl then surfaces the cached value as a
+      Python datetime/time object instead of the underlying float serial.
+      The engine's actual computed value IS the serial -- the datetime-ness
+      is presentation, so converting back to the serial is the faithful raw
+      value, not an interpretation. (Excel 1900 system: 1899-12-30 = 0.
+      This intentionally reproduces Excel's day-59/60 Feb-29-1900
+      compatibility offset for all post-1900-03-01 dates, which is every
+      date used in this corpus.)
+    """
+    import datetime as _dt
+
+    if isinstance(v, _dt.datetime):
+        delta = v - EXCEL_EPOCH
+        return delta.days + delta.seconds / 86400 + delta.microseconds / 86400e6
+    if isinstance(v, _dt.date):
+        return (
+            _dt.datetime(v.year, v.month, v.day) - EXCEL_EPOCH
+        ).days
+    if isinstance(v, _dt.time):
+        return (v.hour * 3600 + v.minute * 60 + v.second) / 86400 + v.microsecond / 86400e6
+    return v
+
+
 def values_roughly_equal(a, b):
     if isinstance(a, (int, float)) and isinstance(b, (int, float)) and not isinstance(a, bool) and not isinstance(b, bool):
         return abs(a - b) < 1e-9
+    # .xlsx storage limitation: a formula legitimately returning the empty
+    # string "" round-trips through file conversion as a cell with no cached
+    # value at all, which openpyxl reads back as None. Blank-vs-empty-string
+    # is genuinely indistinguishable at this layer, so an expected "" is
+    # satisfied by a read-back None. (The raw None is still recorded in the
+    # results file; only the match verdict treats them as equivalent.)
+    if a == "" and b is None or b == "" and a is None:
+        return True
     return a == b
 
 
@@ -322,12 +366,13 @@ def run():
         per_sheet_canary_val = ws[CANARY_ANCHOR].value
         per_sheet_canary_ok = per_sheet_canary_val == CANARY_ARITH_EXPECTED
 
-        anchor_val = ws[c["anchor"]].value
+        anchor_val = normalize_readback_value(ws[c["anchor"]].value)
 
         range_flat = None
         if c["check_range"]:
             grid = cell_addrs_in_range(c["check_range"])
-            range_flat = [ws[addr].value for row in grid for addr in row]
+            range_flat = [normalize_readback_value(ws[addr].value)
+                          for row in grid for addr in row]
 
         error = anchor_val if is_error_value(anchor_val) else None
         matched, mismatch_detail = compare_expected(c["expected"], anchor_val, range_flat)
@@ -340,7 +385,7 @@ def run():
         if mismatch_detail:
             notes.append(f"MISMATCH vs expected: {mismatch_detail}")
 
-        storage_formula = to_storage_formula(c["formula"], c["function"])
+        storage_formula = to_storage_formula_all(c["formula"])
 
         result = {
             "description": c["description"],

@@ -72,6 +72,7 @@ _XLFN_FUNCTIONS = {
     "ISOWEEKNUM",
     "DAYS",
     "CEILING.MATH", "FLOOR.MATH",
+    "XOR",  # Excel 2013 addition -- yes, even XOR needs the prefix
 }
 
 
@@ -106,3 +107,32 @@ def to_storage_formula(formula: str, function_name: str) -> str:
 def storage_function_names():
     """Return the set of all function names known to need a storage prefix."""
     return set(_XLFN_FUNCTIONS) | set(_XLWS_FUNCTIONS)
+
+
+def to_storage_formula_all(formula: str) -> str:
+    """
+    Like to_storage_formula, but prefixes EVERY known future-function call
+    site in the formula, not just one named function. This matches what
+    real Excel does when it serializes a formula: every post-2007 function
+    in the expression gets its prefix, including nested calls (e.g.
+    '=UNICHAR(UNICODE("x"))' must become
+    '=_xlfn.UNICHAR(_xlfn.UNICODE("x"))' -- prefixing only the outer
+    UNICHAR leaves the inner UNICODE unrecognized and the whole formula
+    evaluates to #NAME? in every engine, which would be a harness artifact
+    masquerading as an unsupported-function finding).
+
+    Names are applied longest-first, and the word-boundary lookbehind
+    (which rejects a preceding '.') prevents re-prefixing an
+    already-prefixed call or matching a shorter name inside a longer
+    dotted one (e.g. plain CEILING never matches 'CEILING.MATH(' because
+    the lookahead requires an immediate '(').
+    """
+    import re
+
+    out = formula
+    for name in sorted(storage_function_names(), key=len, reverse=True):
+        prefix = "_xlfn._xlws." if name in _XLWS_FUNCTIONS else "_xlfn."
+        pattern = re.compile(
+            r"(?<![A-Za-z0-9_.])" + re.escape(name) + r"(?=\()", re.IGNORECASE)
+        out = pattern.sub(prefix + name, out)
+    return out
