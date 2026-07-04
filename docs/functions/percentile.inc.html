@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PERCENTILE.INC — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="PERCENTILE.INC (Statistical) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>PERCENTILE.INC — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="PERCENTILE.INC (Statistical) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 4 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/percentile.inc.html">
-<meta property="og:title" content="PERCENTILE.INC — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="PERCENTILE.INC (Statistical) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="PERCENTILE.INC — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="PERCENTILE.INC (Statistical) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 4 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/percentile.inc.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>PERCENTILE.INC</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Supported, with a discovered quirk</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for PERCENTILE.INC yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060184.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Supported, with a discovered quirk</span>
     
   </td>
 </tr>
@@ -314,11 +306,90 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=PERCENTILE.INC(A1:A3,1.5)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for PERCENTILE.INC yet. This function's
-entry above reflects documentation inventory only.</p>
+
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=PERCENTILE.INC(A1:A10,0)</td>
+  <td>k=0 is a valid boundary for PERCENTILE.INC and returns the minimum</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTILE.INC(A1:A10,1)</td>
+  <td>k=1 is a valid boundary for PERCENTILE.INC and returns the maximum</td>
+  <td class="result mono">10</td>
+  <td class="result mono">10</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTILE.INC(A1:A10,0.5)</td>
+  <td>k=0.5 (median); compare to PERCENTILE.EXC_k_half on identical data</td>
+  <td class="result mono">5.5</td>
+  <td class="result mono">5.5</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTILE.INC(A1:A3,1.5)</td>
+  <td>k outside [0,1] -&gt; #NUM!</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!</td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

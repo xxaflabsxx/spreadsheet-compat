@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHOOSE — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="CHOOSE (Lookup and reference) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>CHOOSE — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="CHOOSE (Lookup and reference) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/choose.html">
-<meta property="og:title" content="CHOOSE — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="CHOOSE (Lookup and reference) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="CHOOSE — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="CHOOSE (Lookup and reference) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/choose.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>CHOOSE</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Lookup and reference</p>
+<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for CHOOSE yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060109.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,67 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for CHOOSE yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=CHOOSE(2,&#34;a&#34;,&#34;b&#34;,&#34;c&#34;)</td>
+  <td>index_num=2 selects the second value in the list</td>
+  <td class="result mono">b</td>
+  <td class="result mono">b</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHOOSE(1,10,20,30)</td>
+  <td>index_num=1 selects the first value</td>
+  <td class="result mono">10</td>
+  <td class="result mono">10</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHOOSE(5,&#34;a&#34;,&#34;b&#34;,&#34;c&#34;)</td>
+  <td>index_num beyond the number of supplied values -&gt; #VALUE!</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">https://support.microsoft.com/en-us/office/choose-function-fc5c184f-cb62-4ec7-a46e-38653b98f5bc -- &#39;If index_num is less than 1 or greater than the number of the last value in the list, CHOOSE returns the #VALUE! error value.&#39;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHOOSE(2.9,&#34;a&#34;,&#34;b&#34;,&#34;c&#34;)</td>
+  <td>Non-integer index_num is truncated toward the lowest integer before use, not rounded</td>
+  <td class="result mono">b</td>
+  <td class="result mono">b<br><span class="category-tag">Same doc as above: &#39;If index_num is a fraction, it is truncated to the lowest integer before being used.&#39; 2.9 truncates to 2, not rounded to 3</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUM(CHOOSE(2,A1:A3,B1:B3))</td>
+  <td>CHOOSE can select an entire range as its &#39;value&#39;, which is then fed to SUM</td>
+  <td class="result mono">60</td>
+  <td class="result mono">60<br><span class="category-tag">index_num=2 selects the B1:B3 range; SUM of 10+20+30=60</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SEARCH — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="SEARCH (Text) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>SEARCH — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="SEARCH (Text) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/search.html">
-<meta property="og:title" content="SEARCH — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="SEARCH (Text) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="SEARCH — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="SEARCH (Text) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/search.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>SEARCH</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Text</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for SEARCH yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,59 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for SEARCH yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SEARCH(&#34;a&#34;,&#34;Apple&#34;)</td>
+  <td>SEARCH is case-insensitive: lowercase &#39;a&#39; matches the leading uppercase &#39;A&#39; -&gt; position 1 (contrast with FIND on this exact same input, which is case-sensitive and returns #VALUE!)</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Source: https://support.microsoft.com/en-us/office/search-function-9ab04538-0e55-4719-a72e-b6f54513b495 - SEARCH is not case-sensitive</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCH(&#34;p*e&#34;,&#34;Apple&#34;)</td>
+  <td>SEARCH supports wildcards unlike FIND: &#39;*&#39; matches any sequence of characters, so &#34;p*e&#34; matches the substring &#34;pple&#34; starting at position 2</td>
+  <td class="result mono">2</td>
+  <td class="result mono">2<br><span class="category-tag">Source: https://support.microsoft.com/en-us/office/search-function-9ab04538-0e55-4719-a72e-b6f54513b495 - SEARCH allows the wildcard characters &#39;?&#39; and &#39;*&#39; in find_text; FIND does not support wildcards at all</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCH(&#34;?pple&#34;,&#34;Apple&#34;)</td>
+  <td>&#39;?&#39; wildcard matches exactly one character, so &#34;?pple&#34; matches &#34;Apple&#34; starting at position 1</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCH(&#34;z&#34;,&#34;Apple&#34;)</td>
+  <td>find_text not present anywhere in within_text -&gt; #VALUE!</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

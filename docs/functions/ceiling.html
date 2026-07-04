@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CEILING — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="CEILING (Compatibility) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>CEILING — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="CEILING (Compatibility) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 6 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/ceiling.html">
-<meta property="og:title" content="CEILING — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="CEILING (Compatibility) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="CEILING — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="CEILING (Compatibility) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 6 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/ceiling.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>CEILING</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Compatibility</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for CEILING yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,75 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for CEILING yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=CEILING(2.5,1)</td>
+  <td>Basic case, rounds 2.5 up to the nearest multiple of 1. Source: https://support.microsoft.com/en-us/office/ceiling-function-0a5cd7c8-0720-4f0a-bd2c-c943e510899f (worked example table)</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CEILING(0.234,0.01)</td>
+  <td>Rounds 0.234 up to the nearest multiple of 0.01. Source: Microsoft CEILING docs worked example table.</td>
+  <td class="result mono">0.24</td>
+  <td class="result mono">0.24</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CEILING(-2.5,-2)</td>
+  <td>Number and significance both negative -&gt; rounds away from zero (more negative), per Microsoft&#39;s documented rule and worked example.</td>
+  <td class="result mono">-4</td>
+  <td class="result mono">-4<br><span class="category-tag">Microsoft: &#39;If number is negative, and significance is negative, the value is rounded down, away from zero.&#39; Worked example CEILING(-2.5,-2)=-4 at https://support.microsoft.com/en-us/office/ceiling-function-0a5cd7c8-0720-4f0a-bd2c-c943e510899f</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CEILING(-2.5,2)</td>
+  <td>Number negative, significance positive -&gt; rounds up toward zero (less negative), per Microsoft&#39;s documented rule and worked example.</td>
+  <td class="result mono">-2</td>
+  <td class="result mono">-2<br><span class="category-tag">Microsoft: &#39;If number is negative, and significance is positive, the value is rounded up towards zero.&#39; Worked example CEILING(-2.5,2)=-2 at the same doc page.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CEILING(-45.67,-2)</td>
+  <td>GOLD QUIRK CANDIDATE: identical 2-argument call (Mode omitted) with number and significance both negative. Per Microsoft&#39;s documented CEILING rule this must round AWAY from zero.</td>
+  <td class="result mono">-46</td>
+  <td class="result mono">-46<br><span class="category-tag">Microsoft (https://support.microsoft.com/en-us/office/ceiling-function-0a5cd7c8-0720-4f0a-bd2c-c943e510899f): both-negative case rounds away from zero, so CEILING(-45.67,-2) -&gt; -46 (ratio -45.67/-2=22.835, ceiling(22.835)=23, 23*-2=-46). LibreOffice&#39;s own CEILING docs (https://help.libreoffice.org/latest/en-US/text/scalc/01/func_ceiling.html) define a 3rd optional Mode argument that ONLY applies when both Number and Significance are negative, and state: &#39;if Mode is equal to zero or not given, negative numbers are rounded up (towards zero)&#39; -- with LO&#39;s own worked example CEILING(-45.67;-2;0) = -44. That means the identical 2-arg formula (Mode omitted) is documented to resolve to -44 under LibreOffice&#39;s own default, vs -46 under Microsoft&#39;s documented default -- a genuine cross-engine default-behavior divergence for the exact same formula text, not just a wording difference. If LO&#39;s executed result is -44, matched_expected:false here is the intended, correct signal of that divergence -- do not &#39;fix&#39; this expectation to match LO.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CEILING(&#34;abc&#34;,1)</td>
+  <td>Nonnumeric first argument -&gt; #VALUE!, per Microsoft docs: &#39;If either argument is nonnumeric, CEILING returns the #VALUE! error value.&#39;</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

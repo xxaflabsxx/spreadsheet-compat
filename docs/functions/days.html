@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAYS — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="DAYS (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>DAYS — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="DAYS (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/days.html">
-<meta property="og:title" content="DAYS — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="DAYS (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="DAYS — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="DAYS (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/days.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>DAYS</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Date and time</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for DAYS yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,59 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for DAYS yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DAYS(DATE(2024,3,15),DATE(2024,3,1))</td>
+  <td>DAYS takes END_DATE FIRST, then start_date -- the opposite argument order from DAYS360/YEARFRAC. Verified via https://support.microsoft.com/en-us/office/days-function-57740535-d549-4395-8728-0f07bff0b9df (&#34;DAYS(end_date, start_date)&#34;)</td>
+  <td class="result mono">14</td>
+  <td class="result mono">14<br><span class="category-tag">2024-03-15 minus 2024-03-01 = 14 days</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS(DATE(2024,3,1),DATE(2024,3,15))</td>
+  <td>Swapping which date is passed first (now the earlier date is &#39;end_date&#39;) flips the sign -- reinforcing that argument order is significant and not auto-corrected</td>
+  <td class="result mono">-14</td>
+  <td class="result mono">-14<br><span class="category-tag">Same two dates as DAYS_basic_end_first_argument_order but with roles swapped -&gt; -14</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS(&#34;15-MAR-2021&#34;,&#34;1-FEB-2021&#34;)</td>
+  <td>Microsoft&#39;s own documented example, using text dates parsed as if by DATEVALUE</td>
+  <td class="result mono">42</td>
+  <td class="result mono">42<br><span class="category-tag">Exact example from the DAYS function documentation</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS(DATE(2021,12,31),DATE(2021,1,1))</td>
+  <td>A second literal example from the same Microsoft documentation page</td>
+  <td class="result mono">364</td>
+  <td class="result mono">364<br><span class="category-tag">Dec 31, 2021 minus Jan 1, 2021 = 364 days</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

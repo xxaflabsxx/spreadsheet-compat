@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>INDIRECT — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="INDIRECT (Lookup and reference) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>INDIRECT — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="INDIRECT (Lookup and reference) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/indirect.html">
-<meta property="og:title" content="INDIRECT — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="INDIRECT (Lookup and reference) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="INDIRECT — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="INDIRECT (Lookup and reference) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/indirect.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>INDIRECT</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Lookup and reference</p>
+<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for INDIRECT yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060109.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,67 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for INDIRECT yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=INDIRECT(&#34;A1&#34;)</td>
+  <td>Basic ref_text naming a cell literally</td>
+  <td class="result mono">42</td>
+  <td class="result mono">42</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDIRECT(&#34;A&#34;&amp;2)</td>
+  <td>ref_text built dynamically by concatenating column letter and a row number</td>
+  <td class="result mono">99</td>
+  <td class="result mono">99</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDIRECT(&#34;NotACell!!&#34;)</td>
+  <td>A ref_text string that isn&#39;t a valid cell reference in either A1 or R1C1 style -&gt; #REF!</td>
+  <td class="result mono">#REF!</td>
+  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDIRECT(&#34;R2C1&#34;,FALSE)</td>
+  <td>a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2</td>
+  <td class="result mono">7</td>
+  <td class="result mono">7</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDIRECT(&#34;Z50&#34;)</td>
+  <td>Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

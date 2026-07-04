@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ISOWEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="ISOWEEKNUM (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>ISOWEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="ISOWEEKNUM (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/isoweeknum.html">
-<meta property="og:title" content="ISOWEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="ISOWEEKNUM (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="ISOWEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="ISOWEEKNUM (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/isoweeknum.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>ISOWEEKNUM</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Date and time</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for ISOWEEKNUM yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,59 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for ISOWEEKNUM yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ISOWEEKNUM(DATE(2012,3,9))</td>
+  <td>Microsoft&#39;s own documented example date/result. Verified via https://support.microsoft.com/en-us/office/isoweeknum-function-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e</td>
+  <td class="result mono">10</td>
+  <td class="result mono">10</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISOWEEKNUM(DATE(2023,1,1))</td>
+  <td>Genuine algorithmic divergence from plain WEEKNUM: ISO 8601 week 1 is defined as the week containing the year&#39;s first Thursday (Monday-start weeks), NOT the week containing Jan 1. Jan 1, 2023 is a Sunday, so it belongs to the week Dec 26, 2022 - Jan 1, 2023, whose Thursday (Dec 29, 2022) is in 2022 -- so this date is ISO week 52 of 2022, even though plain WEEKNUM would call it week 1 of 2023</td>
+  <td class="result mono">52</td>
+  <td class="result mono">52<br><span class="category-tag">Cross-checked against Python&#39;s datetime.date(2023,1,1).isocalendar() -&gt; (2022, 52, 7), which implements ISO 8601</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISOWEEKNUM(DATE(2024,1,1))</td>
+  <td>Contrast case: Jan 1, 2024 is a Monday, so (unlike the 2023 case above) it DOES start ISO week 1 of 2024 -- showing the year-boundary quirk depends entirely on which weekday Jan 1 falls on</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Cross-checked against Python&#39;s datetime.date(2024,1,1).isocalendar() -&gt; (2024, 1, 1)</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISOWEEKNUM(DATE(2024,12,31))</td>
+  <td>The same phenomenon at the OTHER end of the year: Dec 31, 2024 is a Tuesday, and the Monday-start week containing it (Dec 30, 2024 - Jan 5, 2025) has its Thursday (Jan 2, 2025) in the following calendar year, so this December date is actually ISO week 1 of 2025</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Cross-checked against Python&#39;s datetime.date(2024,12,31).isocalendar() -&gt; (2025, 1, 2)</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

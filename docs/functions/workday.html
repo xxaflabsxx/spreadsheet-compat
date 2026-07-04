@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WORKDAY — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="WORKDAY (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>WORKDAY — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="WORKDAY (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/workday.html">
-<meta property="og:title" content="WORKDAY — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="WORKDAY (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="WORKDAY — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="WORKDAY (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/workday.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>WORKDAY</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Date and time</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for WORKDAY yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,59 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for WORKDAY yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=WORKDAY(DATE(2024,1,1),5)</td>
+  <td>5 working days after Mon Jan 1, 2024, no holidays supplied</td>
+  <td class="result mono">45299</td>
+  <td class="result mono">45299<br><span class="category-tag">Jan 1, 2024 (Mon) + 5 workdays, skipping the Jan 6-7 weekend, = Jan 8, 2024 = serial 45299</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WORKDAY(DATE(2024,1,1),5,DATE(2024,1,3))</td>
+  <td>Same start/offset as WORKDAY_basic_no_holidays but with Jan 3 excluded as a holiday, pushing the result one calendar day later</td>
+  <td class="result mono">45300</td>
+  <td class="result mono">45300<br><span class="category-tag">With Jan 3 excluded, the 5th workday becomes Jan 9, 2024 = serial 45300</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WORKDAY(DATE(2024,1,1),5,A2:A3)</td>
+  <td>holidays argument as a multi-cell range (Jan 3 and Jan 4 both excluded)</td>
+  <td class="result mono">45301</td>
+  <td class="result mono">45301<br><span class="category-tag">With both Jan 3 and Jan 4 excluded, the 5th workday becomes Jan 10, 2024 = serial 45301</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WORKDAY(DATE(2024,1,10),-5)</td>
+  <td>Negative days argument counts backward from start_date instead of forward. Verified via https://support.microsoft.com/en-us/office/workday-function-f764a5b7-05fc-4494-9486-60d494efbf33 (&#34;A positive value for days yields a future date; a negative value yields a past date&#34;)</td>
+  <td class="result mono">45294</td>
+  <td class="result mono">45294<br><span class="category-tag">Jan 10, 2024 (Wed) - 5 workdays, skipping the Jan 6-7 weekend, = Jan 3, 2024 = serial 45294</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

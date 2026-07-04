@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ADDRESS — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="ADDRESS (Lookup and reference) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>ADDRESS — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="ADDRESS (Lookup and reference) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 6 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/address.html">
-<meta property="og:title" content="ADDRESS — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="ADDRESS (Lookup and reference) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="ADDRESS — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="ADDRESS (Lookup and reference) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 6 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/address.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>ADDRESS</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Lookup and reference</p>
+<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for ADDRESS yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060109.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,75 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for ADDRESS yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ADDRESS(2,3)</td>
+  <td>abs_num omitted defaults to 1 (fully absolute)</td>
+  <td class="result mono">$C$2</td>
+  <td class="result mono">$C$2<br><span class="category-tag">https://support.microsoft.com/en-us/office/address-function-d0c26c0d-3991-446b-8de4-ab46431d4f89 -- abs_num default is 1 (absolute); row 2, column 3 = C, giving $C$2</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ADDRESS(2,3,1)</td>
+  <td>abs_num=1: absolute row and absolute column</td>
+  <td class="result mono">$C$2</td>
+  <td class="result mono">$C$2</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ADDRESS(2,3,2)</td>
+  <td>abs_num=2: absolute row, relative column</td>
+  <td class="result mono">C$2</td>
+  <td class="result mono">C$2<br><span class="category-tag">Per the ADDRESS docs&#39; abs_num table, mode 2 locks the row with $ but leaves the column floating</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ADDRESS(2,3,3)</td>
+  <td>abs_num=3: relative row, absolute column</td>
+  <td class="result mono">$C2</td>
+  <td class="result mono">$C2<br><span class="category-tag">Mode 3 is the mirror of mode 2: column locked with $, row left relative</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ADDRESS(2,3,4)</td>
+  <td>abs_num=4: fully relative, no dollar signs</td>
+  <td class="result mono">C2</td>
+  <td class="result mono">C2</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ADDRESS(1,1,1,TRUE,&#34;Sheet1&#34;)</td>
+  <td>sheet_text argument prefixes the result with a sheet-qualified reference</td>
+  <td class="result mono">Sheet1!$A$1</td>
+  <td class="result mono">Sheet1!$A$1</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FLOOR — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="FLOOR (Compatibility) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>FLOOR — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="FLOOR (Compatibility) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 6 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/floor.html">
-<meta property="og:title" content="FLOOR — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="FLOOR (Compatibility) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="FLOOR — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="FLOOR (Compatibility) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 6 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/floor.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>FLOOR</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Supported, with a discovered quirk</span>
   
 </div>
-<p class="category-tag">Category: Compatibility</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for FLOOR yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Supported, with a discovered quirk</span>
     
   </td>
 </tr>
@@ -314,11 +306,110 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=FLOOR(2.5,-2)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for FLOOR yet. This function's
-entry above reflects documentation inventory only.</p>
+
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=FLOOR(3.7,2)</td>
+  <td>Basic case, rounds 3.7 down to the nearest multiple of 2. Source: https://support.microsoft.com/en-us/office/floor-function-14bb497c-24f2-4e04-b327-b0b4de5a8886 (worked example table)</td>
+  <td class="result mono">2</td>
+  <td class="result mono">2</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FLOOR(0.234,0.01)</td>
+  <td>Rounds 0.234 down to the nearest multiple of 0.01. Source: Microsoft FLOOR docs worked example table.</td>
+  <td class="result mono">0.23</td>
+  <td class="result mono">0.23</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FLOOR(-2.5,-2)</td>
+  <td>Number and significance both negative -&gt; Microsoft&#39;s own worked example rounds this TOWARD zero (-2), which is the opposite direction CEILING takes for the same-signed case.</td>
+  <td class="result mono">-2</td>
+  <td class="result mono">-2<br><span class="category-tag">Microsoft&#39;s worked example table gives FLOOR(-2.5,-2) = -2 exactly (https://support.microsoft.com/en-us/office/floor-function-14bb497c-24f2-4e04-b327-b0b4de5a8886). Note this is the OPPOSITE rounding direction of CEILING(-2.5,-2)=-4 for the identical arguments -- FLOOR and CEILING deliberately diverge on both-negative inputs, not a bug.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FLOOR(2.5,-2)</td>
+  <td>Number positive, significance negative (opposite signs) -&gt; #NUM!, explicitly documented by Microsoft: &#39;If Number is positive and Significance is negative, FLOOR returns the #NUM! error value.&#39;</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!</td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FLOOR(-45.67,-2)</td>
+  <td>GOLD QUIRK CANDIDATE: mirror image of the CEILING default-Mode divergence. Both Number and significance negative, Mode omitted.</td>
+  <td class="result mono">-44</td>
+  <td class="result mono">-44<br><span class="category-tag">Derived from Microsoft&#39;s own worked FLOOR(-2.5,-2)=-2 example (both-negative case rounds TOWARD zero): ratio -45.67/-2=22.835, truncating toward zero gives 22, 22*-2=-44. LibreOffice&#39;s own FLOOR docs (https://help.libreoffice.org/latest/en-US/text/scalc/01/func_floor.html) define an optional 3rd Mode argument that only applies when both Number and Significance are negative, stating &#39;Mode = 0 or omitted: negative numbers are rounded down (away from zero)&#39; with LO&#39;s own worked example FLOOR(-45.67;-2;0) = -46. So the identical 2-arg formula (Mode omitted) is documented to resolve to -46 under LibreOffice&#39;s default vs -44 under Microsoft&#39;s documented behavior -- a genuine divergence, and the exact mirror image of the CEILING case above (there Excel defaults away-from-zero and LO defaults toward-zero; here Excel defaults toward-zero and LO defaults away-from-zero). If LO&#39;s executed result is -46, matched_expected:false is the correct, intended signal -- do not &#39;fix&#39; this expectation to match LO.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FLOOR(&#34;abc&#34;,1)</td>
+  <td>Nonnumeric first argument -&gt; #VALUE!, per Microsoft docs: &#39;If either argument is nonnumeric, FLOOR returns the #VALUE! error value.&#39;</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

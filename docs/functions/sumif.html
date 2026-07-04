@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SUMIF — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="SUMIF (Math and trigonometry) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>SUMIF — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="SUMIF (Math and trigonometry) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/sumif.html">
-<meta property="og:title" content="SUMIF — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="SUMIF (Math and trigonometry) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="SUMIF — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="SUMIF (Math and trigonometry) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/sumif.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>SUMIF</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for SUMIF yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,67 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for SUMIF yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SUMIF(A1:A5,&#34;&gt;10&#34;)</td>
+  <td>Sum of cells in the range itself that satisfy the criteria (no sum_range)</td>
+  <td class="result mono">60</td>
+  <td class="result mono">60<br><span class="category-tag">15+20+25=60; 5 and 10 fail the &gt;10 test</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMIF(A1:A5,&#34;&gt;2&#34;,B1:B5)</td>
+  <td>Criteria evaluated against A but the matching B cells are summed</td>
+  <td class="result mono">120</td>
+  <td class="result mono">120<br><span class="category-tag">Rows 3,4,5 satisfy A&gt;2; sum of paired B = 30+40+50</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMIF(B1:B3,&#34;a*&#34;,A1:A3)</td>
+  <td>Wildcard text criteria matches cells starting with &#39;a&#39;</td>
+  <td class="result mono">4</td>
+  <td class="result mono">4<br><span class="category-tag">apple(1)+avocado(3)=4; banana excluded</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMIF(A1:A3,&#34;&gt;100&#34;)</td>
+  <td>No cells satisfy the criteria -&gt; 0</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMIF(A1:A5,&#34;&gt;0&#34;)</td>
+  <td>Blank cells interspersed in the range are simply skipped, not treated as matching or as errors</td>
+  <td class="result mono">30</td>
+  <td class="result mono">30<br><span class="category-tag">A2 and A4 are blank (unset); only A1,A3,A5 exist and all satisfy &gt;0</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

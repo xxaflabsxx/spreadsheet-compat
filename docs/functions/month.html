@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MONTH — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="MONTH (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>MONTH — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="MONTH (Date and time) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 3 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/month.html">
-<meta property="og:title" content="MONTH — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="MONTH (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="MONTH — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="MONTH (Date and time) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 3 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/month.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>MONTH</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Supported, with a discovered quirk</span>
   
 </div>
-<p class="category-tag">Category: Date and time</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for MONTH yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Supported, with a discovered quirk</span>
     
   </td>
 </tr>
@@ -314,11 +306,80 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+      <li>
+        <span class="formula">=MONTH(1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">12</span>, but the documented/expected
+        result is <span class="formula">1</span>.
+        Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 12
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for MONTH yet. This function's
-entry above reflects documentation inventory only.</p>
+
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=MONTH(DATE(2024,3,15))</td>
+  <td>MONTH applied to a constructed date</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MONTH(1)</td>
+  <td>MONTH applied directly to the raw serial number 1 (Jan 1, 1900)</td>
+  <td class="result mono">12</td>
+  <td class="result mono">1<br><span class="category-tag">Serial 1 is Jan 1, 1900 in the 1900 date system</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MONTH(45366.75)</td>
+  <td>A serial with a fractional (time-of-day) component still resolves to the correct calendar month</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3<br><span class="category-tag">45366 = 2024-03-15; the .75 fractional day is ignored by MONTH</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

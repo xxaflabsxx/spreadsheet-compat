@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAYS360 — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="DAYS360 (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>DAYS360 — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="DAYS360 (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/days360.html">
-<meta property="og:title" content="DAYS360 — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="DAYS360 (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="DAYS360 — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="DAYS360 (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 4 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/days360.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>DAYS360</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Date and time</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for DAYS360 yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,59 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for DAYS360 yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2011,1,30),DATE(2011,2,1))</td>
+  <td>Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2011,1,1),DATE(2011,12,31))</td>
+  <td>A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
+  <td class="result mono">360</td>
+  <td class="result mono">360</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31))</td>
+  <td>US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
+  <td class="result mono">30</td>
+  <td class="result mono">30<br><span class="category-tag">Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31),TRUE)</td>
+  <td>Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
+  <td class="result mono">29</td>
+  <td class="result mono">29<br><span class="category-tag">Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

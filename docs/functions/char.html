@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHAR — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="CHAR (Text) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>CHAR — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="CHAR (Text) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 4 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/char.html">
-<meta property="og:title" content="CHAR — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="CHAR (Text) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="CHAR — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="CHAR (Text) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 4 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/char.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>CHAR</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Supported, with a discovered quirk</span>
   
 </div>
-<p class="category-tag">Category: Text</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for CHAR yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Supported, with a discovered quirk</span>
     
   </td>
 </tr>
@@ -314,11 +306,90 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=CHAR(0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">_x0000_</span>, but the documented/expected
+        result is <span class="formula">#VALUE!</span>.
+        Microsoft docs: CHAR takes &#34;A number between 1 and 255 specifying which character you want.&#34; Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;_x0000_&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for CHAR yet. This function's
-entry above reflects documentation inventory only.</p>
+
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=CHAR(65)</td>
+  <td>Basic code-to-character lookup</td>
+  <td class="result mono">A</td>
+  <td class="result mono">A</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHAR(97)</td>
+  <td>Lowercase letter lookup</td>
+  <td class="result mono">a</td>
+  <td class="result mono">a</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHAR(0)</td>
+  <td>0 is outside CHAR&#39;s documented valid range of 1-255 -&gt; #VALUE!</td>
+  <td class="result mono">_x0000_</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft docs: CHAR takes &#34;A number between 1 and 255 specifying which character you want.&#34; Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHAR(256)</td>
+  <td>256 is above CHAR&#39;s documented valid range of 1-255 -&gt; #VALUE!</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a - valid range is 1-255; values outside it are invalid</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

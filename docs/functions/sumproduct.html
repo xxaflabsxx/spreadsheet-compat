@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SUMPRODUCT — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="SUMPRODUCT (Math and trigonometry) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>SUMPRODUCT — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="SUMPRODUCT (Math and trigonometry) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/sumproduct.html">
-<meta property="og:title" content="SUMPRODUCT — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="SUMPRODUCT (Math and trigonometry) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="SUMPRODUCT — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="SUMPRODUCT (Math and trigonometry) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/sumproduct.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>SUMPRODUCT</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for SUMPRODUCT yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060107.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,67 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for SUMPRODUCT yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SUMPRODUCT(A1:A3,B1:B3)</td>
+  <td>Sum of pairwise products across two equal-sized arrays</td>
+  <td class="result mono">140</td>
+  <td class="result mono">140<br><span class="category-tag">1*10+2*20+3*30 = 10+40+90 = 140</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMPRODUCT(A1:A3)</td>
+  <td>With only one array argument, SUMPRODUCT just sums its elements</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMPRODUCT(--(A1:A5&gt;2))</td>
+  <td>Classic double-unary-minus idiom coerces a boolean array to 1/0 to count matches without an extra helper column</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3<br><span class="category-tag">A3,A4,A5 satisfy &gt;2; --(...) turns TRUE/FALSE into 1/0 and SUMPRODUCT sums them</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMPRODUCT((A1:A5&gt;2)*B1:B5)</td>
+  <td>Multiplying a boolean condition array by a value array replicates SUMIF without a separate criteria function</td>
+  <td class="result mono">120</td>
+  <td class="result mono">120<br><span class="category-tag">Rows where A&gt;2 (rows 3,4,5) contribute their B value: 30+40+50=120</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUMPRODUCT(A1:A3,B1:B2)</td>
+  <td>Arrays of different dimensions cannot be multiplied element-wise -&gt; #VALUE!</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft docs: array arguments must have the same dimensions, otherwise SUMPRODUCT returns #VALUE!</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

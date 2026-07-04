@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YEARFRAC — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="YEARFRAC (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>YEARFRAC — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="YEARFRAC (Date and time) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 6 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/yearfrac.html">
-<meta property="og:title" content="YEARFRAC — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="YEARFRAC (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="YEARFRAC — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="YEARFRAC (Date and time) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 6 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/yearfrac.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>YEARFRAC</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Supported, with a discovered quirk</span>
   
 </div>
-<p class="category-tag">Category: Date and time</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for YEARFRAC yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Supported, with a discovered quirk</span>
     
   </td>
 </tr>
@@ -314,11 +306,110 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),9)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft docs: &#39;invalid basis values (&lt; 0 or &gt; 4) return a #NUM! error.&#39;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for YEARFRAC yet. This function's
-entry above reflects documentation inventory only.</p>
+
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30))</td>
+  <td>Default basis 0 (US/NASD 30/360): treats every month as 30 days. Days = 6*30+29 = 209, over a 360-day year -&gt; 209/360. Source: https://support.microsoft.com/en-us/office/yearfrac-function-3844141e-c76d-4143-82b6-208454ddc6a8 (worked example rounds to 0.58055556)</td>
+  <td class="result mono">0.580555555555556</td>
+  <td class="result mono">0.5805555555555556</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),1)</td>
+  <td>basis 1 (Actual/actual): actual 211 calendar days between the two dates, divided by 366 since the enclosing 1-year span (Jan 2012-Jan 2013) is a leap year. Source: Microsoft YEARFRAC docs worked example rounds to 0.57650273.</td>
+  <td class="result mono">0.576502732240437</td>
+  <td class="result mono">0.5765027322404372<br><span class="category-tag">211/366 = 0.5765027322404372, matching Microsoft&#39;s documented rounded example (0.57650273) to 8 decimal places. Actual/actual leap-year-boundary handling is a documented high-divergence area across spreadsheet engines.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),2)</td>
+  <td>basis 2 (Actual/360): actual 211 calendar days divided by a fixed 360-day year. Source: Microsoft YEARFRAC docs basis table.</td>
+  <td class="result mono">0.586111111111111</td>
+  <td class="result mono">0.5861111111111111<br><span class="category-tag">211/360 = 0.5861111111111111.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),3)</td>
+  <td>basis 3 (Actual/365): actual 211 calendar days divided by a fixed 365-day year. Source: Microsoft YEARFRAC docs worked example rounds to 0.57808219.</td>
+  <td class="result mono">0.578082191780822</td>
+  <td class="result mono">0.5780821917808219<br><span class="category-tag">211/365 = 0.5780821917808219, matches Microsoft&#39;s documented rounded example exactly.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),4)</td>
+  <td>basis 4 (European 30/360). For this particular date pair neither day-of-month is the 31st, so the European day-count adjustment never triggers and the result equals basis 0&#39;s 209/360.</td>
+  <td class="result mono">0.580555555555556</td>
+  <td class="result mono">0.5805555555555556<br><span class="category-tag">European 30/360 only differs from US 30/360 when a start/end day-of-month is 31; with day 1 and day 30 as here, both conventions compute 209/360 identically.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),9)</td>
+  <td>basis values outside 0-4 are documented as invalid.</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft docs: &#39;invalid basis values (&lt; 0 or &gt; 4) return a #NUM! error.&#39;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

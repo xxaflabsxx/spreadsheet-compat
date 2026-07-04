@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="WEEKNUM (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>WEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="WEEKNUM (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/weeknum.html">
-<meta property="og:title" content="WEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="WEEKNUM (Date and time) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="WEEKNUM — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="WEEKNUM (Date and time) real compatibility results: LibreOffice Calc: Supported, behaves as documented. 5 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/weeknum.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>WEEKNUM</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Date and time</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for WEEKNUM yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -316,9 +308,67 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for WEEKNUM yet. This function's
-entry above reflects documentation inventory only.</p>
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=WEEKNUM(DATE(2024,1,1),1)</td>
+  <td>return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEEKNUM(DATE(2024,1,1),2)</td>
+  <td>return_type 2 = same &#39;week containing Jan 1 is week 1&#39; system, but weeks start Monday</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEEKNUM(DATE(2012,3,9))</td>
+  <td>Microsoft&#39;s own documented example date/result for the default return_type (1)</td>
+  <td class="result mono">10</td>
+  <td class="result mono">10<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEEKNUM(DATE(2012,3,9),2)</td>
+  <td>Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft&#39;s own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence</td>
+  <td class="result mono">11</td>
+  <td class="result mono">11<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEEKNUM(DATE(2023,1,1),21)</td>
+  <td>return_type 21 uses &#39;System 2&#39;: the week containing the year&#39;s first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use &#39;week containing Jan 1 = week 1&#39;). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json</td>
+  <td class="result mono">52</td>
+  <td class="result mono">52<br><span class="category-tag">Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

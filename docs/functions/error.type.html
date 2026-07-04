@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ERROR.TYPE — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?</title>
-<meta name="description" content="ERROR.TYPE (Information) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<title>ERROR.TYPE — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?</title>
+<meta name="description" content="ERROR.TYPE (Information) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 8 executed test cases, last tested 2026-07-04.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/functions/error.type.html">
-<meta property="og:title" content="ERROR.TYPE — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | Can I Spreadsheet?">
-<meta property="og:description" content="ERROR.TYPE (Information) documentation inventory: is it documented for Excel, Google Sheets, and LibreOffice Calc? Not yet live-tested by a real engine.">
+<meta property="og:title" content="ERROR.TYPE — Excel vs Google Sheets vs LibreOffice compatibility | Can I Spreadsheet?">
+<meta property="og:description" content="ERROR.TYPE (Information) real compatibility results: LibreOffice Calc: Supported, with a discovered quirk. 8 executed test cases, last tested 2026-07-04.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/functions/error.type.html">
 <meta name="twitter:card" content="summary">
@@ -252,19 +252,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>ERROR.TYPE</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Supported, with a discovered quirk</span>
   
 </div>
-<p class="category-tag">Category: Information</p>
+<p class="category-tag">Category: Information &middot; Last tested 2026-07-04</p>
 
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for ERROR.TYPE yet. The table below reflects only whether each vendor's
-  official documentation lists this function — it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -301,10 +293,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060109.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (24.2.7.2, 2026-07-04)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Supported, with a discovered quirk</span>
     
   </td>
 </tr>
@@ -314,11 +306,138 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=ERROR.TYPE(OFFSET(A1,-1,0))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">4</span>.
+        MISMATCH vs expected: expected 4, got &#39;#N/A&#39;
+      </li>
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=ERROR.TYPE(SQRT(-1))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">6</span>.
+        MISMATCH vs expected: expected 6, got &#39;#N/A&#39;
+      </li>
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for ERROR.TYPE yet. This function's
-entry above reflects documentation inventory only.</p>
+
+<h2 class="section-title">Executed test cases</h2>
+
+
+
+
+
+
+
+
+
+<h3>LibreOffice Calc 24.2.7.2 <span class="category-tag">(tested 2026-07-04)</span></h3>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(A1:A2 C1:C2)</td>
+  <td>Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -&gt; ERROR.TYPE code 1</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(1/0)</td>
+  <td>#DIV/0! -&gt; code 2</td>
+  <td class="result mono">2</td>
+  <td class="result mono">2</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(&#34;a&#34;+1)</td>
+  <td>#VALUE! -&gt; code 3</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(OFFSET(A1,-1,0))</td>
+  <td>Offsetting above row 1 produces a genuine #REF! error -&gt; code 4</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">4</td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(qwertyzz)</td>
+  <td>An undefined name reference produces #NAME? -&gt; code 5</td>
+  <td class="result mono">5</td>
+  <td class="result mono">5</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(SQRT(-1))</td>
+  <td>Square root of a negative number produces #NUM! -&gt; code 6</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">6</td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(NA())</td>
+  <td>#N/A -&gt; code 7</td>
+  <td class="result mono">7</td>
+  <td class="result mono">7<br><span class="category-tag">Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ERROR.TYPE(5)</td>
+  <td>Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: &#39;returns the #N/A error&#39; for non-error input.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spreadsheet function quirks — real Excel/Google Sheets/LibreOffice divergence | Can I Spreadsheet?</title>
-<meta name="description" content="49 real, executed spreadsheet function results that diverge from documented behavior, found across 13 functions.">
+<meta name="description" content="86 real, executed spreadsheet function results that diverge from documented behavior, found across 41 functions.">
 <link rel="canonical" href="https://xxaflabsxx.github.io/spreadsheet-compat/quirks.html">
 <meta property="og:title" content="Spreadsheet function quirks — real Excel/Google Sheets/LibreOffice divergence | Can I Spreadsheet?">
-<meta property="og:description" content="49 real, executed spreadsheet function results that diverge from documented behavior, found across 13 functions.">
+<meta property="og:description" content="86 real, executed spreadsheet function results that diverge from documented behavior, found across 41 functions.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xxaflabsxx.github.io/spreadsheet-compat/quirks.html">
 <meta name="twitter:card" content="summary">
@@ -253,7 +253,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 not match documented/expected behavior. This is the flagship content of
 Can I Spreadsheet? — cross-engine divergence that only shows up when you actually
 run the formula.</p>
-<p class="search-hint">49 quirks found across 13 functions.</p>
+<p class="search-hint">86 quirks found across 41 functions.</p>
 
 <ul class="quirks-list">
 
@@ -310,6 +310,45 @@ run the formula.</p>
 </li>
 
 <li class="quirk-entry">
+  <h3><a href="functions/char.html">CHAR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=CHAR(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">_x0000_</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft docs: CHAR takes &#34;A number between 1 and 255 specifying which character you want.&#34; Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;_x0000_&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/count.html">COUNT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=COUNT(A1:A1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Per Microsoft&#39;s COUNT documentation, booleans in a referenced range are excluded from COUNT, unlike booleans typed directly as literal arguments; MISMATCH vs expected: expected 0, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/count.html">COUNT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=COUNT(A1:A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">3</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>A3 and A6 are blank, A2 is text, A4 is a boolean cell; only A1=10 and A5=20 are counted; MISMATCH vs expected: expected 2, got 3</p>
+</li>
+
+<li class="quirk-entry">
   <h3><a href="functions/datedif.html">DATEDIF</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h3>
   <div class="formula mono">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),&#34;D&#34;)</div>
@@ -320,6 +359,45 @@ run the formula.</p>
     <dt>Category</dt><dd>Date and time</dd>
   </dl>
   <p>Microsoft docs state end&lt;start raises #NUM!; record engines&#39; ACTUAL error code here since this is a known point of cross-engine divergence; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/day.html">DAY</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=DAY(1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">31</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Date and time</dd>
+  </dl>
+  <p>Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 31</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/error.type.html">ERROR.TYPE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=ERROR.TYPE(SQRT(-1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">6</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected 6, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/error.type.html">ERROR.TYPE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=ERROR.TYPE(OFFSET(A1,-1,0))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected 4, got &#39;#N/A&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -388,6 +466,45 @@ run the formula.</p>
 </li>
 
 <li class="quirk-entry">
+  <h3><a href="functions/floor.html">FLOOR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=FLOOR(2.5,-2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/hlookup.html">HLOOKUP</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=HLOOKUP(&#34;a&#34;,A1:C2,5,FALSE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#REF!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#REF!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/isnumber.html">ISNUMBER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=ISNUMBER(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">True</dd>
+    <dt>Documented / expected</dt><dd class="mono">False</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>ISNUMBER(TRUE) = FALSE; use ISLOGICAL to detect booleans instead.; MISMATCH vs expected: expected False, got True</p>
+</li>
+
+<li class="quirk-entry">
   <h3><a href="functions/lambda.html">LAMBDA</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h3>
   <div class="formula mono">=LAMBDA(x,x*2)(5)</div>
@@ -424,6 +541,32 @@ run the formula.</p>
     <dt>Category</dt><dd>Logical</dd>
   </dl>
   <p>MISMATCH vs expected: expected 16, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/large.html">LARGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LARGE(A1:A5,6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Only 5 values exist; requesting the 6th-largest is out of range; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/large.html">LARGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LARGE(A1:A3,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -479,6 +622,201 @@ run the formula.</p>
 </li>
 
 <li class="quirk-entry">
+  <h3><a href="functions/ln.html">LN</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LN(-5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/ln.html">LN</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LN(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Microsoft&#39;s LN docs specify the Number argument must be &#39;the positive real number for which you want the natural logarithm&#39; -- https://support.microsoft.com/en-us/office/ln-function-81fe1ed7-dac9-4acd-ba1d-07a142c6118f -- 0 and negative numbers are outside that domain and both are well-established to raise #NUM!, matching every other Excel logarithm function; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/log.html">LOG</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LOG(-10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/log.html">LOG</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LOG(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/log10.html">LOG10</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LOG10(-5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/log10.html">LOG10</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=LOG10(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/mode.html">MODE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=MODE(A1:A4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Microsoft&#39;s MODE docs state verbatim: &#39;If the data set contains no duplicate data points, MODE returns the #N/A error value&#39; -- https://support.microsoft.com/en-us/office/mode-function-e45192ce-9122-4980-82ed-4bdc34973120; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/month.html">MONTH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=MONTH(1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">12</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Date and time</dd>
+  </dl>
+  <p>Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 12</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/mround.html">MROUND</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=MROUND(5,-2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">6</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got 6</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/offset.html">OFFSET</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=OFFSET(A1,-1,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#REF!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>https://support.microsoft.com/en-us/office/offset-function-c8de19ae-dd79-4b9b-a14e-b4d906d11b66 -- &#39;If rows and cols offset reference over the edge of the worksheet, OFFSET returns the #REF! error value.&#39;; MISMATCH vs expected: expected &#39;#REF!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/percentile.exc.html">PERCENTILE.EXC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=PERCENTILE.EXC(A1:A10,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/percentile.exc.html">PERCENTILE.EXC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=PERCENTILE.EXC(A1:A10,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/percentile.inc.html">PERCENTILE.INC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=PERCENTILE.INC(A1:A3,1.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/power.html">POWER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=POWER(-8,1/3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">-2</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Confirmed via Microsoft&#39;s own community support: entering =(-8)^(2/3) (equivalent power semantics to POWER) returns #NUM! in Excel -- https://answers.microsoft.com/en-us/msoffice/forum/all/excel-calculating-exponential-of-negative-number/5c67eae2-5682-4daf-b3d6-50b22e9919c2 -- note that -8^(1/3) is mathematically -2 as a real cube root, but Excel&#39;s POWER/^ implementation does not special-case rational exponents with odd integer denominators and returns #NUM! for any negative base with a non-integer exponent; MISMATCH vs expected: expected &#39;#NUM!&#39;, got -2</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/quartile.inc.html">QUARTILE.INC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=QUARTILE.INC(A1:A3,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h3><a href="functions/sequence.html">SEQUENCE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h3>
   <div class="formula mono">=SEQUENCE(5)</div>
@@ -531,6 +869,32 @@ run the formula.</p>
 </li>
 
 <li class="quirk-entry">
+  <h3><a href="functions/small.html">SMALL</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=SMALL(A1:A5,6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Only 5 values exist; requesting the 6th-smallest is out of range; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/small.html">SMALL</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=SMALL(A1:A3,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h3><a href="functions/sort.html">SORT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h3>
   <div class="formula mono">=SORT(A1:B3,2,1)</div>
@@ -580,6 +944,32 @@ run the formula.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>Blank cell sorts as 0 in numeric context; no error expected; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/sqrt.html">SQRT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=SQRT(-16)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Microsoft&#39;s SQRT docs state verbatim: &#39;If number is negative, SQRT returns the #NUM! error value&#39; -- https://support.microsoft.com/en-US/Excel/functions/sqrt-function; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/sum.html">SUM</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=SUM(1,&#34;2&#34;,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">6</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Contrast with SUM_text_in_cell_reference_ignored: Excel coerces literal string arguments that look like numbers when they are typed directly into the formula, but does not do so for text found inside a range reference; MISMATCH vs expected: expected 6, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -752,6 +1142,58 @@ run the formula.</p>
 </li>
 
 <li class="quirk-entry">
+  <h3><a href="functions/trim.html">TRIM</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=TRIM(CHAR(160)&amp;&#34;Hello&#34;&amp;CHAR(160))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">�Hello�</dd>
+    <dt>Documented / expected</dt><dd class="mono"> Hello </dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft docs state explicitly: &#34;by itself, the TRIM function does not remove the nonbreaking space character (which has a decimal value of 160 and is commonly used in web pages as the HTML entity  ).&#34; Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9; MISMATCH vs expected: expected &#39;\xa0Hello\xa0&#39;, got &#39;�Hello�&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/type.html">TYPE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=TYPE(A1:A3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">64</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected 64, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/type.html">TYPE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=TYPE(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected 4, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/unichar.html">UNICHAR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=UNICHAR(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">_x0000_</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;_x0000_&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h3><a href="functions/unique.html">UNIQUE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h3>
   <div class="formula mono">=UNIQUE(A1:A5)</div>
@@ -814,6 +1256,19 @@ run the formula.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>Microsoft docs specify #REF! for out-of-range col_index_num; record engines&#39; ACTUAL error code here since this is a known point of cross-engine divergence; MISMATCH vs expected: expected &#39;#REF!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/weekday.html">WEEKDAY</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=WEEKDAY(DATE(2008,2,14),99)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Date and time</dd>
+  </dl>
+  <p>Microsoft docs: an invalid return_type raises #NUM!.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -892,6 +1347,32 @@ run the formula.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>Two rows match &#39;x&#39; (1 and 3); reverse search returns the later one; MISMATCH vs expected: expected 3, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/year.html">YEAR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=YEAR(1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1899</dd>
+    <dt>Documented / expected</dt><dd class="mono">1900</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Date and time</dd>
+  </dl>
+  <p>Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1900, got 1899</p>
+</li>
+
+<li class="quirk-entry">
+  <h3><a href="functions/yearfrac.html">YEARFRAC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h3>
+  <div class="formula mono">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 24.2.7.2</dd>
+    <dt>Category</dt><dd>Date and time</dd>
+  </dl>
+  <p>Microsoft docs: &#39;invalid basis values (&lt; 0 or &gt; 4) return a #NUM! error.&#39;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 </ul>
