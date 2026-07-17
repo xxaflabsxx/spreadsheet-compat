@@ -544,6 +544,7 @@ BASE_TMPL = """<!doctype html>
     <a class="brand" href="{{ rel }}index.html">{{ site_name_html|safe }}</a>
     <nav class="site-nav">
       <a href="{{ rel }}index.html">Functions</a>
+      <a href="{{ rel }}how-to/index.html">How-to</a>
       <a href="{{ rel }}quirks.html">Quirks</a>
       <a href="{{ github_url }}">GitHub</a>
     </nav>
@@ -803,6 +804,73 @@ def fmtval_filter(v):
     return str(v)
 
 
+RECIPE_INDEX_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Spreadsheet how-to recipes</h1>
+<p class="lede">Common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each one <strong>executed and verified in a real engine</strong>, not just documented.</p>
+<ul class="recipe-list">
+{% for r in recipes %}
+<li><a href="{{ rel }}how-to/{{ r.slug }}.html">{{ r.title }}</a>{% if r.verified %} <span class="badge badge-good">verified</span>{% endif %}</li>
+{% endfor %}
+</ul>
+{% endblock %}
+"""
+
+RECIPE_TMPL = """{% extends "base.html" %}
+{% block content %}
+<a class="back-link" href="{{ rel }}how-to/index.html">&larr; All how-to recipes</a>
+<div class="func-header">
+  <h1>{{ r.title }}</h1>
+  {% if r.verified %}<span class="badge badge-good">&#10003; Verified in LibreOffice {{ r.engine_version }}</span>{% endif %}
+</div>
+<p class="lede">{{ r.task }}</p>
+
+<h2 class="section-title">The formula</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>App</th><th>Formula</th><th>Notes</th></tr></thead>
+<tbody>
+{% for app in app_order %}{% set s = r.solutions.get(app) %}{% if s %}
+<tr><td>{{ app_labels[app] }}</td><td><code>{{ s.formula }}</code></td><td>{{ s.note }}</td></tr>
+{% endif %}{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2 class="section-title">How it works</h2>
+<p>{{ r.explanation }}</p>
+
+{% if r.verified %}
+<h2 class="section-title">Verified, not just documented</h2>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+{% endif %}
+{% endblock %}
+"""
+
+
+def load_recipes():
+    recs = []
+    verif = {}
+    vpath = RESULTS_DIR / "recipes-verified.json"
+    if vpath.exists():
+        verif = json.loads(vpath.read_text()).get("recipes", {})
+    rdir = DATA_DIR / "recipes"
+    if not rdir.exists():
+        return recs
+    for p in sorted(rdir.glob("*.json")):
+        d = json.loads(p.read_text())
+        v = verif.get(d["slug"], {})
+        act = v.get("actual", "")
+        if isinstance(act, list):
+            act = ", ".join(str(x) for x in act)
+        d["verified"] = bool(v.get("verified"))
+        d["engine_version"] = v.get("engine_version", "")
+        d["example_formula"] = (d.get("verify") or {}).get("formula", "")
+        d["example_actual"] = act
+        recs.append(d)
+    return recs
+
+
 def build_env():
     env = Environment(
         loader=DictLoader(
@@ -811,6 +879,8 @@ def build_env():
                 "index.html": INDEX_TMPL,
                 "function.html": FUNCTION_TMPL,
                 "quirks.html": QUIRKS_TMPL,
+                "recipe.html": RECIPE_TMPL,
+                "recipe_index.html": RECIPE_INDEX_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
             }
         ),
@@ -954,6 +1024,45 @@ def main():
         sitemap_urls.append(
             {"loc": BASE_URL + f"functions/{r['name_lower']}.html", "lastmod": page_date}
         )
+
+    # ---- How-to recipe pages ----
+    recipes = load_recipes()
+    if recipes:
+        (OUT_DIR / "how-to").mkdir(parents=True, exist_ok=True)
+        rctx = common_ctx(rel="../")
+        rctx.update(
+            page_title="Spreadsheet how-to recipes — verified formulas for Excel, Google Sheets & LibreOffice",
+            meta_description=(
+                "Copy-paste formulas for common spreadsheet tasks, each executed and "
+                "verified in a real engine. Excel, Google Sheets, and LibreOffice Calc."
+            ),
+            canonical=BASE_URL + "how-to/index.html",
+            recipes=recipes,
+        )
+        (OUT_DIR / "how-to" / "index.html").write_text(
+            env.get_template("recipe_index.html").render(**rctx)
+        )
+        sitemap_urls.append({"loc": BASE_URL + "how-to/index.html", "lastmod": build_date})
+        for rc in recipes:
+            kw = ", ".join(rc.get("keywords", [])[:3])
+            cx = common_ctx(rel="../")
+            cx.update(
+                page_title=rc["title"],
+                meta_description=(
+                    f"{rc['task']} Verified formula for Excel, Google Sheets and "
+                    f"LibreOffice Calc" + (f" ({kw})." if kw else ".")
+                ),
+                canonical=BASE_URL + f"how-to/{rc['slug']}.html",
+                r=rc,
+                app_order=ENGINE_ORDER,
+                app_labels=ENGINE_LABELS,
+            )
+            (OUT_DIR / "how-to" / f"{rc['slug']}.html").write_text(
+                env.get_template("recipe.html").render(**cx)
+            )
+            sitemap_urls.append(
+                {"loc": BASE_URL + f"how-to/{rc['slug']}.html", "lastmod": build_date}
+            )
 
     # ---- sitemap.xml + robots.txt ----
     sitemap_xml = env.get_template("sitemap.xml").render(urls=sitemap_urls)
