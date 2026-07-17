@@ -54,6 +54,9 @@ _XLWS_FUNCTIONS = {
 _XLFN_FUNCTIONS = {
     "XLOOKUP", "XMATCH",
     "LET", "LAMBDA",
+    # Lambda-helper functions (Excel 2022) -- all stored with the _xlfn. prefix.
+    "MAP", "REDUCE", "SCAN", "BYROW", "BYCOL", "MAKEARRAY",
+    "GROUPBY", "PIVOTBY",
     "UNIQUE", "SEQUENCE", "SORTBY", "RANDARRAY",
     "TEXTSPLIT", "TEXTBEFORE", "TEXTAFTER",
     "ARRAYTOTEXT", "VALUETOTEXT", "VSTACK", "HSTACK",
