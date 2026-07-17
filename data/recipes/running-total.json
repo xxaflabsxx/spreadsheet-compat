@@ -1,0 +1,35 @@
+{
+  "slug": "running-total",
+  "title": "How to make a running (cumulative) total",
+  "task": "Show a column that adds each new row to the sum of everything above it \u2014 a running balance.",
+  "keywords": [
+    "running total excel",
+    "cumulative sum google sheets",
+    "running balance formula",
+    "accumulate column"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUM($B$2:B2)",
+      "note": "Anchor the start with $, drag down. The end reference grows each row."
+    },
+    "google_sheets": {
+      "formula": "=SUM($B$2:B2)",
+      "note": "Identical; or =SCAN(0,B2:B10,LAMBDA(a,c,a+c)) for a spill."
+    },
+    "libreoffice": {
+      "formula": "=SUM($B$2:B2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "B2": 10,
+      "B3": 20,
+      "B4": 30
+    },
+    "formula": "=SUM($B$2:B4)",
+    "expected": 60
+  },
+  "explanation": "The trick is a half-locked range: $B$2 stays put while the second reference (B2, B3, B4 ...) grows as you drag down, so each cell sums from the top to its own row. Row 3's total to B4 is 10+20+30 = 60."
+}

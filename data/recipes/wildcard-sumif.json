@@ -1,0 +1,42 @@
+{
+  "slug": "wildcard-sumif",
+  "title": "How to SUMIF with a wildcard (sum rows that start with / contain text)",
+  "task": "Total the numbers whose label matches a pattern, e.g. every category starting with 'North'.",
+  "keywords": [
+    "sumif wildcard",
+    "sumif contains text",
+    "sumif starts with",
+    "partial match sum formula"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIF(A2:A6,\"North*\",B2:B6)",
+      "note": "* = any characters; ? = one character. Use *text* for 'contains'."
+    },
+    "google_sheets": {
+      "formula": "=SUMIF(A2:A6,\"North*\",B2:B6)",
+      "note": "Identical wildcard rules."
+    },
+    "libreoffice": {
+      "formula": "=SUMIF(A2:A6,\"North*\",B2:B6)",
+      "note": "Works when Tools>Options>Calc>Calculate has wildcards enabled (default for xlsx)."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "North East",
+      "B2": 10,
+      "A3": "South",
+      "B3": 5,
+      "A4": "North West",
+      "B4": 7,
+      "A5": "East",
+      "B5": 3,
+      "A6": "Northland",
+      "B6": 2
+    },
+    "formula": "=SUMIF(A2:A6,\"North*\",B2:B6)",
+    "expected": 19
+  },
+  "explanation": "The asterisk wildcard matches any trailing text, so 'North*' catches 'North East', 'North West' and 'Northland' (10+7+2 = 19) but not 'South' or 'East'. Use '*North*' to match North anywhere in the text."
+}
