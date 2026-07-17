@@ -76,7 +76,27 @@ TESTS_DIR = os.path.join(REPO_ROOT, "data", "tests")
 RESULTS_DIR = os.path.join(REPO_ROOT, "results")
 
 SOFFICE_BIN = "soffice"
-LO_VERSION = "24.2.7.2"  # `soffice --version` at harness build time
+
+
+def _detect_lo_version():
+    """Detect the running LibreOffice version at runtime so results never
+    silently claim a stale/hardcoded version. Falls back to 'unknown'."""
+    try:
+        out = subprocess.run(
+            [SOFFICE_BIN, "--version"], capture_output=True, text=True, timeout=30
+        ).stdout
+        for tok in out.split():
+            if tok[:1].isdigit() and "." in tok:
+                return tok
+    except Exception:
+        pass
+    return "unknown"
+
+
+LO_VERSION = _detect_lo_version()  # e.g. "25.8.7.3"
+LO_VERSION_TAG = (
+    ".".join(LO_VERSION.split(".")[:2]) if LO_VERSION != "unknown" else "unknown"
+)  # major.minor for the results filename, e.g. "25.8"
 
 KNOWN_ERROR_STRINGS = {
     "#NULL!", "#DIV/0!", "#VALUE!", "#REF!", "#NAME?", "#NUM!", "#N/A",
@@ -412,7 +432,7 @@ def run():
     }
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
-    out_json_path = os.path.join(RESULTS_DIR, "libreoffice-24.2.json")
+    out_json_path = os.path.join(RESULTS_DIR, f"libreoffice-{LO_VERSION_TAG}.json")
     with open(out_json_path, "w") as f:
         json.dump(output, f, indent=2, default=str)
         f.write("\n")

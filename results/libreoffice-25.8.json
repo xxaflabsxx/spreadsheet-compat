@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-17T08:36:30.601765+00:00",
+  "generated_at": "2026-07-17T11:40:10.745711+00:00",
   "engine": "LibreOffice Calc",
-  "engine_version": "24.2.7.2",
+  "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
   "trusted": true,
   "canary": {
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-07-04 03:47:46.056000",
-    "now_run_2": "2026-07-04 03:48:11.514000",
+    "now_run_1": "2026-07-17 04:39:28.681000",
+    "now_run_2": "2026-07-17 04:39:53.423000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 21.39,
+    "conversion_seconds_run_1": 25.3,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -901,6 +901,44 @@
         "notes": null
       }
     },
+    "CONCATENATE": {
+      "CONCATENATE_literals": {
+        "description": "Join string literals",
+        "formula_display": "=CONCATENATE(\"a\",\"b\",\"c\")",
+        "formula_stored_xlsx": "=CONCATENATE(\"a\",\"b\",\"c\")",
+        "value": "abc",
+        "range_values": null,
+        "error": null,
+        "expected": "abc",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CONCATENATE_cell_refs": {
+        "description": "Join cells with a space separator",
+        "formula_display": "=CONCATENATE(A1,\" \",B1)",
+        "formula_stored_xlsx": "=CONCATENATE(A1,\" \",B1)",
+        "value": "Hello World",
+        "range_values": null,
+        "error": null,
+        "expected": "Hello World",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CONCATENATE_number_coercion": {
+        "description": "Number is coerced to text",
+        "formula_display": "=CONCATENATE(\"Item \",A1)",
+        "formula_stored_xlsx": "=CONCATENATE(\"Item \",A1)",
+        "value": "Item 42",
+        "range_values": null,
+        "error": null,
+        "expected": "Item 42",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "COUNT": {
       "COUNT_mixed_types_range": {
         "description": "COUNT only counts numeric cells in a range; text, blanks, and booleans (when referenced via a range) are all excluded",
@@ -1439,6 +1477,34 @@
         "notes": null
       }
     },
+    "DROP": {
+      "DROP_first_row_and_col": {
+        "description": "Drop the first row and first column of a 3x3 range",
+        "formula_display": "=DROP(A1:C3,1,1)",
+        "formula_stored_xlsx": "=_xlfn.DROP(A1:C3,1,1)",
+        "value": 5,
+        "range_values": [
+          5,
+          6,
+          8,
+          9
+        ],
+        "error": null,
+        "expected": [
+          [
+            5,
+            6
+          ],
+          [
+            8,
+            9
+          ]
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "EDATE": {
       "EDATE_leap_year_clamp": {
         "description": "Jan 31 + 1 month clamps to the last day of February in a leap year (2024-02-29); result is the underlying date serial number",
@@ -1780,58 +1846,58 @@
         "description": "Spill the subset of A1:A5 where the paired B value is >2",
         "formula_display": "=FILTER(A1:A5,B1:B5>2)",
         "formula_stored_xlsx": "=_xlfn._xlws.FILTER(A1:A5,B1:B5>2)",
-        "value": "#NAME?",
+        "value": "c",
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          "c",
+          "d",
+          "e"
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           "c",
           "d",
           "e"
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 'c', got '#NAME?'"
+        "notes": null
       },
       "FILTER_all_false_with_default": {
         "description": "if_empty argument is returned when no rows match",
         "formula_display": "=FILTER(A1:A3,B1:B3>100,\"none\")",
         "formula_stored_xlsx": "=_xlfn._xlws.FILTER(A1:A3,B1:B3>100,\"none\")",
-        "value": "#NAME?",
+        "value": "none",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "none",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'none', got '#NAME?'"
+        "notes": null
       },
       "FILTER_all_false_no_default": {
         "description": "No if_empty and no matches raises #CALC!",
         "formula_display": "=FILTER(A1:A3,B1:B3>100)",
         "formula_stored_xlsx": "=_xlfn._xlws.FILTER(A1:A3,B1:B3>100)",
-        "value": "#NAME?",
+        "value": "#N/A",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#N/A",
         "expected": "#CALC!",
         "matched_expected": false,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected '#CALC!', got '#NAME?'"
+        "notes": "MISMATCH vs expected: expected '#CALC!', got '#N/A'"
       },
       "FILTER_2d_by_column_condition": {
         "description": "Filtering a 2-column range by a condition on the first column",
         "formula_display": "=FILTER(A1:B3,A1:A3>1)",
         "formula_stored_xlsx": "=_xlfn._xlws.FILTER(A1:B3,A1:A3>1)",
-        "value": "#NAME?",
+        "value": 2,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          2,
+          "y",
+          3,
+          "z"
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           [
             2,
@@ -1842,27 +1908,27 @@
             "z"
           ]
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 2, got '#NAME?'"
+        "notes": null
       },
       "FILTER_inline_array_literal": {
         "description": "Filtering an inline array literal by an inline boolean/number mask",
         "formula_display": "=FILTER({1,2,3,4},{1,0,1,0})",
         "formula_stored_xlsx": "=_xlfn._xlws.FILTER({1,2,3,4},{1,0,1,0})",
-        "value": "#NAME?",
+        "value": 1,
         "range_values": [
-          "#NAME?",
-          "#NAME?"
+          1,
+          3
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           1,
           3
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
+        "notes": null
       }
     },
     "FIND": {
@@ -2177,6 +2243,34 @@
         "notes": "0.75 of a day = 18:00"
       }
     },
+    "HSTACK": {
+      "HSTACK_two_columns": {
+        "description": "Horizontally join two 2-row columns into a 2x2 array",
+        "formula_display": "=HSTACK(A1:A2,B1:B2)",
+        "formula_stored_xlsx": "=_xlfn.HSTACK(A1:A2,B1:B2)",
+        "value": 1,
+        "range_values": [
+          1,
+          3,
+          2,
+          4
+        ],
+        "error": null,
+        "expected": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "HYPERLINK": {
       "HYPERLINK_with_friendly_name": {
         "description": "Formula result (display text) is the friendly_name when supplied",
@@ -2222,6 +2316,44 @@
         "range_values": null,
         "error": null,
         "expected": "Go",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "IF": {
+      "IF_true_branch": {
+        "description": "Condition true returns value_if_true",
+        "formula_display": "=IF(5>3,\"yes\",\"no\")",
+        "formula_stored_xlsx": "=IF(5>3,\"yes\",\"no\")",
+        "value": "yes",
+        "range_values": null,
+        "error": null,
+        "expected": "yes",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "IF_false_branch": {
+        "description": "Condition false returns value_if_false",
+        "formula_display": "=IF(1>3,\"yes\",\"no\")",
+        "formula_stored_xlsx": "=IF(1>3,\"yes\",\"no\")",
+        "value": "no",
+        "range_values": null,
+        "error": null,
+        "expected": "no",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "IF_numeric_result": {
+        "description": "Numeric branch values",
+        "formula_display": "=IF(2>1,10,20)",
+        "formula_stored_xlsx": "=IF(2>1,10,20)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -3088,13 +3220,13 @@
         "description": "LAMBDA bound to a name via LET, then called",
         "formula_display": "=LET(f,LAMBDA(x,x^2),f(4))",
         "formula_stored_xlsx": "=_xlfn.LET(f,_xlfn.LAMBDA(x,x^2),f(4))",
-        "value": "#NAME?",
+        "value": "#VALUE!",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#VALUE!",
         "expected": 16,
         "matched_expected": false,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 16, got '#NAME?'"
+        "notes": "MISMATCH vs expected: expected 16, got '#VALUE!'"
       },
       "LAMBDA_wrong_arg_count": {
         "description": "Calling with fewer arguments than parameters is an error",
@@ -3264,49 +3396,49 @@
         "description": "Single binding used in the calculation",
         "formula_display": "=LET(x,5,x*2)",
         "formula_stored_xlsx": "=_xlfn.LET(x,5,x*2)",
-        "value": "#NAME?",
+        "value": 10,
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": 10,
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 10, got '#NAME?'"
+        "notes": null
       },
       "LET_chained_bindings": {
         "description": "Later bindings can reference earlier ones in the same LET",
         "formula_display": "=LET(a,2,b,a*3,a+b)",
         "formula_stored_xlsx": "=_xlfn.LET(a,2,b,a*3,a+b)",
-        "value": "#NAME?",
+        "value": 8,
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": 8,
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 8, got '#NAME?'"
+        "notes": null
       },
       "LET_array_binding": {
         "description": "LET can bind an array literal and pass it to another function",
         "formula_display": "=LET(rng,{1,2,3},SUM(rng))",
         "formula_stored_xlsx": "=_xlfn.LET(rng,{1,2,3},SUM(rng))",
-        "value": "#NAME?",
+        "value": 6,
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": 6,
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 6, got '#NAME?'"
+        "notes": null
       },
       "LET_odd_arg_count_error": {
         "description": "Odd total arg count (missing final calculation expression) is a syntax/value error",
         "formula_display": "=LET(x,5,y,x*2)",
         "formula_stored_xlsx": "=_xlfn.LET(x,5,y,x*2)",
-        "value": "#NAME?",
+        "value": "#VALUE!",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#VALUE!",
         "expected": "#VALUE!",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call; MISMATCH vs expected: expected '#VALUE!', got '#NAME?'"
+        "notes": "LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call"
       }
     },
     "LN": {
@@ -4864,7 +4996,7 @@
         "description": "Existence probe only: RAND() is non-deterministic; we just confirm the engine recognizes the function (not #NAME?) and returns a plausible value",
         "formula_display": "=RAND()",
         "formula_stored_xlsx": "=RAND()",
-        "value": 0.484424644652224,
+        "value": 0.472413287643254,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -4878,7 +5010,7 @@
         "description": "Existence probe: confirm recognized and result plausible (integer 1..10)",
         "formula_display": "=RANDBETWEEN(1,10)",
         "formula_stored_xlsx": "=RANDBETWEEN(1,10)",
-        "value": 2,
+        "value": 10,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -4902,7 +5034,7 @@
         "description": "Existence probe with an all-negative range",
         "formula_display": "=RANDBETWEEN(-5,-1)",
         "formula_stored_xlsx": "=RANDBETWEEN(-5,-1)",
-        "value": -2,
+        "value": -1,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5506,15 +5638,15 @@
         "description": "Default rows-only sequence starting at 1, step 1",
         "formula_display": "=SEQUENCE(5)",
         "formula_stored_xlsx": "=_xlfn.SEQUENCE(5)",
-        "value": "#NAME?",
+        "value": 1,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          1,
+          2,
+          3,
+          4,
+          5
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           1,
           2,
@@ -5522,24 +5654,24 @@
           4,
           5
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
+        "notes": null
       },
       "SEQUENCE_rows_cols": {
         "description": "2 rows x 3 columns filled row-major from 1",
         "formula_display": "=SEQUENCE(2,3)",
         "formula_stored_xlsx": "=_xlfn.SEQUENCE(2,3)",
-        "value": "#NAME?",
+        "value": 1,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           [
             1,
@@ -5552,23 +5684,23 @@
             6
           ]
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
+        "notes": null
       },
       "SEQUENCE_start_step": {
         "description": "Custom start=10, step=5",
         "formula_display": "=SEQUENCE(5,1,10,5)",
         "formula_stored_xlsx": "=_xlfn.SEQUENCE(5,1,10,5)",
-        "value": "#NAME?",
+        "value": 10,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          10,
+          15,
+          20,
+          25,
+          30
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           10,
           15,
@@ -5576,29 +5708,29 @@
           25,
           30
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 10, got '#NAME?'"
+        "notes": null
       },
       "SEQUENCE_negative_step": {
         "description": "Negative step counts down",
         "formula_display": "=SEQUENCE(3,1,5,-1)",
         "formula_stored_xlsx": "=_xlfn.SEQUENCE(3,1,5,-1)",
-        "value": "#NAME?",
+        "value": 5,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          5,
+          4,
+          3
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           5,
           4,
           3
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
+        "notes": null
       }
     },
     "SIGN": {
@@ -5706,15 +5838,15 @@
         "description": "Default sort_index=1, ascending",
         "formula_display": "=SORT(A1:A5)",
         "formula_stored_xlsx": "=_xlfn._xlws.SORT(A1:A5)",
-        "value": "#NAME?",
+        "value": 1,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          1,
+          1,
+          3,
+          4,
+          5
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           1,
           1,
@@ -5722,23 +5854,23 @@
           4,
           5
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
+        "notes": null
       },
       "SORT_descending": {
         "description": "Explicit descending sort order",
         "formula_display": "=SORT(A1:A5,1,-1)",
         "formula_stored_xlsx": "=_xlfn._xlws.SORT(A1:A5,1,-1)",
-        "value": "#NAME?",
+        "value": 5,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          5,
+          4,
+          3,
+          1,
+          1
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           5,
           4,
@@ -5746,24 +5878,24 @@
           1,
           1
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
+        "notes": null
       },
       "SORT_by_second_column": {
         "description": "2D range sorted by its second column ascending",
         "formula_display": "=SORT(A1:B3,2,1)",
         "formula_stored_xlsx": "=_xlfn._xlws.SORT(A1:B3,2,1)",
-        "value": "#NAME?",
+        "value": "y",
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          "y",
+          10,
+          "z",
+          20,
+          "x",
+          30
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           [
             "y",
@@ -5778,21 +5910,21 @@
             30
           ]
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 'y', got '#NAME?'"
+        "notes": null
       },
       "SORT_empty_range_error": {
         "description": "Sorting a single blank cell (degenerate case)",
         "formula_display": "=SORT(A1:A1)",
         "formula_stored_xlsx": "=_xlfn._xlws.SORT(A1:A1)",
-        "value": "#NAME?",
+        "value": 0,
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": 0,
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "Blank cell sorts as 0 in numeric context; no error expected; MISMATCH vs expected: expected 0, got '#NAME?'"
+        "notes": "Blank cell sorts as 0 in numeric context; no error expected"
       }
     },
     "SQRT": {
@@ -6283,6 +6415,34 @@
         "notes": null
       }
     },
+    "TAKE": {
+      "TAKE_first_2x2": {
+        "description": "Take the first 2 rows and first 2 columns of a 3x3 range",
+        "formula_display": "=TAKE(A1:C3,2,2)",
+        "formula_stored_xlsx": "=_xlfn.TAKE(A1:C3,2,2)",
+        "value": 1,
+        "range_values": [
+          1,
+          2,
+          4,
+          5
+        ],
+        "error": null,
+        "expected": [
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            5
+          ]
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "TEXT": {
       "TEXT_currency_format": {
         "description": "Currency-style format code with thousands separator and 2 decimal places, rounding the value. Source: https://support.microsoft.com/en-us/office/text-function-20d5ac4d-7b94-49fd-bb38-93d29371225c (worked example)",
@@ -6362,49 +6522,49 @@
         "description": "Text after the first delimiter occurrence",
         "formula_display": "=TEXTAFTER(\"a-b-c\",\"-\")",
         "formula_stored_xlsx": "=_xlfn.TEXTAFTER(\"a-b-c\",\"-\")",
-        "value": "#NAME?",
+        "value": "b-c",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "b-c",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'b-c', got '#NAME?'"
+        "notes": null
       },
       "TEXTAFTER_instance_num": {
         "description": "instance_num=2 counts to the 2nd delimiter",
         "formula_display": "=TEXTAFTER(\"a-b-c\",\"-\",2)",
         "formula_stored_xlsx": "=_xlfn.TEXTAFTER(\"a-b-c\",\"-\",2)",
-        "value": "#NAME?",
+        "value": "c",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "c",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'c', got '#NAME?'"
+        "notes": null
       },
       "TEXTAFTER_negative_instance": {
         "description": "Negative instance_num counts delimiters from the end",
         "formula_display": "=TEXTAFTER(\"a-b-c\",\"-\",-1)",
         "formula_stored_xlsx": "=_xlfn.TEXTAFTER(\"a-b-c\",\"-\",-1)",
-        "value": "#NAME?",
+        "value": "c",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "c",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "-1 means the last delimiter; text after it is 'c'; MISMATCH vs expected: expected 'c', got '#NAME?'"
+        "notes": "-1 means the last delimiter; text after it is 'c'"
       },
       "TEXTAFTER_not_found_custom": {
         "description": "Delimiter not present with if_not_found supplied",
         "formula_display": "=TEXTAFTER(\"abc\",\"-\",\"none\")",
         "formula_stored_xlsx": "=_xlfn.TEXTAFTER(\"abc\",\"-\",\"none\")",
-        "value": "#NAME?",
+        "value": "#VALUE!",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#VALUE!",
         "expected": "none",
         "matched_expected": false,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'none', got '#NAME?'"
+        "notes": "MISMATCH vs expected: expected 'none', got '#VALUE!'"
       }
     },
     "TEXTBEFORE": {
@@ -6412,61 +6572,61 @@
         "description": "Text before the first delimiter occurrence",
         "formula_display": "=TEXTBEFORE(\"a-b-c\",\"-\")",
         "formula_stored_xlsx": "=_xlfn.TEXTBEFORE(\"a-b-c\",\"-\")",
-        "value": "#NAME?",
+        "value": "a",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "a",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'a', got '#NAME?'"
+        "notes": null
       },
       "TEXTBEFORE_instance_num": {
         "description": "instance_num=2 counts to the 2nd delimiter",
         "formula_display": "=TEXTBEFORE(\"a-b-c\",\"-\",2)",
         "formula_stored_xlsx": "=_xlfn.TEXTBEFORE(\"a-b-c\",\"-\",2)",
-        "value": "#NAME?",
+        "value": "a-b",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "a-b",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'a-b', got '#NAME?'"
+        "notes": null
       },
       "TEXTBEFORE_not_found_default": {
         "description": "Delimiter not present and no if_not_found -> #N/A",
         "formula_display": "=TEXTBEFORE(\"abc\",\"-\")",
         "formula_stored_xlsx": "=_xlfn.TEXTBEFORE(\"abc\",\"-\")",
-        "value": "#NAME?",
+        "value": "#N/A",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#N/A",
         "expected": "#N/A",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected '#N/A', got '#NAME?'"
+        "notes": null
       },
       "TEXTBEFORE_not_found_custom": {
         "description": "Delimiter not present with if_not_found supplied",
         "formula_display": "=TEXTBEFORE(\"abc\",\"-\",\"none\")",
         "formula_stored_xlsx": "=_xlfn.TEXTBEFORE(\"abc\",\"-\",\"none\")",
-        "value": "#NAME?",
+        "value": "#VALUE!",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#VALUE!",
         "expected": "none",
         "matched_expected": false,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'none', got '#NAME?'"
+        "notes": "MISMATCH vs expected: expected 'none', got '#VALUE!'"
       },
       "TEXTBEFORE_negative_instance": {
         "description": "Negative instance_num counts delimiters from the end",
         "formula_display": "=TEXTBEFORE(\"a-b-c\",\"-\",-1)",
         "formula_stored_xlsx": "=_xlfn.TEXTBEFORE(\"a-b-c\",\"-\",-1)",
-        "value": "#NAME?",
+        "value": "a-b",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "a-b",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "-1 means the last delimiter; text before it is 'a-b'; MISMATCH vs expected: expected 'a-b', got '#NAME?'"
+        "notes": "-1 means the last delimiter; text before it is 'a-b'"
       }
     },
     "TEXTJOIN": {
@@ -6524,34 +6684,34 @@
         "description": "Basic column split on a single delimiter",
         "formula_display": "=TEXTSPLIT(\"a,b,c\",\",\")",
         "formula_stored_xlsx": "=_xlfn.TEXTSPLIT(\"a,b,c\",\",\")",
-        "value": "#NAME?",
+        "value": "a",
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          "a",
+          "b",
+          "c"
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           "a",
           "b",
           "c"
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 'a', got '#NAME?'"
+        "notes": null
       },
       "TEXTSPLIT_row_and_col_delims": {
         "description": "col_delimiter=\",\" and row_delimiter=\";\" produce a 2x2 grid",
         "formula_display": "=TEXTSPLIT(\"a,b;c,d\",\",\",\";\")",
         "formula_stored_xlsx": "=_xlfn.TEXTSPLIT(\"a,b;c,d\",\",\",\";\")",
-        "value": "#NAME?",
+        "value": "a",
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          "a",
+          "b",
+          "c",
+          "d"
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           [
             "a",
@@ -6562,42 +6722,42 @@
             "d"
           ]
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 'a', got '#NAME?'"
+        "notes": null
       },
       "TEXTSPLIT_ignore_empty": {
         "description": "ignore_empty=TRUE collapses consecutive delimiters",
         "formula_display": "=TEXTSPLIT(\"a,,b\",\",\",,TRUE)",
         "formula_stored_xlsx": "=_xlfn.TEXTSPLIT(\"a,,b\",\",\",,TRUE)",
-        "value": "#NAME?",
+        "value": "a",
         "range_values": [
-          "#NAME?",
-          "#NAME?"
+          "a",
+          "b"
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           "a",
           "b"
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 'a', got '#NAME?'"
+        "notes": null
       },
       "TEXTSPLIT_pad_with": {
         "description": "Uneven row lengths are padded with pad_with instead of #N/A",
         "formula_display": "=TEXTSPLIT(\"a,b,c;d\",\",\",\";\",FALSE,0,\"-\")",
         "formula_stored_xlsx": "=_xlfn.TEXTSPLIT(\"a,b,c;d\",\",\",\";\",FALSE,0,\"-\")",
-        "value": "#NAME?",
+        "value": "a",
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          "a",
+          "b",
+          "c",
+          "d",
+          "-",
+          "-"
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           [
             "a",
@@ -6610,9 +6770,9 @@
             "-"
           ]
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 'a', got '#NAME?'"
+        "notes": null
       }
     },
     "TIME": {
@@ -6653,12 +6813,36 @@
         "notes": "27 mod 24 = 3 -> TIME(3,0,0) = 3/24 = 0.125, matching the cited doc example verbatim"
       }
     },
+    "TOCOL": {
+      "TOCOL_flatten_by_row": {
+        "description": "Flatten a 2x2 range into a single column, scanning by row",
+        "formula_display": "=TOCOL(A1:B2)",
+        "formula_stored_xlsx": "=_xlfn.TOCOL(A1:B2)",
+        "value": 1,
+        "range_values": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "error": null,
+        "expected": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "TODAY": {
       "TODAY_exists_and_plausible": {
         "description": "Existence probe only: TODAY() is non-deterministic (changes daily), so there is no fixed 'expected' value",
         "formula_display": "=TODAY()",
         "formula_stored_xlsx": "=TODAY()",
-        "value": 46207.0,
+        "value": 46220.0,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -6689,6 +6873,30 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "Both TODAY() calls are evaluated as part of one recalculation of one cell, so they cannot differ"
+      }
+    },
+    "TOROW": {
+      "TOROW_flatten_by_row": {
+        "description": "Flatten a 2x2 range into a single row, scanning by row",
+        "formula_display": "=TOROW(A1:B2)",
+        "formula_stored_xlsx": "=_xlfn.TOROW(A1:B2)",
+        "value": 1,
+        "range_values": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "error": null,
+        "expected": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "TRANSPOSE": {
@@ -7108,75 +7316,75 @@
         "description": "Basic unique list preserving first-occurrence order",
         "formula_display": "=UNIQUE(A1:A5)",
         "formula_stored_xlsx": "=_xlfn.UNIQUE(A1:A5)",
-        "value": "#NAME?",
+        "value": 1,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          1,
+          2,
+          3
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           1,
           2,
           3
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
+        "notes": null
       },
       "UNIQUE_exactly_once": {
         "description": "exactly_once=TRUE returns only items that appear exactly once",
         "formula_display": "=UNIQUE(A1:A5,FALSE,TRUE)",
         "formula_stored_xlsx": "=_xlfn.UNIQUE(A1:A5,FALSE,TRUE)",
-        "value": "#NAME?",
+        "value": 3,
         "range_values": [
-          "#NAME?"
+          3
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           3
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 3, got '#NAME?'"
+        "notes": null
       },
       "UNIQUE_by_column": {
         "description": "by_col=TRUE compares whole columns instead of rows",
         "formula_display": "=UNIQUE(A1:C2,TRUE)",
         "formula_stored_xlsx": "=_xlfn.UNIQUE(A1:C2,TRUE)",
-        "value": "#NAME?",
+        "value": 1,
         "range_values": [
-          "#NAME?",
-          "#NAME?"
+          1,
+          2
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           1,
           2
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "Column A and column C are identical (1,1); unique columns are {1,2} and {1,1} but by_col dedups the repeated column, leaving 2 columns: [1,2] and [1,1] -> flatten to first row [1,2]; MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
+        "notes": "Column A and column C are identical (1,1); unique columns are {1,2} and {1,1} but by_col dedups the repeated column, leaving 2 columns: [1,2] and [1,1] -> flatten to first row [1,2]"
       },
       "UNIQUE_no_duplicates": {
         "description": "Input with no duplicates returns the input unchanged",
         "formula_display": "=UNIQUE(A1:A3)",
         "formula_stored_xlsx": "=_xlfn.UNIQUE(A1:A3)",
-        "value": "#NAME?",
+        "value": 5,
         "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
+          5,
+          6,
+          7
         ],
-        "error": "#NAME?",
+        "error": null,
         "expected": [
           5,
           6,
           7
         ],
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
+        "notes": null
       }
     },
     "UPPER": {
@@ -7379,6 +7587,34 @@
         "notes": "First row matching the a* wildcard pattern is 'apple'"
       }
     },
+    "VSTACK": {
+      "VSTACK_two_rows": {
+        "description": "Vertically stack two 2-col rows into a 2x2 array",
+        "formula_display": "=VSTACK(A1:B1,A2:B2)",
+        "formula_stored_xlsx": "=_xlfn.VSTACK(A1:B1,A2:B2)",
+        "value": 1,
+        "range_values": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "error": null,
+        "expected": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "WEEKDAY": {
       "WEEKDAY_default_type1": {
         "description": "Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)",
@@ -7570,73 +7806,73 @@
         "description": "Basic exact-match lookup returns the corresponding value",
         "formula_display": "=XLOOKUP(\"b\",A1:A3,B1:B3)",
         "formula_stored_xlsx": "=_xlfn.XLOOKUP(\"b\",A1:A3,B1:B3)",
-        "value": "#NAME?",
+        "value": 2,
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": 2,
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 2, got '#NAME?'"
+        "notes": null
       },
       "XLOOKUP_not_found_default_na": {
         "description": "No if_not_found arg and no match -> #N/A",
         "formula_display": "=XLOOKUP(\"z\",A1:A3,B1:B3)",
         "formula_stored_xlsx": "=_xlfn.XLOOKUP(\"z\",A1:A3,B1:B3)",
-        "value": "#NAME?",
+        "value": "#N/A",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#N/A",
         "expected": "#N/A",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected '#N/A', got '#NAME?'"
+        "notes": null
       },
       "XLOOKUP_not_found_custom": {
         "description": "Custom if_not_found value is returned when no match",
         "formula_display": "=XLOOKUP(\"z\",A1:A3,B1:B3,\"missing\")",
         "formula_stored_xlsx": "=_xlfn.XLOOKUP(\"z\",A1:A3,B1:B3,\"missing\")",
-        "value": "#NAME?",
+        "value": "missing",
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": "missing",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: expected 'missing', got '#NAME?'"
+        "notes": null
       },
       "XLOOKUP_match_mode_next_smaller": {
         "description": "match_mode -1 (exact or next smaller item) with no exact match",
         "formula_display": "=XLOOKUP(2.5,A1:A4,B1:B4,\"none\",-1)",
         "formula_stored_xlsx": "=_xlfn.XLOOKUP(2.5,A1:A4,B1:B4,\"none\",-1)",
-        "value": "#NAME?",
+        "value": 20,
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": 20,
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "2.5 has no exact match; next-smaller is 2 -> 20; MISMATCH vs expected: expected 20, got '#NAME?'"
+        "notes": "2.5 has no exact match; next-smaller is 2 -> 20"
       },
       "XLOOKUP_search_mode_last_to_first": {
         "description": "search_mode -1 finds the LAST occurrence of a duplicated key",
         "formula_display": "=XLOOKUP(\"x\",A1:A4,B1:B4,\"none\",0,-1)",
         "formula_stored_xlsx": "=_xlfn.XLOOKUP(\"x\",A1:A4,B1:B4,\"none\",0,-1)",
-        "value": "#NAME?",
+        "value": 3,
         "range_values": null,
-        "error": "#NAME?",
+        "error": null,
         "expected": 3,
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "Two rows match 'x' (1 and 3); reverse search returns the later one; MISMATCH vs expected: expected 3, got '#NAME?'"
+        "notes": "Two rows match 'x' (1 and 3); reverse search returns the later one"
       },
       "XLOOKUP_empty_lookup_array": {
         "description": "Degenerate 1-cell lookup/return arrays where the cell is blank",
         "formula_display": "=XLOOKUP(\"a\",A1:A1,B1:B1)",
         "formula_stored_xlsx": "=_xlfn.XLOOKUP(\"a\",A1:A1,B1:B1)",
-        "value": "#NAME?",
+        "value": "#N/A",
         "range_values": null,
-        "error": "#NAME?",
+        "error": "#N/A",
         "expected": "#N/A",
-        "matched_expected": false,
+        "matched_expected": true,
         "canary_ok_this_sheet": true,
-        "notes": "A1 and B1 are blank; lookup value 'a' is not found; MISMATCH vs expected: expected '#N/A', got '#NAME?'"
+        "notes": "A1 and B1 are blank; lookup value 'a' is not found"
       }
     },
     "XOR": {
@@ -7811,242 +8047,6 @@
         "matched_expected": false,
         "canary_ok_this_sheet": true,
         "notes": "Microsoft docs: 'invalid basis values (< 0 or > 4) return a #NUM! error.'; MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
-      }
-    },
-    "CONCATENATE": {
-      "CONCATENATE_literals": {
-        "description": "Join string literals",
-        "formula_display": "=CONCATENATE(\"a\",\"b\",\"c\")",
-        "formula_stored_xlsx": "=CONCATENATE(\"a\",\"b\",\"c\")",
-        "value": "abc",
-        "range_values": null,
-        "error": null,
-        "expected": "abc",
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": null
-      },
-      "CONCATENATE_cell_refs": {
-        "description": "Join cells with a space separator",
-        "formula_display": "=CONCATENATE(A1,\" \",B1)",
-        "formula_stored_xlsx": "=CONCATENATE(A1,\" \",B1)",
-        "value": "Hello World",
-        "range_values": null,
-        "error": null,
-        "expected": "Hello World",
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": null
-      },
-      "CONCATENATE_number_coercion": {
-        "description": "Number is coerced to text",
-        "formula_display": "=CONCATENATE(\"Item \",A1)",
-        "formula_stored_xlsx": "=CONCATENATE(\"Item \",A1)",
-        "value": "Item 42",
-        "range_values": null,
-        "error": null,
-        "expected": "Item 42",
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": null
-      }
-    },
-    "DROP": {
-      "DROP_first_row_and_col": {
-        "description": "Drop the first row and first column of a 3x3 range",
-        "formula_display": "=DROP(A1:C3,1,1)",
-        "formula_stored_xlsx": "=_xlfn.DROP(A1:C3,1,1)",
-        "value": "#NAME?",
-        "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
-        ],
-        "error": "#NAME?",
-        "expected": [
-          [
-            5,
-            6
-          ],
-          [
-            8,
-            9
-          ]
-        ],
-        "matched_expected": false,
-        "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
-      }
-    },
-    "HSTACK": {
-      "HSTACK_two_columns": {
-        "description": "Horizontally join two 2-row columns into a 2x2 array",
-        "formula_display": "=HSTACK(A1:A2,B1:B2)",
-        "formula_stored_xlsx": "=_xlfn.HSTACK(A1:A2,B1:B2)",
-        "value": "#NAME?",
-        "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
-        ],
-        "error": "#NAME?",
-        "expected": [
-          [
-            1,
-            3
-          ],
-          [
-            2,
-            4
-          ]
-        ],
-        "matched_expected": false,
-        "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
-      }
-    },
-    "IF": {
-      "IF_true_branch": {
-        "description": "Condition true returns value_if_true",
-        "formula_display": "=IF(5>3,\"yes\",\"no\")",
-        "formula_stored_xlsx": "=IF(5>3,\"yes\",\"no\")",
-        "value": "yes",
-        "range_values": null,
-        "error": null,
-        "expected": "yes",
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": null
-      },
-      "IF_false_branch": {
-        "description": "Condition false returns value_if_false",
-        "formula_display": "=IF(1>3,\"yes\",\"no\")",
-        "formula_stored_xlsx": "=IF(1>3,\"yes\",\"no\")",
-        "value": "no",
-        "range_values": null,
-        "error": null,
-        "expected": "no",
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": null
-      },
-      "IF_numeric_result": {
-        "description": "Numeric branch values",
-        "formula_display": "=IF(2>1,10,20)",
-        "formula_stored_xlsx": "=IF(2>1,10,20)",
-        "value": 10,
-        "range_values": null,
-        "error": null,
-        "expected": 10,
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": null
-      }
-    },
-    "TAKE": {
-      "TAKE_first_2x2": {
-        "description": "Take the first 2 rows and first 2 columns of a 3x3 range",
-        "formula_display": "=TAKE(A1:C3,2,2)",
-        "formula_stored_xlsx": "=_xlfn.TAKE(A1:C3,2,2)",
-        "value": "#NAME?",
-        "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
-        ],
-        "error": "#NAME?",
-        "expected": [
-          [
-            1,
-            2
-          ],
-          [
-            4,
-            5
-          ]
-        ],
-        "matched_expected": false,
-        "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
-      }
-    },
-    "TOCOL": {
-      "TOCOL_flatten_by_row": {
-        "description": "Flatten a 2x2 range into a single column, scanning by row",
-        "formula_display": "=TOCOL(A1:B2)",
-        "formula_stored_xlsx": "=_xlfn.TOCOL(A1:B2)",
-        "value": "#NAME?",
-        "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
-        ],
-        "error": "#NAME?",
-        "expected": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "matched_expected": false,
-        "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
-      }
-    },
-    "TOROW": {
-      "TOROW_flatten_by_row": {
-        "description": "Flatten a 2x2 range into a single row, scanning by row",
-        "formula_display": "=TOROW(A1:B2)",
-        "formula_stored_xlsx": "=_xlfn.TOROW(A1:B2)",
-        "value": "#NAME?",
-        "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
-        ],
-        "error": "#NAME?",
-        "expected": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "matched_expected": false,
-        "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
-      }
-    },
-    "VSTACK": {
-      "VSTACK_two_rows": {
-        "description": "Vertically stack two 2-col rows into a 2x2 array",
-        "formula_display": "=VSTACK(A1:B1,A2:B2)",
-        "formula_stored_xlsx": "=_xlfn.VSTACK(A1:B1,A2:B2)",
-        "value": "#NAME?",
-        "range_values": [
-          "#NAME?",
-          "#NAME?",
-          "#NAME?",
-          "#NAME?"
-        ],
-        "error": "#NAME?",
-        "expected": [
-          [
-            1,
-            2
-          ],
-          [
-            3,
-            4
-          ]
-        ],
-        "matched_expected": false,
-        "canary_ok_this_sheet": true,
-        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
       }
     }
   }
