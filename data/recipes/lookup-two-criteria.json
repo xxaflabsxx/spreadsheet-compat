@@ -1,0 +1,47 @@
+{
+  "slug": "lookup-two-criteria",
+  "title": "How to look up a value with two criteria (multi-condition lookup)",
+  "task": "Return a value that matches on two columns at once, e.g. the amount for Region = North AND Quarter = Q2.",
+  "keywords": [
+    "xlookup multiple criteria",
+    "lookup two conditions",
+    "index match two criteria",
+    "vlookup multiple columns"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
+      "note": "Excel 365; concatenate the keys."
+    },
+    "google_sheets": {
+      "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
+      "note": "Native XLOOKUP."
+    },
+    "libreoffice": {
+      "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
+      "note": "LibreOffice 25.8 (XLOOKUP added 24.8)."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "North",
+      "B2": "Q1",
+      "C2": 100,
+      "A3": "North",
+      "B3": "Q2",
+      "C3": 250,
+      "A4": "South",
+      "B4": "Q2",
+      "C4": 300,
+      "A5": "South",
+      "B5": "Q1",
+      "C5": 150,
+      "A6": "North",
+      "B6": "Q3",
+      "C6": 400
+    },
+    "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
+    "expected": 250
+  },
+  "explanation": "Concatenate the two key columns (A&\"|\"&B) into a single combined key, then XLOOKUP that combined key. 'North|Q2' matches row 3, returning 250. The pipe separator avoids accidental collisions between key parts."
+}
