@@ -1,0 +1,38 @@
+{
+  "slug": "vlookup-to-the-left",
+  "title": "How to VLOOKUP to the left (return a value from a column before the match)",
+  "task": "Look up a value and return something from a column to the LEFT of it \u2014 which plain VLOOKUP can't do.",
+  "keywords": [
+    "vlookup to the left",
+    "index match left lookup",
+    "reverse vlookup",
+    "lookup return left column"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INDEX(A2:A6,MATCH(\"Bob\",B2:B6,0))",
+      "note": "INDEX/MATCH ignores column order. Or =XLOOKUP(\"Bob\",B2:B6,A2:A6)."
+    },
+    "google_sheets": {
+      "formula": "=INDEX(A2:A6,MATCH(\"Bob\",B2:B6,0))",
+      "note": "Identical; XLOOKUP also works."
+    },
+    "libreoffice": {
+      "formula": "=INDEX(A2:A6,MATCH(\"Bob\",B2:B6,0))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "X1",
+      "B2": "Alice",
+      "A3": "X2",
+      "B3": "Bob",
+      "A4": "X3",
+      "B4": "Carol"
+    },
+    "formula": "=INDEX(A2:A4,MATCH(\"Bob\",B2:B4,0))",
+    "expected": "X2"
+  },
+  "explanation": "MATCH finds the position of the lookup value in the key column; INDEX returns the value at that same position from any other column \u2014 including one to the left. MATCH(\"Bob\",B2:B4,0) is 2, so INDEX(A2:A4, 2) returns X2. XLOOKUP does the same natively."
+}
