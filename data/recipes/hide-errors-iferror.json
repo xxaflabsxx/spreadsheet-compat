@@ -1,0 +1,34 @@
+{
+  "slug": "hide-errors-iferror",
+  "title": "How to hide formula errors (show 0 or blank instead of #DIV/0!, #N/A)",
+  "task": "Replace ugly error values like #DIV/0! or #N/A with a 0, a blank, or a friendly message.",
+  "keywords": [
+    "iferror excel",
+    "hide div/0 error",
+    "replace #n/a with blank",
+    "iferror google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IFERROR(A2/B2,0)",
+      "note": "Return 0 on any error. Use \"\" for blank, or \"Not found\" for text."
+    },
+    "google_sheets": {
+      "formula": "=IFERROR(A2/B2,0)",
+      "note": "Identical. IFNA() catches only #N/A."
+    },
+    "libreoffice": {
+      "formula": "=IFERROR(A2/B2,0)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "B2": 0
+    },
+    "formula": "=IFERROR(A2/B2,0)",
+    "expected": 0
+  },
+  "explanation": "IFERROR(value, value_if_error) returns the second argument whenever the first would be any error. 10/0 is #DIV/0!, so this returns 0. Use IFNA() if you only want to trap #N/A and still see other errors."
+}
