@@ -593,6 +593,21 @@ INDEX_TMPL = """{% extends "base.html" %}
   fully linked; use your browser's find-in-page instead.</p></noscript>
 </section>
 
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.5rem 0">
+  <a href="{{ rel }}checker.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
+    <strong style="display:block;margin-bottom:.35rem">&#128269; Formula compatibility checker</strong>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Paste any formula &mdash; instantly see if every function works in Excel, Google Sheets &amp; current LibreOffice.</span>
+  </a>
+  <a href="{{ rel }}how-to/index.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
+    <strong style="display:block;margin-bottom:.35rem">&#128221; How-to recipes</strong>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Copy-paste formulas for common tasks &mdash; each one executed and verified in a real engine, not just documented.</span>
+  </a>
+  <a href="{{ rel }}quirks.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
+    <strong style="display:block;margin-bottom:.35rem">&#9888;&#65039; Quirks &amp; gotchas</strong>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Where the three apps disagree on the same formula &mdash; surprising differences caught by running them.</span>
+  </a>
+</div>
+
 <div class="stats-grid">
   <div class="stat-card"><span class="num">{{ stats.total_functions }}</span><span class="label">Functions inventoried</span></div>
   <div class="stat-card"><span class="num">{{ stats.engines_executed }}/{{ stats.engines_targeted }}</span><span class="label">Engines executed</span></div>
