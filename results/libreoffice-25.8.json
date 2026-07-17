@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-17T19:37:24.995618+00:00",
+  "generated_at": "2026-07-17T21:34:57.087826+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-07-17 12:36:52.902000",
-    "now_run_2": "2026-07-17 12:37:13.776000",
+    "now_run_1": "2026-07-17 14:34:30.764000",
+    "now_run_2": "2026-07-17 14:34:47.906000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 18.98,
+    "conversion_seconds_run_1": 15.33,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -425,6 +425,26 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "apple and avocado match a*; average of 10,30 = 20"
+      }
+    },
+    "BYCOL": {
+      "BYCOL_colsums": {
+        "description": "Reduce each column to one value (column sums)",
+        "formula_display": "=BYCOL(A1:B2,LAMBDA(c,SUM(c)))",
+        "formula_stored_xlsx": "=_xlfn.BYCOL(A1:B2,_xlfn.LAMBDA(c,SUM(c)))",
+        "value": "#NAME?",
+        "range_values": [
+          "#NAME?",
+          "#NAME?"
+        ],
+        "error": "#NAME?",
+        "expected": [
+          4,
+          6
+        ],
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "MISMATCH vs expected: value mismatch: expected 4, got '#NAME?'"
       }
     },
     "BYROW": {
@@ -3739,6 +3759,34 @@
         "notes": null
       }
     },
+    "MAKEARRAY": {
+      "MAKEARRAY_rc": {
+        "description": "Build a 2x2 array where each cell = row*col",
+        "formula_display": "=MAKEARRAY(2,2,LAMBDA(r,c,r*c))",
+        "formula_stored_xlsx": "=_xlfn.MAKEARRAY(2,2,_xlfn.LAMBDA(r,c,r*c))",
+        "value": "#NAME?",
+        "range_values": [
+          "#NAME?",
+          "#NAME?",
+          "#NAME?",
+          "#NAME?"
+        ],
+        "error": "#NAME?",
+        "expected": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
+      }
+    },
     "MAP": {
       "MAP_double": {
         "description": "Apply a lambda to each element (double it)",
@@ -5078,7 +5126,7 @@
         "description": "Existence probe only: RAND() is non-deterministic; we just confirm the engine recognizes the function (not #NAME?) and returns a plausible value",
         "formula_display": "=RAND()",
         "formula_stored_xlsx": "=RAND()",
-        "value": 0.441116741743841,
+        "value": 0.212625968000094,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5092,7 +5140,7 @@
         "description": "Existence probe: confirm recognized and result plausible (integer 1..10)",
         "formula_display": "=RANDBETWEEN(1,10)",
         "formula_stored_xlsx": "=RANDBETWEEN(1,10)",
-        "value": 1,
+        "value": 9,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -7939,6 +7987,62 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "Jan 10, 2024 (Wed) - 5 workdays, skipping the Jan 6-7 weekend, = Jan 3, 2024 = serial 45294"
+      }
+    },
+    "WRAPCOLS": {
+      "WRAPCOLS_2": {
+        "description": "Wrap a 4-cell row into a grid 2 tall, filling by column",
+        "formula_display": "=WRAPCOLS(A1:D1,2)",
+        "formula_stored_xlsx": "=_xlfn.WRAPCOLS(A1:D1,2)",
+        "value": 1,
+        "range_values": [
+          1,
+          3,
+          2,
+          4
+        ],
+        "error": null,
+        "expected": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "WRAPROWS": {
+      "WRAPROWS_2": {
+        "description": "Wrap a 4-cell row into a 2-column grid, filling by row",
+        "formula_display": "=WRAPROWS(A1:D1,2)",
+        "formula_stored_xlsx": "=_xlfn.WRAPROWS(A1:D1,2)",
+        "value": 1,
+        "range_values": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "error": null,
+        "expected": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "XLOOKUP": {
