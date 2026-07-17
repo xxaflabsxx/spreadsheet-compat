@@ -655,6 +655,10 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 </div>
 <p class="category-tag">Category: {{ r.category }}{% if r.last_tested %} &middot; Last tested {{ r.last_tested }}{% endif %}</p>
 
+{% if r.any_tested %}
+<p class="lede">Real, executed compatibility results for the <strong>{{ r.name }}</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
+{% endif %}
+
 {% if not r.any_tested %}
 <div class="not-live-tested">
   <strong>Not yet live-tested.</strong> No engine has executed real test cases
@@ -925,19 +929,14 @@ def main():
     for r in records:
         page_date = r["last_tested"] or build_date
         if r["any_tested"]:
-            title = f"{r['name']} — Excel vs Google Sheets vs LibreOffice compatibility | {SITE_NAME}"
-            verdict_bits = [
-                f"{e['label']}: {VERDICT_LABELS[e['verdict']]}"
-                for e in r["engines"].values()
-                if e["verdict"]
-            ]
+            title = f"{r['name']} function: Excel vs Google Sheets vs LibreOffice compatibility"
             desc = (
-                f"{r['name']} ({r['category']}) real compatibility results: "
-                + "; ".join(verdict_bits)
-                + f". {r['tested_case_count']} executed test cases, last tested {page_date}."
+                f"Does {r['name']} work the same in Excel, Google Sheets, and "
+                f"LibreOffice Calc? Real executed test results, syntax, and links to "
+                f"each official doc for the {r['name']} function ({r['category']})."
             )
         else:
-            title = f"{r['name']} — Excel vs Google Sheets vs LibreOffice compatibility (not yet live-tested) | {SITE_NAME}"
+            title = f"{r['name']} function — is it in Excel, Google Sheets & LibreOffice?"
             desc = (
                 f"{r['name']} ({r['category']}) documentation inventory: "
                 f"is it documented for Excel, Google Sheets, and LibreOffice Calc? "
