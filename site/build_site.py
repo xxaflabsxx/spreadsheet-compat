@@ -545,6 +545,7 @@ BASE_TMPL = """<!doctype html>
     <nav class="site-nav">
       <a href="{{ rel }}index.html">Functions</a>
       <a href="{{ rel }}how-to/index.html">How-to</a>
+      <a href="{{ rel }}checker.html">Checker</a>
       <a href="{{ rel }}quirks.html">Quirks</a>
       <a href="{{ github_url }}">GitHub</a>
     </nav>
@@ -848,6 +849,42 @@ RECIPE_TMPL = """{% extends "base.html" %}
 """
 
 
+CHECKER_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Spreadsheet formula compatibility checker</h1>
+<p class="lede">Paste a formula and see whether every function in it works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real executed tests, not just documentation.</p>
+<textarea id="f" rows="3" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:1rem;padding:.6rem" placeholder='=XLOOKUP("North", B2:B6, A2:A6)'></textarea>
+<p><button id="btn" class="promo-btn" style="border:0;cursor:pointer">Check compatibility</button></p>
+<div id="out"></div>
+<script>const DATA_URL="{{ rel }}data/compat.json"; const FUNC_BASE="{{ rel }}functions/";</script>
+{% raw %}
+<script>
+let DB=null;
+async function load(){ if(!DB){ DB=await (await fetch(DATA_URL)).json(); } return DB; }
+function funcs(s){ const set=new Set(); const re=/([A-Za-z][A-Za-z0-9_.]*)\\s*\\(/g; let m; while((m=re.exec(s))){ set.add(m[1].toUpperCase()); } return [...set]; }
+function yn(ok){ return ok?'<span style="color:#0a7a2f">&#10003; yes</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+function lo(d){ if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+async function check(){
+  const db=await load(); const fs=funcs(document.getElementById('f').value); const out=document.getElementById('out');
+  if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
+  let rows='', xAll=true,gAll=true,lAll=true, unknown=[];
+  for(const fn of fs){ const d=db[fn]; if(!d){ unknown.push(fn); continue; }
+    const lok=d.lv?(d.lv!=='unsupported'):d.l; xAll=xAll&&d.x; gAll=gAll&&d.g; lAll=lAll&&lok;
+    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a></td><td>'+yn(d.x)+'</td><td>'+yn(d.g)+'</td><td>'+lo(d)+'</td></tr>'; }
+  const say=ok=>ok?'<span style="color:#0a7a2f">works</span>':'<span style="color:#c02020">has an unsupported function</span>';
+  let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
+  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel</th><th>Google Sheets</th><th>LibreOffice</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
+  out.innerHTML=html;
+}
+document.getElementById('btn').addEventListener('click',check);
+document.getElementById('f').addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter') check(); });
+</script>
+{% endraw %}
+{% endblock %}
+"""
+
+
 def load_recipes():
     recs = []
     verif = {}
@@ -881,6 +918,7 @@ def build_env():
                 "quirks.html": QUIRKS_TMPL,
                 "recipe.html": RECIPE_TMPL,
                 "recipe_index.html": RECIPE_INDEX_TMPL,
+                "checker.html": CHECKER_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
             }
         ),
@@ -1063,6 +1101,34 @@ def main():
             sitemap_urls.append(
                 {"loc": BASE_URL + f"how-to/{rc['slug']}.html", "lastmod": build_date}
             )
+
+    # ---- Formula compatibility checker (client-side tool) ----
+    compat_export = {}
+    for r in records:
+        e = r["engines"]
+        compat_export[r["name"]] = {
+            "cat": r["category"],
+            "x": bool(e["excel"]["documented"]),
+            "g": bool(e["google_sheets"]["documented"]),
+            "l": bool(e["libreoffice"]["documented"]),
+            "lv": e["libreoffice"]["verdict"],
+            "lver": e["libreoffice"]["version"],
+        }
+    (OUT_DIR / "data").mkdir(parents=True, exist_ok=True)
+    (OUT_DIR / "data" / "compat.json").write_text(
+        json.dumps(compat_export, separators=(",", ":"))
+    )
+    cctx = common_ctx(rel="")
+    cctx.update(
+        page_title="Spreadsheet formula compatibility checker — Excel, Google Sheets & LibreOffice",
+        meta_description=(
+            "Paste a formula and instantly see whether every function works in Excel, "
+            "Google Sheets, and current LibreOffice Calc. Based on real executed tests."
+        ),
+        canonical=BASE_URL + "checker.html",
+    )
+    (OUT_DIR / "checker.html").write_text(env.get_template("checker.html").render(**cctx))
+    sitemap_urls.append({"loc": BASE_URL + "checker.html", "lastmod": build_date})
 
     # ---- sitemap.xml + robots.txt ----
     sitemap_xml = env.get_template("sitemap.xml").render(urls=sitemap_urls)
