@@ -536,7 +536,10 @@ BASE_TMPL = """<!doctype html>
 <meta property="og:description" content="{{ meta_description }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ canonical }}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
 <style>{{ css | safe }}</style>
 </head>
 <body>
