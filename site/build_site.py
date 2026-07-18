@@ -548,7 +548,7 @@ BASE_TMPL = """<!doctype html>
     <a class="brand" href="{{ rel }}index.html">{{ site_name_html|safe }}</a>
     <nav class="site-nav">
       <a href="{{ rel }}index.html">Functions</a>
-      <a href="{{ rel }}how-to/index.html">How-to</a>
+      <a href="{{ rel }}how-to/">How-to</a>
       <a href="{{ rel }}checker.html">Checker</a>
       <a href="{{ rel }}quirks.html">Quirks</a>
       <a href="{{ github_url }}">GitHub</a>
@@ -602,7 +602,7 @@ INDEX_TMPL = """{% extends "base.html" %}
     <strong style="display:block;margin-bottom:.35rem">&#128269; Formula compatibility checker</strong>
     <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Paste any formula &mdash; instantly see if every function works in Excel, Google Sheets &amp; current LibreOffice.</span>
   </a>
-  <a href="{{ rel }}how-to/index.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
+  <a href="{{ rel }}how-to/" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#128221; How-to recipes</strong>
     <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Copy-paste formulas for common tasks &mdash; each one executed and verified in a real engine, not just documented.</span>
   </a>
@@ -845,7 +845,7 @@ RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 
 RECIPE_TMPL = """{% extends "base.html" %}
 {% block content %}
-<a class="back-link" href="{{ rel }}how-to/index.html">&larr; All how-to recipes</a>
+<a class="back-link" href="{{ rel }}how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
   <h1>{{ r.title }}</h1>
   {% if r.verified %}<span class="badge badge-good">&#10003; Verified in LibreOffice {{ r.engine_version }}</span>{% endif %}
@@ -1113,13 +1113,13 @@ def main():
                 "Copy-paste formulas for common spreadsheet tasks, each executed and "
                 "verified in a real engine. Excel, Google Sheets, and LibreOffice Calc."
             ),
-            canonical=BASE_URL + "how-to/index.html",
+            canonical=BASE_URL + "how-to/",
             recipes=recipes,
         )
         (OUT_DIR / "how-to" / "index.html").write_text(
             env.get_template("recipe_index.html").render(**rctx)
         )
-        sitemap_urls.append({"loc": BASE_URL + "how-to/index.html", "lastmod": build_date})
+        sitemap_urls.append({"loc": BASE_URL + "how-to/", "lastmod": build_date})
         for rc in recipes:
             kw = ", ".join(rc.get("keywords", [])[:3])
             cx = common_ctx(rel="../")
