@@ -26,6 +26,7 @@ live-tested" badge — never implied to be tested.
 """
 
 import json
+import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -768,6 +769,13 @@ entry above reflects documentation inventory only.</p>
 {% if e.doc_url %}<li>{{ e.label }}: <a href="{{ e.doc_url }}">official documentation</a></li>{% endif %}
 {% endfor %}
 </ul>
+
+{% if related_recipes %}
+<h2 class="section-title">Related how-to recipes</h2>
+<ul>
+{% for rec in related_recipes %}<li><a href="{{ rel }}how-to/{{ rec.slug }}.html">{{ rec.title }}</a></li>{% endfor %}
+</ul>
+{% endif %}
 {% endblock %}
 """
 
@@ -1048,6 +1056,18 @@ def main():
     sitemap_urls.append({"loc": BASE_URL + "quirks.html", "lastmod": latest_result_date})
 
     # ---- Function pages ----
+    # Map each function -> how-to recipes that use it (internal linking).
+    recipes_for_links = load_recipes()
+    _fnre = re.compile(r"([A-Za-z][A-Za-z0-9_.]*)\s*\(")
+    func_recipes = {}
+    for rc in recipes_for_links:
+        seen = set()
+        for s in rc.get("solutions", {}).values():
+            for m in _fnre.finditer(s.get("formula", "")):
+                seen.add(m.group(1).upper())
+        for fn in seen:
+            func_recipes.setdefault(fn, []).append({"slug": rc["slug"], "title": rc["title"]})
+
     func_tmpl = env.get_template("function.html")
     for r in records:
         page_date = r["last_tested"] or build_date
@@ -1071,6 +1091,7 @@ def main():
             meta_description=desc,
             canonical=BASE_URL + f"functions/{r['name_lower']}.html",
             r=r,
+            related_recipes=func_recipes.get(r["name"], []),
         )
         out_path = OUT_DIR / "functions" / f"{r['name_lower']}.html"
         out_path.write_text(func_tmpl.render(**ctx))
