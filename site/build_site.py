@@ -67,6 +67,12 @@ VERDICT_BADGE_CLASS = {
     "unsupported": "badge-bad",
     None: "badge-unknown",
 }
+VERDICT_SHORT = {
+    "supported": "Supported",
+    "quirky": "Quirk",
+    "unsupported": "Unsupported",
+    None: "n/a",
+}
 
 ERROR_VALUES = {"#NAME?", "#REF!", "#VALUE!", "#NUM!", "#N/A", "#DIV/0!", "#NULL!", "#ERROR!"}
 
@@ -258,11 +264,19 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 entry["lo_history"] = history
                 change = None
                 if len(history) >= 2 and history[0]["verdict"] != history[-1]["verdict"]:
+                    # Precise "supported since" = the FIRST tested release whose
+                    # verdict is supported (with an earlier release that wasn't).
+                    since = None
+                    for h in history:
+                        if h["verdict"] == "supported":
+                            since = h["version"]
+                            break
                     change = {
                         "from_version": history[0]["version"],
                         "from_verdict": history[0]["verdict"],
                         "to_version": history[-1]["version"],
                         "to_verdict": history[-1]["verdict"],
+                        "since_version": since,
                         "newly_supported": (
                             history[0]["verdict"] == "unsupported"
                             and history[-1]["verdict"] == "supported"
@@ -772,12 +786,14 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 {% endif %}
 
 {% set le = r.engines['libreoffice'] %}
-{% if le.lo_change and le.lo_change.newly_supported %}
+{% set since = le.lo_change.since_version if le.lo_change else None %}
+{% if le.lo_change and le.lo_change.newly_supported and since %}
 <div class="newin-box">
-  <strong>&#10003; New in LibreOffice {{ le.lo_change.to_version }}.</strong>
-  We ran <code>{{ r.name }}</code> in both LibreOffice {{ le.lo_change.from_version }} and {{ le.lo_change.to_version }}:
-  it returned <code>#NAME?</code> (unrecognized) in {{ le.lo_change.from_version }} but works correctly in {{ le.lo_change.to_version }}.
-  If you need <strong>{{ r.name }}</strong> in LibreOffice Calc, upgrade to {{ le.lo_change.to_version }} or newer.
+  <strong>&#10003; Supported in LibreOffice since {{ since }}.</strong>
+  We ran <code>{{ r.name }}</code> under every LibreOffice release we test
+  ({{ le.lo_history|map(attribute='version')|join(', ') }}):
+  it returned <code>#NAME?</code> (unrecognized) in {{ le.lo_change.from_version }} and first works in {{ since }}.
+  If you need <strong>{{ r.name }}</strong> in LibreOffice Calc, use {{ since }} or newer.
 </div>
 {% endif %}
 
@@ -1035,26 +1051,28 @@ WHATSNEW_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>LibreOffice Calc function support by version</h1>
 <p class="lede">Which functions does each LibreOffice Calc release actually support? We ran the
-same corpus of test formulas under LibreOffice {{ from_version }} and {{ to_version }} and
-recorded the real results &mdash; so this is machine-verified compatibility, not documentation
-claims. <strong>{{ newly_supported|length }} functions</strong> that returned <code>#NAME?</code>
-in {{ from_version }} work correctly in {{ to_version }}.</p>
+same corpus of test formulas under LibreOffice {{ versions_tested|join(', ') }} and recorded the
+real computed results &mdash; so this is machine-verified compatibility, not documentation claims.
+<strong>{{ newly_supported|length }} functions</strong> that returned <code>#NAME?</code> in
+{{ from_version }} now work in a later release &mdash; and below is the exact version each one
+landed in.</p>
 
 {% if newly_supported %}
-<h2 class="section-title">Newly supported in LibreOffice {{ to_version }}</h2>
+<h2 class="section-title">Newly supported functions &mdash; and the release each landed in</h2>
 <p>These functions were <strong>not recognized</strong> (returned <code>#NAME?</code>) in
-LibreOffice {{ from_version }} but are fully supported in {{ to_version }}. Most are modern
-dynamic-array and lookup functions Excel and Google Sheets already had.</p>
+LibreOffice {{ from_version }} but became fully supported in a later release. Most are modern
+dynamic-array and lookup functions Excel and Google Sheets already had. The
+<strong>Supported since</strong> column is the earliest release we tested where the function works.</p>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Function</th><th>Category</th><th>LibreOffice {{ from_version }}</th><th>LibreOffice {{ to_version }}</th></tr></thead>
+<thead><tr><th>Function</th><th>Category</th>{% for v in versions_tested %}<th>{{ v }}</th>{% endfor %}<th>Supported since</th></tr></thead>
 <tbody>
 {% for r in newly_supported %}
 <tr>
   <td><a href="{{ rel }}functions/{{ r.name_lower }}.html">{{ r.name }}</a></td>
   <td>{{ r.category }}</td>
-  <td><span class="badge badge-bad">Unsupported</span></td>
-  <td><span class="badge badge-good">Supported</span></td>
+  {% for vd in r.verdicts %}<td><span class="badge {{ verdict_class[vd] }}">{{ verdict_short[vd] }}</span></td>{% endfor %}
+  <td><strong>{{ r.since }}</strong></td>
 </tr>
 {% endfor %}
 </tbody>
@@ -1064,18 +1082,17 @@ dynamic-array and lookup functions Excel and Google Sheets already had.</p>
 
 {% if other_changes %}
 <h2 class="section-title">Other support changes</h2>
-<p>Functions whose behaviour changed between {{ from_version }} and {{ to_version }} in some
-other way (for example, newly recognized but with an edge-case quirk).</p>
+<p>Functions whose behaviour changed across these releases in some other way &mdash; for example,
+newly recognized but with an edge-case quirk rather than full support.</p>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Function</th><th>Category</th><th>LibreOffice {{ from_version }}</th><th>LibreOffice {{ to_version }}</th></tr></thead>
+<thead><tr><th>Function</th><th>Category</th>{% for v in versions_tested %}<th>{{ v }}</th>{% endfor %}</tr></thead>
 <tbody>
 {% for r in other_changes %}
 <tr>
   <td><a href="{{ rel }}functions/{{ r.name_lower }}.html">{{ r.name }}</a></td>
   <td>{{ r.category }}</td>
-  <td><span class="badge {{ verdict_class[r.from_verdict] }}">{{ verdict_label[r.from_verdict] }}</span></td>
-  <td><span class="badge {{ verdict_class[r.to_verdict] }}">{{ verdict_label[r.to_verdict] }}</span></td>
+  {% for vd in r.verdicts %}<td><span class="badge {{ verdict_class[vd] }}">{{ verdict_short[vd] }}</span></td>{% endfor %}
 </tr>
 {% endfor %}
 </tbody>
@@ -1154,6 +1171,7 @@ def common_ctx(rel):
         "rel": rel,
         "engine_order": ENGINE_ORDER,
         "verdict_label": VERDICT_LABELS,
+        "verdict_short": VERDICT_SHORT,
         "verdict_class": VERDICT_BADGE_CLASS,
     }
 
@@ -1340,8 +1358,8 @@ def main():
             "l": bool(e["libreoffice"]["documented"]),
             "lv": e["libreoffice"]["verdict"],
             "lver": e["libreoffice"]["version"],
-            # newly supported: the version it started working in (else null)
-            "lnew": lch["to_version"] if (lch and lch["newly_supported"]) else None,
+            # newly supported: the exact release it started working in (else null)
+            "lnew": lch["since_version"] if (lch and lch["newly_supported"]) else None,
         }
     (OUT_DIR / "data").mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "data" / "compat.json").write_text(
@@ -1368,15 +1386,21 @@ def main():
             ch = r["engines"]["libreoffice"].get("lo_change")
             if not ch:
                 continue
+            hm = {
+                h["version"]: h["verdict"]
+                for h in r["engines"]["libreoffice"].get("lo_history", [])
+            }
             row = {
                 "name": r["name"],
                 "name_lower": r["name_lower"],
                 "category": r["category"],
-                "from_verdict": ch["from_verdict"],
-                "to_verdict": ch["to_verdict"],
+                "since": ch.get("since_version"),
+                # per-version verdicts aligned to lo_ver_list (column order)
+                "verdicts": [hm.get(v) for v in lo_ver_list],
             }
             (newly if ch["newly_supported"] else other).append(row)
-        newly.sort(key=lambda x: x["name"])
+        # newly-supported: group by the release they landed in, newest first
+        newly.sort(key=lambda x: (_version_tuple(x["since"]), x["name"]))
         other.sort(key=lambda x: x["name"])
         wctx = common_ctx(rel="")
         wctx.update(
