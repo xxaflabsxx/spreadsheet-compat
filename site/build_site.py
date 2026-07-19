@@ -109,14 +109,48 @@ def load_tests():
 
 
 def load_results():
-    """engine key -> raw results blob for that engine's results/*.json file"""
+    """engine key -> raw results blob for that engine's results/*.json file.
+
+    When several results files map to the same engine (e.g. multiple
+    LibreOffice versions), the NEWEST version wins the live verdict, so the
+    support matrix always reflects current-release behaviour.
+    """
     out = {}
     for p in sorted(RESULTS_DIR.glob("*.json")):
         d = json.loads(p.read_text())
         key = engine_key_from_engine_name(d.get("engine", ""))
-        if key:
+        if not key:
+            continue
+        prev = out.get(key)
+        if prev is None or _version_tuple(d.get("engine_version")) >= _version_tuple(
+            prev.get("engine_version")
+        ):
             out[key] = d
     return out
+
+
+def _version_tuple(v):
+    """'25.8.7.3' -> (25, 8, 7, 3) for correct numeric version ordering."""
+    if not v:
+        return ()
+    parts = []
+    for tok in str(v).split("."):
+        num = "".join(ch for ch in tok if ch.isdigit())
+        parts.append(int(num) if num else 0)
+    return tuple(parts)
+
+
+def load_lo_versions():
+    """Return every executed LibreOffice results blob, ascending by version:
+    [(version_str, blob), ...]. Powers the caniuse-style version-range data
+    (which functions gained support in which release)."""
+    blobs = []
+    for p in sorted(RESULTS_DIR.glob("libreoffice-*.json")):
+        d = json.loads(p.read_text())
+        if engine_key_from_engine_name(d.get("engine", "")) == "libreoffice":
+            blobs.append((d.get("engine_version", ""), d))
+    blobs.sort(key=lambda t: _version_tuple(t[0]))
+    return blobs
 
 
 # --------------------------------------------------------------------------
@@ -144,9 +178,10 @@ def classify_verdict(case_results):
     return "quirky"
 
 
-def build_records(functions_doc, tests_by_fn, results_by_engine):
+def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=None):
     records = []
     all_quirks = []  # flattened, for the quirks page
+    lo_versions = lo_versions or []
 
     for f in functions_doc["functions"]:
         name = f["name"]
@@ -202,6 +237,38 @@ def build_records(functions_doc, tests_by_fn, results_by_engine):
                                 "case": mc,
                             }
                         )
+
+            # LibreOffice version history: run the SAME executed corpus under
+            # each LibreOffice release we have results for, so we can show a
+            # real, machine-verified "supported since version X" range rather
+            # than only the current release's verdict.
+            if ek == "libreoffice":
+                history = []
+                for vstr, blob in lo_versions:
+                    vres = blob.get("function_results", {}).get(name)
+                    if not vres:
+                        continue
+                    history.append(
+                        {
+                            "version": vstr,
+                            "verdict": classify_verdict(list(vres.values())),
+                            "generated_at": blob.get("generated_at"),
+                        }
+                    )
+                entry["lo_history"] = history
+                change = None
+                if len(history) >= 2 and history[0]["verdict"] != history[-1]["verdict"]:
+                    change = {
+                        "from_version": history[0]["version"],
+                        "from_verdict": history[0]["verdict"],
+                        "to_version": history[-1]["version"],
+                        "to_verdict": history[-1]["verdict"],
+                        "newly_supported": (
+                            history[0]["verdict"] == "unsupported"
+                            and history[-1]["verdict"] == "supported"
+                        ),
+                    }
+                entry["lo_change"] = change
 
             engines[ek] = entry
 
@@ -444,6 +511,25 @@ table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
 .verdict-ok { color: var(--good); }
 .verdict-bad { color: var(--bad); font-weight: 600; }
 
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
 .quirks-list { list-style: none; padding: 0; margin: 0; }
 .quirk-entry {
   border: 1px solid var(--border);
@@ -550,6 +636,7 @@ BASE_TMPL = """<!doctype html>
       <a href="{{ rel }}index.html">Functions</a>
       <a href="{{ rel }}how-to/">How-to</a>
       <a href="{{ rel }}checker.html">Checker</a>
+      <a href="{{ rel }}libreoffice-version-support.html">LO&nbsp;versions</a>
       <a href="{{ rel }}quirks.html">Quirks</a>
       <a href="{{ github_url }}">GitHub</a>
     </nav>
@@ -609,6 +696,10 @@ INDEX_TMPL = """{% extends "base.html" %}
   <a href="{{ rel }}quirks.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#9888;&#65039; Quirks &amp; gotchas</strong>
     <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Where the three apps disagree on the same formula &mdash; surprising differences caught by running them.</span>
+  </a>
+  <a href="{{ rel }}libreoffice-version-support.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
+    <strong style="display:block;margin-bottom:.35rem">&#128200; LibreOffice by version</strong>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Which functions each LibreOffice release supports &mdash; XLOOKUP, FILTER, SORT &amp; 15 more, tested across versions.</span>
   </a>
 </div>
 
@@ -680,6 +771,16 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 <p class="lede">Real, executed compatibility results for the <strong>{{ r.name }}</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
 {% endif %}
 
+{% set le = r.engines['libreoffice'] %}
+{% if le.lo_change and le.lo_change.newly_supported %}
+<div class="newin-box">
+  <strong>&#10003; New in LibreOffice {{ le.lo_change.to_version }}.</strong>
+  We ran <code>{{ r.name }}</code> in both LibreOffice {{ le.lo_change.from_version }} and {{ le.lo_change.to_version }}:
+  it returned <code>#NAME?</code> (unrecognized) in {{ le.lo_change.from_version }} but works correctly in {{ le.lo_change.to_version }}.
+  If you need <strong>{{ r.name }}</strong> in LibreOffice Calc, upgrade to {{ le.lo_change.to_version }} or newer.
+</div>
+{% endif %}
+
 {% if not r.any_tested %}
 <div class="not-live-tested">
   <strong>Not yet live-tested.</strong> No engine has executed real test cases
@@ -713,6 +814,26 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 </tbody>
 </table>
 </div>
+
+{% if le.lo_history and le.lo_history|length > 1 %}
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+{{ r.name }}&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+{% for h in le.lo_history %}
+<tr class="{% if not loop.first and h.verdict != le.lo_history[loop.index0 - 1].verdict %}ver-changed{% endif %}">
+  <td>{{ h.version }}</td>
+  <td><span class="badge {{ verdict_class[h.verdict] }}">{{ verdict_label[h.verdict] }}</span></td>
+  <td>{{ h.generated_at|dateonly }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
 
 {% if r.quirk_count > 0 %}
 <div class="quirk-box">
@@ -889,7 +1010,7 @@ let DB=null;
 async function load(){ if(!DB){ DB=await (await fetch(DATA_URL)).json(); } return DB; }
 function funcs(s){ const set=new Set(); const re=/([A-Za-z][A-Za-z0-9_.]*)\\s*\\(/g; let m; while((m=re.exec(s))){ set.add(m[1].toUpperCase()); } return [...set]; }
 function yn(ok){ return ok?'<span style="color:#0a7a2f">&#10003; yes</span>':'<span style="color:#c02020">&#10007; no</span>'; }
-function lo(d){ if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 async function check(){
   const db=await load(); const fs=funcs(document.getElementById('f').value); const out=document.getElementById('out');
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
@@ -907,6 +1028,68 @@ document.getElementById('btn').addEventListener('click',check);
 document.getElementById('f').addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter') check(); });
 </script>
 {% endraw %}
+{% endblock %}
+"""
+
+WHATSNEW_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>LibreOffice Calc function support by version</h1>
+<p class="lede">Which functions does each LibreOffice Calc release actually support? We ran the
+same corpus of test formulas under LibreOffice {{ from_version }} and {{ to_version }} and
+recorded the real results &mdash; so this is machine-verified compatibility, not documentation
+claims. <strong>{{ newly_supported|length }} functions</strong> that returned <code>#NAME?</code>
+in {{ from_version }} work correctly in {{ to_version }}.</p>
+
+{% if newly_supported %}
+<h2 class="section-title">Newly supported in LibreOffice {{ to_version }}</h2>
+<p>These functions were <strong>not recognized</strong> (returned <code>#NAME?</code>) in
+LibreOffice {{ from_version }} but are fully supported in {{ to_version }}. Most are modern
+dynamic-array and lookup functions Excel and Google Sheets already had.</p>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Category</th><th>LibreOffice {{ from_version }}</th><th>LibreOffice {{ to_version }}</th></tr></thead>
+<tbody>
+{% for r in newly_supported %}
+<tr>
+  <td><a href="{{ rel }}functions/{{ r.name_lower }}.html">{{ r.name }}</a></td>
+  <td>{{ r.category }}</td>
+  <td><span class="badge badge-bad">Unsupported</span></td>
+  <td><span class="badge badge-good">Supported</span></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+
+{% if other_changes %}
+<h2 class="section-title">Other support changes</h2>
+<p>Functions whose behaviour changed between {{ from_version }} and {{ to_version }} in some
+other way (for example, newly recognized but with an edge-case quirk).</p>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Category</th><th>LibreOffice {{ from_version }}</th><th>LibreOffice {{ to_version }}</th></tr></thead>
+<tbody>
+{% for r in other_changes %}
+<tr>
+  <td><a href="{{ rel }}functions/{{ r.name_lower }}.html">{{ r.name }}</a></td>
+  <td>{{ r.category }}</td>
+  <td><span class="badge {{ verdict_class[r.from_verdict] }}">{{ verdict_label[r.from_verdict] }}</span></td>
+  <td><span class="badge {{ verdict_class[r.to_verdict] }}">{{ verdict_label[r.to_verdict] }}</span></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+
+<h2 class="section-title">How we know</h2>
+<p>For each LibreOffice release, we build a workbook of test formulas with no cached values,
+force a full headless recalculation, and read back the computed results &mdash; with volatile
+and arithmetic canaries proving the recalculation genuinely happened. The same method powers
+every <a href="{{ rel }}index.html">function page</a> and the
+<a href="{{ rel }}checker.html">formula checker</a>. Versions tested so far:
+{{ versions_tested|join(', ') }}.</p>
 {% endblock %}
 """
 
@@ -945,6 +1128,7 @@ def build_env():
                 "recipe.html": RECIPE_TMPL,
                 "recipe_index.html": RECIPE_INDEX_TMPL,
                 "checker.html": CHECKER_TMPL,
+                "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
             }
         ),
@@ -987,8 +1171,11 @@ def main():
     functions_doc = load_functions()
     tests_by_fn = load_tests()
     results_by_engine = load_results()
+    lo_versions = load_lo_versions()
 
-    records, quirks = build_records(functions_doc, tests_by_fn, results_by_engine)
+    records, quirks = build_records(
+        functions_doc, tests_by_fn, results_by_engine, lo_versions
+    )
 
     tested_functions = [r for r in records if r["any_tested"]]
     tested_case_count = sum(
@@ -1145,6 +1332,7 @@ def main():
     compat_export = {}
     for r in records:
         e = r["engines"]
+        lch = e["libreoffice"].get("lo_change")
         compat_export[r["name"]] = {
             "cat": r["category"],
             "x": bool(e["excel"]["documented"]),
@@ -1152,6 +1340,8 @@ def main():
             "l": bool(e["libreoffice"]["documented"]),
             "lv": e["libreoffice"]["verdict"],
             "lver": e["libreoffice"]["version"],
+            # newly supported: the version it started working in (else null)
+            "lnew": lch["to_version"] if (lch and lch["newly_supported"]) else None,
         }
     (OUT_DIR / "data").mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "data" / "compat.json").write_text(
@@ -1168,6 +1358,51 @@ def main():
     )
     (OUT_DIR / "checker.html").write_text(env.get_template("checker.html").render(**cctx))
     sitemap_urls.append({"loc": BASE_URL + "checker.html", "lastmod": build_date})
+
+    # ---- LibreOffice version-support (caniuse-style) page ----
+    lo_ver_list = [v for v, _ in lo_versions]
+    if len(lo_ver_list) >= 2:
+        from_v, to_v = lo_ver_list[0], lo_ver_list[-1]
+        newly, other = [], []
+        for r in records:
+            ch = r["engines"]["libreoffice"].get("lo_change")
+            if not ch:
+                continue
+            row = {
+                "name": r["name"],
+                "name_lower": r["name_lower"],
+                "category": r["category"],
+                "from_verdict": ch["from_verdict"],
+                "to_verdict": ch["to_verdict"],
+            }
+            (newly if ch["newly_supported"] else other).append(row)
+        newly.sort(key=lambda x: x["name"])
+        other.sort(key=lambda x: x["name"])
+        wctx = common_ctx(rel="")
+        wctx.update(
+            page_title=(
+                f"LibreOffice Calc function support by version — "
+                f"what's new in {to_v} (XLOOKUP, FILTER, SORT, UNIQUE…)"
+            ),
+            meta_description=(
+                f"Machine-verified LibreOffice Calc function compatibility by version: "
+                f"{len(newly)} functions — including XLOOKUP, FILTER, SORT, UNIQUE, LET and "
+                f"other dynamic-array functions — that returned #NAME? in LibreOffice {from_v} "
+                f"now work in {to_v}. Real executed test results."
+            ),
+            canonical=BASE_URL + "libreoffice-version-support.html",
+            from_version=from_v,
+            to_version=to_v,
+            newly_supported=newly,
+            other_changes=other,
+            versions_tested=lo_ver_list,
+        )
+        (OUT_DIR / "libreoffice-version-support.html").write_text(
+            env.get_template("whatsnew.html").render(**wctx)
+        )
+        sitemap_urls.append(
+            {"loc": BASE_URL + "libreoffice-version-support.html", "lastmod": latest_result_date}
+        )
 
     # ---- sitemap.xml + robots.txt ----
     sitemap_xml = env.get_template("sitemap.xml").render(urls=sitemap_urls)

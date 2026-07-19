@@ -75,7 +75,13 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 TESTS_DIR = os.path.join(REPO_ROOT, "data", "tests")
 RESULTS_DIR = os.path.join(REPO_ROOT, "results")
 
-SOFFICE_BIN = "soffice"
+# Which soffice binary to drive. Defaults to the system "soffice" (PATH), but
+# can be overridden to point at an isolated/alternate LibreOffice install
+# (e.g. an extracted AppImage of an OLDER release) so we can execute the exact
+# same corpus under multiple engine versions for version-range compatibility
+# data. The output filename is derived from the binary's own reported version,
+# so pointing this at 24.2 writes results/libreoffice-24.2.json automatically.
+SOFFICE_BIN = os.environ.get("SOFFICE_BIN", "soffice")
 
 
 def _detect_lo_version():
