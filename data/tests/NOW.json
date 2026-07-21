@@ -1,0 +1,24 @@
+{
+  "function": "NOW",
+  "cases": [
+    {
+      "id": "NOW_exists_and_plausible",
+      "formula": "=NOW()",
+      "description": "Existence probe only: NOW() is volatile (changes every recalculation), so there is no fixed expected value",
+      "expected": null,
+      "expected_note": "Non-deterministic by design; only check the engine recognizes the function and returns a plausible date-time serial"
+    },
+    {
+      "id": "NOW_self_difference_is_deterministic",
+      "formula": "=N(NOW()-NOW())",
+      "description": "Two NOW() calls inside one cell evaluate in the same recalculation pass, so their difference is exactly 0 — a deterministic assertion about a volatile function (N() keeps the result a plain number instead of a duration-formatted cell)",
+      "expected": 0
+    },
+    {
+      "id": "NOW_on_or_after_today",
+      "formula": "=NOW()>=TODAY()",
+      "description": "NOW() includes today's date plus a time fraction, so it is always >= TODAY() within one recalculation",
+      "expected": true
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "function": "GROUPBY",
+  "cases": [
+    {
+      "id": "GROUPBY_exists_sum",
+      "formula": "=GROUPBY(A1:A4,B1:B4,SUM)",
+      "description": "Existence probe: group a,b,a,b over 1,2,3,4 with SUM. In Excel 365 this spills grouped rows (a=4, b=6) plus a grand-total row by default; the exact spill layout depends on optional field_headers/total_depth arguments, so we only assert the engine recognizes the function (not #NAME?)",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b",
+        "A3": "a",
+        "A4": "b",
+        "B1": 1,
+        "B2": 2,
+        "B3": 3,
+        "B4": 4
+      },
+      "expected": null,
+      "expected_note": "Probe only: layout of the spilled result (headers/totals) varies with optional args; the key datum is whether the engine has GROUPBY at all"
+    }
+  ]
+}
