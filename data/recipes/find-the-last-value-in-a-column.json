@@ -1,0 +1,35 @@
+{
+  "slug": "find-the-last-value-in-a-column",
+  "title": "How to find the last value in a column",
+  "task": "Get the most recent entry in a column that keeps growing — the last non-blank cell.",
+  "keywords": [
+    "last value in column excel",
+    "last non blank cell google sheets",
+    "lookup last entry",
+    "most recent value formula"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
+      "note": "Excel 365 alternative: =TAKE(FILTER(A2:A100,A2:A100<>\"\"),-1)."
+    },
+    "google_sheets": {
+      "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
+      "note": "Identical; Sheets also has =INDEX(A2:A100,COUNTA(A2:A100)) for gap-free columns."
+    },
+    "libreoffice": {
+      "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple",
+      "A3": "banana",
+      "A5": "cherry"
+    },
+    "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
+    "expected": "cherry"
+  },
+  "explanation": "The classic LOOKUP trick: (A2:A100<>\"\") is an array of TRUE/FALSE, and 1 divided by it gives 1 for filled cells and a #DIV/0! error for blanks. LOOKUP searches for 2 — larger than anything in the array — so it scans to the end and returns the value beside the last 1, i.e. the last non-blank cell. It skips gaps: in the sample, A4 is empty but the result is still \"cherry\" from A5."
+}
