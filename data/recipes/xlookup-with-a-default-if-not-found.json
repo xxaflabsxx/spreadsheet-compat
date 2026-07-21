@@ -1,0 +1,39 @@
+{
+  "slug": "xlookup-with-a-default-if-not-found",
+  "title": "How to return a default value when a lookup finds nothing",
+  "task": "Stop lookups showing #N/A when the value isn't in the table — show \"Not found\" (or 0) instead.",
+  "keywords": [
+    "xlookup if not found",
+    "vlookup #N/A replace",
+    "iferror vlookup",
+    "lookup default value"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=XLOOKUP(D2,A2:A4,B2:B4,\"Not found\")",
+      "note": "XLOOKUP's 4th argument is the built-in not-found result. Older Excel: =IFERROR(VLOOKUP(D2,A2:B4,2,FALSE),\"Not found\")."
+    },
+    "google_sheets": {
+      "formula": "=XLOOKUP(D2,A2:A4,B2:B4,\"Not found\")",
+      "note": "Identical; the IFERROR+VLOOKUP form also works."
+    },
+    "libreoffice": {
+      "formula": "=XLOOKUP(D2,A2:A4,B2:B4,\"Not found\")",
+      "note": "XLOOKUP needs LibreOffice 24.8+; earlier versions use IFERROR(VLOOKUP(...))."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple",
+      "B2": 10,
+      "A3": "banana",
+      "B3": 20,
+      "A4": "cherry",
+      "B4": 30,
+      "D2": "pear"
+    },
+    "formula": "=XLOOKUP(D2,A2:A4,B2:B4,\"Not found\")",
+    "expected": "Not found"
+  },
+  "explanation": "XLOOKUP takes the not-found result as its fourth argument — no error-wrapping needed. \"pear\" isn't in the fruit list, so the formula returns \"Not found\" instead of #N/A. The classic IFERROR(VLOOKUP(...)) pattern does the same in any version, but note IFERROR hides all errors (including typos in the range), while XLOOKUP's argument only handles the genuine not-found case."
+}
