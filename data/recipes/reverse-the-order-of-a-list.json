@@ -1,0 +1,36 @@
+{
+  "slug": "reverse-the-order-of-a-list",
+  "title": "How to reverse the order of a list",
+  "task": "Flip a column so the last value comes first — without sorting alphabetically.",
+  "keywords": [
+    "reverse order excel",
+    "flip column upside down",
+    "reverse list google sheets",
+    "sortby row descending"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
+      "note": "Excel 365/2021. Works for any values — it reverses position, not sort order."
+    },
+    "google_sheets": {
+      "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
+      "note": "Identical; SORT(A2:A4,ROW(A2:A4),FALSE) also works in Sheets."
+    },
+    "libreoffice": {
+      "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
+      "note": "Needs LibreOffice 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple",
+      "A3": "banana",
+      "A4": "cherry"
+    },
+    "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
+    "expected": ["cherry", "banana", "apple"],
+    "check_range": "D1:D3"
+  },
+  "explanation": "SORTBY sorts one range by another: here the list is sorted by its own row numbers in descending order (-1), which simply flips it — cherry, banana, apple. Unlike SORT, this preserves the original arrangement in reverse rather than alphabetizing. In older versions without SORTBY, =INDEX($A$2:$A$4,COUNTA($A$2:$A$4)-ROWS($A$2:A2)+1) filled down does the same."
+}

@@ -1,0 +1,41 @@
+{
+  "slug": "find-values-in-both-lists",
+  "title": "How to find values that appear in both of two lists",
+  "task": "Compare two columns and pull out the values they have in common.",
+  "keywords": [
+    "compare two lists excel",
+    "find common values two columns",
+    "values in both lists google sheets",
+    "compare columns for matches"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=FILTER(A2:A6,COUNTIF(C2:C4,A2:A6)>0)",
+      "note": "Excel 365/2021. Per-row alternative: =IF(COUNTIF($C$2:$C$4,A2)>0,\"In both\",\"\")."
+    },
+    "google_sheets": {
+      "formula": "=FILTER(A2:A6,COUNTIF(C2:C4,A2:A6)>0)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=FILTER(A2:A6,COUNTIF(C2:C4,A2:A6)>0)",
+      "note": "FILTER needs LibreOffice 24.8+; the per-row IF+COUNTIF form works in any version."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple",
+      "A3": "banana",
+      "A4": "cherry",
+      "A5": "date",
+      "A6": "fig",
+      "C2": "banana",
+      "C3": "fig",
+      "C4": "grape"
+    },
+    "formula": "=FILTER(A2:A6,COUNTIF(C2:C4,A2:A6)>0)",
+    "expected": ["banana", "fig"],
+    "check_range": "E1:E2"
+  },
+  "explanation": "COUNTIF(C2:C4,A2:A6) counts how many times each value from the first list appears in the second — an array of 0s and 1s — and FILTER keeps the first-list values whose count is positive. \"banana\" and \"fig\" are in both lists; \"grape\" is only in the second, so it doesn't appear. Swap the ranges to get the second list's matches, or use COUNTIF(...)=0 to find values in one list but NOT the other."
+}

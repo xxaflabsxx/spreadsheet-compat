@@ -1,0 +1,38 @@
+{
+  "slug": "sum-every-nth-row",
+  "title": "How to sum every nth row",
+  "task": "Add up every 2nd, 3rd, or nth value in a column — common with repeating blocks of data.",
+  "keywords": [
+    "sum every nth row excel",
+    "sum every other row",
+    "sumproduct mod row",
+    "sum alternate rows google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT((MOD(ROW(B2:B7)-ROW(B2),3)=0)*B2:B7)",
+      "note": "Change the 3 to your n. Anchoring on ROW(B2) makes the first row count as position 0."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT((MOD(ROW(B2:B7)-ROW(B2),3)=0)*B2:B7)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT((MOD(ROW(B2:B7)-ROW(B2),3)=0)*B2:B7)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "B2": 10,
+      "B3": 20,
+      "B4": 30,
+      "B5": 40,
+      "B6": 50,
+      "B7": 60
+    },
+    "formula": "=SUMPRODUCT((MOD(ROW(B2:B7)-ROW(B2),3)=0)*B2:B7)",
+    "expected": 50
+  },
+  "explanation": "ROW(B2:B7)-ROW(B2) numbers the rows 0,1,2,3,4,5 regardless of where the range starts; MOD(...,3)=0 is true for positions 0 and 3 — every 3rd row. SUMPRODUCT multiplies those TRUE/FALSE values (1/0) by the numbers and sums: 10 + 40 = 50. Every-other-row is the same formula with 2, and MOD(...,3)=1 shifts the starting offset."
+}
