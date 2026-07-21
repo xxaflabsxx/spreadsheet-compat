@@ -169,7 +169,14 @@ def classify_verdict(case_results):
     """
     if not case_results:
         return None
-    if all(c.get("matched_expected") for c in case_results):
+    # Probe cases (expected == None, e.g. volatile NOW/RAND existence checks)
+    # assert only "no error"; an error-free probe must not count against the
+    # verdict, or fully-working volatile functions get mislabeled "quirky".
+    def case_ok(c):
+        if c.get("expected") is None and c.get("matched_expected") is None:
+            return c.get("error") is None
+        return bool(c.get("matched_expected"))
+    if all(case_ok(c) for c in case_results):
         return "supported"
     if any(c.get("value") in ERROR_VALUES and c.get("value") == "#NAME?" for c in case_results):
         return "unsupported"
@@ -888,7 +895,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
   <td>{{ c.description }}</td>
   <td class="result mono">{{ (c.range_values if c.range_values else c.value)|fmtval }}</td>
   <td class="result mono">{{ c.expected|fmtval }}{% if c.expected_note %}<br><span class="category-tag">{{ c.expected_note }}</span>{% endif %}</td>
-  <td>{% if c.matched_expected %}<span class="verdict-ok">Matched</span>{% else %}<span class="verdict-bad">Mismatch</span>{% endif %}</td>
+  <td>{% if c.matched_expected %}<span class="verdict-ok">Matched</span>{% elif c.matched_expected is none and c.expected is none %}{% if c.error %}<span class="verdict-bad">Error</span>{% else %}<span class="verdict-ok">Ran OK</span>{% endif %}{% else %}<span class="verdict-bad">Mismatch</span>{% endif %}</td>
 </tr>
 {% endfor %}
 </tbody>
