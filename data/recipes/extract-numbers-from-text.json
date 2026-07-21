@@ -1,0 +1,33 @@
+{
+  "slug": "extract-numbers-from-text",
+  "title": "How to extract numbers from text in a cell",
+  "task": "Pull just the digits out of a cell that mixes text and numbers, like an order code or address.",
+  "keywords": [
+    "extract numbers from text excel",
+    "extract numbers from string google sheets",
+    "get only numbers from a cell",
+    "remove letters keep numbers"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TEXTJOIN(\"\",TRUE,IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,\"\"))",
+      "note": "Excel 365/2021 (needs SEQUENCE + TEXTJOIN)."
+    },
+    "google_sheets": {
+      "formula": "=REGEXREPLACE(A2,\"[^0-9]\",\"\")",
+      "note": "Sheets has REGEXREPLACE, the cleanest way. The Excel formula also works."
+    },
+    "libreoffice": {
+      "formula": "=TEXTJOIN(\"\",TRUE,IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,\"\"))",
+      "note": "Works in LibreOffice 25.8+ (SEQUENCE arrived in 24.8)."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "Order #4092 (qty 15)"
+    },
+    "formula": "=TEXTJOIN(\"\",TRUE,IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,\"\"))",
+    "expected": "409215"
+  },
+  "explanation": "SEQUENCE(LEN(A2)) generates one index per character, MID splits the text into single characters, multiplying by 1 turns digits into numbers and everything else into an error, IFERROR blanks the errors, and TEXTJOIN glues the surviving digits back together. \"Order #4092 (qty 15)\" becomes \"409215\". The result is text; wrap the whole thing in VALUE() if you need a real number. In Google Sheets, REGEXREPLACE(A2,\"[^0-9]\",\"\") does the same job in one step."
+}
