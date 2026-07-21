@@ -858,6 +858,31 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 </div>
 {% endif %}
 
+{% if le.tested and ((le.lo_change and le.lo_change.newly_supported and since) or le.verdict in ('unsupported', 'quirky')) %}
+<h2 class="section-title">Why isn't {{ r.name }} working in LibreOffice?</h2>
+{% if le.lo_change and le.lo_change.newly_supported and since %}
+<p>If <code>{{ r.name }}</code> returns a <code>#NAME?</code> error in LibreOffice Calc, you are
+almost certainly running a release older than <strong>{{ since }}</strong> &mdash; that is exactly
+what our executed tests show: <code>#NAME?</code> in {{ le.lo_change.from_version }}, working from
+{{ since }} onward. Check your version under <em>Help &rarr; About LibreOffice</em> and upgrade to
+{{ since }} or newer; no setting or extension enables it in older releases.</p>
+{% elif le.verdict == 'unsupported' %}
+<p>LibreOffice Calc does not implement <code>{{ r.name }}</code> as of {{ le.version }} &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet{% if le.documented %} despite appearing in some documentation{% endif %}.
+{% if r.engines['excel'].documented %}The same formula does work in
+{% if r.engines['google_sheets'].documented %}Excel and Google Sheets{% else %}Excel{% endif %}.{% endif %}
+Watch the <a href="{{ rel }}libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+{% elif le.verdict == 'quirky' %}
+<p><code>{{ r.name }}</code> exists in LibreOffice {{ le.version }}, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+{% endif %}
+{% endif %}
+
 {% if r.quirk_count > 0 %}
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
