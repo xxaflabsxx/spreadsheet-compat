@@ -27,7 +27,7 @@ XLOOKUP and SORT landed in 24.8; HSTACK/TEXTSPLIT/TAKE only in 25.8.
 Three things to try:
 - /checker — paste any formula, it extracts every function and tells you if it works
   in each app (e.g. MAP works in Excel & Sheets but not LibreOffice yet).
-- /how-to — 50 common tasks (sum by category, VLOOKUP-to-the-left, extract numbers
+- /how-to — 55 common tasks (sum by category, VLOOKUP-to-the-left, extract numbers
   from text...) each with a copy-paste formula that's been executed and verified,
   not just documented.
 - /libreoffice-version-support.html — what's new per LibreOffice release, from real runs.
