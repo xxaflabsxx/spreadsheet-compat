@@ -1,0 +1,31 @@
+{
+  "slug": "hours-between-two-times",
+  "title": "How to calculate hours between two times",
+  "task": "Get the duration between a start and end time — for timesheets, shifts, or logs.",
+  "keywords": [
+    "hours between two times excel",
+    "time difference formula",
+    "timesheet hours google sheets",
+    "calculate shift duration"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TEXT(B2-A2,\"h:mm\")",
+      "note": "Or =(B2-A2)*24 for a decimal number of hours (7.25 for 7h15m)."
+    },
+    "google_sheets": {
+      "formula": "=TEXT(B2-A2,\"h:mm\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=TEXT(B2-A2,\"H:MM\")",
+      "note": "Format codes are case-insensitive here."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(TIME(17,15,0)-TIME(9,0,0),\"H:MM\")",
+    "expected": "8:15"
+  },
+  "explanation": "Times are stored as fractions of a day, so subtracting start from end gives the duration directly — 9:00 to 17:15 is 8:15. Multiply by 24 instead when you need decimal hours for pay calculations: 8.25. For shifts that cross midnight, use =MOD(B2-A2,1) so the negative wrap-around comes out right; and if a total might exceed 24 hours, format the cell as [h]:mm rather than using TEXT."
+}

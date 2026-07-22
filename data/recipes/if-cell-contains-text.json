@@ -1,0 +1,33 @@
+{
+  "slug": "if-cell-contains-text",
+  "title": "How to check if a cell contains specific text",
+  "task": "Return Yes/No (or anything else) depending on whether a cell contains a word or substring.",
+  "keywords": [
+    "if cell contains text excel",
+    "check if cell contains word",
+    "search isnumber if",
+    "contains substring google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(ISNUMBER(SEARCH(\"red\",A2)),\"Yes\",\"No\")",
+      "note": "SEARCH is case-insensitive; use FIND for case-sensitive matching."
+    },
+    "google_sheets": {
+      "formula": "=IF(ISNUMBER(SEARCH(\"red\",A2)),\"Yes\",\"No\")",
+      "note": "Identical; REGEXMATCH(A2,\"red\") is a Sheets-only shortcut."
+    },
+    "libreoffice": {
+      "formula": "=IF(ISNUMBER(SEARCH(\"red\",A2)),\"Yes\",\"No\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "dark red shirt"
+    },
+    "formula": "=IF(ISNUMBER(SEARCH(\"red\",A2)),\"Yes\",\"No\")",
+    "expected": "Yes"
+  },
+  "explanation": "SEARCH returns the position of \"red\" inside the text (here 6) or a #VALUE! error when it's absent. ISNUMBER turns that into TRUE/FALSE, and IF maps it to your labels. You can't write =IF(A2=\"*red*\",...) — wildcards don't work in a plain equals test, which is the usual reason this formula surprises people. To count or sum by contains instead, COUNTIF/SUMIF do accept wildcards: =COUNTIF(A:A,\"*red*\")."
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "extract-text-between-two-characters",
+  "title": "How to extract text between two characters",
+  "task": "Pull out the text between two delimiters — like the part inside parentheses.",
+  "keywords": [
+    "extract text between characters excel",
+    "text between parentheses",
+    "mid find formula",
+    "extract between brackets google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MID(A2,FIND(\"(\",A2)+1,FIND(\")\",A2)-FIND(\"(\",A2)-1)",
+      "note": "Excel 365 alternative: =TEXTBEFORE(TEXTAFTER(A2,\"(\"),\")\")."
+    },
+    "google_sheets": {
+      "formula": "=MID(A2,FIND(\"(\",A2)+1,FIND(\")\",A2)-FIND(\"(\",A2)-1)",
+      "note": "Identical; REGEXEXTRACT(A2,\"\\((.*?)\\)\") is a Sheets-only shortcut."
+    },
+    "libreoffice": {
+      "formula": "=MID(A2,FIND(\"(\",A2)+1,FIND(\")\",A2)-FIND(\"(\",A2)-1)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "Widget (blue) large"
+    },
+    "formula": "=MID(A2,FIND(\"(\",A2)+1,FIND(\")\",A2)-FIND(\"(\",A2)-1)",
+    "expected": "blue"
+  },
+  "explanation": "FIND locates the opening and closing characters; MID then grabs the text starting one position after the \"(\" for a length equal to the distance between the two delimiters minus one. \"Widget (blue) large\" yields \"blue\". Swap the two characters for anything — dashes, brackets, quotes. If the delimiters can appear more than once, the newer TEXTBEFORE/TEXTAFTER pair (or REGEXEXTRACT in Sheets) is easier to control."
+}

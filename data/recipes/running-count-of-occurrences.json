@@ -1,0 +1,35 @@
+{
+  "slug": "running-count-of-occurrences",
+  "title": "How to get a running count of occurrences",
+  "task": "Number each appearance of a value as it recurs down a column — 1st, 2nd, 3rd time seen.",
+  "keywords": [
+    "running count excel",
+    "count occurrences so far",
+    "cumulative countif",
+    "nth occurrence number google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=COUNTIF($A$2:A2,A2)",
+      "note": "Put it beside the first row and fill down — the expanding range does the work."
+    },
+    "google_sheets": {
+      "formula": "=COUNTIF($A$2:A2,A2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=COUNTIF($A$2:A2,A2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple",
+      "A3": "banana",
+      "A4": "apple"
+    },
+    "formula": "=COUNTIF($A$2:A4,A4)",
+    "expected": 2
+  },
+  "explanation": "The trick is the half-anchored range $A$2:A2: the start is locked but the end grows as you fill down, so each row counts occurrences of its own value from the top down to itself. By row 4, \"apple\" has appeared twice, so its running count is 2. Useful for numbering duplicates, making unique keys (=A2&\"-\"&COUNTIF($A$2:A2,A2)), or finding each value's first appearance (running count = 1)."
+}

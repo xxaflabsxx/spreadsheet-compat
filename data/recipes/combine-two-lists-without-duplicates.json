@@ -1,0 +1,38 @@
+{
+  "slug": "combine-two-lists-without-duplicates",
+  "title": "How to combine two lists without duplicates",
+  "task": "Merge two columns into one list where each value appears only once.",
+  "keywords": [
+    "combine lists remove duplicates excel",
+    "merge columns unique google sheets",
+    "unique vstack",
+    "union of two lists"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=UNIQUE(VSTACK(A2:A4,C2:C3))",
+      "note": "Excel 365. VSTACK stacks the ranges; UNIQUE dedupes the result."
+    },
+    "google_sheets": {
+      "formula": "=UNIQUE({A2:A4;C2:C3})",
+      "note": "Sheets uses {range1;range2} array literals instead of VSTACK (though VSTACK also works)."
+    },
+    "libreoffice": {
+      "formula": "=UNIQUE(VSTACK(A2:A4,C2:C3))",
+      "note": "Needs LibreOffice 25.8+ (VSTACK); UNIQUE alone needs 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple",
+      "A3": "banana",
+      "A4": "apple",
+      "C2": "banana",
+      "C3": "cherry"
+    },
+    "formula": "=UNIQUE(VSTACK(A2:A4,C2:C3))",
+    "expected": ["apple", "banana", "cherry"],
+    "check_range": "E1:E3"
+  },
+  "explanation": "VSTACK places the second range under the first (apple, banana, apple, banana, cherry) and UNIQUE removes the repeats, leaving each value once. The output is live — edits to either source list update the merged result. In Google Sheets the {A2:A4;C2:C3} literal does the stacking; the semicolon means \"stack vertically\" (locale note: some European locales swap ; and , in array literals)."
+}

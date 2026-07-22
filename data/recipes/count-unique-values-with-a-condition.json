@@ -1,0 +1,38 @@
+{
+  "slug": "count-unique-values-with-a-condition",
+  "title": "How to count unique values that match a condition",
+  "task": "Count distinct entries in one column, but only for rows matching a criterion in another.",
+  "keywords": [
+    "count unique with criteria excel",
+    "count distinct values condition",
+    "unique filter rows google sheets",
+    "countunique by group"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=ROWS(UNIQUE(FILTER(A2:A7,B2:B7=\"East\")))",
+      "note": "Excel 365/2021. COUNTA can replace ROWS if the source has no blanks."
+    },
+    "google_sheets": {
+      "formula": "=ROWS(UNIQUE(FILTER(A2:A7,B2:B7=\"East\")))",
+      "note": "Sheets also has =COUNTUNIQUEIFS(A2:A7,B2:B7,\"East\") built in."
+    },
+    "libreoffice": {
+      "formula": "=ROWS(UNIQUE(FILTER(A2:A7,B2:B7=\"East\")))",
+      "note": "Needs LibreOffice 24.8+ (UNIQUE and FILTER)."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "alice", "B2": "East",
+      "A3": "bob",   "B3": "West",
+      "A4": "alice", "B4": "East",
+      "A5": "carol", "B5": "East",
+      "A6": "bob",   "B6": "East",
+      "A7": "dave",  "B7": "West"
+    },
+    "formula": "=ROWS(UNIQUE(FILTER(A2:A7,B2:B7=\"East\")))",
+    "expected": 3
+  },
+  "explanation": "Working inside-out: FILTER keeps the names on \"East\" rows (alice, alice, carol, bob), UNIQUE collapses the duplicates (alice, carol, bob), and ROWS counts them — 3 distinct people. The classic pre-dynamic-array alternative =SUMPRODUCT((B2:B7=\"East\")/COUNTIFS(A2:A7,A2:A7,B2:B7,B2:B7)) still works in older versions but is much harder to reason about."
+}
