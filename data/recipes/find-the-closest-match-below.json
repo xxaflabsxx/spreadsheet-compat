@@ -1,0 +1,37 @@
+{
+  "slug": "find-the-closest-match-below",
+  "title": "How to look up the closest match (tax brackets, tiers, grades)",
+  "task": "Find which bracket or tier a value falls into — the largest threshold that doesn't exceed it.",
+  "keywords": [
+    "vlookup closest match",
+    "lookup tax bracket excel",
+    "approximate match tiers",
+    "index match closest value"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INDEX(B2:B5,MATCH(D2,A2:A5,1))",
+      "note": "Thresholds in A2:A5 must be sorted ascending. XLOOKUP(D2,A2:A5,B2:B5,,-1) needs no sorting logic change."
+    },
+    "google_sheets": {
+      "formula": "=INDEX(B2:B5,MATCH(D2,A2:A5,1))",
+      "note": "Identical; VLOOKUP(D2,A2:B5,2,TRUE) is the classic equivalent."
+    },
+    "libreoffice": {
+      "formula": "=INDEX(B2:B5,MATCH(D2,A2:A5,1))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 0,   "B2": "Bronze",
+      "A3": 50,  "B3": "Silver",
+      "A4": 100, "B4": "Gold",
+      "A5": 200, "B5": "Platinum",
+      "D2": 120
+    },
+    "formula": "=INDEX(B2:B5,MATCH(D2,A2:A5,1))",
+    "expected": "Gold"
+  },
+  "explanation": "MATCH with type 1 finds the LAST threshold ≤ the value in an ascending list — 120 clears the 100 tier but not 200, so the answer is \"Gold\". This is exactly how tax brackets, commission tiers, shipping bands, and letter grades work, and it's why the thresholds list the BOTTOM of each band. The classic VLOOKUP-with-TRUE does the same; unsorted data silently returns wrong answers, which XLOOKUP's -1 match mode avoids."
+}

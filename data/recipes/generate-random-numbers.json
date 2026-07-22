@@ -1,0 +1,31 @@
+{
+  "slug": "generate-random-numbers",
+  "title": "How to generate random numbers",
+  "task": "Get random decimals, whole numbers in a range, or a whole grid of random values.",
+  "keywords": [
+    "random number excel",
+    "randbetween",
+    "random number generator google sheets",
+    "randarray"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=RANDBETWEEN(1,100)",
+      "note": "Whole numbers, both bounds inclusive. RAND() for 0-1 decimals; RANDARRAY(5,3) for a grid (365)."
+    },
+    "google_sheets": {
+      "formula": "=RANDBETWEEN(1,100)",
+      "note": "Identical, including RAND and RANDARRAY."
+    },
+    "libreoffice": {
+      "formula": "=RANDBETWEEN(1,100)",
+      "note": "Identical; RANDARRAY works in 25.8+ per our tests."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=AND(RANDBETWEEN(1,100)>=1,RANDBETWEEN(1,100)<=100)",
+    "expected": true
+  },
+  "explanation": "RANDBETWEEN gives whole numbers with both ends included; RAND gives decimals in [0,1) — scale with =RAND()*(max-min)+min. All of these are volatile: they re-roll on every edit or recalculation. To freeze a set of random values, copy the cells and Paste Special → Values only. (Our verification asserts the deterministic part — the bounds — since the values themselves change every run.)"
+}

@@ -1,0 +1,31 @@
+{
+  "slug": "round-time-to-nearest-15-minutes",
+  "title": "How to round time to the nearest 15 minutes",
+  "task": "Snap clock-in/clock-out or log times to the nearest quarter hour for billing and timesheets.",
+  "keywords": [
+    "round time to 15 minutes excel",
+    "round to quarter hour",
+    "timesheet rounding formula",
+    "mround time google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MROUND(A2,TIME(0,15,0))",
+      "note": "CEILING/FLOOR with TIME(0,15,0) round strictly up or down instead."
+    },
+    "google_sheets": {
+      "formula": "=MROUND(A2,TIME(0,15,0))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MROUND(A2,TIME(0,15,0))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(MROUND(TIME(9,7,0),TIME(0,15,0)),\"H:MM\")",
+    "expected": "9:00"
+  },
+  "explanation": "Times are day-fractions, so MROUND with a 15-minute step (TIME(0,15,0)) snaps to the nearest quarter hour: 9:07 is closer to 9:00 than 9:15, so it rounds down; 9:08 would round up. Billing that always rounds in one direction uses CEILING (up) or FLOOR (down) with the same step — and the step is arbitrary: TIME(0,6,0) gives tenth-of-an-hour rounding."
+}
