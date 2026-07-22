@@ -1,0 +1,23 @@
+{
+  "slug": "if-vs-ifs",
+  "title": "IF vs IFS: when to stop nesting",
+  "meta_desc": "Nested IF vs IFS compared: readability, else-defaults, evaluation order, and compatibility across Excel, Google Sheets, and LibreOffice — from executed tests.",
+  "funcs": ["IF", "IFS"],
+  "intro": "IFS exists to kill the nested-IF pyramid: =IF(a,x,IF(b,y,IF(c,z,...))) becomes one flat list of condition/value pairs. The catch: IFS has no built-in \"else\", and it doesn't exist in old Excel.",
+  "table": [
+    {"aspect": "Multiple conditions", "cols": ["By nesting (readable to ~3 levels)", "Flat condition/value pairs"]},
+    {"aspect": "Default / else branch", "cols": ["Yes — the 3rd argument", "No — end with TRUE, <default> as the last pair"]},
+    {"aspect": "What happens with no match", "cols": ["Returns the else value", "#N/A error"]},
+    {"aspect": "Evaluation", "cols": ["Stops at the first true condition", "Same — first true pair wins, order matters"]},
+    {"aspect": "Availability", "cols": ["Universal", "Excel 2019+ / Sheets / LibreOffice (all versions we test)"]}
+  ],
+  "when": [
+    {"func": "IF", "use_when": "One or two conditions, you need an else-branch, or the file must open in Excel 2016 or older."},
+    {"func": "IFS", "use_when": "Three or more tiers (grades, pricing bands, status labels) on modern versions — write pairs in priority order and end with TRUE,\"default\" as a catch-all."}
+  ],
+  "compat_note": "Both execute correctly in every LibreOffice release we test and in Google Sheets. IFS needs Excel 2019 or newer — in older Excel it's #NAME?, so files shared with legacy-Office users should stick to nested IF (or SWITCH for equality tests, same version rules as IFS).",
+  "examples": [
+    {"label": "Nested IF (with else)", "formula": "=IF(A2>=90,\"A\",IF(A2>=80,\"B\",\"C\"))"},
+    {"label": "IFS equivalent (TRUE = else)", "formula": "=IFS(A2>=90,\"A\",A2>=80,\"B\",TRUE,\"C\")"}
+  ]
+}

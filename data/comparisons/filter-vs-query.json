@@ -1,0 +1,25 @@
+{
+  "slug": "filter-vs-query",
+  "title": "FILTER vs QUERY: Sheets' two ways to slice data",
+  "meta_desc": "FILTER vs QUERY in Google Sheets — and what happens to each in Excel and LibreOffice. Portability is the real difference: QUERY exists ONLY in Google Sheets.",
+  "funcs": ["FILTER", "QUERY"],
+  "intro": "In Google Sheets these overlap heavily, so people ask which to learn. The portability answer is decisive: FILTER now exists in Excel and LibreOffice too (verified by execution), while QUERY is Google Sheets-only — a sheet built on QUERY cannot be exported anywhere.",
+  "table": [
+    {"aspect": "Keep rows matching conditions", "cols": ["Yes — its whole job", "Yes (WHERE clause)"]},
+    {"aspect": "Select/reorder specific columns", "cols": ["No — returns whole rows of the range (combine with CHOOSECOLS)", "Yes (SELECT B, D)"]},
+    {"aspect": "Sort, group, aggregate, pivot", "cols": ["No — compose with SORT/UNIQUE/etc.", "Yes — ORDER BY, GROUP BY, PIVOT, SUM()..."]},
+    {"aspect": "Syntax style", "cols": ["Spreadsheet formulas", "Mini-SQL in a text string"]},
+    {"aspect": "Google Sheets", "cols": ["Yes", "Yes"]},
+    {"aspect": "Excel", "cols": ["Yes (365/2021)", "No — #NAME?"]},
+    {"aspect": "LibreOffice (executed result)", "cols": ["Yes since 24.8 (quirks noted on its page)", "No — not implemented"]}
+  ],
+  "when": [
+    {"func": "FILTER", "use_when": "Anything that might ever leave Google Sheets — it's the only one of the two with a future in Excel/LibreOffice. Compose with SORT, UNIQUE, and CHOOSECOLS for most QUERY-like results."},
+    {"func": "QUERY", "use_when": "Sheets-only workbooks where you genuinely need SQL-style grouping, aggregation, or pivoting in one formula — it has no equal for that, but accept the lock-in."}
+  ],
+  "compat_note": "We executed FILTER in real LibreOffice: #NAME? in 24.2, working (with edge-case quirks — see its function page) from 24.8. QUERY is documented only by Google; in Excel and LibreOffice it does not exist at all. Exporting a QUERY-based sheet to .xlsx silently breaks every QUERY cell.",
+  "examples": [
+    {"label": "FILTER (portable)", "formula": "=FILTER(A2:C10,C2:C10>100)"},
+    {"label": "QUERY (Sheets only)", "formula": "=QUERY(A1:C10,\"SELECT A, SUM(C) WHERE C > 100 GROUP BY A\",1)"}
+  ]
+}

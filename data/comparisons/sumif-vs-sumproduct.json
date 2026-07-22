@@ -1,0 +1,26 @@
+{
+  "slug": "sumif-vs-sumproduct",
+  "title": "SUMIF vs SUMPRODUCT: conditional sums two ways",
+  "meta_desc": "SUMIF vs SUMPRODUCT for conditional sums: OR logic, computed conditions, cross-sheet quirks, speed, and compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["SUMIF", "SUMPRODUCT"],
+  "intro": "SUMIF (and SUMIFS) cover the common cases fast; SUMPRODUCT is the escape hatch when conditions get interesting — OR logic, calculations inside the condition, or weighting. Knowing which is which saves both headaches and recalculation time.",
+  "table": [
+    {"aspect": "Simple condition (\"East\", \">100\")", "cols": ["Perfect fit, very fast", "Works but overkill"]},
+    {"aspect": "OR across conditions", "cols": ["Add two SUMIFs (double-counts overlap!)", "Natural: ((a)+(b)>0)* — handles overlap correctly"]},
+    {"aspect": "Condition computed from the data (e.g. MONTH(dates)=7)", "cols": ["No — criteria are literal strings", "Yes — any array expression"]},
+    {"aspect": "Multiply-then-sum (weights, qty x price)", "cols": ["No", "Its original purpose"]},
+    {"aspect": "Wildcards (\"Widg*\")", "cols": ["Yes", "No — use SEARCH/ISNUMBER instead"]},
+    {"aspect": "Speed on large ranges", "cols": ["Optimized, cheap", "Array evaluation — heavier on full columns"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (every version of all three apps we test)"]}
+  ],
+  "when": [
+    {"func": "SUMIF", "use_when": "Single literal condition — and reach for SUMIFS (not SUMPRODUCT) when you just need several ANDed literal conditions."},
+    {"func": "SUMPRODUCT", "use_when": "OR logic, conditions that require computing on the data first (dates by month, text lengths), or genuine sum-of-products like quantity x price."}
+  ],
+  "compat_note": "Both execute correctly in every version of all three apps we test — choose on capability, not compatibility. One portability note: SUMPRODUCT treats TRUE/FALSE arrays as 1/0 when multiplied or double-negated (--), and that behavior is identical across Excel, Sheets, and LibreOffice in our runs.",
+  "examples": [
+    {"label": "SUMIF (single condition)", "formula": "=SUMIF(A2:A10,\"East\",C2:C10)"},
+    {"label": "SUMPRODUCT with OR (East or West, no double-count)", "formula": "=SUMPRODUCT(((A2:A10=\"East\")+(A2:A10=\"West\")>0)*C2:C10)"},
+    {"label": "SUMPRODUCT quantity x price", "formula": "=SUMPRODUCT(B2:B10,C2:C10)"}
+  ]
+}

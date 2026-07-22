@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more</title>
-<meta name="description" content="Head-to-head guides for commonly confused spreadsheet functions: real differences, which to use when, and executed compatibility results for Excel, Google Sheets, and LibreOffice.">
-<link rel="canonical" href="https://canispreadsheet.com/compare/">
-<meta property="og:title" content="Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more">
-<meta property="og:description" content="Head-to-head guides for commonly confused spreadsheet functions: real differences, which to use when, and executed compatibility results for Excel, Google Sheets, and LibreOffice.">
+<title>XLOOKUP vs INDEX/MATCH: is there still a reason to nest?</title>
+<meta name="description" content="XLOOKUP vs INDEX MATCH compared: capability parity, two-dimensional lookups, portability to old versions, and executed compatibility results for all three apps.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/xlookup-vs-index-match.html">
+<meta property="og:title" content="XLOOKUP vs INDEX/MATCH: is there still a reason to nest?">
+<meta property="og:description" content="XLOOKUP vs INDEX MATCH compared: capability parity, two-dimensional lookups, portability to old versions, and executed compatibility results for all three apps.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/compare/">
+<meta property="og:url" content="https://canispreadsheet.com/compare/xlookup-vs-index-match.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,51 +299,65 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<h1>Spreadsheet function comparisons</h1>
-<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (backed by executed tests, not documentation).</p>
-<ul class="quirks-list">
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
+<div class="func-header">
+  <h1>XLOOKUP vs INDEX/MATCH: is there still a reason to nest?</h1>
+</div>
+<p class="lede">XLOOKUP does in one call nearly everything INDEX/MATCH does in two — so the real question is portability: INDEX/MATCH works in every spreadsheet ever shipped; XLOOKUP needs modern versions (LibreOffice 24.8+, verified by execution).</p>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/concatenate-vs-concat-vs-textjoin.html">CONCATENATE vs CONCAT vs TEXTJOIN: which to use?</a></h3>
-  <p style="margin:.3rem 0 0">Three generations of the same idea: CONCATENATE is the legacy function, CONCAT adds range support, and TEXTJOIN adds the two things everyone actually wants...</p>
-</li>
+<h2 class="section-title">The differences at a glance</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th></th><th><a href="../functions/xlookup.html">XLOOKUP</a></th><th><a href="../functions/index.html">INDEX</a></th><th><a href="../functions/match.html">MATCH</a></th></tr></thead>
+<tbody>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/filter-vs-query.html">FILTER vs QUERY: Sheets&#39; two ways to slice data</a></h3>
-  <p style="margin:.3rem 0 0">In Google Sheets these overlap heavily, so people ask which to learn. The portability answer is decisive: FILTER now exists in Excel and LibreOffice too...</p>
-</li>
+<tr><td><strong>Left lookups</strong></td><td>Yes</td><td>Yes</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/if-vs-ifs.html">IF vs IFS: when to stop nesting</a></h3>
-  <p style="margin:.3rem 0 0">IFS exists to kill the nested-IF pyramid: =IF(a,x,IF(b,y,IF(c,z,...))) becomes one flat list of condition/value pairs. The catch: IFS has no built-in...</p>
-</li>
+<tr><td><strong>Built-in if-not-found</strong></td><td>Yes — 4th argument</td><td>No — wrap in IFERROR</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/sumif-vs-sumifs.html">SUMIF vs SUMIFS: what&#39;s the difference?</a></h3>
-  <p style="margin:.3rem 0 0">SUMIFS does everything SUMIF does and handles multiple conditions — but the two put their arguments in OPPOSITE orders, which is the bug most people...</p>
-</li>
+<tr><td><strong>Two-dimensional lookup (row AND column)</strong></td><td>Nest two XLOOKUPs</td><td>Classic INDEX(range,MATCH(),MATCH()) — arguably cleaner</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/sumif-vs-sumproduct.html">SUMIF vs SUMPRODUCT: conditional sums two ways</a></h3>
-  <p style="margin:.3rem 0 0">SUMIF (and SUMIFS) cover the common cases fast; SUMPRODUCT is the escape hatch when conditions get interesting — OR logic, calculations inside the...</p>
-</li>
+<tr><td><strong>Search from end / binary search</strong></td><td>Built-in modes</td><td>MATCH is ascending-only (approximate)</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/vlookup-vs-index-match.html">VLOOKUP vs INDEX/MATCH: which is better?</a></h3>
-  <p style="margin:.3rem 0 0">INDEX/MATCH was the power user&#39;s lookup long before XLOOKUP existed, and it still matters because it runs in every spreadsheet app and every version — while...</p>
-</li>
+<tr><td><strong>Return several columns at once</strong></td><td>Yes (spills)</td><td>INDEX with 0 as row/col can, awkwardly</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/vlookup-vs-xlookup.html">VLOOKUP vs XLOOKUP: which should you use?</a></h3>
-  <p style="margin:.3rem 0 0">XLOOKUP is VLOOKUP&#39;s modern replacement — but VLOOKUP still wins on one thing: it runs everywhere, including old Excel versions and every LibreOffice...</p>
-</li>
+<tr><td><strong>Old Excel (2019 and earlier)</strong></td><td>No</td><td>Yes</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/xlookup-vs-index-match.html">XLOOKUP vs INDEX/MATCH: is there still a reason to nest?</a></h3>
-  <p style="margin:.3rem 0 0">XLOOKUP does in one call nearly everything INDEX/MATCH does in two — so the real question is portability: INDEX/MATCH works in every spreadsheet ever...</p>
-</li>
+<tr><td><strong>LibreOffice (executed result)</strong></td><td>24.8+ (#NAME? in 24.2)</td><td>Every version we test</td></tr>
+
+</tbody>
+</table>
+</div>
+
+<h2 class="section-title">Which should you use?</h2>
+<ul>
+
+<li><strong>XLOOKUP</strong> &mdash; Modern-version environments — simpler to read, safer defaults, built-in not-found handling.</li>
+
+<li><strong>INDEX/MATCH</strong> &mdash; Maximum portability (old Excel, LibreOffice 24.2, unknown recipients), or two-dimensional lookups where INDEX with two MATCHes reads naturally.</li>
 
 </ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>Executed results: INDEX and MATCH work in every LibreOffice release we test; XLOOKUP first works in LibreOffice 24.8 and returns #NAME? in 24.2. All are available in current Google Sheets and Excel 365; only INDEX/MATCH exists in Excel 2019 and earlier.</p>
+
+<h2 class="section-title">Example formulas</h2>
+<div class="table-scroll">
+<table class="matrix">
+<tbody>
+
+<tr><td>XLOOKUP</td><td><code>=XLOOKUP(&#34;cherry&#34;,A2:A10,B2:B10,&#34;Not found&#34;)</code></td></tr>
+
+<tr><td>INDEX/MATCH equivalent</td><td><code>=IFERROR(INDEX(B2:B10,MATCH(&#34;cherry&#34;,A2:A10,0)),&#34;Not found&#34;)</code></td></tr>
+
+<tr><td>Two-dimensional INDEX/MATCH/MATCH</td><td><code>=INDEX(B2:E10,MATCH(&#34;cherry&#34;,A2:A10,0),MATCH(&#34;Q3&#34;,B1:E1,0))</code></td></tr>
+
+</tbody>
+</table>
+</div>
+
+<p>Full per-version details on each function page:
+<a href="../functions/xlookup.html">XLOOKUP</a> &middot; <a href="../functions/index.html">INDEX</a> &middot; <a href="../functions/match.html">MATCH</a>.</p>
 
 <aside class="promo-card">
   <div>

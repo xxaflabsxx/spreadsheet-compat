@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more</title>
-<meta name="description" content="Head-to-head guides for commonly confused spreadsheet functions: real differences, which to use when, and executed compatibility results for Excel, Google Sheets, and LibreOffice.">
-<link rel="canonical" href="https://canispreadsheet.com/compare/">
-<meta property="og:title" content="Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more">
-<meta property="og:description" content="Head-to-head guides for commonly confused spreadsheet functions: real differences, which to use when, and executed compatibility results for Excel, Google Sheets, and LibreOffice.">
+<title>IF vs IFS: when to stop nesting</title>
+<meta name="description" content="Nested IF vs IFS compared: readability, else-defaults, evaluation order, and compatibility across Excel, Google Sheets, and LibreOffice — from executed tests.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/if-vs-ifs.html">
+<meta property="og:title" content="IF vs IFS: when to stop nesting">
+<meta property="og:description" content="Nested IF vs IFS compared: readability, else-defaults, evaluation order, and compatibility across Excel, Google Sheets, and LibreOffice — from executed tests.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/compare/">
+<meta property="og:url" content="https://canispreadsheet.com/compare/if-vs-ifs.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,51 +299,59 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<h1>Spreadsheet function comparisons</h1>
-<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (backed by executed tests, not documentation).</p>
-<ul class="quirks-list">
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
+<div class="func-header">
+  <h1>IF vs IFS: when to stop nesting</h1>
+</div>
+<p class="lede">IFS exists to kill the nested-IF pyramid: =IF(a,x,IF(b,y,IF(c,z,...))) becomes one flat list of condition/value pairs. The catch: IFS has no built-in &#34;else&#34;, and it doesn&#39;t exist in old Excel.</p>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/concatenate-vs-concat-vs-textjoin.html">CONCATENATE vs CONCAT vs TEXTJOIN: which to use?</a></h3>
-  <p style="margin:.3rem 0 0">Three generations of the same idea: CONCATENATE is the legacy function, CONCAT adds range support, and TEXTJOIN adds the two things everyone actually wants...</p>
-</li>
+<h2 class="section-title">The differences at a glance</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th></th><th><a href="../functions/if.html">IF</a></th><th><a href="../functions/ifs.html">IFS</a></th></tr></thead>
+<tbody>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/filter-vs-query.html">FILTER vs QUERY: Sheets&#39; two ways to slice data</a></h3>
-  <p style="margin:.3rem 0 0">In Google Sheets these overlap heavily, so people ask which to learn. The portability answer is decisive: FILTER now exists in Excel and LibreOffice too...</p>
-</li>
+<tr><td><strong>Multiple conditions</strong></td><td>By nesting (readable to ~3 levels)</td><td>Flat condition/value pairs</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/if-vs-ifs.html">IF vs IFS: when to stop nesting</a></h3>
-  <p style="margin:.3rem 0 0">IFS exists to kill the nested-IF pyramid: =IF(a,x,IF(b,y,IF(c,z,...))) becomes one flat list of condition/value pairs. The catch: IFS has no built-in...</p>
-</li>
+<tr><td><strong>Default / else branch</strong></td><td>Yes — the 3rd argument</td><td>No — end with TRUE, &lt;default&gt; as the last pair</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/sumif-vs-sumifs.html">SUMIF vs SUMIFS: what&#39;s the difference?</a></h3>
-  <p style="margin:.3rem 0 0">SUMIFS does everything SUMIF does and handles multiple conditions — but the two put their arguments in OPPOSITE orders, which is the bug most people...</p>
-</li>
+<tr><td><strong>What happens with no match</strong></td><td>Returns the else value</td><td>#N/A error</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/sumif-vs-sumproduct.html">SUMIF vs SUMPRODUCT: conditional sums two ways</a></h3>
-  <p style="margin:.3rem 0 0">SUMIF (and SUMIFS) cover the common cases fast; SUMPRODUCT is the escape hatch when conditions get interesting — OR logic, calculations inside the...</p>
-</li>
+<tr><td><strong>Evaluation</strong></td><td>Stops at the first true condition</td><td>Same — first true pair wins, order matters</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/vlookup-vs-index-match.html">VLOOKUP vs INDEX/MATCH: which is better?</a></h3>
-  <p style="margin:.3rem 0 0">INDEX/MATCH was the power user&#39;s lookup long before XLOOKUP existed, and it still matters because it runs in every spreadsheet app and every version — while...</p>
-</li>
+<tr><td><strong>Availability</strong></td><td>Universal</td><td>Excel 2019+ / Sheets / LibreOffice (all versions we test)</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/vlookup-vs-xlookup.html">VLOOKUP vs XLOOKUP: which should you use?</a></h3>
-  <p style="margin:.3rem 0 0">XLOOKUP is VLOOKUP&#39;s modern replacement — but VLOOKUP still wins on one thing: it runs everywhere, including old Excel versions and every LibreOffice...</p>
-</li>
+</tbody>
+</table>
+</div>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/xlookup-vs-index-match.html">XLOOKUP vs INDEX/MATCH: is there still a reason to nest?</a></h3>
-  <p style="margin:.3rem 0 0">XLOOKUP does in one call nearly everything INDEX/MATCH does in two — so the real question is portability: INDEX/MATCH works in every spreadsheet ever...</p>
-</li>
+<h2 class="section-title">Which should you use?</h2>
+<ul>
+
+<li><strong>IF</strong> &mdash; One or two conditions, you need an else-branch, or the file must open in Excel 2016 or older.</li>
+
+<li><strong>IFS</strong> &mdash; Three or more tiers (grades, pricing bands, status labels) on modern versions — write pairs in priority order and end with TRUE,&#34;default&#34; as a catch-all.</li>
 
 </ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>Both execute correctly in every LibreOffice release we test and in Google Sheets. IFS needs Excel 2019 or newer — in older Excel it&#39;s #NAME?, so files shared with legacy-Office users should stick to nested IF (or SWITCH for equality tests, same version rules as IFS).</p>
+
+<h2 class="section-title">Example formulas</h2>
+<div class="table-scroll">
+<table class="matrix">
+<tbody>
+
+<tr><td>Nested IF (with else)</td><td><code>=IF(A2&gt;=90,&#34;A&#34;,IF(A2&gt;=80,&#34;B&#34;,&#34;C&#34;))</code></td></tr>
+
+<tr><td>IFS equivalent (TRUE = else)</td><td><code>=IFS(A2&gt;=90,&#34;A&#34;,A2&gt;=80,&#34;B&#34;,TRUE,&#34;C&#34;)</code></td></tr>
+
+</tbody>
+</table>
+</div>
+
+<p>Full per-version details on each function page:
+<a href="../functions/if.html">IF</a> &middot; <a href="../functions/ifs.html">IFS</a>.</p>
 
 <aside class="promo-card">
   <div>

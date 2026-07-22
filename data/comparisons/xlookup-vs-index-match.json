@@ -1,0 +1,26 @@
+{
+  "slug": "xlookup-vs-index-match",
+  "title": "XLOOKUP vs INDEX/MATCH: is there still a reason to nest?",
+  "meta_desc": "XLOOKUP vs INDEX MATCH compared: capability parity, two-dimensional lookups, portability to old versions, and executed compatibility results for all three apps.",
+  "funcs": ["XLOOKUP", "INDEX", "MATCH"],
+  "intro": "XLOOKUP does in one call nearly everything INDEX/MATCH does in two — so the real question is portability: INDEX/MATCH works in every spreadsheet ever shipped; XLOOKUP needs modern versions (LibreOffice 24.8+, verified by execution).",
+  "table": [
+    {"aspect": "Left lookups", "cols": ["Yes", "Yes"]},
+    {"aspect": "Built-in if-not-found", "cols": ["Yes — 4th argument", "No — wrap in IFERROR"]},
+    {"aspect": "Two-dimensional lookup (row AND column)", "cols": ["Nest two XLOOKUPs", "Classic INDEX(range,MATCH(),MATCH()) — arguably cleaner"]},
+    {"aspect": "Search from end / binary search", "cols": ["Built-in modes", "MATCH is ascending-only (approximate)"]},
+    {"aspect": "Return several columns at once", "cols": ["Yes (spills)", "INDEX with 0 as row/col can, awkwardly"]},
+    {"aspect": "Old Excel (2019 and earlier)", "cols": ["No", "Yes"]},
+    {"aspect": "LibreOffice (executed result)", "cols": ["24.8+ (#NAME? in 24.2)", "Every version we test"]}
+  ],
+  "when": [
+    {"func": "XLOOKUP", "use_when": "Modern-version environments — simpler to read, safer defaults, built-in not-found handling."},
+    {"func": "INDEX/MATCH", "use_when": "Maximum portability (old Excel, LibreOffice 24.2, unknown recipients), or two-dimensional lookups where INDEX with two MATCHes reads naturally."}
+  ],
+  "compat_note": "Executed results: INDEX and MATCH work in every LibreOffice release we test; XLOOKUP first works in LibreOffice 24.8 and returns #NAME? in 24.2. All are available in current Google Sheets and Excel 365; only INDEX/MATCH exists in Excel 2019 and earlier.",
+  "examples": [
+    {"label": "XLOOKUP", "formula": "=XLOOKUP(\"cherry\",A2:A10,B2:B10,\"Not found\")"},
+    {"label": "INDEX/MATCH equivalent", "formula": "=IFERROR(INDEX(B2:B10,MATCH(\"cherry\",A2:A10,0)),\"Not found\")"},
+    {"label": "Two-dimensional INDEX/MATCH/MATCH", "formula": "=INDEX(B2:E10,MATCH(\"cherry\",A2:A10,0),MATCH(\"Q3\",B1:E1,0))"}
+  ]
+}
