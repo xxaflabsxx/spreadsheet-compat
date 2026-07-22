@@ -1,0 +1,23 @@
+{
+  "slug": "concatenate-vs-concat-vs-textjoin",
+  "title": "CONCATENATE vs CONCAT vs TEXTJOIN: which to use?",
+  "meta_desc": "CONCATENATE vs CONCAT vs TEXTJOIN compared: ranges, delimiters, skipping blanks, and verified compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["CONCATENATE", "CONCAT", "TEXTJOIN"],
+  "intro": "Three generations of the same idea: CONCATENATE is the legacy function, CONCAT adds range support, and TEXTJOIN adds the two things everyone actually wants — a delimiter and blank-skipping. (And the & operator quietly beats all three for two or three values.)",
+  "table": [
+    {"aspect": "Accepts whole ranges (A2:A10)", "cols": ["No — cell by cell", "Yes", "Yes"]},
+    {"aspect": "Delimiter between values", "cols": ["Manual — you type every separator", "No", "Yes — first argument"]},
+    {"aspect": "Skip empty cells", "cols": ["No", "No", "Yes — second argument TRUE"]},
+    {"aspect": "Availability", "cols": ["Everywhere (legacy, kept for compatibility)", "Excel 2016+ / Sheets / LibreOffice", "Excel 2016+ / Sheets / LibreOffice (verified in every LO version we test)"]}
+  ],
+  "when": [
+    {"func": "CONCATENATE", "use_when": "Only when a file must open in genuinely ancient Excel (2013 or older). Otherwise there is no reason to start using it today — & is shorter."},
+    {"func": "CONCAT", "use_when": "You want to mash a range together with NO separator, e.g. reassembling split digits."},
+    {"func": "TEXTJOIN", "use_when": "Almost every real join: lists with commas, names with spaces, skipping blanks — =TEXTJOIN(\", \",TRUE,A2:A10) is the one to remember."}
+  ],
+  "compat_note": "We executed CONCATENATE and TEXTJOIN in real LibreOffice across four releases — both work in all of them (TEXTJOIN needs the _xlfn storage prefix in raw .xlsx files, a file-format quirk, not a support gap). In Google Sheets all three are available.",
+  "examples": [
+    {"label": "The & operator (best for a few values)", "formula": "=A2&\" \"&B2"},
+    {"label": "TEXTJOIN (delimiter + skip blanks)", "formula": "=TEXTJOIN(\", \",TRUE,A2:A10)"}
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "slug": "sumif-vs-sumifs",
+  "title": "SUMIF vs SUMIFS: what's the difference?",
+  "meta_desc": "SUMIF vs SUMIFS: the argument-order trap, when you need each, and verified compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["SUMIF", "SUMIFS"],
+  "intro": "SUMIFS does everything SUMIF does and handles multiple conditions — but the two put their arguments in OPPOSITE orders, which is the bug most people actually hit when switching between them.",
+  "table": [
+    {"aspect": "Number of conditions", "cols": ["Exactly one", "One or many (all ANDed)"]},
+    {"aspect": "Argument order", "cols": ["criteria range, criteria, THEN sum range (last)", "sum range FIRST, then range/criteria pairs"]},
+    {"aspect": "Sum range optional?", "cols": ["Yes — omit it to sum the criteria range itself", "No — always explicit"]},
+    {"aspect": "Wildcards and comparisons (\">100\", \"Widg*\")", "cols": ["Yes", "Yes"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (Excel 2007+, all Sheets & LibreOffice versions we test)"]}
+  ],
+  "when": [
+    {"func": "SUMIF", "use_when": "One condition and you're summing the same column you're testing — =SUMIF(A:A,\">100\") is the shortest form."},
+    {"func": "SUMIFS", "use_when": "Everything else. Even with one condition, using SUMIFS consistently avoids the argument-order flip when you later add a second condition."}
+  ],
+  "compat_note": "Both execute correctly in every version of all three apps we test — this choice is purely about syntax and conditions, not compatibility. The same relationship holds for COUNTIF/COUNTIFS and AVERAGEIF/AVERAGEIFS.",
+  "examples": [
+    {"label": "SUMIF (sum range LAST)", "formula": "=SUMIF(A2:A10,\"East\",C2:C10)"},
+    {"label": "SUMIFS (sum range FIRST, two conditions)", "formula": "=SUMIFS(C2:C10,A2:A10,\"East\",B2:B10,\"Widget\")"}
+  ]
+}

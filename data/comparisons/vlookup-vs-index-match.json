@@ -1,0 +1,23 @@
+{
+  "slug": "vlookup-vs-index-match",
+  "title": "VLOOKUP vs INDEX/MATCH: which is better?",
+  "meta_desc": "VLOOKUP vs INDEX MATCH compared: left lookups, robustness to column inserts, speed, readability, and compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["VLOOKUP", "INDEX", "MATCH"],
+  "intro": "INDEX/MATCH was the power user's lookup long before XLOOKUP existed, and it still matters because it runs in every spreadsheet app and every version — while fixing VLOOKUP's worst habits.",
+  "table": [
+    {"aspect": "Look left of the key column", "cols": ["No", "Yes — MATCH and INDEX ranges are independent"]},
+    {"aspect": "Survives inserting/deleting columns", "cols": ["No — the column number goes stale", "Yes — ranges adjust automatically"]},
+    {"aspect": "Readability", "cols": ["One compact call", "Two nested calls — harder for beginners"]},
+    {"aspect": "Speed on large data", "cols": ["Scans the whole table width", "Can be faster — only touches two columns"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal — works in every version of all three apps"]}
+  ],
+  "when": [
+    {"func": "VLOOKUP", "use_when": "Quick lookups in simple, stable tables where the key is already the first column and nobody inserts columns."},
+    {"func": "INDEX/MATCH", "use_when": "The sheet must work for users on ANY version (including LibreOffice 24.2 and old Excel where XLOOKUP doesn't exist), you need a left-lookup, or the table's columns change over time."}
+  ],
+  "compat_note": "All three functions execute correctly in every LibreOffice release we test, all Excel versions, and Google Sheets — INDEX/MATCH is the most portable robust lookup that exists. If everyone's on a modern version, XLOOKUP does everything INDEX/MATCH does with one call.",
+  "examples": [
+    {"label": "VLOOKUP (key must be column 1)", "formula": "=VLOOKUP(\"cherry\",A2:B10,2,FALSE)"},
+    {"label": "INDEX/MATCH equivalent (works even if B is left of A)", "formula": "=INDEX(B2:B10,MATCH(\"cherry\",A2:A10,0))"}
+  ]
+}

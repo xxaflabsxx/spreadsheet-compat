@@ -656,6 +656,7 @@ BASE_TMPL = """<!doctype html>
     <nav class="site-nav">
       <a href="{{ rel }}index.html">Functions</a>
       <a href="{{ rel }}how-to/">How-to</a>
+      <a href="{{ rel }}compare/">Compare</a>
       <a href="{{ rel }}checker.html">Checker</a>
       <a href="{{ rel }}libreoffice-version-support.html">LO&nbsp;versions</a>
       <a href="{{ rel }}quirks.html">Quirks</a>
@@ -1044,6 +1045,69 @@ RECIPE_TMPL = """{% extends "base.html" %}
 """
 
 
+COMPARISON_TMPL = """{% extends "base.html" %}
+{% block content %}
+<a class="back-link" href="{{ rel }}compare/">&larr; All comparisons</a>
+<div class="func-header">
+  <h1>{{ c.title }}</h1>
+</div>
+<p class="lede">{{ c.intro }}</p>
+
+<h2 class="section-title">The differences at a glance</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th></th>{% for f in c.funcs %}<th><a href="{{ rel }}functions/{{ f|lower|replace('/','-') }}.html">{{ f }}</a></th>{% endfor %}</tr></thead>
+<tbody>
+{% for row in c.table %}
+<tr><td><strong>{{ row.aspect }}</strong></td>{% for col in row.cols %}<td>{{ col }}</td>{% endfor %}</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2 class="section-title">Which should you use?</h2>
+<ul>
+{% for w in c.when %}
+<li><strong>{{ w.func }}</strong> &mdash; {{ w.use_when }}</li>
+{% endfor %}
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>{{ c.compat_note }}</p>
+
+<h2 class="section-title">Example formulas</h2>
+<div class="table-scroll">
+<table class="matrix">
+<tbody>
+{% for ex in c.examples %}
+<tr><td>{{ ex.label }}</td><td><code>{{ ex.formula }}</code></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<p>Full per-version details on each function page:
+{% for f in c.funcs %}<a href="{{ rel }}functions/{{ f|lower|replace('/','-') }}.html">{{ f }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %}.</p>
+{% endblock %}
+"""
+
+
+COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Spreadsheet function comparisons</h1>
+<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (backed by executed tests, not documentation).</p>
+<ul class="quirks-list">
+{% for c in comparisons %}
+<li class="quirk-entry">
+  <h3><a href="{{ rel }}compare/{{ c.slug }}.html">{{ c.title }}</a></h3>
+  <p style="margin:.3rem 0 0">{{ c.intro|truncate(160) }}</p>
+</li>
+{% endfor %}
+</ul>
+{% endblock %}
+"""
+
+
 CHECKER_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet formula compatibility checker</h1>
@@ -1166,6 +1230,13 @@ def load_recipes():
     return recs
 
 
+def load_comparisons():
+    cdir = DATA_DIR / "comparisons"
+    if not cdir.exists():
+        return []
+    return [json.loads(p.read_text()) for p in sorted(cdir.glob("*.json"))]
+
+
 def build_env():
     env = Environment(
         loader=DictLoader(
@@ -1176,6 +1247,8 @@ def build_env():
                 "quirks.html": QUIRKS_TMPL,
                 "recipe.html": RECIPE_TMPL,
                 "recipe_index.html": RECIPE_INDEX_TMPL,
+                "comparison.html": COMPARISON_TMPL,
+                "comparison_index.html": COMPARISON_INDEX_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
@@ -1376,6 +1449,40 @@ def main():
             )
             sitemap_urls.append(
                 {"loc": BASE_URL + f"how-to/{rc['slug']}.html", "lastmod": build_date}
+            )
+
+    # ---- Function comparison pages ----
+    comparisons = load_comparisons()
+    if comparisons:
+        (OUT_DIR / "compare").mkdir(parents=True, exist_ok=True)
+        ictx = common_ctx(rel="../")
+        ictx.update(
+            page_title="Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more",
+            meta_description=(
+                "Head-to-head guides for commonly confused spreadsheet functions: real "
+                "differences, which to use when, and executed compatibility results for "
+                "Excel, Google Sheets, and LibreOffice."
+            ),
+            canonical=BASE_URL + "compare/",
+            comparisons=comparisons,
+        )
+        (OUT_DIR / "compare" / "index.html").write_text(
+            env.get_template("comparison_index.html").render(**ictx)
+        )
+        sitemap_urls.append({"loc": BASE_URL + "compare/", "lastmod": build_date})
+        for c in comparisons:
+            cx = common_ctx(rel="../")
+            cx.update(
+                page_title=c["title"],
+                meta_description=c["meta_desc"],
+                canonical=BASE_URL + f"compare/{c['slug']}.html",
+                c=c,
+            )
+            (OUT_DIR / "compare" / f"{c['slug']}.html").write_text(
+                env.get_template("comparison.html").render(**cx)
+            )
+            sitemap_urls.append(
+                {"loc": BASE_URL + f"compare/{c['slug']}.html", "lastmod": build_date}
             )
 
     # ---- Formula compatibility checker (client-side tool) ----
