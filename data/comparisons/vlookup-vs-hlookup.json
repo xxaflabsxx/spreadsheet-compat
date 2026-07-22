@@ -1,0 +1,25 @@
+{
+  "slug": "vlookup-vs-hlookup",
+  "title": "VLOOKUP vs HLOOKUP: vertical or horizontal?",
+  "meta_desc": "VLOOKUP vs HLOOKUP: when data runs down vs across, why HLOOKUP is rare, and what replaces both. Compatibility verified across Excel, Google Sheets, LibreOffice.",
+  "funcs": ["VLOOKUP", "HLOOKUP"],
+  "intro": "They're the same function rotated 90°: VLOOKUP searches the first COLUMN and reads across; HLOOKUP searches the first ROW and reads down. VLOOKUP dominates because data almost always grows downward — but when you meet a horizontal table, HLOOKUP (or better, XLOOKUP) is the answer.",
+  "table": [
+    {"aspect": "Searches", "cols": ["First column of the range", "First row of the range"]},
+    {"aspect": "Returns from", "cols": ["A column N to the right", "A row N below"]},
+    {"aspect": "Typical data shape", "cols": ["Records as rows (normal tables)", "Time periods or attributes as columns"]},
+    {"aspect": "Same pitfalls", "cols": ["Approximate-match default, positional index", "Identical — pass FALSE, count rows carefully"]},
+    {"aspect": "Modern replacement", "cols": ["XLOOKUP (any direction)", "XLOOKUP works sideways too — one function replaces both"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (every version of all three apps we test)"]}
+  ],
+  "when": [
+    {"func": "VLOOKUP", "use_when": "Normal record-per-row tables — the 95% case."},
+    {"func": "HLOOKUP", "use_when": "Header-per-column layouts like months across the top (budget sheets, quarter columns) that you can't restructure. If you can, TRANSPOSE the data or use XLOOKUP instead."}
+  ],
+  "compat_note": "Both execute correctly in every version of Excel, Google Sheets, and LibreOffice we test — they're part of the ancient core. XLOOKUP, which replaces both directions, needs Excel 2021+/365, current Sheets, or LibreOffice 24.8+ (verified: #NAME? in LO 24.2).",
+  "examples": [
+    {"label": "VLOOKUP (data in rows)", "formula": "=VLOOKUP(\"cherry\",A2:B10,2,FALSE)"},
+    {"label": "HLOOKUP (months across the top)", "formula": "=HLOOKUP(\"Mar\",B1:M5,3,FALSE)"},
+    {"label": "XLOOKUP (replaces both)", "formula": "=XLOOKUP(\"Mar\",B1:M1,B3:M3)"}
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "slug": "unique-function-vs-remove-duplicates",
+  "title": "UNIQUE function vs Remove Duplicates: live formula or one-time cleanup?",
+  "meta_desc": "UNIQUE vs the Remove Duplicates menu command: live updating vs destructive cleanup, version requirements (UNIQUE needs LibreOffice 24.8+), and when each wins.",
+  "funcs": ["UNIQUE"],
+  "intro": "Same goal, opposite philosophies: the Remove Duplicates menu command edits your data once and destructively; the UNIQUE function leaves the source untouched and produces a live deduplicated view that updates itself. Which one you want depends on whether the duplicates are noise to delete or structure to summarize.",
+  "table": [
+    {"aspect": "Type", "cols": ["Formula — spills a live result"]},
+    {"aspect": "Source data", "cols": ["Untouched; result updates when the source changes"]},
+    {"aspect": "Menu equivalent", "cols": ["Data → Remove Duplicates (Excel & Sheets built-in; LibreOffice needs Standard Filter with 'no duplications' — there's no one-click command)"]},
+    {"aspect": "Availability (executed)", "cols": ["Excel 365/2021, Google Sheets, LibreOffice 24.8+ (#NAME? in 24.2 — verified)"]},
+    {"aspect": "Extras", "cols": ["exactly_once mode returns values appearing only once — the menu command can't do that"]}
+  ],
+  "when": [
+    {"func": "UNIQUE (formula)", "use_when": "Dashboards, dropdown sources, and any dedup that must stay current as data grows — plus counting distinct values (wrap in ROWS/COUNTA)."},
+    {"func": "Remove Duplicates (menu)", "use_when": "One-time cleanup of imported data where the duplicates are genuinely junk — and the only easy option in old Excel or LibreOffice 24.2 where UNIQUE doesn't exist (LibreOffice: Data → More Filters → Standard Filter, check 'No duplications')."}
+  ],
+  "compat_note": "We executed UNIQUE across four LibreOffice releases: #NAME? in 24.2, working from 24.8 onward; it's in Excel 365/2021 and all current Google Sheets. The menu route exists everywhere in some form, so it remains the universal fallback.",
+  "examples": [
+    {"label": "Live deduplicated list", "formula": "=UNIQUE(A2:A100)"},
+    {"label": "Distinct count", "formula": "=ROWS(UNIQUE(A2:A100))"},
+    {"label": "Values that appear exactly once", "formula": "=UNIQUE(A2:A100,FALSE,TRUE)"}
+  ]
+}

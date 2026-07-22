@@ -1,0 +1,24 @@
+{
+  "slug": "sum-vs-subtotal",
+  "title": "SUM vs SUBTOTAL: why your filtered totals are wrong",
+  "meta_desc": "SUM vs SUBTOTAL: filtered and hidden rows, nested totals that don't double-count, the 9 vs 109 codes, and compatibility across Excel, Google Sheets, LibreOffice.",
+  "funcs": ["SUM", "SUBTOTAL"],
+  "intro": "Filter a table and SUM keeps adding the rows you just hid — that's the bug that leads people here. SUBTOTAL(9,...) counts only what's visible after filtering, and it has a second superpower: SUBTOTALs ignore other SUBTOTALs, so section totals plus a grand total never double-count.",
+  "table": [
+    {"aspect": "Rows hidden by a FILTER", "cols": ["Still included", "Excluded (any function code)"]},
+    {"aspect": "Rows hidden manually", "cols": ["Still included", "Code 9: included · Code 109: excluded"]},
+    {"aspect": "Ignores other subtotals in its range", "cols": ["No — double-counts them", "Yes — nested totals just work"]},
+    {"aspect": "Other aggregates", "cols": ["SUM only", "11 functions by code: 1=AVERAGE, 2=COUNT, 3=COUNTA, 4=MAX, 5=MIN, 9=SUM..."]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (every version of all three apps we test)"]}
+  ],
+  "when": [
+    {"func": "SUM", "use_when": "Fixed totals that should never change with filtering — invoice math, closed reports."},
+    {"func": "SUBTOTAL", "use_when": "Anything users filter (SUBTOTAL(9,...) — it's what the Total Row in Excel/Sheets tables inserts), or sheets with section subtotals feeding a grand total. Use 109 when rows are hidden by hand rather than by filter."}
+  ],
+  "compat_note": "Both execute correctly in every version of all three apps we test, including the 100-series codes. AGGREGATE (Excel/LibreOffice, not Google Sheets) extends the idea with error-ignoring — that one IS a portability decision.",
+  "examples": [
+    {"label": "Filter-aware total", "formula": "=SUBTOTAL(9,C2:C100)"},
+    {"label": "Also ignore manually hidden rows", "formula": "=SUBTOTAL(109,C2:C100)"},
+    {"label": "Visible-row count", "formula": "=SUBTOTAL(3,A2:A100)"}
+  ]
+}

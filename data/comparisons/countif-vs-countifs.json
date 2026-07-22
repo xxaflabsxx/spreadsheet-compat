@@ -1,0 +1,23 @@
+{
+  "slug": "countif-vs-countifs",
+  "title": "COUNTIF vs COUNTIFS: one letter, one big difference",
+  "meta_desc": "COUNTIF vs COUNTIFS: multiple criteria, argument patterns, OR-counting, and verified compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["COUNTIF", "COUNTIFS"],
+  "intro": "COUNTIFS is COUNTIF's multi-condition sibling — and unlike the SUMIF/SUMIFS pair, the argument order doesn't flip, so the safest habit is simply: always use COUNTIFS.",
+  "table": [
+    {"aspect": "Number of conditions", "cols": ["Exactly one", "One or many (all ANDed)"]},
+    {"aspect": "Argument pattern", "cols": ["range, criteria", "range1, criteria1, range2, criteria2, ..."]},
+    {"aspect": "Wildcards and comparisons", "cols": ["Yes (\"Widg*\", \">100\")", "Yes, per condition"]},
+    {"aspect": "OR counting", "cols": ["Add COUNTIFs (beware overlap)", "Same — COUNTIFS is AND-only; use SUMPRODUCT for true OR"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (Excel 2007+, every Sheets & LibreOffice version we test)"]}
+  ],
+  "when": [
+    {"func": "COUNTIF", "use_when": "Legacy sheets that already use it — there's no functional advantage over a one-pair COUNTIFS."},
+    {"func": "COUNTIFS", "use_when": "Everything new. Same syntax for one condition or five, no relearning when requirements grow."}
+  ],
+  "compat_note": "Both execute correctly in every version of all three apps we test. One shared quirk to know: criteria ranges must be the same size, and text criteria over ~255 characters fail in Excel — neither limit differs between the two functions.",
+  "examples": [
+    {"label": "COUNTIF", "formula": "=COUNTIF(A2:A100,\"East\")"},
+    {"label": "COUNTIFS (two conditions)", "formula": "=COUNTIFS(A2:A100,\"East\",B2:B100,\">100\")"}
+  ]
+}
