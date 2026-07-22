@@ -1,0 +1,36 @@
+{
+  "slug": "sum-values-by-month",
+  "title": "How to sum values by month",
+  "task": "Total a column of dated amounts for one month — monthly spend, sales, or hours.",
+  "keywords": [
+    "sum by month excel",
+    "sumifs month of date",
+    "monthly total from dates google sheets",
+    "sumproduct month"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT((MONTH(A2:A5)=7)*(YEAR(A2:A5)=2026)*B2:B5)",
+      "note": "Or SUMIFS with date bounds: =SUMIFS(B:B,A:A,\">=\"&DATE(2026,7,1),A:A,\"<\"&DATE(2026,8,1))."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT((MONTH(A2:A5)=7)*(YEAR(A2:A5)=2026)*B2:B5)",
+      "note": "Identical; the SUMIFS date-bounds form also works."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT((MONTH(A2:A5)=7)*(YEAR(A2:A5)=2026)*B2:B5)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 46204, "B2": 100,
+      "A3": 46188, "B3": 50,
+      "A4": 46215, "B4": 25,
+      "A5": 46240, "B5": 10
+    },
+    "formula": "=SUMPRODUCT((MONTH(A2:A5)=7)*B2:B5)",
+    "expected": 125
+  },
+  "explanation": "MONTH extracts 1–12 from each date, the comparison makes a 1/0 array, and SUMPRODUCT uses it to keep only July rows: here the two July dates carry 100 + 25 = 125. (In the verified example the dates are raw serial numbers — 46204 is July 1, 2026 — which is exactly what a formatted date cell contains underneath.) Include the YEAR test when data spans years, or use the SUMIFS date-range form, which is faster on big columns and doesn't need array evaluation."
+}

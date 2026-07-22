@@ -1,0 +1,34 @@
+{
+  "slug": "add-tax-to-a-price",
+  "title": "How to add tax to a price (and back it out again)",
+  "task": "Compute a price including sales tax or VAT — and recover the pre-tax amount from a total.",
+  "keywords": [
+    "add sales tax excel",
+    "vat formula",
+    "price including tax google sheets",
+    "remove vat from total"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=ROUND(A2*(1+B2),2)",
+      "note": "A2=net price, B2=tax rate (e.g. 9.5%). To back out: =ROUND(A2/(1+B2),2)."
+    },
+    "google_sheets": {
+      "formula": "=ROUND(A2*(1+B2),2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=ROUND(A2*(1+B2),2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 80,
+      "B2": 0.095
+    },
+    "formula": "=ROUND(A2*(1+B2),2)",
+    "expected": 87.6
+  },
+  "explanation": "Adding tax is multiplying by (1 + rate): $80 at 9.5% is 80 × 1.095 = $87.60. Going the other way, divide — don't multiply by (1 − rate): a $87.60 total at 9.5% is 87.60 / 1.095 = $80.00, whereas 87.60 × 0.905 gives the wrong $79.28. That asymmetry is the classic VAT-removal mistake. ROUND to 2 decimals in the formula so invoice lines sum to the displayed total."
+}

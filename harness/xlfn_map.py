@@ -69,6 +69,8 @@ _XLFN_FUNCTIONS = {
     # Source: XlsxWriter's "Working with Formulas" future-function table.
     "STDEV.S", "STDEV.P", "VAR.S",
     "MODE.SNGL", "MODE.MULT",
+    "FORECAST.LINEAR", "FORECAST.ETS", "FORECAST.ETS.CONFINT",
+    "FORECAST.ETS.SEASONALITY", "FORECAST.ETS.STAT",
     "RANK.EQ", "RANK.AVG",
     "PERCENTILE.INC", "PERCENTILE.EXC", "QUARTILE.INC",
     "UNICHAR", "UNICODE",

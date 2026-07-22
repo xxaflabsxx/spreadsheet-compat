@@ -1,0 +1,38 @@
+{
+  "slug": "return-all-matches-not-just-the-first",
+  "title": "How to return ALL matches, not just the first (VLOOKUP for multiple results)",
+  "task": "A lookup that lists every row matching the key — where VLOOKUP/XLOOKUP stop at one.",
+  "keywords": [
+    "vlookup multiple results",
+    "return all matches excel",
+    "filter all matching rows",
+    "lookup many values google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=FILTER(B2:B6,A2:A6=\"East\")",
+      "note": "Excel 365/2021. Spills one row per match; wrap in TEXTJOIN to get a single cell."
+    },
+    "google_sheets": {
+      "formula": "=FILTER(B2:B6,A2:A6=\"East\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=FILTER(B2:B6,A2:A6=\"East\")",
+      "note": "Needs LibreOffice 24.8+; older versions need the legacy SMALL/IF array pattern."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "East", "B2": 150,
+      "A3": "West", "B3": 120,
+      "A4": "East", "B4": 80,
+      "A5": "West", "B5": 300,
+      "A6": "East", "B6": 200
+    },
+    "formula": "=FILTER(B2:B6,A2:A6=\"East\")",
+    "expected": [150, 80, 200],
+    "check_range": "D1:D3"
+  },
+  "explanation": "Lookups return one result by design; FILTER returns the whole set — all three East values spill down in source order. Combine as needed: TEXTJOIN(\", \",TRUE,FILTER(...)) for one cell, SORT(FILTER(...)) for ordered output, or filter several columns at once by widening the first range. This one formula replaces the notoriously fragile Ctrl+Shift+Enter SMALL/IF/ROW construction from the pre-dynamic-array era."
+}
