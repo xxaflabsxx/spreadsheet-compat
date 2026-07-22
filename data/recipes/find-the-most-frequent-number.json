@@ -1,0 +1,37 @@
+{
+  "slug": "find-the-most-frequent-number",
+  "title": "How to find the most frequent number in a range",
+  "task": "Get the value that appears most often — the statistical mode.",
+  "keywords": [
+    "most frequent value excel",
+    "mode function",
+    "most common number google sheets",
+    "mode.sngl"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MODE.SNGL(A2:A6)",
+      "note": "MODE.MULT returns ALL tied modes as a spill; legacy =MODE() still works."
+    },
+    "google_sheets": {
+      "formula": "=MODE(A2:A6)",
+      "note": "MODE.SNGL also available; identical behavior."
+    },
+    "libreoffice": {
+      "formula": "=MODE.SNGL(A2:A6)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 1,
+      "A3": 2,
+      "A4": 2,
+      "A5": 3,
+      "A6": 2
+    },
+    "formula": "=MODE.SNGL(A2:A6)",
+    "expected": 2
+  },
+  "explanation": "MODE.SNGL returns the single most frequent number — 2 appears three times here. With a tie it returns whichever mode occurs first, which is why MODE.MULT (spilling every tied value) exists. These only work on numbers; for the most frequent TEXT value use =INDEX(A2:A6,MATCH(MAX(COUNTIF(A2:A6,A2:A6)),COUNTIF(A2:A6,A2:A6),0)) — or UNIQUE+COUNTIF sorting in modern versions."
+}

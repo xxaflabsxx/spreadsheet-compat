@@ -68,6 +68,7 @@ _XLFN_FUNCTIONS = {
     # handful of Excel 2013 additions, needed for the Phase-2 test batch.
     # Source: XlsxWriter's "Working with Formulas" future-function table.
     "STDEV.S", "STDEV.P", "VAR.S",
+    "MODE.SNGL", "MODE.MULT",
     "RANK.EQ", "RANK.AVG",
     "PERCENTILE.INC", "PERCENTILE.EXC", "QUARTILE.INC",
     "UNICHAR", "UNICODE",
