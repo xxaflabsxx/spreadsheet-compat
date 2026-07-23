@@ -1004,14 +1004,48 @@ def fmtval_filter(v):
 RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet how-to recipes</h1>
-<p class="lede">Common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each one <strong>executed and verified in a real engine</strong>, not just documented.</p>
+<p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each one <strong>executed and verified in a real engine</strong>, not just documented.</p>
+<p>
+{% for cat, items in grouped %}<a href="#{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</a> ({{ items|length }}){% if not loop.last %} &middot; {% endif %}{% endfor %}
+</p>
+{% for cat, items in grouped %}
+<h2 class="section-title" id="{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</h2>
 <ul class="recipe-list">
-{% for r in recipes %}
+{% for r in items %}
 <li><a href="{{ rel }}how-to/{{ r.slug }}.html">{{ r.title }}</a>{% if r.verified %} <span class="badge badge-good">verified</span>{% endif %}</li>
 {% endfor %}
 </ul>
+{% endfor %}
 {% endblock %}
 """
+
+
+# Topical grouping for the how-to index. Order = display order; first match wins.
+_RECIPE_CATEGORIES = [
+    ("Dates & times", ("date", "day", "month", "week", "year", "quarter", "age",
+                       "time", "hour", "minute", "second", "birthdate", "countdown")),
+    ("Text & names", ("text", "name", "word", "character", "letter", "space",
+                      "case", "concatenate", "combine-first", "split", "extract",
+                      "initials", "line-break", "domain", "trim", "capitalize",
+                      "leading-zeros")),
+    ("Lookups & filters", ("lookup", "match", "filter", "find-the", "find-values",
+                           "duplicate", "unique", "blank-cells-from", "both-lists",
+                           "all-matches", "transpose", "reverse", "list", "nth-largest")),
+    ("Counting & conditions", ("count", "if-", "-if", "contains", "rank",
+                               "occurrences", "condition")),
+    ("Math, money & stats", ("sum", "average", "percentage", "round", "median",
+                             "deviation", "interest", "loan", "cagr", "margin",
+                             "tax", "discount", "price", "weighted", "random",
+                             "interpolation", "multiply", "subtract", "convert",
+                             "clamp", "mode", "frequent", "largest", "total")),
+]
+
+
+def _recipe_category(slug):
+    for cat, keys in _RECIPE_CATEGORIES:
+        if any(k in slug for k in keys):
+            return cat
+    return "More tasks"
 
 RECIPE_TMPL = """{% extends "base.html" %}
 {% block content %}
@@ -1425,6 +1459,11 @@ def main():
             ),
             canonical=BASE_URL + "how-to/",
             recipes=recipes,
+            grouped=[
+                (cat, [r for r in recipes if _recipe_category(r["slug"]) == cat])
+                for cat in [c for c, _ in _RECIPE_CATEGORIES] + ["More tasks"]
+                if any(_recipe_category(r["slug"]) == cat for r in recipes)
+            ],
         )
         (OUT_DIR / "how-to" / "index.html").write_text(
             env.get_template("recipe_index.html").render(**rctx)
