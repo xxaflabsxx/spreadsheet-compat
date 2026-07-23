@@ -1,0 +1,31 @@
+{
+  "slug": "calculate-hours-worked-minus-break",
+  "title": "How to calculate hours worked minus a break",
+  "task": "Timesheet math: end time minus start time minus the unpaid break, as decimal hours for pay.",
+  "keywords": [
+    "hours worked formula excel",
+    "timesheet minus lunch",
+    "payroll hours calculation",
+    "decimal hours google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=(C2-B2-D2)*24",
+      "note": "B2=start, C2=end, D2=break duration (as a time like 0:30). Format the result as a Number."
+    },
+    "google_sheets": {
+      "formula": "=(C2-B2-D2)*24",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=(C2-B2-D2)*24",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=(TIME(17,0,0)-TIME(9,0,0)-TIME(0,30,0))*24",
+    "expected": 7.5
+  },
+  "explanation": "Times are day-fractions, so (end − start − break) gives the worked portion of a day, and ×24 converts it to decimal hours: 9:00 to 17:00 minus a 30-minute lunch is 7.5 hours — the number you multiply by an hourly rate. Format the result cell as Number (it inherits time formatting otherwise). For overnight shifts wrap the difference in MOD(C2-B2,1) so crossing midnight doesn't go negative."
+}

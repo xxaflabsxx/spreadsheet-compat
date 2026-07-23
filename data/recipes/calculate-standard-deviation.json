@@ -1,0 +1,37 @@
+{
+  "slug": "calculate-standard-deviation",
+  "title": "How to calculate standard deviation (STDEV.S vs STDEV.P)",
+  "task": "Measure how spread out values are — and pick the right one of the two functions.",
+  "keywords": [
+    "standard deviation excel",
+    "stdev.s vs stdev.p",
+    "sample vs population standard deviation",
+    "spread of data google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=STDEV.S(A2:A6)",
+      "note": "S = sample (your data is a subset). STDEV.P when the range IS the entire population."
+    },
+    "google_sheets": {
+      "formula": "=STDEV(A2:A6)",
+      "note": "STDEV = sample, STDEVP = population; the dotted names also work."
+    },
+    "libreoffice": {
+      "formula": "=STDEV.S(A2:A6)",
+      "note": "Identical to Excel."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 2,
+      "A3": 4,
+      "A4": 4,
+      "A5": 4,
+      "A6": 6
+    },
+    "formula": "=ROUND(STDEV.P(A2:A6),4)",
+    "expected": 1.2649
+  },
+  "explanation": "Standard deviation is the typical distance from the mean: for 2,4,4,4,6 (mean 4) the population version gives √1.6 ≈ 1.2649. Use STDEV.S when your rows are a sample of something bigger (it divides by n−1, giving a slightly larger, unbiased estimate — here 1.4142); use STDEV.P only when the data is complete in itself. Roughly two-thirds of normal-ish data falls within one standard deviation of the mean — a quick sanity check for outliers."
+}
