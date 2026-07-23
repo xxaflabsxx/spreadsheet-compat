@@ -1,0 +1,31 @@
+{
+  "slug": "flag-overdue-dates",
+  "title": "How to flag overdue dates",
+  "task": "Mark rows whose due date has passed — invoices, tasks, renewals.",
+  "keywords": [
+    "overdue formula excel",
+    "past due date flag",
+    "if date before today google sheets",
+    "days overdue calculation"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(A2<TODAY(),\"Overdue\",\"OK\")",
+      "note": "Days overdue as a number: =MAX(0,TODAY()-A2)."
+    },
+    "google_sheets": {
+      "formula": "=IF(A2<TODAY(),\"Overdue\",\"OK\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IF(A2<TODAY(),\"Overdue\",\"OK\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=IF(DATE(2026,7,1)<DATE(2026,7,23),\"Overdue\",\"OK\")",
+    "expected": "Overdue"
+  },
+  "explanation": "Dates compare like numbers, so due-date < today means the deadline has passed (the verification pins both dates so the result never changes; in your sheet use TODAY(), which keeps the flags current every day). Useful refinements: MAX(0,TODAY()-A2) counts days overdue without going negative for future dates, a \"Due soon\" tier is IFS(A2<TODAY(),\"Overdue\",A2<=TODAY()+7,\"Due soon\",TRUE,\"OK\"), and blank due-dates need an IF(A2=\"\",\"\",...) guard so empty rows don't all read Overdue."
+}

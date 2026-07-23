@@ -1,0 +1,33 @@
+{
+  "slug": "convert-currency-text-to-a-number",
+  "title": "How to convert currency text like \"$1,234.50\" to a number",
+  "task": "Clean imported/pasted money values — strip the symbol and thousands separators so math works.",
+  "keywords": [
+    "convert currency text to number excel",
+    "remove dollar sign formula",
+    "imported numbers as text",
+    "strip commas google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=VALUE(SUBSTITUTE(SUBSTITUTE(A2,\"$\",\"\"),\",\",\"\"))",
+      "note": "Add more SUBSTITUTE layers for other symbols (€, spaces, currency codes)."
+    },
+    "google_sheets": {
+      "formula": "=VALUE(SUBSTITUTE(SUBSTITUTE(A2,\"$\",\"\"),\",\",\"\"))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=VALUE(SUBSTITUTE(SUBSTITUTE(A2,\"$\",\"\"),\",\",\"\"))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "$1,234.50"
+    },
+    "formula": "=VALUE(SUBSTITUTE(SUBSTITUTE(A2,\"$\",\"\"),\",\",\"\"))",
+    "expected": 1234.5
+  },
+  "explanation": "The inner SUBSTITUTE removes the $, the outer one removes the thousands commas, and VALUE parses what's left into a real number: \"$1,234.50\" → 1234.5. Text-numbers are the classic import bug — they sort alphabetically and sum to zero. Watch the locale trap: European-formatted text like \"1.234,50\" needs the separators swapped the other way. In Sheets, REGEXREPLACE(A2,\"[^0-9.]\",\"\") clears everything non-numeric in one pass."
+}

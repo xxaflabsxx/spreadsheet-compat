@@ -1,0 +1,33 @@
+{
+  "slug": "extract-the-username-from-an-email",
+  "title": "How to extract the username from an email address",
+  "task": "Get the part before the @ — for display names, matching, or de-duplication.",
+  "keywords": [
+    "extract username from email excel",
+    "text before @ formula",
+    "split email address",
+    "email local part google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=LEFT(A2,FIND(\"@\",A2)-1)",
+      "note": "Excel 365: =TEXTBEFORE(A2,\"@\")."
+    },
+    "google_sheets": {
+      "formula": "=LEFT(A2,FIND(\"@\",A2)-1)",
+      "note": "Identical; also =REGEXEXTRACT(A2,\"^[^@]+\")."
+    },
+    "libreoffice": {
+      "formula": "=LEFT(A2,FIND(\"@\",A2)-1)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "ada.lovelace@example.com"
+    },
+    "formula": "=LEFT(A2,FIND(\"@\",A2)-1)",
+    "expected": "ada.lovelace"
+  },
+  "explanation": "FIND locates the @ and LEFT keeps everything before it: \"ada.lovelace\". The companion extraction — the domain after the @ — is covered in the extract-domain-from-email recipe; together they split any address in two. To go further and title-case a name out of the username, chain the sentence-case and substitute-dots-for-spaces patterns: =PROPER(SUBSTITUTE(LEFT(A2,FIND(\"@\",A2)-1),\".\",\" \")) gives \"Ada Lovelace\"."
+}

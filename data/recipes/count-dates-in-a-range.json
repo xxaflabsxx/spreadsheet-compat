@@ -1,0 +1,36 @@
+{
+  "slug": "count-dates-in-a-range",
+  "title": "How to count dates within a range",
+  "task": "Count how many entries fall between two dates — orders this month, signups this quarter.",
+  "keywords": [
+    "countif between dates excel",
+    "count dates in month",
+    "countifs date range google sheets",
+    "count entries by period"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=COUNTIFS(A2:A100,\">=\"&DATE(2026,7,1),A2:A100,\"<\"&DATE(2026,8,1))",
+      "note": "The < on the first of the NEXT month cleanly captures all of July, time-of-day included."
+    },
+    "google_sheets": {
+      "formula": "=COUNTIFS(A2:A100,\">=\"&DATE(2026,7,1),A2:A100,\"<\"&DATE(2026,8,1))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=COUNTIFS(A2:A100,\">=\"&DATE(2026,7,1),A2:A100,\"<\"&DATE(2026,8,1))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 46204,
+      "A3": 46188,
+      "A4": 46215,
+      "A5": 46240
+    },
+    "formula": "=COUNTIFS(A2:A5,\">=\"&DATE(2026,7,1),A2:A5,\"<\"&DATE(2026,8,1))",
+    "expected": 2
+  },
+  "explanation": "Two conditions on the same column bracket the period: on-or-after July 1 AND before August 1. In the sample (dates as their underlying serial numbers), two of the four fall inside July 2026. Using \"< first of next month\" instead of \"<= July 31\" is the safe habit — it still works when cells carry a time component like July 31, 14:30. Reference cells for the bounds by concatenating: \">=\"&E1."
+}
