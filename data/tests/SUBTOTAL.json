@@ -1,0 +1,26 @@
+{
+  "function": "SUBTOTAL",
+  "cases": [
+    {
+      "id": "SUBTOTAL_sum_code9",
+      "formula": "=SUBTOTAL(9,A1:A4)",
+      "description": "Function code 9 = SUM over visible rows (none hidden here)",
+      "setup_cells": {"A1": 10, "A2": 20, "A3": 30, "A4": 40},
+      "expected": 100
+    },
+    {
+      "id": "SUBTOTAL_counta_code3",
+      "formula": "=SUBTOTAL(3,A1:A4)",
+      "description": "Function code 3 = COUNTA",
+      "setup_cells": {"A1": 10, "A2": 20, "A3": 30, "A4": 40},
+      "expected": 4
+    },
+    {
+      "id": "SUBTOTAL_ignores_nested_subtotal",
+      "formula": "=SUBTOTAL(9,A1:A5)",
+      "description": "A5 contains its own SUBTOTAL over A1:A4; the outer SUBTOTAL must skip it (no double-count), so the answer is 100, not 200",
+      "setup_cells": {"A1": 10, "A2": 20, "A3": 30, "A4": 40, "A5": "=SUBTOTAL(9,A1:A4)"},
+      "expected": 100
+    }
+  ]
+}
