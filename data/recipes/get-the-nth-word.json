@@ -1,0 +1,33 @@
+{
+  "slug": "get-the-nth-word",
+  "title": "How to extract the nth word from a cell",
+  "task": "Pull out the 1st, 2nd, or any specific word from a text cell.",
+  "keywords": [
+    "extract nth word excel",
+    "get second word formula",
+    "textsplit index word",
+    "nth word google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TRIM(MID(SUBSTITUTE(A2,\" \",REPT(\" \",100)),(2-1)*100+1,100))",
+      "note": "The 2 is the word number. Excel 365: =INDEX(TEXTSPLIT(A2,\" \"),2) is far clearer."
+    },
+    "google_sheets": {
+      "formula": "=TRIM(MID(SUBSTITUTE(A2,\" \",REPT(\" \",100)),(2-1)*100+1,100))",
+      "note": "Or the Sheets-only =INDEX(SPLIT(A2,\" \"),2)."
+    },
+    "libreoffice": {
+      "formula": "=TRIM(MID(SUBSTITUTE(A2,\" \",REPT(\" \",100)),(2-1)*100+1,100))",
+      "note": "Identical; INDEX(TEXTSPLIT(...)) works in 25.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "alpha beta gamma"
+    },
+    "formula": "=TRIM(MID(SUBSTITUTE(A2,\" \",REPT(\" \",100)),(2-1)*100+1,100))",
+    "expected": "beta"
+  },
+  "explanation": "The classic trick: SUBSTITUTE pads every space to 100 spaces, so each word sits in its own 100-character \"slot\"; MID grabs slot n and TRIM strips the padding — word 2 of \"alpha beta gamma\" is \"beta\". It looks arcane but runs in every version of every app. On modern versions, INDEX(TEXTSPLIT(A2,\" \"),2) says the same thing readably. The 100 just needs to exceed your longest word."
+}

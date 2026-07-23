@@ -1,0 +1,33 @@
+{
+  "slug": "remove-text-after-a-character",
+  "title": "How to remove everything after a character",
+  "task": "Keep only the part of a cell before a dash, comma, @ or any delimiter.",
+  "keywords": [
+    "remove text after character excel",
+    "keep text before dash",
+    "textbefore formula",
+    "trim after comma google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=LEFT(A2,FIND(\"-\",A2)-1)",
+      "note": "Excel 365: =TEXTBEFORE(A2,\"-\") is cleaner and handles missing delimiters with a 3rd argument."
+    },
+    "google_sheets": {
+      "formula": "=LEFT(A2,FIND(\"-\",A2)-1)",
+      "note": "Identical; Sheets also has REGEXEXTRACT(A2,\"^[^-]*\")."
+    },
+    "libreoffice": {
+      "formula": "=LEFT(A2,FIND(\"-\",A2)-1)",
+      "note": "Identical; TEXTBEFORE works in 24.8+ (with quirks — see its page)."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "ABC-123-XYZ"
+    },
+    "formula": "=LEFT(A2,FIND(\"-\",A2)-1)",
+    "expected": "ABC"
+  },
+  "explanation": "FIND locates the first dash (position 4) and LEFT keeps everything before it: \"ABC-123-XYZ\" → \"ABC\". Note it cuts at the FIRST occurrence; to cut at the LAST one, use the text-after-last-delimiter trick in reverse, and to keep the part AFTER the character swap LEFT for MID. If some cells have no delimiter at all, FIND errors — wrap in IFERROR(...,A2) to pass those through unchanged."
+}

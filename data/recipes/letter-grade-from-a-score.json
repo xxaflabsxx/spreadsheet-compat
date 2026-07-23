@@ -1,0 +1,33 @@
+{
+  "slug": "letter-grade-from-a-score",
+  "title": "How to convert a score to a letter grade",
+  "task": "Map numeric scores to A/B/C/D/F (or any tiered label) automatically.",
+  "keywords": [
+    "letter grade formula excel",
+    "score to grade google sheets",
+    "ifs grading scale",
+    "grade boundaries formula"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IFS(A2>=90,\"A\",A2>=80,\"B\",A2>=70,\"C\",A2>=60,\"D\",TRUE,\"F\")",
+      "note": "Excel 2019+. Older Excel: nested IFs, or the VLOOKUP approach in the explanation."
+    },
+    "google_sheets": {
+      "formula": "=IFS(A2>=90,\"A\",A2>=80,\"B\",A2>=70,\"C\",A2>=60,\"D\",TRUE,\"F\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IFS(A2>=90,\"A\",A2>=80,\"B\",A2>=70,\"C\",A2>=60,\"D\",TRUE,\"F\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 84
+    },
+    "formula": "=IFS(A2>=90,\"A\",A2>=80,\"B\",A2>=70,\"C\",A2>=60,\"D\",TRUE,\"F\")",
+    "expected": "B"
+  },
+  "explanation": "IFS checks the conditions in order and returns the first hit: 84 fails the ≥90 test but passes ≥80, so it's a B. The TRUE,\"F\" pair at the end is the catch-all — without it, scores below 60 return #N/A. For long or changing scales, a lookup table beats a formula: thresholds 0/60/70/80/90 in one column, letters in the next, then the closest-match lookup pattern (=VLOOKUP(A2,table,2,TRUE)) — edit the table, not the formula."
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "average-the-last-n-values",
+  "title": "How to average the last N values in a growing column",
+  "task": "A rolling average of the most recent entries — last 3 months, last 7 days — that stays current as rows are added.",
+  "keywords": [
+    "average last n values excel",
+    "rolling average formula",
+    "moving average recent rows",
+    "offset count average google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=AVERAGE(OFFSET(A2,COUNT(A2:A1000)-3,0,3,1))",
+      "note": "Change both 3s for a different window. Excel 365: =AVERAGE(TAKE(FILTER(A2:A1000,A2:A1000<>\"\"),-3))."
+    },
+    "google_sheets": {
+      "formula": "=AVERAGE(OFFSET(A2,COUNT(A2:A1000)-3,0,3,1))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=AVERAGE(OFFSET(A2,COUNT(A2:A1000)-3,0,3,1))",
+      "note": "Identical; the TAKE alternative needs 25.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": 20,
+      "A4": 30,
+      "A5": 40,
+      "A6": 50
+    },
+    "formula": "=AVERAGE(OFFSET(A2,COUNT(A2:A6)-3,0,3,1))",
+    "expected": 40
+  },
+  "explanation": "COUNT finds how many numbers exist (5), so OFFSET starts 5−3=2 rows below the top and grabs a 3-row window — the last three values (30, 40, 50), averaging to 40. As new rows arrive the window slides automatically. OFFSET is volatile (recalculates on every change), which is fine at this scale; the TAKE version in the notes is the calmer modern equivalent. Works with SUM or MAX in place of AVERAGE for rolling totals and peaks."
+}
