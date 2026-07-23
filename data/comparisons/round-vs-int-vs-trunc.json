@@ -1,0 +1,25 @@
+{
+  "slug": "round-vs-int-vs-trunc",
+  "title": "ROUND vs INT vs TRUNC: they disagree below zero",
+  "meta_desc": "ROUND vs INT vs TRUNC compared: identical on positive numbers where they overlap, different on negatives (INT(-2.5) = -3, TRUNC(-2.5) = -2). Verified in all three apps.",
+  "funcs": ["ROUND", "INT", "TRUNC"],
+  "intro": "On positive numbers these three feel interchangeable and people use whichever they learned first. The differences bite with negatives and with digits: INT always rounds DOWN (toward minus infinity), TRUNC just deletes decimals (toward zero), and only ROUND actually rounds.",
+  "table": [
+    {"aspect": "2.7", "cols": ["3 (nearest)", "2 (down)", "2 (chop)"]},
+    {"aspect": "-2.5", "cols": ["-3 (away from zero on .5)", "-3 (down = more negative)", "-2 (toward zero)"]},
+    {"aspect": "Keep some decimals", "cols": ["Yes — digits argument", "No — integers only", "Yes — TRUNC(x,2) chops to 2 decimals without rounding"]},
+    {"aspect": "Use for", "cols": ["Money, display-safe values", "Bucketing, whole units, MOD-style math", "Cutting precision without changing direction"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal — all three verified in every version we test"]}
+  ],
+  "when": [
+    {"func": "ROUND", "use_when": "Anything financial or user-facing — it's the only one of the three that rounds. ROUNDUP/ROUNDDOWN when the direction must be fixed."},
+    {"func": "INT", "use_when": "\"How many whole units fit\" and floor-style math — but remember INT(-2.5) is -3, which surprises people processing refunds or temperature data."},
+    {"func": "TRUNC", "use_when": "Dropping decimals while keeping sign symmetry — TRUNC(-2.5) is -2, mirroring TRUNC(2.5)=2. Also the safe way to strip the time from a date-time serial."}
+  ],
+  "compat_note": "All three execute identically in every version of Excel, Google Sheets, and LibreOffice we test, including the negative-number edge cases — the differences are mathematical, not cross-app. (FLOOR and CEILING have messier cross-version stories; see their function pages.)",
+  "examples": [
+    {"label": "Round to cents", "formula": "=ROUND(A2,2)"},
+    {"label": "Whole units (floor)", "formula": "=INT(A2)"},
+    {"label": "Strip time from a datetime", "formula": "=TRUNC(A2)"}
+  ]
+}

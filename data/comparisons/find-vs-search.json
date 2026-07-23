@@ -1,0 +1,26 @@
+{
+  "slug": "find-vs-search",
+  "title": "FIND vs SEARCH (vs MATCH): locating text the right way",
+  "meta_desc": "FIND vs SEARCH: case sensitivity and wildcards; and how MATCH differs (position in a range, not in a string). Verified across Excel, Google Sheets, LibreOffice.",
+  "funcs": ["FIND", "SEARCH", "MATCH"],
+  "intro": "FIND and SEARCH both return where a substring starts inside a text cell — they differ on exactly two things: case sensitivity and wildcards. MATCH sounds similar but answers a different question entirely: which ROW of a range holds a value.",
+  "table": [
+    {"aspect": "Looks inside", "cols": ["One text string", "One text string", "A range of cells"]},
+    {"aspect": "Returns", "cols": ["Character position", "Character position", "Position (row/column number) in the range"]},
+    {"aspect": "Case-sensitive", "cols": ["Yes — \"Red\" ≠ \"red\"", "No", "No (exact-match mode)"]},
+    {"aspect": "Wildcards (* ?)", "cols": ["No — treated literally", "Yes", "Yes (with match type 0)"]},
+    {"aspect": "Not found", "cols": ["#VALUE!", "#VALUE!", "#N/A"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal — all verified in every version we test"]}
+  ],
+  "when": [
+    {"func": "FIND", "use_when": "Position of a known, exact-case substring — part codes, case-sensitive IDs."},
+    {"func": "SEARCH", "use_when": "The usual choice for \"does this cell contain X\" checks (with ISNUMBER) — case-insensitive and wildcard-friendly."},
+    {"func": "MATCH", "use_when": "You want which row/column a value is in — usually feeding INDEX, not slicing text."}
+  ],
+  "compat_note": "All three execute identically in every version of Excel, Google Sheets, and LibreOffice we test — this is one area with genuinely zero cross-app surprises. The gotchas are inside the functions themselves (case, wildcards, error types), not between apps.",
+  "examples": [
+    {"label": "Contains check (case-insensitive)", "formula": "=ISNUMBER(SEARCH(\"red\",A2))"},
+    {"label": "Case-sensitive position", "formula": "=FIND(\"ID-\",A2)"},
+    {"label": "Which row holds the value", "formula": "=MATCH(\"cherry\",A2:A10,0)"}
+  ]
+}

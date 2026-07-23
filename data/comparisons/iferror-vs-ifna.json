@@ -1,0 +1,23 @@
+{
+  "slug": "iferror-vs-ifna",
+  "title": "IFERROR vs IFNA: don't hide the errors you need",
+  "meta_desc": "IFERROR vs IFNA: which errors each catches, why IFERROR can mask real bugs in lookups, and compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["IFERROR", "IFNA"],
+  "intro": "Both replace an error with a fallback value — the difference is scope. IFERROR swallows EVERY error; IFNA only catches #N/A, the \"not found\" signal. Around lookups that distinction decides whether a typo in your range shows up or gets silently papered over.",
+  "table": [
+    {"aspect": "#N/A (lookup not found)", "cols": ["Caught", "Caught"]},
+    {"aspect": "#DIV/0!, #VALUE!, #REF!, #NAME?", "cols": ["Caught — including genuine bugs", "NOT caught — real errors stay visible"]},
+    {"aspect": "Typical use", "cols": ["Divisions that may hit zero, conversions", "Wrapping VLOOKUP/XLOOKUP/MATCH"]},
+    {"aspect": "Risk", "cols": ["A broken range or typo shows your fallback text instead of failing loudly", "Minimal — only the expected miss is handled"]},
+    {"aspect": "Compatibility", "cols": ["Universal (Excel 2007+, all Sheets & LO versions we test)", "Excel 2013+, Sheets, LibreOffice (verified)"]}
+  ],
+  "when": [
+    {"func": "IFERROR", "use_when": "The formula can only fail one obvious way and any error means the same thing — e.g. a rate calculation that divides by a count that may be zero."},
+    {"func": "IFNA", "use_when": "Every lookup. \"Not found\" gets your friendly fallback, while a deleted column (#REF!) or misspelled function (#NAME?) still surfaces as an error you'll notice and fix."}
+  ],
+  "compat_note": "Both execute correctly in every LibreOffice release we test, Google Sheets, and modern Excel (IFNA arrived in Excel 2013). XLOOKUP users get a third option: its built-in 4th argument handles only the not-found case, like IFNA, without wrapping anything.",
+  "examples": [
+    {"label": "IFNA around a lookup (recommended)", "formula": "=IFNA(VLOOKUP(D2,A2:B10,2,FALSE),\"Not found\")"},
+    {"label": "IFERROR for an expected division error", "formula": "=IFERROR(A2/B2,0)"}
+  ]
+}

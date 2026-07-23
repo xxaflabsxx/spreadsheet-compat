@@ -1,0 +1,24 @@
+{
+  "slug": "arrayformula-vs-dynamic-arrays",
+  "title": "ARRAYFORMULA vs dynamic arrays: the same idea, three dialects",
+  "meta_desc": "Google Sheets ARRAYFORMULA vs Excel/LibreOffice auto-spilling dynamic arrays: portability, syntax differences, and what breaks when you export.",
+  "funcs": ["FILTER", "SEQUENCE", "UNIQUE"],
+  "intro": "Google Sheets makes formulas operate over whole ranges by wrapping them in ARRAYFORMULA; modern Excel and LibreOffice instead auto-spill any array expression. Same concept, incompatible spellings — and the number-one thing that silently breaks when a Sheet is exported to .xlsx.",
+  "table": [
+    {"aspect": "Per-row math over a range", "cols": ["Sheets: =ARRAYFORMULA(A2:A10*B2:B10)", "Excel 365 / LO 24.8+: =A2:A10*B2:B10 just spills", "—"]},
+    {"aspect": "ARRAYFORMULA function itself", "cols": ["Sheets-only — #NAME? everywhere else", "Not needed; arrays are native", "—"]},
+    {"aspect": "Dynamic-array functions (FILTER/UNIQUE/SEQUENCE...)", "cols": ["Available, no wrapper needed", "Available (LibreOffice since 24.8 — executed result)", "—"]},
+    {"aspect": "Spill collision behavior", "cols": ["#REF! mentioning the blocking cell", "#SPILL! (Excel) / err:522-style (LO)", "—"]},
+    {"aspect": "Old-version fallback", "cols": ["ARRAYFORMULA works in all Sheets", "Ctrl+Shift+Enter legacy array formulas", "—"]}
+  ],
+  "when": [
+    {"func": "ARRAYFORMULA (Sheets)", "use_when": "Sheets-only workbooks. If the file might ever export to Excel/LibreOffice, prefer the dynamic-array functions (FILTER, UNIQUE, SEQUENCE...) that exist on both sides, and avoid wrapping plain arithmetic."},
+    {"func": "Native spilling (Excel/LO)", "use_when": "Excel 365/2021 and LibreOffice 24.8+ — write the array expression directly. For files that must open in genuinely old versions, neither dialect survives; stick to fill-down formulas."}
+  ],
+  "compat_note": "From our executed tests: the shared dynamic-array functions (FILTER, SORT, UNIQUE, SEQUENCE, XLOOKUP...) work in LibreOffice 24.8+ and are documented in both Excel 365 and Sheets — they are the portable core. ARRAYFORMULA itself exists only in Google Sheets; on export, Sheets rewrites what it can, but wrapped arithmetic frequently degrades to a single-cell result.",
+  "examples": [
+    {"label": "Sheets dialect", "formula": "=ARRAYFORMULA(A2:A10*B2:B10)"},
+    {"label": "Excel/LibreOffice dialect (auto-spill)", "formula": "=A2:A10*B2:B10"},
+    {"label": "Portable across all three (modern versions)", "formula": "=FILTER(A2:A10,B2:B10>100)"}
+  ]
+}

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more</title>
-<meta name="description" content="Head-to-head guides for commonly confused spreadsheet functions: real differences, which to use when, and executed compatibility results for Excel, Google Sheets, and LibreOffice.">
-<link rel="canonical" href="https://canispreadsheet.com/compare/">
-<meta property="og:title" content="Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more">
-<meta property="og:description" content="Head-to-head guides for commonly confused spreadsheet functions: real differences, which to use when, and executed compatibility results for Excel, Google Sheets, and LibreOffice.">
+<title>ARRAYFORMULA vs dynamic arrays: the same idea, three dialects</title>
+<meta name="description" content="Google Sheets ARRAYFORMULA vs Excel/LibreOffice auto-spilling dynamic arrays: portability, syntax differences, and what breaks when you export.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/arrayformula-vs-dynamic-arrays.html">
+<meta property="og:title" content="ARRAYFORMULA vs dynamic arrays: the same idea, three dialects">
+<meta property="og:description" content="Google Sheets ARRAYFORMULA vs Excel/LibreOffice auto-spilling dynamic arrays: portability, syntax differences, and what breaks when you export.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/compare/">
+<meta property="og:url" content="https://canispreadsheet.com/compare/arrayformula-vs-dynamic-arrays.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,91 +299,61 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<h1>Spreadsheet function comparisons</h1>
-<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (backed by executed tests, not documentation).</p>
-<ul class="quirks-list">
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
+<div class="func-header">
+  <h1>ARRAYFORMULA vs dynamic arrays: the same idea, three dialects</h1>
+</div>
+<p class="lede">Google Sheets makes formulas operate over whole ranges by wrapping them in ARRAYFORMULA; modern Excel and LibreOffice instead auto-spill any array expression. Same concept, incompatible spellings — and the number-one thing that silently breaks when a Sheet is exported to .xlsx.</p>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/arrayformula-vs-dynamic-arrays.html">ARRAYFORMULA vs dynamic arrays: the same idea, three dialects</a></h3>
-  <p style="margin:.3rem 0 0">Google Sheets makes formulas operate over whole ranges by wrapping them in ARRAYFORMULA; modern Excel and LibreOffice instead auto-spill any array...</p>
-</li>
+<h2 class="section-title">The differences at a glance</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th></th><th><a href="../functions/filter.html">FILTER</a></th><th><a href="../functions/sequence.html">SEQUENCE</a></th><th><a href="../functions/unique.html">UNIQUE</a></th></tr></thead>
+<tbody>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/concatenate-vs-concat-vs-textjoin.html">CONCATENATE vs CONCAT vs TEXTJOIN: which to use?</a></h3>
-  <p style="margin:.3rem 0 0">Three generations of the same idea: CONCATENATE is the legacy function, CONCAT adds range support, and TEXTJOIN adds the two things everyone actually wants...</p>
-</li>
+<tr><td><strong>Per-row math over a range</strong></td><td>Sheets: =ARRAYFORMULA(A2:A10*B2:B10)</td><td>Excel 365 / LO 24.8+: =A2:A10*B2:B10 just spills</td><td>—</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/countif-vs-countifs.html">COUNTIF vs COUNTIFS: one letter, one big difference</a></h3>
-  <p style="margin:.3rem 0 0">COUNTIFS is COUNTIF&#39;s multi-condition sibling — and unlike the SUMIF/SUMIFS pair, the argument order doesn&#39;t flip, so the safest habit is simply: always use...</p>
-</li>
+<tr><td><strong>ARRAYFORMULA function itself</strong></td><td>Sheets-only — #NAME? everywhere else</td><td>Not needed; arrays are native</td><td>—</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/filter-vs-query.html">FILTER vs QUERY: Sheets&#39; two ways to slice data</a></h3>
-  <p style="margin:.3rem 0 0">In Google Sheets these overlap heavily, so people ask which to learn. The portability answer is decisive: FILTER now exists in Excel and LibreOffice too...</p>
-</li>
+<tr><td><strong>Dynamic-array functions (FILTER/UNIQUE/SEQUENCE...)</strong></td><td>Available, no wrapper needed</td><td>Available (LibreOffice since 24.8 — executed result)</td><td>—</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/find-vs-search.html">FIND vs SEARCH (vs MATCH): locating text the right way</a></h3>
-  <p style="margin:.3rem 0 0">FIND and SEARCH both return where a substring starts inside a text cell — they differ on exactly two things: case sensitivity and wildcards. MATCH sounds...</p>
-</li>
+<tr><td><strong>Spill collision behavior</strong></td><td>#REF! mentioning the blocking cell</td><td>#SPILL! (Excel) / err:522-style (LO)</td><td>—</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/if-vs-ifs.html">IF vs IFS: when to stop nesting</a></h3>
-  <p style="margin:.3rem 0 0">IFS exists to kill the nested-IF pyramid: =IF(a,x,IF(b,y,IF(c,z,...))) becomes one flat list of condition/value pairs. The catch: IFS has no built-in...</p>
-</li>
+<tr><td><strong>Old-version fallback</strong></td><td>ARRAYFORMULA works in all Sheets</td><td>Ctrl+Shift+Enter legacy array formulas</td><td>—</td></tr>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/iferror-vs-ifna.html">IFERROR vs IFNA: don&#39;t hide the errors you need</a></h3>
-  <p style="margin:.3rem 0 0">Both replace an error with a fallback value — the difference is scope. IFERROR swallows EVERY error; IFNA only catches #N/A, the &#34;not found&#34; signal. Around...</p>
-</li>
+</tbody>
+</table>
+</div>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/round-vs-int-vs-trunc.html">ROUND vs INT vs TRUNC: they disagree below zero</a></h3>
-  <p style="margin:.3rem 0 0">On positive numbers these three feel interchangeable and people use whichever they learned first. The differences bite with negatives and with digits: INT...</p>
-</li>
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/sum-vs-subtotal.html">SUM vs SUBTOTAL: why your filtered totals are wrong</a></h3>
-  <p style="margin:.3rem 0 0">Filter a table and SUM keeps adding the rows you just hid — that&#39;s the bug that leads people here. SUBTOTAL(9,...) counts only what&#39;s visible after...</p>
-</li>
+<li><strong>ARRAYFORMULA (Sheets)</strong> &mdash; Sheets-only workbooks. If the file might ever export to Excel/LibreOffice, prefer the dynamic-array functions (FILTER, UNIQUE, SEQUENCE...) that exist on both sides, and avoid wrapping plain arithmetic.</li>
 
-<li class="quirk-entry">
-  <h3><a href="../compare/sumif-vs-sumifs.html">SUMIF vs SUMIFS: what&#39;s the difference?</a></h3>
-  <p style="margin:.3rem 0 0">SUMIFS does everything SUMIF does and handles multiple conditions — but the two put their arguments in OPPOSITE orders, which is the bug most people...</p>
-</li>
-
-<li class="quirk-entry">
-  <h3><a href="../compare/sumif-vs-sumproduct.html">SUMIF vs SUMPRODUCT: conditional sums two ways</a></h3>
-  <p style="margin:.3rem 0 0">SUMIF (and SUMIFS) cover the common cases fast; SUMPRODUCT is the escape hatch when conditions get interesting — OR logic, calculations inside the...</p>
-</li>
-
-<li class="quirk-entry">
-  <h3><a href="../compare/unique-function-vs-remove-duplicates.html">UNIQUE function vs Remove Duplicates: live formula or one-time cleanup?</a></h3>
-  <p style="margin:.3rem 0 0">Same goal, opposite philosophies: the Remove Duplicates menu command edits your data once and destructively; the UNIQUE function leaves the source untouched...</p>
-</li>
-
-<li class="quirk-entry">
-  <h3><a href="../compare/vlookup-vs-hlookup.html">VLOOKUP vs HLOOKUP: vertical or horizontal?</a></h3>
-  <p style="margin:.3rem 0 0">They&#39;re the same function rotated 90°: VLOOKUP searches the first COLUMN and reads across; HLOOKUP searches the first ROW and reads down. VLOOKUP dominates...</p>
-</li>
-
-<li class="quirk-entry">
-  <h3><a href="../compare/vlookup-vs-index-match.html">VLOOKUP vs INDEX/MATCH: which is better?</a></h3>
-  <p style="margin:.3rem 0 0">INDEX/MATCH was the power user&#39;s lookup long before XLOOKUP existed, and it still matters because it runs in every spreadsheet app and every version — while...</p>
-</li>
-
-<li class="quirk-entry">
-  <h3><a href="../compare/vlookup-vs-xlookup.html">VLOOKUP vs XLOOKUP: which should you use?</a></h3>
-  <p style="margin:.3rem 0 0">XLOOKUP is VLOOKUP&#39;s modern replacement — but VLOOKUP still wins on one thing: it runs everywhere, including old Excel versions and every LibreOffice...</p>
-</li>
-
-<li class="quirk-entry">
-  <h3><a href="../compare/xlookup-vs-index-match.html">XLOOKUP vs INDEX/MATCH: is there still a reason to nest?</a></h3>
-  <p style="margin:.3rem 0 0">XLOOKUP does in one call nearly everything INDEX/MATCH does in two — so the real question is portability: INDEX/MATCH works in every spreadsheet ever...</p>
-</li>
+<li><strong>Native spilling (Excel/LO)</strong> &mdash; Excel 365/2021 and LibreOffice 24.8+ — write the array expression directly. For files that must open in genuinely old versions, neither dialect survives; stick to fill-down formulas.</li>
 
 </ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>From our executed tests: the shared dynamic-array functions (FILTER, SORT, UNIQUE, SEQUENCE, XLOOKUP...) work in LibreOffice 24.8+ and are documented in both Excel 365 and Sheets — they are the portable core. ARRAYFORMULA itself exists only in Google Sheets; on export, Sheets rewrites what it can, but wrapped arithmetic frequently degrades to a single-cell result.</p>
+
+<h2 class="section-title">Example formulas</h2>
+<div class="table-scroll">
+<table class="matrix">
+<tbody>
+
+<tr><td>Sheets dialect</td><td><code>=ARRAYFORMULA(A2:A10*B2:B10)</code></td></tr>
+
+<tr><td>Excel/LibreOffice dialect (auto-spill)</td><td><code>=A2:A10*B2:B10</code></td></tr>
+
+<tr><td>Portable across all three (modern versions)</td><td><code>=FILTER(A2:A10,B2:B10&gt;100)</code></td></tr>
+
+</tbody>
+</table>
+</div>
+
+<p>Full per-version details on each function page:
+<a href="../functions/filter.html">FILTER</a> &middot; <a href="../functions/sequence.html">SEQUENCE</a> &middot; <a href="../functions/unique.html">UNIQUE</a>.</p>
 
 <aside class="promo-card">
   <div>
