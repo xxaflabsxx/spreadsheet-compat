@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T04:49:47.298185+00:00",
+  "generated_at": "2026-07-23T04:49:00.571015+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.2.0.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-07-21 21:49:13.766000",
-    "now_run_2": "2026-07-21 21:49:33.587000",
+    "now_run_1": "2026-07-22 21:48:37.288000",
+    "now_run_2": "2026-07-22 21:48:52.950000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 18.63,
+    "conversion_seconds_run_1": 13.53,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -2180,6 +2180,60 @@
         "range_values": null,
         "error": "#VALUE!",
         "expected": "#VALUE!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FORECAST.ETS": {
+      "FORECAST_ETS_exists": {
+        "description": "Existence probe: exponential-smoothing forecast of the next point of a rising series. The AAA algorithm's exact output depends on implementation internals, so we only assert the engine recognizes the function and returns a numeric value (not #NAME?)",
+        "formula_display": "=FORECAST.ETS(A7,B1:B6,A1:A6)",
+        "formula_stored_xlsx": "=_xlfn.FORECAST.ETS(A7,B1:B6,A1:A6)",
+        "value": 70,
+        "range_values": null,
+        "error": null,
+        "expected": null,
+        "matched_expected": null,
+        "canary_ok_this_sheet": true,
+        "notes": "Non-deterministic across implementations by design (smoothing-parameter optimization differs); the key datum is whether the engine has FORECAST.ETS at all. Excel returns ~70 for this series."
+      }
+    },
+    "FORECAST.LINEAR": {
+      "FORECAST_LINEAR_two_point_interpolation": {
+        "description": "Modern renamed FORECAST (Excel 2016+): exact line through (2,10),(3,20) evaluated at 2.5 = 15",
+        "formula_display": "=FORECAST.LINEAR(2.5,B1:B2,A1:A2)",
+        "formula_stored_xlsx": "=_xlfn.FORECAST.LINEAR(2.5,B1:B2,A1:A2)",
+        "value": 15,
+        "range_values": null,
+        "error": null,
+        "expected": 15,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FORECAST": {
+      "FORECAST_two_point_interpolation": {
+        "description": "Linear fit through (2,10) and (3,20): the line is exact, so x=2.5 must give exactly 15",
+        "formula_display": "=FORECAST(2.5,B1:B2,A1:A2)",
+        "formula_stored_xlsx": "=FORECAST(2.5,B1:B2,A1:A2)",
+        "value": 15,
+        "range_values": null,
+        "error": null,
+        "expected": 15,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "FORECAST_extrapolation": {
+        "description": "Points (1,10),(2,20),(3,30) lie exactly on y=10x; extrapolating to x=5 gives 50",
+        "formula_display": "=FORECAST(5,B1:B3,A1:A3)",
+        "formula_stored_xlsx": "=FORECAST(5,B1:B3,A1:A3)",
+        "value": 50,
+        "range_values": null,
+        "error": null,
+        "expected": 50,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -4628,7 +4682,7 @@
         "description": "Existence probe only: NOW() is volatile (changes every recalculation), so there is no fixed expected value",
         "formula_display": "=NOW()",
         "formula_stored_xlsx": "=NOW()",
-        "value": 46224.90926475694,
+        "value": 46225.90882423611,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -4640,7 +4694,7 @@
         "description": "Two NOW() calls inside one cell evaluate in the same recalculation pass, so their difference is exactly 0 \u2014 a deterministic assertion about a volatile function (N() keeps the result a plain number instead of a duration-formatted cell)",
         "formula_display": "=N(NOW()-NOW())",
         "formula_stored_xlsx": "=N(NOW()-NOW())",
-        "value": -7.27662037037037e-11,
+        "value": -5.09375e-11,
         "range_values": null,
         "error": null,
         "expected": 0,
@@ -5192,7 +5246,7 @@
         "description": "Existence probe only: RAND() is non-deterministic; we just confirm the engine recognizes the function (not #NAME?) and returns a plausible value",
         "formula_display": "=RAND()",
         "formula_stored_xlsx": "=RAND()",
-        "value": 0.960732160658244,
+        "value": 0.539868472366549,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5232,7 +5286,7 @@
         "description": "Existence probe: confirm recognized and result plausible (integer 1..10)",
         "formula_display": "=RANDBETWEEN(1,10)",
         "formula_stored_xlsx": "=RANDBETWEEN(1,10)",
-        "value": 5,
+        "value": 7,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5256,7 +5310,7 @@
         "description": "Existence probe with an all-negative range",
         "formula_display": "=RANDBETWEEN(-5,-1)",
         "formula_stored_xlsx": "=RANDBETWEEN(-5,-1)",
-        "value": -3,
+        "value": -1,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -7122,7 +7176,7 @@
         "description": "Existence probe only: TODAY() is non-deterministic (changes daily), so there is no fixed 'expected' value",
         "formula_display": "=TODAY()",
         "formula_stored_xlsx": "=TODAY()",
-        "value": 46224.0,
+        "value": 46225.0,
         "range_values": null,
         "error": null,
         "expected": null,
