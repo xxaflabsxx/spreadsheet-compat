@@ -1,0 +1,24 @@
+{
+  "slug": "substitute-vs-replace",
+  "title": "SUBSTITUTE vs REPLACE: by text or by position",
+  "meta_desc": "SUBSTITUTE vs REPLACE in spreadsheets: one swaps known text, the other overwrites by character position. When to use each, verified across all three apps.",
+  "funcs": ["SUBSTITUTE", "REPLACE"],
+  "intro": "They sound like synonyms; they're opposites in how they aim. SUBSTITUTE finds TEXT you know (\"replace every dash\") — REPLACE overwrites a POSITION you know (\"replace characters 4-6, whatever they are\"). Picking the wrong one is why the other one's arguments never seem to make sense.",
+  "table": [
+    {"aspect": "You specify", "cols": ["The old text and its replacement", "Start position, length, and the new text"]},
+    {"aspect": "Occurrences", "cols": ["All by default; the 4th argument picks the nth", "Exactly one position"]},
+    {"aspect": "Case sensitivity", "cols": ["Case-sensitive", "N/A — position-based"]},
+    {"aspect": "Typical jobs", "cols": ["Strip symbols, swap separators, clean imports", "Mask digits, fix fixed-width codes, insert into IDs"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (every version of all three apps we test)"]}
+  ],
+  "when": [
+    {"func": "SUBSTITUTE", "use_when": "You know WHAT to change: remove commas, change \"/\" to \"-\", swap CHAR(10) line breaks. If the text moves around, SUBSTITUTE finds it anyway."},
+    {"func": "REPLACE", "use_when": "You know WHERE to change: overwrite characters 5-8 of a fixed-format code, mask a card number (=REPLACE(A2,1,12,\"************\")), or insert text at a position (length 0)."}
+  ],
+  "compat_note": "Both execute identically in every version of Excel, Google Sheets, and LibreOffice we test. One cross-app note: Google Sheets' REGEXREPLACE covers both jobs (and more) but is Sheets-only — formulas using it break on export.",
+  "examples": [
+    {"label": "SUBSTITUTE (by text)", "formula": "=SUBSTITUTE(A2,\"-\",\"/\")"},
+    {"label": "REPLACE (by position)", "formula": "=REPLACE(A2,1,12,\"************\")"},
+    {"label": "Insert without deleting (length 0)", "formula": "=REPLACE(A2,4,0,\"-\")"}
+  ]
+}
