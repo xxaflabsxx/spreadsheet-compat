@@ -1,0 +1,33 @@
+{
+  "slug": "convert-12-hour-to-24-hour-time",
+  "title": "How to convert 12-hour text times to 24-hour",
+  "task": "Turn \"3:45 PM\" strings from exports into real 24-hour times.",
+  "keywords": [
+    "convert 12 hour to 24 hour excel",
+    "am pm to military time",
+    "timevalue function",
+    "text time to real time google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TEXT(TIMEVALUE(A2),\"HH:MM\")",
+      "note": "Drop the TEXT wrapper to keep a real time value for math; format the cell as HH:MM instead."
+    },
+    "google_sheets": {
+      "formula": "=TEXT(TIMEVALUE(A2),\"HH:MM\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=TEXT(TIMEVALUE(A2),\"HH:MM\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "3:45 PM"
+    },
+    "formula": "=TEXT(TIMEVALUE(A2),\"HH:MM\")",
+    "expected": "15:45"
+  },
+  "explanation": "TIMEVALUE parses a time written as text — including the AM/PM suffix — into the day-fraction spreadsheets use, and TEXT with an HH code renders it 24-hour style: \"3:45 PM\" → \"15:45\". For calculations (durations, sorting), skip the TEXT wrapper and just format the TIMEVALUE cell as HH:MM — keeping it numeric. If TIMEVALUE returns #VALUE!, the text has a nonbreaking space or stray characters; TRIM/SUBSTITUTE it clean first."
+}

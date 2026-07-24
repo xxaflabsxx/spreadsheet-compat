@@ -1,0 +1,35 @@
+{
+  "slug": "count-total-words-in-a-range",
+  "title": "How to count the total words in a range",
+  "task": "Word-count across many cells at once — content sheets, survey answers, translations.",
+  "keywords": [
+    "count words in range excel",
+    "total word count formula",
+    "sumproduct len substitute words",
+    "word count google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT(LEN(TRIM(A2:A4))-LEN(SUBSTITUTE(A2:A4,\" \",\"\"))+1)",
+      "note": "Assumes no fully blank cells in the range — each blank inflates the count by 1 (see below)."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT(LEN(TRIM(A2:A4))-LEN(SUBSTITUTE(A2:A4,\" \",\"\"))+1)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT(LEN(TRIM(A2:A4))-LEN(SUBSTITUTE(A2:A4,\" \",\"\"))+1)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "alpha beta",
+      "A3": "gamma",
+      "A4": "delta epsilon zeta"
+    },
+    "formula": "=SUMPRODUCT(LEN(TRIM(A2:A4))-LEN(SUBSTITUTE(A2:A4,\" \",\"\"))+1)",
+    "expected": 6
+  },
+  "explanation": "Per cell, words = spaces + 1: LEN minus LEN-without-spaces counts the spaces, TRIM guards against padding, and SUMPRODUCT totals it across the range — 2 + 1 + 3 = 6 here. The known flaw: an empty cell still contributes +1. The blank-safe version subtracts them: add -SUMPRODUCT(--(TRIM(A2:A4)=\"\")) or filter blanks out first with the FILTER-based patterns. For one cell only, the simpler count-words-in-a-cell recipe covers it."
+}

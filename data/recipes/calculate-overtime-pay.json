@@ -1,0 +1,34 @@
+{
+  "slug": "calculate-overtime-pay",
+  "title": "How to calculate overtime pay",
+  "task": "Split hours into regular and overtime at 1.5x past 40 — payroll's most common formula.",
+  "keywords": [
+    "overtime pay formula excel",
+    "time and a half calculation",
+    "hours over 40 payroll",
+    "overtime google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MIN(A2,40)*B2+MAX(0,A2-40)*B2*1.5",
+      "note": "A2=total hours, B2=hourly rate. Change 40 and 1.5 to your rules."
+    },
+    "google_sheets": {
+      "formula": "=MIN(A2,40)*B2+MAX(0,A2-40)*B2*1.5",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MIN(A2,40)*B2+MAX(0,A2-40)*B2*1.5",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 45,
+      "B2": 20
+    },
+    "formula": "=MIN(A2,40)*B2+MAX(0,A2-40)*B2*1.5",
+    "expected": 950
+  },
+  "explanation": "MIN caps the regular hours at 40 and MAX floors the overtime at zero, so the pair works for both sides of the threshold: 45 hours at $20 is 40×20 + 5×30 = $950, and a 35-hour week is simply 35×20 with no negative overtime. The same MIN/MAX pattern handles any tiered rate — double time past 60 just adds another MAX term."
+}

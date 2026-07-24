@@ -1,0 +1,31 @@
+{
+  "slug": "business-days-left-in-the-month",
+  "title": "How to count business days left in the month",
+  "task": "Working days remaining before month-end — quota pacing, close deadlines.",
+  "keywords": [
+    "business days left in month excel",
+    "working days remaining",
+    "networkdays eomonth",
+    "days to month end google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=NETWORKDAYS(TODAY(),EOMONTH(TODAY(),0))",
+      "note": "Counts today too (if a weekday). Add a holidays range as NETWORKDAYS' 3rd argument."
+    },
+    "google_sheets": {
+      "formula": "=NETWORKDAYS(TODAY(),EOMONTH(TODAY(),0))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=NETWORKDAYS(TODAY(),EOMONTH(TODAY(),0))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=NETWORKDAYS(DATE(2026,7,24),DATE(2026,7,31))",
+    "expected": 6
+  },
+  "explanation": "EOMONTH(TODAY(),0) is the last day of the current month, and NETWORKDAYS counts the weekdays from today through that date inclusive — from Friday July 24, 2026 that's the 24th, 27th–31st: 6 working days (the verification pins the dates; use TODAY() live). Divide remaining target by this number for a required daily run-rate. Exclude today by starting from TODAY()+1."
+}

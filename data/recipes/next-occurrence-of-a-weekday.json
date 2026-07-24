@@ -1,0 +1,31 @@
+{
+  "slug": "next-occurrence-of-a-weekday",
+  "title": "How to find the next occurrence of a weekday (next Friday)",
+  "task": "From any date, jump to the coming Friday (or any weekday) — schedules, deadlines, recurring events.",
+  "keywords": [
+    "next friday formula excel",
+    "next weekday date",
+    "upcoming monday google sheets",
+    "weekday mod trick"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=A2+MOD(5-WEEKDAY(A2,2),7)",
+      "note": "5 = Friday in mode 2 (Mon=1..Sun=7). Returns A2 itself if it's already Friday; use MOD(...,7)+7 variants to force strictly-next."
+    },
+    "google_sheets": {
+      "formula": "=A2+MOD(5-WEEKDAY(A2,2),7)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=A2+MOD(5-WEEKDAY(A2,2),7)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(DATE(2026,7,22)+MOD(5-WEEKDAY(DATE(2026,7,22),2),7),\"YYYY-MM-DD\")",
+    "expected": "2026-07-24"
+  },
+  "explanation": "WEEKDAY mode 2 numbers Monday=1 through Sunday=7, so 5−WEEKDAY gives how far away Friday is, and MOD ...,7 wraps negative gaps into the coming week: from Wednesday July 22 it's +2 days → Friday July 24. Swap the 5 for any target day. On the target day itself the formula returns that same day; if \"next\" must mean strictly after, use =A2+7-MOD(WEEKDAY(A2,2)+7-5,7)... or simply add IF(WEEKDAY(A2,2)=5,7,0)."
+}

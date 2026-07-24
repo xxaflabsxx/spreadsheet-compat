@@ -1,0 +1,31 @@
+{
+  "slug": "prorate-a-monthly-amount",
+  "title": "How to prorate a monthly amount by days",
+  "task": "Charge or pay a fair share of a monthly figure — mid-month move-ins, partial billing periods.",
+  "keywords": [
+    "prorate rent formula excel",
+    "partial month calculation",
+    "daily rate from monthly",
+    "prorated salary google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=ROUND(A2/DAY(EOMONTH(B2,0))*C2,2)",
+      "note": "A2=monthly amount, B2=any date in that month, C2=days occupied. DAY(EOMONTH(...)) = days in that month."
+    },
+    "google_sheets": {
+      "formula": "=ROUND(A2/DAY(EOMONTH(B2,0))*C2,2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=ROUND(A2/DAY(EOMONTH(B2,0))*C2,2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=ROUND(1500/DAY(EOMONTH(DATE(2026,7,1),0))*10,2)",
+    "expected": 483.87
+  },
+  "explanation": "EOMONTH finds the month's last day and DAY reads its number — 31 for July — giving a true daily rate that adapts to each month's length: $1,500 ÷ 31 × 10 days = $483.87. That's fairer than a fixed /30, which overcharges February and undercharges July. Some leases specify a flat 30-day convention instead — then the formula is simply A2/30*C2; match the contract, not the calendar."
+}

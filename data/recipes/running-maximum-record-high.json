@@ -1,0 +1,36 @@
+{
+  "slug": "running-maximum-record-high",
+  "title": "How to track a running maximum (record high so far)",
+  "task": "A column showing the best value reached up to each row — peaks, records, high-water marks.",
+  "keywords": [
+    "running max excel",
+    "record high formula",
+    "cumulative maximum",
+    "high water mark google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MAX($A$2:A2)",
+      "note": "Fill down; the half-anchored range grows one row at a time. MIN for a running minimum."
+    },
+    "google_sheets": {
+      "formula": "=MAX($A$2:A2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MAX($A$2:A2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": 25,
+      "A4": 18,
+      "A5": 30
+    },
+    "formula": "=MAX($A$2:A4)",
+    "expected": 25
+  },
+  "explanation": "The expanding range $A$2:A2 is the whole trick (the same one behind running totals and running counts): each filled-down row computes MAX over everything from the top to itself. At row 4 the values so far are 10, 25, 18, so the record high is still 25 — the later 30 only shows up from its own row on. Flag NEW records with =A2=MAX($A$2:A2), which is TRUE exactly when a row sets a high."
+}
