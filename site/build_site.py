@@ -682,7 +682,7 @@ BASE_TMPL = """<!doctype html>
     engine and recalculation-proven, never scraped from documentation alone.
     Functions without an executed-result badge are documentation-only inventory,
     clearly marked as not yet live-tested.</p>
-    <p>Data and test harness on <a href="{{ github_url }}">GitHub</a>.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="{{ rel }}methodology.html">how we verify</a>. Data and test harness on <a href="{{ github_url }}">GitHub</a>.</p>
     <p>Built by AF Labs — <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates</a>.</p>
   </div>
 </footer>
@@ -1153,6 +1153,45 @@ COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
 """
 
 
+METHODOLOGY_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>How we verify spreadsheet compatibility</h1>
+<p class="lede">Every LibreOffice verdict on this site comes from <strong>actually executing the formula</strong> in a real engine and checking what came back &mdash; not from reading documentation. This page explains the machinery, what &ldquo;verified&rdquo; means here, and the limits of the approach.</p>
+
+<h2 class="section-title">The execution harness</h2>
+<p>For each function we author test cases: a formula, any setup cells it needs, and the result Excel documents or produces for that input. The harness writes each case into a real <code>.xlsx</code> workbook with openpyxl, then runs <strong>headless LibreOffice Calc</strong> over it (<code>soffice --convert-to xlsx</code>), which forces a full recalculation. We reload the output and compare every result against the expected value.</p>
+<p>Two guards make the results trustworthy:</p>
+<ul>
+<li><strong>Recalculation canaries.</strong> Every generated workbook contains sentinel formulas (deterministic arithmetic plus a volatile function) whose values prove the engine really recalculated rather than echoing stored results. A run that fails its canary is discarded, never published.</li>
+<li><strong>The OOXML <code>_xlfn.</code> storage prefix.</strong> Functions added to Excel after 2007 are not stored in <code>.xlsx</code> files under their display names &mdash; Excel silently writes <code>_xlfn.XLOOKUP(...)</code> and strips the prefix for display. Libraries that write raw XML don&rsquo;t do this for you: write <code>=XLOOKUP(...)</code> verbatim with openpyxl and <em>every</em> engine, including ones that fully support XLOOKUP, shows <code>#NAME?</code>. The harness translates display formulas to correct storage form before writing, so a <code>#NAME?</code> in our results means the engine genuinely lacks the function &mdash; not a file-format artifact. (If you&rsquo;ve ever generated a spreadsheet from Python and hit an inexplicable <code>#NAME?</code> on a modern function, this prefix is almost certainly why.)</li>
+</ul>
+
+<h2 class="section-title">Version matrix</h2>
+<p>The same corpus runs against multiple LibreOffice releases &mdash; currently {{ versions|join(', ') }} &mdash; which is how function pages can state a precise &ldquo;supported since&rdquo; release rather than a guess. Current corpus: <strong>{{ n_funcs }} functions live-tested</strong> across <strong>{{ n_cases }} executed cases</strong> per release.</p>
+
+<h2 class="section-title">What the verdicts mean</h2>
+<ul>
+<li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result (probe cases for volatile functions like NOW/RAND assert error-free execution and deterministic invariants instead of exact values).</li>
+<li><strong>Quirk found</strong> &mdash; the function exists but at least one case returned a different value or error than Excel produces; the failing case is shown on the function&rsquo;s page.</li>
+<li><strong>Unsupported</strong> &mdash; the engine returns <code>#NAME?</code> (unrecognized function) with the storage prefix correctly applied.</li>
+</ul>
+
+<h2 class="section-title">How-to recipes are verified too</h2>
+<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned.</p>
+
+<h2 class="section-title">Honest limitations</h2>
+<ul>
+<li><strong>Excel and Google Sheets are not live-executed.</strong> Their columns reflect each vendor&rsquo;s official function documentation. We can&rsquo;t headlessly run those engines (yet); where our executed LibreOffice results reveal a difference against documented Excel behavior, that&rsquo;s labeled a quirk of LibreOffice, and disputed cases are re-checked by hand.</li>
+<li><strong>Coverage is partial.</strong> {{ n_funcs }} of ~600 catalog functions have executed tests; untested functions say so explicitly rather than borrowing a verdict.</li>
+<li><strong>A passing case is evidence, not proof.</strong> A function can match on our cases and still differ on inputs we haven&rsquo;t authored. When you find such an edge, please report it.</li>
+</ul>
+
+<h2 class="section-title">Reproduce or dispute a result</h2>
+<p>The entire harness, test corpus, and raw per-version results are public in the <a href="{{ github_url }}">GitHub repository</a>. Every function page shows the exact formula, inputs, and returned value for each case, so any result can be reproduced in a few minutes &mdash; and if an engine disagrees with us on your machine, an issue with your version number is the fastest way to get it fixed.</p>
+{% endblock %}
+"""
+
+
 CHECKER_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet formula compatibility checker</h1>
@@ -1294,6 +1333,7 @@ def build_env():
                 "recipe_index.html": RECIPE_INDEX_TMPL,
                 "comparison.html": COMPARISON_TMPL,
                 "comparison_index.html": COMPARISON_INDEX_TMPL,
+                "methodology.html": METHODOLOGY_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
@@ -1574,6 +1614,29 @@ def main():
     )
     (OUT_DIR / "checker.html").write_text(env.get_template("checker.html").render(**cctx))
     sitemap_urls.append({"loc": BASE_URL + "checker.html", "lastmod": build_date})
+
+    # ---- Methodology page ----
+    if lo_versions:
+        latest_blob = lo_versions[-1][1]
+        fr = latest_blob.get("function_results", {})
+        mctx = common_ctx(rel="")
+        mctx.update(
+            page_title="Methodology — how canispreadsheet verifies formulas by executing them",
+            meta_description=(
+                "How this site tests spreadsheet functions: headless LibreOffice "
+                "execution, recalculation canaries, the OOXML _xlfn storage-prefix "
+                "gotcha, a multi-release version matrix, and honest limitations."
+            ),
+            canonical=BASE_URL + "methodology.html",
+            versions=[v for v, _ in lo_versions],
+            current_version=lo_versions[-1][0],
+            n_funcs=len(fr),
+            n_cases=sum(len(v) for v in fr.values()),
+        )
+        (OUT_DIR / "methodology.html").write_text(
+            env.get_template("methodology.html").render(**mctx)
+        )
+        sitemap_urls.append({"loc": BASE_URL + "methodology.html", "lastmod": build_date})
 
     # ---- LibreOffice version-support (caniuse-style) page ----
     lo_ver_list = [v for v, _ in lo_versions]
