@@ -723,6 +723,10 @@ INDEX_TMPL = """{% extends "base.html" %}
     <strong style="display:block;margin-bottom:.35rem">&#128200; LibreOffice by version</strong>
     <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Which functions each LibreOffice release supports &mdash; XLOOKUP, FILTER, SORT &amp; 15 more, tested across versions.</span>
   </a>
+  <a href="{{ rel }}compare/" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
+    <strong style="display:block;margin-bottom:.35rem">&#9878;&#65039; Function comparisons</strong>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">VLOOKUP vs XLOOKUP, SUMIF vs SUMIFS, IFERROR vs IFNA &mdash; which to use when, with real compatibility data.</span>
+  </a>
 </div>
 
 <div class="stats-grid">
@@ -947,6 +951,13 @@ entry above reflects documentation inventory only.</p>
 <h2 class="section-title">Related how-to recipes</h2>
 <ul>
 {% for rec in related_recipes %}<li><a href="{{ rel }}how-to/{{ rec.slug }}.html">{{ rec.title }}</a></li>{% endfor %}
+</ul>
+{% endif %}
+
+{% if related_comparisons %}
+<h2 class="section-title">Compared against other functions</h2>
+<ul>
+{% for c in related_comparisons %}<li><a href="{{ rel }}compare/{{ c.slug }}.html">{{ c.title }}</a></li>{% endfor %}
 </ul>
 {% endif %}
 {% endblock %}
@@ -1415,6 +1426,14 @@ def main():
         for fn in seen:
             func_recipes.setdefault(fn, []).append({"slug": rc["slug"], "title": rc["title"]})
 
+    # Map each function -> comparison pages that feature it (internal linking).
+    func_comparisons = {}
+    for cp in load_comparisons():
+        for fn in cp.get("funcs", []):
+            func_comparisons.setdefault(fn.upper(), []).append(
+                {"slug": cp["slug"], "title": cp["title"]}
+            )
+
     func_tmpl = env.get_template("function.html")
     for r in records:
         page_date = r["last_tested"] or build_date
@@ -1439,6 +1458,7 @@ def main():
             canonical=BASE_URL + f"functions/{r['name_lower']}.html",
             r=r,
             related_recipes=func_recipes.get(r["name"], []),
+            related_comparisons=func_comparisons.get(r["name"], []),
         )
         out_path = OUT_DIR / "functions" / f"{r['name_lower']}.html"
         out_path.write_text(func_tmpl.render(**ctx))
