@@ -1,0 +1,24 @@
+{
+  "slug": "mod-vs-quotient",
+  "title": "MOD vs QUOTIENT: remainder and integer division",
+  "meta_desc": "MOD vs QUOTIENT in spreadsheets: the two halves of division, negative-number sign rules (different from most programming languages), and classic MOD idioms.",
+  "funcs": ["MOD", "QUOTIENT"],
+  "intro": "Divide 17 by 5 and you get two useful integers: how many times it fits (QUOTIENT → 3) and what's left over (MOD → 2). Together they decompose any division — and MOD's sign convention on negatives trips up everyone arriving from a programming language.",
+  "table": [
+    {"aspect": "17 and 5", "cols": ["2 (remainder)", "3 (how many fit)"]},
+    {"aspect": "-17 and 5", "cols": ["3 — result takes the DIVISOR's sign (unlike C/JS/Java's -2)", "-3 (truncates toward zero)"]},
+    {"aspect": "Identity", "cols": ["n = divisor × QUOTIENT + ... not always! Use n - MOD(n,d) = floor-multiple instead", "Pairs with MOD only when signs agree"]},
+    {"aspect": "Classic idioms", "cols": ["Every-nth-row (MOD(ROW(),n)), cycling indexes, time-of-day from datetime (MOD(A2,1)), overnight shifts", "Full boxes/packs from a count, pagination"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both verified in every version of all three apps we test)"]}
+  ],
+  "when": [
+    {"func": "MOD", "use_when": "Cycles and leftovers: alternating row bands, wrapping indexes, extracting the time fraction from a datetime, every-nth-row sums. Its divisor-sign rule is exactly what makes MOD(B2-A2,1) handle past-midnight time gaps."},
+    {"func": "QUOTIENT", "use_when": "\"How many whole X fit\": full cartons from an order count, complete weeks from days. INT(a/b) matches it for positives but rounds DOWN for negatives where QUOTIENT truncates toward zero — pick deliberately."}
+  ],
+  "compat_note": "Both behave identically in every version of Excel, Google Sheets, and LibreOffice we test, including the negative-number conventions. The spreadsheet MOD-takes-the-divisor's-sign rule matches Python — not C, JavaScript, or Java — so ported formulas involving negative inputs deserve a test case.",
+  "examples": [
+    {"label": "Remainder", "formula": "=MOD(17,5)"},
+    {"label": "Whole units", "formula": "=QUOTIENT(17,5)"},
+    {"label": "Time-of-day from a datetime", "formula": "=MOD(A2,1)"}
+  ]
+}

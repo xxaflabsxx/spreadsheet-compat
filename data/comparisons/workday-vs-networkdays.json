@@ -1,0 +1,25 @@
+{
+  "slug": "workday-vs-networkdays",
+  "title": "WORKDAY vs NETWORKDAYS: two sides of business days",
+  "meta_desc": "WORKDAY vs NETWORKDAYS: one moves a date forward by working days, the other counts working days between dates. INTL variants, holidays, off-by-one rules.",
+  "funcs": ["WORKDAY", "NETWORKDAYS"],
+  "intro": "Mirror twins: NETWORKDAYS answers \"how many business days between these dates?\", WORKDAY answers \"what date is N business days from here?\". Mixing them up — or forgetting their different inclusivity rules — is where deadline sheets go wrong by a day.",
+  "table": [
+    {"aspect": "Question", "cols": ["Date + N working days → what DATE?", "Date range → how MANY working days?"]},
+    {"aspect": "Returns", "cols": ["A date", "A count"]},
+    {"aspect": "Includes the start date?", "cols": ["No — day 1 is the NEXT working day", "Yes — both endpoints count if they're weekdays"]},
+    {"aspect": "Holidays", "cols": ["Optional 3rd-argument range", "Same"]},
+    {"aspect": "Custom weekends", "cols": ["WORKDAY.INTL (e.g. \"0000011\" mask)", "NETWORKDAYS.INTL, same masks"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (verified in every version of all three apps we test; .INTL variants Excel 2010+)"]}
+  ],
+  "when": [
+    {"func": "WORKDAY", "use_when": "Computing due dates: \"invoice payable 10 business days after issue\" is =WORKDAY(A2,10,holidays). Negative N steps backward — \"prep starts 5 working days before the event\"."},
+    {"func": "NETWORKDAYS", "use_when": "Measuring spans: SLA elapsed days, business days remaining in a period, working-day durations between timestamps. Remember it counts BOTH endpoints — the round trip WORKDAY(a, NETWORKDAYS(a,b)) does NOT land on b."}
+  ],
+  "compat_note": "Both functions and their .INTL variants execute identically across every version of all three apps we test. The inclusivity asymmetry (NETWORKDAYS counts the start day, WORKDAY doesn't) is identical everywhere too — it's a semantics gotcha, not a compatibility one.",
+  "examples": [
+    {"label": "Due 10 business days after issue", "formula": "=WORKDAY(A2,10)"},
+    {"label": "Working days between two dates", "formula": "=NETWORKDAYS(A2,B2)"},
+    {"label": "Fri-Sat weekend (e.g. Middle East)", "formula": "=NETWORKDAYS.INTL(A2,B2,7)"}
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "slug": "char-vs-code-vs-unichar",
+  "title": "CHAR vs CODE vs UNICHAR: characters by number",
+  "meta_desc": "CHAR vs CODE vs UNICHAR/UNICODE: the 255 limit, line breaks, emoji and symbols, and cross-app behavior verified by execution.",
+  "funcs": ["CHAR", "CODE", "UNICHAR", "UNICODE"],
+  "intro": "CHAR turns a number into a character and CODE goes the other way — but they speak 8-bit: numbers up to 255. UNICHAR/UNICODE are the same pair with the full Unicode range, which is what you want for symbols, arrows, and emoji.",
+  "table": [
+    {"aspect": "Range", "cols": ["1-255 (ANSI/ASCII)", "First char → its 1-255 code", "Any Unicode code point (→ \"✓\", \"€\", emoji)", "First char → full code point"]},
+    {"aspect": "Star use", "cols": ["CHAR(10) = line break inside a cell", "Detecting invisible characters in imports", "Symbols without hunting menus: UNICHAR(10003)=✓", "Auditing exactly which character an import contains"]},
+    {"aspect": "Beyond 255", "cols": ["Errors or wrong glyph", "Returns ? -codes for non-ANSI", "Works", "Works"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Excel 2013+ / Sheets / LibreOffice", "Same as UNICHAR"]}
+  ],
+  "when": [
+    {"func": "CHAR / CODE", "use_when": "The classics: CHAR(10) for in-cell line breaks (pair with TEXTJOIN or wrap-text), CHAR(34) for literal quotes, CODE to expose why two 'identical' cells differ (nonbreaking space = 160 vs space = 32)."},
+    {"func": "UNICHAR / UNICODE", "use_when": "Anything outside Latin-1: checkmarks, arrows, box-drawing, currency signs, emoji — and UNICODE when diagnosing imported text with characters CODE can't represent."}
+  ],
+  "compat_note": "CHAR and CODE execute identically in every version of all three apps we test; UNICHAR/UNICODE are documented across all three modern apps (Excel 2013+). One cross-app footnote: what CHAR(128)-CHAR(255) draw depends on the system code page in very old Excel — another reason to prefer UNICHAR for anything non-ASCII.",
+  "examples": [
+    {"label": "Line break in a formula-built cell", "formula": "=A2&CHAR(10)&B2"},
+    {"label": "Expose an invisible character", "formula": "=CODE(MID(A2,5,1))"},
+    {"label": "Checkmark by code point", "formula": "=UNICHAR(10003)"}
+  ]
+}
