@@ -1,0 +1,35 @@
+{
+  "slug": "count-cells-by-color",
+  "title": "How to count cells by color (and why formulas can't see color)",
+  "task": "Count highlighted cells — the honest answer about a famously impossible formula.",
+  "keywords": [
+    "count cells by color excel",
+    "countif background color",
+    "count highlighted cells google sheets",
+    "subtotal filter by color"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUBTOTAL(103,A2:A100)",
+      "note": "With Data → Filter → Filter by Color applied: SUBTOTAL counts only the visible (colored) rows."
+    },
+    "google_sheets": {
+      "formula": "=SUBTOTAL(103,A2:A100)",
+      "note": "Same trick via the filter's \"Filter by color\"."
+    },
+    "libreoffice": {
+      "formula": "=SUBTOTAL(103,A2:A100)",
+      "note": "LibreOffice's Standard Filter can't filter by color — color counting needs a Basic macro."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "x",
+      "A3": "y",
+      "A4": "z"
+    },
+    "formula": "=SUBTOTAL(103,A2:A4)",
+    "expected": 3
+  },
+  "explanation": "No built-in formula in any of the three apps can read a cell's fill color — COUNTIF sees values, not formatting. The practical workaround: apply Filter by Color, then SUBTOTAL(103,...) — code 103 is COUNTA over visible rows only — counts what remains (the verification proves the SUBTOTAL machinery; with a color filter active, hidden rows drop out of the count). The robust long-term fix is to stop encoding data in color: add a status column and count that — colors can even be driven FROM it with conditional formatting, giving the same look plus countability."
+}

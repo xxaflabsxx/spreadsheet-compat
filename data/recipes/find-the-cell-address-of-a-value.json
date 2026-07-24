@@ -1,0 +1,36 @@
+{
+  "slug": "find-the-cell-address-of-a-value",
+  "title": "How to find the cell address of a value",
+  "task": "Get \"$A$3\"-style coordinates of where a value lives — for audits, debugging, or building references.",
+  "keywords": [
+    "find cell address of value excel",
+    "address match formula",
+    "locate value position",
+    "cell reference of match google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=ADDRESS(MATCH(D2,A:A,0),1)",
+      "note": "MATCH finds the row; ADDRESS formats it. Column 1 = A."
+    },
+    "google_sheets": {
+      "formula": "=ADDRESS(MATCH(D2,A:A,0),1)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=ADDRESS(MATCH(D2,A:A,0),1)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A1": "apple",
+      "A2": "banana",
+      "A3": "cherry",
+      "D2": "cherry"
+    },
+    "formula": "=ADDRESS(MATCH(D2,A1:A3,0),1)",
+    "expected": "$A$3"
+  },
+  "explanation": "MATCH returns the position of \"cherry\" (row 3) and ADDRESS turns a row/column pair into a reference string: \"$A$3\". ADDRESS's later arguments control the style — ADDRESS(3,1,4) gives relative \"A3\". The result is TEXT, not a live reference; to actually pull the value at a computed address, feed it to INDIRECT — though INDEX/MATCH does that more efficiently without the volatile INDIRECT."
+}

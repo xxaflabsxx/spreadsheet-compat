@@ -1,0 +1,37 @@
+{
+  "slug": "median-with-a-condition",
+  "title": "How to calculate a median with a condition (MEDIANIF)",
+  "task": "The median of only the rows matching a criterion — no MEDIANIFS exists, so here's the pattern.",
+  "keywords": [
+    "medianif excel",
+    "conditional median formula",
+    "median filter criteria",
+    "median by group google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MEDIAN(FILTER(B2:B6,A2:A6=\"East\"))",
+      "note": "Excel 365/2021. Older Excel: =MEDIAN(IF(A2:A6=\"East\",B2:B6)) entered with Ctrl+Shift+Enter."
+    },
+    "google_sheets": {
+      "formula": "=MEDIAN(FILTER(B2:B6,A2:A6=\"East\"))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MEDIAN(FILTER(B2:B6,A2:A6=\"East\"))",
+      "note": "FILTER needs 24.8+; the CSE MEDIAN(IF(...)) form works in older versions."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "East", "B2": 150,
+      "A3": "West", "B3": 120,
+      "A4": "East", "B4": 80,
+      "A5": "West", "B5": 300,
+      "A6": "East", "B6": 200
+    },
+    "formula": "=MEDIAN(FILTER(B2:B6,A2:A6=\"East\"))",
+    "expected": 150
+  },
+  "explanation": "AVERAGEIF and SUMIF have -IF versions; MEDIAN never got one in any of the three apps. FILTER fills the gap: it hands MEDIAN just the East values (150, 80, 200), whose middle is 150. Any condition FILTER accepts works — numeric thresholds, dates, multiple ANDed tests. The pre-dynamic-array MEDIAN(IF(...)) array formula does the same everywhere, entered with Ctrl+Shift+Enter in old versions."
+}
