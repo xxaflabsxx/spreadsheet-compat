@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-23T04:49:00.571015+00:00",
+  "generated_at": "2026-07-24T01:50:02.331951+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.2.0.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-07-22 21:48:37.288000",
-    "now_run_2": "2026-07-22 21:48:52.950000",
+    "now_run_1": "2026-07-23 18:48:59.088000",
+    "now_run_2": "2026-07-23 18:49:38.951000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 13.53,
+    "conversion_seconds_run_1": 30.97,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -160,6 +160,20 @@
         "range_values": null,
         "error": null,
         "expected": "Sheet1!$A$1",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "AGGREGATE": {
+      "AGGREGATE_sum_ignoring_errors": {
+        "description": "Function 9 (SUM) with option 6 (ignore errors): A3 is #DIV/0! and must be skipped, giving 10+20+40=70",
+        "formula_display": "=AGGREGATE(9,6,A1:A4)",
+        "formula_stored_xlsx": "=_xlfn.AGGREGATE(9,6,A1:A4)",
+        "value": 70,
+        "range_values": null,
+        "error": null,
+        "expected": 70,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -1014,6 +1028,20 @@
         "range_values": null,
         "error": null,
         "expected": "Item 42",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "CORREL": {
+      "CORREL_perfect_linear": {
+        "description": "y=2x exactly, so the correlation coefficient must be exactly 1",
+        "formula_display": "=CORREL(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=CORREL(A1:A3,B1:B3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -2289,6 +2317,42 @@
         "notes": null
       }
     },
+    "FREQUENCY": {
+      "FREQUENCY_three_bins": {
+        "description": "Data 1..5 with bin edges 2 and 4: counts are (<=2)=2, (3..4)=2, (>4)=1, spilled vertically",
+        "formula_display": "=FREQUENCY(A1:A5,B1:B2)",
+        "formula_stored_xlsx": "=FREQUENCY(A1:A5,B1:B2)",
+        "value": 2,
+        "range_values": [
+          2,
+          2,
+          1
+        ],
+        "error": null,
+        "expected": [
+          2,
+          2,
+          1
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FV": {
+      "FV_monthly_savings": {
+        "description": "Future value of $100/month for 10 years at 5% annual, compounded monthly",
+        "formula_display": "=ROUND(FV(0.05/12,120,-100,0),2)",
+        "formula_stored_xlsx": "=ROUND(FV(0.05/12,120,-100,0),2)",
+        "value": 15528.23,
+        "range_values": null,
+        "error": null,
+        "expected": 15528.23,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "GROUPBY": {
       "GROUPBY_exists_sum": {
         "description": "Existence probe: group a,b,a,b over 1,2,3,4 with SUM. In Excel 365 this spills grouped rows (a=4, b=6) plus a grand-total row by default; the exact spill layout depends on optional field_headers/total_depth arguments, so we only assert the engine recognizes the function (not #NAME?)",
@@ -2822,6 +2886,34 @@
         "range_values": null,
         "error": null,
         "expected": -5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "INTERCEPT": {
+      "INTERCEPT_exact_line": {
+        "description": "Points on y=2x+1 exactly: least-squares intercept must be exactly 1",
+        "formula_display": "=INTERCEPT(B1:B3,A1:A3)",
+        "formula_stored_xlsx": "=INTERCEPT(B1:B3,A1:A3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "IRR": {
+      "IRR_simple_investment": {
+        "description": "-1000 followed by three 500s: the rate where NPV=0 is ~23.4% (mathematically determined root; all engines must converge to it)",
+        "formula_display": "=ROUND(IRR(A1:A4),3)",
+        "formula_stored_xlsx": "=ROUND(IRR(A1:A4),3)",
+        "value": 0.234,
+        "range_values": null,
+        "error": null,
+        "expected": 0.234,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -4682,7 +4774,7 @@
         "description": "Existence probe only: NOW() is volatile (changes every recalculation), so there is no fixed expected value",
         "formula_display": "=NOW()",
         "formula_stored_xlsx": "=NOW()",
-        "value": 46225.90882423611,
+        "value": 46226.78417704861,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -4694,7 +4786,7 @@
         "description": "Two NOW() calls inside one cell evaluate in the same recalculation pass, so their difference is exactly 0 \u2014 a deterministic assertion about a volatile function (N() keeps the result a plain number instead of a duration-formatted cell)",
         "formula_display": "=N(NOW()-NOW())",
         "formula_stored_xlsx": "=N(NOW()-NOW())",
-        "value": -5.09375e-11,
+        "value": -8.73148148148148e-11,
         "range_values": null,
         "error": null,
         "expected": 0,
@@ -4710,6 +4802,34 @@
         "range_values": null,
         "error": null,
         "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "NPER": {
+      "NPER_payoff_periods": {
+        "description": "Years to pay off 5000 at 10% with 1000/period: -ln(1-r*PV/pmt)/ln(1+r) = 7.2725",
+        "formula_display": "=ROUND(NPER(0.1,-1000,5000),4)",
+        "formula_stored_xlsx": "=ROUND(NPER(0.1,-1000,5000),4)",
+        "value": 7.2725,
+        "range_values": null,
+        "error": null,
+        "expected": 7.2725,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "NPV": {
+      "NPV_three_cashflows": {
+        "description": "100/1.1 + 200/1.1^2 + 300/1.1^3 = 481.59 (NPV discounts the FIRST argument one period)",
+        "formula_display": "=ROUND(NPV(0.1,100,200,300),2)",
+        "formula_stored_xlsx": "=ROUND(NPV(0.1,100,200,300),2)",
+        "value": 481.59,
+        "range_values": null,
+        "error": null,
+        "expected": 481.59,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -4977,6 +5097,20 @@
         "notes": "MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
       }
     },
+    "PERCENTILE": {
+      "PERCENTILE_median_equivalent": {
+        "description": "50th percentile of 1,2,3,4 by linear interpolation = 2.5 (matches MEDIAN)",
+        "formula_display": "=PERCENTILE(A1:A4,0.5)",
+        "formula_stored_xlsx": "=PERCENTILE(A1:A4,0.5)",
+        "value": 2.5,
+        "range_values": null,
+        "error": null,
+        "expected": 2.5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "PI": {
       "PI_value": {
         "description": "PI() takes no arguments and returns the double-precision approximation of pi",
@@ -5027,6 +5161,20 @@
         "matched_expected": null,
         "canary_ok_this_sheet": true,
         "notes": "Probe only: spilled pivot layout (headers/totals) varies with optional args; the key datum is whether the engine has PIVOTBY at all"
+      }
+    },
+    "PMT": {
+      "PMT_standard_mortgage": {
+        "description": "Monthly payment on a $300k 30-year loan at 6% annual: the standard amortization formula gives $1,798.65",
+        "formula_display": "=ROUND(PMT(0.06/12,360,-300000),2)",
+        "formula_stored_xlsx": "=ROUND(PMT(0.06/12,360,-300000),2)",
+        "value": 1798.65,
+        "range_values": null,
+        "error": null,
+        "expected": 1798.65,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "POWER": {
@@ -5129,6 +5277,20 @@
         "notes": null
       }
     },
+    "PV": {
+      "PV_annuity": {
+        "description": "Present value of $1,000/year for 5 years at 10%: 1000*(1-1.1^-5)/0.1",
+        "formula_display": "=ROUND(PV(0.1,5,-1000),2)",
+        "formula_stored_xlsx": "=ROUND(PV(0.1,5,-1000),2)",
+        "value": 3790.79,
+        "range_values": null,
+        "error": null,
+        "expected": 3790.79,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "QUARTILE.INC": {
       "QUARTILE.INC_quart_zero_min": {
         "description": "quart=0 returns the minimum",
@@ -5191,6 +5353,34 @@
         "notes": "MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
       }
     },
+    "QUARTILE": {
+      "QUARTILE_first_quartile": {
+        "description": "Q1 of 1,2,3,4 under the inclusive linear-interpolation method Excel uses = 1.75",
+        "formula_display": "=QUARTILE(A1:A4,1)",
+        "formula_stored_xlsx": "=QUARTILE(A1:A4,1)",
+        "value": 1.75,
+        "range_values": null,
+        "error": null,
+        "expected": 1.75,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "QUOTIENT": {
+      "QUOTIENT_integer_division": {
+        "description": "Integer part of 17/5, discarding the remainder",
+        "formula_display": "=QUOTIENT(17,5)",
+        "formula_stored_xlsx": "=QUOTIENT(17,5)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "RADIANS": {
       "RADIANS_180_is_pi": {
         "description": "180 degrees is exactly pi radians",
@@ -5246,7 +5436,7 @@
         "description": "Existence probe only: RAND() is non-deterministic; we just confirm the engine recognizes the function (not #NAME?) and returns a plausible value",
         "formula_display": "=RAND()",
         "formula_stored_xlsx": "=RAND()",
-        "value": 0.539868472366549,
+        "value": 0.543826667280995,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5286,7 +5476,7 @@
         "description": "Existence probe: confirm recognized and result plausible (integer 1..10)",
         "formula_display": "=RANDBETWEEN(1,10)",
         "formula_stored_xlsx": "=RANDBETWEEN(1,10)",
-        "value": 7,
+        "value": 6,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5310,7 +5500,7 @@
         "description": "Existence probe with an all-negative range",
         "formula_display": "=RANDBETWEEN(-5,-1)",
         "formula_stored_xlsx": "=RANDBETWEEN(-5,-1)",
-        "value": -1,
+        "value": -4,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5431,6 +5621,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "Two values (30,40) exceed 20, so both 20s tie for rank 3; rank 4 is skipped entirely"
+      }
+    },
+    "RATE": {
+      "RATE_recover_annual_rate": {
+        "description": "Inverting the PMT mortgage case: 360 payments of $1,798.65 on $300k recovers the 6% annual rate (iterative solver; all engines must converge)",
+        "formula_display": "=ROUND(RATE(360,-1798.65,300000)*12,4)",
+        "formula_stored_xlsx": "=ROUND(RATE(360,-1798.65,300000)*12,4)",
+        "value": 0.06,
+        "range_values": null,
+        "error": null,
+        "expected": 0.06,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "REDUCE": {
@@ -6095,6 +6299,20 @@
         "notes": null
       }
     },
+    "SLOPE": {
+      "SLOPE_exact_line": {
+        "description": "Points on y=2x+1 exactly: least-squares slope must be exactly 2",
+        "formula_display": "=SLOPE(B1:B3,A1:A3)",
+        "formula_stored_xlsx": "=SLOPE(B1:B3,A1:A3)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "SMALL": {
       "SMALL_basic": {
         "description": "2nd smallest value in the range",
@@ -6470,6 +6688,44 @@
         "range_values": null,
         "error": null,
         "expected": "Apple",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SUBTOTAL": {
+      "SUBTOTAL_sum_code9": {
+        "description": "Function code 9 = SUM over visible rows (none hidden here)",
+        "formula_display": "=SUBTOTAL(9,A1:A4)",
+        "formula_stored_xlsx": "=SUBTOTAL(9,A1:A4)",
+        "value": 100,
+        "range_values": null,
+        "error": null,
+        "expected": 100,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "SUBTOTAL_counta_code3": {
+        "description": "Function code 3 = COUNTA",
+        "formula_display": "=SUBTOTAL(3,A1:A4)",
+        "formula_stored_xlsx": "=SUBTOTAL(3,A1:A4)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "SUBTOTAL_ignores_nested_subtotal": {
+        "description": "A5 contains its own SUBTOTAL over A1:A4; the outer SUBTOTAL must skip it (no double-count), so the answer is 100, not 200",
+        "formula_display": "=SUBTOTAL(9,A1:A5)",
+        "formula_stored_xlsx": "=SUBTOTAL(9,A1:A5)",
+        "value": 100,
+        "range_values": null,
+        "error": null,
+        "expected": 100,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -7176,7 +7432,7 @@
         "description": "Existence probe only: TODAY() is non-deterministic (changes daily), so there is no fixed 'expected' value",
         "formula_display": "=TODAY()",
         "formula_stored_xlsx": "=TODAY()",
-        "value": 46225.0,
+        "value": 46226.0,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -7331,6 +7587,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "B1 is left unset (blank); its transposed position reads back as 0"
+      }
+    },
+    "TREND": {
+      "TREND_extrapolate_exact_line": {
+        "description": "y=2x data extrapolated to x=5 must give exactly 10",
+        "formula_display": "=TREND(B1:B3,A1:A3,5)",
+        "formula_stored_xlsx": "=TREND(B1:B3,A1:A3,5)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "TRIM": {
@@ -8191,6 +8461,20 @@
         "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
       }
     },
+    "XIRR": {
+      "XIRR_one_year_10pct": {
+        "description": "-1000 on 2026-01-01, +1100 exactly 365 days later: annualized return is exactly 10% (dates given as serials)",
+        "formula_display": "=ROUND(XIRR(B1:B2,A1:A2),3)",
+        "formula_stored_xlsx": "=ROUND(XIRR(B1:B2,A1:A2),3)",
+        "value": 0.1,
+        "range_values": null,
+        "error": null,
+        "expected": 0.1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "XLOOKUP": {
       "XLOOKUP_exact_match": {
         "description": "Basic exact-match lookup returns the corresponding value",
@@ -8274,6 +8558,20 @@
         "range_values": null,
         "error": null,
         "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "XNPV": {
+      "XNPV_zero_at_irr": {
+        "description": "Discounting the same two dated cashflows at their XIRR (10%) must give NPV = 0",
+        "formula_display": "=ROUND(XNPV(0.1,B1:B2,A1:A2),2)",
+        "formula_stored_xlsx": "=ROUND(XNPV(0.1,B1:B2,A1:A2),2)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
