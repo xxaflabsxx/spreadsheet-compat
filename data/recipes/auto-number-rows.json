@@ -1,0 +1,32 @@
+{
+  "slug": "auto-number-rows",
+  "title": "How to auto-number rows with a formula",
+  "task": "Row numbers that renumber themselves when rows are added, deleted, or sorted.",
+  "keywords": [
+    "auto number rows excel",
+    "sequence function numbering",
+    "row number formula",
+    "numbering that updates google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SEQUENCE(COUNTA(B2:B100))",
+      "note": "Excel 365: one formula spills numbers for every data row. Universal per-row: =ROW()-1."
+    },
+    "google_sheets": {
+      "formula": "=SEQUENCE(COUNTA(B2:B100))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SEQUENCE(COUNTA(B2:B100))",
+      "note": "SEQUENCE needs 24.8+; =ROW()-1 works everywhere."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=SEQUENCE(3,1,10,10)",
+    "expected": [10, 20, 30],
+    "check_range": "D1:D3"
+  },
+  "explanation": "SEQUENCE(rows, cols, start, step) generates a number series in one spill — the verified example makes 10, 20, 30 (3 rows starting at 10, stepping 10). For row numbering, SEQUENCE(COUNTA(B2:B100)) sizes itself to the data. The old-school =ROW()-1 filled down also survives inserts/deletes (each cell recomputes its own position) but breaks under sorting — typed literal numbers break under everything, which is why formulas beat typing 1,2,3."
+}

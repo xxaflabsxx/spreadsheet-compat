@@ -1,0 +1,34 @@
+{
+  "slug": "compare-two-columns-row-by-row",
+  "title": "How to compare two columns row by row",
+  "task": "Check whether each row's values match between two columns — reconciling exports, before/after lists.",
+  "keywords": [
+    "compare two columns excel",
+    "match or differ formula",
+    "exact case sensitive compare",
+    "reconcile columns google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(A2=B2,\"Match\",\"Differ\")",
+      "note": "Case-insensitive. Case-sensitive: =IF(EXACT(A2,B2),\"Match\",\"Differ\")."
+    },
+    "google_sheets": {
+      "formula": "=IF(A2=B2,\"Match\",\"Differ\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IF(A2=B2,\"Match\",\"Differ\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "Widget",
+      "B2": "widget"
+    },
+    "formula": "=IF(EXACT(A2,B2),\"Match\",\"Differ\")",
+    "expected": "Differ"
+  },
+  "explanation": "The = operator ignores case (\"Widget\" = \"widget\" is TRUE), which is usually what you want; EXACT compares byte-for-byte, which is why the verified example returns \"Differ\". Count the mismatches in one cell with =SUMPRODUCT(--(A2:A100<>B2:B100)). The other common surprise: trailing spaces from exports make identical-looking cells differ — wrap both sides in TRIM when reconciling pasted data. (Comparing whole LISTS regardless of order is a different task — see the find-values-in-both-lists recipe.)"
+}

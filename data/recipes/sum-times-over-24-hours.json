@@ -1,0 +1,31 @@
+{
+  "slug": "sum-times-over-24-hours",
+  "title": "How to sum times past 24 hours (without them wrapping)",
+  "task": "Total hours across many rows — and stop the total resetting to zero after 24.",
+  "keywords": [
+    "sum hours over 24 excel",
+    "time total wrong wraps",
+    "[h]:mm format",
+    "add up durations google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUM(A2:A10)",
+      "note": "The formula is fine — format the result cell as [h]:mm (square brackets stop the 24-hour wrap)."
+    },
+    "google_sheets": {
+      "formula": "=SUM(A2:A10)",
+      "note": "Identical; Format → Number → Duration does the same thing."
+    },
+    "libreoffice": {
+      "formula": "=SUM(A2:A10)",
+      "note": "Identical; format code [HH]:MM."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(TIME(20,0,0)+TIME(10,30,0),\"[H]:MM\")",
+    "expected": "30:30"
+  },
+  "explanation": "20:00 plus 10:30 is 30 and a half hours, but a cell formatted h:mm shows 6:30 — the display wraps at 24 like a clock, even though the underlying value (1.27 days) is correct. Bracketed hour codes ([h]:mm) tell the app to keep counting instead of wrapping: 30:30. So the fix is formatting, not the SUM. For payroll math, multiply the total by 24 to get decimal hours instead."
+}

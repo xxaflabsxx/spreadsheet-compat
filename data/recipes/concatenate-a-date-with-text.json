@@ -1,0 +1,31 @@
+{
+  "slug": "concatenate-a-date-with-text",
+  "title": "How to concatenate a date with text (without getting a number)",
+  "task": "Build strings like \"Report for 7/24/2026\" — where naive joining shows 46227 instead of the date.",
+  "keywords": [
+    "date shows as number when concatenated",
+    "concatenate date and text excel",
+    "text function date format",
+    "join date string google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=\"Report for \"&TEXT(A2,\"m/d/yyyy\")",
+      "note": "TEXT controls the format: \"mmmm d\" gives July 24, \"yyyy-mm-dd\" gives ISO."
+    },
+    "google_sheets": {
+      "formula": "=\"Report for \"&TEXT(A2,\"m/d/yyyy\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=\"Report for \"&TEXT(A2,\"M/D/YYYY\")",
+      "note": "Identical (codes case-insensitive)."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=\"Report for \"&TEXT(DATE(2026,7,24),\"M/D/YYYY\")",
+    "expected": "Report for 7/24/2026"
+  },
+  "explanation": "Joining a date with & uses the cell's underlying value — the day-count serial number — so \"Report for \"&A2 produces \"Report for 46227\". Wrapping the date in TEXT with a format code renders it the way you'd see it in the cell: \"Report for 7/24/2026\". The same trick applies to numbers that lose their formatting when concatenated: currency (TEXT(B2,\"$#,##0.00\")), percentages (TEXT(C2,\"0.0%\")), and times."
+}

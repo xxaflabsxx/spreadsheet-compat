@@ -1,0 +1,35 @@
+{
+  "slug": "countif-across-multiple-columns",
+  "title": "How to COUNTIF across multiple columns",
+  "task": "Count matches in a whole grid, not just one column.",
+  "keywords": [
+    "countif multiple columns excel",
+    "count across range grid",
+    "countif 2d range",
+    "count value in table google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=COUNTIF(A2:C10,\"yes\")",
+      "note": "COUNTIF happily takes a 2-D range — this is all it needs."
+    },
+    "google_sheets": {
+      "formula": "=COUNTIF(A2:C10,\"yes\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=COUNTIF(A2:C10,\"yes\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "yes", "B2": "no",  "C2": "yes",
+      "A3": "no",  "B3": "yes", "C3": "no",
+      "A4": "yes", "B4": "no",  "C4": "no"
+    },
+    "formula": "=COUNTIF(A2:C4,\"yes\")",
+    "expected": 4
+  },
+  "explanation": "COUNTIF's range can be any rectangle — it scans every cell in the 3×3 grid and finds four \"yes\" values. The limitation people then hit: COUNTIFS requires all its criteria ranges to be the SAME shape, so you can't mix a 2-D range with a 1-D condition. For \"count rows where ANY column says yes\", use =SUMPRODUCT(--(COUNTIF(OFFSET(...)...))) patterns or simply add per-column COUNTIFS. Wildcards and comparisons work exactly as in the single-column case."
+}

@@ -1,0 +1,31 @@
+{
+  "slug": "calculate-elapsed-years-as-a-decimal",
+  "title": "How to calculate elapsed years as a decimal (YEARFRAC)",
+  "task": "Get the fraction of a year between two dates — accruals, prorating, service length.",
+  "keywords": [
+    "yearfrac excel",
+    "fraction of year between dates",
+    "prorate by days formula",
+    "decimal years google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=YEARFRAC(A2,B2,1)",
+      "note": "Basis 1 = actual/actual (real calendar). Basis 0 (default) is the 30/360 bond convention."
+    },
+    "google_sheets": {
+      "formula": "=YEARFRAC(A2,B2,1)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=YEARFRAC(A2,B2,1)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=ROUND(YEARFRAC(DATE(2026,1,1),DATE(2026,7,1),0),4)",
+    "expected": 0.5
+  },
+  "explanation": "YEARFRAC turns two dates into decimal years. The basis argument picks the day-count convention: 0 (default) is 30/360 — every month counts as 30 days, so Jan 1 to Jul 1 is exactly 0.5 — while basis 1 uses the actual calendar (181/365 ≈ 0.4959 for the same dates). Use 30/360 for bond-style finance, actual/actual for real elapsed time like tenure or prorated fees. A simpler approximation, (B2-A2)/365.25, is fine when the convention doesn't matter."
+}
