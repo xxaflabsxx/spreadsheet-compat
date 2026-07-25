@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-24T01:48:45.543633+00:00",
+  "generated_at": "2026-07-25T04:50:55.948908+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-07-23 18:48:09.491000",
-    "now_run_2": "2026-07-23 18:48:31.903000",
+    "now_run_1": "2026-07-24 21:50:27.558000",
+    "now_run_2": "2026-07-24 21:50:46.355000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 21.35,
+    "conversion_seconds_run_1": 16.98,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -241,6 +241,20 @@
         "notes": null
       }
     },
+    "ARABIC": {
+      "ARABIC_basic": {
+        "description": "Roman numerals back to a number",
+        "formula_display": "=ARABIC(\"MMXXVI\")",
+        "formula_stored_xlsx": "=_xlfn.ARABIC(\"MMXXVI\")",
+        "value": 2026,
+        "range_values": null,
+        "error": null,
+        "expected": 2026,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "ARRAYTOTEXT": {
       "ARRAYTOTEXT_default_format": {
         "description": "Default (concise) format joins elements with comma+space",
@@ -439,6 +453,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "apple and avocado match a*; average of 10,30 = 20"
+      }
+    },
+    "BASE": {
+      "BASE_basic": {
+        "description": "Convert 255 to hexadecimal text",
+        "formula_display": "=BASE(255,16)",
+        "formula_stored_xlsx": "=_xlfn.BASE(255,16)",
+        "value": "FF",
+        "range_values": null,
+        "error": null,
+        "expected": "FF",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "BYCOL": {
@@ -1535,6 +1563,20 @@
         "notes": "Effective dates become Jan 1 -> Jan 30 (31 clamped to 30, no next-month shift) -> (1-1)*30 + (30-1) = 29"
       }
     },
+    "DECIMAL": {
+      "DECIMAL_basic": {
+        "description": "Parse hexadecimal text back to a number",
+        "formula_display": "=DECIMAL(\"FF\",16)",
+        "formula_stored_xlsx": "=_xlfn.DECIMAL(\"FF\",16)",
+        "value": 255,
+        "range_values": null,
+        "error": null,
+        "expected": 255,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "DEGREES": {
       "DEGREES_pi_is_180": {
         "description": "Pi radians is exactly a half turn, i.e. 180 degrees",
@@ -1580,6 +1622,20 @@
         "range_values": null,
         "error": null,
         "expected": -90,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DOLLAR": {
+      "DOLLAR_basic": {
+        "description": "Currency-format text with 2 decimals (en-US locale)",
+        "formula_display": "=DOLLAR(1234.567,2)",
+        "formula_stored_xlsx": "=DOLLAR(1234.567,2)",
+        "value": "$1,234.57",
+        "range_values": null,
+        "error": null,
+        "expected": "$1,234.57",
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -2084,6 +2140,20 @@
         "range_values": null,
         "error": null,
         "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FIXED": {
+      "FIXED_basic": {
+        "description": "Fixed-decimal text with thousands separator",
+        "formula_display": "=FIXED(1234.567,1)",
+        "formula_stored_xlsx": "=FIXED(1234.567,1)",
+        "value": "1,234.6",
+        "range_values": null,
+        "error": null,
+        "expected": "1,234.6",
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -3114,6 +3184,32 @@
         "range_values": null,
         "error": "#VALUE!",
         "expected": "#VALUE!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "ISFORMULA": {
+      "ISFORMULA_true_on_formula_cell": {
+        "description": "A1 contains a live formula (=1+2), so ISFORMULA must return TRUE",
+        "formula_display": "=ISFORMULA(A1)",
+        "formula_stored_xlsx": "=_xlfn.ISFORMULA(A1)",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "ISFORMULA_false_on_literal": {
+        "description": "B1 holds a plain number, so FALSE",
+        "formula_display": "=ISFORMULA(B1)",
+        "formula_stored_xlsx": "=_xlfn.ISFORMULA(B1)",
+        "value": false,
+        "range_values": null,
+        "error": null,
+        "expected": false,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -4774,7 +4870,7 @@
         "description": "Existence probe only: NOW() is volatile (changes every recalculation), so there is no fixed expected value",
         "formula_display": "=NOW()",
         "formula_stored_xlsx": "=NOW()",
-        "value": 46226.78353814815,
+        "value": 46227.910114259255,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -4786,7 +4882,7 @@
         "description": "Two NOW() calls inside one cell evaluate in the same recalculation pass, so their difference is exactly 0 \u2014 a deterministic assertion about a volatile function (N() keeps the result a plain number instead of a duration-formatted cell)",
         "formula_display": "=N(NOW()-NOW())",
         "formula_stored_xlsx": "=N(NOW()-NOW())",
-        "value": -8.73148148148148e-11,
+        "value": -5.82175925925926e-11,
         "range_values": null,
         "error": null,
         "expected": 0,
@@ -5436,7 +5532,7 @@
         "description": "Existence probe only: RAND() is non-deterministic; we just confirm the engine recognizes the function (not #NAME?) and returns a plausible value",
         "formula_display": "=RAND()",
         "formula_stored_xlsx": "=RAND()",
-        "value": 0.970180549968338,
+        "value": 0.454698897542288,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5476,7 +5572,7 @@
         "description": "Existence probe: confirm recognized and result plausible (integer 1..10)",
         "formula_display": "=RANDBETWEEN(1,10)",
         "formula_stored_xlsx": "=RANDBETWEEN(1,10)",
-        "value": 7,
+        "value": 3,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5500,7 +5596,7 @@
         "description": "Existence probe with an all-negative range",
         "formula_display": "=RANDBETWEEN(-5,-1)",
         "formula_stored_xlsx": "=RANDBETWEEN(-5,-1)",
-        "value": -5,
+        "value": -2,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5796,6 +5892,20 @@
         "range_values": null,
         "error": null,
         "expected": "",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "ROMAN": {
+      "ROMAN_basic": {
+        "description": "Classic-form Roman numerals",
+        "formula_display": "=ROMAN(2026)",
+        "formula_stored_xlsx": "=ROMAN(2026)",
+        "value": "MMXXVI",
+        "range_values": null,
+        "error": null,
+        "expected": "MMXXVI",
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -6244,6 +6354,34 @@
           4,
           3
         ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SHEET": {
+      "SHEET_returns_positive_index": {
+        "description": "SHEET() returns the current sheet's 1-based index; the absolute number depends on workbook structure (our harness batches many test sheets into one workbook), so we assert the invariant instead",
+        "formula_display": "=SHEET()>=1",
+        "formula_stored_xlsx": "=_xlfn.SHEET()>=1",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SHEETS": {
+      "SHEETS_returns_positive_count": {
+        "description": "SHEETS() counts sheets in the workbook; the harness workbook holds one sheet per test case, so we assert the invariant rather than a fixed count",
+        "formula_display": "=SHEETS()>=1",
+        "formula_stored_xlsx": "=_xlfn.SHEETS()>=1",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -7432,7 +7570,7 @@
         "description": "Existence probe only: TODAY() is non-deterministic (changes daily), so there is no fixed 'expected' value",
         "formula_display": "=TODAY()",
         "formula_stored_xlsx": "=TODAY()",
-        "value": 46226.0,
+        "value": 46227.0,
         "range_values": null,
         "error": null,
         "expected": null,
