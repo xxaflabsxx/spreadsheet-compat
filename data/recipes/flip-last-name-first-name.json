@@ -1,0 +1,33 @@
+{
+  "slug": "flip-last-name-first-name",
+  "title": "How to flip \"Last, First\" into \"First Last\"",
+  "task": "Reorder comma-style names from exports and directories into natural order.",
+  "keywords": [
+    "flip last name first name excel",
+    "reverse name order formula",
+    "last comma first to first last",
+    "reorder names google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MID(A2,FIND(\",\",A2)+2,100)&\" \"&LEFT(A2,FIND(\",\",A2)-1)",
+      "note": "Assumes \"Last, First\" with one comma-space. 365: =TEXTAFTER(A2,\", \")&\" \"&TEXTBEFORE(A2,\",\")."
+    },
+    "google_sheets": {
+      "formula": "=MID(A2,FIND(\",\",A2)+2,100)&\" \"&LEFT(A2,FIND(\",\",A2)-1)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MID(A2,FIND(\",\",A2)+2,100)&\" \"&LEFT(A2,FIND(\",\",A2)-1)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "Lovelace, Ada"
+    },
+    "formula": "=MID(A2,FIND(\",\",A2)+2,100)&\" \"&LEFT(A2,FIND(\",\",A2)-1)",
+    "expected": "Ada Lovelace"
+  },
+  "explanation": "FIND locates the comma; MID takes everything two characters past it (skipping the comma and space) while LEFT takes everything before it, and & reassembles them in natural order: \"Lovelace, Ada\" → \"Ada Lovelace\". If some entries lack the space after the comma, use +1 with a TRIM wrapper; suffixes like \"Jr.\" travel with whichever part they were typed in."
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "convert-apr-to-apy",
+  "title": "How to convert APR to APY",
+  "task": "Turn a nominal annual rate into the effective yearly rate compounding actually delivers.",
+  "keywords": [
+    "apr to apy formula",
+    "effective annual rate excel",
+    "nominal vs effective interest",
+    "effect function google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=(1+A2/12)^12-1",
+      "note": "A2=APR, monthly compounding. Built-in: =EFFECT(A2,12); NOMINAL() goes the other way."
+    },
+    "google_sheets": {
+      "formula": "=(1+A2/12)^12-1",
+      "note": "Identical; EFFECT/NOMINAL also available."
+    },
+    "libreoffice": {
+      "formula": "=(1+A2/12)^12-1",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 0.06
+    },
+    "formula": "=ROUND((1+A2/12)^12-1,4)",
+    "expected": 0.0617
+  },
+  "explanation": "APR quotes the simple annual rate; APY is what compounding makes of it: 6% APR compounded monthly is (1 + 0.06/12)^12 − 1 ≈ 6.17% APY. The gap widens with higher rates and more frequent compounding — a 24% credit-card APR is really 26.8% APY. Swap the 12s for the actual compounding frequency (365 for daily), or use EFFECT(rate, periods) which is this exact formula built in."
+}

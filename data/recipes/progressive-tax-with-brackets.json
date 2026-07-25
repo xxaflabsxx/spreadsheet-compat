@@ -1,0 +1,36 @@
+{
+  "slug": "progressive-tax-with-brackets",
+  "title": "How to calculate progressive tax with brackets in one formula",
+  "task": "Marginal tax the way real systems work — each bracket taxes only the income inside it.",
+  "keywords": [
+    "progressive tax formula excel",
+    "tax brackets calculation",
+    "marginal tax sumproduct",
+    "income tax formula google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+      "note": "D = bracket thresholds (0, 10000, 40000...), E = RATE INCREASES at each threshold (0.10, 0.10, 0.05 for rates 10/20/25%)."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 50000,
+      "D2": 0,     "E2": 0.1,
+      "D3": 10000, "E3": 0.1,
+      "D4": 40000, "E4": 0.05
+    },
+    "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+    "expected": 9500
+  },
+  "explanation": "The trick is storing each bracket's rate INCREASE rather than its rate: 10%, then +10% (to 20%), then +5% (to 25%). Each increase applies to all income above its threshold, and SUMPRODUCT adds the pieces: 50,000×10% + 40,000×10% + 10,000×5% = $9,500 — exactly the bracket-by-bracket answer (10k@10% + 30k@20% + 10k@25%). Edit the threshold/increase table, not the formula, when rates change. Effective rate is the result ÷ income (19% here), and the marginal rate is the sum of increases passed."
+}
