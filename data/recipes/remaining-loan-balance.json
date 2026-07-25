@@ -1,0 +1,35 @@
+{
+  "slug": "remaining-loan-balance",
+  "title": "How to calculate the remaining balance on a loan",
+  "task": "How much you still owe after N payments — payoff planning, refinance math.",
+  "keywords": [
+    "remaining loan balance formula excel",
+    "loan payoff amount",
+    "fv function balance",
+    "outstanding principal google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=FV(A2/12,D2,PMT(A2/12,B2*12,C2),C2)",
+      "note": "A2=rate, B2=years, C2=principal, D2=payments made. FV of the loan under its own payment stream."
+    },
+    "google_sheets": {
+      "formula": "=FV(A2/12,D2,PMT(A2/12,B2*12,C2),C2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=FV(A2/12,D2,PMT(A2/12,B2*12,C2),C2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 0.06,
+      "B2": 30,
+      "C2": 300000
+    },
+    "formula": "=ROUND(FV(A2/12,B2*12,PMT(A2/12,B2*12,C2),C2),2)",
+    "expected": 0
+  },
+  "explanation": "A loan balance is just a future value: the principal growing at the loan rate while the payment stream chips away at it. Nesting PMT inside FV keeps everything consistent — and the verification exploits that: after all 360 payments the balance must be exactly $0.00, which the engines confirm. Plug any smaller payment count into the periods argument for the balance at that point (after 60 payments of the $300k example: ~$279,163). Signs work out because PMT returns a negative payment against a positive principal."
+}

@@ -1,0 +1,35 @@
+{
+  "slug": "monthly-savings-needed-for-a-goal",
+  "title": "How to calculate the monthly savings needed for a goal",
+  "task": "Working backward from a target: what to put away each month to hit $X by a date.",
+  "keywords": [
+    "monthly savings for goal excel",
+    "pmt savings target",
+    "how much to save per month",
+    "sinking fund formula google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=-PMT(A2/12,B2*12,0,C2)",
+      "note": "A2=annual return, B2=years, C2=target. The 0 = starting from nothing; put current savings there instead if you have a head start."
+    },
+    "google_sheets": {
+      "formula": "=-PMT(A2/12,B2*12,0,C2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=-PMT(A2/12,B2*12,0,C2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 0.04,
+      "B2": 5,
+      "C2": 20000
+    },
+    "formula": "=ROUND(-PMT(A2/12,B2*12,0,C2),2)",
+    "expected": 301.66
+  },
+  "explanation": "PMT solves for the payment in any annuity — pointing its future-value argument at your target makes it answer the savings question: $20,000 in 5 years at 4% needs $301.66/month, noticeably less than the naive 20,000÷60 = $333 because growth does part of the work. At 0% return the two agree exactly. The minus sign flips PMT's pay-out convention into a positive deposit; a nonzero present-value argument accounts for money already saved."
+}
