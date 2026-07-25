@@ -1,0 +1,33 @@
+{
+  "slug": "convert-a-column-number-to-a-letter",
+  "title": "How to convert a column number to a letter",
+  "task": "Turn 28 into \"AB\" — for building references in formulas, scripts, or documentation.",
+  "keywords": [
+    "column number to letter excel",
+    "address substitute trick",
+    "column letter from index",
+    "convert 1 to A google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUBSTITUTE(ADDRESS(1,A2,4),\"1\",\"\")",
+      "note": "ADDRESS builds \"AB1\" in relative style (4); SUBSTITUTE strips the row."
+    },
+    "google_sheets": {
+      "formula": "=SUBSTITUTE(ADDRESS(1,A2,4),\"1\",\"\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUBSTITUTE(ADDRESS(1,A2,4),\"1\",\"\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 28
+    },
+    "formula": "=SUBSTITUTE(ADDRESS(1,A2,4),\"1\",\"\")",
+    "expected": "AB"
+  },
+  "explanation": "ADDRESS(1, 28, 4) produces the relative reference \"AB1\", and stripping the \"1\" leaves the column letters — safe here because style 4 guarantees the only digit is that row 1. The reverse direction (letter → number) is =COLUMN(INDIRECT(A2&\"1\")). Mostly useful when generating formulas from data or writing documentation; inside ordinary formulas, INDEX with numeric coordinates avoids needing letters at all."
+}

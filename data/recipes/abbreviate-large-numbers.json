@@ -1,0 +1,33 @@
+{
+  "slug": "abbreviate-large-numbers",
+  "title": "How to abbreviate large numbers as K and M",
+  "task": "Show 3,400,000 as \"3.4M\" — dashboards, charts, tight columns.",
+  "keywords": [
+    "format numbers as thousands K excel",
+    "abbreviate millions M",
+    "custom format comma scaling",
+    "shorten large numbers google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TEXT(A2,\"0.0,,\"\"M\"\"\")",
+      "note": "Each trailing comma divides the display by 1,000. As a cell format: 0.0,,\"M\" keeps the value numeric."
+    },
+    "google_sheets": {
+      "formula": "=TEXT(A2,\"0.0,,\"\"M\"\"\")",
+      "note": "Identical, including the custom-format route."
+    },
+    "libreoffice": {
+      "formula": "=TEXT(A2,\"0.0,,\"\"M\"\"\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 3400000
+    },
+    "formula": "=TEXT(A2,\"0.0,,\"\"M\"\"\")",
+    "expected": "3.4M"
+  },
+  "explanation": "A comma at the END of a number format's digit section scales the display down by a thousand — two commas mean millions, so 3,400,000 renders as \"3.4M\". One comma with \"K\" does thousands. Applied as a custom cell format instead of TEXT, the cell still holds the real number for math while displaying short. For mixed magnitudes on one sheet (930K next to 1.2M), you need a conditional: =IF(A2>=1E6,TEXT(A2,\"0.0,,\"\"M\"\"\"),TEXT(A2,\"0,\"\"K\"\"\"))."
+}

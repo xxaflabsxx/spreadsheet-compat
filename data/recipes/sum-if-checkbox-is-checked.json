@@ -1,0 +1,35 @@
+{
+  "slug": "sum-if-checkbox-is-checked",
+  "title": "How to sum values where a checkbox is checked",
+  "task": "Total only the ticked rows — selected expenses, chosen items, approved amounts.",
+  "keywords": [
+    "sum if checkbox checked google sheets",
+    "sumif true excel",
+    "total selected rows",
+    "checkbox driven total"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIF(A2:A100,TRUE,B2:B100)",
+      "note": "A = checkbox column (TRUE/FALSE), B = amounts."
+    },
+    "google_sheets": {
+      "formula": "=SUMIF(A2:A100,TRUE,B2:B100)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMIF(A2:A100,TRUE(),B2:B100)",
+      "note": "Same idea; LibreOffice writes the boolean criterion as TRUE()."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": true,  "B2": 100,
+      "A3": false, "B3": 50,
+      "A4": true,  "B4": 25
+    },
+    "formula": "=SUMIF(A2:A4,TRUE(),B2:B4)",
+    "expected": 125
+  },
+  "explanation": "Checkboxes store TRUE/FALSE, so SUMIF with TRUE as the criterion totals just the ticked rows: 100 + 25 = 125. Since TRUE behaves as 1, =SUMPRODUCT(A2:A100*B2:B100) gives the same answer and extends naturally to more conditions. Pair with the count-checked-checkboxes recipe for a live \"3 selected · $125\" summary line."
+}

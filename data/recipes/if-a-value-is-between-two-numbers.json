@@ -1,0 +1,33 @@
+{
+  "slug": "if-a-value-is-between-two-numbers",
+  "title": "How to test if a value is between two numbers",
+  "task": "An in-range check — because 10<=A2<=20 doesn't work the way you'd hope.",
+  "keywords": [
+    "if between two numbers excel",
+    "between formula",
+    "and range check google sheets",
+    "value in range test"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(AND(A2>=10,A2<=20),\"In range\",\"Out\")",
+      "note": "There's no BETWEEN operator; AND of two comparisons is the idiom."
+    },
+    "google_sheets": {
+      "formula": "=IF(AND(A2>=10,A2<=20),\"In range\",\"Out\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IF(AND(A2>=10,A2<=20),\"In range\",\"Out\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 15
+    },
+    "formula": "=IF(AND(A2>=10,A2<=20),\"In range\",\"Out\")",
+    "expected": "In range"
+  },
+  "explanation": "The chained form 10<=A2<=20 doesn't error — worse, it evaluates left-to-right into TRUE<=20, which is always TRUE, so everything passes the test. AND(A2>=10,A2<=20) is the correct spelling: 15 clears both bounds. An arithmetic alternative some prefer: =MEDIAN(10,A2,20)=A2 is TRUE exactly when A2 is within [10,20] — and MEDIAN(10,A2,20) by itself doubles as a clamp."
+}

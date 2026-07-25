@@ -1,0 +1,34 @@
+{
+  "slug": "cap-a-percentage-at-100",
+  "title": "How to cap a percentage at 100%",
+  "task": "Progress bars and completion metrics that shouldn't read 137%.",
+  "keywords": [
+    "cap percentage at 100 excel",
+    "limit value maximum formula",
+    "min function cap",
+    "progress capped google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MIN(1,A2/B2)",
+      "note": "A2=actual, B2=target; format as %. MIN picks the smaller of the ratio and 100%."
+    },
+    "google_sheets": {
+      "formula": "=MIN(1,A2/B2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MIN(1,A2/B2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 137,
+      "B2": 100
+    },
+    "formula": "=MIN(1,A2/B2)",
+    "expected": 1
+  },
+  "explanation": "MIN(1, ratio) lets normal progress through untouched and flattens anything past the target to exactly 100%: 137/100 caps at 1. The mirror MAX(0,...) floors negatives, and both together — MAX(0,MIN(1,A2/B2)) — is the standard progress-bar clamp. Cap the DISPLAY only (keep 137% in the data, show 100% in the bar) by clamping in the chart's helper column, not the source."
+}
