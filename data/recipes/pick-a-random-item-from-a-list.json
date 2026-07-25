@@ -1,0 +1,35 @@
+{
+  "slug": "pick-a-random-item-from-a-list",
+  "title": "How to pick a random item from a list",
+  "task": "Random winner, random assignment, random sample of one.",
+  "keywords": [
+    "random name picker excel",
+    "pick random from list",
+    "index randbetween",
+    "random winner google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INDEX(A2:A100,RANDBETWEEN(1,COUNTA(A2:A100)))",
+      "note": "Re-rolls on every recalculation — copy → Paste Values to freeze the winner."
+    },
+    "google_sheets": {
+      "formula": "=INDEX(A2:A100,RANDBETWEEN(1,COUNTA(A2:A100)))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=INDEX(A2:A100,RANDBETWEEN(1,COUNTA(A2:A100)))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "alice",
+      "A3": "bob",
+      "A4": "carol"
+    },
+    "formula": "=COUNTIF(A2:A4,INDEX(A2:A4,RANDBETWEEN(1,3)))>0",
+    "expected": true
+  },
+  "explanation": "RANDBETWEEN rolls a row number from 1 to the list's length (COUNTA keeps it sized to the data) and INDEX fetches that entry. (The verification asserts the deterministic property — whatever gets picked is genuinely from the list — since the pick itself changes every run.) It re-rolls on every edit, so freeze results with Paste Special → Values. For several picks WITHOUT repeats, modern versions can use =TAKE(SORTBY(A2:A100,RANDARRAY(COUNTA(A2:A100))),3) — shuffle, then take three."
+}

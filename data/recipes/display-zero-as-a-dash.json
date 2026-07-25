@@ -1,0 +1,31 @@
+{
+  "slug": "display-zero-as-a-dash",
+  "title": "How to display zero as a dash",
+  "task": "Show \"-\" instead of 0 in reports, accounting-style, without destroying the numbers.",
+  "keywords": [
+    "show zero as dash excel",
+    "accounting format zero",
+    "custom number format sections",
+    "replace 0 with dash google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "#,##0;-#,##0;\"-\"",
+      "note": "This is a custom NUMBER FORMAT (Ctrl+1 → Custom), not a formula — the cell still contains the real 0."
+    },
+    "google_sheets": {
+      "formula": "#,##0;-#,##0;\"-\"",
+      "note": "Format → Number → Custom number format. Identical syntax."
+    },
+    "libreoffice": {
+      "formula": "#,##0;-#,##0;\"-\"",
+      "note": "Format → Cells → Number → Format code. Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(0,\"#,##0;-#,##0;\"\"-\"\"\")",
+    "expected": "-"
+  },
+  "explanation": "Number formats have up to three value sections separated by semicolons — positive;negative;zero — so putting \"-\" in the third slot swaps every zero's DISPLAY for a dash while the cell keeps its true value for sums and charts (the verification proves the format string via TEXT). This beats formula tricks like IF(A2=0,\"-\",A2), which turn numbers into text and quietly break downstream math. The built-in Accounting format uses exactly this mechanism."
+}

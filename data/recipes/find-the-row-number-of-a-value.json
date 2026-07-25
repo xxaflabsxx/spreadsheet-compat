@@ -1,0 +1,36 @@
+{
+  "slug": "find-the-row-number-of-a-value",
+  "title": "How to find the row number of a value",
+  "task": "Get which row a value sits in — for building references, jumping, or feeding INDEX.",
+  "keywords": [
+    "find row number of value excel",
+    "match function row",
+    "position of value in column",
+    "row of match google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MATCH(D2,A:A,0)",
+      "note": "0 = exact match. Against a partial range, add its offset: MATCH(...,A5:A100,0)+4."
+    },
+    "google_sheets": {
+      "formula": "=MATCH(D2,A:A,0)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MATCH(D2,A:A,0)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A1": "apple",
+      "A2": "banana",
+      "A3": "cherry",
+      "D2": "cherry"
+    },
+    "formula": "=MATCH(D2,A1:A3,0)",
+    "expected": 3
+  },
+  "explanation": "MATCH returns the POSITION within the range you give it — searching whole-column A:A makes position and sheet row number the same thing, which is why that form answers the question directly. \"cherry\" is 3rd. Positions from partial ranges need the range's starting offset added back — the classic off-by-a-few bug. Not found gives #N/A (wrap in IFNA); wildcards work with match type 0 (\"cher*\")."
+}

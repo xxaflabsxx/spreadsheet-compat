@@ -1,0 +1,37 @@
+{
+  "slug": "sum-where-another-column-is-not-blank",
+  "title": "How to sum where another column is not blank",
+  "task": "Total only the rows that have something in a companion column — completed, dated, assigned.",
+  "keywords": [
+    "sumif not blank excel",
+    "sum rows with value in other column",
+    "sumif <> criteria",
+    "exclude blanks from sum google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIF(A2:A6,\"<>\",B2:B6)",
+      "note": "\"<>\" alone means \"not empty\". The inverse (only blanks): =SUMIF(A2:A6,\"\",B2:B6)."
+    },
+    "google_sheets": {
+      "formula": "=SUMIF(A2:A6,\"<>\",B2:B6)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMIF(A2:A6,\"<>\",B2:B6)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "done", "B2": 100,
+      "B3": 50,
+      "A4": "done", "B4": 25,
+      "B5": 75,
+      "A6": "x",    "B6": 10
+    },
+    "formula": "=SUMIF(A2:A6,\"<>\",B2:B6)",
+    "expected": 135
+  },
+  "explanation": "The bare \"<>\" criterion matches any non-empty cell, so only rows whose A-column is filled contribute: 100 + 25 + 10 = 135, while the amounts beside empty cells are skipped. Handy for \"sum only invoiced items\" (date column filled) or \"only assigned tasks\". One caveat: a formula returning \"\" looks blank but counts as NOT blank here — filter on the underlying condition instead when your status column is formula-driven."
+}
