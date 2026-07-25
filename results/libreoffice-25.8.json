@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-25T04:50:55.948908+00:00",
+  "generated_at": "2026-07-25T19:48:29.892195+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-07-24 21:50:27.558000",
-    "now_run_2": "2026-07-24 21:50:46.355000",
+    "now_run_1": "2026-07-25 12:48:01.442000",
+    "now_run_2": "2026-07-25 12:48:20.172000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 16.98,
+    "conversion_seconds_run_1": 16.49,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -1325,6 +1325,34 @@
         "notes": null
       }
     },
+    "CUMIPMT": {
+      "CUMIPMT_first_period": {
+        "description": "Cumulative interest over just period 1 (negative by cash-flow convention) = -1500",
+        "formula_display": "=ROUND(CUMIPMT(0.005,360,300000,1,1,0),2)",
+        "formula_stored_xlsx": "=ROUND(CUMIPMT(0.005,360,300000,1,1,0),2)",
+        "value": -1500,
+        "range_values": null,
+        "error": null,
+        "expected": -1500,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "CUMPRINC": {
+      "CUMPRINC_first_period": {
+        "description": "Cumulative principal over period 1 (negative by convention) = -298.65",
+        "formula_display": "=ROUND(CUMPRINC(0.005,360,300000,1,1,0),2)",
+        "formula_stored_xlsx": "=ROUND(CUMPRINC(0.005,360,300000,1,1,0),2)",
+        "value": -298.65,
+        "range_values": null,
+        "error": null,
+        "expected": -298.65,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "DATE": {
       "DATE_basic": {
         "description": "Ordinary in-range y/m/d construction",
@@ -1563,6 +1591,34 @@
         "notes": "Effective dates become Jan 1 -> Jan 30 (31 clamped to 30, no next-month shift) -> (1-1)*30 + (30-1) = 29"
       }
     },
+    "DB": {
+      "DB_first_year": {
+        "description": "Fixed-declining year 1: rate = 1-(salvage/cost)^(1/life) rounded to 3 places = 0.369, so 3690",
+        "formula_display": "=DB(10000,1000,5,1)",
+        "formula_stored_xlsx": "=DB(10000,1000,5,1)",
+        "value": 3690,
+        "range_values": null,
+        "error": null,
+        "expected": 3690,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DDB": {
+      "DDB_first_year": {
+        "description": "Double-declining year 1: cost x 2/life = 4000",
+        "formula_display": "=DDB(10000,1000,5,1)",
+        "formula_stored_xlsx": "=DDB(10000,1000,5,1)",
+        "value": 4000,
+        "range_values": null,
+        "error": null,
+        "expected": 4000,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "DECIMAL": {
       "DECIMAL_basic": {
         "description": "Parse hexadecimal text back to a number",
@@ -1717,6 +1773,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "1.9 truncates to 1, not rounded to 2"
+      }
+    },
+    "EFFECT": {
+      "EFFECT_monthly_6pct": {
+        "description": "Effective rate of 6% nominal compounded monthly: (1.005)^12-1",
+        "formula_display": "=ROUND(EFFECT(0.06,12),6)",
+        "formula_stored_xlsx": "=ROUND(EFFECT(0.06,12),6)",
+        "value": 0.061678,
+        "range_values": null,
+        "error": null,
+        "expected": 0.061678,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "EOMONTH": {
@@ -2437,6 +2507,20 @@
         "notes": "Probe only: layout of the spilled result (headers/totals) varies with optional args; the key datum is whether the engine has GROUPBY at all"
       }
     },
+    "GROWTH": {
+      "GROWTH_exact_exponential": {
+        "description": "y=2^x data extrapolated to x=4 must give 16 (exact exponential fit)",
+        "formula_display": "=ROUND(GROWTH(B1:B3,A1:A3,4),6)",
+        "formula_stored_xlsx": "=ROUND(GROWTH(B1:B3,A1:A3,4),6)",
+        "value": 16,
+        "range_values": null,
+        "error": null,
+        "expected": 16,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "HLOOKUP": {
       "HLOOKUP_exact_match": {
         "description": "Exact match (range_lookup=FALSE) on a horizontal lookup table",
@@ -2970,6 +3054,20 @@
         "range_values": null,
         "error": null,
         "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "IPMT": {
+      "IPMT_first_month_interest": {
+        "description": "First-month interest on the $300k/6% mortgage: exactly principal x monthly rate = 1500",
+        "formula_display": "=ROUND(IPMT(0.005,1,360,-300000),2)",
+        "formula_stored_xlsx": "=ROUND(IPMT(0.005,1,360,-300000),2)",
+        "value": 1500,
+        "range_values": null,
+        "error": null,
+        "expected": 1500,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -3775,6 +3873,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call"
+      }
+    },
+    "LINEST": {
+      "LINEST_slope_exact_line": {
+        "description": "Slope element of LINEST on exact y=2x+1 data must be exactly 2",
+        "formula_display": "=INDEX(LINEST(B1:B3,A1:A3),1,1)",
+        "formula_stored_xlsx": "=INDEX(LINEST(B1:B3,A1:A3),1,1)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "LN": {
@@ -4803,6 +4915,20 @@
         "notes": null
       }
     },
+    "NOMINAL": {
+      "NOMINAL_inverse_of_effect": {
+        "description": "Inverting EFFECT recovers the 6% nominal rate",
+        "formula_display": "=ROUND(NOMINAL(0.061678,12),4)",
+        "formula_stored_xlsx": "=ROUND(NOMINAL(0.061678,12),4)",
+        "value": 0.06,
+        "range_values": null,
+        "error": null,
+        "expected": 0.06,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "NOT": {
       "NOT_true": {
         "description": "NOT(TRUE) -> FALSE",
@@ -4870,7 +4996,7 @@
         "description": "Existence probe only: NOW() is volatile (changes every recalculation), so there is no fixed expected value",
         "formula_display": "=NOW()",
         "formula_stored_xlsx": "=NOW()",
-        "value": 46227.910114259255,
+        "value": 46228.533421215274,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -4882,7 +5008,7 @@
         "description": "Two NOW() calls inside one cell evaluate in the same recalculation pass, so their difference is exactly 0 \u2014 a deterministic assertion about a volatile function (N() keeps the result a plain number instead of a duration-formatted cell)",
         "formula_display": "=N(NOW()-NOW())",
         "formula_stored_xlsx": "=N(NOW()-NOW())",
-        "value": -5.82175925925926e-11,
+        "value": -8.73148148148148e-11,
         "range_values": null,
         "error": null,
         "expected": 0,
@@ -5335,6 +5461,20 @@
         "notes": "Real Excel (the worksheet function, and even the '^' operator) has a long-standing, Microsoft-acknowledged bug -- reproduced in Excel 2007 and 2010 and still reported unresolved -- where both '=0^0' and '=POWER(0,0)' incorrectly return #NUM! instead of 1, even though VBA's own 'x = 0 ^ 0' correctly evaluates to 1 in the same product. Recording the spec/cross-engine-consensus value (1) as 'expected' here so this exact Excel quirk shows up as a flagged divergence rather than being silently baked in as 'correct' -- https://learn.microsoft.com/en-us/answers/questions/4850441/excel-formula-bug-00-gives-num"
       }
     },
+    "PPMT": {
+      "PPMT_first_month_principal": {
+        "description": "First-month principal: total payment 1798.65 minus 1500 interest",
+        "formula_display": "=ROUND(PPMT(0.005,1,360,-300000),2)",
+        "formula_stored_xlsx": "=ROUND(PPMT(0.005,1,360,-300000),2)",
+        "value": 298.65,
+        "range_values": null,
+        "error": null,
+        "expected": 298.65,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "PROPER": {
       "PROPER_basic_sentence": {
         "description": "Basic multi-word capitalization: the first letter of each word is capitalized, the rest lowercased",
@@ -5532,7 +5672,7 @@
         "description": "Existence probe only: RAND() is non-deterministic; we just confirm the engine recognizes the function (not #NAME?) and returns a plausible value",
         "formula_display": "=RAND()",
         "formula_stored_xlsx": "=RAND()",
-        "value": 0.454698897542288,
+        "value": 0.344359219784261,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5572,7 +5712,7 @@
         "description": "Existence probe: confirm recognized and result plausible (integer 1..10)",
         "formula_display": "=RANDBETWEEN(1,10)",
         "formula_stored_xlsx": "=RANDBETWEEN(1,10)",
-        "value": 3,
+        "value": 1,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5596,7 +5736,7 @@
         "description": "Existence probe with an all-negative range",
         "formula_display": "=RANDBETWEEN(-5,-1)",
         "formula_stored_xlsx": "=RANDBETWEEN(-5,-1)",
-        "value": -2,
+        "value": -3,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -6437,6 +6577,20 @@
         "notes": null
       }
     },
+    "SLN": {
+      "SLN_straight_line": {
+        "description": "(cost-salvage)/life: (10000-1000)/5 = 1800/year",
+        "formula_display": "=SLN(10000,1000,5)",
+        "formula_stored_xlsx": "=SLN(10000,1000,5)",
+        "value": 1800,
+        "range_values": null,
+        "error": null,
+        "expected": 1800,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "SLOPE": {
       "SLOPE_exact_line": {
         "description": "Points on y=2x+1 exactly: least-squares slope must be exactly 2",
@@ -7143,6 +7297,20 @@
         "notes": null
       }
     },
+    "SYD": {
+      "SYD_first_year": {
+        "description": "Sum-of-years digits year 1: 9000 x 5/15 = 3000",
+        "formula_display": "=SYD(10000,1000,5,1)",
+        "formula_stored_xlsx": "=SYD(10000,1000,5,1)",
+        "value": 3000,
+        "range_values": null,
+        "error": null,
+        "expected": 3000,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "TAKE": {
       "TAKE_first_2x2": {
         "description": "Take the first 2 rows and first 2 columns of a 3x3 range",
@@ -7570,7 +7738,7 @@
         "description": "Existence probe only: TODAY() is non-deterministic (changes daily), so there is no fixed 'expected' value",
         "formula_display": "=TODAY()",
         "formula_stored_xlsx": "=TODAY()",
-        "value": 46227.0,
+        "value": 46228.0,
         "range_values": null,
         "error": null,
         "expected": null,
