@@ -1153,6 +1153,30 @@ COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
 """
 
 
+EXCLUSIVE_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>{{ heading }}</h1>
+<p class="lede">{{ lede }}</p>
+<p>{{ items|length }} functions, from each vendor&rsquo;s official documentation{% if show_lo %} &mdash; with LibreOffice&rsquo;s status from our executed tests where available{% endif %}. Formulas using these <strong>break with <code>#NAME?</code></strong> when a file moves to the other app.</p>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Category</th>{% if show_lo %}<th>Also in LibreOffice?</th>{% endif %}</tr></thead>
+<tbody>
+{% for it in items %}
+<tr>
+  <td><a href="{{ rel }}functions/{{ it.name_lower }}.html">{{ it.name }}</a></td>
+  <td>{{ it.category }}</td>
+  {% if show_lo %}<td>{% if it.lo_verdict == 'supported' %}<span class="badge badge-good">Yes (tested)</span>{% elif it.lo_verdict == 'quirky' %}<span class="badge badge-quirk">Yes, with quirks</span>{% elif it.lo_verdict == 'unsupported' %}<span class="badge badge-bad">No (tested)</span>{% elif it.lo_doc %}<span class="badge badge-unknown">Documented</span>{% else %}<span class="badge badge-unknown">No</span>{% endif %}</td>{% endif %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p>{{ outro }}</p>
+{% endblock %}
+"""
+
+
 METHODOLOGY_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>How we verify spreadsheet compatibility</h1>
@@ -1334,6 +1358,7 @@ def build_env():
                 "comparison.html": COMPARISON_TMPL,
                 "comparison_index.html": COMPARISON_INDEX_TMPL,
                 "methodology.html": METHODOLOGY_TMPL,
+                "exclusive.html": EXCLUSIVE_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
@@ -1614,6 +1639,56 @@ def main():
     )
     (OUT_DIR / "checker.html").write_text(env.get_template("checker.html").render(**cctx))
     sitemap_urls.append({"loc": BASE_URL + "checker.html", "lastmod": build_date})
+
+    # ---- App-exclusive function pages (data-driven from documented flags) ----
+    def _excl_items(pred):
+        out = []
+        for r in records:
+            e = r["engines"]
+            if pred(e):
+                out.append({
+                    "name": r["name"], "name_lower": r["name_lower"],
+                    "category": r["category"],
+                    "lo_verdict": e["libreoffice"]["verdict"],
+                    "lo_doc": e["libreoffice"]["documented"],
+                })
+        return sorted(out, key=lambda x: (x["category"], x["name"]))
+
+    for slug, heading, lede, outro, items, show_lo in [
+        (
+            "sheets-functions-not-in-excel",
+            "Google Sheets functions that don't exist in Excel",
+            "QUERY, ARRAYFORMULA, IMPORTRANGE, GOOGLEFINANCE, the REGEX family… "
+            "these work only in Google Sheets. Export the file to .xlsx and every "
+            "cell using them fails.",
+            "Portable alternatives exist for many of these — FILTER/SORT/UNIQUE for "
+            "much of QUERY, native spilling instead of ARRAYFORMULA — see the "
+            "comparison pages for migration patterns.",
+            _excl_items(lambda e: e["google_sheets"]["documented"] and not e["excel"]["documented"]),
+            True,
+        ),
+        (
+            "excel-functions-not-in-google-sheets",
+            "Excel functions that don't exist in Google Sheets",
+            "PIVOTBY, GROUPBY, the CUBE family, AGGREGATE and more are documented "
+            "for Excel but absent from Google Sheets — importing an .xlsx that uses "
+            "them leaves broken formulas.",
+            "The LibreOffice column shows that \"Excel-only\" is often really "
+            "\"not-in-Sheets\": several of these run fine in LibreOffice Calc per "
+            "our executed tests.",
+            _excl_items(lambda e: e["excel"]["documented"] and not e["google_sheets"]["documented"]),
+            True,
+        ),
+    ]:
+        ectx = common_ctx(rel="")
+        ectx.update(
+            page_title=heading + " — full list",
+            meta_description=lede + f" Full list of {len(items)} functions with categories.",
+            canonical=BASE_URL + f"{slug}.html",
+            heading=heading, lede=lede, outro=outro, items=items, show_lo=show_lo,
+        )
+        (OUT_DIR / f"{slug}.html").write_text(env.get_template("exclusive.html").render(**ectx))
+        sitemap_urls.append({"loc": BASE_URL + f"{slug}.html", "lastmod": build_date})
 
     # ---- Methodology page ----
     if lo_versions:
