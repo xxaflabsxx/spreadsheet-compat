@@ -1133,6 +1133,9 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 
 <p>Full per-version details on each function page:
 {% for f in c.funcs %}<a href="{{ rel }}functions/{{ f|lower|replace('/','-') }}.html">{{ f }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %}.</p>
+{% if c.see_also %}
+<p>See also: {% for s in c.see_also %}<a href="{{ rel }}{{ s.href }}">{{ s.label }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %}.</p>
+{% endif %}
 {% endblock %}
 """
 
@@ -1311,6 +1314,11 @@ and arithmetic canaries proving the recalculation genuinely happened. The same m
 every <a href="{{ rel }}index.html">function page</a> and the
 <a href="{{ rel }}checker.html">formula checker</a>. Versions tested so far:
 {{ versions_tested|join(', ') }}.</p>
+
+<p>Related cross-app gaps:
+<a href="{{ rel }}sheets-functions-not-in-excel.html">Google Sheets functions that don&rsquo;t exist in Excel</a> &middot;
+<a href="{{ rel }}excel-functions-not-in-google-sheets.html">Excel functions that don&rsquo;t exist in Google Sheets</a> &middot;
+<a href="{{ rel }}methodology.html">how we verify</a>.</p>
 {% endblock %}
 """
 
