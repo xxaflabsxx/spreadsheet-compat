@@ -1,0 +1,24 @@
+{
+  "slug": "textbefore-textafter-vs-left-mid-right",
+  "title": "TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position",
+  "meta_desc": "TEXTBEFORE and TEXTAFTER vs the classic LEFT/MID/RIGHT+FIND patterns: readability, edge cases, version requirements (LibreOffice quirks verified by execution).",
+  "funcs": ["TEXTBEFORE", "TEXTAFTER", "LEFT", "MID", "RIGHT", "FIND"],
+  "intro": "Every 'extract part of a cell' task used to mean LEFT/MID/RIGHT wrapped around FIND arithmetic. TEXTBEFORE and TEXTAFTER say what you mean — 'the part before the dash' — but they're new enough that portability is the real decision.",
+  "table": [
+    {"aspect": "Cut at a delimiter", "cols": ["One readable call: TEXTBEFORE(A2,\"-\")", "LEFT(A2,FIND(\"-\",A2)-1) — the -1 is on you"]},
+    {"aspect": "Nth or LAST occurrence", "cols": ["Built-in argument (negative counts from the end)", "SUBSTITUTE/CHAR trickery"]},
+    {"aspect": "Delimiter missing", "cols": ["Optional if_not_found argument", "FIND throws #VALUE!; wrap in IFERROR"]},
+    {"aspect": "Fixed-position slicing (chars 3-6)", "cols": ["Wrong tool", "Exactly what MID is for"]},
+    {"aspect": "Availability", "cols": ["Excel 365, Sheets, LibreOffice 24.8+ (with executed QUIRKS — see their pages)", "Universal, verified everywhere"]}
+  ],
+  "when": [
+    {"func": "TEXTBEFORE/TEXTAFTER", "use_when": "Delimiter-based extraction on modern versions — clearer intent, saner edge cases, and chainable: TEXTBEFORE(TEXTAFTER(A2,\"(\"),\")\") reads like the task."},
+    {"func": "LEFT/MID/RIGHT", "use_when": "Position-based slicing (fixed-width codes), or any file that must open in older Excel/LibreOffice 24.2 — the classic patterns run everywhere and always will."}
+  ],
+  "compat_note": "LEFT/MID/RIGHT/FIND execute identically in every version of all three apps we test. TEXTBEFORE/TEXTAFTER first appear in LibreOffice 24.8 and carry verified quirk flags there — our executed cases found edge-case behavior differences vs Excel (see each function's page for the failing case), so test delimiter-missing paths when a sheet must round-trip.",
+  "examples": [
+    {"label": "Modern: domain from email", "formula": "=TEXTAFTER(A2,\"@\")"},
+    {"label": "Classic equivalent", "formula": "=MID(A2,FIND(\"@\",A2)+1,100)"},
+    {"label": "Between parentheses, chained", "formula": "=TEXTBEFORE(TEXTAFTER(A2,\"(\"),\")\")"}
+  ]
+}

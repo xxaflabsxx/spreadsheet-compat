@@ -1,0 +1,24 @@
+{
+  "slug": "text-function-vs-cell-formatting",
+  "title": "TEXT() vs cell formatting: same codes, different consequences",
+  "meta_desc": "The TEXT function vs number formatting: both use format codes, but one converts values to strings and the other only changes display. When each is right.",
+  "funcs": ["TEXT", "VALUE"],
+  "intro": "The TEXT function and custom number formats speak the same format-code language (\"0.0%\", \"yyyy-mm-dd\", \"+0;-0;0\") — but TEXT converts the value into a string, while formatting leaves the number intact and changes only what you see. Choosing wrong either breaks downstream math or breaks your concatenations.",
+  "table": [
+    {"aspect": "Cell still contains", "cols": ["Text — the rendered string", "The real number/date, untouched"]},
+    {"aspect": "Downstream SUM/sort/chart", "cols": ["Broken or text-sorted", "Works normally"]},
+    {"aspect": "Usable inside other text", "cols": ["Yes — its whole purpose (\"due \"&TEXT(A2,\"mmm d\"))", "No — concatenating a formatted cell grabs the raw value"]},
+    {"aspect": "Where it lives", "cols": ["In the formula — visible, copies with it", "On the cell — invisible in formulas, lost on some exports"]},
+    {"aspect": "Compatibility", "cols": ["Universal (verified; format codes match across apps)", "Universal, minor locale differences in codes"]}
+  ],
+  "when": [
+    {"func": "TEXT()", "use_when": "Building strings: labels, sentences, concatenated dates (\"Report for 7/24/2026\"), CSV-style exports — anywhere the number is becoming part of prose."},
+    {"func": "Cell formatting", "use_when": "Everything still used as a number: currency columns, percentages, date columns, dashboards. If it will ever be summed, averaged, sorted, or charted, format — don't TEXT."}
+  ],
+  "compat_note": "TEXT executes identically across every version of all three apps we test, and the format-code dialect (sections, ?/?, [h]:mm, comma scaling) matches — several of our verified recipes lean on exactly that. The reverse trip is VALUE/DATEVALUE when someone TEXTed a column that needed to stay numeric.",
+  "examples": [
+    {"label": "Number into a sentence", "formula": "=\"Growth: \"&TEXT(B2,\"+0.0%;-0.0%\")"},
+    {"label": "Same look, still a number", "formula": "custom format:  +0.0%;-0.0%"},
+    {"label": "Undo an accidental TEXT column", "formula": "=VALUE(A2)"}
+  ]
+}

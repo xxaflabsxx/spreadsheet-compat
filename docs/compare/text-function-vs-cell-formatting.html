@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MID function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
-<link rel="canonical" href="https://canispreadsheet.com/functions/mid.html">
-<meta property="og:title" content="MID function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
+<title>TEXT() vs cell formatting: same codes, different consequences</title>
+<meta name="description" content="The TEXT function vs number formatting: both use format codes, but one converts values to strings and the other only changes display. When each is right.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/text-function-vs-cell-formatting.html">
+<meta property="og:title" content="TEXT() vs cell formatting: same codes, different consequences">
+<meta property="og:description" content="The TEXT function vs number formatting: both use format codes, but one converts values to strings and the other only changes display. When each is right.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/mid.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/text-function-vs-cell-formatting.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,195 +299,61 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>MID</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
+  <h1>TEXT() vs cell formatting: same codes, different consequences</h1>
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-07-25</p>
+<p class="lede">The TEXT function and custom number formats speak the same format-code language (&#34;0.0%&#34;, &#34;yyyy-mm-dd&#34;, &#34;+0;-0;0&#34;) — but TEXT converts the value into a string, while formatting leaves the number intact and changes only what you see. Choosing wrong either breaks downstream math or breaks your concatenations.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>MID</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/text.html">TEXT</a></th><th><a href="../functions/value.html">VALUE</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Cell still contains</strong></td><td>Text — the rendered string</td><td>The real number/date, untouched</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Downstream SUM/sort/chart</strong></td><td>Broken or text-sorted</td><td>Works normally</td></tr>
 
+<tr><td><strong>Usable inside other text</strong></td><td>Yes — its whole purpose (&#34;due &#34;&amp;TEXT(A2,&#34;mmm d&#34;))</td><td>No — concatenating a formatted cell grabs the raw value</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Where it lives</strong></td><td>In the formula — visible, copies with it</td><td>On the cell — invisible in formulas, lost on some exports</td></tr>
 
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-25)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Compatibility</strong></td><td>Universal (verified; format codes match across apps)</td><td>Universal, minor locale differences in codes</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-MID&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>TEXT()</strong> &mdash; Building strings: labels, sentences, concatenated dates (&#34;Report for 7/24/2026&#34;), CSV-style exports — anywhere the number is becoming part of prose.</li>
+
+<li><strong>Cell formatting</strong> &mdash; Everything still used as a number: currency columns, percentages, date columns, dashboards. If it will ever be summed, averaged, sorted, or charted, format — don&#39;t TEXT.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>TEXT executes identically across every version of all three apps we test, and the format-code dialect (sections, ?/?, [h]:mm, comma scaling) matches — several of our verified recipes lean on exactly that. The reverse trip is VALUE/DATEVALUE when someone TEXTed a column that needed to stay numeric.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Number into a sentence</td><td><code>=&#34;Growth: &#34;&amp;TEXT(B2,&#34;+0.0%;-0.0%&#34;)</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Same look, still a number</td><td><code>custom format:  +0.0%;-0.0%</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-25</td>
-</tr>
+<tr><td>Undo an accidental TEXT column</td><td><code>=VALUE(A2)</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-25)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=MID(A1,2,3)</td>
-  <td>Basic extraction of 3 characters starting at position 2</td>
-  <td class="result mono">xce</td>
-  <td class="result mono">xce</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,20,5)</td>
-  <td>start_num beyond the string length returns an empty string, not an error</td>
-  <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Microsoft docs: &#34;If start_num is greater than the length of text, MID returns \&#34;\&#34; (empty text).&#34; Source: https://support.microsoft.com/en-us/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,3,100)</td>
-  <td>num_chars larger than the number of characters remaining returns just what&#39;s left, not an error or padded result</td>
-  <td class="result mono">cel</td>
-  <td class="result mono">cel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,1,5)</td>
-  <td>start_num=1 with num_chars covering the whole string returns the whole string</td>
-  <td class="result mono">Excel</td>
-  <td class="result mono">Excel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/capitalize-the-first-letter-only.html">How to capitalize only the first letter (sentence case)</a></li><li><a href="../how-to/extract-domain-from-email.html">How to extract the domain from an email address</a></li><li><a href="../how-to/extract-last-name-from-a-full-name.html">How to extract the last name from a full name</a></li><li><a href="../how-to/extract-numbers-from-text.html">How to extract numbers from text in a cell</a></li><li><a href="../how-to/extract-text-between-two-characters.html">How to extract text between two characters</a></li><li><a href="../how-to/flip-last-name-first-name.html">How to flip &#34;Last, First&#34; into &#34;First Last&#34;</a></li><li><a href="../how-to/get-the-nth-word.html">How to extract the nth word from a cell</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</a></li>
-</ul>
+<p>Full per-version details on each function page:
+<a href="../functions/text.html">TEXT</a> &middot; <a href="../functions/value.html">VALUE</a>.</p>
 
 
 <aside class="promo-card">

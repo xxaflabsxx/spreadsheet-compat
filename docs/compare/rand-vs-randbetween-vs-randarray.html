@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MID function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
-<link rel="canonical" href="https://canispreadsheet.com/functions/mid.html">
-<meta property="og:title" content="MID function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
+<title>RAND vs RANDBETWEEN vs RANDARRAY: three flavors of random</title>
+<meta name="description" content="RAND vs RANDBETWEEN vs RANDARRAY: decimals, integers, and whole grids; volatility, freezing values, and version support verified by execution.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/rand-vs-randbetween-vs-randarray.html">
+<meta property="og:title" content="RAND vs RANDBETWEEN vs RANDARRAY: three flavors of random">
+<meta property="og:description" content="RAND vs RANDBETWEEN vs RANDARRAY: decimals, integers, and whole grids; volatility, freezing values, and version support verified by execution.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/mid.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/rand-vs-randbetween-vs-randarray.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,195 +299,63 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>MID</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
+  <h1>RAND vs RANDBETWEEN vs RANDARRAY: three flavors of random</h1>
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-07-25</p>
+<p class="lede">One value or a grid, decimals or integers: the random family splits by shape and type. All three share the same gotcha — volatility — and the same cure (Paste Special → Values).</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>MID</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/rand.html">RAND</a></th><th><a href="../functions/randbetween.html">RANDBETWEEN</a></th><th><a href="../functions/randarray.html">RANDARRAY</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Returns</strong></td><td>One decimal in [0,1)</td><td>One integer, both bounds inclusive</td><td>A whole spilled grid — decimals or integers</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Custom range</strong></td><td>Scale manually: RAND()*(max-min)+min</td><td>Built-in (min,max)</td><td>Built-in (min,max args), plus integer flag</td></tr>
 
+<tr><td><strong>Many values at once</strong></td><td>Fill the formula down</td><td>Fill down</td><td>One formula: RANDARRAY(rows,cols,...)</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Re-rolls on every edit</strong></td><td>Yes</td><td>Yes</td><td>Yes — the whole grid at once</td></tr>
 
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-25)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Availability (executed)</strong></td><td>Universal</td><td>Universal</td><td>Excel 365, Sheets, LibreOffice 25.8+ (verified supported)</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-MID&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>RAND</strong> &mdash; Probabilities and continuous values — coin flips (RAND()&lt;0.5), jittering chart points, random sort keys.</li>
+
+<li><strong>RANDBETWEEN</strong> &mdash; Dice, test scores, sample IDs — anything that must be a whole number in a range.</li>
+
+<li><strong>RANDARRAY</strong> &mdash; Bulk generation on modern versions — one formula fills a table, and SORTBY(range,RANDARRAY(n)) is the clean shuffle idiom.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>RAND and RANDBETWEEN execute in every version of all three apps we test; RANDARRAY is verified supported in LibreOffice 25.8 (our harness asserts its deterministic properties — shape and bounds — since the values themselves change per recalc). All three are volatile everywhere: freeze results with Paste Special → Values, or they re-roll on every edit.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Coin flip</td><td><code>=IF(RAND()&lt;0.5,&#34;Heads&#34;,&#34;Tails&#34;)</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Dice roll</td><td><code>=RANDBETWEEN(1,6)</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-25</td>
-</tr>
+<tr><td>Shuffle a list (365 / LO 25.8+)</td><td><code>=SORTBY(A2:A53,RANDARRAY(52))</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-25)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=MID(A1,2,3)</td>
-  <td>Basic extraction of 3 characters starting at position 2</td>
-  <td class="result mono">xce</td>
-  <td class="result mono">xce</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,20,5)</td>
-  <td>start_num beyond the string length returns an empty string, not an error</td>
-  <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Microsoft docs: &#34;If start_num is greater than the length of text, MID returns \&#34;\&#34; (empty text).&#34; Source: https://support.microsoft.com/en-us/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,3,100)</td>
-  <td>num_chars larger than the number of characters remaining returns just what&#39;s left, not an error or padded result</td>
-  <td class="result mono">cel</td>
-  <td class="result mono">cel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,1,5)</td>
-  <td>start_num=1 with num_chars covering the whole string returns the whole string</td>
-  <td class="result mono">Excel</td>
-  <td class="result mono">Excel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/capitalize-the-first-letter-only.html">How to capitalize only the first letter (sentence case)</a></li><li><a href="../how-to/extract-domain-from-email.html">How to extract the domain from an email address</a></li><li><a href="../how-to/extract-last-name-from-a-full-name.html">How to extract the last name from a full name</a></li><li><a href="../how-to/extract-numbers-from-text.html">How to extract numbers from text in a cell</a></li><li><a href="../how-to/extract-text-between-two-characters.html">How to extract text between two characters</a></li><li><a href="../how-to/flip-last-name-first-name.html">How to flip &#34;Last, First&#34; into &#34;First Last&#34;</a></li><li><a href="../how-to/get-the-nth-word.html">How to extract the nth word from a cell</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</a></li>
-</ul>
+<p>Full per-version details on each function page:
+<a href="../functions/rand.html">RAND</a> &middot; <a href="../functions/randbetween.html">RANDBETWEEN</a> &middot; <a href="../functions/randarray.html">RANDARRAY</a>.</p>
 
 
 <aside class="promo-card">

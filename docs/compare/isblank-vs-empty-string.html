@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MID function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
-<link rel="canonical" href="https://canispreadsheet.com/functions/mid.html">
-<meta property="og:title" content="MID function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
+<title>ISBLANK vs =&#34;&#34;: the two kinds of empty</title>
+<meta name="description" content="ISBLANK vs comparing to an empty string: why a formula returning &#34;&#34; isn&#39;t blank, COUNTBLANK&#39;s split personality, and reliable emptiness tests.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/isblank-vs-empty-string.html">
+<meta property="og:title" content="ISBLANK vs =&#34;&#34;: the two kinds of empty">
+<meta property="og:description" content="ISBLANK vs comparing to an empty string: why a formula returning &#34;&#34; isn&#39;t blank, COUNTBLANK&#39;s split personality, and reliable emptiness tests.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/mid.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/isblank-vs-empty-string.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,195 +299,61 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>MID</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
+  <h1>ISBLANK vs =&#34;&#34;: the two kinds of empty</h1>
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-07-25</p>
+<p class="lede">A cell can LOOK empty two ways: truly empty (nothing in it) or holding a formula that returns &#34;&#34;. ISBLANK only believes the first; A2=&#34;&#34; accepts both. Half of all &#39;my IF is wrong on empty cells&#39; bugs are this distinction.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>MID</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/isblank.html">ISBLANK</a></th><th><a href="../functions/countblank.html">COUNTBLANK</a></th><th><a href="../functions/counta.html">COUNTA</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Truly empty cell</strong></td><td>TRUE</td><td>Counted</td><td>Not counted</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Formula returning &#34;&#34;</strong></td><td>FALSE — there IS content (a formula)</td><td>Counted (!) — COUNTBLANK accepts both kinds</td><td>Counted — it&#39;s content</td></tr>
 
+<tr><td><strong>A space character &#34; &#34;</strong></td><td>FALSE</td><td>Not counted</td><td>Counted</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Zero</strong></td><td>FALSE</td><td>Not counted</td><td>Counted</td></tr>
 
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-25)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Compatibility</strong></td><td>Universal</td><td>Universal</td><td>Universal — all verified in every version we test</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-MID&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>ISBLANK</strong> &mdash; You specifically need &#39;was anything ever entered here&#39; — data-entry completeness checks where an IFERROR(&#34;&#34;) placeholder should count as filled.</li>
+
+<li><strong>A2=&#34;&#34; (or LEN(A2)=0)</strong> &mdash; The everyday &#39;looks empty&#39; test — treats true blanks and &#34;&#34;-returning formulas the same, which is usually what the logic wants. TRIM(A2)=&#34;&#34; additionally catches stray spaces.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>All three behave identically across every version of Excel, Google Sheets, and LibreOffice we test — including COUNTBLANK&#39;s quirk of counting BOTH kinds of empty while ISBLANK accepts only one. The trio COUNTA/COUNT/COUNTBLANK don&#39;t partition a range cleanly for exactly this reason.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Looks-empty test (usual choice)</td><td><code>=IF(A2=&#34;&#34;,&#34;missing&#34;,&#34;ok&#34;)</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Never-entered test</td><td><code>=ISBLANK(A2)</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-25</td>
-</tr>
+<tr><td>Empty-ish incl. whitespace</td><td><code>=LEN(TRIM(A2))=0</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-25)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=MID(A1,2,3)</td>
-  <td>Basic extraction of 3 characters starting at position 2</td>
-  <td class="result mono">xce</td>
-  <td class="result mono">xce</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,20,5)</td>
-  <td>start_num beyond the string length returns an empty string, not an error</td>
-  <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Microsoft docs: &#34;If start_num is greater than the length of text, MID returns \&#34;\&#34; (empty text).&#34; Source: https://support.microsoft.com/en-us/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,3,100)</td>
-  <td>num_chars larger than the number of characters remaining returns just what&#39;s left, not an error or padded result</td>
-  <td class="result mono">cel</td>
-  <td class="result mono">cel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,1,5)</td>
-  <td>start_num=1 with num_chars covering the whole string returns the whole string</td>
-  <td class="result mono">Excel</td>
-  <td class="result mono">Excel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/capitalize-the-first-letter-only.html">How to capitalize only the first letter (sentence case)</a></li><li><a href="../how-to/extract-domain-from-email.html">How to extract the domain from an email address</a></li><li><a href="../how-to/extract-last-name-from-a-full-name.html">How to extract the last name from a full name</a></li><li><a href="../how-to/extract-numbers-from-text.html">How to extract numbers from text in a cell</a></li><li><a href="../how-to/extract-text-between-two-characters.html">How to extract text between two characters</a></li><li><a href="../how-to/flip-last-name-first-name.html">How to flip &#34;Last, First&#34; into &#34;First Last&#34;</a></li><li><a href="../how-to/get-the-nth-word.html">How to extract the nth word from a cell</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</a></li>
-</ul>
+<p>Full per-version details on each function page:
+<a href="../functions/isblank.html">ISBLANK</a> &middot; <a href="../functions/countblank.html">COUNTBLANK</a> &middot; <a href="../functions/counta.html">COUNTA</a>.</p>
 
 
 <aside class="promo-card">

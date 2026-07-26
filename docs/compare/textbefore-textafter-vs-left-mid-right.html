@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MID function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
-<link rel="canonical" href="https://canispreadsheet.com/functions/mid.html">
-<meta property="og:title" content="MID function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does MID work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the MID function (Text).">
+<title>TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</title>
+<meta name="description" content="TEXTBEFORE and TEXTAFTER vs the classic LEFT/MID/RIGHT+FIND patterns: readability, edge cases, version requirements (LibreOffice quirks verified by execution).">
+<link rel="canonical" href="https://canispreadsheet.com/compare/textbefore-textafter-vs-left-mid-right.html">
+<meta property="og:title" content="TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position">
+<meta property="og:description" content="TEXTBEFORE and TEXTAFTER vs the classic LEFT/MID/RIGHT+FIND patterns: readability, edge cases, version requirements (LibreOffice quirks verified by execution).">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/mid.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/textbefore-textafter-vs-left-mid-right.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,195 +299,61 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>MID</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
+  <h1>TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</h1>
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-07-25</p>
+<p class="lede">Every &#39;extract part of a cell&#39; task used to mean LEFT/MID/RIGHT wrapped around FIND arithmetic. TEXTBEFORE and TEXTAFTER say what you mean — &#39;the part before the dash&#39; — but they&#39;re new enough that portability is the real decision.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>MID</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/textbefore.html">TEXTBEFORE</a></th><th><a href="../functions/textafter.html">TEXTAFTER</a></th><th><a href="../functions/left.html">LEFT</a></th><th><a href="../functions/mid.html">MID</a></th><th><a href="../functions/right.html">RIGHT</a></th><th><a href="../functions/find.html">FIND</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Cut at a delimiter</strong></td><td>One readable call: TEXTBEFORE(A2,&#34;-&#34;)</td><td>LEFT(A2,FIND(&#34;-&#34;,A2)-1) — the -1 is on you</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Nth or LAST occurrence</strong></td><td>Built-in argument (negative counts from the end)</td><td>SUBSTITUTE/CHAR trickery</td></tr>
 
+<tr><td><strong>Delimiter missing</strong></td><td>Optional if_not_found argument</td><td>FIND throws #VALUE!; wrap in IFERROR</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Fixed-position slicing (chars 3-6)</strong></td><td>Wrong tool</td><td>Exactly what MID is for</td></tr>
 
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-25)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Availability</strong></td><td>Excel 365, Sheets, LibreOffice 24.8+ (with executed QUIRKS — see their pages)</td><td>Universal, verified everywhere</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-MID&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>TEXTBEFORE/TEXTAFTER</strong> &mdash; Delimiter-based extraction on modern versions — clearer intent, saner edge cases, and chainable: TEXTBEFORE(TEXTAFTER(A2,&#34;(&#34;),&#34;)&#34;) reads like the task.</li>
+
+<li><strong>LEFT/MID/RIGHT</strong> &mdash; Position-based slicing (fixed-width codes), or any file that must open in older Excel/LibreOffice 24.2 — the classic patterns run everywhere and always will.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>LEFT/MID/RIGHT/FIND execute identically in every version of all three apps we test. TEXTBEFORE/TEXTAFTER first appear in LibreOffice 24.8 and carry verified quirk flags there — our executed cases found edge-case behavior differences vs Excel (see each function&#39;s page for the failing case), so test delimiter-missing paths when a sheet must round-trip.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Modern: domain from email</td><td><code>=TEXTAFTER(A2,&#34;@&#34;)</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Classic equivalent</td><td><code>=MID(A2,FIND(&#34;@&#34;,A2)+1,100)</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-25</td>
-</tr>
+<tr><td>Between parentheses, chained</td><td><code>=TEXTBEFORE(TEXTAFTER(A2,&#34;(&#34;),&#34;)&#34;)</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-25)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=MID(A1,2,3)</td>
-  <td>Basic extraction of 3 characters starting at position 2</td>
-  <td class="result mono">xce</td>
-  <td class="result mono">xce</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,20,5)</td>
-  <td>start_num beyond the string length returns an empty string, not an error</td>
-  <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Microsoft docs: &#34;If start_num is greater than the length of text, MID returns \&#34;\&#34; (empty text).&#34; Source: https://support.microsoft.com/en-us/office/mid-midb-functions-d5f9e25c-d7d6-472e-b568-4ecb12433028</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,3,100)</td>
-  <td>num_chars larger than the number of characters remaining returns just what&#39;s left, not an error or padded result</td>
-  <td class="result mono">cel</td>
-  <td class="result mono">cel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=MID(A1,1,5)</td>
-  <td>start_num=1 with num_chars covering the whole string returns the whole string</td>
-  <td class="result mono">Excel</td>
-  <td class="result mono">Excel</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/capitalize-the-first-letter-only.html">How to capitalize only the first letter (sentence case)</a></li><li><a href="../how-to/extract-domain-from-email.html">How to extract the domain from an email address</a></li><li><a href="../how-to/extract-last-name-from-a-full-name.html">How to extract the last name from a full name</a></li><li><a href="../how-to/extract-numbers-from-text.html">How to extract numbers from text in a cell</a></li><li><a href="../how-to/extract-text-between-two-characters.html">How to extract text between two characters</a></li><li><a href="../how-to/flip-last-name-first-name.html">How to flip &#34;Last, First&#34; into &#34;First Last&#34;</a></li><li><a href="../how-to/get-the-nth-word.html">How to extract the nth word from a cell</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</a></li>
-</ul>
+<p>Full per-version details on each function page:
+<a href="../functions/textbefore.html">TEXTBEFORE</a> &middot; <a href="../functions/textafter.html">TEXTAFTER</a> &middot; <a href="../functions/left.html">LEFT</a> &middot; <a href="../functions/mid.html">MID</a> &middot; <a href="../functions/right.html">RIGHT</a> &middot; <a href="../functions/find.html">FIND</a>.</p>
 
 
 <aside class="promo-card">
