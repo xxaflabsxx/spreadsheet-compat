@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DATEDIF function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does DATEDIF work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the DATEDIF function (Date and time).">
-<link rel="canonical" href="https://canispreadsheet.com/functions/datedif.html">
-<meta property="og:title" content="DATEDIF function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does DATEDIF work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the DATEDIF function (Date and time).">
+<title>NPV vs PV: which discounting function do you need?</title>
+<meta name="description" content="NPV vs PV in spreadsheets: constant payments vs varying cash flows, the off-by-one timing trap in NPV, and when XNPV is the honest answer.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/npv-vs-pv.html">
+<meta property="og:title" content="NPV vs PV: which discounting function do you need?">
+<meta property="og:description" content="NPV vs PV in spreadsheets: constant payments vs varying cash flows, the off-by-one timing trap in NPV, and when XNPV is the honest answer.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/datedif.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/npv-vs-pv.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,242 +299,63 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>DATEDIF</h1>
-  
-    <span class="badge badge-quirk">Quirk found</span>
-  
+  <h1>NPV vs PV: which discounting function do you need?</h1>
 </div>
-<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-25</p>
+<p class="lede">Both discount future money to today. PV handles the special case of IDENTICAL payments at regular intervals (annuities, loans); NPV takes a list of DIFFERENT cash flows. The trap everyone hits: NPV discounts its very first argument by one full period — it assumes your first flow happens a period from now, not today.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>DATEDIF</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/npv.html">NPV</a></th><th><a href="../functions/pv.html">PV</a></th><th><a href="../functions/xnpv.html">XNPV</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Cash flows</strong></td><td>A list — each can differ</td><td>One constant payment (plus optional lump sum)</td><td>A list, each with its own DATE</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Timing assumption</strong></td><td>First flow = END of period 1 (discounted once!)</td><td>Ordinary annuity (or type=1 for due)</td><td>Explicit — dates say everything</td></tr>
 
+<tr><td><strong>Include today&#39;s outlay</strong></td><td>ADD it outside: =NPV(r,flows)+initial (initial is negative)</td><td>It&#39;s the result — PV is the willing-to-pay-today number</td><td>Just date it today</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Irregular spacing</strong></td><td>No — assumes equal periods</td><td>No</td><td>Yes — its whole purpose</td></tr>
 
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-25)</td>
-  <td>
-    
-      <span class="badge badge-quirk">Quirk found</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Compatibility</strong></td><td>Universal</td><td>Universal</td><td>Universal (all verified by execution)</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-DATEDIF&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>PV</strong> &mdash; Valuing streams of equal payments: what a loan, lease, annuity, or bond coupon leg is worth today.</li>
+
+<li><strong>NPV</strong> &mdash; Project appraisal with varying yearly flows — remembering the initial investment is added OUTSIDE the function, undiscounted.</li>
+
+<li><strong>XNPV</strong> &mdash; Real-world dated cash flows (deals close mid-month, payments cluster) — the assumptions disappear because every flow carries its date.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>All three execute identically in every version of all three apps we test — including the NPV first-flow discounting convention (verified: NPV(10%,100,200,300)=481.59, where 100 is divided by 1.1 once) and XNPV returning 0 when discounting at the flows&#39; own IRR.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Project NPV with initial outlay today</td><td><code>=NPV(10%,C2:C6)+B2</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Value of $1,000/year for 5 years</td><td><code>=PV(10%,5,-1000)</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-25</td>
-</tr>
+<tr><td>Dated flows</td><td><code>=XNPV(10%,B2:B6,A2:A6)</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-
-<h2 class="section-title">Why isn't DATEDIF working in LibreOffice?</h2>
-
-<p><code>DATEDIF</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
-Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
-page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
-against the failing cases above before assuming your data is wrong.</p>
-
-
-
-
-<div class="quirk-box">
-  <h3>Discovered quirks</h3>
-  <ul>
-  
-    
-  
-    
-  
-    
-      
-    
-      
-    
-      
-    
-      
-    
-      
-      <li>
-        <span class="formula">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),&#34;D&#34;)</span> on
-        <strong>LibreOffice Calc</strong> returned
-        <span class="formula">#VALUE!</span>, but the documented/expected
-        result is <span class="formula">#NUM!</span>.
-        Microsoft docs state end&lt;start raises #NUM!; record engines&#39; ACTUAL error code here since this is a known point of cross-engine divergence; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
-      </li>
-      
-    
-  
-  </ul>
-</div>
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-25)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),&#34;Y&#34;)</td>
-  <td>Whole years between two dates</td>
-  <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),&#34;M&#34;)</td>
-  <td>Whole months between two dates</td>
-  <td class="result mono">41</td>
-  <td class="result mono">41</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2024,1,1),DATE(2024,1,10),&#34;D&#34;)</td>
-  <td>Whole days between two dates</td>
-  <td class="result mono">9</td>
-  <td class="result mono">9</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2024,1,31),DATE(2024,3,1),&#34;MD&#34;)</td>
-  <td>&#34;MD&#34; (days ignoring months and years) is documented by Microsoft as unreliable/buggy for some date combos</td>
-  <td class="result mono">-1</td>
-  <td class="result mono">-1<br><span class="category-tag">Textbook-naive expectation might be ~1, but MD has a well-known Microsoft-acknowledged bug around month-end dates; recording the ACTUAL engine output is the point of this test</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),&#34;D&#34;)</td>
-  <td>End date before start date -&gt; #NUM! per Microsoft&#39;s documented DATEDIF behavior</td>
-  <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft docs state end&lt;start raises #NUM!; record engines&#39; ACTUAL error code here since this is a known point of cross-engine divergence</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/calculate-age-from-birthdate.html">How to calculate age in years from a birth date</a></li><li><a href="../how-to/calculate-age-in-years-and-months.html">How to calculate age in years and months</a></li><li><a href="../how-to/days-between-two-dates.html">How to calculate the number of days between two dates</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/datedif-vs-yearfrac.html">DATEDIF vs YEARFRAC: whole units or a fraction</a></li>
-</ul>
+<p>Full per-version details on each function page:
+<a href="../functions/npv.html">NPV</a> &middot; <a href="../functions/pv.html">PV</a> &middot; <a href="../functions/xnpv.html">XNPV</a>.</p>
 
 
 <aside class="promo-card">

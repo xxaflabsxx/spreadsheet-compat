@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DATEDIF function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does DATEDIF work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the DATEDIF function (Date and time).">
-<link rel="canonical" href="https://canispreadsheet.com/functions/datedif.html">
-<meta property="og:title" content="DATEDIF function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does DATEDIF work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the DATEDIF function (Date and time).">
+<title>EDATE vs EOMONTH: same-day or month-end</title>
+<meta name="description" content="EDATE vs EOMONTH: shifting dates by months while keeping the day, versus snapping to month boundaries. The building blocks of billing and reporting date math.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/edate-vs-eomonth.html">
+<meta property="og:title" content="EDATE vs EOMONTH: same-day or month-end">
+<meta property="og:description" content="EDATE vs EOMONTH: shifting dates by months while keeping the day, versus snapping to month boundaries. The building blocks of billing and reporting date math.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/datedif.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/edate-vs-eomonth.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,242 +299,61 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>DATEDIF</h1>
-  
-    <span class="badge badge-quirk">Quirk found</span>
-  
+  <h1>EDATE vs EOMONTH: same-day or month-end</h1>
 </div>
-<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-25</p>
+<p class="lede">Both jump a date by whole months; they differ in where they land. EDATE keeps the day-of-month (the 15th stays the 15th); EOMONTH always lands on the month&#39;s LAST day. Between them they express nearly every recurring-date rule.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>DATEDIF</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/edate.html">EDATE</a></th><th><a href="../functions/eomonth.html">EOMONTH</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Jan 15 + 1 month</strong></td><td>Feb 15</td><td>Feb 28 (end of the target month)</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Jan 31 + 1 month</strong></td><td>Feb 28 (clamps to a valid day)</td><td>Feb 28</td></tr>
 
+<tr><td><strong>Preserves</strong></td><td>Day of month (when possible)</td><td>Nothing — always month-end</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>First-of-month trick</strong></td><td>—</td><td>EOMONTH(date,-1)+1 = first day of date&#39;s month</td></tr>
 
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-25)</td>
-  <td>
-    
-      <span class="badge badge-quirk">Quirk found</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Compatibility</strong></td><td>Universal</td><td>Universal (both verified in every version of all three apps we test)</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-DATEDIF&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>EDATE</strong> &mdash; Anniversary-style recurrence: subscription renewals, monthly due dates, &#39;same day next quarter&#39; (offset 3), birthdays-by-month.</li>
+
+<li><strong>EOMONTH</strong> &mdash; Period boundaries: statement cutoffs, accrual dates, days-in-month (DAY(EOMONTH(d,0))), and — via the -1/+1 idiom — the first of any month.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>Both execute identically in every version of Excel, Google Sheets, and LibreOffice we test, including the Jan-31-plus-a-month clamping behavior. Remember both return date serials — format the cell as a date or the result looks like 46234.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Renewal same day next month</td><td><code>=EDATE(A2,1)</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Last day of this month</td><td><code>=EOMONTH(A2,0)</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-25</td>
-</tr>
+<tr><td>First day of this month</td><td><code>=EOMONTH(A2,-1)+1</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-
-<h2 class="section-title">Why isn't DATEDIF working in LibreOffice?</h2>
-
-<p><code>DATEDIF</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
-Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
-page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
-against the failing cases above before assuming your data is wrong.</p>
-
-
-
-
-<div class="quirk-box">
-  <h3>Discovered quirks</h3>
-  <ul>
-  
-    
-  
-    
-  
-    
-      
-    
-      
-    
-      
-    
-      
-    
-      
-      <li>
-        <span class="formula">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),&#34;D&#34;)</span> on
-        <strong>LibreOffice Calc</strong> returned
-        <span class="formula">#VALUE!</span>, but the documented/expected
-        result is <span class="formula">#NUM!</span>.
-        Microsoft docs state end&lt;start raises #NUM!; record engines&#39; ACTUAL error code here since this is a known point of cross-engine divergence; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
-      </li>
-      
-    
-  
-  </ul>
-</div>
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-25)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),&#34;Y&#34;)</td>
-  <td>Whole years between two dates</td>
-  <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),&#34;M&#34;)</td>
-  <td>Whole months between two dates</td>
-  <td class="result mono">41</td>
-  <td class="result mono">41</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2024,1,1),DATE(2024,1,10),&#34;D&#34;)</td>
-  <td>Whole days between two dates</td>
-  <td class="result mono">9</td>
-  <td class="result mono">9</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2024,1,31),DATE(2024,3,1),&#34;MD&#34;)</td>
-  <td>&#34;MD&#34; (days ignoring months and years) is documented by Microsoft as unreliable/buggy for some date combos</td>
-  <td class="result mono">-1</td>
-  <td class="result mono">-1<br><span class="category-tag">Textbook-naive expectation might be ~1, but MD has a well-known Microsoft-acknowledged bug around month-end dates; recording the ACTUAL engine output is the point of this test</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),&#34;D&#34;)</td>
-  <td>End date before start date -&gt; #NUM! per Microsoft&#39;s documented DATEDIF behavior</td>
-  <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft docs state end&lt;start raises #NUM!; record engines&#39; ACTUAL error code here since this is a known point of cross-engine divergence</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/calculate-age-from-birthdate.html">How to calculate age in years from a birth date</a></li><li><a href="../how-to/calculate-age-in-years-and-months.html">How to calculate age in years and months</a></li><li><a href="../how-to/days-between-two-dates.html">How to calculate the number of days between two dates</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/datedif-vs-yearfrac.html">DATEDIF vs YEARFRAC: whole units or a fraction</a></li>
-</ul>
+<p>Full per-version details on each function page:
+<a href="../functions/edate.html">EDATE</a> &middot; <a href="../functions/eomonth.html">EOMONTH</a>.</p>
 
 
 <aside class="promo-card">

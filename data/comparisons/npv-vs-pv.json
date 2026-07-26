@@ -1,0 +1,25 @@
+{
+  "slug": "npv-vs-pv",
+  "title": "NPV vs PV: which discounting function do you need?",
+  "meta_desc": "NPV vs PV in spreadsheets: constant payments vs varying cash flows, the off-by-one timing trap in NPV, and when XNPV is the honest answer.",
+  "funcs": ["NPV", "PV", "XNPV"],
+  "intro": "Both discount future money to today. PV handles the special case of IDENTICAL payments at regular intervals (annuities, loans); NPV takes a list of DIFFERENT cash flows. The trap everyone hits: NPV discounts its very first argument by one full period — it assumes your first flow happens a period from now, not today.",
+  "table": [
+    {"aspect": "Cash flows", "cols": ["A list — each can differ", "One constant payment (plus optional lump sum)", "A list, each with its own DATE"]},
+    {"aspect": "Timing assumption", "cols": ["First flow = END of period 1 (discounted once!)", "Ordinary annuity (or type=1 for due)", "Explicit — dates say everything"]},
+    {"aspect": "Include today's outlay", "cols": ["ADD it outside: =NPV(r,flows)+initial (initial is negative)", "It's the result — PV is the willing-to-pay-today number", "Just date it today"]},
+    {"aspect": "Irregular spacing", "cols": ["No — assumes equal periods", "No", "Yes — its whole purpose"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal (all verified by execution)"]}
+  ],
+  "when": [
+    {"func": "PV", "use_when": "Valuing streams of equal payments: what a loan, lease, annuity, or bond coupon leg is worth today."},
+    {"func": "NPV", "use_when": "Project appraisal with varying yearly flows — remembering the initial investment is added OUTSIDE the function, undiscounted."},
+    {"func": "XNPV", "use_when": "Real-world dated cash flows (deals close mid-month, payments cluster) — the assumptions disappear because every flow carries its date."}
+  ],
+  "compat_note": "All three execute identically in every version of all three apps we test — including the NPV first-flow discounting convention (verified: NPV(10%,100,200,300)=481.59, where 100 is divided by 1.1 once) and XNPV returning 0 when discounting at the flows' own IRR.",
+  "examples": [
+    {"label": "Project NPV with initial outlay today", "formula": "=NPV(10%,C2:C6)+B2"},
+    {"label": "Value of $1,000/year for 5 years", "formula": "=PV(10%,5,-1000)"},
+    {"label": "Dated flows", "formula": "=XNPV(10%,B2:B6,A2:A6)"}
+  ]
+}

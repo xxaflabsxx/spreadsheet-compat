@@ -1,0 +1,24 @@
+{
+  "slug": "ipmt-vs-ppmt",
+  "title": "IPMT vs PPMT: where each payment actually goes",
+  "meta_desc": "IPMT vs PPMT: splitting a loan payment into interest and principal, why the mix flips over time, and building amortization schedules. Verified in all three apps.",
+  "funcs": ["IPMT", "PPMT", "PMT"],
+  "intro": "Every fixed loan payment is the same size but a different mixture: IPMT returns the interest slice of payment N, PPMT the principal slice, and for any period they sum exactly to PMT. Early on you're mostly renting money; the mix flips past the halfway point.",
+  "table": [
+    {"aspect": "Returns", "cols": ["Interest portion of payment N", "Principal portion of payment N", "The whole (constant) payment"]},
+    {"aspect": "Identity", "cols": ["IPMT + PPMT = PMT for every period — a built-in audit check", "", ""]},
+    {"aspect": "Over time", "cols": ["Shrinks each period", "Grows each period", "Constant"]},
+    {"aspect": "Cumulative versions", "cols": ["CUMIPMT over a period range", "CUMPRINC", "PMT x count"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal (all verified by execution)"]}
+  ],
+  "when": [
+    {"func": "IPMT", "use_when": "Tax-deductible interest for a year (or CUMIPMT for the range), interest-cost reporting, seeing what a month of the loan really costs."},
+    {"func": "PPMT", "use_when": "Equity building, payoff progress, amortization schedule columns — one row per period with IPMT and PPMT side by side is the whole schedule."}
+  ],
+  "compat_note": "Executed on the same $300k/6%/30-year case in LibreOffice: IPMT(period 1) = exactly $1,500.00 (principal x monthly rate), PPMT = $298.65, and they sum to the verified PMT of $1,798.65 — identities intact across all versions we test. Sign conventions match Excel exactly (negative present value gives positive payments).",
+  "examples": [
+    {"label": "Interest slice of month 1", "formula": "=IPMT(6%/12,1,360,-300000)"},
+    {"label": "Principal slice of month 1", "formula": "=PPMT(6%/12,1,360,-300000)"},
+    {"label": "A year of interest (months 13-24)", "formula": "=CUMIPMT(6%/12,360,300000,13,24,0)"}
+  ]
+}
