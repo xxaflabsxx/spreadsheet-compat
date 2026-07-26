@@ -1,0 +1,37 @@
+{
+  "slug": "calculate-a-z-score",
+  "title": "How to calculate a z-score",
+  "task": "How many standard deviations a value sits from the mean — outlier detection, comparing across scales.",
+  "keywords": [
+    "z score excel",
+    "standardize function",
+    "standard deviations from mean",
+    "outlier detection formula google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=(A2-AVERAGE($A$2:$A$100))/STDEV.P($A$2:$A$100)",
+      "note": "Or the built-in =STANDARDIZE(A2,AVERAGE(...),STDEV.P(...)). Use STDEV.S for sample data."
+    },
+    "google_sheets": {
+      "formula": "=(A2-AVERAGE($A$2:$A$100))/STDEV.P($A$2:$A$100)",
+      "note": "Identical, including STANDARDIZE."
+    },
+    "libreoffice": {
+      "formula": "=(A2-AVERAGE($A$2:$A$100))/STDEV.P($A$2:$A$100)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 2,
+      "A3": 4,
+      "A4": 4,
+      "A5": 4,
+      "A6": 6
+    },
+    "formula": "=ROUND((A6-AVERAGE(A2:A6))/STDEV.P(A2:A6),4)",
+    "expected": 1.5811
+  },
+  "explanation": "Subtract the mean, divide by the standard deviation: the 6 in this data (mean 4, σ ≈ 1.265) is 1.58 standard deviations above average. Z-scores make different scales comparable — a 1.58 on test A means the same relative standing as a 1.58 on test B — and power the common |z| > 3 outlier rule. Population vs sample deviation (P vs S) changes the denominator slightly; be consistent across the column, and see the standard-deviation recipe for which to pick."
+}

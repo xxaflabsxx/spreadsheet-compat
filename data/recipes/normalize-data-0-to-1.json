@@ -1,0 +1,35 @@
+{
+  "slug": "normalize-data-0-to-1",
+  "title": "How to normalize data to a 0-1 scale",
+  "task": "Min-max scaling — put different-ranged metrics on one comparable footing.",
+  "keywords": [
+    "normalize data excel",
+    "min max scaling formula",
+    "rescale 0 to 1",
+    "normalize scores google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=(A2-MIN($A$2:$A$100))/(MAX($A$2:$A$100)-MIN($A$2:$A$100))",
+      "note": "Anchor the range and fill down. The minimum maps to 0, the maximum to 1."
+    },
+    "google_sheets": {
+      "formula": "=(A2-MIN($A$2:$A$100))/(MAX($A$2:$A$100)-MIN($A$2:$A$100))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=(A2-MIN($A$2:$A$100))/(MAX($A$2:$A$100)-MIN($A$2:$A$100))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": 30,
+      "A4": 50
+    },
+    "formula": "=(A3-MIN(A2:A4))/(MAX(A2:A4)-MIN(A2:A4))",
+    "expected": 0.5
+  },
+  "explanation": "Subtracting the minimum shifts the scale to start at zero; dividing by the range squeezes it to end at one: 30 sits exactly halfway between 10 and 50 → 0.5. Useful before averaging unlike metrics (a 0-100 score with a 0-5 rating) or for progress bars. Two caveats: a constant column gives 0/0 (guard with IF(MAX=MIN,...)), and new data outside the original min/max lands outside 0-1 — recompute or clamp. For outlier-heavy data, the z-score recipe is the sturdier scaling."
+}

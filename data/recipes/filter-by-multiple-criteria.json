@@ -1,0 +1,38 @@
+{
+  "slug": "filter-by-multiple-criteria",
+  "title": "How to FILTER by multiple criteria (AND / OR)",
+  "task": "FILTER rows that satisfy several conditions — multiplied for AND, added for OR.",
+  "keywords": [
+    "filter multiple criteria excel",
+    "filter and or conditions",
+    "filter two conditions google sheets",
+    "dynamic array filter logic"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=FILTER(B2:B6,(A2:A6=\"East\")*(B2:B6>100))",
+      "note": "Multiply conditions for AND; add them (with >0) for OR. Excel 365/2021."
+    },
+    "google_sheets": {
+      "formula": "=FILTER(B2:B6,(A2:A6=\"East\")*(B2:B6>100))",
+      "note": "Sheets also accepts FILTER(B2:B6,A2:A6=\"East\",B2:B6>100) — extra arguments AND together."
+    },
+    "libreoffice": {
+      "formula": "=FILTER(B2:B6,(A2:A6=\"East\")*(B2:B6>100))",
+      "note": "Needs LibreOffice 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "East", "B2": 150,
+      "A3": "West", "B3": 120,
+      "A4": "East", "B4": 80,
+      "A5": "West", "B5": 300,
+      "A6": "East", "B6": 200
+    },
+    "formula": "=FILTER(B2:B6,(A2:A6=\"East\")*(B2:B6>100))",
+    "expected": [150, 200],
+    "check_range": "D1:D2"
+  },
+  "explanation": "Each parenthesized condition is an array of TRUE/FALSE; multiplying them gives 1 only where BOTH are true (150 and 200 are East and above 100 — the East 80 fails). For OR, add instead: (A2:A6=\"East\")+(B2:B6>250) keeps rows passing either test, and the + can't double-count because FILTER only asks whether the result is nonzero. This condition algebra is the same trick SUMPRODUCT uses — learn it once, use it in both."
+}

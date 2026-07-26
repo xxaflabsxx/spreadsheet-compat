@@ -1,0 +1,36 @@
+{
+  "slug": "tiered-sales-commission",
+  "title": "How to calculate tiered sales commission in one formula",
+  "task": "Marginal commission tiers — each band pays its own rate, like tax brackets for sales.",
+  "keywords": [
+    "tiered commission formula excel",
+    "commission brackets calculation",
+    "marginal commission sumproduct",
+    "sales tiers google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+      "note": "D = tier thresholds (0, 10000, 25000), E = rate INCREASES at each threshold (0.05, 0.03, 0.02 for rates 5/8/10%)."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 30000,
+      "D2": 0,     "E2": 0.05,
+      "D3": 10000, "E3": 0.03,
+      "D4": 25000, "E4": 0.02
+    },
+    "formula": "=SUMPRODUCT(--(A2>D2:D4),(A2-D2:D4),E2:E4)",
+    "expected": 2200
+  },
+  "explanation": "Same machinery as the progressive-tax recipe: store each tier's rate INCREASE (5%, then +3% to reach 8%, then +2% to reach 10%) and let SUMPRODUCT apply each increase to everything above its threshold. $30,000 in sales: 30,000×5% + 20,000×3% + 5,000×2% = $2,200 — matching the tier-by-tier math (10k@5% + 15k@8% + 5k@10%). Cliff-style plans (whole amount at the highest tier's rate) are different and simpler: a closest-match lookup gets the rate, then multiply."
+}

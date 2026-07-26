@@ -1,0 +1,34 @@
+{
+  "slug": "round-line-items-before-summing",
+  "title": "How to round line items before summing (and why totals look 'off by a cent')",
+  "task": "Make displayed line items and their total agree — invoices, currency reports.",
+  "keywords": [
+    "total off by a penny excel",
+    "round before sum",
+    "sumproduct round array",
+    "invoice cents don't add up"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT(ROUND(A2:A10,2))",
+      "note": "Rounds each value THEN sums — matching what the reader sees line by line."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT(ROUND(A2:A10,2))",
+      "note": "Identical; ARRAYFORMULA(SUM(ROUND(...))) also works."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT(ROUND(A2:A10,2))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 1.014,
+      "A3": 2.013
+    },
+    "formula": "=SUMPRODUCT(ROUND(A2:A3,2))",
+    "expected": 3.02
+  },
+  "explanation": "Round-then-sum and sum-then-round genuinely differ: these two items display as 1.01 and 2.01 (summing to 3.02 in the reader's head), but their true sum 3.027 rounds to 3.03 — the infamous penny discrepancy. SUMPRODUCT(ROUND(range,2)) evaluates ROUND over the whole array first, so the total matches the printed lines. Which is 'correct' is a policy choice — invoices usually round per line (this formula); interest calculations usually keep full precision until the end."
+}
