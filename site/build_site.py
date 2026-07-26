@@ -1143,7 +1143,7 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet function comparisons</h1>
-<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (backed by executed tests, not documentation).</p>
+<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (backed by executed tests, not documentation). For the app-level picture, see the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula guide</a>.</p>
 <ul class="quirks-list">
 {% for c in comparisons %}
 <li class="quirk-entry">
@@ -1152,6 +1152,43 @@ COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
 </li>
 {% endfor %}
 </ul>
+{% endblock %}
+"""
+
+
+PILLAR_XVG_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Excel vs Google Sheets: the formula compatibility guide</h1>
+<p class="lede">Most Excel-vs-Sheets comparisons argue about collaboration and price. This one covers the part that silently breaks when you switch: <strong>the formulas</strong> &mdash; which functions exist on each side, where the same function behaves differently, and how to keep a workbook portable.</p>
+
+<h2 class="section-title">The numbers</h2>
+<ul>
+<li><strong>{{ n_both }}</strong> functions are documented for BOTH Excel and Google Sheets &mdash; the shared core where most everyday work lives.</li>
+<li><strong>{{ n_xonly }}</strong> functions are Excel-only (<a href="{{ rel }}excel-functions-not-in-google-sheets.html">full list</a>): PIVOTBY, GROUPBY, the CUBE family, AGGREGATE&hellip; Importing an .xlsx that uses them leaves <code>#NAME?</code> cells in Sheets.</li>
+<li><strong>{{ n_gonly }}</strong> functions are Sheets-only (<a href="{{ rel }}sheets-functions-not-in-excel.html">full list</a>): QUERY, ARRAYFORMULA, IMPORTRANGE, GOOGLEFINANCE, the REGEX family&hellip; These die on export to Excel.</li>
+</ul>
+
+<h2 class="section-title">Same function, different dialect</h2>
+<p>The subtler traps are functions both apps HAVE but spell differently:</p>
+<ul>
+<li><strong>Array formulas.</strong> Sheets wraps per-row math in <code>ARRAYFORMULA(...)</code>; modern Excel just spills array expressions natively. Exporting a Sheet frequently degrades wrapped arithmetic to a single-cell result &mdash; details in <a href="{{ rel }}compare/arrayformula-vs-dynamic-arrays.html">ARRAYFORMULA vs dynamic arrays</a>.</li>
+<li><strong>Filtering with SQL.</strong> Sheets&rsquo; <code>QUERY</code> has no Excel equivalent at all; the portable subset is FILTER/SORT/UNIQUE &mdash; see <a href="{{ rel }}compare/filter-vs-query.html">FILTER vs QUERY</a>.</li>
+<li><strong>Regular expressions.</strong> REGEXMATCH/REGEXEXTRACT/REGEXREPLACE are Sheets-only; Excel&rsquo;s closest tools are SEARCH wildcards and TEXTBEFORE/TEXTAFTER.</li>
+<li><strong>Version skew inside Excel itself.</strong> XLOOKUP, FILTER, LAMBDA and friends need Excel 2021+/365 &mdash; a current Sheet can be MORE compatible with modern functions than a 2019 Excel install.</li>
+</ul>
+
+<h2 class="section-title">Keeping a workbook portable</h2>
+<ol>
+<li>Stick to the shared core &mdash; paste any formula into the <a href="{{ rel }}checker.html">compatibility checker</a> and it flags every function per app.</li>
+<li>Prefer FILTER/SORT/UNIQUE compositions over QUERY, and native ranges over ARRAYFORMULA, when a file might ever leave Sheets.</li>
+<li>Avoid the newest Excel exclusives (GROUPBY, PIVOTBY) in files that co-workers will open in Sheets.</li>
+<li>Test the round trip: export, reopen, and search for <code>#NAME?</code> and <code>#REF!</code>.</li>
+</ol>
+
+<h2 class="section-title">Where LibreOffice fits</h2>
+<p>LibreOffice Calc reads both formats and &mdash; unlike either vendor&rsquo;s docs &mdash; we can actually EXECUTE formulas in it: {{ n_tested }} functions live-tested across {{ versions|join(', ') }}. Its modern-function support now tracks Excel closely (XLOOKUP since 24.8, the dynamic-array batch since 25.8 &mdash; see <a href="{{ rel }}libreoffice-version-support.html">support by version</a>), and several &ldquo;Excel-only&rdquo; functions like AGGREGATE work fine there, making it a viable escape hatch for files Sheets can&rsquo;t fully open.</p>
+
+<p>Every claim here is backed by the underlying pages: <a href="{{ rel }}index.html">per-function verdicts</a>, <a href="{{ rel }}quirks.html">behavioral quirks</a>, and the <a href="{{ rel }}methodology.html">verification methodology</a>.</p>
 {% endblock %}
 """
 
@@ -1176,6 +1213,7 @@ EXCLUSIVE_TMPL = """{% extends "base.html" %}
 </table>
 </div>
 <p>{{ outro }}</p>
+<p>Part of the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula compatibility guide</a>.</p>
 {% endblock %}
 """
 
@@ -1367,6 +1405,7 @@ def build_env():
                 "comparison_index.html": COMPARISON_INDEX_TMPL,
                 "methodology.html": METHODOLOGY_TMPL,
                 "exclusive.html": EXCLUSIVE_TMPL,
+                "pillar_xvg.html": PILLAR_XVG_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
@@ -1697,6 +1736,28 @@ def main():
         )
         (OUT_DIR / f"{slug}.html").write_text(env.get_template("exclusive.html").render(**ectx))
         sitemap_urls.append({"loc": BASE_URL + f"{slug}.html", "lastmod": build_date})
+
+    # ---- Excel vs Google Sheets pillar page ----
+    n_xonly = sum(1 for r in records if r["engines"]["excel"]["documented"] and not r["engines"]["google_sheets"]["documented"])
+    n_gonly = sum(1 for r in records if r["engines"]["google_sheets"]["documented"] and not r["engines"]["excel"]["documented"])
+    n_both = sum(1 for r in records if r["engines"]["excel"]["documented"] and r["engines"]["google_sheets"]["documented"])
+    pctx = common_ctx(rel="")
+    pctx.update(
+        page_title="Excel vs Google Sheets: formula compatibility guide (what breaks and why)",
+        meta_description=(
+            f"Excel vs Google Sheets for formulas: {n_xonly} Excel-only functions, "
+            f"{n_gonly} Sheets-only functions, dialect differences like ARRAYFORMULA "
+            "vs spilling, and how to keep workbooks portable — with executed test data."
+        ),
+        canonical=BASE_URL + "excel-vs-google-sheets.html",
+        n_xonly=n_xonly, n_gonly=n_gonly, n_both=n_both,
+        n_tested=len(lo_versions[-1][1].get("function_results", {})) if lo_versions else 0,
+        versions=[v for v, _ in lo_versions],
+    )
+    (OUT_DIR / "excel-vs-google-sheets.html").write_text(
+        env.get_template("pillar_xvg.html").render(**pctx)
+    )
+    sitemap_urls.append({"loc": BASE_URL + "excel-vs-google-sheets.html", "lastmod": build_date})
 
     # ---- Methodology page ----
     if lo_versions:
