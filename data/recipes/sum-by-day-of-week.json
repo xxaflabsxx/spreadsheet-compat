@@ -1,0 +1,35 @@
+{
+  "slug": "sum-by-day-of-week",
+  "title": "How to sum values by day of the week",
+  "task": "Total all the Mondays (or any weekday) in dated data — traffic by weekday, weekend vs weekday sales.",
+  "keywords": [
+    "sum by day of week excel",
+    "sumproduct weekday",
+    "total mondays formula",
+    "weekday totals google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT((WEEKDAY(A2:A100,2)=1)*B2:B100)",
+      "note": "Mode 2: Monday=1..Sunday=7. Change the =1 for other days; >5 for weekends."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT((WEEKDAY(A2:A100,2)=1)*B2:B100)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT((WEEKDAY(A2:A100,2)=1)*B2:B100)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 46223, "B2": 100,
+      "A3": 46224, "B3": 50,
+      "A4": 46230, "B4": 25
+    },
+    "formula": "=SUMPRODUCT((WEEKDAY(A2:A4,2)=1)*B2:B4)",
+    "expected": 125
+  },
+  "explanation": "WEEKDAY runs over the whole date column (as an array), the =1 test keeps Mondays, and SUMPRODUCT totals the matching amounts: the two Mondays here (serials 46223 = July 20 and 46230 = July 27, 2026) carry 100 + 25 = 125, while Tuesday's 50 is excluded. There's no SUMIF criterion that can see weekdays directly — this computed-condition pattern (or a helper column of WEEKDAY values feeding SUMIF) is the standard route."
+}

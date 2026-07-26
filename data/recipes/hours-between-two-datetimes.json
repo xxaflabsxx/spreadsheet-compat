@@ -1,0 +1,31 @@
+{
+  "slug": "hours-between-two-datetimes",
+  "title": "How to calculate hours between two date-times",
+  "task": "Elapsed hours across days — support tickets, machine uptime, shipping windows.",
+  "keywords": [
+    "hours between two dates excel",
+    "datetime difference in hours",
+    "elapsed hours formula",
+    "time across days google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=(B2-A2)*24",
+      "note": "A2/B2 are date+time values. Format the result as a Number, not a time."
+    },
+    "google_sheets": {
+      "formula": "=(B2-A2)*24",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=(B2-A2)*24",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=ROUND((DATE(2026,7,25)+TIME(18,0,0)-(DATE(2026,7,24)+TIME(9,0,0)))*24,1)",
+    "expected": 33
+  },
+  "explanation": "Date-times are single numbers (days + day-fraction), so subtracting them handles day boundaries automatically: 9:00 on July 24 to 18:00 on July 25 is 1.375 days × 24 = 33 hours — no midnight special-casing needed, unlike time-only values. Divide by 24 again for days, multiply by 60 for minutes. This is why storing timestamps as real date-times (not separate date and time columns) pays off."
+}

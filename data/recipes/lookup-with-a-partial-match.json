@@ -1,0 +1,36 @@
+{
+  "slug": "lookup-with-a-partial-match",
+  "title": "How to VLOOKUP with a partial match (contains)",
+  "task": "Find a row when you only know part of the key — a fragment of a name, code, or title.",
+  "keywords": [
+    "vlookup partial match",
+    "lookup contains text excel",
+    "wildcard vlookup",
+    "xlookup wildcard google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=VLOOKUP(\"*\"&D2&\"*\",A2:B10,2,FALSE)",
+      "note": "Wildcards work in exact-match mode. XLOOKUP needs match_mode 2 for wildcards."
+    },
+    "google_sheets": {
+      "formula": "=VLOOKUP(\"*\"&D2&\"*\",A2:B10,2,FALSE)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=VLOOKUP(\"*\"&D2&\"*\",A2:B10,2,FALSE)",
+      "note": "Identical (wildcards must be enabled in Calc options — they are by default for xlsx files)."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "Ada Lovelace",  "B2": 1815,
+      "A3": "Alan Turing",   "B3": 1912,
+      "A4": "Grace Hopper",  "B4": 1906,
+      "D2": "Turing"
+    },
+    "formula": "=VLOOKUP(\"*\"&D2&\"*\",A2:B4,2,FALSE)",
+    "expected": 1912
+  },
+  "explanation": "Wrapping the fragment in asterisks turns it into a contains-pattern: \"*Turing*\" matches \"Alan Turing\" and returns 1912. The wildcards only fire in EXACT-match mode (FALSE) — the mode people think of as the strict one. First match wins when several rows contain the fragment; ~ escapes a literal * or ? in the data. In XLOOKUP the same needs match_mode 2, and case never matters."
+}
