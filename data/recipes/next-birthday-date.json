@@ -1,0 +1,31 @@
+{
+  "slug": "next-birthday-date",
+  "title": "How to calculate the next birthday (or anniversary) date",
+  "task": "From a birthdate, find when the next birthday falls — reminders, HR sheets, countdowns.",
+  "keywords": [
+    "next birthday formula excel",
+    "upcoming anniversary date",
+    "edate datedif trick",
+    "birthday reminder google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=EDATE(A2,12*(DATEDIF(A2,TODAY(),\"y\")+1))",
+      "note": "A2 = birthdate. Whole years lived so far, plus one, in months — EDATE lands on the next anniversary."
+    },
+    "google_sheets": {
+      "formula": "=EDATE(A2,12*(DATEDIF(A2,TODAY(),\"y\")+1))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=EDATE(A2,12*(DATEDIF(A2,TODAY(),\"y\")+1))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(EDATE(DATE(1992,2,10),12*(DATEDIF(DATE(1992,2,10),DATE(2026,7,26),\"y\")+1)),\"YYYY-MM-DD\")",
+    "expected": "2027-02-10"
+  },
+  "explanation": "DATEDIF counts completed years (34 for a Feb 1992 birthdate as of July 2026); adding one and converting to months lets EDATE jump from the birthdate straight to the NEXT anniversary — February 10, 2027. Because DATEDIF increments exactly on the anniversary, the formula rolls over correctly on the day itself. Days until it: subtract TODAY(). Leap-day birthdays (Feb 29) land on Feb 28 in common years via EDATE's clamping."
+}

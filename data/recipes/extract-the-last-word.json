@@ -1,0 +1,33 @@
+{
+  "slug": "extract-the-last-word",
+  "title": "How to extract the last word from a cell",
+  "task": "Grab the final word — surnames, trailing codes, last path segments.",
+  "keywords": [
+    "extract last word excel",
+    "get last word formula",
+    "text after last space",
+    "trailing word google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\" \",REPT(\" \",100)),100))",
+      "note": "365: =TEXTAFTER(A2,\" \",-1) — the -1 means 'after the LAST space'."
+    },
+    "google_sheets": {
+      "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\" \",REPT(\" \",100)),100))",
+      "note": "Identical; or =INDEX(SPLIT(A2,\" \"),COUNTA(SPLIT(A2,\" \")))."
+    },
+    "libreoffice": {
+      "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\" \",REPT(\" \",100)),100))",
+      "note": "Identical; TEXTAFTER with -1 works in 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "alpha beta gamma"
+    },
+    "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\" \",REPT(\" \",100)),100))",
+    "expected": "gamma"
+  },
+  "explanation": "The mirror of the nth-word trick: pad every space to 100 spaces so each word occupies its own wide slot, take the RIGHTmost 100 characters — which can only contain the final word plus padding — and TRIM it clean: \"gamma\". Works in every version of everything. On modern versions TEXTAFTER(A2,\" \",-1) states the intent directly, and swapping the delimiter handles paths (\"/\") or filenames (\".\") — that variant is the text-after-last-delimiter recipe."
+}

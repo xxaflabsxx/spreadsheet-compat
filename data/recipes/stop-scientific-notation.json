@@ -1,0 +1,33 @@
+{
+  "slug": "stop-scientific-notation",
+  "title": "How to stop numbers showing as scientific notation (1.23E+11)",
+  "task": "Show long numbers in full — and know when the real problem is the 15-digit limit.",
+  "keywords": [
+    "turn off scientific notation excel",
+    "1.23E+11 show full number",
+    "long numbers display",
+    "id numbers corrupted google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TEXT(A2,\"0\")",
+      "note": "Or format the cell as Number with 0 decimals. For IDs, the real fix is importing the column AS TEXT."
+    },
+    "google_sheets": {
+      "formula": "=TEXT(A2,\"0\")",
+      "note": "Identical; Format → Number also works."
+    },
+    "libreoffice": {
+      "formula": "=TEXT(A2,\"0\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 123000000000
+    },
+    "formula": "=TEXT(A2,\"0\")",
+    "expected": "123000000000"
+  },
+  "explanation": "Scientific notation is just the default DISPLAY for wide numbers — a \"0\" format (via TEXT or the cell format) shows all the digits: 1.23E+11 becomes 123000000000. The deeper trap: spreadsheets keep only 15 significant digits, so a 16-digit credit-card or barcode number is already silently corrupted (final digit becomes 0) the moment it's entered as a number — no format can bring it back. Long identifiers must be TEXT from the start: import the column as text or prefix entries with an apostrophe."
+}
