@@ -1263,7 +1263,14 @@ CHECKER_TMPL = """{% extends "base.html" %}
 <p class="lede">Paste a formula and see whether every function in it works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real executed tests, not just documentation.</p>
 <textarea id="f" rows="3" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:1rem;padding:.6rem" placeholder='=XLOOKUP("North", B2:B6, A2:A6)'></textarea>
 <p><button id="btn" class="promo-btn" style="border:0;cursor:pointer">Check compatibility</button></p>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">Try:
+<button data-ex='=XLOOKUP("North",B2:B9,A2:A9,"?")' style="cursor:pointer;margin:0 .2rem">XLOOKUP</button>
+<button data-ex='=TEXTJOIN(", ",TRUE,UNIQUE(A2:A99))' style="cursor:pointer;margin:0 .2rem">TEXTJOIN+UNIQUE</button>
+<button data-ex='=QUERY(A1:C99,"SELECT A, SUM(C) GROUP BY A",1)' style="cursor:pointer;margin:0 .2rem">QUERY</button>
+<button data-ex='=MAP(A2:A9,LAMBDA(x,x*2))' style="cursor:pointer;margin:0 .2rem">MAP/LAMBDA</button>
+</p>
 <div id="out"></div>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">Results are linkable &mdash; the URL updates with your formula, so you can share a check directly (e.g. in a forum answer).</p>
 <script>const DATA_URL="{{ rel }}data/compat.json"; const FUNC_BASE="{{ rel }}functions/";</script>
 {% raw %}
 <script>
@@ -1283,10 +1290,15 @@ async function check(){
   let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
   html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel</th><th>Google Sheets</th><th>LibreOffice</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
+  html+='<p style="font-size:.9em;color:#888">Shareable link: <a href="'+permalink()+'" style="word-break:break-all">'+permalink()+'</a></p>';
   out.innerHTML=html;
 }
-document.getElementById('btn').addEventListener('click',check);
+function permalink(){ return location.origin+location.pathname+'#f='+encodeURIComponent(document.getElementById('f').value); }
+function setAndCheck(v){ document.getElementById('f').value=v; check(); history.replaceState(null,'','#f='+encodeURIComponent(v)); }
+document.getElementById('btn').addEventListener('click',()=>{ history.replaceState(null,'','#f='+encodeURIComponent(document.getElementById('f').value)); check(); });
 document.getElementById('f').addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter') check(); });
+document.querySelectorAll('[data-ex]').forEach(b=>b.addEventListener('click',()=>setAndCheck(b.getAttribute('data-ex'))));
+if(location.hash.startsWith('#f=')){ try{ const v=decodeURIComponent(location.hash.slice(3)); if(v){ document.getElementById('f').value=v; check(); } }catch(e){} }
 </script>
 {% endraw %}
 {% endblock %}
