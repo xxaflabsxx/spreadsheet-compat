@@ -1,0 +1,33 @@
+{
+  "slug": "count-items-in-a-comma-separated-list",
+  "title": "How to count items in a comma-separated cell",
+  "task": "How many tags, emails, or entries live in one delimited cell.",
+  "keywords": [
+    "count comma separated values excel",
+    "count items in cell",
+    "len substitute count delimiter",
+    "tags per cell google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=LEN(A2)-LEN(SUBSTITUTE(A2,\",\",\"\"))+1",
+      "note": "Counts separators and adds one. 365 alternative: =COLUMNS(TEXTSPLIT(A2,\",\"))."
+    },
+    "google_sheets": {
+      "formula": "=LEN(A2)-LEN(SUBSTITUTE(A2,\",\",\"\"))+1",
+      "note": "Identical; or =COUNTA(SPLIT(A2,\",\"))."
+    },
+    "libreoffice": {
+      "formula": "=LEN(A2)-LEN(SUBSTITUTE(A2,\",\",\"\"))+1",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "red,green,blue"
+    },
+    "formula": "=LEN(A2)-LEN(SUBSTITUTE(A2,\",\",\"\"))+1",
+    "expected": 3
+  },
+  "explanation": "Removing the commas shortens the text by exactly the number of separators; items are always one more than that: \"red,green,blue\" loses 2 characters → 3 items. It's the same LEN/SUBSTITUTE trick as word counting, pointed at a different delimiter. Guard the empty-cell case with IF(A2=\"\",0,...) — an empty cell would otherwise count as 1 — and TRIM first if the data has stray spaces around separators you also want to count on."
+}

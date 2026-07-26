@@ -1,0 +1,36 @@
+{
+  "slug": "sort-a-range-with-a-formula",
+  "title": "How to sort with a formula (a live-sorted copy)",
+  "task": "A sorted view that re-sorts itself when the data changes — leaderboards, top-lists, reports.",
+  "keywords": [
+    "sort with formula excel",
+    "sort function descending",
+    "auto sorting list google sheets",
+    "live sorted range"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SORT(A2:A100,1,-1)",
+      "note": "Excel 365/2021. -1 = descending. SORTBY sorts by a different column than it returns."
+    },
+    "google_sheets": {
+      "formula": "=SORT(A2:A100,1,FALSE)",
+      "note": "Sheets' SORT takes TRUE/FALSE for ascending instead of 1/-1 — a real cross-app argument difference."
+    },
+    "libreoffice": {
+      "formula": "=SORT(A2:A100,1,-1)",
+      "note": "Excel-style arguments; needs LibreOffice 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 20,
+      "A3": 50,
+      "A4": 10
+    },
+    "formula": "=SORT(A2:A4,1,-1)",
+    "expected": [50, 20, 10],
+    "check_range": "D1:D3"
+  },
+  "explanation": "SORT spills a sorted copy while the source stays put — edit a value and the copy re-orders instantly, unlike menu sorting which is one-time and destructive. Mind the argument dialect: Excel and LibreOffice use 1/-1 for direction, Google Sheets uses TRUE/FALSE — one of the few places the same function has different signatures. Sort whole tables by widening the range (=SORT(A2:C100,3,-1) orders by the third column), and wrap FILTER output in SORT for filtered-and-ordered views."
+}

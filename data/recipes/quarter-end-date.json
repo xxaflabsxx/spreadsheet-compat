@@ -1,0 +1,31 @@
+{
+  "slug": "quarter-end-date",
+  "title": "How to get the quarter-end date for any date",
+  "task": "Snap a date to its quarter's last day — reporting cutoffs, fiscal deadlines.",
+  "keywords": [
+    "quarter end date formula excel",
+    "end of quarter eomonth",
+    "fiscal quarter close date",
+    "quarter boundaries google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=EOMONTH(DATE(YEAR(A2),CEILING(MONTH(A2)/3,1)*3,1),0)",
+      "note": "CEILING(month/3)*3 finds the quarter's last month; EOMONTH finds its last day."
+    },
+    "google_sheets": {
+      "formula": "=EOMONTH(DATE(YEAR(A2),CEILING(MONTH(A2)/3,1)*3,1),0)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=EOMONTH(DATE(YEAR(A2),CEILING(MONTH(A2)/3,1)*3,1),0)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(EOMONTH(DATE(2026,CEILING(MONTH(DATE(2026,7,26))/3,1)*3,1),0),\"YYYY-MM-DD\")",
+    "expected": "2026-09-30"
+  },
+  "explanation": "Month 7 divided by 3 and ceiled gives quarter 3; times 3 gives its closing month (September); EOMONTH lands on the 30th. The quarter-START date is the same construction minus two months: DATE(YEAR(A2),CEILING(MONTH(A2)/3,1)*3-2,1). For fiscal years that don't start in January, shift the month first with MOD before the arithmetic — or add a helper column, which everyone can read."
+}
