@@ -730,6 +730,14 @@ INDEX_TMPL = """{% extends "base.html" %}
   </a>
 </div>
 
+{% if popular_functions %}
+<h2 class="section-title">Popular functions</h2>
+<p style="margin:-0.3rem 0 0.6rem;color:var(--text-muted,#6b7280);font-size:.95rem">The most-searched functions, each with executed cross-app results and version history:</p>
+<p style="line-height:2.1">
+{% for r in popular_functions %}<a href="{{ rel }}functions/{{ r.name_lower }}.html" style="display:inline-block;padding:.15rem .6rem;margin:0 .15rem .1rem 0;border:1px solid var(--border,#e5e7eb);border-radius:999px;text-decoration:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem">{{ r.name }}</a>{% endfor %}
+</p>
+{% endif %}
+
 <div class="stats-grid">
   <div class="stat-card"><span class="num">{{ stats.total_functions }}</span><span class="label">Functions inventoried</span></div>
   <div class="stat-card"><span class="num">{{ stats.engines_executed }}/{{ stats.engines_targeted }}</span><span class="label">Engines executed</span></div>
@@ -1532,6 +1540,26 @@ def main():
         key=lambda r: (0 if r["primary_verdict"] == "quirky" else 1, -r["quirk_count"], r["name"]),
     )[:8]
 
+    # Curated most-searched functions (Search Console impression leaders +
+    # universally high-volume lookups/logic/text/date functions). Surfacing them
+    # as prominent homepage links concentrates internal link equity on the pages
+    # that already earn impressions, and gets visitors to common functions fast.
+    # Only link functions that have a live-tested (indexable) page.
+    _by_name = {r["name"]: r for r in records}
+    _POPULAR = [
+        "VLOOKUP", "XLOOKUP", "INDEX", "MATCH", "OFFSET", "INDIRECT",
+        "IF", "IFS", "IFERROR", "SUMIF", "SUMIFS", "COUNTIF", "COUNTIFS",
+        "FILTER", "SORT", "UNIQUE", "SEQUENCE", "TEXTJOIN", "CONCATENATE",
+        "TEXTSPLIT", "SUBSTITUTE", "LEFT", "MID", "RIGHT", "TEXT",
+        "DATEDIF", "EOMONTH", "WEEKDAY", "NETWORKDAYS", "WORKDAY",
+        "MEDIAN", "AVERAGEIF", "MINIFS", "MAXIFS", "ROUND", "MOD",
+        "PMT", "NUMBERVALUE", "FORECAST.ETS", "CHAR",
+    ]
+    popular_functions = [
+        _by_name[n] for n in _POPULAR
+        if n in _by_name and _by_name[n]["any_tested"]
+    ]
+
     quirks.sort(key=lambda q: (q["function"], q["case"].get("id", "")))
     quirk_fn_count = len({q["function"] for q in quirks})
 
@@ -1557,6 +1585,7 @@ def main():
         functions=records,
         stats=stats,
         top_functions=top_functions,
+        popular_functions=popular_functions,
     )
     (OUT_DIR / "index.html").write_text(env.get_template("index.html").render(**ctx))
     sitemap_urls.append({"loc": BASE_URL, "lastmod": build_date})
