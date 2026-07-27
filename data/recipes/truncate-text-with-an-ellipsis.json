@@ -1,0 +1,33 @@
+{
+  "slug": "truncate-text-with-an-ellipsis",
+  "title": "How to truncate text with an ellipsis",
+  "task": "Cap long descriptions at N characters, adding \"...\" only when something was cut.",
+  "keywords": [
+    "truncate text excel",
+    "shorten with ellipsis formula",
+    "limit cell characters display",
+    "cut long text google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(LEN(A2)>20,LEFT(A2,17)&\"...\",A2)",
+      "note": "20 = the cap; 17 = cap minus the 3 ellipsis dots. Adjust both together."
+    },
+    "google_sheets": {
+      "formula": "=IF(LEN(A2)>20,LEFT(A2,17)&\"...\",A2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IF(LEN(A2)>20,LEFT(A2,17)&\"...\",A2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "The quick brown fox jumps"
+    },
+    "formula": "=IF(LEN(A2)>20,LEFT(A2,17)&\"...\",A2)",
+    "expected": "The quick brown f..."
+  },
+  "explanation": "The IF guard is what makes it polite: short values pass through untouched, and only genuinely long ones get cut to 17 characters plus \"...\" — so the result never exceeds the 20-character cap and never shows a pointless ellipsis on text that fit anyway. A tidier variant avoids cutting mid-word: =IF(LEN(A2)>20,LEFT(A2,FIND(\" \",A2&\" \",17))&\"...\",A2) backs up to a space. Remember this is display text — keep the full value in its own column."
+}

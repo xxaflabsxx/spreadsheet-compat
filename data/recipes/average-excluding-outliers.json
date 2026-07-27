@@ -1,0 +1,37 @@
+{
+  "slug": "average-excluding-outliers",
+  "title": "How to average while excluding outliers (TRIMMEAN)",
+  "task": "A mean that one crazy value can't wreck — response times, judge scores, sensor data.",
+  "keywords": [
+    "trimmean excel",
+    "average without outliers",
+    "trimmed mean formula",
+    "exclude extremes google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TRIMMEAN(A2:A11,0.2)",
+      "note": "0.2 = trim 20% of the COUNT total, split between both ends (10% top, 10% bottom)."
+    },
+    "google_sheets": {
+      "formula": "=TRIMMEAN(A2:A11,0.2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=TRIMMEAN(A2:A11,0.2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 2,
+      "A3": 4,
+      "A4": 4,
+      "A5": 4,
+      "A6": 100
+    },
+    "formula": "=TRIMMEAN(A2:A6,0.4)",
+    "expected": 4
+  },
+  "explanation": "TRIMMEAN sorts the data, discards the specified fraction from BOTH ends, and averages what's left: trimming 40% of five values drops one from each end (the 2 and the 100), leaving a clean mean of 4 — while the plain AVERAGE of the same data is a useless 22.8. It's Olympic-judging math. The fraction counts total values trimmed, always split evenly; rounding means small datasets may trim fewer than you expect. For asymmetric or rule-based exclusions, AVERAGEIFS with explicit bounds is the transparent alternative — and MEDIAN remains the maximally outlier-proof option."
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "average-of-the-top-n-scores",
+  "title": "How to average the top N scores (drop the lowest)",
+  "task": "Best-3-of-5 grading, top-scores averages, drop-the-worst policies.",
+  "keywords": [
+    "average top 3 scores excel",
+    "drop lowest score formula",
+    "best n of m grading",
+    "average largest values google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=AVERAGE(LARGE(A2:A6,{1,2,3}))",
+      "note": "The {1,2,3} array asks LARGE for the top three at once. Change to match your N."
+    },
+    "google_sheets": {
+      "formula": "=AVERAGE(LARGE(A2:A6,{1,2,3}))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=AVERAGE(LARGE(A2:A6,{1,2,3}))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 60,
+      "A3": 90,
+      "A4": 70,
+      "A5": 85,
+      "A6": 95
+    },
+    "formula": "=AVERAGE(LARGE(A2:A6,{1,2,3}))",
+    "expected": 90
+  },
+  "explanation": "LARGE with the array constant {1,2,3} returns the three best values (95, 90, 85), and AVERAGE collapses them: 90. The complementary drop-the-lowest phrasing is arithmetic instead: =(SUM(range)-MIN(range))/(COUNT(range)-1) drops exactly one worst score. SMALL with the same array pattern averages the bottom N, and SUMPRODUCT(LARGE(range,{1,2,3})) is the total-of-best-3 variant already in the sum-top-n recipe."
+}
