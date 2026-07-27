@@ -870,7 +870,8 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 almost certainly running a release older than <strong>{{ since }}</strong> &mdash; that is exactly
 what our executed tests show: <code>#NAME?</code> in {{ le.lo_change.from_version }}, working from
 {{ since }} onward. Check your version under <em>Help &rarr; About LibreOffice</em> and upgrade to
-{{ since }} or newer; no setting or extension enables it in older releases.</p>
+{{ since }} or newer; no setting or extension enables it in older releases. (Other causes of this
+error: see the <a href="{{ rel }}spreadsheet-errors.html">error values guide</a>.)</p>
 {% elif le.verdict == 'unsupported' %}
 <p>LibreOffice Calc does not implement <code>{{ r.name }}</code> as of {{ le.version }} &mdash; in our
 executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
@@ -1156,6 +1157,48 @@ COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
 """
 
 
+ERRORS_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Spreadsheet error values, explained</h1>
+<p class="lede">Every hash-error is the engine telling you something specific. Here&rsquo;s what each one means, the usual causes ranked by likelihood, and the fastest fix &mdash; for Excel, Google Sheets, and LibreOffice Calc.</p>
+
+<h2 class="section-title" id="name">#NAME? &mdash; unrecognized name</h2>
+<p>The engine doesn&rsquo;t know a function or name in the formula. In order of likelihood:</p>
+<ul>
+<li><strong>The function doesn&rsquo;t exist in this app or version.</strong> XLOOKUP in Excel 2019, QUERY anywhere outside Sheets, MAP in LibreOffice. Paste the formula into the <a href="{{ rel }}checker.html">compatibility checker</a> to see exactly which function fails where, and check the <a href="{{ rel }}libreoffice-version-support.html">LibreOffice version page</a> &mdash; upgrading often IS the fix (XLOOKUP needs LO 24.8+).</li>
+<li><strong>A typo</strong> &mdash; =SUMIFF(...), =VLOOKUPP(...).</li>
+<li><strong>Text without quotes</strong> &mdash; =IF(A2=yes,...) reads yes as a name; it needs \"yes\".</li>
+<li><strong>Generated files missing the storage prefix.</strong> If a Python/library-generated .xlsx shows #NAME? on modern functions in every app, it&rsquo;s the OOXML <code>_xlfn.</code> prefix issue &mdash; explained in our <a href="{{ rel }}methodology.html">methodology</a>.</li>
+</ul>
+
+<h2 class="section-title" id="ref">#REF! &mdash; broken reference</h2>
+<p>The formula points at cells that no longer exist: rows/columns deleted, a sheet removed, or a copied formula whose relative references walked off the edge of the grid. VLOOKUP with a column index bigger than its table is the classic. Undo is your friend; longer-term, INDEX/MATCH and whole-range references survive edits that hard-coded positions don&rsquo;t.</p>
+
+<h2 class="section-title" id="value">#VALUE! &mdash; wrong type of input</h2>
+<p>A function got text where it needed a number or date: arithmetic on cells containing text (often invisible &mdash; see the <a href="{{ rel }}compare/trim-vs-clean.html">TRIM vs CLEAN guide</a>), dates stored as text (<a href="{{ rel }}how-to/convert-text-to-date.html">convert them</a>), or FIND/SEARCH not finding its target. In legacy Excel it&rsquo;s also un-entered array formulas that needed Ctrl+Shift+Enter.</p>
+
+<h2 class="section-title" id="div0">#DIV/0! &mdash; division by zero</h2>
+<p>The denominator is zero or blank. Averages of empty ranges throw it too (AVERAGEIF with no matches). Guard the specific case &mdash; =IF(B2=0,\"\",A2/B2) &mdash; rather than blanket-wrapping in IFERROR, which also hides real bugs (<a href="{{ rel }}compare/iferror-vs-ifna.html">why that matters</a>).</p>
+
+<h2 class="section-title" id="na">#N/A &mdash; not found (usually not an error)</h2>
+<p>Lookup functions return it when the value isn&rsquo;t there &mdash; it&rsquo;s a legitimate answer, not breakage. Handle the expected miss with XLOOKUP&rsquo;s 4th argument or IFNA; investigate only when everything comes back #N/A (usually a type mismatch: numbers vs text-numbers, or stray spaces &mdash; the <a href="{{ rel }}compare/isblank-vs-empty-string.html">two-kinds-of-empty</a> and TRIM issues).</p>
+
+<h2 class="section-title" id="spill">#SPILL! / blocked arrays</h2>
+<p>A dynamic-array formula (FILTER, SORT, UNIQUE, SEQUENCE&hellip;) needs room to spill and something occupies the target cells. Clear the blocking cells &mdash; the error message highlights them in Excel. Google Sheets says #REF! with a &ldquo;result was not expanded&rdquo; note instead; LibreOffice reports its own error code. Legacy note: in pre-dynamic-array versions these functions don&rsquo;t exist at all (#NAME? instead) &mdash; see <a href="{{ rel }}libreoffice-version-support.html">which versions have them</a>.</p>
+
+<h2 class="section-title" id="num">#NUM! &mdash; impossible number</h2>
+<p>Math that can&rsquo;t produce a representable result: SQRT of a negative, IRR that doesn&rsquo;t converge (add a guess argument), dates before the epoch, or numbers beyond ~1E308. Usually the inputs are wrong, not the formula.</p>
+
+<h2 class="section-title" id="tools">Tools for diagnosing</h2>
+<ul>
+<li><code>=ERROR.TYPE(A2)</code> returns a code per error kind (7 = #N/A) &mdash; see <a href="{{ rel }}compare/iserror-vs-iserr-vs-isna.html">the IS-function guide</a> for detector strategies.</li>
+<li>The <a href="{{ rel }}checker.html">formula checker</a> answers &ldquo;is this #NAME? a version problem?&rdquo; instantly.</li>
+<li>Our <a href="{{ rel }}quirks.html">quirks catalog</a> lists cases where an app returns a DIFFERENT error than Excel for the same formula &mdash; found by executing them.</li>
+</ul>
+{% endblock %}
+"""
+
+
 PILLAR_XVG_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Excel vs Google Sheets: the formula compatibility guide</h1>
@@ -1418,6 +1461,7 @@ def build_env():
                 "methodology.html": METHODOLOGY_TMPL,
                 "exclusive.html": EXCLUSIVE_TMPL,
                 "pillar_xvg.html": PILLAR_XVG_TMPL,
+                "errors.html": ERRORS_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
@@ -1748,6 +1792,22 @@ def main():
         )
         (OUT_DIR / f"{slug}.html").write_text(env.get_template("exclusive.html").render(**ectx))
         sitemap_urls.append({"loc": BASE_URL + f"{slug}.html", "lastmod": build_date})
+
+    # ---- Error values reference page ----
+    ectx2 = common_ctx(rel="")
+    ectx2.update(
+        page_title="#NAME?, #REF!, #VALUE!, #SPILL! — spreadsheet errors explained and fixed",
+        meta_description=(
+            "What every spreadsheet error value means — #NAME?, #REF!, #VALUE!, "
+            "#DIV/0!, #N/A, #SPILL!, #NUM! — with likely causes ranked and the "
+            "fastest fixes, for Excel, Google Sheets, and LibreOffice."
+        ),
+        canonical=BASE_URL + "spreadsheet-errors.html",
+    )
+    (OUT_DIR / "spreadsheet-errors.html").write_text(
+        env.get_template("errors.html").render(**ectx2)
+    )
+    sitemap_urls.append({"loc": BASE_URL + "spreadsheet-errors.html", "lastmod": build_date})
 
     # ---- Excel vs Google Sheets pillar page ----
     n_xonly = sum(1 for r in records if r["engines"]["excel"]["documented"] and not r["engines"]["google_sheets"]["documented"])
