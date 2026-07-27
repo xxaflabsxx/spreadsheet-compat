@@ -1,0 +1,34 @@
+{
+  "slug": "count-substring-occurrences",
+  "title": "How to count occurrences of a substring in a cell",
+  "task": "How many times a word or code appears inside one text value.",
+  "keywords": [
+    "count occurrences of word in cell excel",
+    "substring count formula",
+    "len substitute divide",
+    "count text appearances google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=(LEN(A2)-LEN(SUBSTITUTE(A2,B2,\"\")))/LEN(B2)",
+      "note": "A2 = the text, B2 = the substring. Case-sensitive."
+    },
+    "google_sheets": {
+      "formula": "=(LEN(A2)-LEN(SUBSTITUTE(A2,B2,\"\")))/LEN(B2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=(LEN(A2)-LEN(SUBSTITUTE(A2,B2,\"\")))/LEN(B2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "the cat sat, the cat ran",
+      "B2": "cat"
+    },
+    "formula": "=(LEN(A2)-LEN(SUBSTITUTE(A2,B2,\"\")))/LEN(B2)",
+    "expected": 2
+  },
+  "explanation": "Deleting every copy of the substring shortens the text by (count × substring length), so dividing the shrinkage by LEN(B2) recovers the count: removing both \"cat\"s drops 6 characters, 6/3 = 2. The single-character version is the comma-counting recipe. SUBSTITUTE is case-sensitive — wrap both haystack and needle in LOWER() for case-blind counting — and note overlapping matches (\"aaa\" containing \"aa\") count non-overlapping occurrences only."
+}

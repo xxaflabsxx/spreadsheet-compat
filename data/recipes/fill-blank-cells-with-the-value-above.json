@@ -1,0 +1,34 @@
+{
+  "slug": "fill-blank-cells-with-the-value-above",
+  "title": "How to fill blank cells with the value above",
+  "task": "Un-merge pivot-style exports where the group label appears once and the rows below are blank.",
+  "keywords": [
+    "fill blanks with value above excel",
+    "fill down empty cells",
+    "pivot export blank labels",
+    "forward fill google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(A2=\"\",B1,A2)",
+      "note": "In a helper column B (formula shown for B2, referencing B1 above), fill down, then Paste Special → Values over A."
+    },
+    "google_sheets": {
+      "formula": "=IF(A2=\"\",B1,A2)",
+      "note": "Identical helper-column pattern."
+    },
+    "libreoffice": {
+      "formula": "=IF(A2=\"\",B1,A2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A3": "",
+      "B2": "Widgets"
+    },
+    "formula": "=IF(A3=\"\",B2,A3)",
+    "expected": "Widgets"
+  },
+  "explanation": "The helper column carries values forward: each row shows its own A-value when present, otherwise it repeats the helper cell ABOVE — which already holds the last real label. Filled down, every blank inherits the nearest label upward (the verification shows one link of that chain). Finish by copying the helper over the original as values. Excel's non-formula route: select the column, Go To Special → Blanks, type = the-cell-above, then Ctrl+Enter fills every blank at once."
+}

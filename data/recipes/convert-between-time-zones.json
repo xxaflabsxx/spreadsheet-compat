@@ -1,0 +1,31 @@
+{
+  "slug": "convert-between-time-zones",
+  "title": "How to convert times between time zones",
+  "task": "Shift timestamps by a UTC offset — server logs to local time, meeting times across offices.",
+  "keywords": [
+    "convert timezone excel",
+    "utc to local time formula",
+    "add hours to timestamp",
+    "time zone offset google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=A2+B2/24",
+      "note": "A2 = datetime, B2 = offset in hours (e.g. -7 for UTC→Pacific in summer)."
+    },
+    "google_sheets": {
+      "formula": "=A2+B2/24",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=A2+B2/24",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(DATE(2026,7,27)+TIME(2,30,0)+(-7)/24,\"YYYY-MM-DD HH:MM\")",
+    "expected": "2026-07-26 19:30"
+  },
+  "explanation": "Times are day-fractions, so hours divide by 24: adding −7/24 turns 02:30 UTC on July 27 into 19:30 on July 26 — the date rolls back automatically because datetimes are one number. Keep the offset in its own cell so DST changes are one edit, not a formula hunt. The honest limitation: spreadsheets have no time-zone database — the formula applies the offset YOU supply; it can't know when Denver switches to daylight time. For always-correct conversion across DST boundaries you need the source data stamped in UTC plus a rules table."
+}
