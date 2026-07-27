@@ -1312,7 +1312,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 CHECKER_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet formula compatibility checker</h1>
-<p class="lede">Paste a formula and see whether every function in it works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real executed tests, not just documentation.</p>
+<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real executed tests, not just documentation. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests verified alternatives.</p>
 <textarea id="f" rows="3" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:1rem;padding:.6rem" placeholder='=XLOOKUP("North", B2:B6, A2:A6)'></textarea>
 <p><button id="btn" class="promo-btn" style="border:0;cursor:pointer">Check compatibility</button></p>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Try:
@@ -1321,9 +1321,15 @@ CHECKER_TMPL = """{% extends "base.html" %}
 <button data-ex='=QUERY(A1:C99,"SELECT A, SUM(C) GROUP BY A",1)' style="cursor:pointer;margin:0 .2rem">QUERY</button>
 <button data-ex='=MAP(A2:A9,LAMBDA(x,x*2))' style="cursor:pointer;margin:0 .2rem">MAP/LAMBDA</button>
 </p>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280);margin:.3rem 0 0">Moving this formula to another app? Pick a target for a migration report:
+<label style="margin-left:.4rem"><input type="radio" name="tgt" value="" checked> none</label>
+<label style="margin-left:.5rem"><input type="radio" name="tgt" value="x"> Excel</label>
+<label style="margin-left:.5rem"><input type="radio" name="tgt" value="g"> Google Sheets</label>
+<label style="margin-left:.5rem"><input type="radio" name="tgt" value="l"> LibreOffice</label>
+</p>
 <div id="out"></div>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Results are linkable &mdash; the URL updates with your formula, so you can share a check directly (e.g. in a forum answer).</p>
-<script>const DATA_URL="{{ rel }}data/compat.json"; const FUNC_BASE="{{ rel }}functions/";</script>
+<script>const DATA_URL="{{ rel }}data/compat.json"; const FUNC_BASE="{{ rel }}functions/"; const CMP_BASE="{{ rel }}compare/";</script>
 {% raw %}
 <script>
 let DB=null;
@@ -1331,6 +1337,59 @@ async function load(){ if(!DB){ DB=await (await fetch(DATA_URL)).json(); } retur
 function funcs(s){ const set=new Set(); const re=/([A-Za-z][A-Za-z0-9_.]*)\\s*\\(/g; let m; while((m=re.exec(s))){ set.add(m[1].toUpperCase()); } return [...set]; }
 function yn(ok){ return ok?'<span style="color:#0a7a2f">&#10003; yes</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};
+// Curated, verified portable alternatives (from the comparison pages) for
+// functions with a genuine cross-app gap. cmp = comparison slug to link, if any.
+const MIG={
+ QUERY:{r:'Google Sheets only. Rebuild with FILTER (for SELECT/WHERE) plus SUMIF/UNIQUE/SORT for grouping and aggregation.',cmp:'filter-vs-query'},
+ ARRAYFORMULA:{r:'Google Sheets only. In Excel 365 and LibreOffice 24.8+, array expressions spill natively — drop the wrapper.',cmp:'arrayformula-vs-dynamic-arrays'},
+ REGEXMATCH:{r:'Google Sheets only. No regex functions in Excel/LibreOffice — use SEARCH/FIND with wildcards, or ISNUMBER(SEARCH(...)).'},
+ REGEXEXTRACT:{r:'Google Sheets only. Use LEFT/MID/RIGHT with FIND, or TEXTBEFORE/TEXTAFTER (Excel 365 / LO 24.8+).'},
+ REGEXREPLACE:{r:'Google Sheets only. Use SUBSTITUTE (by text) or nested SUBSTITUTE for multiple patterns.'},
+ GOOGLEFINANCE:{r:'Google Sheets only — no Excel/LibreOffice equivalent for live market data.'},
+ IMPORTRANGE:{r:'Google Sheets only. In Excel, link workbooks or use Power Query; LibreOffice uses external references.'},
+ IMPORTHTML:{r:'Google Sheets only. In Excel use Power Query (Data → From Web).'},
+ IMPORTXML:{r:'Google Sheets only. In Excel use Power Query.'},
+ IMPORTDATA:{r:'Google Sheets only. In Excel use Power Query (From Text/CSV).'},
+ GROUPBY:{r:'Excel 365 only — not in Google Sheets or LibreOffice yet. Rebuild with a PivotTable, or SUMIFS over UNIQUE keys.'},
+ PIVOTBY:{r:'Excel 365 only. Use a PivotTable, or SUMIFS/COUNTIFS over UNIQUE row+column keys.'},
+ MAP:{r:'Excel 365 and Google Sheets, but NOT LibreOffice (it has LAMBDA/LET, not the lambda-helpers). Fill a formula down instead.'},
+ REDUCE:{r:'Excel 365 and Google Sheets only — not in LibreOffice. Use a running-total helper column.'},
+ SCAN:{r:'Excel 365 and Google Sheets only — not in LibreOffice. Use a helper column of cumulative values.'},
+ BYROW:{r:'Excel 365 and Google Sheets only — not in LibreOffice. Apply the per-row formula down a column.'},
+ BYCOL:{r:'Excel 365 and Google Sheets only — not in LibreOffice.'},
+ MAKEARRAY:{r:'Excel 365 and Google Sheets only — not in LibreOffice.'},
+ XLOOKUP:{r:'Needs Excel 2021+/365, current Sheets, or LibreOffice 24.8+. In older Excel/LibreOffice use INDEX/MATCH.',cmp:'vlookup-vs-index-match'},
+ XMATCH:{r:'Needs Excel 2021+/365, Sheets, or LibreOffice 24.8+. Older versions: use MATCH.'},
+ TEXTSPLIT:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. Older: SUBSTITUTE/MID tricks or Text-to-Columns.'},
+ TEXTBEFORE:{r:'Excel 365 & Sheets; LibreOffice 24.8+ (with quirks). Older: LEFT(A,FIND(delim,A)-1).',cmp:'textbefore-textafter-vs-left-mid-right'},
+ TEXTAFTER:{r:'Excel 365 & Sheets; LibreOffice 24.8+ (with quirks). Older: MID(A,FIND(delim,A)+1,...).',cmp:'textbefore-textafter-vs-left-mid-right'},
+ HSTACK:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only.'},
+ VSTACK:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. In Sheets you can also use {range1;range2}.'},
+ TAKE:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. Older: INDEX ranges.'},
+ DROP:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only.'},
+ LET:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older versions: inline the repeated expressions.'},
+ LAMBDA:{r:'Excel 365, Sheets, LibreOffice 24.8+ (direct-invoke has quirks in LO).'},
+ SEQUENCE:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: ROW(INDIRECT(...)) tricks.'},
+ FILTER:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older Excel/LO: SMALL/IF array formulas (Ctrl+Shift+Enter).'},
+ SORT:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: rank-and-INDEX or the menu sort.'},
+ UNIQUE:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: Remove Duplicates, or COUNTIF-based formulas.',cmp:'unique-function-vs-remove-duplicates'}
+};
+function migrate(fs,db,tg){
+  const okIn=(d)=> tg==='l' ? (d.lv?(d.lv!=='unsupported'):d.l) : (tg==='x'?d.x:d.g);
+  let blockers=[];
+  for(const fn of fs){ const d=db[fn]; if(!d) continue; if(!okIn(d)) blockers.push(fn); }
+  let h='<h2 class="section-title" style="margin-top:1.4rem">Migration to '+TGT_NAME[tg]+'</h2>';
+  if(!blockers.length){ h+='<p style="color:#0a7a2f;font-weight:600">All recognized functions work in '+TGT_NAME[tg]+'. This formula should port cleanly.</p>'; return h; }
+  h+='<p style="font-weight:600;color:#c02020">'+blockers.length+' function'+(blockers.length>1?'s':'')+' need attention:</p><ul>';
+  for(const fn of blockers){ const m=MIG[fn];
+    h+='<li style="margin-bottom:.5rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> — '+(m?m.r:'not available in '+TGT_NAME[tg]+' (see its page for details).');
+    if(m&&m.cmp) h+=' <a href="'+CMP_BASE+m.cmp+'.html" style="font-size:.9em">compare →</a>';
+    h+='</li>';
+  }
+  h+='</ul><p style="font-size:.9em;color:#888">Alternatives are hand-verified from our comparison pages. This report flags what breaks; it does not auto-rewrite your formula.</p>';
+  return h;
+}
 async function check(){
   const db=await load(); const fs=funcs(document.getElementById('f').value); const out=document.getElementById('out');
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
@@ -1342,15 +1401,19 @@ async function check(){
   let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
   html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel</th><th>Google Sheets</th><th>LibreOffice</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
+  const tg=target(); if(tg) html+=migrate(fs,db,tg);
   html+='<p style="font-size:.9em;color:#888">Shareable link: <a href="'+permalink()+'" style="word-break:break-all">'+permalink()+'</a></p>';
   out.innerHTML=html;
 }
-function permalink(){ return location.origin+location.pathname+'#f='+encodeURIComponent(document.getElementById('f').value); }
-function setAndCheck(v){ document.getElementById('f').value=v; check(); history.replaceState(null,'','#f='+encodeURIComponent(v)); }
-document.getElementById('btn').addEventListener('click',()=>{ history.replaceState(null,'','#f='+encodeURIComponent(document.getElementById('f').value)); check(); });
+function target(){ const r=document.querySelector('input[name=tgt]:checked'); return r?r.value:''; }
+function permalink(){ const tg=target(); return location.origin+location.pathname+'#f='+encodeURIComponent(document.getElementById('f').value)+(tg?'&t='+tg:''); }
+function sync(){ history.replaceState(null,'',permalink()); }
+function setAndCheck(v){ document.getElementById('f').value=v; sync(); check(); }
+document.getElementById('btn').addEventListener('click',()=>{ sync(); check(); });
 document.getElementById('f').addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter') check(); });
 document.querySelectorAll('[data-ex]').forEach(b=>b.addEventListener('click',()=>setAndCheck(b.getAttribute('data-ex'))));
-if(location.hash.startsWith('#f=')){ try{ const v=decodeURIComponent(location.hash.slice(3)); if(v){ document.getElementById('f').value=v; check(); } }catch(e){} }
+document.querySelectorAll('input[name=tgt]').forEach(r=>r.addEventListener('change',()=>{ if(document.getElementById('f').value.trim()){ sync(); check(); } }));
+if(location.hash.startsWith('#f=')){ try{ const p=new URLSearchParams(location.hash.slice(1)); const v=p.get('f'); const t=p.get('t'); if(t){ const r=document.querySelector('input[name=tgt][value="'+t+'"]'); if(r) r.checked=true; } if(v){ document.getElementById('f').value=v; check(); } }catch(e){} }
 </script>
 {% endraw %}
 {% endblock %}
