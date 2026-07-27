@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CODE function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does CODE work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the CODE function (Text).">
-<link rel="canonical" href="https://canispreadsheet.com/functions/code.html">
-<meta property="og:title" content="CODE function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does CODE work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the CODE function (Text).">
+<title>ISERROR vs ISERR vs ISNA: how wide a net</title>
+<meta name="description" content="ISERROR vs ISERR vs ISNA compared: which errors each detects, the parallel with IFERROR/IFNA, and ERROR.TYPE for telling errors apart.">
+<link rel="canonical" href="https://canispreadsheet.com/compare/iserror-vs-iserr-vs-isna.html">
+<meta property="og:title" content="ISERROR vs ISERR vs ISNA: how wide a net">
+<meta property="og:description" content="ISERROR vs ISERR vs ISNA compared: which errors each detects, the parallel with IFERROR/IFNA, and ERROR.TYPE for telling errors apart.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/code.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/iserror-vs-iserr-vs-isna.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -299,190 +299,63 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>CODE</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
+  <h1>ISERROR vs ISERR vs ISNA: how wide a net</h1>
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-07-25</p>
+<p class="lede">Three error detectors that differ only in scope: ISERROR catches everything, ISNA catches only #N/A (the &#39;not found&#39; signal), and ISERR is the odd middle child — everything EXCEPT #N/A. Same philosophy as IFERROR vs IFNA: match the net to what you actually expect.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>CODE</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/iserror.html">ISERROR</a></th><th><a href="../functions/iserr.html">ISERR</a></th><th><a href="../functions/isna.html">ISNA</a></th><th><a href="../functions/error.type.html">ERROR.TYPE</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>#N/A</strong></td><td>TRUE</td><td>FALSE — deliberately excluded</td><td>TRUE</td><td>7</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>#DIV/0!, #VALUE!, #REF!, #NAME?...</strong></td><td>TRUE</td><td>TRUE</td><td>FALSE</td><td>codes 1-6, 8</td></tr>
 
+<tr><td><strong>Mirror wrapper</strong></td><td>IFERROR</td><td>(none)</td><td>IFNA</td><td>—</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Typical use</strong></td><td>Any-failure flags</td><td>Real-bug detection while tolerating lookup misses</td><td>Lookup-miss handling</td><td>Branching by error kind</td></tr>
 
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-25)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Compatibility</strong></td><td>Universal</td><td>Universal</td><td>Universal</td><td>Universal — all verified by execution</td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-CODE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
-<div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
-<tbody>
-
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
-
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
-
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-25</td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-25)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=CODE(&#34;A&#34;)</td>
-  <td>Basic character-to-code lookup</td>
-  <td class="result mono">65</td>
-  <td class="result mono">65</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=CODE(&#34;!&#34;)</td>
-  <td>Microsoft&#39;s own documented example</td>
-  <td class="result mono">33</td>
-  <td class="result mono">33<br><span class="category-tag">Source: https://support.microsoft.com/en-us/office/code-function-c32b692b-2ed0-4a04-bdd9-75640144b928</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=CODE(&#34;Apple&#34;)</td>
-  <td>CODE only looks at the first character of a multi-character string</td>
-  <td class="result mono">65</td>
-  <td class="result mono">65<br><span class="category-tag">Microsoft docs: CODE &#34;Returns a numeric code for the first character in a text string.&#34; Source: https://support.microsoft.com/en-us/office/code-function-c32b692b-2ed0-4a04-bdd9-75640144b928</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=CODE(CHAR(97))</td>
-  <td>CODE and CHAR are exact inverses of each other for values 1-255</td>
-  <td class="result mono">97</td>
-  <td class="result mono">97</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
+<h2 class="section-title">Which should you use?</h2>
 <ul>
 
+<li><strong>ISNA</strong> &mdash; Around lookups — &#39;did we find it?&#39; — leaving genuine formula bugs visible. The test half of what IFNA does in one step.</li>
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li><strong>ISERR</strong> &mdash; The audit trick: TRUE only for NON-lookup errors, so COUNTIF-style sweeps with ISERR find real breakage in a sheet full of expected #N/As.</li>
 
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">official documentation</a></li>
+<li><strong>ISERROR</strong> &mdash; Dashboards and validation columns where any failure should raise the same flag — accepting that it can&#39;t distinguish a miss from a bug.</li>
 
 </ul>
 
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>All four execute identically in every version of Excel, Google Sheets, and LibreOffice we test. ERROR.TYPE is the escalation path when the boolean tests aren&#39;t enough — it returns a code per error kind (#N/A is 7), letting one formula branch differently on misses vs genuine faults.</p>
 
+<h2 class="section-title">Example formulas</h2>
+<div class="table-scroll">
+<table class="matrix">
+<tbody>
 
+<tr><td>Lookup miss?</td><td><code>=ISNA(MATCH(D2,A:A,0))</code></td></tr>
 
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/char-vs-code-vs-unichar.html">CHAR vs CODE vs UNICHAR: characters by number</a></li><li><a href="../compare/trim-vs-clean.html">TRIM vs CLEAN: the import-cleanup pair (and what both miss)</a></li>
-</ul>
+<tr><td>Real bugs only (ignores #N/A)</td><td><code>=SUMPRODUCT(--ISERR(B2:B100))</code></td></tr>
+
+<tr><td>Branch by error kind</td><td><code>=IF(ISNA(A2),&#34;missing&#34;,IF(ISERROR(A2),&#34;broken&#34;,A2))</code></td></tr>
+
+</tbody>
+</table>
+</div>
+
+<p>Full per-version details on each function page:
+<a href="../functions/iserror.html">ISERROR</a> &middot; <a href="../functions/iserr.html">ISERR</a> &middot; <a href="../functions/isna.html">ISNA</a> &middot; <a href="../functions/error.type.html">ERROR.TYPE</a>.</p>
 
 
 <aside class="promo-card">

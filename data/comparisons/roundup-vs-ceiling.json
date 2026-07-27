@@ -1,0 +1,24 @@
+{
+  "slug": "roundup-vs-ceiling",
+  "title": "ROUNDUP vs CEILING: digits or multiples",
+  "meta_desc": "ROUNDUP vs CEILING (and ROUNDDOWN vs FLOOR): rounding by decimal places versus snapping to multiples, negative-number modes, and version notes.",
+  "funcs": ["ROUNDUP", "CEILING", "ROUNDDOWN", "FLOOR"],
+  "intro": "Both push numbers up, but along different grids: ROUNDUP works in DECIMAL DIGITS (up at the 2nd decimal), CEILING in MULTIPLES (up to the next 0.25, 5, or 15 minutes). Picking by the unit you're thinking in makes the formula self-explanatory.",
+  "table": [
+    {"aspect": "Grid", "cols": ["Powers of ten via a digits argument", "Any multiple you name", "Same, downward", "Same, downward"]},
+    {"aspect": "2.301 →", "cols": ["ROUNDUP(x,1) = 2.4", "CEILING(x,0.25) = 2.5", "ROUNDDOWN(x,1)=2.3", "FLOOR(x,0.25)=2.25"]},
+    {"aspect": "23 people, tables of 6", "cols": ["awkward", "CEILING(23/6,1)... but really ROUNDUP(23/6,0)=4 — integer ceiling is where they meet", "", ""]},
+    {"aspect": "Negative numbers", "cols": ["Away from zero: ROUNDUP(-2.1,0)=-3", "Classic CEILING errors/varies — use CEILING.MATH with its mode argument", "Toward zero", "FLOOR.MATH likewise"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (.MATH variants Excel 2013+/LO, verified)", "Universal", "Universal"]}
+  ],
+  "when": [
+    {"func": "ROUNDUP / ROUNDDOWN", "use_when": "Decimal-place thinking: forcing cents up on a levy, truncating displayed precision pessimistically/optimistically, whole-unit counts via digits 0 (boxes needed = ROUNDUP(items/per_box,0))."},
+    {"func": "CEILING / FLOOR", "use_when": "Real-world step sizes: price points (0.05, 0.99 endings via CEILING minus 0.01), billing increments (15-minute blocks with TIME(0,15,0)), pack sizes, materials sold in fixed lengths."}
+  ],
+  "compat_note": "The classic four execute identically in every version we test on positive numbers. Negative inputs are where they diverge by design (away-from-zero vs grid semantics) and where old CEILING is treacherous — the .MATH variants exist precisely to pin that down; both are verified in current LibreOffice.",
+  "examples": [
+    {"label": "Boxes needed", "formula": "=ROUNDUP(A2/12,0)"},
+    {"label": "Bill in 15-min blocks", "formula": "=CEILING(A2,TIME(0,15,0))"},
+    {"label": "Price ending in .99", "formula": "=CEILING(A2,1)-0.01"}
+  ]
+}

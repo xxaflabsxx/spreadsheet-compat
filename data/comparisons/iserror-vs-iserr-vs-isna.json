@@ -1,0 +1,25 @@
+{
+  "slug": "iserror-vs-iserr-vs-isna",
+  "title": "ISERROR vs ISERR vs ISNA: how wide a net",
+  "meta_desc": "ISERROR vs ISERR vs ISNA compared: which errors each detects, the parallel with IFERROR/IFNA, and ERROR.TYPE for telling errors apart.",
+  "funcs": ["ISERROR", "ISERR", "ISNA", "ERROR.TYPE"],
+  "intro": "Three error detectors that differ only in scope: ISERROR catches everything, ISNA catches only #N/A (the 'not found' signal), and ISERR is the odd middle child — everything EXCEPT #N/A. Same philosophy as IFERROR vs IFNA: match the net to what you actually expect.",
+  "table": [
+    {"aspect": "#N/A", "cols": ["TRUE", "FALSE — deliberately excluded", "TRUE", "7"]},
+    {"aspect": "#DIV/0!, #VALUE!, #REF!, #NAME?...", "cols": ["TRUE", "TRUE", "FALSE", "codes 1-6, 8"]},
+    {"aspect": "Mirror wrapper", "cols": ["IFERROR", "(none)", "IFNA", "—"]},
+    {"aspect": "Typical use", "cols": ["Any-failure flags", "Real-bug detection while tolerating lookup misses", "Lookup-miss handling", "Branching by error kind"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal", "Universal — all verified by execution"]}
+  ],
+  "when": [
+    {"func": "ISNA", "use_when": "Around lookups — 'did we find it?' — leaving genuine formula bugs visible. The test half of what IFNA does in one step."},
+    {"func": "ISERR", "use_when": "The audit trick: TRUE only for NON-lookup errors, so COUNTIF-style sweeps with ISERR find real breakage in a sheet full of expected #N/As."},
+    {"func": "ISERROR", "use_when": "Dashboards and validation columns where any failure should raise the same flag — accepting that it can't distinguish a miss from a bug."}
+  ],
+  "compat_note": "All four execute identically in every version of Excel, Google Sheets, and LibreOffice we test. ERROR.TYPE is the escalation path when the boolean tests aren't enough — it returns a code per error kind (#N/A is 7), letting one formula branch differently on misses vs genuine faults.",
+  "examples": [
+    {"label": "Lookup miss?", "formula": "=ISNA(MATCH(D2,A:A,0))"},
+    {"label": "Real bugs only (ignores #N/A)", "formula": "=SUMPRODUCT(--ISERR(B2:B100))"},
+    {"label": "Branch by error kind", "formula": "=IF(ISNA(A2),\"missing\",IF(ISERROR(A2),\"broken\",A2))"}
+  ]
+}

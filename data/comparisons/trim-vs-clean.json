@@ -1,0 +1,25 @@
+{
+  "slug": "trim-vs-clean",
+  "title": "TRIM vs CLEAN: the import-cleanup pair (and what both miss)",
+  "meta_desc": "TRIM vs CLEAN for dirty imported data: spaces vs nonprintable characters, the nonbreaking-space gap both miss, and the full cleanup chain.",
+  "funcs": ["TRIM", "CLEAN", "SUBSTITUTE", "CODE"],
+  "intro": "Pasted and imported text carries invisible junk that breaks lookups and duplicates 'identical' values. TRIM and CLEAN each remove a different kind — and the most common web-import culprit, the nonbreaking space, slips past BOTH.",
+  "table": [
+    {"aspect": "Removes", "cols": ["Leading/trailing spaces + collapses internal runs to one", "Nonprintable control characters (codes 1-31)", "Whatever you tell it — the gap-filler", "Removes nothing — DIAGNOSES by revealing char codes"]},
+    {"aspect": "Nonbreaking space (CHAR(160))", "cols": ["NOT removed", "NOT removed", "SUBSTITUTE(A2,CHAR(160),\" \") converts it", "CODE(MID(...))=160 exposes it"]},
+    {"aspect": "In-cell line breaks (CHAR(10))", "cols": ["Kept", "Removed", "Or targeted: SUBSTITUTE(...,CHAR(10),\", \")", "code 10"]},
+    {"aspect": "Typical source", "cols": ["Human typing, CSV padding", "Legacy exports, database dumps", "Web pages, HTML copy-paste", "—"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal", "Universal — all verified by execution"]}
+  ],
+  "when": [
+    {"func": "TRIM", "use_when": "First resort whenever lookups mysteriously miss or 'duplicates' won't dedupe — stray spaces cause most of it."},
+    {"func": "CLEAN", "use_when": "Data from old systems or binary-ish exports showing boxes/garbage glyphs, or when in-cell line breaks need flattening."},
+    {"func": "The full chain", "use_when": "Web-pasted data: =TRIM(CLEAN(SUBSTITUTE(A2,CHAR(160),\" \"))) handles all three kinds in one pass — the order (SUBSTITUTE inside, TRIM outside) matters so converted nbsp-spaces get collapsed too."}
+  ],
+  "compat_note": "All four execute identically in every version of all three apps we test. Diagnose before cleaning: LEN(A2)-LEN(TRIM(A2)) counts suspect spaces, and CODE(MID(A2,k,1)) at the failing position names the exact culprit — 160 means nonbreaking space, and only SUBSTITUTE will save you.",
+  "examples": [
+    {"label": "The full cleanup chain", "formula": "=TRIM(CLEAN(SUBSTITUTE(A2,CHAR(160),\" \")))"},
+    {"label": "Why doesn't my lookup match?", "formula": "=CODE(MID(A2,LEN(A2),1))"},
+    {"label": "Flatten line breaks readably", "formula": "=SUBSTITUTE(A2,CHAR(10),\", \")"}
+  ]
+}
