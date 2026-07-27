@@ -638,6 +638,7 @@ BASE_TMPL = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ page_title }}</title>
 <meta name="description" content="{{ meta_description }}">
+{% if noindex %}<meta name="robots" content="noindex,follow">{% endif %}
 <link rel="canonical" href="{{ canonical }}">
 <meta property="og:title" content="{{ page_title }}">
 <meta property="og:description" content="{{ meta_description }}">
@@ -1619,6 +1620,15 @@ def main():
                 f"is it documented for Excel, Google Sheets, and LibreOffice Calc? "
                 f"Not yet live-tested by a real engine."
             )
+        # Thin, untested stub pages (only a documentation-inventory table, no
+        # executed data) are near-duplicates. On a young domain that already drew
+        # a Google "alternate/duplicate" warning, they dilute crawl budget and
+        # site-quality signal away from the ~455 pages that carry real executed
+        # data. noindex them (keep crawlable/followable so their outbound links
+        # still pass equity, and keep them reachable for direct navigation) and
+        # drop them from the sitemap, which should list only indexable URLs.
+        # Cleanly reversible: delete this branch to re-index them.
+        stub = not r["any_tested"]
         ctx = common_ctx(rel="../")
         ctx.update(
             page_title=title,
@@ -1627,12 +1637,14 @@ def main():
             r=r,
             related_recipes=func_recipes.get(r["name"], []),
             related_comparisons=func_comparisons.get(r["name"], []),
+            noindex=stub,
         )
         out_path = OUT_DIR / "functions" / f"{r['name_lower']}.html"
         out_path.write_text(func_tmpl.render(**ctx))
-        sitemap_urls.append(
-            {"loc": BASE_URL + f"functions/{r['name_lower']}.html", "lastmod": page_date}
-        )
+        if not stub:
+            sitemap_urls.append(
+                {"loc": BASE_URL + f"functions/{r['name_lower']}.html", "lastmod": page_date}
+            )
 
     # ---- How-to recipe pages ----
     recipes = load_recipes()
