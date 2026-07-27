@@ -1,0 +1,35 @@
+{
+  "slug": "count-visible-rows-after-filtering",
+  "title": "How to count only visible rows after filtering",
+  "task": "A count that respects the filter — \"showing N of M records\".",
+  "keywords": [
+    "count visible rows excel",
+    "count filtered rows only",
+    "subtotal 103 counta",
+    "filtered count google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUBTOTAL(103,A2:A1000)",
+      "note": "103 = COUNTA over visible rows only. Put it ABOVE the data or beside it, not in a filterable row."
+    },
+    "google_sheets": {
+      "formula": "=SUBTOTAL(103,A2:A1000)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUBTOTAL(103,A2:A1000)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "x",
+      "A3": "y",
+      "A4": "z"
+    },
+    "formula": "=SUBTOTAL(103,A2:A4)",
+    "expected": 3
+  },
+  "explanation": "Plain COUNTA keeps counting rows a filter has hidden; SUBTOTAL with the 100-series COUNTA code (103) counts only what's visible (all 3 here since nothing's filtered — apply a filter and the number drops live). A \"showing X of Y\" header is =SUBTOTAL(103,A2:A1000)&\" of \"&COUNTA(A2:A1000). Codes 109/101 do the same for SUM/AVERAGE, and the full code table lives in the SUM-vs-SUBTOTAL comparison. Place the formula outside the filtered range or it can hide itself."
+}

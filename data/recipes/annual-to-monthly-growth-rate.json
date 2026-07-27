@@ -1,0 +1,33 @@
+{
+  "slug": "annual-to-monthly-growth-rate",
+  "title": "How to convert an annual growth rate to monthly",
+  "task": "De-compound a yearly rate into its monthly equivalent — forecasts, run-rate models.",
+  "keywords": [
+    "annual to monthly growth rate",
+    "de-annualize rate excel",
+    "monthly equivalent rate",
+    "compound rate conversion google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=(1+A2)^(1/12)-1",
+      "note": "A2 = annual rate. The 12th root, not division by 12 — compounding isn't linear."
+    },
+    "google_sheets": {
+      "formula": "=(1+A2)^(1/12)-1",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=(1+A2)^(1/12)-1",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 0.126825
+    },
+    "formula": "=ROUND((1+A2)^(1/12)-1,4)",
+    "expected": 0.01
+  },
+  "explanation": "Twelve months of growth multiply, so the monthly rate is the 12th ROOT of (1 + annual) minus one: a 12.68% year unwinds to exactly 1% per month — while naive division (12.68/12 = 1.057%) overshoots, compounding to 13.4% when reapplied. The same formula generalizes: any period conversion is (1+rate)^(periods_ratio)−1 — quarterly from annual uses 1/4, annual from daily uses 365. It's CAGR's little sibling."
+}
