@@ -659,6 +659,7 @@ BASE_TMPL = """<!doctype html>
       <a href="{{ rel }}how-to/">How-to</a>
       <a href="{{ rel }}compare/">Compare</a>
       <a href="{{ rel }}checker.html">Checker</a>
+      <a href="{{ rel }}excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
       <a href="{{ rel }}libreoffice-version-support.html">LO&nbsp;versions</a>
       <a href="{{ rel }}quirks.html">Quirks</a>
       <a href="{{ github_url }}">GitHub</a>
@@ -1315,7 +1316,7 @@ EXCLUSIVE_TMPL = """{% extends "base.html" %}
 </table>
 </div>
 <p>{{ outro }}</p>
-<p>Part of the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula compatibility guide</a>.</p>
+<p>See the <a href="{{ rel }}excel-google-sheets-equivalents.html">Excel &harr; Google Sheets equivalents table</a> for the verified replacement to use for each. Part of the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula compatibility guide</a>.</p>
 {% endblock %}
 """
 
