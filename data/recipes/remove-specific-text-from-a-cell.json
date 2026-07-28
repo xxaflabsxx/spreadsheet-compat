@@ -1,0 +1,33 @@
+{
+  "slug": "remove-specific-text-from-a-cell",
+  "title": "How to remove specific text from a cell",
+  "task": "Strip a known word, code, or symbol out of text — clean up \"USD 45\" to \"45\", drop a prefix, delete a label.",
+  "keywords": [
+    "remove text from cell excel",
+    "delete specific characters formula",
+    "substitute remove text",
+    "strip word from cell google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUBSTITUTE(A2,\"USD \",\"\")",
+      "note": "Replaces the target with nothing. Add a 4th argument to remove only the Nth occurrence."
+    },
+    "google_sheets": {
+      "formula": "=SUBSTITUTE(A2,\"USD \",\"\")",
+      "note": "Identical; REGEXREPLACE(A2,\"USD \",\"\") also works in Sheets."
+    },
+    "libreoffice": {
+      "formula": "=SUBSTITUTE(A2,\"USD \",\"\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "USD 45.00"
+    },
+    "formula": "=SUBSTITUTE(A2,\"USD \",\"\")",
+    "expected": "45.00"
+  },
+  "explanation": "SUBSTITUTE swaps every copy of the target text for a replacement; making the replacement an empty string \"\" deletes it — \"USD 45.00\" becomes \"45.00\". It's case-sensitive, so \"USD\" won't match \"usd\". Nest SUBSTITUTE to remove several different strings at once: =SUBSTITUTE(SUBSTITUTE(A2,\"(\",\"\"),\")\",\"\"). Note the result is still TEXT even if it looks numeric — wrap in VALUE() if you need to calculate with it. To remove by POSITION rather than by content, use REPLACE instead."
+}
