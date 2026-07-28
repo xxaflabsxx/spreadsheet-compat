@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Excel vs Google Sheets: formula compatibility guide (what breaks and why)</title>
-<meta name="description" content="Excel vs Google Sheets for formulas: 54 Excel-only functions, 47 Sheets-only functions, dialect differences like ARRAYFORMULA vs spilling, and how to keep workbooks portable — with executed test data.">
+<title>Excel to Google Sheets function equivalents — what to use instead</title>
+<meta name="description" content="Google Sheets equivalents for Excel-only functions (GROUPBY, PIVOTBY, AGGREGATE) and Excel equivalents for Sheets-only ones (QUERY, ARRAYFORMULA, REGEXMATCH, IMPORTRANGE) — plus same-name gotchas. Verified from executed compatibility tests.">
 
-<link rel="canonical" href="https://canispreadsheet.com/excel-vs-google-sheets.html">
-<meta property="og:title" content="Excel vs Google Sheets: formula compatibility guide (what breaks and why)">
-<meta property="og:description" content="Excel vs Google Sheets for formulas: 54 Excel-only functions, 47 Sheets-only functions, dialect differences like ARRAYFORMULA vs spilling, and how to keep workbooks portable — with executed test data.">
+<link rel="canonical" href="https://canispreadsheet.com/excel-google-sheets-equivalents.html">
+<meta property="og:title" content="Excel to Google Sheets function equivalents — what to use instead">
+<meta property="og:description" content="Google Sheets equivalents for Excel-only functions (GROUPBY, PIVOTBY, AGGREGATE) and Excel equivalents for Sheets-only ones (QUERY, ARRAYFORMULA, REGEXMATCH, IMPORTRANGE) — plus same-name gotchas. Verified from executed compatibility tests.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/excel-vs-google-sheets.html">
+<meta property="og:url" content="https://canispreadsheet.com/excel-google-sheets-equivalents.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
@@ -300,37 +300,92 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<h1>Excel vs Google Sheets: the formula compatibility guide</h1>
-<p class="lede">Most Excel-vs-Sheets comparisons argue about collaboration and price. This one covers the part that silently breaks when you switch: <strong>the formulas</strong> &mdash; which functions exist on each side, where the same function behaves differently, and how to keep a workbook portable.</p>
+<h1>Excel &harr; Google Sheets function equivalents</h1>
+<p class="lede">Moving a formula between Excel and Google Sheets? Most functions are <strong>identical</strong> &mdash; VLOOKUP, SUMIFS, INDEX/MATCH, IF, the whole everyday toolkit works the same name, same arguments. This page covers the ones that <em>don&rsquo;t</em>, in both directions, with the verified replacement to use instead.</p>
+<p>Need it for one specific formula? Paste it into the <a href="checker.html">compatibility checker</a> and pick a target app for an instant migration report.</p>
 
-<h2 class="section-title">The numbers</h2>
-<ul>
-<li><strong>468</strong> functions are documented for BOTH Excel and Google Sheets &mdash; the shared core where most everyday work lives.</li>
-<li><strong>54</strong> functions are Excel-only (<a href="excel-functions-not-in-google-sheets.html">full list</a>): PIVOTBY, GROUPBY, the CUBE family, AGGREGATE&hellip; Importing an .xlsx that uses them leaves <code>#NAME?</code> cells in Sheets.</li>
-<li><strong>47</strong> functions are Sheets-only (<a href="sheets-functions-not-in-excel.html">full list</a>): QUERY, ARRAYFORMULA, IMPORTRANGE, GOOGLEFINANCE, the REGEX family&hellip; These die on export to Excel.</li>
-</ul>
+<h2 class="section-title">Only in Google Sheets &mdash; what to use in Excel</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Google Sheets</th><th>Excel equivalent</th></tr></thead>
+<tbody>
 
-<h2 class="section-title">Same function, different dialect</h2>
-<p>The subtler traps are functions both apps HAVE but spell differently:</p>
-<ul>
-<li><strong>Array formulas.</strong> Sheets wraps per-row math in <code>ARRAYFORMULA(...)</code>; modern Excel just spills array expressions natively. Exporting a Sheet frequently degrades wrapped arithmetic to a single-cell result &mdash; details in <a href="compare/arrayformula-vs-dynamic-arrays.html">ARRAYFORMULA vs dynamic arrays</a>.</li>
-<li><strong>Filtering with SQL.</strong> Sheets&rsquo; <code>QUERY</code> has no Excel equivalent at all; the portable subset is FILTER/SORT/UNIQUE &mdash; see <a href="compare/filter-vs-query.html">FILTER vs QUERY</a>.</li>
-<li><strong>Regular expressions.</strong> REGEXMATCH/REGEXEXTRACT/REGEXREPLACE are Sheets-only; Excel&rsquo;s closest tools are SEARCH wildcards and TEXTBEFORE/TEXTAFTER.</li>
-<li><strong>Version skew inside Excel itself.</strong> XLOOKUP, FILTER, LAMBDA and friends need Excel 2021+/365 &mdash; a current Sheet can be MORE compatible with modern functions than a 2019 Excel install.</li>
-</ul>
+<tr><td><a href="functions/query.html"><code>QUERY</code></a></td><td>No single equivalent. Use FILTER for SELECT/WHERE; add SUMIFS/UNIQUE/SORT for grouping and aggregation. For heavy reshaping, Power Query.</td></tr>
 
-<h2 class="section-title">Keeping a workbook portable</h2>
-<ol>
-<li>Stick to the shared core &mdash; paste any formula into the <a href="checker.html">compatibility checker</a> and it flags every function per app.</li>
-<li>Prefer FILTER/SORT/UNIQUE compositions over QUERY, and native ranges over ARRAYFORMULA, when a file might ever leave Sheets.</li>
-<li>Avoid the newest Excel exclusives (GROUPBY, PIVOTBY) in files that co-workers will open in Sheets.</li>
-<li>Test the round trip: export, reopen, and search for <code>#NAME?</code> and <code>#REF!</code>.</li>
-</ol>
+<tr><td><a href="functions/arrayformula.html"><code>ARRAYFORMULA</code></a></td><td>Not needed — Excel 365 spills array expressions natively. Just write =A2:A10*B2:B10.</td></tr>
 
-<h2 class="section-title">Where LibreOffice fits</h2>
-<p>LibreOffice Calc reads both formats and &mdash; unlike either vendor&rsquo;s docs &mdash; we can actually EXECUTE formulas in it: 215 functions live-tested across 24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3. Its modern-function support now tracks Excel closely (XLOOKUP since 24.8, the dynamic-array batch since 25.8 &mdash; see <a href="libreoffice-version-support.html">support by version</a>), and several &ldquo;Excel-only&rdquo; functions like AGGREGATE work fine there, making it a viable escape hatch for files Sheets can&rsquo;t fully open.</p>
+<tr><td><a href="functions/regexmatch.html"><code>REGEXMATCH</code></a></td><td>No regex in Excel. Use ISNUMBER(SEARCH(&#34;text&#34;,A2)) for contains, or wildcards in COUNTIF/SUMIF.</td></tr>
 
-<p>Every claim here is backed by the underlying pages: <a href="index.html">per-function verdicts</a>, <a href="quirks.html">behavioral quirks</a>, the <a href="excel-google-sheets-equivalents.html">function equivalents table</a>, and the <a href="methodology.html">verification methodology</a>.</p>
+<tr><td><a href="functions/regexextract.html"><code>REGEXEXTRACT</code></a></td><td>Use LEFT/MID/RIGHT with FIND, or TEXTBEFORE/TEXTAFTER (Excel 365).</td></tr>
+
+<tr><td><a href="functions/regexreplace.html"><code>REGEXREPLACE</code></a></td><td>Use SUBSTITUTE (by text), nested for multiple patterns.</td></tr>
+
+<tr><td><a href="functions/googlefinance.html"><code>GOOGLEFINANCE</code></a></td><td>No native equivalent. Excel 365 has the STOCKHISTORY function and Stocks data type for some of this.</td></tr>
+
+<tr><td><a href="functions/importrange.html"><code>IMPORTRANGE</code></a></td><td>Link workbooks with external references, or pull data via Power Query.</td></tr>
+
+<tr><td><a href="functions/importhtml.html"><code>IMPORTHTML</code></a></td><td>Power Query: Data → From Web imports HTML tables and lists.</td></tr>
+
+<tr><td><a href="functions/importxml.html"><code>IMPORTXML</code></a></td><td>Power Query (Data → From Web) for structured web data.</td></tr>
+
+<tr><td><a href="functions/split.html"><code>SPLIT</code></a></td><td>TEXTSPLIT (Excel 365), or the Text to Columns wizard.</td></tr>
+
+<tr><td><a href="functions/join.html"><code>JOIN</code></a></td><td>TEXTJOIN(delimiter, TRUE, range) — same idea, works in both.</td></tr>
+
+<tr><td><a href="functions/flatten.html"><code>FLATTEN</code></a></td><td>TOCOL(range) in Excel 365 flattens a range to one column.</td></tr>
+
+</tbody>
+</table>
+</div>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">Full list: <a href="sheets-functions-not-in-excel.html">all Google Sheets functions not in Excel</a>.</p>
+
+<h2 class="section-title">Only in Excel &mdash; what to use in Google Sheets</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Excel</th><th>Google Sheets equivalent</th></tr></thead>
+<tbody>
+
+<tr><td><a href="functions/groupby.html"><code>GROUPBY</code></a></td><td>Not in Sheets yet. Use a pivot table, or SUMIFS/COUNTIFS over UNIQUE keys.</td></tr>
+
+<tr><td><a href="functions/pivotby.html"><code>PIVOTBY</code></a></td><td>Use a pivot table, or QUERY with GROUP BY.</td></tr>
+
+<tr><td><a href="functions/stockhistory.html"><code>STOCKHISTORY</code></a></td><td>GOOGLEFINANCE(ticker, ...) pulls historical prices in Sheets.</td></tr>
+
+<tr><td><a href="functions/aggregate.html"><code>AGGREGATE</code></a></td><td>No direct equivalent; SUBTOTAL covers the filter-aware subset, or FILTER out errors then aggregate.</td></tr>
+
+<tr><td><a href="functions/textbefore.html"><code>TEXTBEFORE</code></a></td><td>Available in Sheets too; older sheets use LEFT(A2,FIND(delim,A2)-1).</td></tr>
+
+<tr><td><a href="functions/arraytotext.html"><code>ARRAYTOTEXT</code></a></td><td>TEXTJOIN(&#34;, &#34;,TRUE,range) approximates it in Sheets.</td></tr>
+
+<tr><td><a href="functions/image.html"><code>IMAGE</code></a></td><td>Sheets has IMAGE(url) too — one of the few that matches.</td></tr>
+
+</tbody>
+</table>
+</div>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">Full list: <a href="excel-functions-not-in-google-sheets.html">all Excel functions not in Google Sheets</a>.</p>
+
+<h2 class="section-title">Same name, watch the difference</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>What differs between Excel and Sheets</th></tr></thead>
+<tbody>
+
+<tr><td><code>SORT</code></td><td>Direction argument differs: Excel uses 1/-1 (asc/desc); Google Sheets uses TRUE/FALSE.</td></tr>
+
+<tr><td><code>WEEKDAY</code></td><td>Both support the return-type argument, but be explicit about it — the default (Sunday=1) trips up weekend logic in both.</td></tr>
+
+<tr><td><code>TEXT</code></td><td>Format codes mostly match, but locale affects date/number separators — a comma-decimal locale reads codes differently.</td></tr>
+
+<tr><td><code>CONCATENATE</code></td><td>Works in both, but Sheets also allows CONCATENATE of a whole range; Excel&#39;s version is cell-by-cell (use CONCAT/TEXTJOIN).</td></tr>
+
+<tr><td><code>FILTER</code></td><td>Same core behavior; the &#39;no matches&#39; fallback argument exists in both (Excel 365), but error text differs.</td></tr>
+
+</tbody>
+</table>
+</div>
+
+<h2 class="section-title">A note on versions</h2>
+<p>Some &ldquo;differences&rdquo; are really just version age. XLOOKUP, FILTER, SORT, LET, LAMBDA and the dynamic-array family need <strong>Excel 2021 or 365</strong> &mdash; current Google Sheets has had them for years, so a modern Sheet can be <em>more</em> compatible with these than an Excel 2019 install. Full support-by-version detail (including LibreOffice) is on each <a href="index.html">function page</a>, and the app-level picture is in the <a href="excel-vs-google-sheets.html">Excel vs Google Sheets guide</a>.</p>
 
 <aside class="promo-card">
   <div>

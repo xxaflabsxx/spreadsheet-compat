@@ -1208,6 +1208,56 @@ ERRORS_TMPL = """{% extends "base.html" %}
 """
 
 
+EQUIV_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Excel &harr; Google Sheets function equivalents</h1>
+<p class="lede">Moving a formula between Excel and Google Sheets? Most functions are <strong>identical</strong> &mdash; VLOOKUP, SUMIFS, INDEX/MATCH, IF, the whole everyday toolkit works the same name, same arguments. This page covers the ones that <em>don&rsquo;t</em>, in both directions, with the verified replacement to use instead.</p>
+<p>Need it for one specific formula? Paste it into the <a href="{{ rel }}checker.html">compatibility checker</a> and pick a target app for an instant migration report.</p>
+
+<h2 class="section-title">Only in Google Sheets &mdash; what to use in Excel</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Google Sheets</th><th>Excel equivalent</th></tr></thead>
+<tbody>
+{% for r in g_only %}
+<tr><td>{% if r.exists %}<a href="{{ rel }}functions/{{ r.fn|lower }}.html"><code>{{ r.fn }}</code></a>{% else %}<code>{{ r.fn }}</code>{% endif %}</td><td>{{ r.note }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">Full list: <a href="{{ rel }}sheets-functions-not-in-excel.html">all Google Sheets functions not in Excel</a>.</p>
+
+<h2 class="section-title">Only in Excel &mdash; what to use in Google Sheets</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Excel</th><th>Google Sheets equivalent</th></tr></thead>
+<tbody>
+{% for r in x_only %}
+<tr><td>{% if r.exists %}<a href="{{ rel }}functions/{{ r.fn|lower }}.html"><code>{{ r.fn }}</code></a>{% else %}<code>{{ r.fn }}</code>{% endif %}</td><td>{{ r.note }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">Full list: <a href="{{ rel }}excel-functions-not-in-google-sheets.html">all Excel functions not in Google Sheets</a>.</p>
+
+<h2 class="section-title">Same name, watch the difference</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>What differs between Excel and Sheets</th></tr></thead>
+<tbody>
+{% for r in gotcha %}
+<tr><td><code>{{ r.fn }}</code></td><td>{{ r.note }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2 class="section-title">A note on versions</h2>
+<p>Some &ldquo;differences&rdquo; are really just version age. XLOOKUP, FILTER, SORT, LET, LAMBDA and the dynamic-array family need <strong>Excel 2021 or 365</strong> &mdash; current Google Sheets has had them for years, so a modern Sheet can be <em>more</em> compatible with these than an Excel 2019 install. Full support-by-version detail (including LibreOffice) is on each <a href="{{ rel }}index.html">function page</a>, and the app-level picture is in the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets guide</a>.</p>
+{% endblock %}
+"""
+
+
 PILLAR_XVG_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Excel vs Google Sheets: the formula compatibility guide</h1>
@@ -1240,7 +1290,7 @@ PILLAR_XVG_TMPL = """{% extends "base.html" %}
 <h2 class="section-title">Where LibreOffice fits</h2>
 <p>LibreOffice Calc reads both formats and &mdash; unlike either vendor&rsquo;s docs &mdash; we can actually EXECUTE formulas in it: {{ n_tested }} functions live-tested across {{ versions|join(', ') }}. Its modern-function support now tracks Excel closely (XLOOKUP since 24.8, the dynamic-array batch since 25.8 &mdash; see <a href="{{ rel }}libreoffice-version-support.html">support by version</a>), and several &ldquo;Excel-only&rdquo; functions like AGGREGATE work fine there, making it a viable escape hatch for files Sheets can&rsquo;t fully open.</p>
 
-<p>Every claim here is backed by the underlying pages: <a href="{{ rel }}index.html">per-function verdicts</a>, <a href="{{ rel }}quirks.html">behavioral quirks</a>, and the <a href="{{ rel }}methodology.html">verification methodology</a>.</p>
+<p>Every claim here is backed by the underlying pages: <a href="{{ rel }}index.html">per-function verdicts</a>, <a href="{{ rel }}quirks.html">behavioral quirks</a>, the <a href="{{ rel }}excel-google-sheets-equivalents.html">function equivalents table</a>, and the <a href="{{ rel }}methodology.html">verification methodology</a>.</p>
 {% endblock %}
 """
 
@@ -1534,6 +1584,7 @@ def build_env():
                 "exclusive.html": EXCLUSIVE_TMPL,
                 "pillar_xvg.html": PILLAR_XVG_TMPL,
                 "errors.html": ERRORS_TMPL,
+                "equiv.html": EQUIV_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
@@ -1912,6 +1963,57 @@ def main():
         env.get_template("errors.html").render(**ectx2)
     )
     sitemap_urls.append({"loc": BASE_URL + "spreadsheet-errors.html", "lastmod": build_date})
+
+    # ---- Excel <-> Google Sheets equivalents reference ----
+    equiv_g_only = [  # Sheets-only -> Excel equivalent
+        {"fn": "QUERY", "note": "No single equivalent. Use FILTER for SELECT/WHERE; add SUMIFS/UNIQUE/SORT for grouping and aggregation. For heavy reshaping, Power Query."},
+        {"fn": "ARRAYFORMULA", "note": "Not needed — Excel 365 spills array expressions natively. Just write =A2:A10*B2:B10."},
+        {"fn": "REGEXMATCH", "note": "No regex in Excel. Use ISNUMBER(SEARCH(\"text\",A2)) for contains, or wildcards in COUNTIF/SUMIF."},
+        {"fn": "REGEXEXTRACT", "note": "Use LEFT/MID/RIGHT with FIND, or TEXTBEFORE/TEXTAFTER (Excel 365)."},
+        {"fn": "REGEXREPLACE", "note": "Use SUBSTITUTE (by text), nested for multiple patterns."},
+        {"fn": "GOOGLEFINANCE", "note": "No native equivalent. Excel 365 has the STOCKHISTORY function and Stocks data type for some of this."},
+        {"fn": "IMPORTRANGE", "note": "Link workbooks with external references, or pull data via Power Query."},
+        {"fn": "IMPORTHTML", "note": "Power Query: Data → From Web imports HTML tables and lists."},
+        {"fn": "IMPORTXML", "note": "Power Query (Data → From Web) for structured web data."},
+        {"fn": "SPLIT", "note": "TEXTSPLIT (Excel 365), or the Text to Columns wizard."},
+        {"fn": "JOIN", "note": "TEXTJOIN(delimiter, TRUE, range) — same idea, works in both."},
+        {"fn": "FLATTEN", "note": "TOCOL(range) in Excel 365 flattens a range to one column."},
+    ]
+    equiv_x_only = [  # Excel-only -> Sheets equivalent
+        {"fn": "GROUPBY", "note": "Not in Sheets yet. Use a pivot table, or SUMIFS/COUNTIFS over UNIQUE keys."},
+        {"fn": "PIVOTBY", "note": "Use a pivot table, or QUERY with GROUP BY."},
+        {"fn": "STOCKHISTORY", "note": "GOOGLEFINANCE(ticker, ...) pulls historical prices in Sheets."},
+        {"fn": "AGGREGATE", "note": "No direct equivalent; SUBTOTAL covers the filter-aware subset, or FILTER out errors then aggregate."},
+        {"fn": "TEXTBEFORE", "note": "Available in Sheets too; older sheets use LEFT(A2,FIND(delim,A2)-1)."},
+        {"fn": "ARRAYTOTEXT", "note": "TEXTJOIN(\", \",TRUE,range) approximates it in Sheets."},
+        {"fn": "IMAGE", "note": "Sheets has IMAGE(url) too — one of the few that matches."},
+    ]
+    equiv_gotcha = [  # same name, different behavior
+        {"fn": "SORT", "note": "Direction argument differs: Excel uses 1/-1 (asc/desc); Google Sheets uses TRUE/FALSE."},
+        {"fn": "WEEKDAY", "note": "Both support the return-type argument, but be explicit about it — the default (Sunday=1) trips up weekend logic in both."},
+        {"fn": "TEXT", "note": "Format codes mostly match, but locale affects date/number separators — a comma-decimal locale reads codes differently."},
+        {"fn": "CONCATENATE", "note": "Works in both, but Sheets also allows CONCATENATE of a whole range; Excel's version is cell-by-cell (use CONCAT/TEXTJOIN)."},
+        {"fn": "FILTER", "note": "Same core behavior; the 'no matches' fallback argument exists in both (Excel 365), but error text differs."},
+    ]
+    _fn_names = {r["name"] for r in records}
+    for _row in equiv_g_only + equiv_x_only:
+        _row["exists"] = _row["fn"] in _fn_names
+    eqctx = common_ctx(rel="")
+    eqctx.update(
+        page_title="Excel to Google Sheets function equivalents — what to use instead",
+        meta_description=(
+            "Google Sheets equivalents for Excel-only functions (GROUPBY, PIVOTBY, "
+            "AGGREGATE) and Excel equivalents for Sheets-only ones (QUERY, "
+            "ARRAYFORMULA, REGEXMATCH, IMPORTRANGE) — plus same-name gotchas. "
+            "Verified from executed compatibility tests."
+        ),
+        canonical=BASE_URL + "excel-google-sheets-equivalents.html",
+        g_only=equiv_g_only, x_only=equiv_x_only, gotcha=equiv_gotcha,
+    )
+    (OUT_DIR / "excel-google-sheets-equivalents.html").write_text(
+        env.get_template("equiv.html").render(**eqctx)
+    )
+    sitemap_urls.append({"loc": BASE_URL + "excel-google-sheets-equivalents.html", "lastmod": build_date})
 
     # ---- Excel vs Google Sheets pillar page ----
     n_xonly = sum(1 for r in records if r["engines"]["excel"]["documented"] and not r["engines"]["google_sheets"]["documented"])
