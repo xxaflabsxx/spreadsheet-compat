@@ -1,0 +1,24 @@
+{
+  "slug": "if-vs-switch",
+  "title": "IF vs SWITCH: comparisons or exact matches",
+  "meta_desc": "IF vs SWITCH: SWITCH matches one value against a list of exact cases; IF handles ranges and comparisons. When each is cleaner, plus the default-value pattern.",
+  "funcs": ["IF", "SWITCH", "IFS"],
+  "intro": "SWITCH tests ONE expression against a list of exact values — perfect for mapping codes to labels. IF (and its flat sibling IFS) handle ranges and comparisons that SWITCH can't express. Use SWITCH when you're matching equals; reach for IF/IFS the moment you need greater-than.",
+  "table": [
+    {"aspect": "Tests", "cols": ["Any condition (>, <, =, AND/OR)", "One expression equal to each case value"]},
+    {"aspect": "Ranges (score >= 80)", "cols": ["Yes", "No — exact matches only"]},
+    {"aspect": "Repetition", "cols": ["Restates the expression each branch", "States the expression ONCE, then value/result pairs"]},
+    {"aspect": "Default / else", "cols": ["The false argument", "A final lone argument (odd one out) is the default"]},
+    {"aspect": "Availability", "cols": ["Universal", "Excel 2019+, Google Sheets, LibreOffice (verified)"]}
+  ],
+  "when": [
+    {"func": "SWITCH", "use_when": "Mapping a value to outputs by exact match: status codes to labels, month numbers to names, department IDs to managers. =SWITCH(A2,1,\"Low\",2,\"Med\",3,\"High\",\"?\") is cleaner than nested IFs and names the expression once."},
+    {"func": "IF / IFS", "use_when": "Anything involving ranges, comparisons, or combined conditions (grades by score band, tiered pricing). SWITCH(TRUE, cond1, val1, ...) can fake ranges, but IFS reads better for that."}
+  ],
+  "compat_note": "Both execute identically across every version of all three apps we test. SWITCH needs Excel 2019+ (it's in Google Sheets and LibreOffice throughout our tested range); in older Excel, nested IF or a lookup table is the fallback. For the IF-vs-IFS choice specifically, see that comparison.",
+  "examples": [
+    {"label": "SWITCH (exact-match mapping)", "formula": "=SWITCH(A2,1,\"Low\",2,\"Med\",3,\"High\",\"Unknown\")"},
+    {"label": "IF (a range test)", "formula": "=IF(A2>=80,\"Pass\",\"Fail\")"},
+    {"label": "SWITCH(TRUE,...) faking ranges", "formula": "=SWITCH(TRUE,A2>=80,\"A\",A2>=70,\"B\",\"C\")"}
+  ]
+}

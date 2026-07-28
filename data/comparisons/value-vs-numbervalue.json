@@ -1,0 +1,24 @@
+{
+  "slug": "value-vs-numbervalue",
+  "title": "VALUE vs NUMBERVALUE: parsing text to numbers, and locales",
+  "meta_desc": "VALUE vs NUMBERVALUE: converting text to numbers, and why NUMBERVALUE matters when decimal/thousands separators differ by locale. Verified across all three apps.",
+  "funcs": ["VALUE", "NUMBERVALUE"],
+  "intro": "Both turn text that looks like a number into a real number so you can do math. VALUE uses your spreadsheet's locale settings to interpret separators; NUMBERVALUE lets you SPECIFY the decimal and grouping characters explicitly — which is the whole point when you're cleaning data that came from a different region.",
+  "table": [
+    {"aspect": "Separator interpretation", "cols": ["Follows the app's locale settings", "You pass the decimal and group separators as arguments"]},
+    {"aspect": "\"1.234,56\" (European) on a US machine", "cols": ["Misreads it (or errors)", "NUMBERVALUE(A2,\",\",\".\") returns 1234.56"]},
+    {"aspect": "Currency symbols, %, spaces", "cols": ["Handles common ones per locale", "Strips grouping chars; % divides by 100"]},
+    {"aspect": "When to reach for it", "cols": ["Quick cleanup of locally-formatted text", "Cross-locale imports, fixed known formats"]},
+    {"aspect": "Availability", "cols": ["Universal", "Excel 2013+, Google Sheets, LibreOffice (verified by execution)"]}
+  ],
+  "when": [
+    {"func": "VALUE", "use_when": "The text already matches your machine's locale — the common case for a quick =VALUE(A2) to un-text a number, or letting arithmetic coerce it (A2*1)."},
+    {"func": "NUMBERVALUE", "use_when": "Imported data uses different separators than your locale (a German CSV's \"1.234,56\", or thousands-spaces), so you must state the decimal and grouping characters to parse it reliably regardless of machine settings."}
+  ],
+  "compat_note": "Both execute correctly in every version of all three apps we test. NUMBERVALUE needs Excel 2013+ but has been in Google Sheets and LibreOffice throughout our tested range. The reverse trip — number to formatted text — is TEXT; and for cleaning stray currency symbols first, see the convert-currency-text-to-a-number recipe.",
+  "examples": [
+    {"label": "Text to number (local format)", "formula": "=VALUE(A2)"},
+    {"label": "Parse a European-formatted string", "formula": "=NUMBERVALUE(A2,\",\",\".\")"},
+    {"label": "Let arithmetic coerce it", "formula": "=A2*1"}
+  ]
+}

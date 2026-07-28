@@ -1,0 +1,25 @@
+{
+  "slug": "round-vs-mround",
+  "title": "ROUND vs MROUND: to decimals or to a multiple",
+  "meta_desc": "ROUND vs MROUND: rounding to decimal places versus rounding to the nearest multiple (0.25, 5, 15 minutes). When each fits, plus negative-number notes.",
+  "funcs": ["ROUND", "MROUND"],
+  "intro": "ROUND snaps to a number of decimal PLACES; MROUND snaps to the nearest MULTIPLE of whatever you give it. \"Round to 2 decimals\" is ROUND; \"round to the nearest quarter / nickel / 15 minutes\" is MROUND. Choosing by the unit you're thinking in makes the formula read itself.",
+  "table": [
+    {"aspect": "Rounds to", "cols": ["A number of decimal places", "The nearest multiple of a value"]},
+    {"aspect": "2.37 →", "cols": ["ROUND(x,1) = 2.4", "MROUND(x,0.25) = 2.50"]},
+    {"aspect": "Direction", "cols": ["Nearest (ROUNDUP/DOWN force it)", "Nearest (CEILING/FLOOR force it)"]},
+    {"aspect": "Whole-number step", "cols": ["ROUND(x,0)", "MROUND(x,5) for nearest 5, MROUND(x,1) = nearest integer"]},
+    {"aspect": "Negative sign rule", "cols": ["Works with any sign", "Number and multiple must share a sign, or MROUND errors (#NUM!)"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both verified in every version we test)"]}
+  ],
+  "when": [
+    {"func": "ROUND", "use_when": "Decimal precision: currency to cents (2 places), trimming display noise, ROUND(x,-2) for the nearest hundred. It's the everyday rounder."},
+    {"func": "MROUND", "use_when": "Real-world increments: prices to the nearest 0.05 or 0.25, quantities to case sizes, and time to 15-minute blocks with MROUND(t,TIME(0,15,0)). Anything sold or billed in fixed steps."}
+  ],
+  "compat_note": "Both execute identically in every version of Excel, Google Sheets, and LibreOffice we test. One MROUND gotcha that's the same everywhere: the value and the multiple must have the same sign — MROUND(-7,5) errors, MROUND(-7,-5) is fine. For forced-direction multiple rounding, CEILING and FLOOR are the cousins (see ROUNDUP vs CEILING).",
+  "examples": [
+    {"label": "Money to cents", "formula": "=ROUND(A2,2)"},
+    {"label": "Price to nearest nickel", "formula": "=MROUND(A2,0.05)"},
+    {"label": "Time to nearest 15 min", "formula": "=MROUND(A2,TIME(0,15,0))"}
+  ]
+}

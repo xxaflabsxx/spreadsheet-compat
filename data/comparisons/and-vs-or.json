@@ -1,0 +1,25 @@
+{
+  "slug": "and-vs-or",
+  "title": "AND vs OR: all conditions or any condition",
+  "meta_desc": "AND vs OR in spreadsheet logic: AND needs every condition true, OR needs at least one. Combining them, using them inside IF, and array-math equivalents.",
+  "funcs": ["AND", "OR", "IF", "NOT"],
+  "intro": "The two workhorses of logic: AND is true only when EVERY condition is true; OR is true when AT LEAST ONE is. On their own they return TRUE/FALSE, but you'll almost always wrap them in IF to return something useful.",
+  "table": [
+    {"aspect": "True when", "cols": ["All conditions are true", "Any one condition is true"]},
+    {"aspect": "(5>3, 5>10)", "cols": ["FALSE (second fails)", "TRUE (first passes)"]},
+    {"aspect": "Empty / no conditions met", "cols": ["Needs every one", "Needs just one"]},
+    {"aspect": "Inside IF", "cols": ["=IF(AND(a,b),x,y)", "=IF(OR(a,b),x,y)"]},
+    {"aspect": "Array-math form (for SUMPRODUCT/FILTER)", "cols": ["multiply: (a)*(b)", "add: (a)+(b)>0"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal — both verified in every version we test"]}
+  ],
+  "when": [
+    {"func": "AND", "use_when": "Every requirement must hold: in-stock AND under-budget, date-in-range (AND of two bounds), all-fields-complete checks."},
+    {"func": "OR", "use_when": "Any one qualifies: region is East OR West, status is Urgent OR Overdue, value hits any of several flags. NOT(OR(...)) means 'none of these'."}
+  ],
+  "compat_note": "AND, OR, NOT execute identically in every version of all three apps we test. Key limitation shared everywhere: AND/OR return a single TRUE/FALSE for the whole set — they do NOT work element-by-element inside array formulas. For per-row AND/OR across ranges (SUMPRODUCT, FILTER), use arithmetic instead: multiply conditions for AND, add them for OR (see the filter-by-multiple-criteria and sumif-vs-sumproduct recipes).",
+  "examples": [
+    {"label": "All must pass", "formula": "=IF(AND(A2>=0,A2<=100),\"valid\",\"out of range\")"},
+    {"label": "Any qualifies", "formula": "=IF(OR(A2=\"East\",A2=\"West\"),\"west half\",\"east half\")"},
+    {"label": "None of these", "formula": "=NOT(OR(A2=\"done\",A2=\"cancelled\"))"}
+  ]
+}
