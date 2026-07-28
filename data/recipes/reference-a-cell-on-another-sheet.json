@@ -1,0 +1,35 @@
+{
+  "slug": "reference-a-cell-on-another-sheet",
+  "title": "How to reference a cell on another sheet",
+  "task": "The basics of pulling a value from another tab into a formula — and the one syntax that changes between apps.",
+  "keywords": [
+    "reference another sheet excel",
+    "cell from another tab formula",
+    "link to another sheet",
+    "pull value from other sheet google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=Summary!B2*Data!C5",
+      "note": "SheetName!Cell. Just type = then click the cell on the other tab and Excel builds it."
+    },
+    "google_sheets": {
+      "formula": "=Summary!B2*Data!C5",
+      "note": "Identical. To pull from a different FILE, wrap in IMPORTRANGE (Sheets-only)."
+    },
+    "libreoffice": {
+      "formula": "=Summary.B2*Data.C5",
+      "note": "LibreOffice uses a DOT (Summary.B2), not an exclamation mark."
+    }
+  },
+  "verify": {
+    "setup_sheets": {
+      "Summary": {"B2": 12},
+      "Data": {"C5": 5}
+    },
+    "setup_cells": {},
+    "formula": "=Summary!B2*Data!C5",
+    "expected": 60
+  },
+  "explanation": "Any formula can reach other tabs by prefixing the cell with the sheet name: Summary!B2 times Data!C5 gives 12 x 5 = 60. Excel and Google Sheets use SheetName!Cell; LibreOffice uses SheetName.Cell (a dot) — so a workbook saved from one and opened in the other translates the separator automatically, but hand-typed formulas need the right one. Sheet names with spaces go in single quotes: ='Q1 Data'!A1. Referencing a cell in a completely separate FILE needs external links (Excel/LibreOffice) or IMPORTRANGE (Google Sheets only)."
+}

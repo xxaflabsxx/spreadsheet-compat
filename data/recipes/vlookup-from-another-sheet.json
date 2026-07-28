@@ -1,0 +1,40 @@
+{
+  "slug": "vlookup-from-another-sheet",
+  "title": "How to VLOOKUP from another sheet",
+  "task": "Pull a value from a lookup table that lives on a different tab.",
+  "keywords": [
+    "vlookup another sheet excel",
+    "vlookup from different tab",
+    "vlookup across sheets google sheets",
+    "reference another sheet lookup"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=VLOOKUP(A2,Prices!A:B,2,FALSE)",
+      "note": "SheetName!Range. Quote names with spaces: ='Price List'!A:B."
+    },
+    "google_sheets": {
+      "formula": "=VLOOKUP(A2,Prices!A:B,2,FALSE)",
+      "note": "Identical syntax."
+    },
+    "libreoffice": {
+      "formula": "=VLOOKUP(A2,Prices.A:B,2,FALSE)",
+      "note": "LibreOffice uses a DOT between sheet and cell (Prices.A:B) instead of the ! — the one real cross-app difference here."
+    }
+  },
+  "verify": {
+    "setup_sheets": {
+      "Prices": {
+        "A1": "apple", "B1": 10,
+        "A2": "banana", "B2": 20,
+        "A3": "cherry", "B3": 30
+      }
+    },
+    "setup_cells": {
+      "A2": "banana"
+    },
+    "formula": "=VLOOKUP(A2,Prices!A1:B3,2,FALSE)",
+    "expected": 20
+  },
+  "explanation": "Prefix the lookup range with the other tab's name: VLOOKUP finds \"banana\" in the Prices sheet and returns 20 — everything else works exactly as a same-sheet VLOOKUP. Excel and Google Sheets separate the sheet name from the range with an exclamation mark (Prices!A:B); LibreOffice Calc uses a dot (Prices.A:B), which is the gotcha when a file moves between them. Wrap sheet names containing spaces in single quotes. This recipe was verified by actually placing the table on a second tab and executing the cross-sheet formula."
+}

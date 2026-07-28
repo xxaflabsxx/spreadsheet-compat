@@ -22,8 +22,13 @@ def norm(v):
     if isinstance(v,float) and v.is_integer(): return int(v)
     return v
 
-def run_case(setup, formula, check_range):
+def run_case(setup, formula, check_range, setup_sheets=None):
     wb=openpyxl.Workbook(); ws=wb.active
+    # Optional extra sheets so recipes can reference another tab (Sheet2!A1).
+    # Written before the main sheet's data; the main formula lives on ws.
+    for sheet_name, cells in (setup_sheets or {}).items():
+        extra=wb.create_sheet(title=sheet_name)
+        for a,val in (cells or {}).items(): extra[a]=val
     for a,val in (setup or {}).items(): ws[a]=val
     anchor = check_range.split(":")[0] if check_range else "H1"
     formula = to_storage_formula_all(formula)  # add _xlfn. prefixes for OOXML round-trip
@@ -48,7 +53,7 @@ for f in sorted(glob.glob(os.path.join(ROOT,"data/recipes/*.json"))):
     r=json.load(open(f)); v=r["verify"]
     exp=v["expected"]; cr=v.get("check_range")
     try:
-        actual=run_case(v.get("setup_cells"), v["formula"], cr)
+        actual=run_case(v.get("setup_cells"), v["formula"], cr, v.get("setup_sheets"))
         ok = (actual==exp) if not isinstance(exp,list) else ([str(x) for x in actual]==[str(x) for x in exp])
     except Exception as e:
         actual=f"ERR {e}"; ok=False

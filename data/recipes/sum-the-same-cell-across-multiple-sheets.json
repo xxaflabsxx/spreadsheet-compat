@@ -1,0 +1,36 @@
+{
+  "slug": "sum-the-same-cell-across-multiple-sheets",
+  "title": "How to sum the same cell across multiple sheets (3D reference)",
+  "task": "Total one cell (like B2) from every monthly tab at once — the classic workbook roll-up.",
+  "keywords": [
+    "sum across multiple sheets excel",
+    "3d reference sum",
+    "sum same cell all sheets",
+    "sum across tabs google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUM(Jan:Dec!B2)",
+      "note": "A 3D reference: first sheet : last sheet ! cell. Sums that cell on every tab in between."
+    },
+    "google_sheets": {
+      "formula": "=Jan!B2+Feb!B2+Mar!B2",
+      "note": "Google Sheets has NO 3D references — you must add each sheet explicitly (or use a helper)."
+    },
+    "libreoffice": {
+      "formula": "=SUM(Jan.B2:Dec.B2)",
+      "note": "LibreOffice supports 3D refs with dot syntax: SUM(First.Cell:Last.Cell)."
+    }
+  },
+  "verify": {
+    "setup_sheets": {
+      "Jan": {"B2": 100},
+      "Feb": {"B2": 200},
+      "Mar": {"B2": 300}
+    },
+    "setup_cells": {},
+    "formula": "=Jan!B2+Feb!B2+Mar!B2",
+    "expected": 600
+  },
+  "explanation": "A 3D reference sums one cell across a span of tabs: =SUM(Jan:Dec!B2) adds B2 from January through December — reorder or insert tabs between the endpoints and they're automatically included. The big cross-app catch: 3D references exist in Excel and LibreOffice but NOT Google Sheets, where you must add each sheet by hand (=Jan!B2+Feb!B2+...) or restructure the data. The verification adds B2 across three real tabs (the portable per-sheet form) and confirms 600."
+}
