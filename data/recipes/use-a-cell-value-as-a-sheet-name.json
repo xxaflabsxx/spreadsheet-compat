@@ -1,0 +1,36 @@
+{
+  "slug": "use-a-cell-value-as-a-sheet-name",
+  "title": "How to use a cell value as a sheet name (INDIRECT)",
+  "task": "Pull from whichever tab a cell names — a dashboard that switches months by typing the tab name.",
+  "keywords": [
+    "indirect sheet name excel",
+    "reference sheet from cell value",
+    "dynamic sheet reference",
+    "indirect another tab google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INDIRECT(A1&\"!B2\")",
+      "note": "A1 holds the sheet name as text. Quote names with spaces: =INDIRECT(\"'\"&A1&\"'!B2\")."
+    },
+    "google_sheets": {
+      "formula": "=INDIRECT(A1&\"!B2\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=INDIRECT(A1&\".B2\")",
+      "note": "LibreOffice's native A1 syntax uses a dot; or force Excel-style with INDIRECT(ref,1)."
+    }
+  },
+  "verify": {
+    "setup_sheets": {
+      "Feb": {"B2": 555}
+    },
+    "setup_cells": {
+      "A1": "Feb"
+    },
+    "formula": "=INDIRECT(A1&\"!B2\")",
+    "expected": 555
+  },
+  "explanation": "INDIRECT turns a text string into a live reference, so building \"Feb\"&\"!B2\" and feeding it to INDIRECT reads B2 from the Feb tab — change A1 to \"Mar\" and the same formula reads the March tab instead. It powers month-switching dashboards and roll-ups over many identically-structured sheets. Two cautions: INDIRECT is volatile (recalculates constantly, slow in bulk) and its references don't auto-adjust when you insert rows/columns on the target sheet. LibreOffice's native syntax uses a dot (A1&\".B2\"), a real gotcha when porting. Verified by reading B2 from a real named tab."
+}

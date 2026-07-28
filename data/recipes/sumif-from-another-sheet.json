@@ -1,0 +1,38 @@
+{
+  "slug": "sumif-from-another-sheet",
+  "title": "How to SUMIF from another sheet",
+  "task": "Conditionally total data that lives on a different tab — a summary sheet reading a data sheet.",
+  "keywords": [
+    "sumif another sheet excel",
+    "sumif from different tab",
+    "sumif across sheets google sheets",
+    "summary sheet sumif"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIF(Data!A:A,\"East\",Data!B:B)",
+      "note": "Prefix every range with the sheet name. All ranges must be on the SAME other sheet and the same size."
+    },
+    "google_sheets": {
+      "formula": "=SUMIF(Data!A:A,\"East\",Data!B:B)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMIF(Data.A:A,\"East\",Data.B:B)",
+      "note": "LibreOffice uses a dot: Data.A:A."
+    }
+  },
+  "verify": {
+    "setup_sheets": {
+      "Data": {
+        "A1": "East", "B1": 100,
+        "A2": "West", "B2": 50,
+        "A3": "East", "B3": 25
+      }
+    },
+    "setup_cells": {},
+    "formula": "=SUMIF(Data!A1:A3,\"East\",Data!B1:B3)",
+    "expected": 125
+  },
+  "explanation": "A cross-sheet SUMIF is an ordinary SUMIF with each range prefixed by the source tab: the two East rows on the Data sheet total 100 + 25 = 125. The criteria range and sum range must both live on that same sheet and match in size. Excel and Google Sheets write Data!A:A; LibreOffice writes Data.A:A (dot). SUMIFS, COUNTIF, and AVERAGEIF all take cross-sheet ranges the same way. Verified by running the formula against a real second tab."
+}

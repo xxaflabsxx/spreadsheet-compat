@@ -1,0 +1,40 @@
+{
+  "slug": "xlookup-from-another-sheet",
+  "task": "Do a modern XLOOKUP where the lookup table sits on a different tab.",
+  "title": "How to XLOOKUP from another sheet",
+  "keywords": [
+    "xlookup another sheet excel",
+    "xlookup from different tab",
+    "xlookup across sheets google sheets",
+    "xlookup other tab"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=XLOOKUP(A2,Prices!A:A,Prices!B:B,\"Not found\")",
+      "note": "Needs Excel 2021+/365. Lookup and return ranges both carry the sheet prefix."
+    },
+    "google_sheets": {
+      "formula": "=XLOOKUP(A2,Prices!A:A,Prices!B:B,\"Not found\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=XLOOKUP(A2,Prices.A:A,Prices.B:B,\"Not found\")",
+      "note": "LibreOffice 24.8+ (dot syntax). Older LibreOffice: use INDEX/MATCH across the sheet."
+    }
+  },
+  "verify": {
+    "setup_sheets": {
+      "Prices": {
+        "A1": "apple", "B1": 10,
+        "A2": "banana", "B2": 20,
+        "A3": "cherry", "B3": 30
+      }
+    },
+    "setup_cells": {
+      "A2": "cherry"
+    },
+    "formula": "=XLOOKUP(A2,Prices!A1:A3,Prices!B1:B3,\"Not found\")",
+    "expected": 30
+  },
+  "explanation": "XLOOKUP reaches another tab exactly like VLOOKUP does — prefix the lookup and return ranges with the sheet name — but with XLOOKUP's advantages: exact match by default, a built-in not-found result, and no column-number counting. \"cherry\" on the Prices sheet returns 30. XLOOKUP needs Excel 2021+/365, current Google Sheets, or LibreOffice 24.8+; in older versions use INDEX/MATCH with the same sheet-prefixed ranges. Remember LibreOffice's dot separator (Prices.A1). Verified against a real second tab."
+}
