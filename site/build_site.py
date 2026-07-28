@@ -684,7 +684,7 @@ BASE_TMPL = """<!doctype html>
     engine and recalculation-proven, never scraped from documentation alone.
     Functions without an executed-result badge are documentation-only inventory,
     clearly marked as not yet live-tested.</p>
-    <p>Every result produced by executing real formulas &mdash; <a href="{{ rel }}methodology.html">how we verify</a>. Data and test harness on <a href="{{ github_url }}">GitHub</a>.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="{{ rel }}methodology.html">how we verify</a>. Open <a href="{{ rel }}data.html">compatibility dataset</a> and test harness on <a href="{{ github_url }}">GitHub</a>.</p>
     <p>Built by AF Labs — <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates</a>.</p>
   </div>
 </footer>
@@ -1209,6 +1209,49 @@ ERRORS_TMPL = """{% extends "base.html" %}
 """
 
 
+DATASET_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Open spreadsheet compatibility dataset</h1>
+<p class="lede">The machine-verified data behind this site is free to use. It records, for {{ n_funcs }} spreadsheet functions, whether each works in Microsoft Excel and Google Sheets (from official documentation) and in LibreOffice Calc (from <a href="{{ rel }}methodology.html">actually executing the formula</a>, with per-version history). As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
+
+<h2 class="section-title">Download</h2>
+<p><a href="{{ rel }}data/compat.json"><code>data/compat.json</code></a> &mdash; one JSON object, keyed by uppercase function name ({{ n_funcs }} entries, {{ kb }} KB). The full test harness, authored test cases, and raw per-LibreOffice-version results are in the <a href="{{ github_url }}">GitHub repository</a>.</p>
+
+<h2 class="section-title">Schema</h2>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>cat</code></td><td>string</td><td>Function category (e.g. &ldquo;Lookup and reference&rdquo;).</td></tr>
+<tr><td><code>x</code></td><td>boolean</td><td>Documented in Microsoft Excel.</td></tr>
+<tr><td><code>g</code></td><td>boolean</td><td>Documented in Google Sheets.</td></tr>
+<tr><td><code>l</code></td><td>boolean</td><td>Documented in LibreOffice Calc.</td></tr>
+<tr><td><code>lv</code></td><td>string / null</td><td>LibreOffice <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, or null when not yet live-tested.</td></tr>
+<tr><td><code>lver</code></td><td>string</td><td>LibreOffice version the verdict was produced on (e.g. <code>25.8.7.3</code>).</td></tr>
+<tr><td><code>lnew</code></td><td>string / null</td><td>The LibreOffice version the function first became supported in, when known (else null).</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 class="section-title">Example</h2>
+<div class="table-scroll">
+<pre style="background:var(--bg-alt,#f6f8fa);padding:1rem;border-radius:8px;overflow:auto"><code>// fetch the dataset
+const db = await (await fetch("https://canispreadsheet.com/data/compat.json")).json();
+
+db["XLOOKUP"]
+// {"cat":"Lookup and reference","x":true,"g":true,"l":true,
+//  "lv":"supported","lver":"25.8.7.3","lnew":"24.8.7.2"}
+//  -> documented in all three; executed as supported in LibreOffice,
+//     first working in LibreOffice 24.8.</code></pre>
+</div>
+
+<h2 class="section-title">License</h2>
+<p>The compatibility dataset is released under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 (CC&nbsp;BY&nbsp;4.0)</a>. Use it freely, including commercially &mdash; just credit <strong>canispreadsheet.com</strong> with a link. If you build something with it, we&rsquo;d love to hear about it.</p>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted and each vendor&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Corrections welcome via the <a href="{{ github_url }}">repository</a>.</p>
+{% endblock %}
+"""
+
+
 EQUIV_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Excel &harr; Google Sheets function equivalents</h1>
@@ -1586,6 +1629,7 @@ def build_env():
                 "pillar_xvg.html": PILLAR_XVG_TMPL,
                 "errors.html": ERRORS_TMPL,
                 "equiv.html": EQUIV_TMPL,
+                "dataset.html": DATASET_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
@@ -1964,6 +2008,24 @@ def main():
         env.get_template("errors.html").render(**ectx2)
     )
     sitemap_urls.append({"loc": BASE_URL + "spreadsheet-errors.html", "lastmod": build_date})
+
+    # ---- Open dataset documentation page ----
+    _compat_path = OUT_DIR / "data" / "compat.json"
+    _compat_obj = json.loads(_compat_path.read_text()) if _compat_path.exists() else {}
+    dctx = common_ctx(rel="")
+    dctx.update(
+        page_title="Open spreadsheet function compatibility dataset (CC BY) — Excel, Sheets, LibreOffice",
+        meta_description=(
+            "Free, machine-verified dataset of spreadsheet function compatibility "
+            "across Excel, Google Sheets, and LibreOffice Calc — executed results "
+            "with per-version history, as JSON under CC BY 4.0. Schema and examples."
+        ),
+        canonical=BASE_URL + "data.html",
+        n_funcs=len(_compat_obj),
+        kb=max(1, round(_compat_path.stat().st_size / 1024)) if _compat_path.exists() else 0,
+    )
+    (OUT_DIR / "data.html").write_text(env.get_template("dataset.html").render(**dctx))
+    sitemap_urls.append({"loc": BASE_URL + "data.html", "lastmod": build_date})
 
     # ---- Excel <-> Google Sheets equivalents reference ----
     equiv_g_only = [  # Sheets-only -> Excel equivalent
