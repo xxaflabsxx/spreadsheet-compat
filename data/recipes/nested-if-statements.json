@@ -1,0 +1,33 @@
+{
+  "slug": "nested-if-statements",
+  "title": "How to write nested IF statements",
+  "task": "Chain several IF tests for multi-way decisions — grades, tiers, status labels.",
+  "keywords": [
+    "nested if excel",
+    "multiple if statements",
+    "if inside if formula",
+    "nested if google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(A2>=90,\"A\",IF(A2>=80,\"B\",IF(A2>=70,\"C\",\"F\")))",
+      "note": "Each IF's 'else' slot holds the next IF. On Excel 2019+/Sheets, IFS is the flatter alternative."
+    },
+    "google_sheets": {
+      "formula": "=IF(A2>=90,\"A\",IF(A2>=80,\"B\",IF(A2>=70,\"C\",\"F\")))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IF(A2>=90,\"A\",IF(A2>=80,\"B\",IF(A2>=70,\"C\",\"F\")))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 85
+    },
+    "formula": "=IF(A2>=90,\"A\",IF(A2>=80,\"B\",IF(A2>=70,\"C\",\"F\")))",
+    "expected": "B"
+  },
+  "explanation": "A nested IF puts the next IF where the previous one's \"value if false\" goes, so the tests run in order until one is true: 85 fails >=90, passes >=80, so it stops at \"B\". Order matters — arrange tests from most to least restrictive, or an early loose test grabs everything. The last IF's false-slot is your catch-all (\"F\" here). Beyond ~3-4 levels nesting gets unreadable and error-prone; switch to IFS (=IFS(A2>=90,\"A\",A2>=80,\"B\",...,TRUE,\"F\")) or a lookup table with the closest-match pattern, both easier to maintain."
+}
