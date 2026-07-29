@@ -1,0 +1,31 @@
+{
+  "slug": "quarter-and-year-label",
+  "title": "How to create a quarter-and-year label like \"Q3 2026\"",
+  "task": "Build fiscal-period labels from a date for grouping, pivots, and report headers.",
+  "keywords": [
+    "quarter year label excel",
+    "q3 2026 formula",
+    "fiscal quarter text",
+    "quarter label google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=\"Q\"&ROUNDUP(MONTH(A2)/3,0)&\" \"&YEAR(A2)",
+      "note": "ROUNDUP(month/3) gives the quarter number; the rest concatenates the label."
+    },
+    "google_sheets": {
+      "formula": "=\"Q\"&ROUNDUP(MONTH(A2)/3,0)&\" \"&YEAR(A2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=\"Q\"&ROUNDUP(MONTH(A2)/3,0)&\" \"&YEAR(A2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=\"Q\"&ROUNDUP(MONTH(DATE(2026,7,21))/3,0)&\" \"&YEAR(DATE(2026,7,21))",
+    "expected": "Q3 2026"
+  },
+  "explanation": "MONTH divided by 3 and rounded up maps months to quarters (July = month 7, 7/3 rounds up to 3), and the pieces are glued into \"Q3 2026\". This text label is exactly what pivot tables and SUMIFS group on for quarterly reporting. For a fiscal year that doesn't start in January, shift the month first (e.g. an April start: ROUNDUP(MOD(MONTH(A2)-4,12)/3+0.01,0)). Sortable variant: put the year first -> =YEAR(A2)&\"-Q\"&ROUNDUP(MONTH(A2)/3,0) gives \"2026-Q3\", which sorts chronologically."
+}

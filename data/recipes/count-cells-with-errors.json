@@ -1,0 +1,37 @@
+{
+  "slug": "count-cells-with-errors",
+  "title": "How to count cells that contain errors",
+  "task": "Tally how many cells in a range are #N/A, #DIV/0!, #VALUE! etc. — a quick data-quality check.",
+  "keywords": [
+    "count errors excel",
+    "count cells with errors formula",
+    "sumproduct iserror",
+    "count na cells google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT(--ISERROR(A2:A6))",
+      "note": "The -- turns TRUE/FALSE into 1/0. Count only #N/A with ISNA instead of ISERROR."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT(--ISERROR(A2:A6))",
+      "note": "Identical; =COUNTIF(A2:A6,\"#N/A\") also works for just #N/A."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT(--ISERROR(A2:A6))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": "=1/0",
+      "A4": 20,
+      "A5": "=NA()",
+      "A6": 30
+    },
+    "formula": "=SUMPRODUCT(--ISERROR(A2:A6))",
+    "expected": 2
+  },
+  "explanation": "ISERROR returns TRUE for any error cell, the double-negative -- converts the TRUE/FALSE array to 1s and 0s, and SUMPRODUCT totals them — 2 error cells here (the #DIV/0! and the #N/A). A plain COUNTIF can't do this because it can't reliably match error values across all apps. Swap ISERROR for ISNA to count only lookup misses (#N/A), or ISERR to count everything EXCEPT #N/A. This is the fast way to audit a column before trusting a total."
+}
