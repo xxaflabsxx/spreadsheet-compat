@@ -1,0 +1,33 @@
+{
+  "slug": "extract-the-file-name-from-a-path",
+  "title": "How to extract the file name from a path or URL",
+  "task": "Get just the file name (or last segment) from a path or URL — clean up import logs, links, and directory listings.",
+  "keywords": [
+    "extract filename from path excel",
+    "get file name from url formula",
+    "text after last slash",
+    "filename from path google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\"/\",REPT(\" \",200)),200))",
+      "note": "For Windows backslash paths, replace \"/\" with a backslash. Excel 365: =TEXTAFTER(A2,\"/\",-1)."
+    },
+    "google_sheets": {
+      "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\"/\",REPT(\" \",200)),200))",
+      "note": "Identical; or =REGEXEXTRACT(A2,\"[^/]+$\")."
+    },
+    "libreoffice": {
+      "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\"/\",REPT(\" \",200)),200))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "docs/2026/reports/report.xlsx"
+    },
+    "formula": "=TRIM(RIGHT(SUBSTITUTE(A2,\"/\",REPT(\" \",200)),200))",
+    "expected": "report.xlsx"
+  },
+  "explanation": "The last-word trick pointed at the path separator: SUBSTITUTE pads every \"/\" to 200 spaces so the final segment sits alone in the rightmost 200 characters, RIGHT grabs it, and TRIM cleans up — \"docs/2026/reports/report.xlsx\" yields \"report.xlsx\". Swap \"/\" for a backslash to handle Windows file paths. On modern versions TEXTAFTER(A2,\"/\",-1) does it directly (the -1 means after the LAST separator). To then drop the extension, apply the same idea to the \".\" with LEFT/FIND."
+}
