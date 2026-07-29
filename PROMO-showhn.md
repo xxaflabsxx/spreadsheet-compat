@@ -19,18 +19,21 @@ So I built canispreadsheet.com — a compatibility DB for ~600 spreadsheet funct
 across Excel, Google Sheets and LibreOffice Calc. The twist: every LibreOffice result
 is *executed*, not scraped. A headless LibreOffice writes each formula into a real
 workbook, recalculates, and I check the output — with deterministic + volatile canary
-formulas each run to prove recalculation actually happened. Currently 172 functions
-have live-run test cases (635 cases), executed against three LibreOffice releases
-(24.2, 24.8, 25.8), so pages show caniuse-style "supported since" versions — e.g.
+formulas each run to prove recalculation actually happened. Currently 215 functions
+have live-run test cases (682 cases), executed against four LibreOffice releases
+(24.2, 24.8, 25.2, 25.8), so pages show caniuse-style "supported since" versions — e.g.
 XLOOKUP and SORT landed in 24.8; HSTACK/TEXTSPLIT/TAKE only in 25.8.
 
-Three things to try:
+Things to try:
 - /checker — paste any formula, it extracts every function and tells you if it works
-  in each app (e.g. MAP works in Excel & Sheets but not LibreOffice yet).
-- /how-to — 55 common tasks (sum by category, VLOOKUP-to-the-left, extract numbers
-  from text...) each with a copy-paste formula that's been executed and verified,
-  not just documented.
+  in each app (e.g. MAP works in Excel & Sheets but not LibreOffice yet). Pick a target
+  app for a migration report that flags what breaks + suggests verified alternatives.
+- /how-to — 206 common tasks (sum by category, VLOOKUP from another sheet, extract
+  numbers from text...) each with a copy-paste formula that's been executed and
+  verified, not just documented.
+- /compare — 40 head-to-heads (VLOOKUP vs XLOOKUP, SUMIF vs SUMIFS...).
 - /libreoffice-version-support.html — what's new per LibreOffice release, from real runs.
+- /data.html — the whole compatibility dataset is open (CC BY).
 
 Honest limitations: only LibreOffice is live-executed today; Excel/Sheets verdicts are
 from their official function lists (I can't headlessly run those). The lambda-helpers
