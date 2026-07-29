@@ -1613,6 +1613,19 @@ def load_comparisons():
     return [json.loads(p.read_text()) for p in sorted(cdir.glob("*.json"))]
 
 
+def breadcrumb_ld(items):
+    """items: list of (name, absolute_url). Returns compact BreadcrumbList JSON-LD
+    so deep pages show a breadcrumb trail in search results instead of a raw URL."""
+    return json.dumps({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "name": n, "item": u}
+            for i, (n, u) in enumerate(items)
+        ],
+    }, separators=(",", ":"))
+
+
 def build_env():
     env = Environment(
         loader=DictLoader(
@@ -1843,6 +1856,10 @@ def main():
             related_recipes=func_recipes.get(r["name"], []),
             related_comparisons=func_comparisons.get(r["name"], []),
             noindex=stub,
+            json_ld=breadcrumb_ld([
+                (SITE_NAME, BASE_URL),
+                (f"{r['name']} function", BASE_URL + f"functions/{r['name_lower']}.html"),
+            ]),
         )
         out_path = OUT_DIR / "functions" / f"{r['name_lower']}.html"
         out_path.write_text(func_tmpl.render(**ctx))
@@ -1887,6 +1904,11 @@ def main():
                 r=rc,
                 app_order=ENGINE_ORDER,
                 app_labels=ENGINE_LABELS,
+                json_ld=breadcrumb_ld([
+                    (SITE_NAME, BASE_URL),
+                    ("How-to recipes", BASE_URL + "how-to/"),
+                    (rc["title"], BASE_URL + f"how-to/{rc['slug']}.html"),
+                ]),
             )
             (OUT_DIR / "how-to" / f"{rc['slug']}.html").write_text(
                 env.get_template("recipe.html").render(**cx)
@@ -1921,6 +1943,11 @@ def main():
                 meta_description=c["meta_desc"],
                 canonical=BASE_URL + f"compare/{c['slug']}.html",
                 c=c,
+                json_ld=breadcrumb_ld([
+                    (SITE_NAME, BASE_URL),
+                    ("Comparisons", BASE_URL + "compare/"),
+                    (c["title"], BASE_URL + f"compare/{c['slug']}.html"),
+                ]),
             )
             (OUT_DIR / "compare" / f"{c['slug']}.html").write_text(
                 env.get_template("comparison.html").render(**cx)
