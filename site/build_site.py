@@ -648,6 +648,7 @@ BASE_TMPL = """<!doctype html>
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+{% if json_ld %}<script type="application/ld+json">{{ json_ld | safe }}</script>{% endif %}
 <style>{{ css | safe }}</style>
 </head>
 <body>
@@ -1745,6 +1746,22 @@ def main():
         stats=stats,
         top_functions=top_functions,
         popular_functions=popular_functions,
+        json_ld=json.dumps({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": SITE_NAME,
+            "url": BASE_URL,
+            "description": (
+                "Executed compatibility results for spreadsheet functions across "
+                "Microsoft Excel, Google Sheets, and LibreOffice Calc."
+            ),
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": {"@type": "EntryPoint",
+                           "urlTemplate": BASE_URL + "?q={search_term_string}"},
+                "query-input": "required name=search_term_string",
+            },
+        }, separators=(",", ":")),
     )
     (OUT_DIR / "index.html").write_text(env.get_template("index.html").render(**ctx))
     sitemap_urls.append({"loc": BASE_URL, "lastmod": build_date})
@@ -2023,6 +2040,29 @@ def main():
         canonical=BASE_URL + "data.html",
         n_funcs=len(_compat_obj),
         kb=max(1, round(_compat_path.stat().st_size / 1024)) if _compat_path.exists() else 0,
+        json_ld=json.dumps({
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            "name": "Spreadsheet function compatibility (Excel, Google Sheets, LibreOffice)",
+            "description": (
+                f"Machine-verified compatibility data for {len(_compat_obj)} spreadsheet "
+                "functions across Microsoft Excel and Google Sheets (from official "
+                "documentation) and LibreOffice Calc (from executed test results, with "
+                "per-version history). The only openly available executed cross-application "
+                "spreadsheet compatibility dataset."
+            ),
+            "url": BASE_URL + "data.html",
+            "keywords": ["spreadsheet", "Excel", "Google Sheets", "LibreOffice",
+                         "function compatibility", "formula compatibility"],
+            "license": "https://creativecommons.org/licenses/by/4.0/",
+            "isAccessibleForFree": True,
+            "creator": {"@type": "Organization", "name": SITE_NAME, "url": BASE_URL},
+            "distribution": [{
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": BASE_URL + "data/compat.json",
+            }],
+        }, separators=(",", ":")),
     )
     (OUT_DIR / "data.html").write_text(env.get_template("dataset.html").render(**dctx))
     sitemap_urls.append({"loc": BASE_URL + "data.html", "lastmod": build_date})
