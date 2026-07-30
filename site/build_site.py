@@ -1053,14 +1053,20 @@ _RECIPE_CATEGORIES = [
                       "leading-zeros")),
     ("Lookups & filters", ("lookup", "match", "filter", "find-the", "find-values",
                            "duplicate", "unique", "blank-cells-from", "both-lists",
-                           "all-matches", "transpose", "reverse", "list", "nth-largest")),
+                           "all-matches", "transpose", "reverse", "list", "nth-largest",
+                           "reference", "compare", "sort", "fill-blank")),
     ("Counting & conditions", ("count", "if-", "-if", "contains", "rank",
                                "occurrences", "condition")),
+    ("Formatting & display", ("abbreviate", "fraction", "-dash", "plus-sign",
+                              "scientific")),
     ("Math, money & stats", ("sum", "average", "percentage", "round", "median",
                              "deviation", "interest", "loan", "cagr", "margin",
                              "tax", "discount", "price", "weighted", "random",
                              "interpolation", "multiply", "subtract", "convert",
-                             "clamp", "mode", "frequent", "largest", "total")),
+                             "clamp", "mode", "frequent", "largest", "total",
+                             "ratio", "z-score", "break-even", "absolute",
+                             "normalize", "commission", "running", "difference",
+                             "auto-number")),
 ]
 
 
