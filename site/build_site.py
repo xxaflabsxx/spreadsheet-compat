@@ -1058,7 +1058,7 @@ _RECIPE_CATEGORIES = [
     ("Counting & conditions", ("count", "if-", "-if", "contains", "rank",
                                "occurrences", "condition")),
     ("Formatting & display", ("abbreviate", "fraction", "-dash", "plus-sign",
-                              "scientific")),
+                              "scientific", "instead-of-zero")),
     ("Math, money & stats", ("sum", "average", "percentage", "round", "median",
                              "deviation", "interest", "loan", "cagr", "margin",
                              "tax", "discount", "price", "weighted", "random",
@@ -1066,7 +1066,7 @@ _RECIPE_CATEGORIES = [
                              "clamp", "mode", "frequent", "largest", "total",
                              "ratio", "z-score", "break-even", "absolute",
                              "normalize", "commission", "running", "difference",
-                             "auto-number")),
+                             "auto-number", "max-minus")),
 ]
 
 

@@ -1,0 +1,34 @@
+{
+  "slug": "return-blank-instead-of-zero",
+  "title": "How to make a formula return blank instead of zero",
+  "task": "Keep a results column clean — show nothing (not 0) when there's no data or the inputs are empty.",
+  "keywords": [
+    "formula return blank not zero excel",
+    "if blank return blank",
+    "hide zero result formula",
+    "empty instead of 0 google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IF(A2=\"\",\"\",A2*B2)",
+      "note": "Guards on the empty input. To blank ANY zero result: =IF(A2*B2=0,\"\",A2*B2)."
+    },
+    "google_sheets": {
+      "formula": "=IF(A2=\"\",\"\",A2*B2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IF(A2=\"\",\"\",A2*B2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 5,
+      "B2": 4
+    },
+    "formula": "=IF(A2=\"\",\"\",A2*B2)",
+    "expected": 20
+  },
+  "explanation": "The IF checks whether the source cell is empty: when A2 has data it does the calculation (5 x 4 = 20, as verified here), and when A2 is empty it returns \"\" instead of 0, leaving the cell looking blank. That keeps summary columns and charts tidy while a sheet is still being filled in. Two things to know: the \"\" result is TEXT that only LOOKS blank — ISBLANK reports it as non-empty, though SUM still ignores it. If you only want to hide zeros visually while keeping the real number underneath, use a custom number format (0;-0;;) or the display-zero-as-a-dash approach instead of changing the value."
+}
