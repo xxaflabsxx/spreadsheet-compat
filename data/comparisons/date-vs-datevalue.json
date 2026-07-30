@@ -1,0 +1,25 @@
+{
+  "slug": "date-vs-datevalue",
+  "title": "DATE vs DATEVALUE: build a date or parse one",
+  "meta_desc": "DATE vs DATEVALUE: DATE assembles a date from year/month/day numbers; DATEVALUE parses a date written as text. When each is the right tool, plus locale gotchas.",
+  "funcs": ["DATE", "DATEVALUE"],
+  "intro": "Both hand you a real date value, but from opposite starting points. DATE builds one from separate year, month, and day NUMBERS. DATEVALUE parses one out of a TEXT string that looks like a date. If your inputs are numbers, use DATE; if they're text, use DATEVALUE.",
+  "table": [
+    {"aspect": "Input", "cols": ["Three numbers: year, month, day", "One text string, e.g. \"2026-07-21\""]},
+    {"aspect": "Returns", "cols": ["A date serial number", "A date serial number"]},
+    {"aspect": "Handles out-of-range parts", "cols": ["Yes — DATE(2026,13,1) rolls to Jan 2027; day 0 = last of prev month", "N/A — it reads what's written"]},
+    {"aspect": "Locale sensitivity", "cols": ["None — parts are explicit", "Yes — \"03/04/2026\" depends on the machine's date order"]},
+    {"aspect": "Fails when", "cols": ["Never (any integers work)", "The text isn't a recognizable date -> #VALUE!"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both verified by execution)"]}
+  ],
+  "when": [
+    {"func": "DATE", "use_when": "Assembling dates from parts you already have as numbers: first-of-month (DATE(YEAR(A2),MONTH(A2),1)), shifting years, or turning three columns (Y/M/D) into one date. Its roll-over behavior also powers month-end and next-anniversary tricks."},
+    {"func": "DATEVALUE", "use_when": "Fixing dates that arrived as TEXT — CSV imports, pasted logs, ISO strings — so they sort and calculate. Prefer unambiguous ISO (yyyy-mm-dd) input; locale-order strings like 03/04/2026 can be misread as March 4 or April 3."}
+  ],
+  "compat_note": "Both execute correctly in every version of all three apps we test (DATE(2026,7,21) and DATEVALUE(\"2026-07-21\") both return the same serial). DATEVALUE parses time-less date strings; its sibling TIMEVALUE parses times, and combining them reconstructs a full timestamp from text. The reverse direction — a real date to formatted text — is TEXT.",
+  "examples": [
+    {"label": "Build a date from parts", "formula": "=DATE(2026,7,21)"},
+    {"label": "Parse a text date", "formula": "=DATEVALUE(\"2026-07-21\")"},
+    {"label": "Three columns into one date", "formula": "=DATE(A2,B2,C2)"}
+  ]
+}

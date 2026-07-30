@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DATE function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does DATE work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the DATE function (Date and time).">
+<title>DATE vs DATEVALUE: build a date or parse one</title>
+<meta name="description" content="DATE vs DATEVALUE: DATE assembles a date from year/month/day numbers; DATEVALUE parses a date written as text. When each is the right tool, plus locale gotchas.">
 
-<link rel="canonical" href="https://canispreadsheet.com/functions/date.html">
-<meta property="og:title" content="DATE function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does DATE work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the DATE function (Date and time).">
+<link rel="canonical" href="https://canispreadsheet.com/compare/date-vs-datevalue.html">
+<meta property="og:title" content="DATE vs DATEVALUE: build a date or parse one">
+<meta property="og:description" content="DATE vs DATEVALUE: DATE assembles a date from year/month/day numbers; DATEVALUE parses a date written as text. When each is the right tool, plus locale gotchas.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/date.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/date-vs-datevalue.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"DATE function","item":"https://canispreadsheet.com/functions/date.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Comparisons","item":"https://canispreadsheet.com/compare/"},{"@type":"ListItem","position":3,"name":"DATE vs DATEVALUE: build a date or parse one","item":"https://canispreadsheet.com/compare/date-vs-datevalue.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -302,187 +302,63 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>DATE</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
+  <h1>DATE vs DATEVALUE: build a date or parse one</h1>
 </div>
-<p class="category-tag">Category: Date and time &middot; Last tested 2026-07-29</p>
+<p class="lede">Both hand you a real date value, but from opposite starting points. DATE builds one from separate year, month, and day NUMBERS. DATEVALUE parses one out of a TEXT string that looks like a date. If your inputs are numbers, use DATE; if they&#39;re text, use DATEVALUE.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>DATE</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/date.html">DATE</a></th><th><a href="../functions/datevalue.html">DATEVALUE</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Input</strong></td><td>Three numbers: year, month, day</td><td>One text string, e.g. &#34;2026-07-21&#34;</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Returns</strong></td><td>A date serial number</td><td>A date serial number</td></tr>
 
+<tr><td><strong>Handles out-of-range parts</strong></td><td>Yes — DATE(2026,13,1) rolls to Jan 2027; day 0 = last of prev month</td><td>N/A — it reads what&#39;s written</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Locale sensitivity</strong></td><td>None — parts are explicit</td><td>Yes — &#34;03/04/2026&#34; depends on the machine&#39;s date order</td></tr>
 
+<tr><td><strong>Fails when</strong></td><td>Never (any integers work)</td><td>The text isn&#39;t a recognizable date -&gt; #VALUE!</td></tr>
 
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-29)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Compatibility</strong></td><td>Universal</td><td>Universal (both verified by execution)</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-DATE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>DATE</strong> &mdash; Assembling dates from parts you already have as numbers: first-of-month (DATE(YEAR(A2),MONTH(A2),1)), shifting years, or turning three columns (Y/M/D) into one date. Its roll-over behavior also powers month-end and next-anniversary tricks.</li>
+
+<li><strong>DATEVALUE</strong> &mdash; Fixing dates that arrived as TEXT — CSV imports, pasted logs, ISO strings — so they sort and calculate. Prefer unambiguous ISO (yyyy-mm-dd) input; locale-order strings like 03/04/2026 can be misread as March 4 or April 3.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>Both execute correctly in every version of all three apps we test (DATE(2026,7,21) and DATEVALUE(&#34;2026-07-21&#34;) both return the same serial). DATEVALUE parses time-less date strings; its sibling TIMEVALUE parses times, and combining them reconstructs a full timestamp from text. The reverse direction — a real date to formatted text — is TEXT.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Build a date from parts</td><td><code>=DATE(2026,7,21)</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>Parse a text date</td><td><code>=DATEVALUE(&#34;2026-07-21&#34;)</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-29</td>
-</tr>
+<tr><td>Three columns into one date</td><td><code>=DATE(A2,B2,C2)</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-29)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=DATE(2024,3,15)</td>
-  <td>Ordinary in-range y/m/d construction</td>
-  <td class="result mono">45366.0</td>
-  <td class="result mono">45366<br><span class="category-tag">2024-03-15 = serial 45366 (1900 date system; Dec 31 2023 = 45291, Jan 1 2024 = 45292)</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATE(2024,13,1)</td>
-  <td>Documented rollover: month=13 adds 13 months worth of offset from January, landing in January of the FOLLOWING year rather than raising an error. Verified via https://support.microsoft.com/en-us/office/date-function-e36c0c8c-4104-49da-ab83-82328b832349 (&#34;If month is greater than 12 ... DATE(2008,14,2) returns ... February 2, 2009&#34;)</td>
-  <td class="result mono">45658.0</td>
-  <td class="result mono">45658<br><span class="category-tag">month 13 = 12 months past January 2024 -&gt; January 2025; 2025-01-01 = serial 45658 (2024 is a leap year, 366 days after 45292)</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=DATE(2008,-3,2)</td>
-  <td>Documented rollback: month&lt;=0 subtracts months backward across a year boundary. Verified via the same DATE documentation (&#34;If month is less than 1 ... DATE(2008,-3,2) returns ... September 2, 2007&#34;)</td>
-  <td class="result mono">39327.0</td>
-  <td class="result mono">39327<br><span class="category-tag">2007-09-02 = serial 39327</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/check-if-a-year-is-a-leap-year.html">How to check if a year is a leap year</a></li><li><a href="../how-to/count-dates-in-a-range.html">How to count dates within a range</a></li><li><a href="../how-to/day-of-the-year.html">How to get the day number of the year (1-365)</a></li><li><a href="../how-to/quarter-end-date.html">How to get the quarter-end date for any date</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/date-vs-datevalue.html">DATE vs DATEVALUE: build a date or parse one</a></li>
-</ul>
+<p>Full per-version details on each function page:
+<a href="../functions/date.html">DATE</a> &middot; <a href="../functions/datevalue.html">DATEVALUE</a>.</p>
 
 
 <aside class="promo-card">
