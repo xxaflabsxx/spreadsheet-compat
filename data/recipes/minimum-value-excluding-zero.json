@@ -1,0 +1,37 @@
+{
+  "slug": "minimum-value-excluding-zero",
+  "title": "How to find the minimum value excluding zeros",
+  "task": "The smallest non-zero value — lowest actual price, shortest real time, ignoring empty/zero placeholders.",
+  "keywords": [
+    "min excluding zero excel",
+    "minimum ignore zeros formula",
+    "minifs greater than zero",
+    "smallest nonzero value google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MINIFS(A2:A6,A2:A6,\">0\")",
+      "note": "Excel 2019+. Older Excel: =MIN(IF(A2:A6>0,A2:A6)) entered with Ctrl+Shift+Enter."
+    },
+    "google_sheets": {
+      "formula": "=MINIFS(A2:A6,A2:A6,\">0\")",
+      "note": "Identical; =MIN(FILTER(A2:A6,A2:A6>0)) also works."
+    },
+    "libreoffice": {
+      "formula": "=MINIFS(A2:A6,A2:A6,\">0\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 0,
+      "A3": 15,
+      "A4": 0,
+      "A5": 8,
+      "A6": 22
+    },
+    "formula": "=MINIFS(A2:A6,A2:A6,\">0\")",
+    "expected": 8
+  },
+  "explanation": "Plain MIN would return 0 here because the zeros are the smallest values. MINIFS applies a condition — take the minimum of the range only where the same range is greater than 0 — so it skips the zeros and returns 8, the smallest real value. This matters when 0 stands for 'no data' rather than an actual measurement. MINIFS needs Excel 2019+ (it's in Google Sheets and LibreOffice); on older Excel use the MIN(IF(...)) array formula, or MIN(FILTER(...)) on modern versions. The same pattern with MAXIFS finds the largest under a condition."
+}

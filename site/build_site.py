@@ -1066,7 +1066,7 @@ _RECIPE_CATEGORIES = [
                              "clamp", "mode", "frequent", "largest", "total",
                              "ratio", "z-score", "break-even", "absolute",
                              "normalize", "commission", "running", "difference",
-                             "auto-number", "max-minus")),
+                             "auto-number", "max-minus", "minimum")),
 ]
 
 
