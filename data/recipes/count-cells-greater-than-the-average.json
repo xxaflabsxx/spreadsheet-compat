@@ -1,0 +1,37 @@
+{
+  "slug": "count-cells-greater-than-the-average",
+  "title": "How to count cells above the average",
+  "task": "How many values beat the mean — above-average performers, over-target rows.",
+  "keywords": [
+    "count above average excel",
+    "countif greater than average",
+    "count values over mean",
+    "above average count google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=COUNTIF(A2:A6,\">\"&AVERAGE(A2:A6))",
+      "note": "Concatenate the operator with the computed average. Use >= to include values equal to the mean."
+    },
+    "google_sheets": {
+      "formula": "=COUNTIF(A2:A6,\">\"&AVERAGE(A2:A6))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=COUNTIF(A2:A6,\">\"&AVERAGE(A2:A6))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": 20,
+      "A4": 30,
+      "A5": 40,
+      "A6": 50
+    },
+    "formula": "=COUNTIF(A2:A6,\">\"&AVERAGE(A2:A6))",
+    "expected": 2
+  },
+  "explanation": "COUNTIF's criteria can be built on the fly: \">\"&AVERAGE(A2:A6) evaluates the average (30 here) and glues it to the greater-than sign, giving the criterion \">30\". Two values (40 and 50) exceed the mean, so the count is 2. The & is what lets a criterion reference a calculated value — the same trick works with a cell (\">\"&C1) or another function (\">\"&MEDIAN(...)). Excel also has a built-in COUNTIF-style shortcut, but this concatenation pattern is the portable, general way and extends to SUMIF/AVERAGEIF."
+}

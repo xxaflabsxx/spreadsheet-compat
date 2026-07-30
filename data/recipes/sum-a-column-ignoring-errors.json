@@ -1,0 +1,37 @@
+{
+  "slug": "sum-a-column-ignoring-errors",
+  "title": "How to sum a column that contains errors",
+  "task": "Get a total even when some cells are #N/A or #DIV/0! — without cleaning the data first.",
+  "keywords": [
+    "sum ignoring errors excel",
+    "aggregate sum errors",
+    "sum column with na",
+    "sum skip errors google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=AGGREGATE(9,6,A2:A6)",
+      "note": "Function 9 = SUM, option 6 = ignore errors. Excel/LibreOffice; not in Google Sheets."
+    },
+    "google_sheets": {
+      "formula": "=SUMIF(A2:A6,\"<>#N/A\")",
+      "note": "Sheets has no AGGREGATE. This handles #N/A; for all error types use =SUM(IFERROR(A2:A6,0)) entered as an array."
+    },
+    "libreoffice": {
+      "formula": "=AGGREGATE(9,6,A2:A6)",
+      "note": "Same as Excel."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": "=1/0",
+      "A4": 20,
+      "A5": "=NA()",
+      "A6": 30
+    },
+    "formula": "=AGGREGATE(9,6,A2:A6)",
+    "expected": 60
+  },
+  "explanation": "A plain SUM propagates any error — one #DIV/0! in the range makes the whole total an error. AGGREGATE(9,6,range) sums (function code 9) while ignoring errors (option 6), so the two good-plus-good rows total 10+20+30 = 60 despite the #DIV/0! and #N/A in between. AGGREGATE lives in Excel and LibreOffice but NOT Google Sheets — there, wrap the values in IFERROR (=SUM(IFERROR(A2:A6,0)) entered with Ctrl+Shift+Enter in older versions, or it just spills in modern ones), or SUMIF around specific error types. The same AGGREGATE trick does error-ignoring AVERAGE (code 1), MAX (4), COUNT (2) and more."
+}

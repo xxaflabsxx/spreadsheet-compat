@@ -1,0 +1,35 @@
+{
+  "slug": "cumulative-percentage",
+  "title": "How to calculate a cumulative (running) percentage",
+  "task": "Show what share of the total has accumulated by each row — Pareto charts, progress, top-N contribution.",
+  "keywords": [
+    "cumulative percentage excel",
+    "running percentage formula",
+    "pareto cumulative percent",
+    "cumulative percent of total google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUM($A$2:A2)/SUM($A$2:$A$100)",
+      "note": "Sort descending first for a Pareto. Fill down; format as %. The expanding range is the running total."
+    },
+    "google_sheets": {
+      "formula": "=SUM($A$2:A2)/SUM($A$2:$A$100)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUM($A$2:A2)/SUM($A$2:$A$100)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 50,
+      "A3": 30,
+      "A4": 20
+    },
+    "formula": "=SUM($A$2:A3)/SUM($A$2:$A$4)",
+    "expected": 0.8
+  },
+  "explanation": "Two pieces: a running total (the half-anchored range $A$2:A2 grows as you fill down, summing everything from the top to the current row) divided by the grand total (the fully-anchored $A$2:$A$100). By the second row the running sum is 50+30 = 80 out of a 100 total, so 80% has accumulated. Format the column as a percentage. This is the backbone of a Pareto analysis — sort the values largest-first, and the cumulative % shows how few items make up 80% of the whole. The final row always reaches 100%."
+}
