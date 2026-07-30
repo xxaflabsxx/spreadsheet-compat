@@ -1,0 +1,36 @@
+{
+  "slug": "how-to-use-vlookup",
+  "title": "How to use VLOOKUP (and the FALSE you must not forget)",
+  "task": "Look up a value in a table and return a matching value from another column — the workhorse lookup.",
+  "keywords": [
+    "how to use vlookup excel",
+    "vlookup tutorial",
+    "vlookup exact match false",
+    "vlookup formula google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=VLOOKUP(D2,A2:B10,2,FALSE)",
+      "note": "lookup value, table, column number to return, FALSE. Always pass FALSE for an exact match."
+    },
+    "google_sheets": {
+      "formula": "=VLOOKUP(D2,A2:B10,2,FALSE)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=VLOOKUP(D2,A2:B10,2,FALSE)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple", "B2": 10,
+      "A3": "banana", "B3": 20,
+      "A4": "cherry", "B4": 30,
+      "D2": "banana"
+    },
+    "formula": "=VLOOKUP(D2,A2:B4,2,FALSE)",
+    "expected": 20
+  },
+  "explanation": "VLOOKUP takes four things: the value to find (D2 = \"banana\"), the table to search (A2:B4), which column's value to return counting from the left (2 = the price column), and the match type. It finds \"banana\" in the first column and returns 20 from column 2. The fourth argument is the one that bites everyone: FALSE (or 0) means exact match and is what you almost always want; TRUE (or leaving it blank) means approximate match and silently returns wrong answers on unsorted data. Two more rules: the lookup value must be in the FIRST column of your table (VLOOKUP can't look left — see vlookup-to-the-left), and the column number is a fixed count, so inserting columns breaks it (INDEX/MATCH or XLOOKUP avoid that)."
+}
