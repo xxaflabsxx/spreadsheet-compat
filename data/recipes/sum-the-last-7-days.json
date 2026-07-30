@@ -1,0 +1,35 @@
+{
+  "slug": "sum-the-last-7-days",
+  "title": "How to sum values from the last 7 days",
+  "task": "A rolling total for a recent window — last week's sales, last 7 days of activity — that updates itself daily.",
+  "keywords": [
+    "sum last 7 days excel",
+    "rolling 7 day total",
+    "sumifs date range today",
+    "last week total google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&(TODAY()-6),A2:A100,\"<=\"&TODAY())",
+      "note": "A = dates, B = amounts. TODAY()-6 through TODAY() is a 7-day window including today."
+    },
+    "google_sheets": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&(TODAY()-6),A2:A100,\"<=\"&TODAY())",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&(TODAY()-6),A2:A100,\"<=\"&TODAY())",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 46227, "B2": 100,
+      "A3": 46229, "B3": 50,
+      "A4": 46200, "B4": 999
+    },
+    "formula": "=SUMIFS(B2:B4,A2:A4,\">=\"&DATE(2026,7,24),A2:A4,\"<=\"&DATE(2026,7,30))",
+    "expected": 150
+  },
+  "explanation": "SUMIFS with two date conditions brackets a window: on-or-after the start and on-or-before the end. For a live rolling week, TODAY()-6 to TODAY() slides forward automatically every day (the verification pins the window to July 24-30, 2026, where two dated rows fall inside and total 100+50 = 150; the older row is excluded). Concatenating the date with & is what lets the criteria reference a calculated date. Change the 6 for other windows (29 for a rolling 30 days), or drop the upper bound to mean 'since 7 days ago'. Because SUMIFS uses real date comparisons, the source column must contain actual dates, not text."
+}

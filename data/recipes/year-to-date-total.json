@@ -1,0 +1,35 @@
+{
+  "slug": "year-to-date-total",
+  "title": "How to calculate a year-to-date (YTD) total",
+  "task": "Total everything from January 1 through today — YTD sales, expenses, or hours.",
+  "keywords": [
+    "year to date total excel",
+    "ytd formula sumifs",
+    "sum from start of year",
+    "ytd sales google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&DATE(YEAR(TODAY()),1,1),A2:A100,\"<=\"&TODAY())",
+      "note": "A = dates, B = amounts. DATE(YEAR(TODAY()),1,1) is Jan 1 of the current year."
+    },
+    "google_sheets": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&DATE(YEAR(TODAY()),1,1),A2:A100,\"<=\"&TODAY())",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&DATE(YEAR(TODAY()),1,1),A2:A100,\"<=\"&TODAY())",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 46042, "B2": 200,
+      "A3": 46229, "B3": 50,
+      "A4": 45900, "B4": 999
+    },
+    "formula": "=SUMIFS(B2:B4,A2:A4,\">=\"&DATE(2026,1,1),A2:A4,\"<=\"&DATE(2026,7,30))",
+    "expected": 250
+  },
+  "explanation": "YTD is a date-range SUMIFS whose start is January 1 of the current year and whose end is today: DATE(YEAR(TODAY()),1,1) computes Jan 1 without hardcoding the year, so it rolls into the new year automatically. In the verification the window is Jan 1-Jul 30, 2026, and the two 2026 rows total 200+50 = 250 while the prior-year row (serial 45900) is excluded. Same-period-last-year for comparison just shifts both bounds back a year with EDATE(...,-12) or DATE(YEAR(TODAY())-1,...). For fiscal years that don't start in January, replace the Jan 1 with your fiscal start date."
+}
