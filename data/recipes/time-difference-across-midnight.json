@@ -1,0 +1,31 @@
+{
+  "slug": "time-difference-across-midnight",
+  "title": "How to calculate a time difference that crosses midnight",
+  "task": "Shift durations where clock-out is the next day — night shifts, overnight processes — without a negative result.",
+  "keywords": [
+    "time difference across midnight excel",
+    "overnight shift hours formula",
+    "negative time result fix",
+    "time past midnight google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MOD(B2-A2,1)",
+      "note": "A = start time, B = end time. MOD wraps the negative overnight difference into the right positive value."
+    },
+    "google_sheets": {
+      "formula": "=MOD(B2-A2,1)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=MOD(B2-A2,1)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(MOD(TIME(6,0,0)-TIME(22,0,0),1),\"H:MM\")",
+    "expected": "8:00"
+  },
+  "explanation": "When the end time is earlier on the clock than the start (22:00 to 06:00), a plain B2-A2 goes negative and shows ###### or a wrong value, because the spreadsheet doesn't know a day rolled over. MOD(B2-A2,1) fixes it: MOD wraps the negative fraction back into the 0-1 day range, giving the correct 8 hours. It works for same-day shifts too (a positive difference is unchanged), so you can use MOD everywhere and stop special-casing overnight rows. Multiply by 24 for decimal hours. If shifts can exceed 24 hours, store real date-times instead and just subtract."
+}
