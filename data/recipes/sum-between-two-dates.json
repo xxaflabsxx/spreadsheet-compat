@@ -1,0 +1,35 @@
+{
+  "slug": "sum-between-two-dates",
+  "title": "How to sum values between two dates",
+  "task": "Total amounts that fall in a date range you specify — sales in a period, expenses between two dates.",
+  "keywords": [
+    "sumifs between two dates excel",
+    "sum values in date range",
+    "sum between dates formula",
+    "sumifs date range google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&D1,A2:A100,\"<=\"&D2)",
+      "note": "A = dates, B = amounts, D1/D2 = start/end dates in cells. Concatenate the operator with the date cell."
+    },
+    "google_sheets": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&D1,A2:A100,\"<=\"&D2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMIFS(B2:B100,A2:A100,\">=\"&D1,A2:A100,\"<=\"&D2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 46227, "B2": 100,
+      "A3": 46232, "B3": 50,
+      "A4": 46250, "B4": 999
+    },
+    "formula": "=SUMIFS(B2:B4,A2:A4,\">=\"&DATE(2026,7,24),A2:A4,\"<=\"&DATE(2026,7,31))",
+    "expected": 150
+  },
+  "explanation": "Two date conditions on the same column bracket the window: on-or-after the start AND on-or-before the end. In the verification the window is July 24-31, 2026, so the two rows in that range total 100+50 = 150 while the August-ish row (serial 46250) is excluded. Putting the start and end dates in cells (D1, D2) and concatenating them with & (\">=\"&D1) makes the range adjustable without editing the formula — the basis of a date-filtered dashboard. The date column must hold real dates, not text. Use \"<\"&(D2+1) if D2 might carry a time component."
+}

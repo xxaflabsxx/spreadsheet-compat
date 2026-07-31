@@ -1,0 +1,35 @@
+{
+  "slug": "average-between-two-dates",
+  "title": "How to average values between two dates",
+  "task": "The mean of values within a date range — average order value in a period, average daily total for a month.",
+  "keywords": [
+    "averageifs between two dates excel",
+    "average in date range",
+    "average between dates formula",
+    "average by period google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=AVERAGEIFS(B2:B100,A2:A100,\">=\"&D1,A2:A100,\"<=\"&D2)",
+      "note": "Same pattern as SUMIFS but averages. Returns #DIV/0! if no rows fall in the range."
+    },
+    "google_sheets": {
+      "formula": "=AVERAGEIFS(B2:B100,A2:A100,\">=\"&D1,A2:A100,\"<=\"&D2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=AVERAGEIFS(B2:B100,A2:A100,\">=\"&D1,A2:A100,\"<=\"&D2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 46227, "B2": 100,
+      "A3": 46232, "B3": 40,
+      "A4": 46250, "B4": 999
+    },
+    "formula": "=AVERAGEIFS(B2:B4,A2:A4,\">=\"&DATE(2026,7,24),A2:A4,\"<=\"&DATE(2026,7,31))",
+    "expected": 70
+  },
+  "explanation": "AVERAGEIFS works exactly like SUMIFS with two date bounds, but takes the mean of the qualifying rows instead of the total: the two rows inside the July 24-31, 2026 window are 100 and 40, averaging 70 (the out-of-range row is skipped). Reference the bounds from cells (D1/D2) with the \">=\"&D1 concatenation to make the period adjustable. One thing to guard: if no rows fall in the range, AVERAGEIFS returns #DIV/0! — wrap in IFERROR(...,0) or IFERROR(...,\"-\") if an empty period is possible. Add more range/criteria pairs (region, product) to average a slice within the period."
+}
