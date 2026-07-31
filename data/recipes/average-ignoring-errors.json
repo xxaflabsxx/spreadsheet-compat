@@ -1,0 +1,37 @@
+{
+  "slug": "average-ignoring-errors",
+  "title": "How to average a range that contains errors",
+  "task": "Get a mean even when some cells are #N/A or #DIV/0! — without deleting them first.",
+  "keywords": [
+    "average ignoring errors excel",
+    "aggregate average errors",
+    "average skip na",
+    "averageif ignore errors google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=AGGREGATE(1,6,A2:A6)",
+      "note": "Function 1 = AVERAGE, option 6 = ignore errors. Excel/LibreOffice; not in Google Sheets."
+    },
+    "google_sheets": {
+      "formula": "=AVERAGEIF(A2:A6,\"<>#N/A\")",
+      "note": "Sheets has no AGGREGATE. For all error types: =AVERAGE(IFERROR(A2:A6,\"\")) as an array, or FILTER out errors first."
+    },
+    "libreoffice": {
+      "formula": "=AGGREGATE(1,6,A2:A6)",
+      "note": "Same as Excel."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": "=1/0",
+      "A4": 20,
+      "A5": "=NA()",
+      "A6": 30
+    },
+    "formula": "=AGGREGATE(1,6,A2:A6)",
+    "expected": 20
+  },
+  "explanation": "A plain AVERAGE returns an error if any cell in the range is an error. AGGREGATE(1,6,range) averages (function code 1) while ignoring errors (option 6), so it takes the mean of just the three valid numbers: (10+20+30)/3 = 20, skipping the #DIV/0! and #N/A. AGGREGATE is in Excel and LibreOffice but NOT Google Sheets — there, use AVERAGEIF to exclude #N/A, or wrap the range in IFERROR. The same AGGREGATE approach ignores errors for SUM (code 9), MAX (4), MIN (5), COUNT (2) and more — see the sum-a-column-ignoring-errors recipe."
+}
