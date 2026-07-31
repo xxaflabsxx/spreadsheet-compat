@@ -1,0 +1,34 @@
+{
+  "slug": "how-to-use-iferror",
+  "title": "How to use IFERROR",
+  "task": "Show a friendly value instead of an ugly error when a formula fails — clean up #N/A, #DIV/0!, and lookup misses.",
+  "keywords": [
+    "how to use iferror excel",
+    "iferror formula",
+    "iferror vlookup",
+    "hide errors formula google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IFERROR(A2/B2,0)",
+      "note": "IFERROR(formula, value if it errors). Catches EVERY error type; use IFNA to catch only #N/A."
+    },
+    "google_sheets": {
+      "formula": "=IFERROR(A2/B2,0)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=IFERROR(A2/B2,0)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "B2": 0
+    },
+    "formula": "=IFERROR(A2/B2,0)",
+    "expected": 0
+  },
+  "explanation": "IFERROR runs the first argument and, if it produces any error, returns the second instead: 10/0 would be #DIV/0!, so IFERROR gives 0. The fallback can be a number, text (\"Not found\"), or a blank (\"\"). Its most common use is wrapping lookups: =IFERROR(VLOOKUP(...),\"-\"). One caution worth knowing: IFERROR hides ALL errors, including real bugs like a #REF! from a deleted column or a #NAME? typo — so it can mask problems you'd want to see. When you only mean to handle a lookup miss, IFNA (which catches only #N/A) is the safer, more precise choice."
+}
