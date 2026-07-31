@@ -1,0 +1,36 @@
+{
+  "slug": "how-to-use-sumifs",
+  "title": "How to use SUMIFS (sum with multiple conditions)",
+  "task": "Add up numbers where several conditions are all true — sales for one region AND one product AND a date range.",
+  "keywords": [
+    "how to use sumifs excel",
+    "sumifs multiple conditions",
+    "sumif multiple criteria",
+    "sumifs formula google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMIFS(C2:C10,A2:A10,\"East\",B2:B10,\"Widget\")",
+      "note": "Sum range FIRST, then range/criteria pairs. Note this order is the OPPOSITE of SUMIF."
+    },
+    "google_sheets": {
+      "formula": "=SUMIFS(C2:C10,A2:A10,\"East\",B2:B10,\"Widget\")",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMIFS(C2:C10,A2:A10,\"East\",B2:B10,\"Widget\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "East", "B2": "Widget", "C2": 100,
+      "A3": "West", "B3": "Widget", "C3": 50,
+      "A4": "East", "B4": "Gadget", "C4": 30,
+      "A5": "East", "B5": "Widget", "C5": 25
+    },
+    "formula": "=SUMIFS(C2:C5,A2:A5,\"East\",B2:B5,\"Widget\")",
+    "expected": 125
+  },
+  "explanation": "SUMIFS starts with the range to add (C, the amounts), then takes as many range/criteria pairs as you need — each row must satisfy EVERY pair. Only rows that are both \"East\" and \"Widget\" count: 100 + 25 = 125 (the West-Widget and East-Gadget rows fail one test each). The single most common mistake: SUMIFS puts the sum range FIRST, whereas SUMIF puts it LAST — flipping them silently gives wrong or zero results. Criteria accept comparisons (\">100\"), wildcards (\"Widg*\"), and cell references (\">\"&E1). Add date bounds as two more pairs to sum within a period (see sum-between-two-dates). COUNTIFS and AVERAGEIFS follow the same pattern."
+}
