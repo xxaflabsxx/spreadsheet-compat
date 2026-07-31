@@ -1,0 +1,26 @@
+{
+  "slug": "sum-vs-sumproduct",
+  "title": "SUM vs SUMPRODUCT: when the extra power is worth it",
+  "meta_desc": "SUM vs SUMPRODUCT: plain totals versus multiply-then-sum, weighted averages, conditional sums with array logic, and the performance trade-off. Verified in all three apps.",
+  "funcs": ["SUM", "SUMPRODUCT"],
+  "intro": "SUM adds up numbers. SUMPRODUCT multiplies corresponding values across ranges and THEN adds — which quietly makes it a Swiss-army knife for weighted totals and array-based conditional sums that plain SUM (and even SUMIFS) can't express. The trade-off is speed: SUMPRODUCT does array work, so it's heavier on big ranges.",
+  "table": [
+    {"aspect": "Adds a list of numbers", "cols": ["Yes — its whole job, fast", "Works (single range) but overkill"]},
+    {"aspect": "Multiply-then-sum (qty x price)", "cols": ["No — needs a helper column", "SUMPRODUCT(qty, price) in one cell"]},
+    {"aspect": "Weighted average", "cols": ["No", "SUMPRODUCT(values, weights)/SUM(weights)"]},
+    {"aspect": "Conditional sum with computed tests", "cols": ["No", "SUMPRODUCT((MONTH(dates)=7)*amounts) etc."]},
+    {"aspect": "OR conditions / overlap-safe", "cols": ["No", "Yes, via array arithmetic"]},
+    {"aspect": "Speed on large ranges", "cols": ["Optimized, cheap", "Array evaluation — noticeably heavier"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both verified in every version we test)"]}
+  ],
+  "when": [
+    {"func": "SUM", "use_when": "Straight totals of a column or a few cells — and reach for SUMIFS (not SUMPRODUCT) when you just need literal AND conditions. It's faster and clearer for the common case."},
+    {"func": "SUMPRODUCT", "use_when": "Multiply-then-add in one step (order totals, weighted scores, hours x rate), weighted averages, or conditional sums whose criteria require computing on the data first (by month, by text length) or OR logic. It's the escape hatch when SUMIFS can't express the condition."}
+  ],
+  "compat_note": "Both execute identically in every version of Excel, Google Sheets, and LibreOffice we test — including SUMPRODUCT's treatment of TRUE/FALSE arrays as 1/0 (whether via multiplication or a double-negative --). The choice is capability and speed, not compatibility. For purely conditional sums, SUMIF/SUMIFS are the lighter tool; see SUMIF vs SUMPRODUCT.",
+  "examples": [
+    {"label": "Plain total", "formula": "=SUM(A2:A100)"},
+    {"label": "Order total (qty x price)", "formula": "=SUMPRODUCT(B2:B100,C2:C100)"},
+    {"label": "Weighted average", "formula": "=SUMPRODUCT(A2:A10,B2:B10)/SUM(B2:B10)"}
+  ]
+}
