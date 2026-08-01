@@ -1050,7 +1050,7 @@ _RECIPE_CATEGORIES = [
     ("Text & names", ("text", "name", "word", "character", "letter", "space",
                       "case", "concatenate", "combine-first", "split", "extract",
                       "initials", "line-break", "domain", "trim", "capitalize",
-                      "leading-zeros")),
+                      "leading-zeros", "combine-cells", "left-mid")),
     ("Lookups & filters", ("lookup", "match", "filter", "find-the", "find-values",
                            "duplicate", "unique", "blank-cells-from", "both-lists",
                            "all-matches", "transpose", "reverse", "list", "nth-largest",
