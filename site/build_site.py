@@ -1056,7 +1056,7 @@ _RECIPE_CATEGORIES = [
                            "all-matches", "transpose", "reverse", "list", "nth-largest",
                            "reference", "compare", "sort", "fill-blank")),
     ("Counting & conditions", ("count", "if-", "-if", "contains", "rank",
-                               "occurrences", "condition")),
+                               "occurrences", "condition", "frequency")),
     ("Formatting & display", ("abbreviate", "fraction", "-dash", "plus-sign",
                               "scientific", "instead-of-zero")),
     ("Math, money & stats", ("sum", "average", "percentage", "round", "median",

@@ -1,0 +1,34 @@
+{
+  "slug": "list-the-top-n-values",
+  "title": "How to list the top N values",
+  "task": "Pull out the highest N numbers as a list — top 5 sales, biggest three costs — not just their total.",
+  "keywords": [
+    "top 5 values excel",
+    "list largest n numbers",
+    "large function multiple",
+    "top n values formula google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=LARGE($A$2:$A$8,ROW(A1))",
+      "note": "Fill down for as many as you want. Excel 365: =SORT(A2:A8,,-1) spills them all, or wrap in TAKE for the top N."
+    },
+    "google_sheets": {
+      "formula": "=LARGE($A$2:$A$8,ROW(A1))",
+      "note": "Identical; =SORT(A2:A8,1,FALSE) also works."
+    },
+    "libreoffice": {
+      "formula": "=LARGE($A$2:$A$8,ROW(A1))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 40, "A3": 90, "A4": 70, "A5": 85, "A6": 95, "A7": 60, "A8": 50
+    },
+    "formula": "=LARGE(A2:A8,{1;2;3})",
+    "expected": [95, 90, 85],
+    "check_range": "D1:D3"
+  },
+  "explanation": "LARGE returns the k-th largest value, so feeding it 1, 2, 3... gives the ranked top values: the three largest here are 95, 90, 85. Using ROW(A1) as the k makes it produce 1, 2, 3... as you fill down; the array form LARGE(range,{1;2;3}) spills them in one formula (verified above). SMALL does the same for the bottom N. On modern versions, SORT(range,,-1) sorts everything descending and TAKE(SORT(...),5) grabs just the top five — cleaner when N is large. To also show WHAT each top value belongs to, feed it into INDEX/MATCH."
+}
