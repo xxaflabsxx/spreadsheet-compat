@@ -1,0 +1,35 @@
+{
+  "slug": "how-to-use-averageif",
+  "title": "How to use AVERAGEIF (and AVERAGEIFS)",
+  "task": "Average only the numbers whose row meets a condition — mean sales for one region, average score above zero.",
+  "keywords": [
+    "how to use averageif excel",
+    "averageif function",
+    "average with condition formula",
+    "averageifs multiple criteria google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=AVERAGEIF(A2:A10,\"East\",B2:B10)",
+      "note": "AVERAGEIF(test range, criteria, average range). AVERAGEIFS for multiple conditions (average range FIRST)."
+    },
+    "google_sheets": {
+      "formula": "=AVERAGEIF(A2:A10,\"East\",B2:B10)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=AVERAGEIF(A2:A10,\"East\",B2:B10)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "East", "B2": 100,
+      "A3": "West", "B3": 50,
+      "A4": "East", "B4": 20
+    },
+    "formula": "=AVERAGEIF(A2:A4,\"East\",B2:B4)",
+    "expected": 60
+  },
+  "explanation": "AVERAGEIF works exactly like SUMIF but takes the mean instead of the total: it checks the first range for the criteria and averages the matching values from the third range. The two East rows are 100 and 20, so the average is 60 (the West row is ignored). The criteria can be text, a number, a comparison in quotes (\">0\" to average only positives), or a wildcard. For more than one condition use AVERAGEIFS, which — like SUMIFS — puts the range-to-average FIRST, then the range/criteria pairs. One gotcha: if no rows match, both return #DIV/0! (wrap in IFERROR if an empty result is possible), and truly blank cells are skipped rather than counted as zero."
+}
