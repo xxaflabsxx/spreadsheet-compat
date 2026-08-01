@@ -1054,7 +1054,7 @@ _RECIPE_CATEGORIES = [
     ("Lookups & filters", ("lookup", "match", "filter", "find-the", "find-values",
                            "duplicate", "unique", "blank-cells-from", "both-lists",
                            "all-matches", "transpose", "reverse", "list", "nth-largest",
-                           "reference", "compare", "sort", "fill-blank")),
+                           "reference", "compare", "sort", "fill-blank", "position")),
     ("Counting & conditions", ("count", "if-", "-if", "contains", "rank",
                                "occurrences", "condition", "frequency")),
     ("Formatting & display", ("abbreviate", "fraction", "-dash", "plus-sign",
