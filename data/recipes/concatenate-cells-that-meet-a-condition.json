@@ -1,0 +1,36 @@
+{
+  "slug": "concatenate-cells-that-meet-a-condition",
+  "title": "How to concatenate cells that meet a condition (TEXTJOIN IF)",
+  "task": "Build a comma-list from only the rows that match — the products in one order, the names on one team.",
+  "keywords": [
+    "textjoin if condition excel",
+    "concatenate with criteria",
+    "join cells that match",
+    "textjoin filter google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TEXTJOIN(\", \",TRUE,IF(A2:A6=\"East\",B2:B6,\"\"))",
+      "note": "The IF blanks non-matching rows; TEXTJOIN skips the blanks. In older Excel, enter with Ctrl+Shift+Enter."
+    },
+    "google_sheets": {
+      "formula": "=TEXTJOIN(\", \",TRUE,IF(A2:A6=\"East\",B2:B6,\"\"))",
+      "note": "Identical; =TEXTJOIN(\", \",TRUE,FILTER(B2:B6,A2:A6=\"East\")) is cleaner."
+    },
+    "libreoffice": {
+      "formula": "=TEXTJOIN(\", \",TRUE,IF(A2:A6=\"East\",B2:B6,\"\"))",
+      "note": "Works in 25.8+; the FILTER version needs 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "East", "B2": "apple",
+      "A3": "West", "B3": "banana",
+      "A4": "East", "B4": "cherry",
+      "A5": "East", "B5": "date"
+    },
+    "formula": "=TEXTJOIN(\", \",TRUE,FILTER(B2:B5,A2:A5=\"East\"))",
+    "expected": "apple, cherry, date"
+  },
+  "explanation": "The IF runs over the whole range and returns each B value where the condition is true and \"\" where it isn't, producing an array like {\"apple\",\"\",\"cherry\",\"date\"}; TEXTJOIN with its ignore-empty argument set to TRUE then glues only the real values together: \"apple, cherry, date\" (the West row is dropped). On modern versions TEXTJOIN(\", \",TRUE,FILTER(B2:B6,A2:A6=\"East\")) reads more clearly and does the same. This is the standard 'list all the X for each Y' pattern for turning rows into a summary cell; add more conditions by multiplying them inside the IF or FILTER."
+}

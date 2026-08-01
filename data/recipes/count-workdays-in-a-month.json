@@ -1,0 +1,31 @@
+{
+  "slug": "count-workdays-in-a-month",
+  "title": "How to count the working days in a month",
+  "task": "How many business days a given month has — for capacity planning, quotas, and billing.",
+  "keywords": [
+    "working days in a month excel",
+    "count workdays month networkdays",
+    "business days in month formula",
+    "number of working days google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=NETWORKDAYS(A2,EOMONTH(A2,0))",
+      "note": "A2 = any date in the month. EOMONTH(A2,0) is that month's last day; NETWORKDAYS skips weekends."
+    },
+    "google_sheets": {
+      "formula": "=NETWORKDAYS(A2,EOMONTH(A2,0))",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=NETWORKDAYS(A2,EOMONTH(A2,0))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=NETWORKDAYS(DATE(2026,8,1),EOMONTH(DATE(2026,8,1),0))",
+    "expected": 21
+  },
+  "explanation": "NETWORKDAYS counts weekdays (Mon-Fri) between two dates inclusive, and EOMONTH(A2,0) gives the last day of the month, so pairing them with the first of the month counts every working day it contains: August 2026 has 21. To count from the first properly, pass DATE(YEAR(A2),MONTH(A2),1) as the start rather than an arbitrary mid-month date. Add a range of public holidays as NETWORKDAYS' third argument to exclude them, or use NETWORKDAYS.INTL if your weekend isn't Saturday-Sunday. Dividing a monthly target by this count gives a required daily run-rate."
+}
