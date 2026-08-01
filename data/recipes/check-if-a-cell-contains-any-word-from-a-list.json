@@ -1,0 +1,36 @@
+{
+  "slug": "check-if-a-cell-contains-any-word-from-a-list",
+  "title": "How to check if a cell contains any word from a list",
+  "task": "Flag rows whose text includes any of several keywords — banned words, categories, tags to match.",
+  "keywords": [
+    "if cell contains one of many values excel",
+    "check text against list formula",
+    "sumproduct search list",
+    "contains any keyword google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUMPRODUCT(--ISNUMBER(SEARCH(D2:D4,A2)))>0",
+      "note": "D2:D4 = the list of words, A2 = the text. Returns TRUE if any word is found (case-insensitive)."
+    },
+    "google_sheets": {
+      "formula": "=SUMPRODUCT(--ISNUMBER(SEARCH(D2:D4,A2)))>0",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=SUMPRODUCT(--ISNUMBER(SEARCH(D2:D4,A2)))>0",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "large red widget",
+      "D2": "blue",
+      "D3": "widget",
+      "D4": "gadget"
+    },
+    "formula": "=SUMPRODUCT(--ISNUMBER(SEARCH(D2:D4,A2)))>0",
+    "expected": true
+  },
+  "explanation": "SEARCH looks for each word from the list inside the cell and returns a position number when found or an error when not; ISNUMBER turns those into TRUE/FALSE, the -- converts to 1/0, and SUMPRODUCT adds them — a total above 0 means at least one word matched. \"large red widget\" contains \"widget\" (from the list), so the result is TRUE. SEARCH is case-insensitive; swap it for FIND to match case. To return WHICH word matched, wrap in a lookup; to count HOW MANY matched, drop the >0 and keep the SUMPRODUCT. This is the array-powered version of stacking many ISNUMBER(SEARCH(...)) tests with OR."
+}

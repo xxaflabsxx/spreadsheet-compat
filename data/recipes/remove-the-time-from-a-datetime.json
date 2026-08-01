@@ -1,0 +1,31 @@
+{
+  "slug": "remove-the-time-from-a-datetime",
+  "title": "How to remove the time from a date-time",
+  "task": "Strip the time portion off a timestamp so you're left with just the date — for grouping and matching by day.",
+  "keywords": [
+    "remove time from date excel",
+    "date only from datetime formula",
+    "int datetime remove time",
+    "strip time google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INT(A2)",
+      "note": "INT drops the fractional (time) part. Format the result cell as a date. TRUNC(A2) does the same."
+    },
+    "google_sheets": {
+      "formula": "=INT(A2)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=INT(A2)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=INT(DATE(2026,7,21)+TIME(14,30,0))",
+    "expected": 46224
+  },
+  "explanation": "A date-time is stored as a whole number (the date) plus a fraction (the time), so INT keeps just the whole-number date part and discards the time: July 21, 2026 at 14:30 becomes the date serial 46224 (format the cell as a date to read it). This matters when you group or match by day — two timestamps on the same day won't equal each other until the time is stripped, which is why cross-referencing or SUMIFS on raw timestamps quietly misses rows. TRUNC(A2) gives the identical result. To keep only the TIME instead, subtract the date: =A2-INT(A2), or MOD(A2,1)."
+}
