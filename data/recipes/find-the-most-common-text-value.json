@@ -1,0 +1,38 @@
+{
+  "slug": "find-the-most-common-text-value",
+  "title": "How to find the most common text value (mode for text)",
+  "task": "The most-repeated label in a column — the best-selling product, the top response, the modal category. MODE only works on numbers, so text needs a different trick.",
+  "keywords": [
+    "most frequent text value excel",
+    "mode for text excel",
+    "most common word in a column",
+    "modal category google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INDEX(A2:A6,MATCH(MAX(COUNTIF(A2:A6,A2:A6)),COUNTIF(A2:A6,A2:A6),0))",
+      "note": "MODE errors on text. COUNTIF-against-itself scores each cell by its frequency; MATCH(MAX(...)) finds the winner. In older Excel enter with Ctrl+Shift+Enter."
+    },
+    "google_sheets": {
+      "formula": "=INDEX(A2:A6,MATCH(MAX(COUNTIF(A2:A6,A2:A6)),COUNTIF(A2:A6,A2:A6),0))",
+      "note": "Identical. Or =INDEX(SORTN(A2:A6,1,0,A2:A6,FALSE),1) style with COUNTIF sorting."
+    },
+    "libreoffice": {
+      "formula": "=INDEX(A2:A6,MATCH(MAX(COUNTIF(A2:A6,A2:A6)),COUNTIF(A2:A6,A2:A6),0))",
+      "note": "Identical; array-enter with Ctrl+Shift+Enter in older builds."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple",
+      "A3": "banana",
+      "A4": "apple",
+      "A5": "apple",
+      "A6": "cherry"
+    },
+    "formula": "=INDEX(A2:A6,MATCH(MAX(COUNTIF(A2:A6,A2:A6)),COUNTIF(A2:A6,A2:A6),0))",
+    "check_range": "H1:H1",
+    "expected": ["apple"]
+  },
+  "explanation": "COUNTIF(A2:A6,A2:A6) is the key move: it compares the range to itself and returns an array of each cell's occurrence count — here {3;1;3;3;1}, because 'apple' shows up three times. MAX of that array is the highest frequency (3), and MATCH finds the first position that hits it, which INDEX turns back into the value 'apple'. This works on text where MODE — a numbers-only function — would return #N/A. If two values tie for most-common it returns the first one; to surface ties, wrap the count logic in a filter. On modern Google Sheets or Excel 365, SORTN / a COUNTIF-keyed SORT does the same thing without array entry."
+}

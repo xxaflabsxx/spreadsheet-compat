@@ -1,0 +1,37 @@
+{
+  "slug": "case-sensitive-lookup",
+  "title": "How to do a case-sensitive lookup",
+  "task": "Match a code exactly, upper- and lower-case included — 'ABC' should not match 'abc'. VLOOKUP and XLOOKUP ignore case, so they can't tell these apart.",
+  "keywords": [
+    "case sensitive vlookup excel",
+    "case sensitive lookup formula",
+    "exact match lookup upper lower case",
+    "case sensitive xlookup google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INDEX(B2:B5,MATCH(TRUE,EXACT(A2:A5,\"ABC\"),0))",
+      "note": "EXACT compares case; MATCH(TRUE,...) finds the exact-case row. Older Excel: enter with Ctrl+Shift+Enter. 365: =XLOOKUP(TRUE,EXACT(A2:A5,\"ABC\"),B2:B5)."
+    },
+    "google_sheets": {
+      "formula": "=INDEX(B2:B5,MATCH(TRUE,EXACT(A2:A5,\"ABC\"),0))",
+      "note": "Identical. XLOOKUP(TRUE,EXACT(A2:A5,\"ABC\"),B2:B5) also works."
+    },
+    "libreoffice": {
+      "formula": "=INDEX(B2:B5,MATCH(TRUE,EXACT(A2:A5,\"ABC\"),0))",
+      "note": "Identical; array-enter in older builds."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "abc", "B2": 1,
+      "A3": "ABC", "B3": 2,
+      "A4": "Abc", "B4": 3,
+      "A5": "aBc", "B5": 4
+    },
+    "formula": "=INDEX(B2:B5,MATCH(TRUE,EXACT(A2:A5,\"ABC\"),0))",
+    "check_range": "H1:H1",
+    "expected": [2]
+  },
+  "explanation": "VLOOKUP, HLOOKUP, XLOOKUP and a plain MATCH all treat 'abc', 'ABC' and 'Abc' as the same string, so they return whichever appears first — wrong when the case IS the identifier (SKUs, tokens, passwords). EXACT(A2:A5,\"ABC\") is the fix: it compares each cell character-by-character including case, producing {FALSE;TRUE;FALSE;FALSE}. MATCH(TRUE, that array, 0) finds the position of the genuine match (row 2), and INDEX returns the paired value from column B — here 2. In legacy Excel this is a Ctrl+Shift+Enter array formula; in Excel 365 and Google Sheets XLOOKUP(TRUE,EXACT(...),...) reads more cleanly. Add more EXACT conditions multiplied together for a case-sensitive multi-column key."
+}
