@@ -1,0 +1,37 @@
+{
+  "slug": "look-up-the-last-matching-value",
+  "title": "How to look up the LAST matching value (not the first)",
+  "task": "When a key appears many times, return the most recent match — latest price, last status, newest entry.",
+  "keywords": [
+    "vlookup last match excel",
+    "lookup last matching value",
+    "xlookup search from bottom",
+    "get last occurrence google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=XLOOKUP(D2,A2:A6,B2:B6,,0,-1)",
+      "note": "Search mode -1 = from the bottom up. Excel 2021+/365. Older: the LOOKUP trick below."
+    },
+    "google_sheets": {
+      "formula": "=XLOOKUP(D2,A2:A6,B2:B6,,0,-1)",
+      "note": "Identical; or =LOOKUP(2,1/(A2:A6=D2),B2:B6)."
+    },
+    "libreoffice": {
+      "formula": "=LOOKUP(2,1/(A2:A6=D2),B2:B6)",
+      "note": "XLOOKUP with -1 needs LibreOffice 24.8+; the LOOKUP trick works in any version."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "apple", "B2": 10,
+      "A3": "banana", "B3": 20,
+      "A4": "apple", "B4": 30,
+      "A5": "cherry", "B5": 40,
+      "D2": "apple"
+    },
+    "formula": "=LOOKUP(2,1/(A2:A5=D2),B2:B5)",
+    "expected": 30
+  },
+  "explanation": "A normal VLOOKUP/XLOOKUP returns the FIRST match, but when rows are in date order you often want the LAST — the most recent price or status. Two ways: XLOOKUP with a search-mode of -1 scans from the bottom up and returns the last match directly. In any version, the classic LOOKUP trick does it too: (A2:A5=D2) is an array of TRUE/FALSE, 1 divided by it gives 1 for matches and errors for non-matches, and LOOKUP searching for 2 (bigger than any value) scans to the end and returns the value beside the LAST 1. For \"apple\" that's the second apple's price, 30. Sort your data chronologically first so 'last' means 'most recent'."
+}
