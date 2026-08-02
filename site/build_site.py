@@ -1077,6 +1077,27 @@ def _recipe_category(slug):
             return cat
     return "More tasks"
 
+
+_FUNC_CALL_RE = re.compile(r"([A-Za-z_][A-Za-z0-9_.]*)\s*\(")
+
+
+def _functions_used(recipe, by_name):
+    """Extract the inventoried functions a recipe's formulas call, so each recipe
+    can link to those function compatibility pages (contextual internal links that
+    pass authority to the money pages, and let readers jump to full compat info)."""
+    seen = {}
+    for app in ("excel", "google_sheets", "libreoffice"):
+        s = (recipe.get("solutions") or {}).get(app)
+        if not s:
+            continue
+        # drop quoted string literals so text like "(sales)" can't match
+        formula = re.sub(r'"[^"]*"', "", s.get("formula", ""))
+        for tok in _FUNC_CALL_RE.findall(formula):
+            name = tok.upper()
+            if name in by_name and name not in seen:
+                seen[name] = by_name[name]["name_lower"]
+    return [{"name": n, "name_lower": nl} for n, nl in seen.items()]
+
 RECIPE_TMPL = """{% extends "base.html" %}
 {% block content %}
 <a class="back-link" href="{{ rel }}how-to/">&larr; All how-to recipes</a>
@@ -1104,6 +1125,10 @@ RECIPE_TMPL = """{% extends "base.html" %}
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
 <p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+{% endif %}
+{% if functions_used %}
+<h2 class="section-title">Functions used</h2>
+<p>{% for f in functions_used %}<a href="{{ rel }}functions/{{ f.name_lower }}.html">{{ f.name }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %} &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
 {% endif %}
 {% endblock %}
 """
@@ -1911,6 +1936,7 @@ def main():
                 r=rc,
                 app_order=ENGINE_ORDER,
                 app_labels=ENGINE_LABELS,
+                functions_used=_functions_used(rc, _by_name),
                 json_ld=breadcrumb_ld([
                     (SITE_NAME, BASE_URL),
                     ("How-to recipes", BASE_URL + "how-to/"),
