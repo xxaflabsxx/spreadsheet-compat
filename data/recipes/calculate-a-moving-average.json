@@ -1,0 +1,35 @@
+{
+  "slug": "calculate-a-moving-average",
+  "title": "How to calculate a moving average",
+  "task": "Smooth out noisy daily numbers into a rolling trend — a 3-, 7-, or 30-period average that updates as you drag it down the column.",
+  "keywords": [
+    "moving average excel formula",
+    "rolling average google sheets",
+    "3 day moving average",
+    "calculate moving average column"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=AVERAGE(B2:B4)",
+      "note": "Average a fixed-size window, then drag down — the range slides with each row. For a trailing 3-period on row N, point at the current row and the two above it."
+    },
+    "google_sheets": {
+      "formula": "=AVERAGE(B2:B4)",
+      "note": "Identical. For a whole spilled column: =MAP(SEQUENCE(ROWS(B:B)),LAMBDA(i,...)) or a helper AVERAGEIFS by date window."
+    },
+    "libreoffice": {
+      "formula": "=AVERAGE(B2:B4)",
+      "note": "Identical drag-down behavior."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "B2": 10,
+      "B3": 20,
+      "B4": 30
+    },
+    "formula": "=AVERAGE(B2:B4)",
+    "expected": 20
+  },
+  "explanation": "A moving (rolling) average is just AVERAGE over a fixed-size sliding window. Put =AVERAGE(B2:B4) beside the third data point and drag down: because B2:B4 is a relative range, row 5 becomes AVERAGE(B3:B5), row 6 becomes AVERAGE(B4:B6), and so on — each result is the mean of the current value and the previous two, which is a 3-period trailing average (here (10+20+30)/3 = 20). Widen the window to B2:B8 for a 7-period, or B2:B31 for a 30-period. The first few rows have no full window, so leave them blank or start the formula once enough history exists. To key the window off dates instead of row position — a true 7-DAY average even with gaps — use AVERAGEIFS with a date-range condition. Moving averages trade responsiveness for smoothness: a longer window is steadier but lags real changes more."
+}
