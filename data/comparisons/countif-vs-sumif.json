@@ -1,0 +1,29 @@
+{
+  "slug": "countif-vs-sumif",
+  "title": "COUNTIF vs SUMIF: counting rows vs adding values",
+  "meta_desc": "COUNTIF vs SUMIF: how many vs how much, their different argument orders, and verified compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["COUNTIF", "SUMIF"],
+  "intro": "Same 'if' idea, two different questions. COUNTIF answers 'how many rows match?' — it tallies cells. SUMIF answers 'what's the total of the values in matching rows?' — it adds a second column. Mixing them up is why a report shows 12 when you wanted $4,300, or vice-versa.",
+  "table": [
+    {"aspect": "What it returns", "cols": ["A count of matching cells", "The sum of values in matching rows"]},
+    {"aspect": "Columns involved", "cols": ["One (the range you test)", "Two (the range you test + the range you add)"]},
+    {"aspect": "Argument order", "cols": ["range, criteria", "range, criteria, [sum_range] — sum_range LAST (opposite of SUMIFS)"]},
+    {"aspect": "Same-column shortcut", "cols": ["N/A", "Omit sum_range to sum the tested column itself: =SUMIF(A:A,\">100\")"]},
+    {"aspect": "Multi-condition sibling", "cols": ["COUNTIFS", "SUMIFS (sum_range moves to FIRST)"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal — identical in every version of all three apps we test"]}
+  ],
+  "when": [
+    {"func": "COUNTIF", "use_when": "You want a headcount: how many orders are 'East', how many scores are ≥90, how many cells contain 'error'. Only the test column matters."},
+    {"func": "SUMIF", "use_when": "You want a filtered total: total sales for 'East', total hours on Project X. You're adding up a value column based on a condition in another (or the same) column."}
+  ],
+  "compat_note": "Both run correctly in every version of all three apps we test. The one true trap isn't compatibility — it's argument order: SUMIF puts the optional sum_range LAST, while its multi-condition upgrade SUMIFS puts sum_range FIRST. COUNTIF has no such column, so switching to COUNTIFS is painless. When in doubt, jump straight to COUNTIFS / SUMIFS for consistent syntax.",
+  "examples": [
+    {"label": "COUNTIF — how many 'East' rows", "formula": "=COUNTIF(A2:A100,\"East\")"},
+    {"label": "SUMIF — total sales for 'East'", "formula": "=SUMIF(A2:A100,\"East\",C2:C100)"},
+    {"label": "SUMIF — sum the column itself where >100", "formula": "=SUMIF(C2:C100,\">100\")"}
+  ],
+  "see_also": [
+    {"href": "compare/countif-vs-countifs.html", "label": "COUNTIF vs COUNTIFS"},
+    {"href": "compare/sumif-vs-sumifs.html", "label": "SUMIF vs SUMIFS"}
+  ]
+}

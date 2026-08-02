@@ -1,0 +1,29 @@
+{
+  "slug": "filter-vs-vlookup",
+  "title": "FILTER vs VLOOKUP: return every match, not just the first",
+  "meta_desc": "FILTER vs VLOOKUP: single vs multiple results, spill behavior, left-lookups, and verified compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["FILTER", "VLOOKUP"],
+  "intro": "VLOOKUP finds the first row that matches and returns one value. FILTER returns every row that matches, spilling them into a range. If a key can appear more than once — all orders for a customer, all students in a class — VLOOKUP silently drops the rest and FILTER is what you actually want.",
+  "table": [
+    {"aspect": "How many results", "cols": ["Every matching row (spills)", "Only the first match"]},
+    {"aspect": "Returns", "cols": ["A whole range/array you can shape", "A single value"]},
+    {"aspect": "Look left of the key", "cols": ["Yes — columns are independent", "No — lookup column must be leftmost"]},
+    {"aspect": "Multiple conditions", "cols": ["Yes — multiply conditions: (a)*(b)", "No — needs a helper column or XLOOKUP"]},
+    {"aspect": "No match", "cols": ["#CALC! (set the [if_empty] argument)", "#N/A (wrap in IFERROR)"]},
+    {"aspect": "Compatibility", "cols": ["Sheets: all; Excel 365 & LibreOffice 24.8+ (see the FILTER page)", "Universal — every version of all three apps"]}
+  ],
+  "when": [
+    {"func": "VLOOKUP", "use_when": "One key maps to one value and you just need that value — a price for a SKU, a name for an ID. It's universal, so it's the portable choice for older Excel or shared files."},
+    {"func": "FILTER", "use_when": "A key can match many rows and you need them all, you want to pull columns to the left of the key, or you need multi-condition logic. Modern Sheets/Excel only — check the compat note before shipping to old Excel."}
+  ],
+  "compat_note": "VLOOKUP runs everywhere; FILTER is newer — native in all Google Sheets, but Excel needs 365 (dynamic arrays) and LibreOffice needs 24.8+. On a version without FILTER it errors as #NAME?, so for files that may open in old Excel, stick with VLOOKUP/INDEX-MATCH or gate on the version. Where both exist, FILTER also sidesteps VLOOKUP's leftmost-column limitation and its silent 'first match only' behavior.",
+  "examples": [
+    {"label": "VLOOKUP — first price for a SKU", "formula": "=VLOOKUP(\"A100\",A2:C500,3,FALSE)"},
+    {"label": "FILTER — every order for a customer", "formula": "=FILTER(C2:C500,A2:A500=\"A100\")"},
+    {"label": "FILTER — two conditions, with empty fallback", "formula": "=FILTER(C2:C500,(A2:A500=\"East\")*(B2:B500>100),\"none\")"}
+  ],
+  "see_also": [
+    {"href": "compare/vlookup-vs-xlookup.html", "label": "VLOOKUP vs XLOOKUP"},
+    {"href": "compare/filter-vs-query.html", "label": "FILTER vs QUERY"}
+  ]
+}
