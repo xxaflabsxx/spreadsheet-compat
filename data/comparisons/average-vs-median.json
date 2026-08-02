@@ -1,0 +1,29 @@
+{
+  "slug": "average-vs-median",
+  "title": "AVERAGE vs MEDIAN: which 'typical value' to trust",
+  "meta_desc": "AVERAGE vs MEDIAN (mean vs median): how each handles outliers and skew, when to use which, and verified behavior across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["AVERAGE", "MEDIAN"],
+  "intro": "Both answer 'what's the typical value?', but differently: AVERAGE (the mean) adds everything up and divides, so a few extreme values drag it around; MEDIAN is the middle value once sorted, so it barely moves when an outlier appears. On skewed data — salaries, house prices, response times — they can tell very different stories.",
+  "table": [
+    {"aspect": "How it's computed", "cols": ["Sum ÷ count", "Middle value when sorted (average of the two middle values if the count is even)"]},
+    {"aspect": "Sensitivity to outliers", "cols": ["High — one huge value shifts it a lot", "Low — extreme values barely affect it"]},
+    {"aspect": "Best for", "cols": ["Roughly symmetric data with no wild extremes", "Skewed data (income, prices, durations)"]},
+    {"aspect": "Empty cells & text", "cols": ["Ignored (use AVERAGEA to count text as 0)", "Ignored"]},
+    {"aspect": "Zeros", "cols": ["Counted as values", "Counted as values"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal — identical in every Excel, Sheets & LibreOffice version we test"]}
+  ],
+  "when": [
+    {"func": "AVERAGE", "use_when": "Data is fairly even and you need a figure that reflects the total (e.g. average order value where the sum matters). Pair with a conditional form via AVERAGEIF/AVERAGEIFS."},
+    {"func": "MEDIAN", "use_when": "A few big or small values would distort the mean — salaries, home prices, load times. The median reports the true 'middle person'. There's no MEDIANIF; use an array MEDIAN(IF(...)) for a conditional median."}
+  ],
+  "compat_note": "Both execute identically across every version of all three apps we test. Two things to know: neither has a built-in *IF variant except AVERAGEIF/AVERAGEIFS (there is no MEDIANIF — use MEDIAN(IF(range=criteria,values)) array-entered), and when the mean and median diverge sharply that gap is itself the signal your data is skewed — report both.",
+  "examples": [
+    {"label": "AVERAGE — the mean", "formula": "=AVERAGE(B2:B100)"},
+    {"label": "MEDIAN — the middle value", "formula": "=MEDIAN(B2:B100)"},
+    {"label": "Conditional median (array-entered)", "formula": "=MEDIAN(IF(A2:A100=\"East\",B2:B100))"}
+  ],
+  "see_also": [
+    {"href": "compare/max-vs-large.html", "label": "MAX vs LARGE"},
+    {"href": "how-to/find-the-most-frequent-number.html", "label": "Find the most frequent number"}
+  ]
+}

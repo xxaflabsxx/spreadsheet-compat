@@ -1,0 +1,29 @@
+{
+  "slug": "count-vs-counta",
+  "title": "COUNT vs COUNTA: numbers only, or everything?",
+  "meta_desc": "COUNT vs COUNTA: what each one actually counts (numbers vs any non-empty cell), the blank-vs-empty-string trap, and verified behavior across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["COUNT", "COUNTA"],
+  "intro": "They look like twins but count different things: COUNT tallies only numbers, while COUNTA tallies every cell that isn't empty — text, dates, errors, TRUE/FALSE and all. Picking the wrong one is the classic reason a 'how many rows' total comes out too low or too high.",
+  "table": [
+    {"aspect": "What it counts", "cols": ["Numbers only (incl. dates & times, which are numbers)", "Any non-empty cell — text, numbers, errors, logicals"]},
+    {"aspect": "Text values", "cols": ["Ignored", "Counted"]},
+    {"aspect": "Blank cells", "cols": ["Not counted", "Not counted"]},
+    {"aspect": "Formula returning \"\"", "cols": ["Not counted", "COUNTED — the cell isn't truly empty (the classic trap)"]},
+    {"aspect": "Error values (#N/A etc.)", "cols": ["Not counted", "Counted"]},
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal — identical in every Excel, Sheets & LibreOffice version we test"]}
+  ],
+  "when": [
+    {"func": "COUNT", "use_when": "You want 'how many numeric entries' — amounts filled in, measurements taken, scores recorded. Text labels and blanks are correctly skipped."},
+    {"func": "COUNTA", "use_when": "You want 'how many rows have anything' — names entered, tickets logged, any non-empty response. Watch out for cells holding a formula's \"\" result, which COUNTA still counts."}
+  ],
+  "compat_note": "Both execute identically across every version of all three apps we test. The one behavior that surprises people isn't a compat difference — it's that a cell containing =IF(...,\"\") is NOT empty, so COUNTA includes it and COUNTBLANK excludes it. To count only visually-blank cells, use COUNTBLANK; to count numbers, COUNT; to count real entries including text, COUNTA.",
+  "examples": [
+    {"label": "COUNT — numeric entries only", "formula": "=COUNT(A2:A100)"},
+    {"label": "COUNTA — any non-empty cell", "formula": "=COUNTA(A2:A100)"},
+    {"label": "Text/blank rows = COUNTA minus COUNT", "formula": "=COUNTA(A2:A100)-COUNT(A2:A100)"}
+  ],
+  "see_also": [
+    {"href": "compare/countif-vs-countifs.html", "label": "COUNTIF vs COUNTIFS"},
+    {"href": "compare/isblank-vs-empty-string.html", "label": "ISBLANK vs empty string"}
+  ]
+}
