@@ -1,0 +1,29 @@
+{
+  "slug": "sumifs-vs-sumproduct",
+  "title": "SUMIFS vs SUMPRODUCT: when the clean one isn't enough",
+  "meta_desc": "SUMIFS vs SUMPRODUCT: multi-condition sums, OR logic, math inside the sum, and verified compatibility across Excel, Google Sheets, and LibreOffice.",
+  "funcs": ["SUMIFS", "SUMPRODUCT"],
+  "intro": "SUMIFS is the clean, fast way to sum with several AND conditions. SUMPRODUCT is the swiss-army knife you reach for when SUMIFS can't do the job — OR logic, a calculation between columns before summing, or criteria SUMIFS simply won't accept. Rule of thumb: SUMIFS until it can't, then SUMPRODUCT.",
+  "table": [
+    {"aspect": "Multiple AND conditions", "cols": ["Built for it: range1,crit1,range2,crit2…", "Yes — multiply the (cond) arrays together"]},
+    {"aspect": "OR conditions", "cols": ["No — needs added SUMIFS or a helper", "Yes — add the condition arrays: (a)+(b)"]},
+    {"aspect": "Math before summing", "cols": ["No — sum_range is taken as-is", "Yes — SUMPRODUCT(qty*price*(cond))"]},
+    {"aspect": "Speed on big ranges", "cols": ["Faster, optimized", "Slower — evaluates full arrays"]},
+    {"aspect": "Readability", "cols": ["Clearer for plain AND sums", "Denser, but far more flexible"]},
+    {"aspect": "Compatibility", "cols": ["Excel 2007+, all Sheets & LibreOffice we test", "Universal — every version, all three apps"]}
+  ],
+  "when": [
+    {"func": "SUMIFS", "use_when": "Straightforward 'sum X where A and B and C' on large data. It's faster, easier to read, and the argument order (sum_range first) never changes."},
+    {"func": "SUMPRODUCT", "use_when": "You need OR logic, a product/calculation between columns before the sum, weighted totals, or a condition SUMIFS rejects. It works in ancient Excel too, so it's the portable fallback."}
+  ],
+  "compat_note": "Both run correctly in every version of all three apps we test. The real choice is capability, not compatibility: SUMPRODUCT can express things SUMIFS can't (OR, inline math, array conditions) but pays for it in speed and legibility on large sheets. A common hybrid — SUMPRODUCT(SUMIFS(...)) — lets SUMIFS do the filtered sum while SUMPRODUCT loops an array of criteria.",
+  "examples": [
+    {"label": "SUMIFS — sum where region=East AND qty>100", "formula": "=SUMIFS(C2:C100,A2:A100,\"East\",B2:B100,\">100\")"},
+    {"label": "SUMPRODUCT — OR: East or West", "formula": "=SUMPRODUCT(((A2:A100=\"East\")+(A2:A100=\"West\"))*C2:C100)"},
+    {"label": "SUMPRODUCT — weighted total (qty × price)", "formula": "=SUMPRODUCT(B2:B100,C2:C100)"}
+  ],
+  "see_also": [
+    {"href": "compare/sumif-vs-sumifs.html", "label": "SUMIF vs SUMIFS"},
+    {"href": "compare/sumif-vs-sumproduct.html", "label": "SUMIF vs SUMPRODUCT"}
+  ]
+}

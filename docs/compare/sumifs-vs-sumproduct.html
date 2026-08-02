@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PROPER function: Excel vs Google Sheets vs LibreOffice compatibility</title>
-<meta name="description" content="Does PROPER work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the PROPER function (Text).">
+<title>SUMIFS vs SUMPRODUCT: when the clean one isn&#39;t enough</title>
+<meta name="description" content="SUMIFS vs SUMPRODUCT: multi-condition sums, OR logic, math inside the sum, and verified compatibility across Excel, Google Sheets, and LibreOffice.">
 
-<link rel="canonical" href="https://canispreadsheet.com/functions/proper.html">
-<meta property="og:title" content="PROPER function: Excel vs Google Sheets vs LibreOffice compatibility">
-<meta property="og:description" content="Does PROPER work the same in Excel, Google Sheets, and LibreOffice Calc? Real executed test results, syntax, and links to each official doc for the PROPER function (Text).">
+<link rel="canonical" href="https://canispreadsheet.com/compare/sumifs-vs-sumproduct.html">
+<meta property="og:title" content="SUMIFS vs SUMPRODUCT: when the clean one isn&#39;t enough">
+<meta property="og:description" content="SUMIFS vs SUMPRODUCT: multi-condition sums, OR logic, math inside the sum, and verified compatibility across Excel, Google Sheets, and LibreOffice.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/proper.html">
+<meta property="og:url" content="https://canispreadsheet.com/compare/sumifs-vs-sumproduct.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"PROPER function","item":"https://canispreadsheet.com/functions/proper.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Comparisons","item":"https://canispreadsheet.com/compare/"},{"@type":"ListItem","position":3,"name":"SUMIFS vs SUMPRODUCT: when the clean one isn't enough","item":"https://canispreadsheet.com/compare/sumifs-vs-sumproduct.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -302,187 +302,65 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
+<a class="back-link" href="../compare/">&larr; All comparisons</a>
 <div class="func-header">
-  <h1>PROPER</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
+  <h1>SUMIFS vs SUMPRODUCT: when the clean one isn&#39;t enough</h1>
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-07-29</p>
+<p class="lede">SUMIFS is the clean, fast way to sum with several AND conditions. SUMPRODUCT is the swiss-army knife you reach for when SUMIFS can&#39;t do the job — OR logic, a calculation between columns before summing, or criteria SUMIFS simply won&#39;t accept. Rule of thumb: SUMIFS until it can&#39;t, then SUMPRODUCT.</p>
 
-
-<p class="lede">Real, executed compatibility results for the <strong>PROPER</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
+<h2 class="section-title">The differences at a glance</h2>
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
+<thead><tr><th></th><th><a href="../functions/sumifs.html">SUMIFS</a></th><th><a href="../functions/sumproduct.html">SUMPRODUCT</a></th></tr></thead>
 <tbody>
 
+<tr><td><strong>Multiple AND conditions</strong></td><td>Built for it: range1,crit1,range2,crit2…</td><td>Yes — multiply the (cond) arrays together</td></tr>
 
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>OR conditions</strong></td><td>No — needs added SUMIFS or a helper</td><td>Yes — add the condition arrays: (a)+(b)</td></tr>
 
+<tr><td><strong>Math before summing</strong></td><td>No — sum_range is taken as-is</td><td>Yes — SUMPRODUCT(qty*price*(cond))</td></tr>
 
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Speed on big ranges</strong></td><td>Faster, optimized</td><td>Slower — evaluates full arrays</td></tr>
 
+<tr><td><strong>Readability</strong></td><td>Clearer for plain AND sums</td><td>Denser, but far more flexible</td></tr>
 
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-29)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
+<tr><td><strong>Compatibility</strong></td><td>Excel 2007+, all Sheets &amp; LibreOffice we test</td><td>Universal — every version, all three apps</td></tr>
 
 </tbody>
 </table>
 </div>
 
+<h2 class="section-title">Which should you use?</h2>
+<ul>
 
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-PROPER&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<li><strong>SUMIFS</strong> &mdash; Straightforward &#39;sum X where A and B and C&#39; on large data. It&#39;s faster, easier to read, and the argument order (sum_range first) never changes.</li>
+
+<li><strong>SUMPRODUCT</strong> &mdash; You need OR logic, a product/calculation between columns before the sum, weighted totals, or a condition SUMIFS rejects. It works in ancient Excel too, so it&#39;s the portable fallback.</li>
+
+</ul>
+
+<h2 class="section-title">Compatibility (from executed tests)</h2>
+<p>Both run correctly in every version of all three apps we test. The real choice is capability, not compatibility: SUMPRODUCT can express things SUMIFS can&#39;t (OR, inline math, array conditions) but pays for it in speed and legibility on large sheets. A common hybrid — SUMPRODUCT(SUMIFS(...)) — lets SUMIFS do the filtered sum while SUMPRODUCT loops an array of criteria.</p>
+
+<h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<table class="matrix">
 <tbody>
 
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>SUMIFS — sum where region=East AND qty&gt;100</td><td><code>=SUMIFS(C2:C100,A2:A100,&#34;East&#34;,B2:B100,&#34;&gt;100&#34;)</code></td></tr>
 
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-19</td>
-</tr>
+<tr><td>SUMPRODUCT — OR: East or West</td><td><code>=SUMPRODUCT(((A2:A100=&#34;East&#34;)+(A2:A100=&#34;West&#34;))*C2:C100)</code></td></tr>
 
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-24</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-29</td>
-</tr>
+<tr><td>SUMPRODUCT — weighted total (qty × price)</td><td><code>=SUMPRODUCT(B2:B100,C2:C100)</code></td></tr>
 
 </tbody>
 </table>
 </div>
 
+<p>Full per-version details on each function page:
+<a href="../functions/sumifs.html">SUMIFS</a> &middot; <a href="../functions/sumproduct.html">SUMPRODUCT</a>.</p>
 
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-07-29)</span></h3>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=PROPER(&#34;this is a title&#34;)</td>
-  <td>Basic multi-word capitalization: the first letter of each word is capitalized, the rest lowercased</td>
-  <td class="result mono">This Is A Title</td>
-  <td class="result mono">This Is A Title</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=PROPER(&#34;76BudGet&#34;)</td>
-  <td>Microsoft&#39;s own documented example: PROPER treats any non-letter (including a run of digits) as a word boundary, so the letter immediately following the digits is also capitalized and treated as a new word-start</td>
-  <td class="result mono">76Budget</td>
-  <td class="result mono">76Budget<br><span class="category-tag">Source: https://support.microsoft.com/en-us/office/proper-function-52a5a283-e8b2-49be-8506-b2887b889f94 - documented example &#39;76BudGet&#39; -&gt; &#39;76Budget&#39;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=PROPER(&#34;o&#39;brien&#34;)</td>
-  <td>PROPER treats an apostrophe as a word boundary too, capitalizing the letter that follows it -- so a name like o&#39;brien becomes O&#39;Brien. Widely reproduced/documented real PROPER behavior (the same non-letter-is-a-boundary rule Microsoft documents for the digit case above), though this exact example isn&#39;t on Microsoft&#39;s own reference page</td>
-  <td class="result mono">O&#39;Brien</td>
-  <td class="result mono">O&#39;Brien</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/how-to-change-text-case.html">How to change text to uppercase, lowercase, or Title Case</a></li><li><a href="../how-to/proper-case-capitalize.html">How to capitalize the first letter of each word (proper case)</a></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/proper-vs-upper-vs-lower.html">PROPER vs UPPER vs LOWER: the three text-case functions</a></li>
-</ul>
+<p>See also: <a href="../compare/sumif-vs-sumifs.html">SUMIF vs SUMIFS</a> &middot; <a href="../compare/sumif-vs-sumproduct.html">SUMIF vs SUMPRODUCT</a>.</p>
 
 
 <aside class="promo-card">
