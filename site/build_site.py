@@ -1130,6 +1130,18 @@ RECIPE_TMPL = """{% extends "base.html" %}
 <h2 class="section-title">Functions used</h2>
 <p>{% for f in functions_used %}<a href="{{ rel }}functions/{{ f.name_lower }}.html">{{ f.name }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %} &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
 {% endif %}
+{% if related_recipes %}
+<h2 class="section-title">Related recipes</h2>
+<ul>
+{% for rec in related_recipes %}<li><a href="{{ rel }}how-to/{{ rec.slug }}.html">{{ rec.title }}</a></li>{% endfor %}
+</ul>
+{% endif %}
+{% if related_comparisons %}
+<h2 class="section-title">Related comparisons</h2>
+<ul>
+{% for c in related_comparisons %}<li><a href="{{ rel }}compare/{{ c.slug }}.html">{{ c.title }}</a></li>{% endfor %}
+</ul>
+{% endif %}
 {% endblock %}
 """
 
@@ -1902,6 +1914,40 @@ def main():
 
     # ---- How-to recipe pages ----
     recipes = load_recipes()
+    # Shared-function relatedness mesh: link each recipe to sibling recipes and
+    # comparisons that use the same functions. Dense, relevant internal linking
+    # keeps readers moving between pages and spreads authority across the site.
+    _recipe_fns = {rc["slug"]: {f["name"] for f in _functions_used(rc, _by_name)}
+                   for rc in recipes}
+    _rec_by_slug = {rc["slug"]: rc for rc in recipes}
+    _func_to_recipes = {}
+    for rc in recipes:
+        for fn in _recipe_fns[rc["slug"]]:
+            _func_to_recipes.setdefault(fn, []).append(rc["slug"])
+    _func_to_cmps = {}
+    for cp in load_comparisons():
+        for fn in cp.get("funcs", []):
+            _func_to_cmps.setdefault(fn.upper(), []).append(cp)
+
+    def _related_for(rc):
+        my = _recipe_fns[rc["slug"]]
+        if not my:
+            return [], []
+        scores = {}
+        for fn in my:
+            for slug in _func_to_recipes.get(fn, []):
+                if slug != rc["slug"]:
+                    scores[slug] = scores.get(slug, 0) + 1
+        ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+        rel_recipes = [_rec_by_slug[s] for s, _ in ranked]
+        seen, rel_cmps = set(), []
+        for fn in sorted(my):
+            for cp in _func_to_cmps.get(fn, []):
+                if cp["slug"] not in seen:
+                    seen.add(cp["slug"])
+                    rel_cmps.append(cp)
+        return rel_recipes, rel_cmps[:3]
+
     if recipes:
         (OUT_DIR / "how-to").mkdir(parents=True, exist_ok=True)
         rctx = common_ctx(rel="../")
@@ -1925,6 +1971,7 @@ def main():
         sitemap_urls.append({"loc": BASE_URL + "how-to/", "lastmod": build_date})
         for rc in recipes:
             kw = ", ".join(rc.get("keywords", [])[:3])
+            _rr, _rc = _related_for(rc)
             cx = common_ctx(rel="../")
             cx.update(
                 page_title=rc["title"],
@@ -1937,6 +1984,8 @@ def main():
                 app_order=ENGINE_ORDER,
                 app_labels=ENGINE_LABELS,
                 functions_used=_functions_used(rc, _by_name),
+                related_recipes=_rr,
+                related_comparisons=_rc,
                 json_ld=breadcrumb_ld([
                     (SITE_NAME, BASE_URL),
                     ("How-to recipes", BASE_URL + "how-to/"),
