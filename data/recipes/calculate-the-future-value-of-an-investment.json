@@ -1,0 +1,35 @@
+{
+  "slug": "calculate-the-future-value-of-an-investment",
+  "title": "How to calculate the future value of an investment",
+  "task": "What a regular contribution grows to — how much a fixed monthly or yearly deposit is worth after N periods at a given rate.",
+  "keywords": [
+    "future value formula excel",
+    "fv function google sheets",
+    "future value of monthly investment",
+    "how much will my savings grow"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=FV(rate, nper, pmt, [pv])",
+      "note": "rate & nper must match the period: monthly uses rate/12 and years*12. Enter deposits (pmt) as NEGATIVE (cash out); FV returns a positive balance."
+    },
+    "google_sheets": {
+      "formula": "=FV(rate, nper, pmt, [pv])",
+      "note": "Identical. Add a starting balance as the 4th argument [pv], also negative."
+    },
+    "libreoffice": {
+      "formula": "=FV(rate, nper, pmt, [pv])",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "B1": 0.1,
+      "B2": 3,
+      "B3": -100
+    },
+    "formula": "=FV(B1,B2,B3)",
+    "expected": 331
+  },
+  "explanation": "FV(rate, nper, pmt) compounds a stream of equal payments to the end of the term. Here $100 invested each year (pmt = -100, negative because it leaves your pocket) for 3 years at 10% grows to $331 — your $300 of deposits plus $31 of compounding. The sign convention trips people up: money you pay in is negative and the value you get back is positive, so a positive pmt would return a negative FV. Match the rate to the period — for monthly contributions use rate/12 and nper = years×12 — and add an existing lump sum as the optional [pv] argument (also negative). Set the final [type] argument to 1 if deposits happen at the start of each period rather than the end. For a single lump sum with no recurring payments, FV(rate, nper, 0, -pv) is just pv×(1+rate)^nper (see calculate-compound-interest)."
+}

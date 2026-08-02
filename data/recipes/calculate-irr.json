@@ -1,0 +1,37 @@
+{
+  "slug": "calculate-irr",
+  "title": "How to calculate IRR (internal rate of return)",
+  "task": "The annualized return that makes a project break even — compare investments by the single rate at which their cash flows net to zero.",
+  "keywords": [
+    "irr formula excel",
+    "internal rate of return google sheets",
+    "calculate irr from cash flows",
+    "irr function spreadsheet"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=IRR(A2:A6)",
+      "note": "A2:A6 = cash flows in time order, starting with the negative initial outlay. IRR needs at least one negative and one positive value. Format the result as a %."
+    },
+    "google_sheets": {
+      "formula": "=IRR(A2:A6)",
+      "note": "Identical. For irregular dates use XIRR(amounts, dates)."
+    },
+    "libreoffice": {
+      "formula": "=IRR(A2:A6)",
+      "note": "Identical; supply a [guess] second argument if it fails to converge."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": -1000,
+      "A3": 300,
+      "A4": 400,
+      "A5": 500,
+      "A6": 600
+    },
+    "formula": "=ROUND(IRR(A2:A6),4)",
+    "expected": 0.2489
+  },
+  "explanation": "IRR finds the discount rate at which a series of cash flows has a net present value of zero — effectively the project's compounded annual return. Feed it the flows in chronological order with the up-front cost as a negative first value; here investing 1000 and receiving 300/400/500/600 over four years returns about 24.89%. Because it's solved iteratively, IRR needs at least one negative and one positive flow, and unusual sign patterns can yield multiple valid answers — pass a [guess] argument to steer convergence. Two big caveats: the periods must be evenly spaced (use XIRR with actual dates when they aren't), and IRR assumes interim cash is reinvested at the IRR itself, which flatters high rates — MIRR lets you set a realistic reinvestment rate. Compare a project's IRR against your required rate of return (hurdle rate): above it, the investment adds value."
+}
