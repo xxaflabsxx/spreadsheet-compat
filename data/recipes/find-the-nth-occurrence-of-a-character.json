@@ -1,0 +1,33 @@
+{
+  "slug": "find-the-nth-occurrence-of-a-character",
+  "title": "How to find the Nth occurrence of a character",
+  "task": "Locate the 2nd, 3rd, or Nth time a character appears — the position of the third slash in a path, the second hyphen in a code — so you can split or extract from there.",
+  "keywords": [
+    "find nth occurrence excel",
+    "position of second character",
+    "find third instance of character",
+    "substitute find nth google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=FIND(CHAR(1),SUBSTITUTE(A2,\"-\",CHAR(1),3))",
+      "note": "SUBSTITUTE's 4th argument swaps only the Nth match for a marker (CHAR(1), which never appears in text); FIND then locates that marker. Change 3 to any N."
+    },
+    "google_sheets": {
+      "formula": "=FIND(CHAR(1),SUBSTITUTE(A2,\"-\",CHAR(1),3))",
+      "note": "Identical. Regex fans can use =REGEXEXTRACT-style position logic, but this is the portable way."
+    },
+    "libreoffice": {
+      "formula": "=FIND(CHAR(1),SUBSTITUTE(A2,\"-\",CHAR(1),3))",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "a-b-c-d"
+    },
+    "formula": "=FIND(CHAR(1),SUBSTITUTE(\"a-b-c-d\",\"-\",CHAR(1),3))",
+    "expected": 6
+  },
+  "explanation": "Plain FIND and SEARCH only ever return the FIRST match, so the trick is to make the Nth match unique first. SUBSTITUTE(text, \"-\", CHAR(1), 3) replaces just the third hyphen with CHAR(1) — a control character that never occurs in normal text — leaving the rest untouched; FIND then reports where that marker sits. In \"a-b-c-d\" the hyphens are at positions 2, 4 and 6, so the third is 6. Swap the 3 for any occurrence number, and use CHAR(1) (or any character you're sure is absent) as the marker. This position is the launchpad for extraction: feed it into MID or LEFT to grab the text after the Nth delimiter, or combine with LEN to pull the final segment. If the character appears fewer than N times, FIND returns #VALUE! — wrap in IFERROR to handle short strings."
+}

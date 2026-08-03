@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How to count only visible rows after filtering</title>
-<meta name="description" content="A count that respects the filter — &#34;showing N of M records&#34;. Verified formula for Excel, Google Sheets and LibreOffice Calc (count visible rows excel, count filtered rows only, subtotal 103 counta).">
+<title>How to find the Nth occurrence of a character</title>
+<meta name="description" content="Locate the 2nd, 3rd, or Nth time a character appears — the position of the third slash in a path, the second hyphen in a code — so you can split or extract from there. Verified formula for Excel, Google Sheets and LibreOffice Calc (find nth occurrence excel, position of second character, find third instance of character).">
 
-<link rel="canonical" href="https://canispreadsheet.com/how-to/count-visible-rows-after-filtering.html">
-<meta property="og:title" content="How to count only visible rows after filtering">
-<meta property="og:description" content="A count that respects the filter — &#34;showing N of M records&#34;. Verified formula for Excel, Google Sheets and LibreOffice Calc (count visible rows excel, count filtered rows only, subtotal 103 counta).">
+<link rel="canonical" href="https://canispreadsheet.com/how-to/find-the-nth-occurrence-of-a-character.html">
+<meta property="og:title" content="How to find the Nth occurrence of a character">
+<meta property="og:description" content="Locate the 2nd, 3rd, or Nth time a character appears — the position of the third slash in a path, the second hyphen in a code — so you can split or extract from there. Verified formula for Excel, Google Sheets and LibreOffice Calc (find nth occurrence excel, position of second character, find third instance of character).">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/how-to/count-visible-rows-after-filtering.html">
+<meta property="og:url" content="https://canispreadsheet.com/how-to/find-the-nth-occurrence-of-a-character.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to count only visible rows after filtering","item":"https://canispreadsheet.com/how-to/count-visible-rows-after-filtering.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to find the Nth occurrence of a character","item":"https://canispreadsheet.com/how-to/find-the-nth-occurrence-of-a-character.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -304,10 +304,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <a class="back-link" href="../how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
-  <h1>How to count only visible rows after filtering</h1>
+  <h1>How to find the Nth occurrence of a character</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
 </div>
-<p class="lede">A count that respects the filter — &#34;showing N of M records&#34;.</p>
+<p class="lede">Locate the 2nd, 3rd, or Nth time a character appears — the position of the third slash in a path, the second hyphen in a code — so you can split or extract from there.</p>
 
 <h2 class="section-title">The formula</h2>
 <div class="table-scroll">
@@ -315,37 +315,37 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <thead><tr><th>App</th><th>Formula</th><th>Notes</th></tr></thead>
 <tbody>
 
-<tr><td>Excel</td><td><code>=SUBTOTAL(103,A2:A1000)</code></td><td>103 = COUNTA over visible rows only. Put it ABOVE the data or beside it, not in a filterable row.</td></tr>
+<tr><td>Excel</td><td><code>=FIND(CHAR(1),SUBSTITUTE(A2,&#34;-&#34;,CHAR(1),3))</code></td><td>SUBSTITUTE&#39;s 4th argument swaps only the Nth match for a marker (CHAR(1), which never appears in text); FIND then locates that marker. Change 3 to any N.</td></tr>
 
-<tr><td>Google Sheets</td><td><code>=SUBTOTAL(103,A2:A1000)</code></td><td>Identical.</td></tr>
+<tr><td>Google Sheets</td><td><code>=FIND(CHAR(1),SUBSTITUTE(A2,&#34;-&#34;,CHAR(1),3))</code></td><td>Identical. Regex fans can use =REGEXEXTRACT-style position logic, but this is the portable way.</td></tr>
 
-<tr><td>LibreOffice Calc</td><td><code>=SUBTOTAL(103,A2:A1000)</code></td><td>Identical.</td></tr>
+<tr><td>LibreOffice Calc</td><td><code>=FIND(CHAR(1),SUBSTITUTE(A2,&#34;-&#34;,CHAR(1),3))</code></td><td>Identical.</td></tr>
 
 </tbody>
 </table>
 </div>
 
 <h2 class="section-title">How it works</h2>
-<p>Plain COUNTA keeps counting rows a filter has hidden; SUBTOTAL with the 100-series COUNTA code (103) counts only what&#39;s visible (all 3 here since nothing&#39;s filtered — apply a filter and the number drops live). A &#34;showing X of Y&#34; header is =SUBTOTAL(103,A2:A1000)&amp;&#34; of &#34;&amp;COUNTA(A2:A1000). Codes 109/101 do the same for SUM/AVERAGE, and the full code table lives in the SUM-vs-SUBTOTAL comparison. Place the formula outside the filtered range or it can hide itself.</p>
+<p>Plain FIND and SEARCH only ever return the FIRST match, so the trick is to make the Nth match unique first. SUBSTITUTE(text, &#34;-&#34;, CHAR(1), 3) replaces just the third hyphen with CHAR(1) — a control character that never occurs in normal text — leaving the rest untouched; FIND then reports where that marker sits. In &#34;a-b-c-d&#34; the hyphens are at positions 2, 4 and 6, so the third is 6. Swap the 3 for any occurrence number, and use CHAR(1) (or any character you&#39;re sure is absent) as the marker. This position is the launchpad for extraction: feed it into MID or LEFT to grab the text after the Nth delimiter, or combine with LEN to pull the final segment. If the character appears fewer than N times, FIND returns #VALUE! — wrap in IFERROR to handle short strings.</p>
 
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=SUBTOTAL(103,A2:A4)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>3</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+<p>We ran <code>=FIND(CHAR(1),SUBSTITUTE(&#34;a-b-c-d&#34;,&#34;-&#34;,CHAR(1),3))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>6</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
 
 
 <h2 class="section-title">Functions used</h2>
-<p><a href="../functions/subtotal.html">SUBTOTAL</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
+<p><a href="../functions/find.html">FIND</a> &middot; <a href="../functions/char.html">CHAR</a> &middot; <a href="../functions/substitute.html">SUBSTITUTE</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
 
 
 <h2 class="section-title">Related recipes</h2>
 <ul>
-<li><a href="../how-to/count-cells-by-color.html">How to count cells by color (and why formulas can&#39;t see color)</a></li><li><a href="../how-to/sum-only-the-filtered-visible-rows.html">How to sum only the filtered (visible) rows</a></li>
+<li><a href="../how-to/remove-line-breaks-from-a-cell.html">How to remove line breaks from a cell</a></li><li><a href="../how-to/concatenate-with-line-break.html">How to combine cells with a line break between them</a></li><li><a href="../how-to/convert-a-column-number-to-a-letter.html">How to convert a column number to a letter</a></li><li><a href="../how-to/convert-currency-text-to-a-number.html">How to convert currency text like &#34;$1,234.50&#34; to a number</a></li><li><a href="../how-to/count-items-in-a-comma-separated-list.html">How to count items in a comma-separated cell</a></li>
 </ul>
 
 
 <h2 class="section-title">Related comparisons</h2>
 <ul>
-<li><a href="../compare/sum-vs-subtotal.html">SUM vs SUBTOTAL: why your filtered totals are wrong</a></li>
+<li><a href="../compare/char-vs-code-vs-unichar.html">CHAR vs CODE vs UNICHAR: characters by number</a></li><li><a href="../compare/find-vs-search.html">FIND vs SEARCH (vs MATCH): locating text the right way</a></li><li><a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</a></li>
 </ul>
 
 

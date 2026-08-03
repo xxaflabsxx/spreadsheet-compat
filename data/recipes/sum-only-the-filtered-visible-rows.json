@@ -1,0 +1,36 @@
+{
+  "slug": "sum-only-the-filtered-visible-rows",
+  "title": "How to sum only the filtered (visible) rows",
+  "task": "Total that updates to match a filter — sum just the rows currently showing, ignoring anything the AutoFilter has hidden.",
+  "keywords": [
+    "sum filtered rows excel",
+    "subtotal function visible cells",
+    "sum only visible cells google sheets",
+    "total filtered data"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SUBTOTAL(9,B2:B100)",
+      "note": "9 = SUM over visible-after-filter rows. Use 109 to also skip rows you hid manually. A plain =SUM would keep counting hidden rows."
+    },
+    "google_sheets": {
+      "formula": "=SUBTOTAL(9,B2:B100)",
+      "note": "Identical. Sheets' function code 9 also ignores rows hidden by a filter."
+    },
+    "libreoffice": {
+      "formula": "=SUBTOTAL(9,B2:B100)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "B2": 10,
+      "B3": 20,
+      "B4": 30,
+      "B5": 40
+    },
+    "formula": "=SUBTOTAL(9,B2:B5)",
+    "expected": 100
+  },
+  "explanation": "SUBTOTAL's first argument picks the operation and, crucially, whether hidden rows count. Code 9 means SUM but ignores rows hidden by an AutoFilter, so the total tracks whatever the filter leaves visible — here all four rows are visible, giving 100, but hide any and the result drops automatically. Use 109 instead of 9 to also exclude rows you hid by hand (not via a filter); codes 1/101 do AVERAGE, 2/102 COUNT, 3/103 COUNTA, 4/104 MAX, and so on. A bonus: SUBTOTAL ignores other SUBTOTAL cells in its range, so grand totals don't double-count subtotals. For summing visible cells with a condition on top, AGGREGATE(9,5,range) or a SUMPRODUCT with SUBTOTAL gives finer control."
+}

@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How to count only visible rows after filtering</title>
-<meta name="description" content="A count that respects the filter — &#34;showing N of M records&#34;. Verified formula for Excel, Google Sheets and LibreOffice Calc (count visible rows excel, count filtered rows only, subtotal 103 counta).">
+<title>How to sum only the filtered (visible) rows</title>
+<meta name="description" content="Total that updates to match a filter — sum just the rows currently showing, ignoring anything the AutoFilter has hidden. Verified formula for Excel, Google Sheets and LibreOffice Calc (sum filtered rows excel, subtotal function visible cells, sum only visible cells google sheets).">
 
-<link rel="canonical" href="https://canispreadsheet.com/how-to/count-visible-rows-after-filtering.html">
-<meta property="og:title" content="How to count only visible rows after filtering">
-<meta property="og:description" content="A count that respects the filter — &#34;showing N of M records&#34;. Verified formula for Excel, Google Sheets and LibreOffice Calc (count visible rows excel, count filtered rows only, subtotal 103 counta).">
+<link rel="canonical" href="https://canispreadsheet.com/how-to/sum-only-the-filtered-visible-rows.html">
+<meta property="og:title" content="How to sum only the filtered (visible) rows">
+<meta property="og:description" content="Total that updates to match a filter — sum just the rows currently showing, ignoring anything the AutoFilter has hidden. Verified formula for Excel, Google Sheets and LibreOffice Calc (sum filtered rows excel, subtotal function visible cells, sum only visible cells google sheets).">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/how-to/count-visible-rows-after-filtering.html">
+<meta property="og:url" content="https://canispreadsheet.com/how-to/sum-only-the-filtered-visible-rows.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to count only visible rows after filtering","item":"https://canispreadsheet.com/how-to/count-visible-rows-after-filtering.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to sum only the filtered (visible) rows","item":"https://canispreadsheet.com/how-to/sum-only-the-filtered-visible-rows.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -304,10 +304,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <a class="back-link" href="../how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
-  <h1>How to count only visible rows after filtering</h1>
+  <h1>How to sum only the filtered (visible) rows</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
 </div>
-<p class="lede">A count that respects the filter — &#34;showing N of M records&#34;.</p>
+<p class="lede">Total that updates to match a filter — sum just the rows currently showing, ignoring anything the AutoFilter has hidden.</p>
 
 <h2 class="section-title">The formula</h2>
 <div class="table-scroll">
@@ -315,22 +315,22 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <thead><tr><th>App</th><th>Formula</th><th>Notes</th></tr></thead>
 <tbody>
 
-<tr><td>Excel</td><td><code>=SUBTOTAL(103,A2:A1000)</code></td><td>103 = COUNTA over visible rows only. Put it ABOVE the data or beside it, not in a filterable row.</td></tr>
+<tr><td>Excel</td><td><code>=SUBTOTAL(9,B2:B100)</code></td><td>9 = SUM over visible-after-filter rows. Use 109 to also skip rows you hid manually. A plain =SUM would keep counting hidden rows.</td></tr>
 
-<tr><td>Google Sheets</td><td><code>=SUBTOTAL(103,A2:A1000)</code></td><td>Identical.</td></tr>
+<tr><td>Google Sheets</td><td><code>=SUBTOTAL(9,B2:B100)</code></td><td>Identical. Sheets&#39; function code 9 also ignores rows hidden by a filter.</td></tr>
 
-<tr><td>LibreOffice Calc</td><td><code>=SUBTOTAL(103,A2:A1000)</code></td><td>Identical.</td></tr>
+<tr><td>LibreOffice Calc</td><td><code>=SUBTOTAL(9,B2:B100)</code></td><td>Identical.</td></tr>
 
 </tbody>
 </table>
 </div>
 
 <h2 class="section-title">How it works</h2>
-<p>Plain COUNTA keeps counting rows a filter has hidden; SUBTOTAL with the 100-series COUNTA code (103) counts only what&#39;s visible (all 3 here since nothing&#39;s filtered — apply a filter and the number drops live). A &#34;showing X of Y&#34; header is =SUBTOTAL(103,A2:A1000)&amp;&#34; of &#34;&amp;COUNTA(A2:A1000). Codes 109/101 do the same for SUM/AVERAGE, and the full code table lives in the SUM-vs-SUBTOTAL comparison. Place the formula outside the filtered range or it can hide itself.</p>
+<p>SUBTOTAL&#39;s first argument picks the operation and, crucially, whether hidden rows count. Code 9 means SUM but ignores rows hidden by an AutoFilter, so the total tracks whatever the filter leaves visible — here all four rows are visible, giving 100, but hide any and the result drops automatically. Use 109 instead of 9 to also exclude rows you hid by hand (not via a filter); codes 1/101 do AVERAGE, 2/102 COUNT, 3/103 COUNTA, 4/104 MAX, and so on. A bonus: SUBTOTAL ignores other SUBTOTAL cells in its range, so grand totals don&#39;t double-count subtotals. For summing visible cells with a condition on top, AGGREGATE(9,5,range) or a SUMPRODUCT with SUBTOTAL gives finer control.</p>
 
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=SUBTOTAL(103,A2:A4)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>3</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+<p>We ran <code>=SUBTOTAL(9,B2:B5)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>100</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
 
 
 <h2 class="section-title">Functions used</h2>
@@ -339,7 +339,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <h2 class="section-title">Related recipes</h2>
 <ul>
-<li><a href="../how-to/count-cells-by-color.html">How to count cells by color (and why formulas can&#39;t see color)</a></li><li><a href="../how-to/sum-only-the-filtered-visible-rows.html">How to sum only the filtered (visible) rows</a></li>
+<li><a href="../how-to/count-cells-by-color.html">How to count cells by color (and why formulas can&#39;t see color)</a></li><li><a href="../how-to/count-visible-rows-after-filtering.html">How to count only visible rows after filtering</a></li>
 </ul>
 
 
