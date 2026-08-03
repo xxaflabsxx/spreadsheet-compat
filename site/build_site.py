@@ -1192,6 +1192,12 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 {% if c.see_also %}
 <p>See also: {% for s in c.see_also %}<a href="{{ rel }}{{ s.href }}">{{ s.label }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %}.</p>
 {% endif %}
+{% if related_recipes %}
+<h2 class="section-title">How-to recipes using these functions</h2>
+<ul>
+{% for rec in related_recipes %}<li><a href="{{ rel }}how-to/{{ rec.slug }}.html">{{ rec.title }}</a></li>{% endfor %}
+</ul>
+{% endif %}
 {% endblock %}
 """
 
@@ -1948,6 +1954,17 @@ def main():
                     rel_cmps.append(cp)
         return rel_recipes, rel_cmps[:3]
 
+    def _recipes_for_cmp(cp):
+        """Recipes whose formulas use the functions this comparison covers —
+        the reverse link, giving comparison readers task-oriented next steps."""
+        funcs = {f.upper() for f in cp.get("funcs", [])}
+        scores = {}
+        for fn in funcs:
+            for slug in _func_to_recipes.get(fn, []):
+                scores[slug] = scores.get(slug, 0) + 1
+        ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:6]
+        return [_rec_by_slug[s] for s, _ in ranked]
+
     if recipes:
         (OUT_DIR / "how-to").mkdir(parents=True, exist_ok=True)
         rctx = common_ctx(rel="../")
@@ -2025,6 +2042,7 @@ def main():
                 meta_description=c["meta_desc"],
                 canonical=BASE_URL + f"compare/{c['slug']}.html",
                 c=c,
+                related_recipes=_recipes_for_cmp(c),
                 json_ld=breadcrumb_ld([
                     (SITE_NAME, BASE_URL),
                     ("Comparisons", BASE_URL + "compare/"),
