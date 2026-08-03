@@ -1,0 +1,36 @@
+{
+  "slug": "return-the-entire-row-of-a-match",
+  "title": "How to return the entire row of a match",
+  "task": "Look up a key and pull back the whole record — every column for that customer, order, or SKU — not just one field.",
+  "keywords": [
+    "return entire row vlookup excel",
+    "filter return whole row",
+    "lookup return all columns",
+    "get full row for a match google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=FILTER(A2:C100,A2:A100=\"Amy\")",
+      "note": "FILTER returns every column of the matching row(s) as a spilled range. Excel 365 / LibreOffice 24.8+. For old Excel, use INDEX per column (below)."
+    },
+    "google_sheets": {
+      "formula": "=FILTER(A2:C100,A2:A100=\"Amy\")",
+      "note": "Identical. Also =VLOOKUP(\"Amy\",A2:C100,{1,2,3},FALSE) spills all columns."
+    },
+    "libreoffice": {
+      "formula": "=FILTER(A2:C100,A2:A100=\"Amy\")",
+      "note": "Identical (24.8+). Legacy: =INDEX(A2:A100,MATCH(...)) repeated per column with an absolute key."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "Bob", "B2": 85, "C2": "Red",
+      "A3": "Amy", "B3": 90, "C3": "Blue",
+      "A4": "Cal", "B4": 70, "C4": "Green"
+    },
+    "formula": "=FILTER(A2:C4,A2:A4=\"Amy\")",
+    "check_range": "H1:J1",
+    "expected": ["Amy", 90, "Blue"]
+  },
+  "explanation": "VLOOKUP returns a single column; to pull a whole record you want FILTER, which keeps every column of the rows whose condition is TRUE. Here filtering the three-column table on name = \"Amy\" spills back her entire row — Amy, 90, Blue — into adjacent cells. Because it's a dynamic array the result grows or shrinks with the data, and if the key matches several rows you get all of them stacked, which is exactly what you want for one-to-many lookups. On versions without FILTER you have three fallbacks: VLOOKUP/XLOOKUP with an array of column numbers ({1,2,3}) to spill columns, INDEX(range, MATCH(...)) written once per column with the key locked absolute, or XLOOKUP returning a whole row by pointing its return argument at the full table. Add more conditions by multiplying them inside FILTER: FILTER(A2:C100,(A2:A100=\"Amy\")*(B2:B100>50))."
+}
