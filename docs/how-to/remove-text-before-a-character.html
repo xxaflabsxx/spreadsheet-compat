@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How to convert a date to text</title>
-<meta name="description" content="Turn a real date into a text string in a format you control — for filenames, labels, exports, or joining. Verified formula for Excel, Google Sheets and LibreOffice Calc (convert date to text excel, date to string formula, text function date format).">
+<title>How to remove text before a character</title>
+<meta name="description" content="Strip everything up to and including a marker — keep just the part after the colon, the last segment after a slash, the value after an equals sign. Verified formula for Excel, Google Sheets and LibreOffice Calc (remove text before character excel, get text after a character, delete everything before colon).">
 
-<link rel="canonical" href="https://canispreadsheet.com/how-to/convert-a-date-to-text.html">
-<meta property="og:title" content="How to convert a date to text">
-<meta property="og:description" content="Turn a real date into a text string in a format you control — for filenames, labels, exports, or joining. Verified formula for Excel, Google Sheets and LibreOffice Calc (convert date to text excel, date to string formula, text function date format).">
+<link rel="canonical" href="https://canispreadsheet.com/how-to/remove-text-before-a-character.html">
+<meta property="og:title" content="How to remove text before a character">
+<meta property="og:description" content="Strip everything up to and including a marker — keep just the part after the colon, the last segment after a slash, the value after an equals sign. Verified formula for Excel, Google Sheets and LibreOffice Calc (remove text before character excel, get text after a character, delete everything before colon).">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/how-to/convert-a-date-to-text.html">
+<meta property="og:url" content="https://canispreadsheet.com/how-to/remove-text-before-a-character.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to convert a date to text","item":"https://canispreadsheet.com/how-to/convert-a-date-to-text.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to remove text before a character","item":"https://canispreadsheet.com/how-to/remove-text-before-a-character.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -304,10 +304,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <a class="back-link" href="../how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
-  <h1>How to convert a date to text</h1>
+  <h1>How to remove text before a character</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
 </div>
-<p class="lede">Turn a real date into a text string in a format you control — for filenames, labels, exports, or joining.</p>
+<p class="lede">Strip everything up to and including a marker — keep just the part after the colon, the last segment after a slash, the value after an equals sign.</p>
 
 <h2 class="section-title">The formula</h2>
 <div class="table-scroll">
@@ -315,37 +315,37 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <thead><tr><th>App</th><th>Formula</th><th>Notes</th></tr></thead>
 <tbody>
 
-<tr><td>Excel</td><td><code>=TEXT(A2,&#34;yyyy-mm-dd&#34;)</code></td><td>The format code controls the output: &#34;mmmm d, yyyy&#34; -&gt; July 21, 2026; &#34;ddd&#34; -&gt; Tue.</td></tr>
+<tr><td>Excel</td><td><code>=MID(A2,FIND(&#34;:&#34;,A2)+1,LEN(A2))</code></td><td>FIND locates the marker; MID returns from just after it to the end. Excel 365 / Sheets: =TEXTAFTER(A2,&#34;:&#34;) is cleaner. Change &#34;:&#34; to your delimiter.</td></tr>
 
-<tr><td>Google Sheets</td><td><code>=TEXT(A2,&#34;yyyy-mm-dd&#34;)</code></td><td>Identical.</td></tr>
+<tr><td>Google Sheets</td><td><code>=MID(A2,FIND(&#34;:&#34;,A2)+1,LEN(A2))</code></td><td>Identical. =TEXTAFTER(A2,&#34;:&#34;) or =REGEXEXTRACT(A2,&#34;:(.*)&#34;) also work.</td></tr>
 
-<tr><td>LibreOffice Calc</td><td><code>=TEXT(A2,&#34;YYYY-MM-DD&#34;)</code></td><td>Identical (format codes are case-insensitive here).</td></tr>
+<tr><td>LibreOffice Calc</td><td><code>=MID(A2,FIND(&#34;:&#34;,A2)+1,LEN(A2))</code></td><td>Identical; TEXTAFTER needs 24.8+.</td></tr>
 
 </tbody>
 </table>
 </div>
 
 <h2 class="section-title">How it works</h2>
-<p>TEXT renders the date&#39;s underlying serial number as a string using the format code you give it, so July 21, 2026 becomes the text &#34;2026-07-21&#34;. Unlike changing the cell format (which only affects display), the result here is genuinely text — it can be concatenated, used in a filename, or exported, but it won&#39;t sort or calculate as a date anymore. Pick the format to match your need: &#34;yyyymmdd&#34; for sortable filenames, &#34;mmmm yyyy&#34; for report headers. The reverse (text back to a real date) is DATEVALUE.</p>
+<p>FIND returns the position of the marker, so FIND(&#34;:&#34;,A2)+1 is the first character AFTER it; MID then grabs from there to the end (passing LEN(A2) as the length just means &#39;take everything left&#39;). For &#34;code:1234&#34; the colon is at position 5, so MID starts at 6 and returns &#34;1234&#34;. Use SEARCH instead of FIND if you want case-insensitive matching or wildcards. This finds the FIRST occurrence — to cut after the LAST one (handy for file paths), the modern one-liner is TEXTAFTER(A2,&#34;/&#34;,-1), or the classic trick swaps the last delimiter for a marker first. If the character might be missing, FIND errors with #VALUE!, so wrap in IFERROR(...,A2) to leave such rows untouched.</p>
 
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=TEXT(DATE(2026,7,21),&#34;YYYY-MM-DD&#34;)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>2026-07-21</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+<p>We ran <code>=MID(&#34;code:1234&#34;,FIND(&#34;:&#34;,&#34;code:1234&#34;)+1,LEN(&#34;code:1234&#34;))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>1234</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
 
 
 <h2 class="section-title">Functions used</h2>
-<p><a href="../functions/text.html">TEXT</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
+<p><a href="../functions/mid.html">MID</a> &middot; <a href="../functions/find.html">FIND</a> &middot; <a href="../functions/len.html">LEN</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
 
 
 <h2 class="section-title">Related recipes</h2>
 <ul>
-<li><a href="../how-to/abbreviate-large-numbers.html">How to abbreviate large numbers as K and M</a></li><li><a href="../how-to/add-leading-zeros-to-numbers.html">How to add leading zeros to a number</a></li><li><a href="../how-to/concatenate-a-date-with-text.html">How to concatenate a date with text (without getting a number)</a></li><li><a href="../how-to/convert-12-hour-to-24-hour-time.html">How to convert 12-hour text times to 24-hour</a></li><li><a href="../how-to/convert-minutes-to-hours-and-minutes.html">How to convert minutes to hours and minutes</a></li>
+<li><a href="../how-to/extract-domain-from-email.html">How to extract the domain from an email address</a></li><li><a href="../how-to/extract-last-name-from-a-full-name.html">How to extract the last name from a full name</a></li><li><a href="../how-to/capitalize-the-first-letter-only.html">How to capitalize only the first letter (sentence case)</a></li><li><a href="../how-to/extract-numbers-from-text.html">How to extract numbers from text in a cell</a></li><li><a href="../how-to/extract-text-between-two-characters.html">How to extract text between two characters</a></li>
 </ul>
 
 
 <h2 class="section-title">Related comparisons</h2>
 <ul>
-<li><a href="../compare/text-function-vs-cell-formatting.html">TEXT() vs cell formatting: same codes, different consequences</a></li>
+<li><a href="../compare/find-vs-search.html">FIND vs SEARCH (vs MATCH): locating text the right way</a></li><li><a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT/MID/RIGHT: delimiter or position</a></li>
 </ul>
 
 

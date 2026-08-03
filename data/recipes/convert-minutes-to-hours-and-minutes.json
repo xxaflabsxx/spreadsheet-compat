@@ -1,0 +1,33 @@
+{
+  "slug": "convert-minutes-to-hours-and-minutes",
+  "title": "How to convert minutes to hours and minutes",
+  "task": "Turn a count of minutes into an H:MM display — 150 minutes shown as 2:30 — for timesheets, call logs, and durations.",
+  "keywords": [
+    "convert minutes to hours and minutes excel",
+    "minutes to hh mm formula",
+    "150 minutes to hours",
+    "total minutes to time google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=INT(A2/60)&\":\"&TEXT(MOD(A2,60),\"00\")",
+      "note": "INT(A2/60) is whole hours; MOD(A2,60) is leftover minutes, padded to two digits. Returns text like \"2:30\"."
+    },
+    "google_sheets": {
+      "formula": "=INT(A2/60)&\":\"&TEXT(MOD(A2,60),\"00\")",
+      "note": "Identical. For a real time value you can do math on, use =A2/1440 and format the cell as [h]:mm."
+    },
+    "libreoffice": {
+      "formula": "=INT(A2/60)&\":\"&TEXT(MOD(A2,60),\"00\")",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 150
+    },
+    "formula": "=INT(150/60)&\":\"&TEXT(MOD(150,60),\"00\")",
+    "expected": "2:30"
+  },
+  "explanation": "The two halves of the answer come from integer division and its remainder: INT(A2/60) gives the whole hours (150 ÷ 60 = 2), and MOD(A2,60) gives the minutes left over (150 mod 60 = 30). Joining them with a colon and padding the minutes to two digits via TEXT(...,\"00\") produces \"2:30\" — so a stray 5 minutes shows as \"0:05\", not \"0:5\". This version returns TEXT, which is perfect for display but can't be summed; if you need a genuine time value to add up or feed into more math, divide the minutes by 1440 (minutes per day) and format the cell as [h]:mm — the square brackets let the hours run past 24 instead of rolling over. Going the other way, multiply an H:MM time by 1440 to get back to total minutes."
+}

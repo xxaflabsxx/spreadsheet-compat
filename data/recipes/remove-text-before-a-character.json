@@ -1,0 +1,33 @@
+{
+  "slug": "remove-text-before-a-character",
+  "title": "How to remove text before a character",
+  "task": "Strip everything up to and including a marker — keep just the part after the colon, the last segment after a slash, the value after an equals sign.",
+  "keywords": [
+    "remove text before character excel",
+    "get text after a character",
+    "delete everything before colon",
+    "extract after delimiter google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=MID(A2,FIND(\":\",A2)+1,LEN(A2))",
+      "note": "FIND locates the marker; MID returns from just after it to the end. Excel 365 / Sheets: =TEXTAFTER(A2,\":\") is cleaner. Change \":\" to your delimiter."
+    },
+    "google_sheets": {
+      "formula": "=MID(A2,FIND(\":\",A2)+1,LEN(A2))",
+      "note": "Identical. =TEXTAFTER(A2,\":\") or =REGEXEXTRACT(A2,\":(.*)\") also work."
+    },
+    "libreoffice": {
+      "formula": "=MID(A2,FIND(\":\",A2)+1,LEN(A2))",
+      "note": "Identical; TEXTAFTER needs 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": "code:1234"
+    },
+    "formula": "=MID(\"code:1234\",FIND(\":\",\"code:1234\")+1,LEN(\"code:1234\"))",
+    "expected": "1234"
+  },
+  "explanation": "FIND returns the position of the marker, so FIND(\":\",A2)+1 is the first character AFTER it; MID then grabs from there to the end (passing LEN(A2) as the length just means 'take everything left'). For \"code:1234\" the colon is at position 5, so MID starts at 6 and returns \"1234\". Use SEARCH instead of FIND if you want case-insensitive matching or wildcards. This finds the FIRST occurrence — to cut after the LAST one (handy for file paths), the modern one-liner is TEXTAFTER(A2,\"/\",-1), or the classic trick swaps the last delimiter for a marker first. If the character might be missing, FIND errors with #VALUE!, so wrap in IFERROR(...,A2) to leave such rows untouched."
+}
