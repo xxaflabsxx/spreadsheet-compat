@@ -1771,14 +1771,21 @@ def main():
     # that already earn impressions, and gets visitors to common functions fast.
     # Only link functions that have a live-tested (indexable) page.
     _by_name = {r["name"]: r for r in records}
+    # Ordered by GSC-proven demand: the functions actually pulling impressions
+    # (offset, median, minifs, forecast.ets, mround, char, error.type, iserror,
+    # numbervalue, abs, stdev — from Search Console, Aug 2026) go FIRST so the
+    # homepage "Popular functions" block concentrates internal-link authority on
+    # the pages Google already surfaces (all stuck ~page 3), then the
+    # conventional lookup/logic staples follow.
     _POPULAR = [
-        "VLOOKUP", "XLOOKUP", "INDEX", "MATCH", "OFFSET", "INDIRECT",
+        "OFFSET", "MEDIAN", "MINIFS", "FORECAST.ETS", "MROUND", "CHAR",
+        "ERROR.TYPE", "ISERROR", "NUMBERVALUE", "ABS", "STDEV",
+        "VLOOKUP", "XLOOKUP", "INDEX", "MATCH", "INDIRECT",
         "IF", "IFS", "IFERROR", "SUMIF", "SUMIFS", "COUNTIF", "COUNTIFS",
         "FILTER", "SORT", "UNIQUE", "SEQUENCE", "TEXTJOIN", "CONCATENATE",
         "TEXTSPLIT", "SUBSTITUTE", "LEFT", "MID", "RIGHT", "TEXT",
         "DATEDIF", "EOMONTH", "WEEKDAY", "NETWORKDAYS", "WORKDAY",
-        "MEDIAN", "AVERAGEIF", "MINIFS", "MAXIFS", "ROUND", "MOD",
-        "PMT", "NUMBERVALUE", "FORECAST.ETS", "CHAR",
+        "AVERAGEIF", "MAXIFS", "ROUND", "MOD", "PMT",
     ]
     popular_functions = [
         _by_name[n] for n in _POPULAR
