@@ -1,0 +1,36 @@
+{
+  "slug": "find-what-percentile-a-value-falls-in",
+  "title": "How to find what percentile a value falls in",
+  "task": "The inverse of a percentile: given a value, what fraction of the data is at or below it — where a score, price, or time ranks in the pack.",
+  "keywords": [
+    "percentrank excel formula",
+    "what percentile is a value",
+    "percent rank google sheets",
+    "rank as a percentage"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=PERCENTRANK.INC(A2:A100,30)",
+      "note": "Returns 0-1 (multiply by 100 for a percent). Replace 30 with a cell. PERCENTRANK() is the older alias; PERCENTRANK.EXC excludes the endpoints."
+    },
+    "google_sheets": {
+      "formula": "=PERCENTRANK(A2:A100,30)",
+      "note": "Identical (matches Excel's .INC). PERCENTRANK.EXC also available."
+    },
+    "libreoffice": {
+      "formula": "=PERCENTRANK(A2:A100,30)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": 20,
+      "A4": 30,
+      "A5": 40
+    },
+    "formula": "=ROUND(PERCENTRANK.INC(A2:A5,30),4)",
+    "expected": 0.667
+  },
+  "explanation": "PERCENTRANK is the mirror image of PERCENTILE: instead of 'what value sits at the 90th percentile?', it answers 'what percentile is THIS value?'. It ranks the target within the sorted data on a 0-to-1 scale — in {10,20,30,40} the value 30 sits above two of the three gaps, so its rank is 2/3 ≈ 0.667, i.e. the ~67th percentile. Multiply by 100 to show a percent. Values between data points are interpolated, so you can ask the rank of a number that isn't in the list. Like PERCENTILE it comes in two flavours: .INC (inclusive, the default and what plain PERCENTRANK uses) spans 0 to 1 across the min and max, while .EXC (exclusive) never quite reaches 0 or 1. Use it to turn raw scores into 'top X%' language, or to place a new observation against a historical distribution."
+}

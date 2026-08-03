@@ -1068,7 +1068,8 @@ _RECIPE_CATEGORIES = [
                              "normalize", "commission", "running", "difference",
                              "auto-number", "max-minus", "minimum",
                              "irr", "future-value", "investment",
-                             "correlation", "percentile")),
+                             "correlation", "percentile",
+                             "coefficient", "variation")),
 ]
 
 

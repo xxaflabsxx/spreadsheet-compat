@@ -1,0 +1,36 @@
+{
+  "slug": "calculate-the-coefficient-of-variation",
+  "title": "How to calculate the coefficient of variation",
+  "task": "Compare the spread of two datasets on different scales — is revenue or headcount more volatile? — using variation relative to the mean, as a single percentage.",
+  "keywords": [
+    "coefficient of variation excel",
+    "cv formula standard deviation mean",
+    "relative standard deviation",
+    "coefficient of variation google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=STDEV.S(A2:A100)/AVERAGE(A2:A100)",
+      "note": "CV = standard deviation ÷ mean. Use STDEV.P for a whole population. Format as % or ×100. Only meaningful for positive-valued, ratio-scale data."
+    },
+    "google_sheets": {
+      "formula": "=STDEV(A2:A100)/AVERAGE(A2:A100)",
+      "note": "STDEV = sample; STDEVP = population. Same ratio."
+    },
+    "libreoffice": {
+      "formula": "=STDEV(A2:A100)/AVERAGE(A2:A100)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": 20,
+      "A4": 30,
+      "A5": 40
+    },
+    "formula": "=ROUND(STDEV.S(A2:A5)/AVERAGE(A2:A5),4)",
+    "expected": 0.5164
+  },
+  "explanation": "The coefficient of variation (CV, or relative standard deviation) divides the standard deviation by the mean, stripping out the units so you can compare variability across datasets of totally different magnitudes — a CV of 0.30 means 'the spread is 30% of the average' whether you're measuring dollars or seconds. For {10,20,30,40} the sample standard deviation is ≈12.91 and the mean is 25, giving CV ≈ 0.5164 (about 52%). Choose STDEV.S when your data is a sample and STDEV.P when it's the entire population — the divisor differs (n-1 vs n). Two guardrails: CV only makes sense for ratio data with a true zero and positive values (it's meaningless if the mean is near zero or negative), and a small mean can inflate it dramatically. It's widely used in finance (risk per unit of return) and quality control to rank consistency."
+}
