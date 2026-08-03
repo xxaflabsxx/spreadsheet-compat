@@ -1,0 +1,36 @@
+{
+  "slug": "calculate-a-percentile",
+  "title": "How to calculate a percentile",
+  "task": "Find the value below which a given share of the data falls — the 90th-percentile response time, the top-quartile cutoff, the median (50th).",
+  "keywords": [
+    "percentile excel formula",
+    "percentile function google sheets",
+    "90th percentile calculation",
+    "percentile.inc vs percentile.exc"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=PERCENTILE.INC(A2:A100,0.9)",
+      "note": "0.9 = 90th percentile; use 0.5 for the median, 0.25/0.75 for quartiles. PERCENTILE() is the older alias for PERCENTILE.INC."
+    },
+    "google_sheets": {
+      "formula": "=PERCENTILE(A2:A100,0.9)",
+      "note": "PERCENTILE here matches Excel's .INC (inclusive). PERCENTILE.EXC also exists for the exclusive method."
+    },
+    "libreoffice": {
+      "formula": "=PERCENTILE(A2:A100,0.9)",
+      "note": "Identical; PERCENTILE.INC/.EXC also supported."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 10,
+      "A3": 20,
+      "A4": 30,
+      "A5": 40
+    },
+    "formula": "=PERCENTILE.INC(A2:A5,0.5)",
+    "expected": 25
+  },
+  "explanation": "A percentile marks the value below which a given fraction of the data sits: the 90th percentile is the point 90% of values fall under. PERCENTILE.INC sorts the numbers and interpolates — for {10,20,30,40} at 0.5 (the median) it lands halfway between 20 and 30, giving 25. Feed 0.25 and 0.75 for the lower and upper quartiles, or 0.9 for the classic 90th-percentile latency metric. There are two conventions: PERCENTILE.INC (inclusive, the default and what plain PERCENTILE uses) always includes the 0th and 100th points, while PERCENTILE.EXC (exclusive) excludes them and needs enough data for the requested rank — the two disagree most on small samples, so state which you used. For the inverse — 'what percentile is this value?' — use PERCENTRANK. QUARTILE is just PERCENTILE fixed at 0/25/50/75/100."
+}

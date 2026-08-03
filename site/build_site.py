@@ -1067,7 +1067,8 @@ _RECIPE_CATEGORIES = [
                              "ratio", "z-score", "break-even", "absolute",
                              "normalize", "commission", "running", "difference",
                              "auto-number", "max-minus", "minimum",
-                             "irr", "future-value", "investment")),
+                             "irr", "future-value", "investment",
+                             "correlation", "percentile")),
 ]
 
 

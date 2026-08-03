@@ -1,0 +1,35 @@
+{
+  "slug": "calculate-the-correlation-between-two-columns",
+  "title": "How to calculate the correlation between two columns",
+  "task": "Measure how strongly two variables move together — ad spend vs sales, temperature vs usage — as a single number from -1 to +1.",
+  "keywords": [
+    "correlation excel formula",
+    "correl function google sheets",
+    "correlation between two columns",
+    "calculate correlation coefficient"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=CORREL(A2:A100,B2:B100)",
+      "note": "Returns Pearson's r: +1 perfect positive, 0 none, -1 perfect negative. The two ranges must be the same size. PEARSON() gives the identical result."
+    },
+    "google_sheets": {
+      "formula": "=CORREL(A2:A100,B2:B100)",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=CORREL(A2:A100,B2:B100)",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {
+      "A2": 1, "B2": 2,
+      "A3": 2, "B3": 4,
+      "A4": 3, "B4": 6
+    },
+    "formula": "=CORREL(A2:A4,B2:B4)",
+    "expected": 1
+  },
+  "explanation": "CORREL returns the Pearson correlation coefficient r, a single number summarising how tightly two columns track each other: here B is always exactly 2×A, a perfectly straight-line relationship, so r = 1. Values near +1 mean they rise together, near -1 mean one falls as the other rises, and near 0 mean no linear relationship. Two cautions that trip people up: r only detects LINEAR patterns (a strong curved relationship can still show r≈0), and correlation is not causation — a high r doesn't prove one variable drives the other. Square it (r²) for the share of variance explained, and pair with a scatter plot to eyeball the shape. Both ranges must be equal length; blank or text cells in a row cause that pair to be skipped."
+}
