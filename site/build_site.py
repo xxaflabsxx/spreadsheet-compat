@@ -1069,7 +1069,7 @@ _RECIPE_CATEGORIES = [
                              "auto-number", "max-minus", "minimum",
                              "irr", "future-value", "investment",
                              "correlation", "percentile",
-                             "coefficient", "variation")),
+                             "coefficient", "variation", "geometric")),
 ]
 
 

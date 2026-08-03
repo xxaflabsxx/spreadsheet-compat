@@ -1,0 +1,31 @@
+{
+  "slug": "first-day-of-next-month",
+  "title": "How to get the first day of next month",
+  "task": "Roll any date forward to the 1st of the following month — for billing cycles, subscription renewals, and month-start schedules.",
+  "keywords": [
+    "first day of next month excel",
+    "start of next month formula",
+    "eomonth next month first day",
+    "next month first date google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=EOMONTH(A2,0)+1",
+      "note": "EOMONTH(A2,0) is this month's last day; +1 lands on the 1st of next month. Works regardless of the day in A2."
+    },
+    "google_sheets": {
+      "formula": "=EOMONTH(A2,0)+1",
+      "note": "Identical. =DATE(YEAR(A2),MONTH(A2)+1,1) also works and self-corrects across December."
+    },
+    "libreoffice": {
+      "formula": "=EOMONTH(A2,0)+1",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(EOMONTH(DATE(2026,8,15),0)+1,\"YYYY-MM-DD\")",
+    "expected": "2026-09-01"
+  },
+  "explanation": "EOMONTH(date, 0) jumps to the last day of the date's own month, so adding 1 always lands on the first day of the NEXT month — here 15 Aug 2026 → 31 Aug → 1 Sep 2026. Because it's anchored to month-end rather than doing arithmetic on the day number, it doesn't care whether the month has 28, 30 or 31 days, and it rolls over the year end cleanly (EOMONTH of any December + 1 = 1 January). The DATE(YEAR,MONTH+1,1) form gives the same answer and also handles the December wrap, since month 13 rolls into the next January. For the first day of the CURRENT month use DATE(YEAR(A2),MONTH(A2),1) or A2-DAY(A2)+1; for N months ahead, EOMONTH(A2,N-1)+1. Format the result cell as a date, since the formula returns a date serial number."
+}

@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How to get the number of days in a month</title>
-<meta name="description" content="Return how many days are in the month of a given date (handles leap years). Verified formula for Excel, Google Sheets and LibreOffice Calc (number of days in a month excel, days in month formula google sheets, eomonth day).">
+<title>How to get the first day of next month</title>
+<meta name="description" content="Roll any date forward to the 1st of the following month — for billing cycles, subscription renewals, and month-start schedules. Verified formula for Excel, Google Sheets and LibreOffice Calc (first day of next month excel, start of next month formula, eomonth next month first day).">
 
-<link rel="canonical" href="https://canispreadsheet.com/how-to/days-in-a-month.html">
-<meta property="og:title" content="How to get the number of days in a month">
-<meta property="og:description" content="Return how many days are in the month of a given date (handles leap years). Verified formula for Excel, Google Sheets and LibreOffice Calc (number of days in a month excel, days in month formula google sheets, eomonth day).">
+<link rel="canonical" href="https://canispreadsheet.com/how-to/first-day-of-next-month.html">
+<meta property="og:title" content="How to get the first day of next month">
+<meta property="og:description" content="Roll any date forward to the 1st of the following month — for billing cycles, subscription renewals, and month-start schedules. Verified formula for Excel, Google Sheets and LibreOffice Calc (first day of next month excel, start of next month formula, eomonth next month first day).">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/how-to/days-in-a-month.html">
+<meta property="og:url" content="https://canispreadsheet.com/how-to/first-day-of-next-month.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to get the number of days in a month","item":"https://canispreadsheet.com/how-to/days-in-a-month.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to get the first day of next month","item":"https://canispreadsheet.com/how-to/first-day-of-next-month.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -304,10 +304,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <a class="back-link" href="../how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
-  <h1>How to get the number of days in a month</h1>
+  <h1>How to get the first day of next month</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
 </div>
-<p class="lede">Return how many days are in the month of a given date (handles leap years).</p>
+<p class="lede">Roll any date forward to the 1st of the following month — for billing cycles, subscription renewals, and month-start schedules.</p>
 
 <h2 class="section-title">The formula</h2>
 <div class="table-scroll">
@@ -315,31 +315,31 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <thead><tr><th>App</th><th>Formula</th><th>Notes</th></tr></thead>
 <tbody>
 
-<tr><td>Excel</td><td><code>=DAY(EOMONTH(A2,0))</code></td><td>EOMONTH gives the last day of the month; DAY extracts its day number.</td></tr>
+<tr><td>Excel</td><td><code>=EOMONTH(A2,0)+1</code></td><td>EOMONTH(A2,0) is this month&#39;s last day; +1 lands on the 1st of next month. Works regardless of the day in A2.</td></tr>
 
-<tr><td>Google Sheets</td><td><code>=DAY(EOMONTH(A2,0))</code></td><td>Identical.</td></tr>
+<tr><td>Google Sheets</td><td><code>=EOMONTH(A2,0)+1</code></td><td>Identical. =DATE(YEAR(A2),MONTH(A2)+1,1) also works and self-corrects across December.</td></tr>
 
-<tr><td>LibreOffice Calc</td><td><code>=DAY(EOMONTH(A2,0))</code></td><td>Identical.</td></tr>
+<tr><td>LibreOffice Calc</td><td><code>=EOMONTH(A2,0)+1</code></td><td>Identical.</td></tr>
 
 </tbody>
 </table>
 </div>
 
 <h2 class="section-title">How it works</h2>
-<p>EOMONTH(date, 0) returns the last day of that date&#39;s month; DAY() then reads its day-of-month number. February 2024 is a leap year, so it has 29 days. Put your date in A2 and use =DAY(EOMONTH(A2,0)).</p>
+<p>EOMONTH(date, 0) jumps to the last day of the date&#39;s own month, so adding 1 always lands on the first day of the NEXT month — here 15 Aug 2026 → 31 Aug → 1 Sep 2026. Because it&#39;s anchored to month-end rather than doing arithmetic on the day number, it doesn&#39;t care whether the month has 28, 30 or 31 days, and it rolls over the year end cleanly (EOMONTH of any December + 1 = 1 January). The DATE(YEAR,MONTH+1,1) form gives the same answer and also handles the December wrap, since month 13 rolls into the next January. For the first day of the CURRENT month use DATE(YEAR(A2),MONTH(A2),1) or A2-DAY(A2)+1; for N months ahead, EOMONTH(A2,N-1)+1. Format the result cell as a date, since the formula returns a date serial number.</p>
 
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=DAY(EOMONTH(DATE(2024,2,10),0))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>29</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+<p>We ran <code>=TEXT(EOMONTH(DATE(2026,8,15),0)+1,&#34;YYYY-MM-DD&#34;)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>2026-09-01</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
 
 
 <h2 class="section-title">Functions used</h2>
-<p><a href="../functions/day.html">DAY</a> &middot; <a href="../functions/eomonth.html">EOMONTH</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
+<p><a href="../functions/eomonth.html">EOMONTH</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
 
 
 <h2 class="section-title">Related recipes</h2>
 <ul>
-<li><a href="../how-to/prorate-a-monthly-amount.html">How to prorate a monthly amount by days</a></li><li><a href="../how-to/business-days-left-in-the-month.html">How to count business days left in the month</a></li><li><a href="../how-to/count-workdays-in-a-month.html">How to count the working days in a month</a></li><li><a href="../how-to/first-and-last-day-of-the-month.html">How to get the first and last day of the month</a></li><li><a href="../how-to/first-day-of-next-month.html">How to get the first day of next month</a></li>
+<li><a href="../how-to/business-days-left-in-the-month.html">How to count business days left in the month</a></li><li><a href="../how-to/count-workdays-in-a-month.html">How to count the working days in a month</a></li><li><a href="../how-to/days-in-a-month.html">How to get the number of days in a month</a></li><li><a href="../how-to/first-and-last-day-of-the-month.html">How to get the first and last day of the month</a></li><li><a href="../how-to/last-day-of-the-previous-month.html">How to get the last day of the previous month</a></li>
 </ul>
 
 

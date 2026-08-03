@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How to get the number of days in a month</title>
-<meta name="description" content="Return how many days are in the month of a given date (handles leap years). Verified formula for Excel, Google Sheets and LibreOffice Calc (number of days in a month excel, days in month formula google sheets, eomonth day).">
+<title>How to calculate the geometric mean</title>
+<meta name="description" content="Average rates that compound — investment returns, growth factors, ratios — where a plain average overstates the true typical rate. Verified formula for Excel, Google Sheets and LibreOffice Calc (geometric mean excel, geomean function google sheets, average growth rate formula).">
 
-<link rel="canonical" href="https://canispreadsheet.com/how-to/days-in-a-month.html">
-<meta property="og:title" content="How to get the number of days in a month">
-<meta property="og:description" content="Return how many days are in the month of a given date (handles leap years). Verified formula for Excel, Google Sheets and LibreOffice Calc (number of days in a month excel, days in month formula google sheets, eomonth day).">
+<link rel="canonical" href="https://canispreadsheet.com/how-to/calculate-the-geometric-mean.html">
+<meta property="og:title" content="How to calculate the geometric mean">
+<meta property="og:description" content="Average rates that compound — investment returns, growth factors, ratios — where a plain average overstates the true typical rate. Verified formula for Excel, Google Sheets and LibreOffice Calc (geometric mean excel, geomean function google sheets, average growth rate formula).">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/how-to/days-in-a-month.html">
+<meta property="og:url" content="https://canispreadsheet.com/how-to/calculate-the-geometric-mean.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to get the number of days in a month","item":"https://canispreadsheet.com/how-to/days-in-a-month.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"How-to recipes","item":"https://canispreadsheet.com/how-to/"},{"@type":"ListItem","position":3,"name":"How to calculate the geometric mean","item":"https://canispreadsheet.com/how-to/calculate-the-geometric-mean.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -304,10 +304,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <a class="back-link" href="../how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
-  <h1>How to get the number of days in a month</h1>
+  <h1>How to calculate the geometric mean</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
 </div>
-<p class="lede">Return how many days are in the month of a given date (handles leap years).</p>
+<p class="lede">Average rates that compound — investment returns, growth factors, ratios — where a plain average overstates the true typical rate.</p>
 
 <h2 class="section-title">The formula</h2>
 <div class="table-scroll">
@@ -315,38 +315,28 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <thead><tr><th>App</th><th>Formula</th><th>Notes</th></tr></thead>
 <tbody>
 
-<tr><td>Excel</td><td><code>=DAY(EOMONTH(A2,0))</code></td><td>EOMONTH gives the last day of the month; DAY extracts its day number.</td></tr>
+<tr><td>Excel</td><td><code>=GEOMEAN(A2:A100)</code></td><td>Multiplies all values and takes the nth root. Every value must be POSITIVE — for percent growth, use growth factors (1.08 for +8%), not the raw percentages.</td></tr>
 
-<tr><td>Google Sheets</td><td><code>=DAY(EOMONTH(A2,0))</code></td><td>Identical.</td></tr>
+<tr><td>Google Sheets</td><td><code>=GEOMEAN(A2:A100)</code></td><td>Identical.</td></tr>
 
-<tr><td>LibreOffice Calc</td><td><code>=DAY(EOMONTH(A2,0))</code></td><td>Identical.</td></tr>
+<tr><td>LibreOffice Calc</td><td><code>=GEOMEAN(A2:A100)</code></td><td>Identical.</td></tr>
 
 </tbody>
 </table>
 </div>
 
 <h2 class="section-title">How it works</h2>
-<p>EOMONTH(date, 0) returns the last day of that date&#39;s month; DAY() then reads its day-of-month number. February 2024 is a leap year, so it has 29 days. Put your date in A2 and use =DAY(EOMONTH(A2,0)).</p>
+<p>The geometric mean multiplies the values together and takes the nth root — for {1, 2, 4} that&#39;s the cube root of 8, which is 2. It&#39;s the correct &#39;average&#39; whenever quantities compound or are ratios: average investment returns, population growth, or index changes. The arithmetic mean overstates these because it ignores compounding — average +50% one year and -50% the next and the arithmetic mean says 0%, but you&#39;re actually down 25%, which the geometric mean of the growth factors (1.5 and 0.5 → √0.75 ≈ 0.866, i.e. -13.4% per year) captures. Two rules: feed it GROWTH FACTORS not raw percentages (1.08 for +8%), and every input must be positive — a single zero makes the whole product zero and negatives are undefined. To turn a series of period returns into an average growth rate, take GEOMEAN of the factors and subtract 1.</p>
 
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=DAY(EOMONTH(DATE(2024,2,10),0))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>29</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+<p>We ran <code>=GEOMEAN(A2:A4)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>2</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
 
 
 <h2 class="section-title">Functions used</h2>
-<p><a href="../functions/day.html">DAY</a> &middot; <a href="../functions/eomonth.html">EOMONTH</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
+<p><a href="../functions/geomean.html">GEOMEAN</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
 
 
-<h2 class="section-title">Related recipes</h2>
-<ul>
-<li><a href="../how-to/prorate-a-monthly-amount.html">How to prorate a monthly amount by days</a></li><li><a href="../how-to/business-days-left-in-the-month.html">How to count business days left in the month</a></li><li><a href="../how-to/count-workdays-in-a-month.html">How to count the working days in a month</a></li><li><a href="../how-to/first-and-last-day-of-the-month.html">How to get the first and last day of the month</a></li><li><a href="../how-to/first-day-of-next-month.html">How to get the first day of next month</a></li>
-</ul>
-
-
-<h2 class="section-title">Related comparisons</h2>
-<ul>
-<li><a href="../compare/edate-vs-eomonth.html">EDATE vs EOMONTH: same-day or month-end</a></li>
-</ul>
 
 
 <aside class="promo-card">
