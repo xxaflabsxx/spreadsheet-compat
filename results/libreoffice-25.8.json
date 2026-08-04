@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-04T10:37:08.195855+00:00",
+  "generated_at": "2026-08-04T13:38:42.762715+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-08-04 03:37:04.619000",
-    "now_run_2": "2026-08-04 03:37:07.740000",
+    "now_run_1": "2026-08-04 06:38:19.796000",
+    "now_run_2": "2026-08-04 06:38:24.324000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 1.04,
+    "conversion_seconds_run_1": 2.3,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -9726,6 +9726,84 @@
         "range_values": null,
         "error": null,
         "expected": -2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DAVERAGE": {
+      "DAVERAGE_matching_criteria": {
+        "description": "Averages the Sales column for rows matching the criteria (Region = East)",
+        "formula_display": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "value": 75,
+        "range_values": null,
+        "error": null,
+        "expected": 75,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DAVERAGE_numeric_criteria": {
+        "description": "Averages Sales for rows where Sales is greater than 75",
+        "formula_display": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "value": 150,
+        "range_values": null,
+        "error": null,
+        "expected": 150,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DCOUNT": {
+      "DCOUNT_matching_criteria": {
+        "description": "Counts the numeric Sales entries for rows matching the criteria (Region = East)",
+        "formula_display": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DCOUNT_all_matching": {
+        "description": "With a criteria that matches every row, counts all numeric Sales entries",
+        "formula_display": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DGET": {
+      "DGET_single_match": {
+        "description": "Returns the single Sales value for the one row matching the criteria (Region = West)",
+        "formula_display": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "value": 200,
+        "range_values": null,
+        "error": null,
+        "expected": 200,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DGET_multiple_matches_error": {
+        "description": "Errors when more than one row matches (East matches two rows), because DGET must return exactly one value. Cross-app difference: Excel and Google Sheets return #NUM! here, but LibreOffice returns #VALUE!.",
+        "formula_display": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "value": "#VALUE!",
+        "range_values": null,
+        "error": "#VALUE!",
+        "expected": "#VALUE!",
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
