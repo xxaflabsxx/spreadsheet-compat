@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-04T19:37:33.777715+00:00",
+  "generated_at": "2026-08-04T22:37:55.736022+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-08-04 12:37:30.247000",
-    "now_run_2": "2026-08-04 12:37:33.315000",
+    "now_run_1": "2026-08-04 15:37:52.030000",
+    "now_run_2": "2026-08-04 15:37:55.227000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 1.03,
+    "conversion_seconds_run_1": 1.21,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -10006,6 +10006,108 @@
         "range_values": null,
         "error": null,
         "expected": 4.5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "CEILING.PRECISE": {
+      "CEILING_PRECISE_basic": {
+        "description": "Rounds up to the nearest multiple of 3",
+        "formula_display": "=CEILING.PRECISE(7,3)",
+        "formula_stored_xlsx": "=_xlfn.CEILING.PRECISE(7,3)",
+        "value": 9,
+        "range_values": null,
+        "error": null,
+        "expected": 9,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CEILING_PRECISE_already_multiple": {
+        "description": "A value already on a multiple is returned unchanged",
+        "formula_display": "=CEILING.PRECISE(10,5)",
+        "formula_stored_xlsx": "=_xlfn.CEILING.PRECISE(10,5)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CEILING_PRECISE_negative_rounds_up": {
+        "description": "Unlike CEILING, PRECISE always rounds toward positive infinity regardless of the significance sign, so -7 rounds up to -6",
+        "formula_display": "=CEILING.PRECISE(-7,3)",
+        "formula_stored_xlsx": "=_xlfn.CEILING.PRECISE(-7,3)",
+        "value": -6,
+        "range_values": null,
+        "error": null,
+        "expected": -6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "COVAR": {
+      "COVAR_positive": {
+        "description": "Population covariance of two perfectly co-varying columns (B = 2A)",
+        "formula_display": "=COVAR(A1:A5,B1:B5)",
+        "formula_stored_xlsx": "=COVAR(A1:A5,B1:B5)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "COVAR_constant_column": {
+        "description": "When one variable never changes there is no covariance",
+        "formula_display": "=COVAR(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=COVAR(A1:A3,B1:B3)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "VARA": {
+      "VARA_numbers_only": {
+        "description": "For pure numbers VARA equals VAR (sample variance dividing by n-1)",
+        "formula_display": "=VARA(2,4,6)",
+        "formula_stored_xlsx": "=VARA(2,4,6)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VARA_counts_text_as_zero": {
+        "description": "Unlike VAR, VARA counts text as 0, so {2,4,\"x\"} is treated as {2,4,0}: sample variance 4",
+        "formula_display": "=VARA(A1:A3)",
+        "formula_stored_xlsx": "=VARA(A1:A3)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VARA_identical_values": {
+        "description": "Identical values have zero variance",
+        "formula_display": "=VARA(9,9,9)",
+        "formula_stored_xlsx": "=VARA(9,9,9)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
