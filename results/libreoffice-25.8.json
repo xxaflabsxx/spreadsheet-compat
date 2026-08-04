@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-29T13:50:05.261786+00:00",
+  "generated_at": "2026-08-04T01:42:28.472070+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-07-29 06:49:04.619000",
-    "now_run_2": "2026-07-29 06:49:42.018000",
+    "now_run_1": "2026-08-03 18:42:23.091000",
+    "now_run_2": "2026-08-03 18:42:28.106000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 35.24,
+    "conversion_seconds_run_1": 3.24,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -9251,6 +9251,118 @@
         "matched_expected": false,
         "canary_ok_this_sheet": true,
         "notes": "Microsoft docs: 'invalid basis values (< 0 or > 4) return a #NUM! error.'; MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
+      }
+    },
+    "MODE.SNGL": {
+      "MODE_SNGL_basic": {
+        "description": "Returns the single most frequently occurring value",
+        "formula_display": "=MODE.SNGL(1,2,2,3,4)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(1,2,2,3,4)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_from_range": {
+        "description": "Most frequent value read from a cell range",
+        "formula_display": "=MODE.SNGL(A1:A5)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(A1:A5)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_first_of_ties": {
+        "description": "When two values tie for most frequent, returns the one that appears first",
+        "formula_display": "=MODE.SNGL(1,1,2,2)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(1,1,2,2)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_negatives": {
+        "description": "Works with negative numbers",
+        "formula_display": "=MODE.SNGL(-4,-4,7)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(-4,-4,7)",
+        "value": -4,
+        "range_values": null,
+        "error": null,
+        "expected": -4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_no_repeats_error": {
+        "description": "Errors when no value repeats. Note a cross-app difference: Excel and Google Sheets return #N/A here, but LibreOffice returns #VALUE!",
+        "formula_display": "=MODE.SNGL(1,2,3)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(1,2,3)",
+        "value": "#VALUE!",
+        "range_values": null,
+        "error": "#VALUE!",
+        "expected": "#VALUE!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "STDEVP": {
+      "STDEVP_textbook": {
+        "description": "Population standard deviation of the classic 8-value example (mean 5, variance 4)",
+        "formula_display": "=STDEVP(2,4,4,4,5,5,7,9)",
+        "formula_stored_xlsx": "=STDEVP(2,4,4,4,5,5,7,9)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVP_two_values": {
+        "description": "Two values equidistant from their mean of 3 give a population standard deviation of 1",
+        "formula_display": "=STDEVP(2,4)",
+        "formula_stored_xlsx": "=STDEVP(2,4)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVP_from_range": {
+        "description": "Identical values have zero spread",
+        "formula_display": "=STDEVP(A1:A4)",
+        "formula_stored_xlsx": "=STDEVP(A1:A4)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVP_ignores_text": {
+        "description": "Text and blank cells are ignored, not treated as zero",
+        "formula_display": "=STDEVP(A1:A4)",
+        "formula_stored_xlsx": "=STDEVP(A1:A4)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     }
   }
