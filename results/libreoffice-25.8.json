@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T07:36:57.824799+00:00",
+  "generated_at": "2026-08-05T10:37:22.104958+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-08-05 00:36:53.777000",
-    "now_run_2": "2026-08-05 00:36:57.164000",
+    "now_run_1": "2026-08-05 03:37:17.924000",
+    "now_run_2": "2026-08-05 03:37:21.432000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 1.23,
+    "conversion_seconds_run_1": 1.21,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -10450,6 +10450,120 @@
         "range_values": null,
         "error": null,
         "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BITLSHIFT": {
+      "BITLSHIFT_basic": {
+        "description": "Shifting bits left by 2 multiplies by 4: 4 becomes 16",
+        "formula_display": "=BITLSHIFT(4,2)",
+        "formula_stored_xlsx": "=_xlfn.BITLSHIFT(4,2)",
+        "value": 16,
+        "range_values": null,
+        "error": null,
+        "expected": 16,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITLSHIFT_by_three": {
+        "description": "Shifting 1 left by 3 places gives 8 (2^3)",
+        "formula_display": "=BITLSHIFT(1,3)",
+        "formula_stored_xlsx": "=_xlfn.BITLSHIFT(1,3)",
+        "value": 8,
+        "range_values": null,
+        "error": null,
+        "expected": 8,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITLSHIFT_zero_shift": {
+        "description": "A shift of zero leaves the value unchanged",
+        "formula_display": "=BITLSHIFT(5,0)",
+        "formula_stored_xlsx": "=_xlfn.BITLSHIFT(5,0)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BITRSHIFT": {
+      "BITRSHIFT_basic": {
+        "description": "Shifting bits right by 2 divides by 4: 16 becomes 4",
+        "formula_display": "=BITRSHIFT(16,2)",
+        "formula_stored_xlsx": "=_xlfn.BITRSHIFT(16,2)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITRSHIFT_by_three": {
+        "description": "Shifting 8 right by 3 places gives 1",
+        "formula_display": "=BITRSHIFT(8,3)",
+        "formula_stored_xlsx": "=_xlfn.BITRSHIFT(8,3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITRSHIFT_reverses_lshift": {
+        "description": "A right shift undoes an equal left shift, recovering the original value",
+        "formula_display": "=BITRSHIFT(BITLSHIFT(5,3),3)",
+        "formula_stored_xlsx": "=_xlfn.BITRSHIFT(_xlfn.BITLSHIFT(5,3),3)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "HEX2BIN": {
+      "HEX2BIN_basic": {
+        "description": "Hex F is 1111 in binary",
+        "formula_display": "=HEX2BIN(\"F\")",
+        "formula_stored_xlsx": "=HEX2BIN(\"F\")",
+        "value": "1111",
+        "range_values": null,
+        "error": null,
+        "expected": "1111",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2BIN_ten": {
+        "description": "Hex A (decimal 10) is 1010 in binary",
+        "formula_display": "=HEX2BIN(\"A\")",
+        "formula_stored_xlsx": "=HEX2BIN(\"A\")",
+        "value": "1010",
+        "range_values": null,
+        "error": null,
+        "expected": "1010",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2BIN_padded": {
+        "description": "The optional places argument pads the binary result to a fixed width",
+        "formula_display": "=HEX2BIN(\"F\",8)",
+        "formula_stored_xlsx": "=HEX2BIN(\"F\",8)",
+        "value": "00001111",
+        "range_values": null,
+        "error": null,
+        "expected": "00001111",
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
