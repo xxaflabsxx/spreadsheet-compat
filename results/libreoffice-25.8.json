@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T19:37:20.592465+00:00",
+  "generated_at": "2026-08-05T22:37:32.578770+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-08-05 12:37:17.653000",
-    "now_run_2": "2026-08-05 12:37:20.331000",
+    "now_run_1": "2026-08-05 15:37:26.857000",
+    "now_run_2": "2026-08-05 15:37:30.157000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 0.52,
+    "conversion_seconds_run_1": 1.18,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -10894,6 +10894,96 @@
         "range_values": null,
         "error": null,
         "expected": "0111",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "COVARIANCE.S": {
+      "COVARIANCE_S_positive": {
+        "description": "Sample covariance (divides by n-1) of two perfectly co-varying columns (B = 2A)",
+        "formula_display": "=COVARIANCE.S(A1:A5,B1:B5)",
+        "formula_stored_xlsx": "=_xlfn.COVARIANCE.S(A1:A5,B1:B5)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "COVARIANCE_S_constant_column": {
+        "description": "When one variable never changes there is no covariance",
+        "formula_display": "=COVARIANCE.S(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=_xlfn.COVARIANCE.S(A1:A3,B1:B3)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "STDEVA": {
+      "STDEVA_numbers_only": {
+        "description": "For pure numbers STDEVA equals STDEV (sample standard deviation)",
+        "formula_display": "=STDEVA(2,4,6)",
+        "formula_stored_xlsx": "=STDEVA(2,4,6)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVA_counts_text_as_zero": {
+        "description": "Unlike STDEV, STDEVA counts text as 0, so {2,4,\"x\"} is treated as {2,4,0}: sample standard deviation 2",
+        "formula_display": "=STDEVA(A1:A3)",
+        "formula_stored_xlsx": "=STDEVA(A1:A3)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVA_identical_values": {
+        "description": "Identical values have zero standard deviation",
+        "formula_display": "=STDEVA(9,9,9)",
+        "formula_stored_xlsx": "=STDEVA(9,9,9)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "STDEVPA": {
+      "STDEVPA_textbook": {
+        "description": "For pure numbers STDEVPA equals STDEVP (population standard deviation): the classic example gives 2",
+        "formula_display": "=STDEVPA(2,4,4,4,5,5,7,9)",
+        "formula_stored_xlsx": "=STDEVPA(2,4,4,4,5,5,7,9)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVPA_counts_text_as_zero": {
+        "description": "Unlike STDEVP, STDEVPA counts text as 0, so {5,5,5,5,\"x\"} is treated as {5,5,5,5,0}: population standard deviation 2",
+        "formula_display": "=STDEVPA(A1:A5)",
+        "formula_stored_xlsx": "=STDEVPA(A1:A5)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
