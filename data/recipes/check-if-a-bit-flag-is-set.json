@@ -1,0 +1,31 @@
+{
+  "slug": "check-if-a-bit-flag-is-set",
+  "task": "Test whether one flag is switched on inside a number that packs several yes/no settings into a single integer (a bitmask).",
+  "title": "How to check if a bit (flag) is set",
+  "keywords": [
+    "check if bit is set excel",
+    "bitwise flag formula",
+    "bitand test flag google sheets",
+    "read a bitmask spreadsheet"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=BITAND(A2,4)>0",
+      "note": "4 is the bit you're testing (2^2). BITAND masks it off; >0 turns the result into TRUE/FALSE. Use 1, 2, 4, 8, 16... for bit positions 0,1,2,3,4."
+    },
+    "google_sheets": {
+      "formula": "=BITAND(A2,4)>0",
+      "note": "Identical."
+    },
+    "libreoffice": {
+      "formula": "=BITAND(A2,4)>0",
+      "note": "Identical."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=BITAND(6,4)",
+    "expected": 4
+  },
+  "explanation": "A bitmask stores several on/off flags in one number: each flag owns a power-of-two bit, so 6 (binary 110) has the 2-bit and 4-bit set but not the 1-bit. BITAND(value, mask) keeps only the bits both share, so BITAND(6,4) returns 4 — non-zero — meaning that flag is on, while BITAND(6,1) returns 0 because the 1-bit is off. Wrapping it in >0 gives a clean TRUE/FALSE. Pick the mask by bit position: 1, 2, 4, 8, 16 for bits 0 through 4. To SET a flag, add it with BITOR(value, 4); to CLEAR one, BITAND(value, BITXOR(value_max, 4)) or subtract it when you know it's set; to TOGGLE, BITXOR(value, 4). This is how compact permission or option fields are read without a column per setting."
+}
