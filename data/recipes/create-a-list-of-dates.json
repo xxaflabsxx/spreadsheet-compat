@@ -1,0 +1,32 @@
+{
+  "slug": "create-a-list-of-dates",
+  "task": "Generate a run of consecutive dates automatically — a daily, weekly, or monthly series for schedules, calendars, and report rows — without typing each one.",
+  "title": "How to create a list of dates",
+  "keywords": [
+    "create list of dates excel",
+    "sequence of dates formula",
+    "generate date series google sheets",
+    "auto fill dates spreadsheet"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=SEQUENCE(7,1,A1,1)",
+      "note": "Spills 7 consecutive daily dates starting from the date in A1. Change 7 for the count, and the last 1 for the step (7 = weekly). Format the cells as dates. Excel 365 / LibreOffice 24.8+."
+    },
+    "google_sheets": {
+      "formula": "=SEQUENCE(7,1,A1,1)",
+      "note": "Identical. =ARRAYFORMULA(A1+SEQUENCE(7)-1) also works."
+    },
+    "libreoffice": {
+      "formula": "=A1+SEQUENCE(7)-1",
+      "note": "SEQUENCE needs 24.8+. Classic drag-down alternative that works everywhere: put =A1+1 below the start date and fill down."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXT(SEQUENCE(3,1,DATE(2026,1,1),1),\"YYYY-MM-DD\")",
+    "check_range": "H1:H3",
+    "expected": ["2026-01-01", "2026-01-02", "2026-01-03"]
+  },
+  "explanation": "SEQUENCE(rows, cols, start, step) builds the whole series in one spilling formula: with a date as the start and a step of 1, SEQUENCE(3,1,DATE(2026,1,1),1) produces 2026-01-01, 2026-01-02 and 2026-01-03. Because dates are just serial numbers, arithmetic steps work naturally — use step 7 for a weekly list, or A1+SEQUENCE(n)-1 to key off a cell. Format the output cells as dates or they'll show as serial numbers. SEQUENCE (and dynamic-array spilling) needs Excel 365, any Google Sheets, or LibreOffice 24.8+; on older versions the timeless approach is to type the start date, put =above+1 beneath it, and fill down. Month- or year-steps aren't evenly spaced in days, so use EDATE(A1,SEQUENCE(12)-1) for the first of each month, or EDATE with a step for every-N-months. To list only workdays, WORKDAY.INTL fed a SEQUENCE gives business-day series."
+}
