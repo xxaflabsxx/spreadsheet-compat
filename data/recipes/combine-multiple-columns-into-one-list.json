@@ -1,0 +1,32 @@
+{
+  "slug": "combine-multiple-columns-into-one-list",
+  "task": "Stack several columns (or a whole block) into a single continuous column — merging split lists, un-pivoting a grid, or building one dropdown source.",
+  "title": "How to combine multiple columns into one list",
+  "keywords": [
+    "combine columns into one column excel",
+    "stack columns into one list",
+    "tocol flatten formula",
+    "merge two columns into one google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TOCOL(A2:C100)",
+      "note": "TOCOL flattens a range into a single column. Add ,1 to skip blanks: =TOCOL(A2:C100,1). Excel 365 / LibreOffice 24.8+. To stack specific ranges use =VSTACK(A2:A100,B2:B100)."
+    },
+    "google_sheets": {
+      "formula": "=FLATTEN(A2:C100)",
+      "note": "FLATTEN is the Sheets equivalent. The array literal ={A2:A100;B2:B100} also stacks columns vertically."
+    },
+    "libreoffice": {
+      "formula": "=TOCOL(A2:C100)",
+      "note": "Needs 24.8+. Older versions: stack with an array and INDEX, or paste-special transpose manually."
+    }
+  },
+  "verify": {
+    "setup_cells": {"A1": 1, "B1": 2, "A2": 3, "B2": 4},
+    "formula": "=TOCOL(A1:B2)",
+    "check_range": "H1:H4",
+    "expected": [1, 2, 3, 4]
+  },
+  "explanation": "TOCOL takes a two-dimensional range and spills it into a single column. By default it reads across each row before moving down, so the 2x2 block 1,2 / 3,4 becomes 1,2,3,4; pass TRUE as the third argument to scan down each column first instead. The handy second argument controls what to drop: TOCOL(range,1) ignores blanks and TOCOL(range,2) ignores errors, so combining ragged columns into one clean list is a single formula. In Google Sheets the direct equivalent is FLATTEN, or an array literal like ={range1;range2} which stacks ranges on top of each other. When you want to stack specific, separately-located ranges rather than flatten one block, VSTACK(range1,range2,...) is clearer, and HSTACK does the same side-by-side. All of these are modern dynamic-array functions — Excel 365, current Google Sheets, or LibreOffice 24.8+; on older Excel you'd use an INDEX/ROW construction or Power Query."
+}
