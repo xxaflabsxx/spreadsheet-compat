@@ -1,0 +1,32 @@
+{
+  "slug": "split-text-into-rows",
+  "task": "Break one delimited cell into a vertical list — turn \"a,b,c\" into three stacked rows for filtering, lookups, or a tidy column.",
+  "title": "How to split text into rows",
+  "keywords": [
+    "split text into rows excel",
+    "textsplit into rows",
+    "comma separated to rows",
+    "split cell vertically google sheets"
+  ],
+  "solutions": {
+    "excel": {
+      "formula": "=TEXTSPLIT(A2,,\",\")",
+      "note": "The empty 2nd argument means no column split; the 3rd argument is the ROW delimiter, so the pieces spill DOWN. Excel 365 / LibreOffice 24.8+."
+    },
+    "google_sheets": {
+      "formula": "=TRANSPOSE(SPLIT(A2,\",\"))",
+      "note": "SPLIT spills across columns; TRANSPOSE flips it to rows. Sheets has no TEXTSPLIT."
+    },
+    "libreoffice": {
+      "formula": "=TEXTSPLIT(A2,,\",\")",
+      "note": "Needs 24.8+."
+    }
+  },
+  "verify": {
+    "setup_cells": {},
+    "formula": "=TEXTSPLIT(\"a,b,c\",,\",\")",
+    "check_range": "H1:H3",
+    "expected": ["a", "b", "c"]
+  },
+  "explanation": "TEXTSPLIT takes three key arguments: the text, a column delimiter, and a row delimiter. Splitting into COLUMNS uses the 2nd argument; splitting into ROWS uses the 3rd. Leaving the column delimiter empty and passing your delimiter as the row delimiter — =TEXTSPLIT(A2,,\",\") — spills the pieces vertically, so \"a,b,c\" becomes a,b,c stacked down three cells. In Google Sheets, which lacks TEXTSPLIT, the idiom is TRANSPOSE(SPLIT(A2,\",\")) since SPLIT only spills horizontally. To flatten a whole delimited grid into one column, wrap it: TOCOL(TEXTSPLIT(A2,\",\")). Handy extras: TEXTSPLIT's later arguments let you ignore empty results and pad missing values, and you can pass an array of delimiters like {\",\",\";\"} to split on several characters at once. All of this needs dynamic arrays — Excel 365, Google Sheets, or LibreOffice 24.8+."
+}
