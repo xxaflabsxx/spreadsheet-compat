@@ -1268,7 +1268,9 @@ DATASET_TMPL = """{% extends "base.html" %}
 <p class="lede">The machine-verified data behind this site is free to use. It records, for {{ n_funcs }} spreadsheet functions, whether each works in Microsoft Excel and Google Sheets (from official documentation) and in LibreOffice Calc (from <a href="{{ rel }}methodology.html">actually executing the formula</a>, with per-version history). As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
 
 <h2 class="section-title">Download</h2>
-<p><a href="{{ rel }}data/compat.json"><code>data/compat.json</code></a> &mdash; one JSON object, keyed by uppercase function name ({{ n_funcs }} entries, {{ kb }} KB). The full test harness, authored test cases, and raw per-LibreOffice-version results are in the <a href="{{ github_url }}">GitHub repository</a>.</p>
+<p><a href="{{ rel }}data/compat.json"><code>data/compat.json</code></a> &mdash; one JSON object, keyed by uppercase function name ({{ n_funcs }} entries, {{ kb }} KB).<br>
+<a href="{{ rel }}data/compat.csv"><code>data/compat.csv</code></a> &mdash; the same data as a CSV (one row per function, headered columns) for spreadsheets and data tools.</p>
+<p>The full test harness, authored test cases, and raw per-LibreOffice-version results are in the <a href="{{ github_url }}">GitHub repository</a>.</p>
 
 <h2 class="section-title">Schema</h2>
 <div class="table-scroll">
@@ -2084,6 +2086,24 @@ def main():
     (OUT_DIR / "data" / "compat.json").write_text(
         json.dumps(compat_export, separators=(",", ":"))
     )
+    # CSV mirror of the dataset (easier to open in a spreadsheet / load into
+    # data tools, and the format dataset registries expect).
+    import csv as _csv
+    import io as _io
+    _buf = _io.StringIO()
+    _w = _csv.writer(_buf)
+    _w.writerow([
+        "function", "category", "in_excel", "in_google_sheets", "in_libreoffice",
+        "libreoffice_verdict", "libreoffice_version_tested",
+        "libreoffice_newly_supported_in",
+    ])
+    for _name in sorted(compat_export):
+        _v = compat_export[_name]
+        _w.writerow([
+            _name, _v["cat"], _v["x"], _v["g"], _v["l"],
+            _v["lv"], _v["lver"], _v["lnew"] if _v["lnew"] is not None else "",
+        ])
+    (OUT_DIR / "data" / "compat.csv").write_text(_buf.getvalue())
     cctx = common_ctx(rel="")
     cctx.update(
         page_title="Spreadsheet formula compatibility checker — Excel, Google Sheets & LibreOffice",
