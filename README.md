@@ -1,7 +1,11 @@
 # spreadsheet-compat
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21974469.svg)](https://doi.org/10.5281/zenodo.21974469)
+
 "caniuse.com for spreadsheets" — a database of *tested, real, executed*
 function behavior across Excel, Google Sheets, and LibreOffice Calc.
+
+Live site: <https://canispreadsheet.com/> &middot; Open dataset (CC BY 4.0): [`compat.csv`](https://canispreadsheet.com/data/compat.csv) / [`compat.json`](https://canispreadsheet.com/data/compat.json) &middot; [dataset page](https://canispreadsheet.com/data.html) &middot; archived on Zenodo with a citable DOI.
 
 The entire value of this project is that every number in it was actually
 computed by the engine in question, not inferred from documentation. Phase 1
