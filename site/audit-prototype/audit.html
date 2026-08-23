@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migration Audit — .xlsx formula extractor (prototype)</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0 auto; padding: 2rem 1rem 4rem; max-width: 46rem;
+    color: #1a1a1a; background: #fff; line-height: 1.5;
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.1rem; margin: 2rem 0 .5rem; }
+  .tagline { color: #555; margin: 0 0 1.5rem; }
+  .privacy { font-size: .85rem; color: #2f6f3e; margin: .75rem 0 0; }
+  #dropzone {
+    border: 2px dashed #bbb; border-radius: 8px; padding: 2.5rem 1rem;
+    text-align: center; color: #555; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  #dropzone.drag { border-color: #3567b2; background: #f0f5fc; }
+  #dropzone strong { color: #1a1a1a; }
+  #fileinput { display: none; }
+  .btnlike {
+    display: inline-block; margin-top: .6rem; padding: .35rem .9rem;
+    border: 1px solid #999; border-radius: 5px; background: #f6f6f6;
+    font-size: .9rem; color: #1a1a1a;
+  }
+  #error {
+    display: none; margin-top: 1rem; padding: .75rem 1rem;
+    border: 1px solid #d9a0a0; border-radius: 6px;
+    background: #fdf3f3; color: #8c2f2f; white-space: pre-wrap;
+  }
+  #results { display: none; }
+  .totals { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1rem 0; }
+  .stat {
+    border: 1px solid #ddd; border-radius: 6px; padding: .5rem .9rem;
+    background: #fafafa; min-width: 7.5rem;
+  }
+  .stat b { display: block; font-size: 1.3rem; }
+  .stat span { font-size: .8rem; color: #555; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: .3rem .6rem; border-bottom: 1px solid #e5e5e5; }
+  th { background: #f5f5f5; font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .85em; background: #f4f4f4; padding: .05em .3em; border-radius: 3px;
+  }
+  details { margin-top: 1rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  #formulalist li { margin: .25rem 0; word-break: break-all; }
+  #formulalist .loc { color: #555; }
+  .note { font-size: .8rem; color: #777; }
+  footer { margin-top: 3rem; font-size: .8rem; color: #888; border-top: 1px solid #eee; padding-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>Migration Audit <span class="note">(prototype)</span></h1>
+<p class="tagline">See every formula and function your Excel workbook actually uses —
+before you migrate it to Google&nbsp;Sheets or LibreOffice.</p>
+
+<div id="dropzone" tabindex="0" role="button" aria-label="Choose or drop an .xlsx file">
+  <strong>Drop your .xlsx here</strong> or
+  <span class="btnlike">Choose file</span>
+  <p class="privacy">100% private: the file is analyzed in your browser and never uploaded anywhere.</p>
+</div>
+<input type="file" id="fileinput" accept=".xlsx,.xlsm,.xltx,.xltm">
+
+<div id="error"></div>
+
+<div id="results">
+  <h2 id="filetitle"></h2>
+  <div class="totals" id="totals"></div>
+
+  <h2>Formulas per sheet</h2>
+  <table id="sheettable"><thead>
+    <tr><th>Sheet</th><th class="num">Formulas</th></tr>
+  </thead><tbody></tbody></table>
+
+  <h2>Functions used</h2>
+  <p class="note">Counted once per formula that uses the function, sorted by count.</p>
+  <table id="fntable"><thead>
+    <tr><th>Function</th><th class="num">Formulas using it</th></tr>
+  </thead><tbody></tbody></table>
+
+  <details id="rawdetails">
+    <summary>Raw formula list</summary>
+    <p class="note" id="rawnote"></p>
+    <ol id="formulalist"></ol>
+  </details>
+</div>
+
+<footer>
+  Runs entirely client-side. Reads .xlsx / .xlsm (modern Excel format).
+  Legacy .xls is not supported — save as .xlsx first.
+</footer>
+
+<script src="audit.js"></script>
+<script>
+(function () {
+  'use strict';
+  var dropzone = document.getElementById('dropzone');
+  var fileinput = document.getElementById('fileinput');
+  var errorBox = document.getElementById('error');
+  var results = document.getElementById('results');
+
+  function showError(msg) {
+    results.style.display = 'none';
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function render(fileName, r) {
+    errorBox.style.display = 'none';
+    document.getElementById('filetitle').textContent = fileName;
+
+    var t = r.totals;
+    var stats = [
+      [t.formulas, 'formulas'],
+      [t.sheets, 'sheets'],
+      [t.uniqueFunctions, 'unique functions'],
+    ];
+    if (t.sharedMembers) stats.push([t.sharedMasters + t.sharedMembers, 'shared-group cells']);
+    if (t.arrayFormulas) stats.push([t.arrayFormulas, 'array formulas']);
+    document.getElementById('totals').innerHTML = stats.map(function (s) {
+      return '<div class="stat"><b>' + s[0] + '</b><span>' + s[1] + '</span></div>';
+    }).join('');
+
+    document.querySelector('#sheettable tbody').innerHTML = r.sheets.map(function (s) {
+      return '<tr><td>' + esc(s.name) + '</td><td class="num">' + s.formulaCount + '</td></tr>';
+    }).join('');
+
+    var fns = Object.keys(r.functionCounts).sort(function (a, b) {
+      return r.functionCounts[b] - r.functionCounts[a] || (a < b ? -1 : 1);
+    });
+    document.querySelector('#fntable tbody').innerHTML = fns.length
+      ? fns.map(function (fn) {
+          return '<tr><td><code>' + esc(fn) + '</code></td><td class="num">' +
+            r.functionCounts[fn] + '</td></tr>';
+        }).join('')
+      : '<tr><td colspan="2">No functions found.</td></tr>';
+
+    var MAX = 200;
+    var shown = r.formulas.slice(0, MAX);
+    document.getElementById('rawnote').textContent = r.formulas.length > MAX
+      ? 'Showing first ' + MAX + ' of ' + r.formulas.length + ' formulas.'
+      : shown.length + ' formulas.';
+    document.getElementById('formulalist').innerHTML = shown.map(function (f) {
+      var tag = f.type === 'array' ? ' [array]'
+        : f.sharedRole === 'member' ? ' [shared]'
+        : f.sharedRole === 'master' ? ' [shared master]' : '';
+      return '<li><span class="loc">' + esc(f.sheet) + '!' + esc(f.cell) + tag +
+        '</span> <code>=' + esc(f.formula) + '</code></li>';
+    }).join('');
+    document.getElementById('rawdetails').open = false;
+    results.style.display = 'block';
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+    if (/\.xls$/i.test(file.name)) {
+      showError('"' + file.name + '" is a legacy .xls file (old binary Excel format), ' +
+        'which this tool cannot read. Open it in Excel and save as .xlsx, then try again.');
+      return;
+    }
+    if (typeof DecompressionStream === 'undefined') {
+      showError('Your browser does not support DecompressionStream, which this tool needs ' +
+        'to read .xlsx files. Please use a current version of Chrome, Edge, Firefox or Safari.');
+      return;
+    }
+    file.arrayBuffer()
+      .then(function (buf) { return XlsxAudit.auditXlsx(buf); })
+      .then(function (r) { render(file.name, r); })
+      .catch(function (e) { showError(e && e.message ? e.message : String(e)); });
+  }
+
+  dropzone.addEventListener('click', function () { fileinput.click(); });
+  dropzone.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileinput.click(); }
+  });
+  fileinput.addEventListener('change', function () { handleFile(fileinput.files[0]); });
+
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault(); dropzone.classList.add('drag');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault(); dropzone.classList.remove('drag');
+    });
+  });
+  dropzone.addEventListener('drop', function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    handleFile(f);
+  });
+})();
+</script>
+</body>
+</html>

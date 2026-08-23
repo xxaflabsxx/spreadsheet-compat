@@ -660,6 +660,7 @@ BASE_TMPL = """<!doctype html>
       <a href="{{ rel }}how-to/">How-to</a>
       <a href="{{ rel }}compare/">Compare</a>
       <a href="{{ rel }}checker.html">Checker</a>
+      <a href="{{ rel }}audit.html">Migration&nbsp;Audit</a>
       <a href="{{ rel }}excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
       <a href="{{ rel }}libreoffice-version-support.html">LO&nbsp;versions</a>
       <a href="{{ rel }}quirks.html">Quirks</a>
@@ -2115,6 +2116,7 @@ def main():
     )
     (OUT_DIR / "checker.html").write_text(env.get_template("checker.html").render(**cctx))
     sitemap_urls.append({"loc": BASE_URL + "checker.html", "lastmod": build_date})
+    sitemap_urls.append({"loc": BASE_URL + "audit.html", "lastmod": build_date})
 
     # ---- App-exclusive function pages (data-driven from documented flags) ----
     def _excl_items(pred):
@@ -2373,6 +2375,13 @@ def main():
     # ---- sitemap.xml + robots.txt ----
     sitemap_xml = env.get_template("sitemap.xml").render(urls=sitemap_urls)
     (OUT_DIR / "sitemap.xml").write_text(sitemap_xml)
+
+    # ---- Migration Audit page (static app maintained in site/audit-page/) ----
+    # Copied at build time so rebuilds never drop it from docs/.
+    import shutil as _shutil
+    _audit_src = ROOT / "site" / "audit-page"
+    for _f in ("audit.html", "audit.js", "audit-verdicts.js", "audit-app.js"):
+        _shutil.copyfile(_audit_src / _f, OUT_DIR / _f)
     (OUT_DIR / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}sitemap.xml\n")
     (OUT_DIR / ".nojekyll").write_text("")
     copy_static_extras()

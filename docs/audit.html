@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spreadsheet Migration Audit — which formulas break when you switch apps?</title>
+<meta name="description" content="Drop an .xlsx and see which formulas break or silently change in Google Sheets, LibreOffice, or Excel — matched against execution-verified compatibility data. The file never leaves your browser.">
+
+<link rel="canonical" href="https://canispreadsheet.com/audit.html">
+<meta property="og:title" content="Spreadsheet Migration Audit — which formulas break when you switch apps?">
+<meta property="og:description" content="Drop an .xlsx and see which formulas break or silently change in Google Sheets, LibreOffice, or Excel — matched against execution-verified compatibility data. The file never leaves your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/audit.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+code { background: var(--bg-alt); padding: 0.05em 0.3em; border-radius: 3px; font-size: 0.9em; }
+
+header.site-header { border-bottom: 1px solid var(--border); padding: 1rem 0; }
+header.site-header .container {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+p.lede { color: var(--text-muted); font-size: 1.05rem; }
+
+#dropzone {
+  border: 2px dashed var(--border); border-radius: 10px; padding: 2.5rem 1rem;
+  text-align: center; color: var(--text-muted); cursor: pointer;
+  transition: border-color .15s, background .15s; margin: 1.25rem 0 0.75rem;
+}
+#dropzone.drag { border-color: var(--accent); background: var(--bg-alt); }
+#dropzone strong { color: var(--text); }
+#fileinput { display: none; }
+.btnlike {
+  display: inline-block; margin-top: .6rem; padding: .35rem .9rem;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--bg-alt);
+  font-size: .9rem; color: var(--text);
+}
+.privacy { font-size: .85rem; color: var(--good); margin: .75rem 0 0; }
+
+#error {
+  display: none; margin-top: 1rem; padding: .75rem 1rem;
+  border: 1px solid var(--bad); border-radius: 6px;
+  background: var(--bad-bg); color: var(--bad); white-space: pre-wrap;
+}
+#results { display: none; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem; margin: 1.5rem 0 1rem;
+}
+@media (min-width: 700px) { .stats-grid { grid-template-columns: repeat(5, 1fr); } }
+.stat-card {
+  background: var(--bg-alt); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1rem; text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+.stat-card.tile-bad .num { color: var(--bad); }
+.stat-card.tile-good .num { color: var(--good); }
+.stat-card.tile-warn .num { color: var(--quirk); }
+
+.methodology {
+  background: var(--bg-alt); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1rem 1.25rem; margin: 1rem 0 1.5rem; font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+.badge {
+  display: inline-block; font-size: 0.8rem; font-weight: 600;
+  padding: 0.2rem 0.55rem; border-radius: 999px; white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+.fnlist { list-style: none; padding: 0; margin: 0.75rem 0; }
+.fnrow { border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.9rem; margin-bottom: 0.6rem; }
+.fnrow summary { cursor: pointer; }
+.fnrow .fnname { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.fnrow .fncount { color: var(--text-muted); font-size: 0.85rem; }
+.fnnote { color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0 0.25rem; }
+.basis { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.lock { color: var(--accent-dark); font-size: 0.82rem; font-weight: 600; background: var(--unknown-bg); border-radius: 999px; padding: 0.15rem 0.6rem; }
+.sheetname { font-weight: 600; margin: 0.6rem 0 0.2rem; font-size: 0.9rem; }
+.celllist { list-style: none; padding-left: 0.5rem; margin: 0; }
+.celllist li { margin: 0.15rem 0; word-break: break-all; font-size: 0.9rem; }
+.cellref { color: var(--text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.allclear { color: var(--good); font-weight: 600; }
+.note { font-size: 0.85rem; color: var(--text-muted); }
+
+table.matrix {
+  width: 100%; border-collapse: collapse; margin: 0.75rem 0 1.5rem; font-size: 0.92rem;
+}
+.table-scroll { overflow-x: auto; }
+table.matrix th, table.matrix td {
+  border: 1px solid var(--border); padding: 0.55rem 0.65rem; text-align: left; vertical-align: top;
+}
+table.matrix th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.matrix td.fnname { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap; margin: 2rem 0 1rem; padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border); background: var(--bg-alt); border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0; display: inline-block; background: var(--accent); color: #fff;
+  font-weight: 600; padding: 0.65rem 1.2rem; border-radius: 8px;
+  text-decoration: none; white-space: nowrap; border: 0; cursor: pointer; font-size: 1rem;
+}
+.promo-btn:hover { filter: brightness(1.1); text-decoration: none; }
+.price-old { text-decoration: line-through; color: var(--text-muted); font-weight: 400; }
+.licrow { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.75rem; width: 100%; }
+#lickey {
+  flex: 1 1 20rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.95rem; padding: 0.55rem 0.75rem; border: 2px solid var(--border); border-radius: 8px;
+}
+#lickey:focus { outline: none; border-color: var(--accent); }
+.licmsg { display: none; width: 100%; margin: 0.5rem 0 0; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; }
+.licmsg.bad { background: var(--bad-bg); color: var(--bad); }
+.licmsg.good { background: var(--good-bg); color: var(--good); }
+#unlock-status { color: var(--good); font-weight: 600; margin: 0; }
+select#direction {
+  font-size: 1rem; padding: 0.5rem 0.65rem; border: 2px solid var(--border);
+  border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit;
+}
+select#direction:focus { outline: none; border-color: var(--accent); }
+.dirrow { margin: 0.75rem 0; }
+
+footer.site-footer {
+  border-top: 1px solid var(--border); padding: 1.5rem 0 3rem;
+  color: var(--text-muted); font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+
+/* Print-friendly report: chrome hidden, details expanded by the Print button. */
+@media print {
+  header.site-header, footer.site-footer, #dropzone, .dirrow, #error,
+  #unlock-free, #unlock-paid .licrow, #csvbtn, #printbtn, .noprint { display: none !important; }
+  body { font-size: 12px; }
+  .fnrow, .stat-card, table.matrix { break-inside: avoid; }
+  a { color: inherit; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="index.html">Functions</a>
+      <a href="how-to/">How-to</a>
+      <a href="compare/">Compare</a>
+      <a href="checker.html">Checker</a>
+      <a href="audit.html">Migration&nbsp;Audit</a>
+      <a href="excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<h1>Spreadsheet Migration Audit</h1>
+<p class="lede">Drop in an .xlsx and see which of <em>your</em> formulas break — or silently
+change behavior — in the app you're moving to. Verdicts are matched against our
+compatibility dataset: LibreOffice results come from <strong>actually executing formulas</strong>
+in real LibreOffice builds; Excel and Google Sheets verdicts are documentation-based.</p>
+
+<noscript><p>This tool runs entirely in your browser and requires JavaScript. Nothing works without it — and nothing is uploaded with it, either.</p></noscript>
+
+<div id="dropzone" tabindex="0" role="button" aria-label="Choose or drop an .xlsx file">
+  <strong>Drop your .xlsx here</strong> or
+  <span class="btnlike">Choose file</span>
+  <p class="privacy">100% private: the file is parsed in your browser and never uploaded anywhere.
+  Verify it yourself — open your browser's network tab while you audit.</p>
+</div>
+<input type="file" id="fileinput" accept=".xlsx,.xlsm,.xltx,.xltm">
+
+<p class="dirrow"><label for="direction"><strong>Migration direction:</strong></label>
+<select id="direction">
+  <option value="x2g" selected>Excel → Google Sheets</option>
+  <option value="x2l">Excel → LibreOffice Calc</option>
+  <option value="g2x">Google Sheets → Excel</option>
+  <option value="g2l">Google Sheets → LibreOffice Calc</option>
+  <option value="l2x">LibreOffice Calc → Excel</option>
+</select></p>
+
+<div id="error"></div>
+
+<div id="results">
+  <h2 class="section-title"><span id="filetitle"></span> <span class="note">→ <span id="dirlabel"></span></span></h2>
+
+  <div class="stats-grid" id="tiles"></div>
+
+  <div class="methodology">
+    <strong>What this is (and isn't):</strong> function-level triage from a pre-computed
+    compatibility dataset — LibreOffice verdicts from formulas we executed in real
+    LibreOffice builds, Excel and Google Sheets verdicts from official documentation.
+    It flags functions known to be missing or to behave differently; it does
+    <strong>not</strong> recalculate your workbook in the target app, so it cannot promise
+    your specific numbers survive. Use it to know where to look first.
+    <a href="methodology.html">How we verify.</a>
+  </div>
+
+  <h2 class="section-title">At-risk functions</h2>
+  <div id="atrisk"></div>
+
+  <div id="unknown-section" style="display:none">
+    <h2 class="section-title">Unknown functions</h2>
+    <p class="note">These are not in our dataset, so we make no compatibility claim about
+    them — they may be newer functions, add-in or macro-defined functions, or named
+    ranges called like functions. Check them manually before migrating.</p>
+    <div id="unknown"></div>
+  </div>
+
+  <h2 class="section-title">All functions found</h2>
+  <div class="table-scroll">
+  <table class="matrix"><thead>
+    <tr><th>Function</th><th>Formulas</th><th>Verdict</th><th>Verdict basis</th></tr>
+  </thead><tbody id="fntable-body"></tbody></table>
+  </div>
+
+  <div id="unlock-free" class="promo-card">
+    <div>
+      <p class="promo-title">Unlock the full report — <span id="price-now">$19</span>
+        <span class="price-old" id="price-later">$29</span> <span class="note">launch price, one-off</span></p>
+      <p class="promo-body">Cell-level detail for <em>every</em> at-risk and unknown function
+      (not just the top 3), the complete per-formula verdict table, CSV export, and a
+      print-ready report. One license, unlimited workbooks, works offline after unlock.</p>
+      <div class="licrow">
+        <input id="lickey" placeholder="Paste your license key (from your Gumroad receipt)" autocomplete="off" spellcheck="false">
+        <button id="licbtn" class="promo-btn">Unlock</button>
+      </div>
+      <div id="licmsg" class="licmsg"></div>
+    </div>
+    <a class="promo-btn" id="buybtn" href="#" rel="sponsored">Buy a license</a>
+  </div>
+
+  <div id="unlock-paid">
+    <div class="promo-card">
+      <p id="unlock-status"></p>
+      <span>
+        <button id="csvbtn" class="promo-btn">Export CSV</button>
+        <button id="printbtn" class="promo-btn" style="margin-left:.6rem">Print report</button>
+      </span>
+    </div>
+    <div id="formulas-section" style="display:none">
+      <h2 class="section-title">Every formula, with verdicts</h2>
+      <p class="note" id="formulas-note"></p>
+      <div class="table-scroll">
+      <table class="matrix"><thead>
+        <tr><th>Sheet</th><th>Cell</th><th>Formula</th><th>Functions</th><th>Verdict</th></tr>
+      </thead><tbody id="formulas-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Reads .xlsx / .xlsm (modern Excel format). Legacy .xls is not supported —
+  save as .xlsx first. Macros/VBA, pivot tables, external links, and add-ins are out of
+  scope: this audit covers worksheet formulas.</p>
+</div>
+
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Your workbook is parsed entirely in this browser tab. The only network requests this
+    page makes are for our own verdict dataset and — only if you enter one — a license-key
+    check with Gumroad. File contents are never transmitted.</p>
+    <p>Every LibreOffice result produced by executing real formulas &mdash; <a href="methodology.html">how we verify</a>. Open <a href="data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates</a>.</p>
+  </div>
+</footer>
+<script src="audit.js"></script>
+<script src="audit-verdicts.js"></script>
+<script src="audit-app.js"></script>
+</body>
+</html>
