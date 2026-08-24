@@ -48,6 +48,7 @@ DATA_DIR = ROOT / "data"
 TESTS_DIR = DATA_DIR / "tests"
 RESULTS_DIR = ROOT / "results"
 OUT_DIR = ROOT / "docs"
+SEO_PAGES_DIR = ROOT / "site" / "seo-pages"
 
 ENGINE_ORDER = ["excel", "google_sheets", "libreoffice"]
 ENGINE_LABELS = {
@@ -1012,6 +1013,12 @@ run the formula.</p>
 </li>
 {% endfor %}
 </ul>
+{% if seo_guides %}
+<h2 class="section-title" style="margin-top:2rem">Deep dives: formulas that behave differently</h2>
+<ul>
+{% for g in seo_guides %}<li><a href="{{ rel }}guides/{{ g.slug }}.html">{{ g.title }}</a></li>
+{% endfor %}</ul>
+{% endif %}
 {% endblock %}
 """
 
@@ -1580,6 +1587,13 @@ if(location.hash.startsWith('#f=')){ try{ const p=new URLSearchParams(location.h
 {% endblock %}
 """
 
+SEO_PAGE_TMPL = """{% extends "base.html" %}
+{% block content %}
+<a class="back-link" href="{{ rel }}quirks.html">&larr; All quirks &amp; gotchas</a>
+<h1>{{ h1 }}</h1>
+{{ body_html | safe }}
+{% endblock %}"""
+
 WHATSNEW_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>LibreOffice Calc function support by version</h1>
@@ -1649,6 +1663,17 @@ every <a href="{{ rel }}index.html">function page</a> and the
 """
 
 
+def load_seo_pages():
+    """Long-form 'behaves differently across engines' guides authored as one
+    JSON file per page in site/seo-pages/. Each: slug, title, meta_description,
+    h1, body_html (raw, pre-rendered HTML using the site's CSS classes)."""
+    pages = []
+    if SEO_PAGES_DIR.exists():
+        for pth in sorted(SEO_PAGES_DIR.glob("*.json")):
+            pages.append(json.loads(pth.read_text()))
+    return pages
+
+
 def load_recipes():
     recs = []
     verif = {}
@@ -1712,6 +1737,7 @@ def build_env():
                 "dataset.html": DATASET_TMPL,
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
+                "seo_page.html": SEO_PAGE_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
             }
         ),
@@ -1869,6 +1895,7 @@ def main():
         canonical=BASE_URL + "quirks.html",
         quirks=quirks,
         quirk_fn_count=quirk_fn_count,
+        seo_guides=load_seo_pages(),
     )
     (OUT_DIR / "quirks.html").write_text(env.get_template("quirks.html").render(**ctx))
     sitemap_urls.append({"loc": BASE_URL + "quirks.html", "lastmod": latest_result_date})
@@ -2037,6 +2064,31 @@ def main():
             )
             sitemap_urls.append(
                 {"loc": BASE_URL + f"how-to/{rc['slug']}.html", "lastmod": build_date}
+            )
+
+    # ---- SEO guide pages (formulas that behave differently across engines) ----
+    seo_pages = load_seo_pages()
+    if seo_pages:
+        (OUT_DIR / "guides").mkdir(parents=True, exist_ok=True)
+        seo_tmpl = env.get_template("seo_page.html")
+        for sp in seo_pages:
+            gx = common_ctx(rel="../")
+            gx.update(
+                page_title=sp["title"],
+                meta_description=sp["meta_description"],
+                canonical=BASE_URL + f"guides/{sp['slug']}.html",
+                h1=sp["h1"],
+                body_html=sp["body_html"],
+                noindex=False,
+                json_ld=breadcrumb_ld([
+                    (SITE_NAME, BASE_URL),
+                    ("Quirks", BASE_URL + "quirks.html"),
+                    (sp["title"], BASE_URL + f"guides/{sp['slug']}.html"),
+                ]),
+            )
+            (OUT_DIR / "guides" / f"{sp['slug']}.html").write_text(seo_tmpl.render(**gx))
+            sitemap_urls.append(
+                {"loc": BASE_URL + f"guides/{sp['slug']}.html", "lastmod": latest_result_date}
             )
 
     # ---- Function comparison pages ----

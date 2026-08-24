@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POWER(-8,1/3) errors in Excel but returns -2 in LibreOffice</title>
+<meta name="description" content="Excel returns #NUM! for POWER(-8,1/3); LibreOffice quietly returns the real cube root -2. The reason for the fork and how to migrate so both engines agree.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/power-negative-base-fractional-exponent-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:title" content="POWER(-8,1/3) errors in Excel but returns -2 in LibreOffice">
+<meta property="og:description" content="Excel returns #NUM! for POWER(-8,1/3); LibreOffice quietly returns the real cube root -2. The reason for the fork and how to migrate so both engines agree.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/power-negative-base-fractional-exponent-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Quirks","item":"https://canispreadsheet.com/quirks.html"},{"@type":"ListItem","position":3,"name":"POWER(-8,1/3) errors in Excel but returns -2 in LibreOffice","item":"https://canispreadsheet.com/guides/power-negative-base-fractional-exponent-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../quirks.html">&larr; All quirks &amp; gotchas</a>
+<h1>A negative base with a fractional exponent errors in Excel, computes in LibreOffice</h1>
+
+<p>Raising a negative number to a non-integer power is treated as out of domain by Excel, which
+returns <code>#NUM!</code>. LibreOffice Calc instead returns the real odd root, so
+<code>=POWER(-8,1/3)</code> is a <code>#NUM!</code> error in one app and the number -2 in the
+other. This is a genuine fork: an error on one side and a finite value on the other.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>Excel rejects the whole class of "negative base, fractional exponent" as a numeric-domain
+  error. LibreOffice evaluates the specific case as the real cube root and hands you a number,
+  so a workbook that shows an error in Excel shows a result in LibreOffice.</p>
+</div>
+
+<h2 class="section-title">A minimal example</h2>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=POWER(-8,1/3)</td><td>#NUM!</td><td>Not yet executed</td><td class="result">-2</td></tr>
+  </tbody>
+</table>
+</div>
+<p><code>#NUM!</code> is the documented-expected value in our test corpus; -2 is what our harness
+computed by recalculating in LibreOffice Calc 25.8.7.3. We have not yet executed this case in Google Sheets.</p>
+
+<h2 class="section-title">Why it happens</h2>
+<p>A negative base raised to a general non-integer exponent has no single real-valued result: the
+principal mathematical value is complex. Excel treats that entire class as a numeric-domain error
+and returns <code>#NUM!</code>, which is the expected value recorded in our corpus. LibreOffice
+resolves this particular exponent as the real odd root and returns -2. The divergence is not a bug
+report on either side; it is two defensible conventions for the same undefined-in-reals case. See
+Microsoft's
+<a href="https://support.microsoft.com/en-us/office/power-function-d3f2908b-56f4-4c3f-895a-07fb519c362a">POWER function reference</a>.</p>
+
+<h2 class="section-title">How to migrate safely</h2>
+<p>If you intend the real odd root, make the intent explicit so every engine returns the same
+number:</p>
+<p><code>=SIGN(-8)*ABS(-8)^(1/3)</code> returns -2 everywhere.</p>
+<p>If a negative base is actually invalid input in your model, guard it so the behavior is defined
+rather than engine-dependent:</p>
+<p><code>=IF(A1&lt;0,"invalid",POWER(A1,B1))</code></p>
+<p>The caret operator behaves the same way as POWER for this case, so <code>=(-8)^(1/3)</code>
+also returns <code>#NUM!</code> in Excel and -2 in LibreOffice; rewriting one form does not help
+unless you make the sign handling explicit as above.</p>
+
+<p>Either way, do not let a formula rely on one engine erroring and the other computing. After
+migrating, look for POWER or <code>^</code> over values that can go negative, since the result can
+switch between an error and a finite number without warning, and a downstream chart or total will
+inherit whichever the engine chose.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
