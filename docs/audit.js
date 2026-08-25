@@ -250,10 +250,16 @@
     var stripped = formula.replace(/"(?:[^"]|"")*"/g, '""');
     var seen = [];
     var have = {};
-    var re = /([A-Z][A-Z0-9_.]*)\s*\(/g;
+    var re = /([A-Z_][A-Z0-9_.]*)\s*\(/gi;
     var m;
     while ((m = re.exec(stripped)) !== null) {
       var fn = m[1].toUpperCase();
+      // Excel serializes post-2007 functions and the spill/intersection
+      // operators with _xlfn. / _xlfn._xlws. prefixes inside .xlsx files
+      // (e.g. _xlfn.XLOOKUP, _xlfn.SINGLE, _xlfn._xlws.FILTER). Normalize
+      // to the bare name so dataset lookup and display match what users see.
+      fn = fn.replace(/^_?XLFN\./, '').replace(/^_?XLWS\./, '');
+      if (!fn) { continue; }
       if (!have[fn]) { have[fn] = true; seen.push(fn); }
     }
     return seen;

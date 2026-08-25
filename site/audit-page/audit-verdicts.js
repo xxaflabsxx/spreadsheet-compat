@@ -73,6 +73,24 @@
    * documentation flag (l) — same precedence the site's checker uses.
    */
   function classifyFunction(fnName, entry, target, source) {
+    // Not functions at all: Excel saves the dynamic-array spill operator (#)
+    // as _xlfn.ANCHORARRAY(...) and the implicit-intersection operator (@)
+    // as _xlfn.SINGLE(...) inside .xlsx files. Explain instead of reporting
+    // them as unknown noise. We have not executed these operators, so the
+    // verdict is honest at-risk-review, not a pass/fail claim.
+    if (!entry && (fnName === 'ANCHORARRAY' || fnName === 'SINGLE')) {
+      var opDesc = fnName === 'ANCHORARRAY'
+        ? 'the spill operator # (e.g. =A1#)'
+        : 'the implicit-intersection operator @ (e.g. =@A1:A10)';
+      return {
+        verdict: 'quirk',
+        basis: 'documented',
+        note: 'Not a real function: this is how Excel saves ' + opDesc + ' in the ' +
+          '.xlsx file format. Behavior in ' + APP_NAMES[target] + ' depends on its ' +
+          'dynamic-array support and version. We have not executed these operators ' +
+          'yet, so review the affected cells manually.'
+      };
+    }
     if (!entry) {
       return {
         verdict: 'unknown',

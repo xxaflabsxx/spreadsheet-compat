@@ -258,6 +258,28 @@ console.log('e2e: Google Sheets -> Excel');
   eq(fnVerdicts(rep).GROUPBY, 'ok', 'GROUPBY fine when moving TO Excel');
 }
 
+console.log('regression: _xlfn prefix + operator serializations (r/libreoffice bug report 2026-08-25)');
+{
+  const ex = X.extractFunctions;
+  eq(ex('_xlfn.SINGLE(_xlfn.ANCHORARRAY(A1))').sort().join(','), 'ANCHORARRAY,SINGLE',
+    'spill/@ serializations extracted with prefix stripped');
+  eq(ex('_xlfn.XLOOKUP(A1,B:B,C:C)').join(','), 'XLOOKUP', '_xlfn.XLOOKUP normalizes to XLOOKUP');
+  eq(ex('_xlfn._xlws.FILTER(A1:B9,A1:A9>1)').join(','), 'FILTER', '_xlfn._xlws.FILTER normalizes to FILTER');
+  eq(ex('_XLFN.TEXTJOIN(",",TRUE,A1:A3)').join(','), 'TEXTJOIN', 'uppercase _XLFN. prefix stripped');
+  eq(ex('SUM(A1:A3)').join(','), 'SUM', 'plain functions unaffected');
+
+  const anchor = V.classifyFunction('ANCHORARRAY', null, 'l', 'x');
+  eq(anchor.verdict, 'quirk', 'ANCHORARRAY classified quirk, not unknown');
+  eq(anchor.basis, 'documented', 'ANCHORARRAY basis is documented');
+  ok(/spill operator #/.test(anchor.note), 'ANCHORARRAY note explains the # operator');
+  ok(/not executed these operators/.test(anchor.note), 'ANCHORARRAY note admits not executed');
+  const single = V.classifyFunction('SINGLE', null, 'g', 'x');
+  eq(single.verdict, 'quirk', 'SINGLE classified quirk');
+  ok(/implicit-intersection operator @/.test(single.note), 'SINGLE note explains the @ operator');
+  const unk = V.classifyFunction('MYMACRO', null, 'l', 'x');
+  eq(unk.verdict, 'unknown', 'other unknown functions still report unknown');
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed' +
   (usedShim ? '  (deflate-raw via zlib shim: this Node lacks native deflate-raw ' +
     'DecompressionStream; browsers have it natively)' : ''));
