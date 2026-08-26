@@ -1,6 +1,6 @@
 # Show HN draft — fire at a weekday US-morning window (Tue-Thu ~13:00-15:00 UTC)
 
-Refreshed 2026-08-26 05:50 UTC from the live corpus (numbers verified against data/ + results/ at that time — re-verify before posting):
+Refreshed 2026-08-26 05:50 UTC from the live corpus (numbers verified against data/ + results/ at that time — re-verify before posting; every example claim below was checked against results/*.json on 8/26 — COUNT literal-vs-reference, MROUND mismatched signs, XLOOKUP/SORT since 24.8.7.2, HSTACK/TEXTSPLIT/TAKE since 25.8.7.3):
 600 functions in inventory; 277 functions / 834 test cases executed in LibreOffice 25.8.7.3 (168 in 24.2.0.3, 168 in 24.8.7.2, 194 in 25.2.0.3); 282 verified how-to recipes; 48 comparisons; 15 executed-data guides; Migration Audit live ($19 launch, free tier = full scan + top-3 detail); offline companion CLI scripts/xlsx_recalc_diff.py (23 tests).
 
 ## Title (pick one, <80 chars)
@@ -17,7 +17,8 @@ Refreshed 2026-08-26 05:50 UTC from the live corpus (numbers verified against da
 ## Body / first comment
 I kept hitting the same wall: a formula works in Excel but breaks in Google Sheets, or a "supported" function
 returns #NAME? or a *different number* in LibreOffice. Vendor docs say a function exists; they don't tell you
-that COUNT(TRUE) is 0 in Excel and 1 in Calc, or that MROUND(5,-2) is #NUM! in Excel and silently 6 in Calc.
+that COUNT over a cell holding TRUE is 0 in Excel and 1 in Calc (a literal TRUE argument counts in both), or
+that MROUND(5,-2) is #NUM! in Excel and silently 6 in Calc.
 
 So I built canispreadsheet.com — a compatibility DB for ~600 spreadsheet functions across Excel, Google Sheets
 and LibreOffice Calc. The twist: every LibreOffice result is *executed*, not scraped. A headless LibreOffice
