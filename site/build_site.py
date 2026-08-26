@@ -660,6 +660,7 @@ BASE_TMPL = """<!doctype html>
       <a href="{{ rel }}index.html">Functions</a>
       <a href="{{ rel }}how-to/">How-to</a>
       <a href="{{ rel }}compare/">Compare</a>
+      <a href="{{ rel }}guides/">Guides</a>
       <a href="{{ rel }}checker.html">Checker</a>
       <a href="{{ rel }}audit.html">Migration&nbsp;Audit</a>
       <a href="{{ rel }}excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
@@ -1616,6 +1617,22 @@ if(location.hash.startsWith('#f=')){ try{ const p=new URLSearchParams(location.h
 {% endblock %}
 """
 
+GUIDES_INDEX_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Formula behavior guides</h1>
+<p class="lede">Executed-data writeups of specific cases where Excel, Google Sheets, and LibreOffice Calc give different results for the exact same formula &mdash; found by actually running the formula, not by comparing documentation pages. LibreOffice values shown are <strong>executed</strong> output from our test harness; Excel and Google Sheets values are each vendor&rsquo;s <strong>documented</strong> behavior unless a guide says otherwise. For the shorter, catalog-style version of these findings across every tested function, see the <a href="{{ rel }}quirks.html">quirks list</a>.</p>
+<ul class="quirks-list">
+{% for g in guides %}
+<li class="quirk-entry">
+  <h3><a href="{{ rel }}guides/{{ g.slug }}.html">{{ g.title }}</a></h3>
+  <p style="margin:.3rem 0 0">{{ g.meta_description }}</p>
+  {% if g.functions %}<p style="margin:.3rem 0 0;font-size:.9em;color:var(--text-muted,#6b7280)">Functions: {% for f in g.functions %}<code>{{ f }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endblock %}
+"""
+
 SEO_PAGE_TMPL = """{% extends "base.html" %}
 {% block content %}
 <a class="back-link" href="{{ rel }}quirks.html">&larr; All quirks &amp; gotchas</a>
@@ -1767,6 +1784,7 @@ def build_env():
                 "checker.html": CHECKER_TMPL,
                 "whatsnew.html": WHATSNEW_TMPL,
                 "seo_page.html": SEO_PAGE_TMPL,
+                "guides_index.html": GUIDES_INDEX_TMPL,
                 "sitemap.xml": SITEMAP_TMPL,
             }
         ),
@@ -2099,6 +2117,22 @@ def main():
     seo_pages = load_seo_pages()
     if seo_pages:
         (OUT_DIR / "guides").mkdir(parents=True, exist_ok=True)
+        gictx = common_ctx(rel="../")
+        gictx.update(
+            page_title="Formula behavior guides — where Excel, Google Sheets & LibreOffice disagree",
+            meta_description=(
+                "Executed-data writeups of formulas that return different results in "
+                "Excel, Google Sheets, and LibreOffice Calc for the same input. "
+                "LibreOffice values are executed; Excel and Google Sheets are documented "
+                "unless stated otherwise."
+            ),
+            canonical=BASE_URL + "guides/",
+            guides=seo_pages,
+        )
+        (OUT_DIR / "guides" / "index.html").write_text(
+            env.get_template("guides_index.html").render(**gictx)
+        )
+        sitemap_urls.append({"loc": BASE_URL + "guides/", "lastmod": latest_result_date})
         seo_tmpl = env.get_template("seo_page.html")
         for sp in seo_pages:
             gx = common_ctx(rel="../")
