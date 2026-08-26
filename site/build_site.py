@@ -486,6 +486,9 @@ h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
 #fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 #fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
 #fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
 
 table.matrix, table.cases {
   width: 100%;
@@ -615,19 +618,59 @@ SEARCH_JS = """
   var input = document.getElementById('fn-search');
   var list = document.getElementById('fn-list');
   var count = document.getElementById('fn-count');
+  var quick = document.getElementById('fn-quick');
   if (!input || !list) return;
   var items = Array.prototype.slice.call(list.children);
+  var visible = [];
   function apply() {
     var q = input.value.trim().toLowerCase();
-    var shown = 0;
+    visible = [];
     items.forEach(function (li) {
       var match = !q || li.dataset.name.indexOf(q) !== -1 || li.dataset.cat.indexOf(q) !== -1;
       li.style.display = match ? '' : 'none';
-      if (match) shown++;
+      if (match) visible.push(li);
     });
-    if (count) count.textContent = shown + ' of ' + items.length + ' functions';
+    if (count) count.textContent = visible.length + ' of ' + items.length + ' functions' + (q ? ' match \u2014 press Enter to open the best match' : '');
+    if (quick) {
+      quick.innerHTML = '';
+      if (q) {
+        // Exact name first, then names starting with the query, then the rest.
+        var ranked = visible.slice().sort(function (a, b) { return rank(a, q) - rank(b, q); }).slice(0, 8);
+        ranked.forEach(function (li) {
+          var a = li.querySelector('a');
+          if (!a) return;
+          var link = document.createElement('a');
+          link.href = a.getAttribute('href');
+          link.textContent = a.textContent;
+          quick.appendChild(link);
+        });
+        if (!ranked.length) {
+          var none = document.createElement('span');
+          none.textContent = 'No function matches \u201c' + input.value.trim() + '\u201d.';
+          quick.appendChild(none);
+        }
+      }
+    }
+  }
+  function rank(li, q) {
+    var n = li.dataset.name;
+    if (n === q) return 0;
+    if (n.indexOf(q) === 0) return 1;
+    if (n.indexOf(q) !== -1) return 2;
+    return 3;
   }
   input.addEventListener('input', apply);
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    var q = input.value.trim().toLowerCase();
+    if (!q) return;
+    var best = null;
+    if (visible.length) best = visible.slice().sort(function (a, b) { return rank(a, q) - rank(b, q); })[0];
+    var a = best && best.querySelector('a');
+    if (a && (best.dataset.name === q || visible.length === 1)) { window.location.href = a.getAttribute('href'); return; }
+    if (visible.length) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   apply();
 })();
 """
@@ -719,6 +762,7 @@ INDEX_TMPL = """{% extends "base.html" %}
     <input type="search" id="fn-search" placeholder="Search a function, e.g. VLOOKUP, XLOOKUP, DATEDIF..." aria-label="Search functions">
   </div>
   <p class="search-hint" id="fn-count">{{ functions|length }} of {{ functions|length }} functions</p>
+  <div id="fn-quick" aria-live="polite"></div>
   <noscript><p>Search needs JavaScript. Every function is still listed below and
   fully linked; use your browser's find-in-page instead.</p></noscript>
 </section>
