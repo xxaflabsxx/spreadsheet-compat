@@ -276,6 +276,133 @@ DAYS360 US-vs-European method (30 vs 29 on the same date pair), ISBLANK
 FALSE on an `=""` formula result, COUNTBLANK counting that same cell as
 blank, and TIME(27,0,0)=0.125 hour wrap-around.
 
+## Offline companion: per-cell recalc diff
+
+`scripts/xlsx_recalc_diff.py` answers a narrower, sharper question than the
+web audit does: **exactly which cells in *my* workbook will compute
+differently in LibreOffice Calc than they did in Excel?**
+
+```
+python3 scripts/xlsx_recalc_diff.py BOOK.xlsx [--json out.json] [--md out.md]
+                                    [--limit N] [--sheet NAME] [--quiet]
+                                    [--include-volatile] [--keep-temp]
+```
+
+Exit codes: `0` every cell matches · `1` differences found · `2` untrusted
+run, unusable input, or error. Dependencies: `openpyxl` and `soffice` on
+`PATH` (or `$SOFFICE_BIN`). Single file, no network, nothing uploaded, your
+workbook is never modified.
+
+### Why this works
+
+An `.xlsx` saved by Excel stores, for every formula cell, both the formula
+(`<f>`) and **the value Excel last computed for it** (`<v>`, the cached
+value). That cached value is real, executed Excel ground truth already
+sitting on disk. Diff it against a forced LibreOffice recalculation of the
+same formulas and you get per-cell truth with no Excel install and no
+upload — which is why this is the offline companion to
+[canispreadsheet.com/audit.html](https://canispreadsheet.com/audit.html),
+whose client-side audit only reaches *function-level* verdicts.
+
+### The trap it works around: LibreOffice may not recalculate
+
+LibreOffice's "Recalculation on File Load" for Excel files does **not**
+default to *always*. Run `soffice --convert-to xlsx` on an Excel-saved file
+and it can copy Excel's cached values straight through — producing a
+beautiful, totally fake, 100%-match report. This is not hypothetical; it is
+what happens, and `scripts/test_xlsx_recalc_diff.py::test_stripping_is_necessary`
+asserts it with a live LibreOffice run:
+
+```
+[evidence] unstripped conversion -> 1 ; stripped conversion -> 2
+           (Excel's cached value was 1)
+```
+
+So the tool builds a **stripped copy** at the XML level: inside every
+`xl/worksheets/sheet*.xml`, each `<v>…</v>` under a cell that has an `<f>`
+is deleted, along with the now-meaningless `t="str"/"e"/"b"` result-type
+attribute. Every other byte of every other part is copied verbatim — a
+round trip through openpyxl would silently drop charts, drawings, pivot
+caches and most styles. Cells inside a legacy array formula's `ref` range
+are stripped too, since they hold results without carrying an `<f>`
+themselves. The stripped copy lives in a temp dir and is converted with
+`soffice --headless --convert-to xlsx` under an isolated
+`-env:UserInstallation` profile. **Nothing is ever injected into your
+file.**
+
+Trust is then verified, not assumed: the report states what fraction of the
+formula cells that had an Excel cached value came back from LibreOffice
+with a value. If that fraction is ~0, LibreOffice evaluated nothing and the
+entire run is marked `UNTRUSTED` (exit 2). Never trust a clean report
+without the "Recalculation check … TRUSTED" line.
+
+### What it reports
+
+Console summary + optional `--json` / `--md`: per-category counts, the
+functions appearing most often in differing cells, and the first N differing
+cells with `Sheet!Addr`, formula, Excel value, LibreOffice value and
+category. Categories are `match`, `volatile`, `numeric_mismatch`,
+`text_mismatch`, `type_mismatch`, `value_vs_error`, `error_vs_value`,
+`error_vs_error`, `missing_in_lo`, `no_excel_value`.
+
+Comparison rules: numbers with a 1e-9 relative tolerance; dates/times
+normalized to Excel serials on both sides; booleans compared as booleans
+(a boolean-vs-number pair is `type_mismatch`, not a numeric one); strings
+compared exactly after decoding OOXML `_xNNNN_` escapes (so LibreOffice's
+`_x0000_` for `CHAR(0)` compares as a real NUL); error cells compared by
+code, so `#NUM!` → `#VALUE!` surfaces as `error_vs_error` rather than
+"an error either way". A formula returning `""` round-trips as a value-less
+cell, so blank and empty-string are treated as equal — they are genuinely
+indistinguishable at this layer.
+
+Shared formulas are handled properly: the set of formula cells is built
+from the raw XML, **not** from openpyxl's view, because openpyxl exposes the
+formula text only on a shared block's master cell. Slaves are diffed too and
+labelled with their master's address.
+
+### Honest limits
+
+- **Only LibreOffice is executed here.** The Excel side is whatever Excel
+  cached in the file. If the workbook was last saved by something other than
+  Excel, you are not diffing against Excel.
+- **`calcMode="manual"`** in `xl/workbook.xml` means Excel was not
+  recalculating automatically, so those cached values may be stale. The tool
+  warns; fix it by opening in Excel, pressing F9, and saving.
+- **No cached values at all** (files written by openpyxl / xlsxwriter /
+  pandas, or saved with calculation disabled) means there is nothing to diff
+  against. The tool says the diff is meaningless and exits 2 rather than
+  inventing a comparison. `site/audit-page/verdict-mix.xlsx` is exactly this
+  case.
+- **Volatile functions** (`NOW`, `TODAY`, `RAND`, `RANDBETWEEN`,
+  `RANDARRAY`) always differ by definition. They get their own `volatile`
+  category and do not count as mismatches; `--include-volatile` overrides
+  that.
+- A difference is a difference, not necessarily a *bug*: it can be a genuine
+  engine divergence (see `docs/quirks.html`), an unsupported function, or a
+  stale Excel cache. The tool tells you which cells to look at; it does not
+  adjudicate.
+- Cell parsing is regex-based over well-formed OOXML cell elements. It is
+  deliberate (byte-preserving) but assumes cell payloads are not exotic.
+
+### Tests
+
+```
+python3 scripts/test_xlsx_recalc_diff.py -v     # 23 tests, runs real soffice
+```
+
+Since we cannot run Excel, the "Excel-saved" side of each fixture is
+simulated honestly: build the workbook with openpyxl, then **inject** a
+cached `<v>` at the XML level exactly where Excel would have written its own
+result, using the value Microsoft documents. Covered: a matching value, a
+diverging value (`=COUNT(A1,1)` with `A1=TRUE` — Excel documents 1 because
+booleans reached through a *reference* are not counted; LibreOffice really
+computes **2**, consistent with `COUNT_boolean_in_range_excluded` in
+`results/libreoffice-25.8.json`), error-vs-value (`=CHAR(0)`: Excel `#VALUE!`
+vs LibreOffice's real NUL character), a shared-formula range, the
+manual-calc warning, the no-cached-values exit-2 path (including this repo's
+own `verdict-mix.xlsx`), volatile classification, and a check that stripping
+preserves every non-formula cell and every non-sheet zip part byte-for-byte.
+
 ## How to add a function
 
 1. Add/verify the function's entry in `data/functions.json` (name,
