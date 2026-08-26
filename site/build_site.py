@@ -800,7 +800,7 @@ INDEX_TMPL = """{% extends "base.html" %}
   {% endfor %}
 </ul>
 
-<script>{{ search_js }}</script>
+<script>{{ search_js | safe }}</script>
 {% endblock %}
 """
 
