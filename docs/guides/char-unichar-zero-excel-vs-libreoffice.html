@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHAR(0) and UNICHAR(0): Excel #VALUE! vs a NUL character in LibreOffice</title>
+<meta name="description" content="Excel documents CHAR(0) and UNICHAR(0) as #VALUE!. LibreOffice Calc returns a NUL control character instead — the value our harness read back as the literal text _x0000_.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/char-unichar-zero-excel-vs-libreoffice.html">
+<meta property="og:title" content="CHAR(0) and UNICHAR(0): Excel #VALUE! vs a NUL character in LibreOffice">
+<meta property="og:description" content="Excel documents CHAR(0) and UNICHAR(0) as #VALUE!. LibreOffice Calc returns a NUL control character instead — the value our harness read back as the literal text _x0000_.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/char-unichar-zero-excel-vs-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Quirks","item":"https://canispreadsheet.com/quirks.html"},{"@type":"ListItem","position":3,"name":"CHAR(0) and UNICHAR(0): Excel #VALUE! vs a NUL character in LibreOffice","item":"https://canispreadsheet.com/guides/char-unichar-zero-excel-vs-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../quirks.html">&larr; All quirks &amp; gotchas</a>
+<h1>CHAR(0) makes an invisible character in LibreOffice instead of an error</h1>
+
+<p>Microsoft documents <code>CHAR</code> as taking &ldquo;a number between 1 and 255&rdquo;, and
+<code>UNICHAR</code>'s reference page is explicit that a number of zero or less returns the
+<code>#VALUE!</code> error. LibreOffice Calc does not reject zero. It builds the character for code
+point 0 &mdash; the NUL control character &mdash; and hands it back as an ordinary string. When our
+harness read the recalculated workbook, that cell came back as the literal seven-character text
+<code>_x0000_</code>, which is the escape the .xlsx format uses to store a NUL inside a string.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>This is the silent kind of divergence. Excel stops with a visible error; LibreOffice returns a
+  string that has content but no appearance. On screen the cell looks empty. <code>LEN</code> of it
+  is not zero, an <code>=</code> comparison with <code>""</code> is false, and exporting the sheet
+  writes a real NUL byte into your CSV &mdash; the kind of thing that makes a downstream database
+  import fail with an error that names a file, not a formula.</p>
+</div>
+
+<h2 class="section-title">Executed results</h2>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=CHAR(0)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">_x0000_</td></tr>
+    <tr><td class="formula">=UNICHAR(0)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">_x0000_</td></tr>
+    <tr><td class="formula">=CHAR(256)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=UNICHAR(-1)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=CHAR(65)</td><td>A</td><td>Not yet executed</td><td class="result">A</td></tr>
+    <tr><td class="formula">=UNICHAR(233)</td><td>&eacute;</td><td>Not yet executed</td><td class="result">&eacute;</td></tr>
+    <tr><td class="formula">=UNICHAR(128512)</td><td>&#128512;</td><td>Not yet executed</td><td class="result">&#128512;</td></tr>
+    <tr><td class="formula">=CODE(CHAR(97))</td><td>97</td><td>Not yet executed</td><td class="result">97</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The Excel column is the documented-expected value from our test corpus; we did not run Excel. The
+LibreOffice column is what our harness read back after recalculating the workbook in LibreOffice Calc
+25.8.7.3. Read the table as a whole and the shape of the bug is clear: LibreOffice <em>does</em>
+range-check these functions &mdash; <code>=CHAR(256)</code> and <code>=UNICHAR(-1)</code> both return
+<code>#VALUE!</code>, matching Excel &mdash; and it handles ordinary code points, accents and even
+supplementary-plane emoji identically. Zero is the single value that slips through the check.</p>
+
+<h2 class="section-title">A note on what <code>_x0000_</code> means</h2>
+<p><code>_x0000_</code> is not a piece of text LibreOffice invented. It is the standard OOXML escape
+for a control character that cannot appear literally in the XML of an .xlsx file, so a cell whose
+value is a NUL character is written to disk as <code>_x0000_</code> and that is what our harness read.
+The practical takeaway is the same either way: the formula produced a character, not an error. In the
+LibreOffice UI you would see an empty-looking cell; in a file handed to another program you get either
+a NUL byte or the literal escape text, and both are trouble.</p>
+
+<h2 class="section-title">Consistent across LibreOffice versions</h2>
+<p><code>=CHAR(0)</code> and <code>=UNICHAR(0)</code> produced the same result in 24.2.0.3, 24.8.7.2,
+25.2.0.3 and 25.8.7.3, and the two out-of-range rows returned <code>#VALUE!</code> in all four builds.
+Long-standing behaviour, not a recent change.</p>
+
+<h2 class="section-title">Why it happens</h2>
+<p>Excel's range check is inclusive of the documented lower bound: 1 is the smallest valid argument,
+so 0 is rejected. LibreOffice's check evidently starts below that, so 0 maps to U+0000 and is
+returned like any other character. The divergence only surfaces when the argument is computed rather
+than typed &mdash; <code>=CHAR(A1)</code> where <code>A1</code> is empty, or
+<code>=CHAR(CODE(x)-64)</code> on an unexpected input, or a lookup that returns nothing. In Excel that
+mistake shows itself; in LibreOffice it disappears into a column of apparently blank cells.</p>
+
+<h2 class="section-title">How to migrate safely</h2>
+<p>Guard the argument rather than trusting the function to reject it:
+<code>=IF(n&lt;1,"",CHAR(n))</code> gives both engines the same answer and makes the intent explicit.
+Where you are cleaning up data that may already contain these characters, <code>CLEAN</code> is the
+tool for the job &mdash; it strips control characters, and our executed run confirms
+<code>=CLEAN("Hello"&amp;CHAR(7)&amp;"World")</code> returns <code>HelloWorld</code> in LibreOffice
+25.8.7.3. We have not executed <code>CLEAN</code> against a NUL specifically, so verify that case in
+your own file before relying on it; <code>=SUBSTITUTE(x,CHAR(0),"")</code> is the direct alternative.</p>
+<p>When auditing, look for the symptom rather than the formula: a text column where
+<code>=LEN(cell)</code> disagrees with what you can see, or a key column where lookups miss on rows
+that look identical, is the fingerprint of an invisible character. And if you have ever seen the
+literal string <code>_x0000_</code> appear in an exported file, this class of formula is where it
+comes from.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column is Microsoft's documented behaviour recorded in our test corpus, not values we
+executed in Excel. Google Sheets is not yet run through our harness, so that column is left honest.
+The LibreOffice column is executed output from LibreOffice Calc 25.8.7.3, reproduced in our three
+earlier version runs; the exact rendering of the NUL character depends on how the reading program
+handles it, and <code>_x0000_</code> is what our .xlsx reader reported.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

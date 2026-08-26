@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6</title>
+<meta name="description" content="Five of Excel&#39;s seven ERROR.TYPE codes match in LibreOffice Calc. The #REF! and #NUM! cases return #N/A instead of 4 and 6 — so error-classification logic breaks on migration.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/error-type-codes-excel-vs-libreoffice.html">
+<meta property="og:title" content="ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6">
+<meta property="og:description" content="Five of Excel&#39;s seven ERROR.TYPE codes match in LibreOffice Calc. The #REF! and #NUM! cases return #N/A instead of 4 and 6 — so error-classification logic breaks on migration.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/error-type-codes-excel-vs-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Quirks","item":"https://canispreadsheet.com/quirks.html"},{"@type":"ListItem","position":3,"name":"ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6","item":"https://canispreadsheet.com/guides/error-type-codes-excel-vs-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../quirks.html">&larr; All quirks &amp; gotchas</a>
+<h1>ERROR.TYPE does not map every error to a code in LibreOffice</h1>
+
+<p><code>ERROR.TYPE</code> exists to turn an error into a number you can branch on: <code>1</code> for
+<code>#NULL!</code>, <code>2</code> for <code>#DIV/0!</code>, <code>3</code> for <code>#VALUE!</code>,
+<code>4</code> for <code>#REF!</code>, <code>5</code> for <code>#NAME?</code>, <code>6</code> for
+<code>#NUM!</code>, <code>7</code> for <code>#N/A</code>. Five of those seven behave identically in
+LibreOffice Calc. Two do not: the cases Microsoft documents as <code>4</code> and <code>6</code>
+return <code>#N/A</code> in LibreOffice &mdash; the same thing <code>ERROR.TYPE</code> returns when
+you hand it something that is not an error at all.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>A dashboard that classifies failures with <code>ERROR.TYPE</code> does not merely mis-label the
+  <code>#REF!</code> and <code>#NUM!</code> classes in LibreOffice &mdash; it stops classifying them.
+  <code>ERROR.TYPE</code> hands back <code>#N/A</code>, which is itself an error, so it propagates
+  through whatever arithmetic or lookup you wrapped around it. A classifier turns into a new error
+  source.</p>
+</div>
+
+<h2 class="section-title">Executed results</h2>
+<p>The <code>#NULL!</code> row uses <code>A1:A2 = 1, 2</code> and <code>C1:C2 = 3, 4</code>, so the
+space intersection of two non-overlapping ranges is a genuine <code>#NULL!</code>.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ERROR.TYPE(OFFSET(A1,-1,0))</td><td>4</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(SQRT(-1))</td><td>6</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(A1:A2 C1:C2)</td><td>1</td><td>Not yet executed</td><td class="result">1</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(1/0)</td><td>2</td><td>Not yet executed</td><td class="result">2</td></tr>
+    <tr><td class="formula">=ERROR.TYPE("a"+1)</td><td>3</td><td>Not yet executed</td><td class="result">3</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(qwertyzz)</td><td>5</td><td>Not yet executed</td><td class="result">5</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(NA())</td><td>7</td><td>Not yet executed</td><td class="result">7</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(5)</td><td>#N/A</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The Excel column is the documented code mapping recorded in our test corpus from Microsoft's
+<code>ERROR.TYPE</code> reference page; we did not run Excel. The LibreOffice column is what our
+harness computed in LibreOffice Calc 25.8.7.3. Note the last row: <code>#N/A</code> is the documented
+answer for a non-error argument, which is exactly why the two divergent rows are so awkward &mdash;
+in LibreOffice, &ldquo;this is a <code>#REF!</code>&rdquo; and &ldquo;this is not an error&rdquo;
+come back indistinguishable.</p>
+
+<h2 class="section-title">Consistent across LibreOffice versions</h2>
+<p>Both divergent cases returned <code>#N/A</code> in 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3, and
+the five matching codes returned <code>1</code>, <code>2</code>, <code>3</code>, <code>5</code> and
+<code>7</code> in every build. Stable behaviour across every version we have executed.</p>
+
+<h2 class="section-title">Why it happens</h2>
+<p>The two divergent rows are downstream of a difference we measured separately. In LibreOffice,
+<code>=OFFSET(A1,-1,0)</code> is not a <code>#REF!</code> at all &mdash; our executed run returns
+<code>#VALUE!</code> &mdash; and <code>=SQRT(-1)</code> is not <code>#NUM!</code> either; standalone
+<code>=SQRT(-16)</code> returns <code>#VALUE!</code> in our run. So the errors that Excel would label
+<code>4</code> and <code>6</code> do not exist here in the first place. What is still surprising is
+that <code>ERROR.TYPE</code> does not then report code <code>3</code> for them, given that
+<code>=ERROR.TYPE("a"+1)</code> &mdash; a plain <code>#VALUE!</code> &mdash; does return
+<code>3</code>. The observable conclusion from our data is that LibreOffice tracks these failures as
+distinct internal conditions that display as <code>#VALUE!</code> but are not mapped onto any of the
+seven Excel codes, so <code>ERROR.TYPE</code> falls through to <code>#N/A</code>. We have not
+inspected LibreOffice's source to confirm the mechanism; the behaviour is what our harness measured.
+The two upstream differences have their own guides:
+<a href="../guides/offset-off-sheet-edge-ref-vs-value-error-excel-vs-libreoffice.html">OFFSET past the sheet edge</a>
+and <a href="../guides/num-error-vs-value-error-excel-vs-libreoffice.html">#NUM! vs #VALUE! domain errors</a>.</p>
+
+<h2 class="section-title">How to migrate safely</h2>
+<p>Treat <code>ERROR.TYPE</code> as non-portable and replace it with the predicates that are.
+<code>ISERROR</code>, <code>ISERR</code>, <code>ISNA</code>, <code>IFERROR</code> and
+<code>IFNA</code> all matched their documented behaviour in our LibreOffice 25.8.7.3 run, including
+the subtle ones: <code>=ISERR(NA())</code> returned <code>FALSE</code> and
+<code>=IFNA(10/0,"na")</code> correctly passed the <code>#DIV/0!</code> through rather than catching
+it. A branch of the shape <code>=IF(ISNA(x),"missing",IF(ISERROR(x),"broken",x))</code> carries the
+same meaning in both engines, where <code>=IF(ERROR.TYPE(x)=4,...)</code> does not.</p>
+<p>If you must keep <code>ERROR.TYPE</code>, at minimum wrap it &mdash;
+<code>=IFERROR(ERROR.TYPE(x),0)</code> &mdash; so the unmapped cases degrade to a sentinel instead of
+injecting a fresh <code>#N/A</code> into the surrounding formula. And do not read a low code count as
+reassurance after migrating: a report that shows zero <code>#REF!</code>-class failures in
+LibreOffice may simply be unable to see them.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel codes are Microsoft's documented mapping as recorded in our test corpus, not values we
+executed in Excel. Google Sheets is not yet run through our harness, so that column is left honest.
+The LibreOffice column is executed output from LibreOffice Calc 25.8.7.3, reproduced in our
+24.2.0.3, 24.8.7.2 and 25.2.0.3 runs.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
