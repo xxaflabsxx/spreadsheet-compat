@@ -15,6 +15,7 @@ do the 2-minute manual check below before announcing.
 | `make_fixtures.py` | Generates `verdict-mix.xlsx` (needs openpyxl: `/home/jon/venv/bin/python make_fixtures.py`). |
 | `verdict-mix.xlsx` | E2E fixture: safe functions + dataset-verified breakers per target (see docstring in `make_fixtures.py`). |
 | `test.mjs` | 84 assertions: verdict-engine unit tests + E2E through the real parser for 3 directions. `node test.mjs`. |
+| `test-adversarial.mjs` | 170 assertions: hostile formulas (quoted parens, structured refs, `_xlfn.` prefixes, LET/LAMBDA names, sheet names with parens, 8k-char formulas) through BOTH extractors — `extractFunctions()` here and the checker's `funcs()` read straight out of the built `docs/checker.html`. `node test-adversarial.mjs`. |
 
 ## Deploy steps
 

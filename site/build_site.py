@@ -1502,7 +1502,36 @@ CHECKER_TMPL = """{% extends "base.html" %}
 <script>
 let DB=null;
 async function load(){ if(!DB){ DB=await (await fetch(DATA_URL)).json(); } return DB; }
-function funcs(s){ const set=new Set(); const re=/([A-Za-z][A-Za-z0-9_.]*)\\s*\\(/g; let m; while((m=re.exec(s))){ set.add(m[1].toUpperCase()); } return [...set]; }
+// Function-name extraction. Kept behaviourally identical to the Migration
+// Audit's extractFunctions() in site/audit-page/audit.js — the shared case
+// list lives in site/audit-page/test-adversarial.mjs, which tests BOTH.
+// Quoted content never counts: double quotes are string literals
+// (="COUNT(A1)" -> nothing) and single quotes are sheet/workbook names
+// (=SUM('My Data (2024)'!A1:A5) -> SUM, not DATA). A name counts only when
+// the next non-space character is "(" and no identifier character (incl.
+// non-ASCII letters) precedes it. Scanning is token-first rather than
+// /NAME\\s*\\(/ because that form backtracks quadratically over a long run of
+// letters — an 8k-char pasted formula was enough to stall it.
+function splitLits(s){ const segs=[]; let cur='', i=0;
+  while(i<s.length){ const ch=s[i];
+    if(ch==='"'||ch==="'"){ if(cur){segs.push({lit:false,t:cur}); cur='';} const q=ch; i++;
+      while(i<s.length){ if(s[i]===q){ if(s[i+1]===q){i+=2; continue;} i++; break; } i++; }
+      segs.push({lit:true,t:''}); }
+    else { cur+=ch; i++; } }
+  if(cur) segs.push({lit:false,t:cur});
+  return segs; }
+const FN_TOKEN_RE=/[A-Z_][A-Z0-9_.]*/gi, FN_IDENT_RE=/[A-Za-z0-9_.\\u0080-\\uFFFF]/;
+function funcs(s){ const set=new Set();
+  for(const seg of splitLits(s===null||s===undefined?'':String(s))){ if(seg.lit) continue;
+    const c=seg.t; let m; FN_TOKEN_RE.lastIndex=0;
+    while((m=FN_TOKEN_RE.exec(c))!==null){
+      if(m.index>0&&FN_IDENT_RE.test(c.charAt(m.index-1))) continue;
+      let j=FN_TOKEN_RE.lastIndex; while(j<c.length&&/[ \\t\\r\\n]/.test(c.charAt(j))) j++;
+      if(c.charAt(j)!=='(') continue;
+      // Excel stores post-2007 functions as _xlfn.NAME / _xlfn._xlws.NAME.
+      const fn=m[0].toUpperCase().replace(/^_?XLFN\\./,'').replace(/^_?XLWS\\./,'');
+      if(fn) set.add(fn); } }
+  return [...set]; }
 function yn(ok){ return ok?'<span style="color:#0a7a2f">&#10003; yes</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};

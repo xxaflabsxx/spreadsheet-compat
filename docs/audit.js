@@ -243,24 +243,49 @@
     return segs;
   }
 
-  // Extract function names: strip double-quoted string literals first, then
-  // match ([A-Z][A-Z0-9_.]*)\s*\( , uppercase, dedupe.
-  // (This mirrors how the site's compatibility checker tokenizes formulas.)
+  // Extract function names, uppercased and deduped, in first-seen order.
+  //
+  // Rules (all three matter against hostile input; see test-adversarial.mjs):
+  //   1. Quoted content never contributes. BOTH quote kinds are skipped via
+  //      splitFormulaLiterals: double quotes for string literals
+  //      (="COUNT(A1)" -> none) and single quotes for sheet/workbook names
+  //      (=SUM('My Data (2024)'!A1:A5) -> SUM, not DATA).
+  //   2. A name only counts as a call when the next non-space character is
+  //      "(", and when it is a WHOLE token — no identifier character (incl.
+  //      non-ASCII letters) immediately before it, so =Groesse-with-umlaut(A1)
+  //      cannot yield a bogus tail like "E".
+  //   3. Matching is done token-first (scan identifiers, then look ahead for
+  //      the paren) rather than with a /NAME\s*\(/ regex: the regex form
+  //      backtracks quadratically over a long run of letters, which an 8k-char
+  //      pasted formula can trigger. This form is linear.
+  var FN_TOKEN_RE = /[A-Z_][A-Z0-9_.]*/gi;
+  var IDENT_CHAR_RE = /[A-Za-z0-9_.\u0080-\uFFFF]/;
+
   function extractFunctions(formula) {
-    var stripped = formula.replace(/"(?:[^"]|"")*"/g, '""');
+    var text = typeof formula === 'string' ? formula
+      : (formula === null || formula === undefined ? '' : String(formula));
+    var segs = splitFormulaLiterals(text);
     var seen = [];
     var have = {};
-    var re = /([A-Z_][A-Z0-9_.]*)\s*\(/gi;
-    var m;
-    while ((m = re.exec(stripped)) !== null) {
-      var fn = m[1].toUpperCase();
-      // Excel serializes post-2007 functions and the spill/intersection
-      // operators with _xlfn. / _xlfn._xlws. prefixes inside .xlsx files
-      // (e.g. _xlfn.XLOOKUP, _xlfn.SINGLE, _xlfn._xlws.FILTER). Normalize
-      // to the bare name so dataset lookup and display match what users see.
-      fn = fn.replace(/^_?XLFN\./, '').replace(/^_?XLWS\./, '');
-      if (!fn) { continue; }
-      if (!have[fn]) { have[fn] = true; seen.push(fn); }
+    for (var s = 0; s < segs.length; s++) {
+      if (segs[s].literal) { continue; }
+      var chunk = segs[s].text;
+      var m;
+      FN_TOKEN_RE.lastIndex = 0;
+      while ((m = FN_TOKEN_RE.exec(chunk)) !== null) {
+        if (m.index > 0 && IDENT_CHAR_RE.test(chunk.charAt(m.index - 1))) { continue; }
+        var j = FN_TOKEN_RE.lastIndex;
+        while (j < chunk.length && /[ \t\r\n]/.test(chunk.charAt(j))) { j++; }
+        if (chunk.charAt(j) !== '(') { continue; }
+        var fn = m[0].toUpperCase();
+        // Excel serializes post-2007 functions and the spill/intersection
+        // operators with _xlfn. / _xlfn._xlws. prefixes inside .xlsx files
+        // (e.g. _xlfn.XLOOKUP, _xlfn.SINGLE, _xlfn._xlws.FILTER). Normalize
+        // to the bare name so dataset lookup and display match what users see.
+        fn = fn.replace(/^_?XLFN\./, '').replace(/^_?XLWS\./, '');
+        if (!fn) { continue; }
+        if (!have[fn]) { have[fn] = true; seen.push(fn); }
+      }
     }
     return seen;
   }
