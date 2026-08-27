@@ -339,6 +339,231 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
 
 
 # --------------------------------------------------------------------------
+# Verdict-bearing <title>/meta description for function pages
+#
+# Search Console showed the (formerly identical, per-page) generic title
+# "X function: Excel vs Google Sheets vs LibreOffice compatibility" ranking
+# page 1-2 with ZERO clicks across hundreds of function pages — a title that
+# only restates the query has nothing to make someone click. These builders
+# read each record's OWN executed/documented data (see build_records above)
+# and put the actual verdict in the title and description instead.
+#
+# Ground truth in this dataset: LibreOffice is the only engine ever actually
+# EXECUTED (results/libreoffice-*.json); Excel and Google Sheets support is
+# known only from official documentation presence (functions.json "apps"
+# flags). Copy must never imply Excel/Sheets were executed.
+# --------------------------------------------------------------------------
+
+ENGINE_SHORT = {"excel": "Excel", "google_sheets": "Sheets", "libreoffice": "LibreOffice"}
+ENGINE_FULL = {"excel": "Excel", "google_sheets": "Google Sheets", "libreoffice": "LibreOffice"}
+
+
+def _join_and(labels):
+    labels = list(labels)
+    if not labels:
+        return ""
+    if len(labels) == 1:
+        return labels[0]
+    if len(labels) == 2:
+        return f"{labels[0]} and {labels[1]}"
+    return ", ".join(labels[:-1]) + f" and {labels[-1]}"
+
+
+def _join_or(labels):
+    labels = list(labels)
+    if not labels:
+        return ""
+    if len(labels) == 1:
+        return labels[0]
+    if len(labels) == 2:
+        return f"{labels[0]} or {labels[1]}"
+    return ", ".join(labels[:-1]) + f" or {labels[-1]}"
+
+
+def _join_amp(labels):
+    labels = list(labels)
+    if not labels:
+        return ""
+    return " & ".join(labels)
+
+
+def _short_version(v):
+    """'25.8.7.3' -> '25.8' (major.minor is what a user needs to know)."""
+    if not v:
+        return v
+    parts = str(v).split(".")
+    return ".".join(parts[:2]) if len(parts) >= 2 else str(v)
+
+
+def _is_error_value(v):
+    return isinstance(v, str) and v in ERROR_VALUES
+
+
+def _case_label(case, func_name):
+    """Short human label derived from a case id, e.g.
+    'YEARFRAC_invalid_basis_error' -> 'invalid basis error'."""
+    cid = case.get("id") or ""
+    label = cid
+    prefix = func_name.upper() + "_"
+    if label.upper().startswith(prefix):
+        label = label[len(prefix):]
+    return label.replace("_", " ").strip().lower()
+
+
+def _case_mismatch_phrase(case, func_name, max_len=70):
+    """Short, human phrase for one failing test case, built from its id (e.g.
+    'YEARFRAC_invalid_basis_error' -> 'invalid basis error returns #VALUE!,
+    not #NUM!') rather than the raw formula, which can run long."""
+    label = _case_label(case, func_name)
+    value = case.get("value")
+    expected = case.get("expected")
+    if isinstance(value, list):
+        value = "an array"
+    if isinstance(expected, list):
+        expected = "an array"
+    phrase = f"{label} returns {value}, not {expected}" if label else f"returns {value}, not {expected}"
+    if len(phrase) <= max_len:
+        return phrase
+    return phrase[: max_len - 1].rstrip() + "…"
+
+
+def build_function_title_desc(r):
+    """Derive (page_title, meta_description) for one function record from its
+    own data: documented flags, tested verdict, executed case counts, and (for
+    LibreOffice) the version a function's support changed in."""
+    name = r["name"]
+    engines = r["engines"]
+    excel_doc = engines["excel"]["documented"]
+    sheets_doc = engines["google_sheets"]["documented"]
+    le = engines["libreoffice"]
+    other_docs = [ek for ek in ("excel", "google_sheets") if engines[ek]["documented"]]
+    other_short = [ENGINE_SHORT[ek] for ek in other_docs]
+
+    if r["any_tested"]:
+        verdict = le["verdict"]
+        total = len(le["cases"])
+        mismatches = [c for c in le["cases"] if c.get("matched_expected") is False]
+        passed = total - len(mismatches)
+
+        if verdict == "unsupported":
+            title = (
+                f"{name} is not supported in LibreOffice Calc ({_join_amp(other_short)} only)"
+                if other_short
+                else f"{name} is not supported in LibreOffice Calc"
+            )
+            desc = (
+                f"LibreOffice returns #NAME? (unrecognized) for {name} in all "
+                f"{total} executed test case{'s' if total != 1 else ''}."
+            )
+        elif verdict == "quirky":
+            first_mismatch = mismatches[0] if mismatches else None
+            # A function whose only mismatches are error-code-vs-error-code
+            # (both sides are documented/executed errors, just different ones,
+            # e.g. #VALUE! where Excel documents #NUM!) is not "different
+            # results" in the way a silently-wrong value is -- it still fails
+            # the same way, just with the wrong error name. Say so precisely
+            # instead of implying a broader behavioral divergence.
+            error_only = bool(mismatches) and all(
+                _is_error_value(c.get("value")) and _is_error_value(c.get("expected"))
+                for c in mismatches
+            )
+            if error_only:
+                title = f"{name} matches Excel in LibreOffice except error codes (tested)"
+                label = _case_label(first_mismatch, name)
+                label_prefix = f"{label} " if label else ""
+                desc = (
+                    f"{passed}/{total} match; {label_prefix}returns "
+                    f"{first_mismatch['value']}, Excel: {first_mismatch['expected']} "
+                    f"(code only)."
+                )
+            else:
+                ref = "excel" if excel_doc else ("google_sheets" if sheets_doc else None)
+                title = (
+                    f"{name} gives different results in LibreOffice vs {ENGINE_SHORT[ref]} (tested)"
+                    if ref
+                    else f"{name} behaves differently in LibreOffice than documented (tested)"
+                )
+                if first_mismatch:
+                    mismatch_phrase = _case_mismatch_phrase(first_mismatch, name, max_len=60)
+                    punct = "" if mismatch_phrase.endswith("…") else "."
+                    desc = f"{passed}/{total} match Excel's docs; {mismatch_phrase}{punct}"
+                else:
+                    desc = f"{passed}/{total} executed cases match Excel's documented behavior."
+        else:  # supported
+            lo_change = le.get("lo_change")
+            since = (
+                lo_change["since_version"]
+                if lo_change and lo_change.get("newly_supported") and lo_change.get("since_version")
+                else None
+            )
+            if since:
+                short_since = _short_version(since)
+                title = (
+                    f"{name} works in LibreOffice since {short_since} ({', '.join(other_short)} too)"
+                    if other_short
+                    else f"{name} works in LibreOffice since {short_since}"
+                )
+                from_v = _short_version(lo_change["from_version"])
+                case_word = "case" if total == 1 else "cases"
+                verb = "passes" if total == 1 else "pass"
+                desc = (
+                    f"Returned #NAME? in LibreOffice {from_v}; works since {short_since} "
+                    f"({total} executed {case_word} {verb})."
+                )
+            elif excel_doc and sheets_doc:
+                title = f"{name} works in Excel, Google Sheets and LibreOffice (tested)"
+                desc = (
+                    f"All {total} executed test case{'s' if total != 1 else ''} for {name} "
+                    f"match Excel's documented result{'s' if total != 1 else ''}."
+                )
+            else:
+                present_full = [ENGINE_FULL[ek] for ek in other_docs] + ["LibreOffice"]
+                title = f"{name} works in {_join_and(present_full)} (tested)"
+                pass_verb = "passes" if total == 1 else "pass"
+                desc = (
+                    f"All {total} executed test case{'s' if total != 1 else ''} "
+                    f"{pass_verb} in LibreOffice; documented in "
+                    f"{_join_and(present_full[:-1]) or 'LibreOffice'} only."
+                )
+        suffix = f" Executed in LibreOffice {le['version']}; Excel/Sheets from official docs."
+        budget = 155 - len(suffix)
+        lead = desc.rstrip()
+        if len(lead) > budget:
+            lead = lead[: max(10, budget - 1)].rstrip() + "…"
+        desc = lead + suffix
+    else:
+        documented = [ek for ek in ENGINE_ORDER if engines[ek]["documented"]]
+        missing = [ek for ek in ENGINE_ORDER if not engines[ek]["documented"]]
+        if documented and missing:
+            missing_or = _join_or([ENGINE_SHORT[ek] for ek in missing])
+            if len(documented) == 1:
+                title = f"{name}: {ENGINE_FULL[documented[0]]} only — not in {missing_or}"
+            else:
+                docd_and = _join_and([ENGINE_SHORT[ek] for ek in documented])
+                title = f"{name}: {docd_and} — not in {missing_or}"
+            desc = (
+                f"{name} ({r['category']}) is documented for "
+                f"{_join_and([ENGINE_FULL[ek] for ek in documented])}, not for "
+                f"{_join_or([ENGINE_FULL[ek] for ek in missing])}. Not yet live-tested by any engine."
+            )
+        else:
+            title = f"{name}: documented in Excel, Sheets & LibreOffice"
+            desc = (
+                f"{name} ({r['category']}) is documented in Excel, Google Sheets & "
+                f"LibreOffice — not yet live-tested by a real engine."
+            )
+    if len(desc) > 155:
+        desc = desc[:154].rstrip() + "…"
+    if len(title) > 70:
+        # Hard safety net for very long function names (e.g.
+        # FORECAST.ETS.SEASONALITY) that would otherwise blow past any
+        # reasonable <title> length no matter how the sentence is phrased.
+        cut = title[:69].rsplit(" ", 1)[0]
+        title = (cut if len(cut) >= 20 else title[:69]).rstrip(" -—,;:")
+    return title, desc
+
+
+# --------------------------------------------------------------------------
 # Templates (kept inline so the generator is a single self-contained script)
 # --------------------------------------------------------------------------
 
@@ -2002,10 +2227,14 @@ def main():
 
     ctx = common_ctx(rel="")
     ctx.update(
-        page_title=f"Spreadsheet function quirks — real Excel/Google Sheets/LibreOffice divergence | {SITE_NAME}",
+        page_title=(
+            f"{stats['quirk_count']} spreadsheet formulas that give different results "
+            f"in LibreOffice vs Excel (executed)"
+        ),
         meta_description=(
-            f"{stats['quirk_count']} real, executed spreadsheet function results that "
-            f"diverge from documented behavior, found across {quirk_fn_count} functions."
+            f"MROUND(5,-2) returns 6, not #NUM!. COUNT(A1:A1) counts a boolean as 1, "
+            f"not 0. SUM(1,\"2\",3) errors #VALUE! not 6 — every result executed, "
+            f"not copied from docs."
         ),
         canonical=BASE_URL + "quirks.html",
         quirks=quirks,
@@ -2052,20 +2281,7 @@ def main():
     func_tmpl = env.get_template("function.html")
     for r in records:
         page_date = r["last_tested"] or build_date
-        if r["any_tested"]:
-            title = f"{r['name']} function: Excel vs Google Sheets vs LibreOffice compatibility"
-            desc = (
-                f"Does {r['name']} work the same in Excel, Google Sheets, and "
-                f"LibreOffice Calc? Real executed test results, syntax, and links to "
-                f"each official doc for the {r['name']} function ({r['category']})."
-            )
-        else:
-            title = f"{r['name']} function — is it in Excel, Google Sheets & LibreOffice?"
-            desc = (
-                f"{r['name']} ({r['category']}) documentation inventory: "
-                f"is it documented for Excel, Google Sheets, and LibreOffice Calc? "
-                f"Not yet live-tested by a real engine."
-            )
+        title, desc = build_function_title_desc(r)
         # Thin, untested stub pages (only a documentation-inventory table, no
         # executed data) are near-duplicates. On a young domain that already drew
         # a Google "alternate/duplicate" warning, they dilute crawl budget and
@@ -2567,17 +2783,52 @@ def main():
         # newly-supported: group by the release they landed in, newest first
         newly.sort(key=lambda x: (_version_tuple(x["since"]), x["name"]))
         other.sort(key=lambda x: x["name"])
+
+        # Data-driven examples for the title/description: group newly-supported
+        # functions by the release they actually landed in (per lo_change.since_version
+        # computed in build_records), then pick a few recognizable names from the
+        # earliest and latest release with a change, so the copy never drifts from
+        # what the page's own table shows (e.g. FILTER is quirky, not newly-supported,
+        # and must never be claimed here).
+        def _pick_examples(names, preferred, n=3):
+            names_set = set(names)
+            chosen = [p for p in preferred if p in names_set][:n]
+            for nm in names:
+                if len(chosen) >= n:
+                    break
+                if nm not in chosen:
+                    chosen.append(nm)
+            return chosen
+
+        _by_since = {}
+        for row in newly:
+            _by_since.setdefault(row["since"], []).append(row["name"])
+        _since_sorted = sorted(_by_since, key=_version_tuple)
+        _earliest_v = _since_sorted[0] if _since_sorted else None
+        _latest_v = _since_sorted[-1] if _since_sorted else None
+        _earliest_examples = _pick_examples(
+            _by_since.get(_earliest_v, []), ["XLOOKUP", "SORT", "LET", "UNIQUE", "SEQUENCE", "XMATCH"]
+        )
+        _latest_examples = _pick_examples(
+            _by_since.get(_latest_v, []), ["HSTACK", "TEXTSPLIT", "TAKE", "DROP", "VSTACK", "CHOOSECOLS"]
+        )
+        _title_examples = (_earliest_examples[:2] + _latest_examples[:2]) if _earliest_v != _latest_v else _earliest_examples
+
         wctx = common_ctx(rel="")
         wctx.update(
             page_title=(
-                f"LibreOffice Calc function support by version — "
-                f"what's new in {to_v} (XLOOKUP, FILTER, SORT, UNIQUE…)"
+                f"Which LibreOffice version added {', '.join(_title_examples)}…? "
+                f"Function support by release (tested)"
             ),
             meta_description=(
-                f"Machine-verified LibreOffice Calc function compatibility by version: "
-                f"{len(newly)} functions — including XLOOKUP, FILTER, SORT, UNIQUE, LET and "
-                f"other dynamic-array functions — that returned #NAME? in LibreOffice {from_v} "
-                f"now work in {to_v}. Real executed test results."
+                f"{len(newly)} LibreOffice functions changed support from "
+                f"{_short_version(from_v)} to {_short_version(to_v)}: "
+                f"{', '.join(_earliest_examples)} since {_short_version(_earliest_v)}"
+                + (
+                    f"; {', '.join(_latest_examples)} since {_short_version(_latest_v)}"
+                    if _latest_v != _earliest_v else ""
+                )
+                + ". Real executed results, not docs."
             ),
             canonical=BASE_URL + "libreoffice-version-support.html",
             from_version=from_v,
