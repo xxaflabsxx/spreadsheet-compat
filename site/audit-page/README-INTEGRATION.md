@@ -117,3 +117,7 @@ form-encoded body works cross-origin. So:
 - meta description: `Drop an .xlsx and see which formulas break or silently change in
   Google Sheets, LibreOffice, or Excel — matched against execution-verified
   compatibility data. The file never leaves your browser.`
+
+## Sitewide honesty guard
+
+`python3 scripts/check_honesty.py` — scans every built page in `docs/` and fails if any copy claims Excel or Google Sheets results were verified/tested/executed (only LibreOffice is executed; Excel/Sheets are documented). Run after every rebuild; negations and "documented in all three" are allowed.
