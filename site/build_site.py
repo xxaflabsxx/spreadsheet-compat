@@ -1034,6 +1034,13 @@ entry above reflects documentation inventory only.</p>
 </ul>
 {% endif %}
 
+{%- if related_guides %}
+<h2 class="section-title">Where {{ r.name }} behaves differently</h2>
+<ul>
+{% for g in related_guides %}<li><a href="{{ rel }}guides/{{ g.slug }}.html">{{ g.title }}</a><br><span class="category-tag">{{ g.meta_description }}</span></li>{% endfor %}
+</ul>
+{% endif %}
+
 {% if related_comparisons %}
 <h2 class="section-title">Compared against other functions</h2>
 <ul>
@@ -1680,7 +1687,7 @@ GUIDES_INDEX_TMPL = """{% extends "base.html" %}
 <li class="quirk-entry">
   <h3><a href="{{ rel }}guides/{{ g.slug }}.html">{{ g.title }}</a></h3>
   <p style="margin:.3rem 0 0">{{ g.meta_description }}</p>
-  {% if g.functions %}<p style="margin:.3rem 0 0;font-size:.9em;color:var(--text-muted,#6b7280)">Functions: {% for f in g.functions %}<code>{{ f }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if g.functions %}<p style="margin:.3rem 0 0;font-size:.9em;color:var(--text-muted,#6b7280)">Functions: {% for f in g.functions %}{% if f in known_functions %}<a href="{{ rel }}functions/{{ f.lower() }}.html"><code>{{ f }}</code></a>{% else %}<code>{{ f }}</code>{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
 </li>
 {% endfor %}
 </ul>
@@ -2022,6 +2029,19 @@ def main():
                 {"slug": cp["slug"], "title": cp["title"]}
             )
 
+    # Map each function -> SEO guides that document its cross-engine divergence
+    # (internal linking; mirrors func_comparisons above).
+    func_guides = {}
+    for sp in load_seo_pages():
+        for fn in sp.get("functions", []):
+            func_guides.setdefault(fn.upper(), []).append(
+                {
+                    "slug": sp["slug"],
+                    "title": sp["title"],
+                    "meta_description": sp["meta_description"],
+                }
+            )
+
     func_tmpl = env.get_template("function.html")
     for r in records:
         page_date = r["last_tested"] or build_date
@@ -2055,6 +2075,7 @@ def main():
             canonical=BASE_URL + f"functions/{r['name_lower']}.html",
             r=r,
             related_recipes=func_recipes.get(r["name"], []),
+            related_guides=func_guides.get(r["name"], []),
             related_comparisons=func_comparisons.get(r["name"], []),
             noindex=stub,
             json_ld=breadcrumb_ld([
@@ -2182,6 +2203,7 @@ def main():
             ),
             canonical=BASE_URL + "guides/",
             guides=seo_pages,
+            known_functions={r["name"] for r in records},
         )
         (OUT_DIR / "guides" / "index.html").write_text(
             env.get_template("guides_index.html").render(**gictx)
