@@ -511,14 +511,15 @@ def build_function_title_desc(r):
                     f"({total} executed {case_word} {verb})."
                 )
             elif excel_doc and sheets_doc:
-                title = f"{name} works in Excel, Google Sheets and LibreOffice (tested)"
+                title = f"{name} works in Excel, Google Sheets and LibreOffice (LibreOffice-tested)"
                 desc = (
                     f"All {total} executed test case{'s' if total != 1 else ''} for {name} "
                     f"match Excel's documented result{'s' if total != 1 else ''}."
                 )
             else:
                 present_full = [ENGINE_FULL[ek] for ek in other_docs] + ["LibreOffice"]
-                title = f"{name} works in {_join_and(present_full)} (tested)"
+                _tested_tag = "(tested)" if not other_docs else "(LibreOffice-tested)"
+                title = f"{name} works in {_join_and(present_full)} {_tested_tag}"
                 pass_verb = "passes" if total == 1 else "pass"
                 desc = (
                     f"All {total} executed test case{'s' if total != 1 else ''} "
@@ -1009,7 +1010,7 @@ INDEX_TMPL = """{% extends "base.html" %}
   </a>
   <a href="{{ rel }}how-to/" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#128221; How-to recipes</strong>
-    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Copy-paste formulas for common tasks &mdash; each one executed and verified in a real engine, not just documented.</span>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Copy-paste formulas for common tasks &mdash; each one executed and verified in LibreOffice Calc, not just documented.</span>
   </a>
   <a href="{{ rel }}quirks.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#9888;&#65039; Quirks &amp; gotchas</strong>
@@ -1098,7 +1099,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 <p class="category-tag">Category: {{ r.category }}{% if r.last_tested %} &middot; Last tested {{ r.last_tested }}{% endif %}</p>
 
 {% if r.any_tested %}
-<p class="lede">Real, executed compatibility results for the <strong>{{ r.name }}</strong> function across Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; verified by actually running it. Syntax and links to each vendor&rsquo;s official documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>{{ r.name }}</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
 {% endif %}
 
 {% set le = r.engines['libreoffice'] %}
@@ -1333,7 +1334,7 @@ def fmtval_filter(v):
 RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet how-to recipes</h1>
-<p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each one <strong>executed and verified in a real engine</strong>, not just documented.</p>
+<p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each one <strong>executed and verified in LibreOffice Calc</strong>, with Excel and Google Sheets support from official documentation, not just guesswork.</p>
 <p>
 {% for cat, items in grouped %}<a href="#{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</a> ({{ items|length }}){% if not loop.last %} &middot; {% endif %}{% endfor %}
 </p>
@@ -1341,7 +1342,7 @@ RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 <h2 class="section-title" id="{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</h2>
 <ul class="recipe-list">
 {% for r in items %}
-<li><a href="{{ rel }}how-to/{{ r.slug }}.html">{{ r.title }}</a>{% if r.verified %} <span class="badge badge-good">verified</span>{% endif %}</li>
+<li><a href="{{ rel }}how-to/{{ r.slug }}.html">{{ r.title }}</a>{% if r.verified %} <span class="badge badge-good">LibreOffice-verified</span>{% endif %}</li>
 {% endfor %}
 </ul>
 {% endfor %}
@@ -1432,7 +1433,7 @@ RECIPE_TMPL = """{% extends "base.html" %}
 
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result. Every formula here is confirmed by actually executing it.</p>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result. The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax.</p>
 {% endif %}
 {% if functions_used %}
 <h2 class="section-title">Functions used</h2>
@@ -1481,7 +1482,7 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 {% endfor %}
 </ul>
 
-<h2 class="section-title">Compatibility (from executed tests)</h2>
+<h2 class="section-title">Compatibility (LibreOffice executed; Excel/Sheets per docs)</h2>
 <p>{{ c.compat_note }}</p>
 
 <h2 class="section-title">Example formulas</h2>
@@ -1513,7 +1514,7 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet function comparisons</h1>
-<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (backed by executed tests, not documentation). For the app-level picture, see the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula guide</a>.</p>
+<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (LibreOffice results executed by our test harness; Excel and Google Sheets from official documentation). For the app-level picture, see the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula guide</a>.</p>
 <ul class="quirks-list">
 {% for c in comparisons %}
 <li class="quirk-entry">
@@ -1616,7 +1617,7 @@ db["XLOOKUP"]
 EQUIV_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Excel &harr; Google Sheets function equivalents</h1>
-<p class="lede">Moving a formula between Excel and Google Sheets? Most functions are <strong>identical</strong> &mdash; VLOOKUP, SUMIFS, INDEX/MATCH, IF, the whole everyday toolkit works the same name, same arguments. This page covers the ones that <em>don&rsquo;t</em>, in both directions, with the verified replacement to use instead.</p>
+<p class="lede">Moving a formula between Excel and Google Sheets? Most functions are <strong>identical</strong> &mdash; VLOOKUP, SUMIFS, INDEX/MATCH, IF, the whole everyday toolkit works the same name, same arguments. This page covers the ones that <em>don&rsquo;t</em>, in both directions, with the documented replacement to use instead.</p>
 <p>Need it for one specific formula? Paste it into the <a href="{{ rel }}checker.html">compatibility checker</a> and pick a target app for an instant migration report.</p>
 
 <h2 class="section-title">Only in Google Sheets &mdash; what to use in Excel</h2>
@@ -1720,7 +1721,7 @@ EXCLUSIVE_TMPL = """{% extends "base.html" %}
 </table>
 </div>
 <p>{{ outro }}</p>
-<p>See the <a href="{{ rel }}excel-google-sheets-equivalents.html">Excel &harr; Google Sheets equivalents table</a> for the verified replacement to use for each. Part of the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula compatibility guide</a>.</p>
+<p>See the <a href="{{ rel }}excel-google-sheets-equivalents.html">Excel &harr; Google Sheets equivalents table</a> for the documented replacement to use for each. Part of the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula compatibility guide</a>.</p>
 {% endblock %}
 """
 
@@ -1767,7 +1768,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 CHECKER_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet formula compatibility checker</h1>
-<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real executed tests, not just documentation. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests verified alternatives.</p>
+<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real tests executed in LibreOffice, plus each vendor&rsquo;s official documentation. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests documented alternatives.</p>
 <textarea id="f" rows="3" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:1rem;padding:.6rem" placeholder='=XLOOKUP("North", B2:B6, A2:A6)'></textarea>
 <p><button id="btn" class="promo-btn" style="border:0;cursor:pointer">Check compatibility</button></p>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Try:
@@ -2188,10 +2189,10 @@ def main():
     ctx.update(
         page_title=f"{SITE_NAME} — Excel vs Google Sheets vs LibreOffice function compatibility",
         meta_description=(
-            f"{stats['total_functions']} spreadsheet functions checked for real "
-            f"compatibility across Excel, Google Sheets, and LibreOffice Calc. "
-            f"{stats['quirk_count']} quirks found from {stats['tested_case_count']} "
-            f"executed, recalculation-proven test cases."
+            f"{stats['total_functions']} spreadsheet functions checked across Excel, "
+            f"Google Sheets, and LibreOffice Calc — {stats['tested_case_count']} "
+            f"executed, recalculation-proven test cases in LibreOffice; Excel/Sheets "
+            f"from official docs. {stats['quirk_count']} quirks found."
         ),
         canonical=BASE_URL,
         functions=records,
@@ -2364,10 +2365,11 @@ def main():
         (OUT_DIR / "how-to").mkdir(parents=True, exist_ok=True)
         rctx = common_ctx(rel="../")
         rctx.update(
-            page_title="Spreadsheet how-to recipes — verified formulas for Excel, Google Sheets & LibreOffice",
+            page_title="Spreadsheet how-to recipes — formulas for Excel, Google Sheets & LibreOffice",
             meta_description=(
                 "Copy-paste formulas for common spreadsheet tasks, each executed and "
-                "verified in a real engine. Excel, Google Sheets, and LibreOffice Calc."
+                "verified in LibreOffice Calc; Excel and Google Sheets support per "
+                "official docs."
             ),
             canonical=BASE_URL + "how-to/",
             recipes=recipes,
@@ -2382,15 +2384,34 @@ def main():
         )
         sitemap_urls.append({"loc": BASE_URL + "how-to/", "lastmod": build_date})
         for rc in recipes:
-            kw = ", ".join(rc.get("keywords", [])[:3])
+            kw_list = list(rc.get("keywords", [])[:3])
+            kw = ", ".join(kw_list)
             _rr, _rc = _related_for(rc)
             cx = common_ctx(rel="../")
+            # Honesty: only LibreOffice results are ever executed on this site —
+            # the meta description must say so explicitly rather than imply Excel
+            # and Google Sheets were verified too. Keywords are dropped one at a
+            # time (never mid-word truncated) to stay within the ~155-char SEO
+            # budget where possible; the honesty clause itself is never trimmed.
+            _honesty = "Executed and verified in LibreOffice Calc; Excel/Sheets per docs"
+            _base = f"{rc['task'].rstrip()} {_honesty}"
+            if kw_list:
+                _desc = f"{_base} ({kw})."
+                if len(_desc) > 155:
+                    _budget = 155 - len(f"{_base} ().")
+                    _fitted, _used = [], 0
+                    for _k in kw_list:
+                        _add = len(_k) + (2 if _fitted else 0)
+                        if _used + _add > _budget:
+                            break
+                        _fitted.append(_k)
+                        _used += _add
+                    _desc = f"{_base} ({', '.join(_fitted)})." if _fitted else f"{_base}."
+            else:
+                _desc = f"{_base}."
             cx.update(
                 page_title=rc["title"],
-                meta_description=(
-                    f"{rc['task']} Verified formula for Excel, Google Sheets and "
-                    f"LibreOffice Calc" + (f" ({kw})." if kw else ".")
-                ),
+                meta_description=_desc,
                 canonical=BASE_URL + f"how-to/{rc['slug']}.html",
                 r=rc,
                 app_order=ENGINE_ORDER,
@@ -2462,8 +2483,8 @@ def main():
             page_title="Spreadsheet function comparisons — VLOOKUP vs XLOOKUP and more",
             meta_description=(
                 "Head-to-head guides for commonly confused spreadsheet functions: real "
-                "differences, which to use when, and executed compatibility results for "
-                "Excel, Google Sheets, and LibreOffice."
+                "differences, which to use when, and compatibility results executed in "
+                "LibreOffice, documented for Excel and Google Sheets."
             ),
             canonical=BASE_URL + "compare/",
             comparisons=comparisons,
@@ -2547,7 +2568,8 @@ def main():
         page_title="Spreadsheet formula compatibility checker — Excel, Google Sheets & LibreOffice",
         meta_description=(
             "Paste a formula and instantly see whether every function works in Excel, "
-            "Google Sheets, and current LibreOffice Calc. Based on real executed tests."
+            "Google Sheets, and current LibreOffice Calc. Based on tests executed in "
+            "LibreOffice plus official vendor docs."
         ),
         canonical=BASE_URL + "checker.html",
     )
@@ -2628,9 +2650,9 @@ def main():
     dctx.update(
         page_title="Open spreadsheet function compatibility dataset (CC BY) — Excel, Sheets, LibreOffice",
         meta_description=(
-            "Free, machine-verified dataset of spreadsheet function compatibility "
-            "across Excel, Google Sheets, and LibreOffice Calc — executed results "
-            "with per-version history, as JSON under CC BY 4.0. Schema and examples."
+            "Free dataset of spreadsheet function compatibility across Excel, Google "
+            "Sheets, and LibreOffice Calc — LibreOffice executed, Excel/Sheets from "
+            "official docs, with per-version history. JSON, CC BY 4.0."
         ),
         canonical=BASE_URL + "data.html",
         n_funcs=len(_compat_obj),
@@ -2703,7 +2725,8 @@ def main():
             "Google Sheets equivalents for Excel-only functions (GROUPBY, PIVOTBY, "
             "AGGREGATE) and Excel equivalents for Sheets-only ones (QUERY, "
             "ARRAYFORMULA, REGEXMATCH, IMPORTRANGE) — plus same-name gotchas. "
-            "Verified from executed compatibility tests."
+            "Cross-checked against official vendor docs and our LibreOffice-executed "
+            "compatibility data."
         ),
         canonical=BASE_URL + "excel-google-sheets-equivalents.html",
         g_only=equiv_g_only, x_only=equiv_x_only, gotcha=equiv_gotcha,
@@ -2723,7 +2746,8 @@ def main():
         meta_description=(
             f"Excel vs Google Sheets for formulas: {n_xonly} Excel-only functions, "
             f"{n_gonly} Sheets-only functions, dialect differences like ARRAYFORMULA "
-            "vs spilling, and how to keep workbooks portable — with executed test data."
+            "vs spilling, and how to keep workbooks portable — sourced from official "
+            "vendor docs."
         ),
         canonical=BASE_URL + "excel-vs-google-sheets.html",
         n_xonly=n_xonly, n_gonly=n_gonly, n_both=n_both,

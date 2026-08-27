@@ -10,13 +10,13 @@
     {"aspect": "Math before summing", "cols": ["No — sum_range is taken as-is", "Yes — SUMPRODUCT(qty*price*(cond))"]},
     {"aspect": "Speed on big ranges", "cols": ["Faster, optimized", "Slower — evaluates full arrays"]},
     {"aspect": "Readability", "cols": ["Clearer for plain AND sums", "Denser, but far more flexible"]},
-    {"aspect": "Compatibility", "cols": ["Excel 2007+, all Sheets & LibreOffice we test", "Universal — every version, all three apps"]}
+    {"aspect": "Compatibility", "cols": ["Excel 2007+, all Sheets & LibreOffice we test", "Universal — documented across all three; executed in every LibreOffice version we test"]}
   ],
   "when": [
     {"func": "SUMIFS", "use_when": "Straightforward 'sum X where A and B and C' on large data. It's faster, easier to read, and the argument order (sum_range first) never changes."},
     {"func": "SUMPRODUCT", "use_when": "You need OR logic, a product/calculation between columns before the sum, weighted totals, or a condition SUMIFS rejects. It works in ancient Excel too, so it's the portable fallback."}
   ],
-  "compat_note": "Both run correctly in every version of all three apps we test. The real choice is capability, not compatibility: SUMPRODUCT can express things SUMIFS can't (OR, inline math, array conditions) but pays for it in speed and legibility on large sheets. A common hybrid — SUMPRODUCT(SUMIFS(...)) — lets SUMIFS do the filtered sum while SUMPRODUCT loops an array of criteria.",
+  "compat_note": "Both run correctly in every LibreOffice version we test; Excel and Google Sheets behavior matches per their documentation. The real choice is capability, not compatibility: SUMPRODUCT can express things SUMIFS can't (OR, inline math, array conditions) but pays for it in speed and legibility on large sheets. A common hybrid — SUMPRODUCT(SUMIFS(...)) — lets SUMIFS do the filtered sum while SUMPRODUCT loops an array of criteria.",
   "examples": [
     {"label": "SUMIFS — sum where region=East AND qty>100", "formula": "=SUMIFS(C2:C100,A2:A100,\"East\",B2:B100,\">100\")"},
     {"label": "SUMPRODUCT — OR: East or West", "formula": "=SUMPRODUCT(((A2:A100=\"East\")+(A2:A100=\"West\"))*C2:C100)"},

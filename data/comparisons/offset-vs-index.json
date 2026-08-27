@@ -1,7 +1,7 @@
 {
   "slug": "offset-vs-index",
   "title": "OFFSET vs INDEX: same tricks, very different cost",
-  "meta_desc": "OFFSET vs INDEX for dynamic ranges: volatility and recalculation cost, dependency tracking, when OFFSET is genuinely needed. Verified across all three apps.",
+  "meta_desc": "OFFSET vs INDEX for dynamic ranges: volatility and recalculation cost, dependency tracking, when OFFSET is genuinely needed. Executed in LibreOffice Calc; Excel and Google Sheets behavior per official docs.",
   "funcs": ["OFFSET", "INDEX"],
   "intro": "Both can build references that move and resize — the difference is that OFFSET is VOLATILE: it recalculates on every change anywhere in the workbook, and everything downstream of it recalculates too. INDEX does most of the same jobs without that tax, which is why 'replace OFFSET with INDEX' is a standard performance fix for slow sheets.",
   "table": [
@@ -10,7 +10,7 @@
     {"aspect": "Dependency tracking", "cols": ["Opaque — audit tools can't see what it points at", "Normal, traceable references"]},
     {"aspect": "Dynamic window (last N rows)", "cols": ["Classic idiom: OFFSET(A2,COUNT(...)-n,0,n,1)", "INDEX(A:A,COUNT(...)-n+1):INDEX(A:A,COUNT(...)) — non-volatile equivalent"]},
     {"aspect": "Resizable in-place (height/width args)", "cols": ["Yes — its unique convenience", "Via the range-of-two-INDEXes pattern"]},
-    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both verified in every version of all three apps we test)"]}
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both executed in every LibreOffice version we test; Excel/Sheets per docs)"]}
   ],
   "when": [
     {"func": "OFFSET", "use_when": "Small sheets where its compact height/width arguments read clearly (rolling windows, resizable named ranges) and the volatility cost is negligible."},
