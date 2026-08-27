@@ -1559,11 +1559,17 @@ CHECKER_TMPL = """{% extends "base.html" %}
 </p>
 <div id="out"></div>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Results are linkable &mdash; the URL updates with your formula, so you can share a check directly (e.g. in a forum answer).</p>
-<script>const DATA_URL="{{ rel }}data/compat.json"; const FUNC_BASE="{{ rel }}functions/"; const CMP_BASE="{{ rel }}compare/";</script>
+<script>const DATA_URL="{{ rel }}data/compat.json"; const GUIDES_URL="{{ rel }}data/guides.json"; const FUNC_BASE="{{ rel }}functions/"; const CMP_BASE="{{ rel }}compare/"; const GUIDE_BASE="{{ rel }}guides/";</script>
 {% raw %}
 <script>
 let DB=null;
 async function load(){ if(!DB){ DB=await (await fetch(DATA_URL)).json(); } return DB; }
+let GDB=null;
+async function loadGuides(){ if(!GDB){ try{ GDB=await (await fetch(GUIDES_URL)).json(); }catch(e){ GDB={}; } } return GDB; }
+// Compact "documented divergence" link line for one function, or '' if none.
+function guideLine(fn,gdb){ const g=gdb&&gdb[fn]; if(!g||!g.length) return '';
+  return '<div style="font-size:.85em;color:var(--text-muted,#6b7280);margin-top:.15em">Behaves differently across apps &mdash; read: '+
+    g.map(x=>'<a href="'+GUIDE_BASE+x.slug+'.html">'+x.title+'</a>').join(', ')+'</div>'; }
 // Function-name extraction. Kept behaviourally identical to the Migration
 // Audit's extractFunctions() in site/audit-page/audit.js — the shared case
 // list lives in site/audit-page/test-adversarial.mjs, which tests BOTH.
@@ -1634,7 +1640,7 @@ const MIG={
  SORT:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: rank-and-INDEX or the menu sort.'},
  UNIQUE:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: Remove Duplicates, or COUNTIF-based formulas.',cmp:'unique-function-vs-remove-duplicates'}
 };
-function migrate(fs,db,tg){
+function migrate(fs,db,tg,gdb){
   const okIn=(d)=> tg==='l' ? (d.lv?(d.lv!=='unsupported'):d.l) : (tg==='x'?d.x:d.g);
   let blockers=[];
   for(const fn of fs){ const d=db[fn]; if(!d) continue; if(!okIn(d)) blockers.push(fn); }
@@ -1644,23 +1650,24 @@ function migrate(fs,db,tg){
   for(const fn of blockers){ const m=MIG[fn];
     h+='<li style="margin-bottom:.5rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> — '+(m?m.r:'not available in '+TGT_NAME[tg]+' (see its page for details).');
     if(m&&m.cmp) h+=' <a href="'+CMP_BASE+m.cmp+'.html" style="font-size:.9em">compare →</a>';
+    h+=guideLine(fn,gdb);
     h+='</li>';
   }
   h+='</ul><p style="font-size:.9em;color:#888">Alternatives are hand-verified from our comparison pages. This report flags what breaks; it does not auto-rewrite your formula.</p>';
   return h;
 }
 async function check(){
-  const db=await load(); const fs=funcs(document.getElementById('f').value); const out=document.getElementById('out');
+  const db=await load(); const gdb=await loadGuides(); const fs=funcs(document.getElementById('f').value); const out=document.getElementById('out');
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
   let rows='', xAll=true,gAll=true,lAll=true, unknown=[];
   for(const fn of fs){ const d=db[fn]; if(!d){ unknown.push(fn); continue; }
     const lok=d.lv?(d.lv!=='unsupported'):d.l; xAll=xAll&&d.x; gAll=gAll&&d.g; lAll=lAll&&lok;
-    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a></td><td>'+yn(d.x)+'</td><td>'+yn(d.g)+'</td><td>'+lo(d)+'</td></tr>'; }
+    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+yn(d.g)+'</td><td>'+lo(d)+'</td></tr>'; }
   const say=ok=>ok?'<span style="color:#0a7a2f">works</span>':'<span style="color:#c02020">has an unsupported function</span>';
   let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
   html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel</th><th>Google Sheets</th><th>LibreOffice</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
-  const tg=target(); if(tg) html+=migrate(fs,db,tg);
+  const tg=target(); if(tg) html+=migrate(fs,db,tg,gdb);
   html+='<p style="font-size:.9em;color:#888">Shareable link: <a href="'+permalink()+'" style="word-break:break-all">'+permalink()+'</a></p>';
   out.innerHTML=html;
 }
@@ -2288,6 +2295,18 @@ def main():
     (OUT_DIR / "data").mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "data" / "compat.json").write_text(
         json.dumps(compat_export, separators=(",", ":"))
+    )
+    # Guide index: function -> documented cross-engine divergence guides.
+    # Deliberately thin (slug + title only, no descriptions) — this is a
+    # "does a guide exist for this function" lookup, not a content mirror.
+    # Consumed by both the checker (inline JS fetch, mirrors DATA_URL) and
+    # the Migration Audit (audit-app.js, same-origin fetch, silent-fail).
+    guides_export = {
+        fn: [{"slug": g["slug"], "title": g["title"]} for g in gl]
+        for fn, gl in func_guides.items()
+    }
+    (OUT_DIR / "data" / "guides.json").write_text(
+        json.dumps(guides_export, separators=(",", ":"))
     )
     # CSV mirror of the dataset (easier to open in a spreadsheet / load into
     # data tools, and the format dataset registries expect).

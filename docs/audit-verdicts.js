@@ -278,6 +278,18 @@
     return LICENSE_KEY_RE.test(String(key || '').trim());
   }
 
+  /* ===================== guide links ===================== */
+
+  // Map a function name -> the documented cross-engine divergence guides for
+  // it, given a parsed docs/data/guides.json ({ FUNC: [{slug, title}] }).
+  // Case-insensitive; missing function or missing/falsy guides map -> [].
+  // Pure, no DOM/network — audit-app.js does the (silent-fail) fetch.
+  function guidesForFunction(fnName, guides) {
+    if (!guides) return [];
+    var key = String(fnName || '').toUpperCase();
+    return guides[key] || [];
+  }
+
   /* ===================== exports ===================== */
 
   var AuditVerdicts = {
@@ -291,7 +303,8 @@
     buildReport: buildReport,
     csvField: csvField,
     reportToCsv: reportToCsv,
-    looksLikeLicenseKey: looksLikeLicenseKey
+    looksLikeLicenseKey: looksLikeLicenseKey,
+    guidesForFunction: guidesForFunction
   };
 
   if (typeof globalThis !== 'undefined') globalThis.AuditVerdicts = AuditVerdicts;

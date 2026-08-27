@@ -4,8 +4,12 @@
  *
  * PRIVACY INVARIANT: the user's file is parsed entirely in this browser tab.
  * The only network requests this page ever makes are
- *   1. fetching the site's own verdict dataset (DATA_URL, same-origin), and
- *   2. the OPTIONAL Gumroad license check — only when the user submits a
+ *   1. fetching the site's own verdict dataset (DATA_URL, same-origin),
+ *   2. fetching the site's own guide index (GUIDES_URL, same-origin — a
+ *      static "does this function have a divergence writeup" lookup, no
+ *      file data involved; failure is silent and never blocks the audit),
+ *      and
+ *   3. the OPTIONAL Gumroad license check — only when the user submits a
  *      license key, and the request contains ONLY the key, never file data.
  * Keep it that way.
  */
@@ -27,6 +31,7 @@
   var PRICE_LATER = '$29';   // regular price (shown struck through)
 
   var DATA_URL = 'data/compat.json';          // relative to the deployed page
+  var GUIDES_URL = 'data/guides.json';        // relative to the deployed page
   var VERIFY_URL = 'https://api.gumroad.com/v2/licenses/verify';
   var LS_KEY = 'csps-audit-license';          // localStorage: {key, status}
 
@@ -36,6 +41,7 @@
   /* ------------------- state ------------------- */
 
   var db = null;            // compat.json
+  var guides = null;        // guides.json, or {} once we know none is available
   var auditResult = null;   // XlsxAudit.auditXlsx output
   var report = null;        // AuditVerdicts.buildReport output
   var fileName = '';
@@ -57,6 +63,31 @@
       if (!r.ok) throw new Error('Could not load the verdict dataset (' + r.status + ').');
       return r.json();
     }).then(function (j) { db = j; return db; });
+  }
+
+  // Guide index is an optional enhancement, never a blocker: any failure
+  // (network, 404, bad JSON) just leaves `guides` empty and the audit keeps
+  // working exactly as before this feature existed.
+  function loadGuides() {
+    if (guides) return Promise.resolve(guides);
+    return fetch(GUIDES_URL).then(function (r) {
+      return r.ok ? r.json() : {};
+    }).then(function (j) {
+      guides = j || {};
+      return guides;
+    }).catch(function () {
+      guides = {};
+      return guides;
+    });
+  }
+
+  // Small "why?" link to a function's divergence guide, or '' if it has
+  // none. Public content — shown in free-tier rows too.
+  function guideLinkHtml(fn) {
+    var g = AuditVerdicts.guidesForFunction(fn, guides);
+    if (!g.length) return '';
+    return ' <a href="guides/' + esc(g[0].slug) + '.html" class="whylink" ' +
+      'title="' + esc(g[0].title) + '">why?</a>';
   }
 
   function direction() {
@@ -86,8 +117,8 @@
         'to read .xlsx files. Please use a current version of Chrome, Edge, Firefox or Safari.');
       return;
     }
-    Promise.all([loadDb(), file.arrayBuffer()])
-      .then(function (pair) { return XlsxAudit.auditXlsx(pair[1]); })
+    Promise.all([loadDb(), loadGuides(), file.arrayBuffer()])
+      .then(function (pair) { return XlsxAudit.auditXlsx(pair[2]); })
       .then(function (r) {
         auditResult = r;
         fileName = file.name;
@@ -146,7 +177,7 @@
   function fnRowHtml(row, withDetail, open) {
     var head = VERDICT_BADGE[row.verdict] + ' <strong class="fnname">' + esc(row.fn) +
       '</strong> <span class="fncount">' + row.count + ' formula' +
-      (row.count === 1 ? '' : 's') + '</span> ' + basisTag(row);
+      (row.count === 1 ? '' : 's') + '</span> ' + basisTag(row) + guideLinkHtml(row.fn);
     var h = '<li class="fnrow v-' + row.verdict + '">';
     if (withDetail) {
       h += '<details' + (open ? ' open' : '') + '><summary>' + head +
@@ -227,7 +258,8 @@
     });
     $('fntable-body').innerHTML = rows.map(function (row) {
       return '<tr><td class="fnname">' + esc(row.fn) + '</td><td>' + row.count +
-        '</td><td>' + VERDICT_BADGE[row.verdict] + '</td><td>' + basisTag(row) + '</td></tr>';
+        '</td><td>' + VERDICT_BADGE[row.verdict] + '</td><td>' + basisTag(row) +
+        guideLinkHtml(row.fn) + '</td></tr>';
     }).join('');
 
     // --- full per-formula table (paid) ---
@@ -418,5 +450,6 @@
 
     restoreLicense();
     loadDb().catch(function () { /* surfaced on first file drop instead */ });
+    loadGuides(); // optional enhancement; already silent-fail internally
   });
 })();

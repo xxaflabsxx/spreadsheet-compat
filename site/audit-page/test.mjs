@@ -168,6 +168,26 @@ console.log('unit: looksLikeLicenseKey');
   ok(!V.looksLikeLicenseKey(null), 'null rejected');
 }
 
+console.log('unit: guidesForFunction (function -> divergence-guide links)');
+{
+  const guides = {
+    XLOOKUP: [{ slug: 'xlookup-vs-vlookup', title: 'XLOOKUP vs VLOOKUP' }],
+    UNIQUE: [
+      { slug: 'unique-a', title: 'UNIQUE quirk A' },
+      { slug: 'unique-b', title: 'UNIQUE quirk B' },
+    ],
+  };
+  eq(V.guidesForFunction('XLOOKUP', guides), guides.XLOOKUP, 'exact-case match returns its guides');
+  eq(V.guidesForFunction('xlookup', guides), guides.XLOOKUP, 'lowercase function name is case-insensitive');
+  eq(V.guidesForFunction('XlOoKuP', guides), guides.XLOOKUP, 'mixed-case function name is case-insensitive');
+  eq(V.guidesForFunction('UNIQUE', guides), guides.UNIQUE, 'function with multiple guides returns all of them');
+  eq(V.guidesForFunction('SUM', guides), [], 'function absent from the guides map returns []');
+  eq(V.guidesForFunction('XLOOKUP', {}), [], 'empty guides map returns []');
+  eq(V.guidesForFunction('XLOOKUP', null), [], 'null guides map returns [] (silent-fail-safe)');
+  eq(V.guidesForFunction('XLOOKUP', undefined), [], 'undefined guides map returns []');
+  eq(V.guidesForFunction('', guides), [], 'empty function name returns []');
+}
+
 /* ---------- end-to-end: verdict-mix.xlsx through parser + engine ---------- */
 console.log('e2e: verdict-mix.xlsx');
 const buf = fs.readFileSync(path.join(here, 'verdict-mix.xlsx'));

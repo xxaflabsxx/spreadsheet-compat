@@ -1,6 +1,6 @@
 # Migration Audit page (E2) — integration & deploy notes
 
-Status: **built, 84/84 automated tests passing** (`node test.mjs`), on top of the
+Status: **built, 105/105 automated tests passing** (`node test.mjs`), on top of the
 unchanged E1 parser (its own suite still passes 67/67). Not yet browser-smoke-tested —
 do the 2-minute manual check below before announcing.
 
@@ -10,11 +10,11 @@ do the 2-minute manual check below before announcing.
 |---|---|
 | `audit.html` | The page. Standalone (inline CSS matching the site's house style, incl. nav + footer + print stylesheet). |
 | `audit.js` | **Byte-for-byte copy of `../audit-prototype/audit.js`** (E1 parser). `test.mjs` fails if it ever drifts from the prototype. |
-| `audit-verdicts.js` | Pure verdict engine: classification, report building, at-risk ordering, CSV export, license-key format check. No DOM/network. |
-| `audit-app.js` | DOM glue: dropzone, direction picker, rendering, free/paid tiers, Gumroad license verify, CSV download, print. |
+| `audit-verdicts.js` | Pure verdict engine: classification, report building, at-risk ordering, CSV export, license-key format check, function→divergence-guide lookup (`guidesForFunction`). No DOM/network. |
+| `audit-app.js` | DOM glue: dropzone, direction picker, rendering, free/paid tiers, Gumroad license verify, CSV download, print, optional guide-index fetch (`data/guides.json`, silent-fail). |
 | `make_fixtures.py` | Generates `verdict-mix.xlsx` (needs openpyxl: `/home/jon/venv/bin/python make_fixtures.py`). |
 | `verdict-mix.xlsx` | E2E fixture: safe functions + dataset-verified breakers per target (see docstring in `make_fixtures.py`). |
-| `test.mjs` | 84 assertions: verdict-engine unit tests + E2E through the real parser for 3 directions. `node test.mjs`. |
+| `test.mjs` | 105 assertions: verdict-engine unit tests (incl. `guidesForFunction`) + E2E through the real parser for 3 directions. `node test.mjs`. |
 | `test-adversarial.mjs` | 170 assertions: hostile formulas (quoted parens, structured refs, `_xlfn.` prefixes, LET/LAMBDA names, sheet names with parens, 8k-char formulas) through BOTH extractors — `extractFunctions()` here and the checker's `funcs()` read straight out of the built `docs/checker.html`. `node test-adversarial.mjs`. |
 
 ## Deploy steps
@@ -22,9 +22,12 @@ do the 2-minute manual check below before announcing.
 1. Copy these four files into `docs/` (flat, next to `checker.html`):
    `audit.html`, `audit.js`, `audit-verdicts.js`, `audit-app.js`.
    The page loads the dataset from `data/compat.json` **relative to the page**, which is
-   already deployed at `docs/data/compat.json`. No build step needed. (Alternatively,
-   fold `audit.html` into `build_site.py` as a template later; it deliberately mirrors
-   the built `checker.html` head/nav/footer so either path works.)
+   already deployed at `docs/data/compat.json`. No build step needed. It also fetches
+   `data/guides.json` (same directory, also already deployed by the site build) to show
+   a "why?" link next to functions with a documented divergence guide — that fetch is
+   an optional enhancement and fails silently, so the audit works fine without it.
+   (Alternatively, fold `audit.html` into `build_site.py` as a template later; it
+   deliberately mirrors the built `checker.html` head/nav/footer so either path works.)
 2. Fill the two consts at the top of **`audit-app.js`**:
    - `PRODUCT_ID` — the Gumroad product id for the license product (used by
      `POST /v2/licenses/verify`). **Until you fill this, any correctly-formatted key
@@ -47,7 +50,7 @@ do the 2-minute manual check below before announcing.
    at-risk functions GROUPBY, AGGREGATE, BAHTTEXT (detail) + TEXTSPLIT (locked);
    Excel→LibreOffice: 7 at-risk formulas, free detail on GROUPBY/ARRAYFORMULA/GOOGLEFINANCE.
    Confirm in the network tab that the only requests are the page assets +
-   `data/compat.json` (and Gumroad only when a key is submitted).
+   `data/compat.json` + `data/guides.json` (and Gumroad only when a key is submitted).
 
 ## License verification — CORS findings (tested 2026-08-23)
 
