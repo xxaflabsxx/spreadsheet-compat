@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IFERROR works in Excel, Google Sheets and LibreOffice</title>
-<meta name="description" content="All 4 executed test cases for IFERROR match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>IFERROR gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="5/6 match Excel&#39;s docs; indirect missing sheet returns #REF!, not missing. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/iferror.html">
-<meta property="og:title" content="IFERROR works in Excel, Google Sheets and LibreOffice">
-<meta property="og:description" content="All 4 executed test cases for IFERROR match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="IFERROR gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="5/6 match Excel&#39;s docs; indirect missing sheet returns #REF!, not missing. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/iferror.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>IFERROR</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Logical &middot; Last tested 2026-08-06</p>
+<p class="category-tag">Category: Logical &middot; Last tested 2026-08-28</p>
 
 
 <p class="lede">Real compatibility results for the <strong>IFERROR</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
@@ -370,10 +370,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060104.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-08-06)</td>
+  <td>Yes (25.8.7.3, 2026-08-28)</td>
   <td>
     
-      <span class="badge badge-good">Supported, behaves as documented</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -409,10 +409,10 @@ IFERROR&rsquo;s support changed &mdash; not documentation claims, real results.<
   <td>2026-07-24</td>
 </tr>
 
-<tr class="">
+<tr class="ver-changed">
   <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-06</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-28</td>
 </tr>
 
 </tbody>
@@ -421,7 +421,48 @@ IFERROR&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 
 
+<h2 class="section-title">Why isn't IFERROR working in LibreOffice?</h2>
 
+<p><code>IFERROR</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#REF!</span>, but the documented/expected
+        result is <span class="formula">missing</span>.
+        Microsoft documents IFERROR as returning value_if_error for any of #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? and #NULL! -- #REF! is explicitly in that list, so the source of the #REF! (a missing sheet name inside INDIRECT) should not matter. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188; MISMATCH vs expected: expected &#39;missing&#39;, got &#39;#REF!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -435,7 +476,7 @@ IFERROR&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-06)</span></h3>
+<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-28)</span></h3>
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
@@ -473,6 +514,22 @@ IFERROR&rsquo;s support changed &mdash; not documentation claims, real results.<
   <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
+<tr>
+  <td class="formula mono">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;)</td>
+  <td>INDIRECT pointed at a sheet that does not exist in the workbook raises #REF!; IFERROR is documented as trapping ANY error value, so the fallback text should be returned</td>
+  <td class="result mono">#REF!</td>
+  <td class="result mono">missing<br><span class="category-tag">Microsoft documents IFERROR as returning value_if_error for any of #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? and #NULL! -- #REF! is explicitly in that list, so the source of the #REF! (a missing sheet name inside INDIRECT) should not matter. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IFERROR(INDIRECT(&#34;NotACell!!&#34;),&#34;bad&#34;)</td>
+  <td>Contrast case: the same IFERROR wrapper around an INDIRECT whose ref_text is simply not a valid reference (see INDIRECT_malformed_ref_error), which also raises #REF!</td>
+  <td class="result mono">bad</td>
+  <td class="result mono">bad<br><span class="category-tag">Same documented rule as IFERROR_indirect_missing_sheet: IFERROR traps #REF! whatever produced it. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
 </tbody>
 </table>
 </div>
@@ -502,7 +559,7 @@ IFERROR&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 <h2 class="section-title">Where IFERROR behaves differently</h2>
 <ul>
-<li><a href="../guides/dget-mode-sngl-value-error-excel-vs-google-sheets-libreoffice.html">DGET and MODE.SNGL: #NUM! and #N/A in Excel, #VALUE! in LibreOffice</a><br><span class="category-tag">DGET with two matching rows is documented as #NUM! in Excel and Google Sheets; MODE.SNGL with no repeats is #N/A in both. LibreOffice Calc returns #VALUE! for each.</span></li><li><a href="../guides/error-type-codes-excel-vs-libreoffice.html">ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6</a><br><span class="category-tag">Five of Excel&#39;s seven ERROR.TYPE codes match in LibreOffice Calc. The #REF! and #NUM! cases return #N/A instead of 4 and 6 — so error-classification logic breaks on migration.</span></li><li><a href="../guides/filter-no-results-calc-error-excel-vs-libreoffice.html">FILTER no match: Excel #CALC! vs LibreOffice #N/A</a><br><span class="category-tag">An empty FILTER is #CALC! in Excel but #N/A in LibreOffice, and TEXTAFTER&#39;s if_not_found fallback still errors with #VALUE!. Modern functions that change error identity.</span></li><li><a href="../guides/num-error-vs-value-error-excel-vs-libreoffice.html">#NUM! vs #VALUE!: Excel vs LibreOffice</a><br><span class="category-tag">Domain errors Microsoft documents as #NUM! — LN(0), SQRT(-16), out-of-range LARGE — return #VALUE! in LibreOffice, silently changing error-handling logic.</span></li><li><a href="../guides/offset-off-sheet-edge-ref-vs-value-error-excel-vs-libreoffice.html">OFFSET off the sheet edge: Excel #REF! vs LibreOffice #VALUE!</a><br><span class="category-tag">OFFSET(A1,-1,0) runs off the top of the sheet: Microsoft documents #REF!, LibreOffice Calc returns #VALUE!. Ordinary OFFSET usage agrees — only the out-of-bounds case forks.</span></li><li><a href="../guides/vlookup-hlookup-out-of-range-index-excel-vs-libreoffice.html">VLOOKUP bad column index: Excel #REF! vs LibreOffice #VALUE!</a><br><span class="category-tag">Microsoft documents an out-of-range col_index_num as #REF!; LibreOffice Calc returns #VALUE! instead. The lookup still fails — but every guard written around #REF! stops matching.</span></li>
+<li><a href="../guides/dget-mode-sngl-value-error-excel-vs-google-sheets-libreoffice.html">DGET and MODE.SNGL: #NUM! and #N/A in Excel, #VALUE! in LibreOffice</a><br><span class="category-tag">DGET with two matching rows is documented as #NUM! in Excel and Google Sheets; MODE.SNGL with no repeats is #N/A in both. LibreOffice Calc returns #VALUE! for each.</span></li><li><a href="../guides/error-type-codes-excel-vs-libreoffice.html">ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6</a><br><span class="category-tag">Five of Excel&#39;s seven ERROR.TYPE codes match in LibreOffice Calc. The #REF! and #NUM! cases return #N/A instead of 4 and 6 — so error-classification logic breaks on migration.</span></li><li><a href="../guides/filter-no-results-calc-error-excel-vs-libreoffice.html">FILTER no match: Excel #CALC! vs LibreOffice #N/A</a><br><span class="category-tag">An empty FILTER is #CALC! in Excel but #N/A in LibreOffice, and TEXTAFTER&#39;s if_not_found fallback still errors with #VALUE!. Modern functions that change error identity.</span></li><li><a href="../guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</a><br><span class="category-tag">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! in LibreOffice Calc 25.8.7.3 instead of the fallback. IFERROR traps every other #REF! we tested — including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.</span></li><li><a href="../guides/num-error-vs-value-error-excel-vs-libreoffice.html">#NUM! vs #VALUE!: Excel vs LibreOffice</a><br><span class="category-tag">Domain errors Microsoft documents as #NUM! — LN(0), SQRT(-16), out-of-range LARGE — return #VALUE! in LibreOffice, silently changing error-handling logic.</span></li><li><a href="../guides/offset-off-sheet-edge-ref-vs-value-error-excel-vs-libreoffice.html">OFFSET off the sheet edge: Excel #REF! vs LibreOffice #VALUE!</a><br><span class="category-tag">OFFSET(A1,-1,0) runs off the top of the sheet: Microsoft documents #REF!, LibreOffice Calc returns #VALUE!. Ordinary OFFSET usage agrees — only the out-of-bounds case forks.</span></li><li><a href="../guides/vlookup-hlookup-out-of-range-index-excel-vs-libreoffice.html">VLOOKUP bad column index: Excel #REF! vs LibreOffice #VALUE!</a><br><span class="category-tag">Microsoft documents an out-of-range col_index_num as #REF!; LibreOffice Calc returns #VALUE! instead. The lookup still fails — but every guard written around #REF! stops matching.</span></li>
 </ul>
 
 

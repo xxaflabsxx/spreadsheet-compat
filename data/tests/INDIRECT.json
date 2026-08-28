@@ -40,6 +40,13 @@
       "formula": "=INDIRECT(\"Z50\")",
       "description": "Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context",
       "expected": 0
+    },
+    {
+      "id": "INDIRECT_missing_sheet_ref_error",
+      "formula": "=INDIRECT(\"'Nope'!B2\")",
+      "description": "ref_text names a sheet that does not exist in the workbook -> #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files",
+      "expected": "#REF!",
+      "expected_note": "https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value"
     }
   ]
 }

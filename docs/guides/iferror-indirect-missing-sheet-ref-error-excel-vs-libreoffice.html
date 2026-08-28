@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SUMSQ works in Excel, Google Sheets and LibreOffice</title>
-<meta name="description" content="All 1 executed test case for SUMSQ match Excel&#39;s documented result. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</title>
+<meta name="description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! in LibreOffice Calc 25.8.7.3 instead of the fallback. IFERROR traps every other #REF! we tested — including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
 
-<link rel="canonical" href="https://canispreadsheet.com/functions/sumsq.html">
-<meta property="og:title" content="SUMSQ works in Excel, Google Sheets and LibreOffice">
-<meta property="og:description" content="All 1 executed test case for SUMSQ match Excel&#39;s documented result. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<link rel="canonical" href="https://canispreadsheet.com/guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">
+<meta property="og:title" content="IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice">
+<meta property="og:description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! in LibreOffice Calc 25.8.7.3 instead of the fallback. IFERROR traps every other #REF! we tested — including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/sumsq.html">
+<meta property="og:url" content="https://canispreadsheet.com/guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"SUMSQ function","item":"https://canispreadsheet.com/functions/sumsq.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"IFERROR doesn't catch INDIRECT's #REF! in LibreOffice","item":"https://canispreadsheet.com/guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -317,125 +317,146 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
-<div class="func-header">
-  <h1>SUMSQ</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
-</div>
-<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-28</p>
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>IFERROR does not catch INDIRECT&#39;s missing-sheet #REF! in LibreOffice</h1>
 
+<p><code>IFERROR</code> is the one error handler everybody trusts. Microsoft documents it as
+returning your fallback for <em>any</em> of the seven error values &mdash; <code>#N/A</code>,
+<code>#VALUE!</code>, <code>#REF!</code>, <code>#DIV/0!</code>, <code>#NUM!</code>,
+<code>#NAME?</code> and <code>#NULL!</code> &mdash; and Google Sheets documents the same blanket
+behaviour. In LibreOffice Calc 25.8.7.3 our harness found one case where it does not fire:
+the <code>#REF!</code> raised by <code>INDIRECT</code> when the reference string names a sheet
+that does not exist. <code>=IFERROR(INDIRECT("'Nope'!B2"),"missing")</code> returned
+<code>#REF!</code>, not <code>"missing"</code>.</p>
 
-<p class="lede">Real compatibility results for the <strong>SUMSQ</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
-<div class="table-scroll">
-<table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
-<tbody>
-
-
-<tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
-
-
-<tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
-
-
-<tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-08-28)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
-
-</tbody>
-</table>
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>This is not "<code>IFERROR</code> is broken in Calc", and it is not "<code>IFERROR</code>
+  ignores <code>#REF!</code>". Both of those are false, and we executed the cases that disprove
+  them. <code>IFERROR</code> caught the <code>#REF!</code> from an out-of-bounds
+  <code>INDEX</code>, and it caught the <code>#REF!</code> from an <code>INDIRECT</code> whose
+  reference text is simply malformed (<code>"NotACell!!"</code>). The single case that escaped it
+  is the missing <em>sheet name</em>. The narrowness is what makes it dangerous: the pattern still
+  looks well-guarded everywhere you test it, and fails on the one input a user is most likely to
+  produce &mdash; a tab name that has been renamed, deleted or mistyped.</p>
+  <p>Stranger still, Calc agrees the value <em>is</em> an error while refusing to trap it:
+  <code>=ISERROR(INDIRECT("'Nope'!B2"))</code> returned <code>TRUE</code> in the same run.</p>
 </div>
 
-
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-28)</span></h3>
+<h2 class="section-title">Executed results</h2>
+<p>The workbook contains no sheet named <code>Nope</code>. Setup for the <code>INDEX</code> row:
+<code>A1:A3 = 1, 2, 3</code>.</p>
 <div class="table-scroll">
 <table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=SUMSQ(3,4)</td>
-  <td>Sum of squares: 9+16</td>
-  <td class="result mono">25</td>
-  <td class="result mono">25</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=INDIRECT("'Nope'!B2")</td><td>#REF!</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
+    <tr><td class="formula">=IFERROR(INDIRECT("'Nope'!B2"),"missing")</td><td>missing</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
+    <tr><td class="formula">=IFERROR(INDIRECT("NotACell!!"),"bad")</td><td>bad</td><td>Not yet executed</td><td class="result">bad</td></tr>
+    <tr><td class="formula">=IFERROR(INDEX(A1:A3,10),"bad index")</td><td>bad index</td><td>Not yet executed</td><td class="result">bad index</td></tr>
+    <tr><td class="formula">=IFERROR(10/0,"err")</td><td>err</td><td>Not yet executed</td><td class="result">err</td></tr>
+    <tr><td class="formula">=ISERROR(INDIRECT("'Nope'!B2"))</td><td>TRUE</td><td>Not yet executed</td><td class="result">TRUE</td></tr>
+    <tr><td class="formula">=ISREF(INDIRECT("'Nope'!B2"))</td><td>FALSE</td><td>Not yet executed</td><td class="result">FALSE</td></tr>
+    <tr><td class="formula">=ISREF(INDIRECT("A1"))</td><td>TRUE</td><td>Not yet executed</td><td class="result">TRUE</td></tr>
+    <tr><td class="formula">=IFNA(INDIRECT("'Nope'!B2"),"x")</td><td>#REF!</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
+    <tr><td class="formula">=IFNA(10/0,"na")</td><td>#DIV/0!</td><td>Not yet executed</td><td class="result">#DIV/0!</td></tr>
+  </tbody>
 </table>
 </div>
+<p>The Excel column is the documented-expected value recorded in our test corpus, taken from
+Microsoft's function reference for each function; we did not run Excel. Google Sheets has not been
+put through the harness, so that column stays honest rather than guessed. The LibreOffice column is
+what the harness computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. Nine of the
+ten rows agree with the documented Excel value. One does not, and it is row two.</p>
+<p>The last two rows are there to keep the comparison fair. <code>IFNA</code> returning
+<code>#REF!</code> is <em>not</em> a divergence &mdash; <code>IFNA</code> is documented to trap
+<code>#N/A</code> and nothing else, in every engine, which is exactly why the row below it lets a
+<code>#DIV/0!</code> through in Excel's documentation and in our run alike. If you have been using
+<code>IFNA</code> as a general error trap, that is a portable bug rather than a Calc one.</p>
 
+<h2 class="section-title">Why it matters</h2>
+<p>The affected pattern is not exotic. It is the standard way to build a dashboard whose data
+source is chosen by the reader: put a tab name in a cell, assemble the reference as text, and read
+it with <code>INDIRECT</code>.</p>
+<p><code>=IFERROR(INDIRECT("'"&amp;A1&amp;"'!B2"),"No such tab")</code></p>
+<p>Month pickers, per-client tabs, per-region tabs, a validation dropdown of sheet names &mdash;
+they all reduce to that formula, and the <code>IFERROR</code> wrapper exists precisely because the
+tab named in <code>A1</code> may not exist. In Excel the wrapper does its job. In LibreOffice Calc
+25.8.7.3 the guarded formula shows <code>#REF!</code> anyway, and it does so at the moment the
+sheet is genuinely missing &mdash; when someone renamed a tab, deleted last quarter's sheet, or
+typed a name with a trailing space. A grid of these cells goes from "one clean fallback message"
+to "a wall of <code>#REF!</code>", and anything downstream that sums or charts the column inherits
+the error.</p>
+<p>It also breaks quietly in the other direction during a migration audit: because
+<code>IFERROR</code> handles every other error source correctly, spot-checking a few formulas will
+not reveal the gap.</p>
 
+<h2 class="section-title">What to use instead</h2>
+<p>Both replacements below rest on values our harness executed in LibreOffice Calc 25.8.7.3, and
+the <code>ISREF</code> form was additionally executed end-to-end in a real multi-sheet workbook for
+our how-to page, where it returned the fallback text rather than an error.</p>
+<p><strong>Test with <code>ISREF</code> first.</strong> This is the most precise fix, because
+"can this reference be resolved?" is exactly the question being asked:</p>
+<p><code>=IF(ISREF(INDIRECT("'"&amp;A1&amp;"'!B2")),INDIRECT("'"&amp;A1&amp;"'!B2"),"No such tab")</code></p>
+<p>That exact formula returned <code>"No such tab"</code> in the multi-sheet run behind our
+how-to page, with <code>A1</code> naming a missing tab; in the corpus run above,
+<code>ISREF</code> on its own returned <code>FALSE</code> for the unresolvable reference and
+<code>TRUE</code> for a valid one. The cost is that <code>INDIRECT</code> is written
+twice and therefore evaluated twice; with a volatile function that recalculates on every edit, it
+is worth confining the pattern to the handful of cells that actually need it.</p>
+<p><strong>Or wrap the test in <code>ISERROR</code>.</strong>
+<code>=ISERROR(INDIRECT("'Nope'!B2"))</code> returned <code>TRUE</code>, so
+<code>=IF(ISERROR(INDIRECT(ref)),"No such tab",INDIRECT(ref))</code> follows from that, and it
+catches other failure modes (malformed strings, a name with a stray character) in the same test. Use
+<code>ISREF</code> when you want to know specifically that the tab is missing;
+<code>ISERROR</code> when any failure should produce the same message.</p>
+<p><strong>What does not help:</strong> swapping <code>IFERROR</code> for <code>IFNA</code>, which
+traps less, not more; and testing for the error code with
+<code>=IF(ERROR.TYPE(...)=4,...)</code>, which still requires the error to reach a function that
+will look at it. If the tab list is fixed and short, the structurally better answer is to avoid
+<code>INDIRECT</code> altogether &mdash; a <code>CHOOSE</code> over real references
+(<code>=CHOOSE(MATCH(A1,{"Q1","Q2","Q3"},0),Q1!B2,Q2!B2,Q3!B2)</code>) keeps live references that
+follow renames and insertions, which string-built references never do.</p>
+<p>Our <a href="../how-to/reference-a-cell-on-another-sheet.html">how-to on referencing a cell on
+another sheet</a> shows the same divergence executed in a real multi-sheet workbook, alongside the
+quoting rules for tab names with spaces and the other <code>INDIRECT</code> caveats worth knowing
+before you build on it.</p>
 
+<h2 class="section-title">Honest limits</h2>
+<p>These cases were executed in LibreOffice Calc 25.8.7.3 only, through our standard
+<code>.xlsx</code> recalculation path (formulas written with no cached value, recalculated by
+LibreOffice, values read back). They were <strong>not</strong> run against our archived 24.2.0.3,
+24.8.7.2 or 25.2.0.3 builds &mdash; those are not installed on the machine that ran this batch, so
+we cannot say when this behaviour started or whether older releases share it. Treat the version
+number on this page as the exact scope of the claim.</p>
+<p>The Excel and Google Sheets columns are documentation, not execution: Microsoft documents
+<code>IFERROR</code> as trapping all seven error values including <code>#REF!</code>, and
+<code>ISREF</code> as returning <code>TRUE</code> when its argument refers to a reference. We did
+not run either app. Nothing here involves dynamic-array spilling or drawing objects, so the usual
+spill-range and shape caveats do not apply. One more scope note: the reference string in these
+cases uses Excel's <code>!</code> sheet separator, which is what an <code>.xlsx</code> workbook
+carries and what LibreOffice parses in a document that arrived in that format; a native
+<code>.ods</code> set to Calc A1 syntax uses a dot, and we did not execute that variant.</p>
 
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">official documentation</a></li>
-
-</ul>
-
-
-
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
 
 
 <aside class="promo-card">

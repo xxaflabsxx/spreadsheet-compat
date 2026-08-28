@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>INDIRECT works in Excel, Google Sheets and LibreOffice</title>
-<meta name="description" content="All 5 executed test cases for INDIRECT match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="All 6 executed test cases for INDIRECT match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/indirect.html">
 <meta property="og:title" content="INDIRECT works in Excel, Google Sheets and LibreOffice">
-<meta property="og:description" content="All 5 executed test cases for INDIRECT match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="All 6 executed test cases for INDIRECT match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/indirect.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,7 +324,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-08-06</p>
+<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-08-28</p>
 
 
 <p class="lede">Real compatibility results for the <strong>INDIRECT</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
@@ -370,7 +370,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060109.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-08-06)</td>
+  <td>Yes (25.8.7.3, 2026-08-28)</td>
   <td>
     
       <span class="badge badge-good">Supported, behaves as documented</span>
@@ -412,7 +412,7 @@ INDIRECT&rsquo;s support changed &mdash; not documentation claims, real results.
 <tr class="">
   <td>25.8.7.3</td>
   <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-06</td>
+  <td>2026-08-28</td>
 </tr>
 
 </tbody>
@@ -435,7 +435,7 @@ INDIRECT&rsquo;s support changed &mdash; not documentation claims, real results.
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-06)</span></h3>
+<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-28)</span></h3>
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
@@ -481,6 +481,14 @@ INDIRECT&rsquo;s support changed &mdash; not documentation claims, real results.
   <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
+<tr>
+  <td class="formula mono">=INDIRECT(&#34;&#39;Nope&#39;!B2&#34;)</td>
+  <td>ref_text names a sheet that does not exist in the workbook -&gt; #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files</td>
+  <td class="result mono">#REF!</td>
+  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
 </tbody>
 </table>
 </div>
@@ -506,6 +514,11 @@ INDIRECT&rsquo;s support changed &mdash; not documentation claims, real results.
 <h2 class="section-title">Related how-to recipes</h2>
 <ul>
 <li><a href="../how-to/convert-a-column-letter-to-a-number.html">How to convert a column letter to a number</a></li><li><a href="../how-to/use-a-cell-value-as-a-sheet-name.html">How to use a cell value as a sheet name (INDIRECT)</a></li>
+</ul>
+
+<h2 class="section-title">Where INDIRECT behaves differently</h2>
+<ul>
+<li><a href="../guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</a><br><span class="category-tag">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! in LibreOffice Calc 25.8.7.3 instead of the fallback. IFERROR traps every other #REF! we tested — including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.</span></li>
 </ul>
 
 

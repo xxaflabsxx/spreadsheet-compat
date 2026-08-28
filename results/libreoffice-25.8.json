@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-06T13:37:30.942987+00:00",
+  "generated_at": "2026-08-28T23:12:34.667557+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.8.7.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-08-06 06:37:27.978000",
-    "now_run_2": "2026-08-06 06:37:30.676000",
+    "now_run_1": "2026-08-28 16:12:30.581000",
+    "now_run_2": "2026-08-28 16:12:34.164000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 0.91,
+    "conversion_seconds_run_1": 1.18,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -2857,6 +2857,30 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
+      },
+      "IFERROR_indirect_missing_sheet": {
+        "description": "INDIRECT pointed at a sheet that does not exist in the workbook raises #REF!; IFERROR is documented as trapping ANY error value, so the fallback text should be returned",
+        "formula_display": "=IFERROR(INDIRECT(\"'Nope'!B2\"),\"missing\")",
+        "formula_stored_xlsx": "=IFERROR(INDIRECT(\"'Nope'!B2\"),\"missing\")",
+        "value": "#REF!",
+        "range_values": null,
+        "error": "#REF!",
+        "expected": "missing",
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents IFERROR as returning value_if_error for any of #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? and #NULL! -- #REF! is explicitly in that list, so the source of the #REF! (a missing sheet name inside INDIRECT) should not matter. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188; MISMATCH vs expected: expected 'missing', got '#REF!'"
+      },
+      "IFERROR_indirect_bad_text": {
+        "description": "Contrast case: the same IFERROR wrapper around an INDIRECT whose ref_text is simply not a valid reference (see INDIRECT_malformed_ref_error), which also raises #REF!",
+        "formula_display": "=IFERROR(INDIRECT(\"NotACell!!\"),\"bad\")",
+        "formula_stored_xlsx": "=IFERROR(INDIRECT(\"NotACell!!\"),\"bad\")",
+        "value": "bad",
+        "range_values": null,
+        "error": null,
+        "expected": "bad",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Same documented rule as IFERROR_indirect_missing_sheet: IFERROR traps #REF! whatever produced it. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188"
       }
     },
     "IFNA": {
@@ -2895,6 +2919,18 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
+      },
+      "IFNA_indirect_missing_sheet": {
+        "description": "IFNA only traps #N/A, so the #REF! from an INDIRECT naming a missing sheet must pass straight through",
+        "formula_display": "=IFNA(INDIRECT(\"'Nope'!B2\"),\"x\")",
+        "formula_stored_xlsx": "=_xlfn.IFNA(INDIRECT(\"'Nope'!B2\"),\"x\")",
+        "value": "#REF!",
+        "range_values": null,
+        "error": "#REF!",
+        "expected": "#REF!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Documented scope difference, not a quirk: IFNA returns value_if_na for #N/A only, while IFERROR traps every error value. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188"
       }
     },
     "IFS": {
@@ -3077,6 +3113,18 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
+      },
+      "INDIRECT_missing_sheet_ref_error": {
+        "description": "ref_text names a sheet that does not exist in the workbook -> #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files",
+        "formula_display": "=INDIRECT(\"'Nope'!B2\")",
+        "formula_stored_xlsx": "=INDIRECT(\"'Nope'!B2\")",
+        "value": "#REF!",
+        "range_values": null,
+        "error": "#REF!",
+        "expected": "#REF!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value"
       }
     },
     "INT": {
@@ -3307,6 +3355,18 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
+      },
+      "ISERROR_indirect_missing_sheet": {
+        "description": "ISERROR over an INDIRECT naming a sheet that does not exist: the #REF! is an error value, so TRUE",
+        "formula_display": "=ISERROR(INDIRECT(\"'Nope'!B2\"))",
+        "formula_stored_xlsx": "=ISERROR(INDIRECT(\"'Nope'!B2\"))",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents ISERROR as TRUE for any error value (#N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? or #NULL!): https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
       }
     },
     "ISEVEN": {
@@ -11030,6 +11090,46 @@
         "canary_ok_this_sheet": true,
         "notes": null
       }
+    },
+    "ISREF": {
+      "ISREF_indirect_missing_sheet": {
+        "description": "INDIRECT could not resolve to a reference (no such sheet), so ISREF is FALSE -- the basis of the IF(ISREF(...)) guard pattern",
+        "formula_display": "=ISREF(INDIRECT(\"'Nope'!B2\"))",
+        "formula_stored_xlsx": "=ISREF(INDIRECT(\"'Nope'!B2\"))",
+        "value": false,
+        "range_values": null,
+        "error": null,
+        "expected": false,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents ISREF as TRUE when value refers to a reference and FALSE otherwise; an unresolvable INDIRECT yields no reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
+      },
+      "ISREF_indirect_valid": {
+        "description": "INDIRECT resolves to a real cell reference on the current sheet, so ISREF is TRUE",
+        "formula_display": "=ISREF(INDIRECT(\"A1\"))",
+        "formula_stored_xlsx": "=ISREF(INDIRECT(\"A1\"))",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents ISREF as TRUE when value refers to a reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
+      }
     }
-  }
+  },
+  "subset_runs": [
+    {
+      "generated_at": "2026-08-28T23:12:34.667557+00:00",
+      "functions": [
+        "IFERROR",
+        "IFNA",
+        "INDIRECT",
+        "ISERROR",
+        "ISREF"
+      ],
+      "trusted_this_run": true,
+      "superseded_generated_at": "2026-08-06T13:37:30.942987+00:00"
+    }
+  ]
 }

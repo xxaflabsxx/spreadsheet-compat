@@ -1,0 +1,19 @@
+{
+  "function": "ISREF",
+  "cases": [
+    {
+      "id": "ISREF_indirect_missing_sheet",
+      "formula": "=ISREF(INDIRECT(\"'Nope'!B2\"))",
+      "description": "INDIRECT could not resolve to a reference (no such sheet), so ISREF is FALSE -- the basis of the IF(ISREF(...)) guard pattern",
+      "expected": false,
+      "expected_note": "Microsoft documents ISREF as TRUE when value refers to a reference and FALSE otherwise; an unresolvable INDIRECT yields no reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
+    },
+    {
+      "id": "ISREF_indirect_valid",
+      "formula": "=ISREF(INDIRECT(\"A1\"))",
+      "description": "INDIRECT resolves to a real cell reference on the current sheet, so ISREF is TRUE",
+      "expected": true,
+      "expected_note": "Microsoft documents ISREF as TRUE when value refers to a reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
+    }
+  ]
+}

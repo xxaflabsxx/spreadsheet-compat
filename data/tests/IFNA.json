@@ -24,6 +24,13 @@
       "formula": "=IFNA(10/2,\"na\")",
       "description": "No error: original value passes through",
       "expected": 5
+    },
+    {
+      "id": "IFNA_indirect_missing_sheet",
+      "formula": "=IFNA(INDIRECT(\"'Nope'!B2\"),\"x\")",
+      "description": "IFNA only traps #N/A, so the #REF! from an INDIRECT naming a missing sheet must pass straight through",
+      "expected": "#REF!",
+      "expected_note": "Documented scope difference, not a quirk: IFNA returns value_if_na for #N/A only, while IFERROR traps every error value. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188"
     }
   ]
 }

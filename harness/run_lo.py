@@ -54,6 +54,24 @@ USAGE
 -----
     python3 harness/run_lo.py                  # run all data/tests/*.json
     python3 harness/run_lo.py XLOOKUP LET       # run only these functions
+
+SUBSET RUNS MERGE, THEY DO NOT OVERWRITE (READ BEFORE CHANGING THIS)
+--------------------------------------------------------------------
+A full run (no function names on the command line) writes
+results/libreoffice-<major.minor>.json from scratch. A SUBSET run merges
+into that file instead: only the function_results entries for the
+functions named on the command line are replaced, every other function's
+previously executed result is preserved byte-for-byte, and the top-level
+generated_at / canary / recalc_method are refreshed from this run so the
+canary block always describes the most recent execution against the file.
+`trusted` becomes the AND of the previous file's flag and this run's, so a
+merge can only ever downgrade trust, never launder an untrusted run into a
+trusted file. Each merge appends a record to a top-level "subset_runs" list
+(timestamp, which functions were re-executed, that run's own trusted flag,
+and the generated_at it superseded) so the provenance of a mixed file is
+auditable. Merging is refused if the installed LibreOffice version does not
+match the engine_version already recorded in the file -- results from two
+different engine builds must never share one results file.
 """
 import glob
 import json
@@ -439,6 +457,43 @@ def run():
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
     out_json_path = os.path.join(RESULTS_DIR, f"libreoffice-{LO_VERSION_TAG}.json")
+
+    # ---- Subset runs merge into the existing results file ----
+    # See "SUBSET RUNS MERGE, THEY DO NOT OVERWRITE" in the module docstring.
+    if requested and os.path.exists(out_json_path):
+        with open(out_json_path) as f:
+            prev = json.load(f)
+        prev_version = prev.get("engine_version")
+        if prev_version != LO_VERSION:
+            sys.exit(
+                f"Refusing to merge: {out_json_path} records engine_version "
+                f"{prev_version!r} but the installed LibreOffice reports "
+                f"{LO_VERSION!r}. Results from different builds must not share a file."
+            )
+        merged = dict(prev)
+        merged_fr = dict(prev.get("function_results") or {})
+        for fn, cases in function_results.items():
+            merged_fr[fn] = cases  # whole function re-executed, so replace wholesale
+        merged["function_results"] = merged_fr
+        merged["generated_at"] = output["generated_at"]
+        merged["engine"] = output["engine"]
+        merged["engine_version"] = output["engine_version"]
+        merged["recalc_method"] = output["recalc_method"]
+        merged["canary"] = canary
+        # A merge can only downgrade trust, never upgrade it.
+        merged["trusted"] = bool(prev.get("trusted", False)) and global_trusted
+        merged.setdefault("subset_runs", []).append({
+            "generated_at": output["generated_at"],
+            "functions": sorted(function_results.keys()),
+            "trusted_this_run": global_trusted,
+            "superseded_generated_at": prev.get("generated_at"),
+        })
+        untouched = len(merged_fr) - len(function_results)
+        print(f"Subset run: merged {len(function_results)} function(s) into "
+              f"{os.path.basename(out_json_path)}; {untouched} other function "
+              f"result(s) preserved unchanged.")
+        output = merged
+
     with open(out_json_path, "w") as f:
         json.dump(output, f, indent=2, default=str)
         f.write("\n")

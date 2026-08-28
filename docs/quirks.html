@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>55 spreadsheet formulas that give different results in LibreOffice vs Excel (executed)</title>
+<title>56 spreadsheet formulas that give different results in LibreOffice vs Excel (executed)</title>
 <meta name="description" content="MROUND(5,-2) returns 6, not #NUM!. COUNT(A1:A1) counts a boolean as 1, not 0. SUM(1,&#34;2&#34;,3) errors #VALUE! not 6 — every result executed, not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="55 spreadsheet formulas that give different results in LibreOffice vs Excel (executed)">
+<meta property="og:title" content="56 spreadsheet formulas that give different results in LibreOffice vs Excel (executed)">
 <meta property="og:description" content="MROUND(5,-2) returns 6, not #NUM!. COUNT(A1:A1) counts a boolean as 1, not 0. SUM(1,&#34;2&#34;,3) errors #VALUE! not 6 — every result executed, not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
@@ -322,7 +322,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 not match documented/expected behavior. This is the flagship content of
 Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula.</p>
-<p class="search-hint">55 quirks found across 41 functions.</p>
+<p class="search-hint">56 quirks found across 42 functions.</p>
 
 <ul class="quirks-list">
 
@@ -532,6 +532,19 @@ run the formula.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>MISMATCH vs expected: expected &#39;#REF!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/iferror.html">IFERROR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#REF!</dd>
+    <dt>Documented / expected</dt><dd class="mono">missing</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Logical</dd>
+  </dl>
+  <p>Microsoft documents IFERROR as returning value_if_error for any of #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? and #NULL! -- #REF! is explicitly in that list, so the source of the #REF! (a missing sheet name inside INDIRECT) should not matter. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188; MISMATCH vs expected: expected &#39;missing&#39;, got &#39;#REF!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -1054,6 +1067,7 @@ run the formula.</p>
 <li><a href="guides/dget-mode-sngl-value-error-excel-vs-google-sheets-libreoffice.html">DGET and MODE.SNGL: #NUM! and #N/A in Excel, #VALUE! in LibreOffice</a></li>
 <li><a href="guides/error-type-codes-excel-vs-libreoffice.html">ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6</a></li>
 <li><a href="guides/filter-no-results-calc-error-excel-vs-libreoffice.html">FILTER no match: Excel #CALC! vs LibreOffice #N/A</a></li>
+<li><a href="guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</a></li>
 <li><a href="guides/isnumber-boolean-excel-vs-google-sheets-libreoffice.html">ISNUMBER(TRUE) is FALSE in Excel but TRUE in LibreOffice</a></li>
 <li><a href="guides/lambda-map-reduce-scan-excel-vs-libreoffice.html">LAMBDA, MAP &amp; SCAN: Excel vs LibreOffice</a></li>
 <li><a href="guides/mround-negative-multiple-excel-vs-libreoffice.html">MROUND(5,-2): Excel #NUM! vs LibreOffice 6</a></li>

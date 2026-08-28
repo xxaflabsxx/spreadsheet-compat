@@ -37,6 +37,20 @@
         "A3": 3
       },
       "expected": "bad index"
+    },
+    {
+      "id": "IFERROR_indirect_missing_sheet",
+      "formula": "=IFERROR(INDIRECT(\"'Nope'!B2\"),\"missing\")",
+      "description": "INDIRECT pointed at a sheet that does not exist in the workbook raises #REF!; IFERROR is documented as trapping ANY error value, so the fallback text should be returned",
+      "expected": "missing",
+      "expected_note": "Microsoft documents IFERROR as returning value_if_error for any of #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? and #NULL! -- #REF! is explicitly in that list, so the source of the #REF! (a missing sheet name inside INDIRECT) should not matter. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188"
+    },
+    {
+      "id": "IFERROR_indirect_bad_text",
+      "formula": "=IFERROR(INDIRECT(\"NotACell!!\"),\"bad\")",
+      "description": "Contrast case: the same IFERROR wrapper around an INDIRECT whose ref_text is simply not a valid reference (see INDIRECT_malformed_ref_error), which also raises #REF!",
+      "expected": "bad",
+      "expected_note": "Same documented rule as IFERROR_indirect_missing_sheet: IFERROR traps #REF! whatever produced it. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188"
     }
   ]
 }
