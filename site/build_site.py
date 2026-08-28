@@ -1929,7 +1929,7 @@ GUIDES_INDEX_TMPL = """{% extends "base.html" %}
 
 SEO_PAGE_TMPL = """{% extends "base.html" %}
 {% block content %}
-<a class="back-link" href="{{ rel }}quirks.html">&larr; All quirks &amp; gotchas</a>
+<a class="back-link" href="{{ rel }}guides/">&larr; All guides</a>
 <h1>{{ h1 }}</h1>
 {{ body_html | safe }}
 {% endblock %}"""
