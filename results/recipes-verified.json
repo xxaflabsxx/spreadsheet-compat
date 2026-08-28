@@ -2244,7 +2244,139 @@
       "engine_version": "25.8.7.3",
       "formula": "=SUMIFS(C2:C6,A2:A6,\"East\",B2:B6,\"Widget\")",
       "expected": 60,
-      "actual": 60
+      "actual": 60,
+      "variants": [
+        {
+          "heading": "\u201cSUMIF with multiple criteria\u201d \u2014 SUMIF takes one, SUMIFS takes many",
+          "checks": [
+            {
+              "label": "SUMIF \u2014 one criterion only (region), sum range LAST",
+              "formula": "=SUMIF(A2:A7,\"North\",C2:C7)",
+              "expected": 165,
+              "actual": 165,
+              "verified": true
+            },
+            {
+              "label": "SUMIFS \u2014 region AND product, sum range FIRST",
+              "formula": "=SUMIFS(C2:C7,A2:A7,\"North\",B2:B7,\"Widget\")",
+              "expected": 125,
+              "actual": 125,
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "Multiple criteria in the SAME column (OR logic)",
+          "checks": [
+            {
+              "label": "North OR South, via an array constant",
+              "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))",
+              "expected": 220,
+              "actual": 220,
+              "verified": true
+            },
+            {
+              "label": "Same answer with SUMPRODUCT (+ is OR)",
+              "formula": "=SUMPRODUCT((A2:A6=\"North\")+(A2:A6=\"South\"),C2:C6)",
+              "expected": 220,
+              "actual": 220,
+              "verified": true
+            },
+            {
+              "label": "(North OR South) AND Widget \u2014 OR inside, AND across",
+              "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\"))",
+              "expected": 150,
+              "actual": 150,
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "Criteria on a column AND a row at the same time (2-D block)",
+          "checks": [
+            {
+              "label": "One row label AND one column label (South \u00d7 Q2)",
+              "formula": "=SUMPRODUCT((A2:A4=\"South\")*(B1:D1=\"Q2\")*B2:D4)",
+              "expected": 50,
+              "actual": 50,
+              "verified": true
+            },
+            {
+              "label": "One row, two columns (South \u00d7 Q2 or Q3)",
+              "formula": "=SUMPRODUCT((A2:A4=\"South\")*((B1:D1=\"Q2\")+(B1:D1=\"Q3\"))*B2:D4)",
+              "expected": 110,
+              "actual": 110,
+              "verified": true
+            },
+            {
+              "label": "Two rows, one column (South or East \u00d7 Q2)",
+              "formula": "=SUMPRODUCT(((A2:A4=\"South\")+(A2:A4=\"East\"))*(B1:D1=\"Q2\")*B2:D4)",
+              "expected": 130,
+              "actual": 130,
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "Mixing number, text and date criteria in one SUMIFS",
+          "checks": [
+            {
+              "label": "Date lower bound only \u2014 everything from 1 Feb 2026",
+              "formula": "=SUMIFS(C2:C6,A2:A6,\">=\"&DATE(2026,2,1))",
+              "expected": 1240,
+              "actual": 1240,
+              "verified": true
+            },
+            {
+              "label": "Text (North) + number (>=100) + a Feb\u2013Mar date window",
+              "formula": "=SUMIFS(C2:C6,B2:B6,\"North\",C2:C6,\">=100\",A2:A6,\">=\"&DATE(2026,2,1),A2:A6,\"<\"&DATE(2026,4,1))",
+              "expected": 750,
+              "actual": 750,
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "Wildcards, and what does (and doesn\u2019t) carry across apps",
+          "checks": [
+            {
+              "label": "Starts with \u2014 and matching is case-insensitive",
+              "formula": "=SUMIFS(C2:C5,A2:A5,\"Widget*\")",
+              "expected": 135,
+              "actual": 135,
+              "verified": true
+            },
+            {
+              "label": "Wildcard plus a second criterion",
+              "formula": "=SUMIFS(C2:C5,A2:A5,\"Widget*\",B2:B5,\"North\")",
+              "expected": 110,
+              "actual": 110,
+              "verified": true
+            },
+            {
+              "label": "Contains",
+              "formula": "=SUMIFS(C2:C5,A2:A5,\"*get*\")",
+              "expected": 185,
+              "actual": 185,
+              "verified": true
+            },
+            {
+              "label": "Not equal to",
+              "formula": "=SUMIFS(C2:C5,A2:A5,\"<>Widget A\")",
+              "expected": 85,
+              "actual": 85,
+              "verified": true
+            },
+            {
+              "label": "FILTER alternative, written portably (one combined condition)",
+              "formula": "=SUM(FILTER(C2:C5,(B2:B5=\"North\")*(A2:A5<>\"Gadget B\")))",
+              "expected": 110,
+              "actual": 110,
+              "verified": true
+            }
+          ]
+        }
+      ]
     },
     "sumif-across-a-row": {
       "verified": true,

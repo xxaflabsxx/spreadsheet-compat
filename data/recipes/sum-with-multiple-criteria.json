@@ -1,11 +1,14 @@
 {
   "slug": "sum-with-multiple-criteria",
   "title": "How to sum with multiple criteria (SUMIFS)",
-  "task": "Add up values only when several conditions are all true — e.g. sales for one region AND one product.",
+  "task": "Sum values only when several conditions are all true.",
   "keywords": [
+    "excel sumif multiple criteria",
+    "excel sumif multiple conditions",
+    "excel sumif criteria",
+    "sumifs multiple criteria column and row",
+    "sumif function in excel with multiple criteria",
     "sumifs multiple criteria",
-    "sum with two conditions excel",
-    "sumifs google sheets",
     "sum by region and product"
   ],
   "solutions": {
@@ -24,14 +27,247 @@
   },
   "verify": {
     "setup_cells": {
-      "A2": "East", "B2": "Widget", "C2": 10,
-      "A3": "West", "B3": "Widget", "C3": 20,
-      "A4": "East", "B4": "Gadget", "C4": 30,
-      "A5": "West", "B5": "Gadget", "C5": 40,
-      "A6": "East", "B6": "Widget", "C6": 50
+      "A2": "East",
+      "B2": "Widget",
+      "C2": 10,
+      "A3": "West",
+      "B3": "Widget",
+      "C3": 20,
+      "A4": "East",
+      "B4": "Gadget",
+      "C4": 30,
+      "A5": "West",
+      "B5": "Gadget",
+      "C5": 40,
+      "A6": "East",
+      "B6": "Widget",
+      "C6": 50
     },
     "formula": "=SUMIFS(C2:C6,A2:A6,\"East\",B2:B6,\"Widget\")",
     "expected": 60
   },
-  "explanation": "SUMIFS takes the sum range first, then any number of range/criteria pairs — a row is included only when every condition matches. Here only rows 2 and 6 are both \"East\" and \"Widget\", so the result is 10 + 50 = 60. Criteria accept comparisons (\">100\") and wildcards (\"Widg*\") too. Note the argument order differs from single-criterion SUMIF, where the sum range comes last."
+  "explanation": "SUMIFS takes the sum range first, then any number of range/criteria pairs — a row is included only when every condition matches. In the example below (region in A, product in B, amount in C) only rows 2 and 6 are both \"East\" and \"Widget\", so the result is 10 + 50 = 60. Criteria accept comparisons (\">100\"), wildcards (\"Widg*\") and cell references (\">=\"&E1). Note the argument order differs from single-criterion SUMIF, where the sum range comes LAST — that swap is the single most common cause of a wrong or zero answer. SUMIFS combines its pairs with AND; the sections below cover OR logic in one column, criteria that sit on a row and a column at the same time, and mixing number, text and date tests in one formula.",
+  "variants": [
+    {
+      "heading": "“SUMIF with multiple criteria” — SUMIF takes one, SUMIFS takes many",
+      "intro": "There is no way to give SUMIF a second criterion: its signature is SUMIF(range, criterion, [sum_range]) — exactly one range and one criterion. The function you want is SUMIFS, which accepts unlimited range/criteria pairs and combines them with AND. The catch is the argument order: SUMIF puts the sum range LAST (and it is optional), while SUMIFS puts the sum range FIRST. Swapping them is the most common cause of a zero or nonsense total.",
+      "formula": "=SUMIFS(C2:C7,A2:A7,\"North\",B2:B7,\"Widget\")",
+      "setup_cells": {
+        "A1": "Region",
+        "B1": "Product",
+        "C1": "Amount",
+        "A2": "North",
+        "B2": "Widget",
+        "C2": 100,
+        "A3": "North",
+        "B3": "Gadget",
+        "C3": 40,
+        "A4": "South",
+        "B4": "Widget",
+        "C4": 60,
+        "A5": "North",
+        "B5": "Widget",
+        "C5": 25,
+        "A6": "South",
+        "B6": "Gadget",
+        "C6": 80,
+        "A7": "East",
+        "B7": "Widget",
+        "C7": 15
+      },
+      "verify": [
+        {
+          "label": "SUMIF — one criterion only (region), sum range LAST",
+          "formula": "=SUMIF(A2:A7,\"North\",C2:C7)",
+          "expected": 165
+        },
+        {
+          "label": "SUMIFS — region AND product, sum range FIRST",
+          "formula": "=SUMIFS(C2:C7,A2:A7,\"North\",B2:B7,\"Widget\")",
+          "expected": 125
+        }
+      ],
+      "note": "SUMIF totals all three North rows (100 + 40 + 25). Adding the product test with SUMIFS drops the North/Gadget row and leaves 100 + 25. Written the SUMIF way round — =SUMIFS(A2:A7,\"North\",B2:B7,\"Widget\",C2:C7) — the formula is an error, not a wrong number, because SUMIFS reads the first argument as the range to add. Excel, Google Sheets and LibreOffice Calc all document the same signature and the same argument order."
+    },
+    {
+      "heading": "Multiple criteria in the SAME column (OR logic)",
+      "intro": "Extra SUMIFS pairs narrow the result, so you cannot ask for “North OR South” by adding a second region pair — no row is both, and the answer is 0. Feed SUMIFS an array constant of the values instead: it then returns one subtotal per value, and an outer SUM adds them up. SUMPRODUCT with added boolean tests is the equivalent that also works with a range of criteria in cells.",
+      "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))",
+      "setup_cells": {
+        "A1": "Region",
+        "B1": "Product",
+        "C1": "Amount",
+        "A2": "North",
+        "B2": "Widget",
+        "C2": 100,
+        "A3": "South",
+        "B3": "Widget",
+        "C3": 50,
+        "A4": "East",
+        "B4": "Widget",
+        "C4": 25,
+        "A5": "North",
+        "B5": "Gadget",
+        "C5": 40,
+        "A6": "South",
+        "B6": "Gadget",
+        "C6": 30
+      },
+      "verify": [
+        {
+          "label": "North OR South, via an array constant",
+          "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))",
+          "expected": 220
+        },
+        {
+          "label": "Same answer with SUMPRODUCT (+ is OR)",
+          "formula": "=SUMPRODUCT((A2:A6=\"North\")+(A2:A6=\"South\"),C2:C6)",
+          "expected": 220
+        },
+        {
+          "label": "(North OR South) AND Widget — OR inside, AND across",
+          "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\"))",
+          "expected": 150
+        }
+      ],
+      "note": "Array-constant behaviour to know about: the braces hold literal values typed into the formula, separated by commas for a horizontal array — you cannot put a cell range inside them (use the SUMPRODUCT form, or SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3)), if the wanted values live in cells). This pattern is only safe for OR over EXACT values in ONE column, because a row cannot equal two different values, so nothing is double-counted; OR across two different columns can overlap and needs the SUMPRODUCT form. Excel, Google Sheets and LibreOffice Calc all document the same brace syntax; in Google Sheets a semicolon separates rows and a comma separates columns, same as Excel. In pre-dynamic-array Excel the SUM(SUMIFS(...)) wrapper may need to be entered with Ctrl+Shift+Enter (documented); modern Excel and Sheets take it as a normal formula."
+    },
+    {
+      "heading": "Criteria on a column AND a row at the same time (2-D block)",
+      "intro": "When the labels run down the side AND across the top — regions in column A, quarters in row 1, numbers in the middle — SUMIFS cannot help: every criteria range it takes must be the same shape and orientation as the sum range, and a matrix has labels on two axes. SUMPRODUCT does it: multiply a vertical TRUE/FALSE mask for the rows by a horizontal mask for the columns, and the two broadcast into a rectangle of 1s and 0s over the block.",
+      "formula": "=SUMPRODUCT((A2:A4=\"South\")*(B1:D1=\"Q2\")*B2:D4)",
+      "setup_cells": {
+        "A1": "Region",
+        "B1": "Q1",
+        "C1": "Q2",
+        "D1": "Q3",
+        "A2": "North",
+        "B2": 10,
+        "C2": 20,
+        "D2": 30,
+        "A3": "South",
+        "B3": 40,
+        "C3": 50,
+        "D3": 60,
+        "A4": "East",
+        "B4": 70,
+        "C4": 80,
+        "D4": 90
+      },
+      "verify": [
+        {
+          "label": "One row label AND one column label (South × Q2)",
+          "formula": "=SUMPRODUCT((A2:A4=\"South\")*(B1:D1=\"Q2\")*B2:D4)",
+          "expected": 50
+        },
+        {
+          "label": "One row, two columns (South × Q2 or Q3)",
+          "formula": "=SUMPRODUCT((A2:A4=\"South\")*((B1:D1=\"Q2\")+(B1:D1=\"Q3\"))*B2:D4)",
+          "expected": 110
+        },
+        {
+          "label": "Two rows, one column (South or East × Q2)",
+          "formula": "=SUMPRODUCT(((A2:A4=\"South\")+(A2:A4=\"East\"))*(B1:D1=\"Q2\")*B2:D4)",
+          "expected": 130
+        }
+      ],
+      "note": "Inside SUMPRODUCT, * is AND and + is OR, and the multiplication coerces TRUE/FALSE to 1/0. If you want the single intersecting cell rather than a sum, INDEX with two MATCHes is clearer: =INDEX(B2:D4,MATCH(\"South\",A2:A4,0),MATCH(\"Q2\",B1:D1,0)). If the block contains text or error cells the multiplication fails — unpivot the matrix into a flat region/quarter/amount list and go back to SUMIFS. The SUMPRODUCT syntax above is documented identically for Excel, Google Sheets and LibreOffice Calc."
+    },
+    {
+      "heading": "Mixing number, text and date criteria in one SUMIFS",
+      "intro": "Criteria types can be mixed freely, and the same column may appear more than once — that is how you bracket a date range. Comparison operators live INSIDE the quotes; to compare against a cell or a function result, concatenate with & : \">=\"&DATE(2026,2,1) or \">=\"&E1.",
+      "formula": "=SUMIFS(C2:C6,B2:B6,\"North\",C2:C6,\">=100\",A2:A6,\">=\"&DATE(2026,2,1),A2:A6,\"<\"&DATE(2026,4,1))",
+      "setup_cells": {
+        "A1": "Date",
+        "B1": "Region",
+        "C1": "Amount",
+        "A2": 46037,
+        "B2": "North",
+        "C2": 100,
+        "A3": 46073,
+        "B3": "North",
+        "C3": 250,
+        "A4": 46078,
+        "B4": "South",
+        "C4": 400,
+        "A5": 46091,
+        "B5": "North",
+        "C5": 90,
+        "A6": 46096,
+        "B6": "North",
+        "C6": 500
+      },
+      "display_cells": {
+        "A2": "2026-01-15",
+        "A3": "2026-02-20",
+        "A4": "2026-02-25",
+        "A5": "2026-03-10",
+        "A6": "2026-03-15"
+      },
+      "display_note": "Column A holds real date values (shown here as yyyy-mm-dd; stored as date serial numbers), not text.",
+      "verify": [
+        {
+          "label": "Date lower bound only — everything from 1 Feb 2026",
+          "formula": "=SUMIFS(C2:C6,A2:A6,\">=\"&DATE(2026,2,1))",
+          "expected": 1240
+        },
+        {
+          "label": "Text (North) + number (>=100) + a Feb–Mar date window",
+          "formula": "=SUMIFS(C2:C6,B2:B6,\"North\",C2:C6,\">=100\",A2:A6,\">=\"&DATE(2026,2,1),A2:A6,\"<\"&DATE(2026,4,1))",
+          "expected": 750
+        }
+      ],
+      "note": "The four pairs narrow 1240 down to 250 + 500 = 750: the January row falls outside the window, the South row fails the region test, and the 90 row fails \">=100\". Two points worth copying: the sum column can also be a criteria column (C appears as both), and an upper bound written as \"<\"&DATE(2026,4,1) is safer than \"<=\"&DATE(2026,3,31) when the cells might carry a time component, which would otherwise push 31 March 09:00 out of the range. Dates must be real dates — text that merely looks like a date never matches. Excel, Google Sheets and LibreOffice Calc document the same operator-in-quotes and &-concatenation rules; only the DATE() serial epoch differs, and only for pre-1900 dates."
+    },
+    {
+      "heading": "Wildcards, and what does (and doesn’t) carry across apps",
+      "intro": "For everything above, the syntax is identical in Microsoft Excel, Google Sheets and LibreOffice Calc as documented by each vendor — same argument order, same operators in quotes, same brace array constants, same SUMPRODUCT behaviour. Text criteria are case-insensitive in all three, and * (any run of characters) and ? (one character) work as wildcards.",
+      "formula": "=SUMIFS(C2:C5,A2:A5,\"Widget*\")",
+      "setup_cells": {
+        "A1": "Product",
+        "B1": "Region",
+        "C1": "Amount",
+        "A2": "Widget A",
+        "B2": "North",
+        "C2": 100,
+        "A3": "Gadget B",
+        "B3": "North",
+        "C3": 50,
+        "A4": "Widget C",
+        "B4": "South",
+        "C4": 25,
+        "A5": "widget D",
+        "B5": "North",
+        "C5": 10
+      },
+      "verify": [
+        {
+          "label": "Starts with — and matching is case-insensitive",
+          "formula": "=SUMIFS(C2:C5,A2:A5,\"Widget*\")",
+          "expected": 135
+        },
+        {
+          "label": "Wildcard plus a second criterion",
+          "formula": "=SUMIFS(C2:C5,A2:A5,\"Widget*\",B2:B5,\"North\")",
+          "expected": 110
+        },
+        {
+          "label": "Contains",
+          "formula": "=SUMIFS(C2:C5,A2:A5,\"*get*\")",
+          "expected": 185
+        },
+        {
+          "label": "Not equal to",
+          "formula": "=SUMIFS(C2:C5,A2:A5,\"<>Widget A\")",
+          "expected": 85
+        },
+        {
+          "label": "FILTER alternative, written portably (one combined condition)",
+          "formula": "=SUM(FILTER(C2:C5,(B2:B5=\"North\")*(A2:A5<>\"Gadget B\")))",
+          "expected": 110
+        }
+      ],
+      "note": "Things to watch. LibreOffice Calc can interpret criteria as regular expressions instead of wildcards (Tools > Options > Calc > Calculate); wildcards are the default for spreadsheets opened from .xlsx, which is the setting our run above used. Under the regex setting the same criterion is documented to be read as a regular expression matched against the whole cell, so \"Widget*\" would mean “Widge” followed by any number of t’s and would match none of these products. To match a literal * or ? put a tilde in front of it (~*). Google Sheets users often reach for FILTER or QUERY instead. FILTER is not Sheets-only: Excel 2021/365 and LibreOffice 24.8+ document it too, and the SUM(FILTER(...)) row above was executed here. Only Sheets’ FILTER takes several separate condition arguments, though — in Excel and LibreOffice Calc you multiply the conditions into one, as that row does (the multi-argument form returned #VALUE! when we ran it in LibreOffice 25.8.7.3). QUERY() is documented for Google Sheets alone, with no Excel or LibreOffice Calc equivalent, so keep to SUMIFS/SUMPRODUCT (or FILTER) if the file has to travel. Everything on this page was executed in LibreOffice Calc by our harness; the Excel and Google Sheets syntax comes from each vendor’s official documentation, not from a run in those apps."
+    }
+  ]
 }

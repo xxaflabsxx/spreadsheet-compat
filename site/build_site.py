@@ -1405,7 +1405,57 @@ def _functions_used(recipe, by_name):
             name = tok.upper()
             if name in by_name and name not in seen:
                 seen[name] = by_name[name]["name_lower"]
+    # Optional "variants" sections use further functions (SUMPRODUCT, DATE, ...);
+    # link those too so the extra sections also feed the function pages.
+    for var in (recipe.get("variants") or []):
+        checks = var.get("verify") or []
+        if isinstance(checks, dict):
+            checks = [checks]
+        for f in [var.get("formula", "")] + [c.get("formula", "") for c in checks]:
+            for tok in _FUNC_CALL_RE.findall(re.sub(r'"[^"]*"', "", f or "")):
+                name = tok.upper()
+                if name in by_name and name not in seen:
+                    seen[name] = by_name[name]["name_lower"]
     return [{"name": n, "name_lower": nl} for n, nl in seen.items()]
+
+
+def _variant_grid(cells, display=None):
+    """Turn a variant's setup_cells ({"A2": "North", ...}) into a spreadsheet-shaped
+    table for the page: column letters across the top, row numbers down the side, so
+    the reader can see exactly the data the executed formula ran against.
+    `display` optionally overrides what is SHOWN for a cell (e.g. a readable date for
+    a stored serial number) without changing what is executed."""
+    if not cells:
+        return None
+    display = display or {}
+    pos = {}
+    for ref, val in cells.items():
+        m = re.fullmatch(r"([A-Za-z]+)([0-9]+)", str(ref).strip())
+        if not m:
+            return None
+        col = openpyxl_col_index(m.group(1).upper())
+        pos[(int(m.group(2)), col)] = display.get(ref, val)
+    rows = sorted({r for r, _ in pos})
+    cols = sorted({c for _, c in pos})
+    return {
+        "cols": [_col_letter(c) for c in cols],
+        "rows": [{"n": r, "cells": [pos.get((r, c), "") for c in cols]} for r in rows],
+    }
+
+
+def _col_letter(idx):
+    out = ""
+    while idx:
+        idx, rem = divmod(idx - 1, 26)
+        out = chr(65 + rem) + out
+    return out
+
+
+def openpyxl_col_index(letters):
+    n = 0
+    for ch in letters:
+        n = n * 26 + (ord(ch) - 64)
+    return n
 
 RECIPE_TMPL = """{% extends "base.html" %}
 {% block content %}
@@ -1431,9 +1481,42 @@ RECIPE_TMPL = """{% extends "base.html" %}
 <h2 class="section-title">How it works</h2>
 <p>{{ r.explanation }}</p>
 
+{% for v in r.variants or [] %}
+<h2 class="section-title">{{ v.heading }}</h2>
+{% if v.intro %}<p>{{ v.intro }}</p>{% endif %}
+{% if v.formula %}<p><code>{{ v.formula }}</code></p>{% endif %}
+{% if v.grid %}
+<div class="table-scroll">
+<table class="matrix">
+<caption>Sample data used for the run below</caption>
+<thead><tr><th></th>{% for c in v.grid.cols %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for row in v.grid.rows %}<tr><th>{{ row.n }}</th>{% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% if v.display_note %}<p style="color:var(--text-muted);font-size:0.9rem;margin-top:-0.5rem">{{ v.display_note }}</p>{% endif %}
+{% endif %}
+{% if v.checks %}
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Formula</th><th>What it does</th><th>{% if r.engine_version %}Returned by LibreOffice {{ r.engine_version }}{% else %}Result{% endif %}</th></tr></thead>
+<tbody>
+{% for ch in v.checks %}
+<tr><td><code>{{ ch.formula }}</code></td><td>{{ ch.label }}</td>
+<td>{% if ch.verified %}<strong>{{ ch.actual }}</strong>{% else %}&mdash;{% endif %}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+{% if v.note %}<p>{{ v.note }}</p>{% endif %}
+{% endfor -%}
+
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result. The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax.</p>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax.</p>
 {% endif %}
 {% if functions_used %}
 <h2 class="section-title">Functions used</h2>
@@ -2033,6 +2116,32 @@ def load_recipes():
         d["engine_version"] = v.get("engine_version", "")
         d["example_formula"] = (d.get("verify") or {}).get("formula", "")
         d["example_actual"] = act
+        # Optional "variants": extra worked sections, each with its own sample grid
+        # and its own executed checks. Merge the values LibreOffice actually
+        # returned (results/recipes-verified.json) onto each check, by position.
+        vres = v.get("variants") or []
+        for i, var in enumerate(d.get("variants") or []):
+            checks = var.get("verify") or []
+            if isinstance(checks, dict):
+                checks = [checks]
+            got = (vres[i].get("checks") if i < len(vres) else []) or []
+            merged = []
+            for j, ch in enumerate(checks):
+                g = got[j] if j < len(got) else {}
+                a = g.get("actual", "")
+                if isinstance(a, list):
+                    a = ", ".join(str(x) for x in a)
+                merged.append({
+                    "formula": ch.get("formula", ""),
+                    "label": ch.get("label", ""),
+                    "actual": a,
+                    "verified": bool(g.get("verified")) and g.get("formula") == ch.get("formula"),
+                })
+            var["checks"] = merged
+            var["grid"] = _variant_grid(var.get("setup_cells"), var.get("display_cells"))
+        d["variant_check_count"] = sum(
+            len(var.get("checks") or []) for var in (d.get("variants") or [])
+        )
         recs.append(d)
     return recs
 
