@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which LibreOffice version for VSTACK, TEXTSPLIT, TAKE &amp; DROP?</title>
+<meta name="description" content="VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP return #NAME? in LibreOffice 24.2, 24.8 and 25.2 - our executed runs show all thirteen working only from 25.8.7.3. Full version map by wave.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">
+<meta property="og:title" content="Which LibreOffice version for VSTACK, TEXTSPLIT, TAKE &amp; DROP?">
+<meta property="og:description" content="VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP return #NAME? in LibreOffice 24.2, 24.8 and 25.2 - our executed runs show all thirteen working only from 25.8.7.3. Full version map by wave.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"Which LibreOffice version for VSTACK, TEXTSPLIT, TAKE & DROP?","item":"https://canispreadsheet.com/guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>Which LibreOffice version do you need for VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP?</h1>
+
+<p>Excel&rsquo;s array-shaping functions &mdash; <code>VSTACK</code>, <code>HSTACK</code>,
+<code>TEXTSPLIT</code>, <code>TAKE</code>, <code>DROP</code> and their relatives &mdash; are the
+functions most likely to decide whether a modern workbook survives a move to LibreOffice Calc. They
+do not degrade gracefully. Either the release you are running has them, in which case our executed
+runs show them computing the documented answer, or it does not, in which case every one of them
+returns <code>#NAME?</code>: the same error you would get from a typo.</p>
+
+<p>We ran the same corpus through four LibreOffice builds &mdash; 24.2.0.3, 24.8.7.2, 25.2.0.3 and
+25.8.7.3 &mdash; and the results sort into three clean groups. Thirteen array-shaping and text-split
+functions arrive in 25.8.7.3 and are <code>#NAME?</code> in everything older. Eight dynamic-array
+functions arrived a wave earlier, in 24.8.7.2. And nine more are still <code>#NAME?</code> in the
+newest build we tested.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>25.2 is not enough. It is tempting to assume that a 2025 release of LibreOffice has the 2022-era
+  Excel array functions, but our 25.2.0.3 run returns <code>#NAME?</code> for <code>VSTACK</code>,
+  <code>HSTACK</code>, <code>TEXTSPLIT</code>, <code>TAKE</code>, <code>DROP</code>,
+  <code>TOCOL</code>, <code>TOROW</code>, <code>WRAPROWS</code>, <code>WRAPCOLS</code>,
+  <code>CHOOSECOLS</code>, <code>CHOOSEROWS</code>, <code>TEXTBEFORE</code> and
+  <code>TEXTAFTER</code> &mdash; all thirteen. They only start evaluating in our 25.8.7.3 run. The
+  gap between &ldquo;current-ish&rdquo; and &ldquo;new enough&rdquo; is one release, and it is the
+  difference between a working workbook and a sheet full of errors.</p>
+</div>
+
+<h2 class="section-title">What this means for a migration</h2>
+<p>The practical rule from our runs is short. <strong>A workbook that uses any of the thirteen
+functions in the first table below needs LibreOffice 25.8 or newer.</strong> On 24.2, 24.8 or 25.2
+those formulas do not compute a different answer &mdash; they do not compute at all, and the
+<code>#NAME?</code> flows downstream into every total, chart and lookup that reads the result.
+A workbook that stops at the second table&rsquo;s eight functions (<code>XLOOKUP</code>,
+<code>FILTER</code>, <code>SORT</code>, <code>UNIQUE</code>, <code>SEQUENCE</code>,
+<code>LET</code>, <code>SORTBY</code>, <code>XMATCH</code>) needs 24.8 or newer. A workbook that
+uses anything in the third table has no LibreOffice release in our tested range that will run it,
+and has to be rewritten.</p>
+<p>If you are checking a single formula, paste it into the free compatibility checker linked at the
+foot of this page; if you are checking a whole file, the Migration Audit button below it takes an
+.xlsx and flags every formula whose function is missing or behaves differently in the target app.
+For the full per-function support table across all four builds, see
+<a href="../libreoffice-version-support.html">LibreOffice Calc function support by version</a>.</p>
+
+<h2 class="section-title">Wave one: thirteen functions that land in 25.8.7.3</h2>
+<p>Inputs, per case: <code>CHOOSECOLS</code> reads <code>A1:C1 = 1, 2, 3</code>;
+<code>CHOOSEROWS</code> reads <code>A1:A5 = 10, 20, 30, 40, 50</code>; <code>TAKE</code> and
+<code>DROP</code> read <code>A1:C3 = 1&hellip;9</code> in reading order; <code>HSTACK</code> reads
+<code>A1:A2 = 1, 2</code> and <code>B1:B2 = 3, 4</code>; <code>TOCOL</code>, <code>TOROW</code> and
+<code>VSTACK</code> read <code>A1:B2 = 1, 2 / 3, 4</code>; <code>WRAPCOLS</code> and
+<code>WRAPROWS</code> read <code>A1:D1 = 1, 2, 3, 4</code>; the text cases take string literals.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Function</th><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice 24.2.0.3, 24.8.7.2 &amp; 25.2.0.3 (executed)</th><th>LibreOffice 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td>CHOOSECOLS</td><td class="formula">=CHOOSECOLS(A1:C1,3,1)</td><td>3, 1</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">3 &mdash; read-back 3, 1 (matches)</td></tr>
+    <tr><td>CHOOSEROWS</td><td class="formula">=CHOOSEROWS(A1:A5,4,2)</td><td>40, 20</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">40 &mdash; read-back 40, 20 (matches)</td></tr>
+    <tr><td>DROP</td><td class="formula">=DROP(A1:C3,1,1)</td><td>5, 6 / 8, 9</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">5 &mdash; read-back 5, 6, 8, 9 (matches)</td></tr>
+    <tr><td>HSTACK</td><td class="formula">=HSTACK(A1:A2,B1:B2)</td><td>1, 3 / 2, 4</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 3, 2, 4 (matches)</td></tr>
+    <tr><td>TAKE</td><td class="formula">=TAKE(A1:C3,2,2)</td><td>1, 2 / 4, 5</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 4, 5 (matches)</td></tr>
+    <tr><td>TEXTAFTER</td><td class="formula">=TEXTAFTER("a-b-c","-")</td><td>b-c</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">b-c</td></tr>
+    <tr><td>TEXTBEFORE</td><td class="formula">=TEXTBEFORE("a-b-c","-")</td><td>a</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">a</td></tr>
+    <tr><td>TEXTSPLIT</td><td class="formula">=TEXTSPLIT("a,b,c",",")</td><td>a, b, c</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">a &mdash; read-back a, b, c (matches)</td></tr>
+    <tr><td>TOCOL</td><td class="formula">=TOCOL(A1:B2)</td><td>1, 2, 3, 4</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 3, 4 (matches)</td></tr>
+    <tr><td>TOROW</td><td class="formula">=TOROW(A1:B2)</td><td>1, 2, 3, 4</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 3, 4 (matches)</td></tr>
+    <tr><td>VSTACK</td><td class="formula">=VSTACK(A1:B1,A2:B2)</td><td>1, 2 / 3, 4</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 3, 4 (matches)</td></tr>
+    <tr><td>WRAPCOLS</td><td class="formula">=WRAPCOLS(A1:D1,2)</td><td>1, 3 / 2, 4</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 3, 2, 4 (matches)</td></tr>
+    <tr><td>WRAPROWS</td><td class="formula">=WRAPROWS(A1:D1,2)</td><td>1, 2 / 3, 4</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 3, 4 (matches)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The <code>#NAME?</code> column is one column because all three older builds agreed: every one of
+these cases returned <code>#NAME?</code> in 24.2.0.3, in 24.8.7.2 <em>and</em> in 25.2.0.3. Of the
+thirteen, our function dataset records <code>CHOOSECOLS</code>, <code>CHOOSEROWS</code>,
+<code>HSTACK</code>, <code>TOCOL</code>, <code>TOROW</code>, <code>VSTACK</code>,
+<code>WRAPCOLS</code> and <code>WRAPROWS</code> as documented in Google Sheets&rsquo; function list;
+it does not record <code>DROP</code>, <code>TAKE</code>, <code>TEXTSPLIT</code>,
+<code>TEXTBEFORE</code> or <code>TEXTAFTER</code> there. Either way we have not run any of them in
+Sheets, so that column says so rather than guessing.</p>
+<p>Two caveats on the 25.8.7.3 column, both covered in detail elsewhere so we will not repeat the
+tables here. <code>TEXTAFTER</code> and <code>TEXTBEFORE</code> evaluate in 25.8.7.3 but do not
+honour the <code>if_not_found</code> fallback argument in our runs, and
+<code>FILTER</code>&rsquo;s empty-result case reports a different error than Excel documents &mdash;
+both are measured and explained in
+<a href="../guides/filter-no-results-calc-error-excel-vs-libreoffice.html">FILTER no match: Excel #CALC! vs LibreOffice #N/A</a>.
+For hand-rolled replacements of the two text functions, see
+<a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT, MID and RIGHT</a>.</p>
+
+<h2 class="section-title">Wave two: eight functions that landed in 24.8.7.2</h2>
+<p>These are the previous generation of dynamic-array functions. They are <code>#NAME?</code> in
+24.2.0.3 only; from 24.8.7.2 onward our runs show them computing.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Function</th><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice 24.2.0.3 (executed)</th><th>LibreOffice 24.8.7.2, 25.2.0.3 &amp; 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td>FILTER</td><td class="formula">=FILTER(A1:A5,B1:B5&gt;2)</td><td>c, d, e</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">c &mdash; read-back c, d, e (matches)</td></tr>
+    <tr><td>LET</td><td class="formula">=LET(x,5,x*2)</td><td>10</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">10</td></tr>
+    <tr><td>SEQUENCE</td><td class="formula">=SEQUENCE(5)</td><td>1, 2, 3, 4, 5</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 3, 4, 5 (matches)</td></tr>
+    <tr><td>SORT</td><td class="formula">=SORT(A1:A5)</td><td>1, 1, 3, 4, 5</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 1, 3, 4, 5 (matches)</td></tr>
+    <tr><td>SORTBY</td><td class="formula">=SORTBY(A1:A3,B1:B3)</td><td>y, z, x</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">y &mdash; read-back y, z, x (matches)</td></tr>
+    <tr><td>UNIQUE</td><td class="formula">=UNIQUE(A1:A5)</td><td>1, 2, 3</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 3 (matches)</td></tr>
+    <tr><td>XLOOKUP</td><td class="formula">=XLOOKUP("b",A1:A3,B1:B3)</td><td>2</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">2</td></tr>
+    <tr><td>XMATCH</td><td class="formula">=XMATCH("b",A1:A3)</td><td>2</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">2</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Inputs: <code>FILTER</code> reads <code>A1:A5 = a&hellip;e</code> with <code>B1:B5 = 1&hellip;5</code>;
+<code>SORT</code> and <code>UNIQUE</code> read <code>A1:A5 = 3, 1, 4, 1, 5</code> and
+<code>1, 2, 2, 3, 1</code> respectively; <code>SORTBY</code> reads <code>A1:A3 = x, y, z</code> with
+<code>B1:B3 = 3, 1, 2</code>; <code>XLOOKUP</code> and <code>XMATCH</code> read
+<code>A1:A3 = a, b, c</code> with <code>B1:B3 = 1, 2, 3</code>. Our dataset records
+<code>FILTER</code>, <code>LET</code>, <code>SEQUENCE</code>, <code>SORT</code>,
+<code>UNIQUE</code> and <code>XLOOKUP</code> as documented in Google Sheets, and does not record
+<code>SORTBY</code> or <code>XMATCH</code> there; none has been executed in Sheets by us.</p>
+<p>One wrinkle inside this wave is worth stating because it cuts against the tidy story. A separate
+<code>SORT</code> case, <code>=SORT(A1:A1)</code> over a single blank cell, returned <code>0</code>
+in 24.8.7.2, <code>#VALUE!</code> in 25.2.0.3, and <code>0</code> again in 25.8.7.3. So &ldquo;landed
+in 24.8&rdquo; describes the ordinary path; one degenerate input regressed for a release and came
+back. It is a reminder that &ldquo;supported&rdquo; is per-case, not per-function.</p>
+
+<h2 class="section-title">Still unsupported in 25.8.7.3</h2>
+<p>Nine functions returned <code>#NAME?</code> in every build we ran, including the newest. There is
+no version in our tested range where these start working, so a migration has to replace them rather
+than wait for an upgrade.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Function</th><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td>ARRAYTOTEXT</td><td class="formula">=ARRAYTOTEXT({1,2,3})</td><td>1, 2, 3</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>BYCOL</td><td class="formula">=BYCOL(A1:B2,LAMBDA(c,SUM(c)))</td><td>4, 6</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>BYROW</td><td class="formula">=BYROW(A1:B2,LAMBDA(r,SUM(r)))</td><td>3, 7</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>GROUPBY</td><td class="formula">=GROUPBY(A1:A4,B1:B4,SUM)</td><td>Documented; spilled layout varies with optional arguments, so our case is a presence probe with no fixed expected value</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>MAKEARRAY</td><td class="formula">=MAKEARRAY(2,2,LAMBDA(r,c,r*c))</td><td>1, 2 / 2, 4</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>MAP</td><td class="formula">=MAP(A1:A3,LAMBDA(x,x*2))</td><td>2, 4, 6</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>PIVOTBY</td><td class="formula">=PIVOTBY(A1:A4,B1:B4,C1:C4,SUM)</td><td>Documented; spilled pivot layout varies with optional arguments, so our case is a presence probe with no fixed expected value</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>REDUCE</td><td class="formula">=REDUCE(0,A1:A3,LAMBDA(a,b,a+b))</td><td>6</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+    <tr><td>SCAN</td><td class="formula">=SCAN(0,A1:A3,LAMBDA(a,b,a+b))</td><td>1, 3, 6</td><td>Not yet executed</td><td class="result">#NAME?</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Seven of these nine &mdash; <code>ARRAYTOTEXT</code>, <code>BYCOL</code>, <code>BYROW</code>,
+<code>MAKEARRAY</code>, <code>MAP</code>, <code>REDUCE</code> and <code>SCAN</code> &mdash; returned
+<code>#NAME?</code> in all four builds: 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. The remaining two
+are a narrower claim: <code>GROUPBY</code> and <code>PIVOTBY</code> were added to our corpus later
+and appear only in our 25.2.0.3 and 25.8.7.3 result files, where both returned <code>#NAME?</code>.
+We make no claim about them in 24.2.0.3 or 24.8.7.2 because we did not run them there.</p>
+<p>Six of the nine are the LAMBDA helper family, and they have their own writeup with the rewrite
+recipes: see
+<a href="../guides/lambda-map-reduce-scan-excel-vs-libreoffice.html">LAMBDA, MAP &amp; SCAN: Excel vs LibreOffice</a>,
+which also covers what happens to an inline <code>=LAMBDA(x,x*2)(5)</code> call in Calc.</p>
+
+<h2 class="section-title">How we measured the spilling cases</h2>
+<p>This matters for reading the tables honestly, because most of these functions return an array
+rather than a single value. Each case is written into its own sheet with no cached result, and the
+file is recalculated by LibreOffice from scratch; the formula sits in the top-left cell of a
+<em>check range</em> recorded with the case. The single value shown in the LibreOffice columns is
+that anchor cell &mdash; which is why <code>=VSTACK(A1:B1,A2:B2)</code> shows as <code>1</code> even
+though its documented result is <code>1, 2 / 3, 4</code>.</p>
+<p>The harness also reads back every cell of the recorded check range and compares that list,
+flattened in reading order, against the flattened expected array &mdash; that is the
+&ldquo;read-back&rdquo; shown after each anchor value, and where it says <em>matches</em>, every
+cell in the recorded range equalled the corresponding expected value. So for these cases the honest
+claim is: <strong>the function evaluates (no <code>#NAME?</code>), the anchor cell matches, and the
+cells inside the recorded check range match value-for-value in reading order</strong>. What we did
+<em>not</em> verify is the shape of the spill &mdash; flattening makes a 2&times;2 block and a
+1&times;4 row indistinguishable &mdash; nor anything outside the recorded range, so a result that
+spilled further than expected would not be caught. For the scalar cases
+(<code>TEXTAFTER</code>, <code>TEXTBEFORE</code>, <code>LET</code>, <code>XLOOKUP</code>,
+<code>XMATCH</code>) there is no range: the single returned value is what was compared.</p>
+
+<h2 class="section-title">How to migrate safely</h2>
+<p><strong>Pin the version, if you can.</strong> The cheapest fix for wave one is not a rewrite but a
+requirement: install 25.8 or newer everywhere the workbook will be opened. Our runs show all thirteen
+functions evaluating there, so a workbook that only uses wave one and wave two functions needs no
+formula changes at all &mdash; it needs a supported release. Where you cannot control the target
+version, treat 24.8 as the floor and rewrite wave one.</p>
+<p><strong>Rewrite wave one with classic functions.</strong> <code>=VSTACK(A1:B1,A2:B2)</code> is a
+literal block of cells, so reference the combined range directly or copy the two pieces into one
+contiguous block. <code>=HSTACK(A1:A2,B1:B2)</code> is the same trick sideways.
+<code>=TAKE(A1:C3,2,2)</code> and <code>=DROP(A1:C3,1,1)</code> are sub-ranges: use
+<code>=INDEX($A$1:$C$3,ROW()-ROW($E$1)+1,COLUMN()-COLUMN($E$1)+1)</code> filled across the target
+block, or simply point at <code>A1:B2</code> and <code>B2:C3</code> when the offsets are fixed.
+<code>=CHOOSECOLS(A1:C1,3,1)</code> and <code>=CHOOSEROWS(A1:A5,4,2)</code> become one
+<code>=INDEX(range,row,col)</code> per output cell. <code>=TOCOL(A1:B2)</code> and
+<code>=TOROW(A1:B2)</code>, and the <code>WRAPROWS</code>/<code>WRAPCOLS</code> pair, are index
+arithmetic: <code>=INDEX($A$1:$B$2,INT((ROW()-1)/2)+1,MOD(ROW()-1,2)+1)</code> filled down reproduces
+the flatten, with the divisor set to the block width. <code>=TEXTSPLIT("a,b,c",",")</code> becomes
+<code>LEFT</code>/<code>MID</code>/<code>RIGHT</code> around <code>FIND</code>, or Calc&rsquo;s
+Text-to-Columns for a one-off.</p>
+<p><strong>Do not rely on catching <code>#NAME?</code>.</strong> Wrapping a missing function in
+<code>=IFERROR(VSTACK(...),"")</code> hides the failure instead of fixing it: the workbook opens
+clean and reports blanks where data should be, which is worse than a visible error. Fix the version
+or fix the formula.</p>
+<p><strong>Check before you commit to a target.</strong> The two buttons below are the fast path: the
+checker answers &ldquo;does this one formula survive?&rdquo; and the Migration Audit answers
+&ldquo;which formulas in this file do not?&rdquo; across a whole .xlsx, in the browser.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column throughout is Microsoft&rsquo;s documented behaviour as recorded in our test
+corpus &mdash; we did not run Excel, and nothing on this page is an Excel measurement. Google Sheets
+has not been run through our harness at all; where we say a function is documented in Sheets that is
+a claim about our dataset&rsquo;s record of Google&rsquo;s function list, not about a result we
+observed. The LibreOffice columns are executed output, and every version claim on this page traces to
+one of four result files from LibreOffice Calc 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. Those are
+the only four builds we tested: a function we describe as arriving in 25.8.7.3 may have arrived in
+any release after 25.2.0.3, and we cannot narrow it further. See
+<a href="../methodology.html">our methodology</a> for how recalculation is proven rather than
+assumed.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
