@@ -2465,7 +2465,7 @@ def main():
                 noindex=False,
                 json_ld=breadcrumb_ld([
                     (SITE_NAME, BASE_URL),
-                    ("Quirks", BASE_URL + "quirks.html"),
+                    ("Guides", BASE_URL + "guides/"),
                     (sp["title"], BASE_URL + f"guides/{sp['slug']}.html"),
                 ]),
             )
