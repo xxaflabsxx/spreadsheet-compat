@@ -1,35 +1,401 @@
 {
   "slug": "reference-a-cell-on-another-sheet",
   "title": "How to reference a cell on another sheet",
-  "task": "The basics of pulling a value from another tab into a formula — and the one syntax that changes between apps.",
+  "task": "Pull a value from another tab into a formula.",
   "keywords": [
+    "reference cell another sheet excel",
+    "formula from another tab",
+    "link to another sheet google sheets",
     "reference another sheet excel",
-    "cell from another tab formula",
-    "link to another sheet",
-    "pull value from other sheet google sheets"
+    "pull value from another sheet",
+    "sheet name with spaces in formula"
+  ],
+  "related": [
+    "vlookup-from-another-sheet",
+    "xlookup-from-another-sheet",
+    "sumif-from-another-sheet",
+    "sum-the-same-cell-across-multiple-sheets",
+    "use-a-cell-value-as-a-sheet-name"
   ],
   "solutions": {
     "excel": {
       "formula": "=Summary!B2*Data!C5",
-      "note": "SheetName!Cell. Just type = then click the cell on the other tab and Excel builds it."
+      "note": "SheetName!Cell. Type = then click the cell on the other tab and Excel writes the prefix for you. Quote names with spaces: ='Q1 Data'!A1."
     },
     "google_sheets": {
       "formula": "=Summary!B2*Data!C5",
-      "note": "Identical. To pull from a different FILE, wrap in IMPORTRANGE (Sheets-only)."
+      "note": "Identical to Excel. To reach a different FILE, wrap in IMPORTRANGE (Sheets-only)."
     },
     "libreoffice": {
       "formula": "=Summary.B2*Data.C5",
-      "note": "LibreOffice uses a DOT (Summary.B2), not an exclamation mark."
+      "note": "LibreOffice's own A1 syntax uses a DOT, and its UI writes the dot when you click. A workbook opened from .xlsx keeps the Excel form, so ! is what actually runs there (executed below)."
     }
   },
   "verify": {
     "setup_sheets": {
-      "Summary": {"B2": 12},
-      "Data": {"C5": 5}
+      "Summary": {
+        "B2": 12
+      },
+      "Data": {
+        "C5": 5
+      }
     },
     "setup_cells": {},
     "formula": "=Summary!B2*Data!C5",
     "expected": 60
   },
-  "explanation": "Any formula can reach other tabs by prefixing the cell with the sheet name: Summary!B2 times Data!C5 gives 12 x 5 = 60. Excel and Google Sheets use SheetName!Cell; LibreOffice uses SheetName.Cell (a dot) — so a workbook saved from one and opened in the other translates the separator automatically, but hand-typed formulas need the right one. Sheet names with spaces go in single quotes: ='Q1 Data'!A1. Referencing a cell in a completely separate FILE needs external links (Excel/LibreOffice) or IMPORTRANGE (Google Sheets only)."
+  "explanation": "Any formula can reach another tab by prefixing the cell with the sheet name: Summary!B2 times Data!C5 gives 12 x 5 = 60. Excel and Google Sheets write SheetName!Cell; LibreOffice Calc's own A1 syntax writes SheetName.Cell with a dot, and that is what its formula bar shows you when you click a cell on another tab. The separator is a display and typing question, not a storage one — a workbook saved as .xlsx carries the exclamation-mark form, and LibreOffice reads and runs it as-is, so files travel fine and only hand-typed formulas need the right character for the app you are typing into. The rules worth knowing beyond that: sheet names containing a space or punctuation go in single quotes ('Q1 Data'!A1); every range in a formula needs its own prefix, because an unprefixed one silently means the current sheet; whole columns work across tabs (Data!B:B); INDIRECT can assemble the reference from a cell so the tab name becomes data; a 3-D reference (Q1:Q3!A1) reaches the same cell on a span of consecutive tabs in Excel and LibreOffice, but not in Google Sheets; and reaching a different FILE is a different mechanism again. Each section below was executed in LibreOffice Calc and shows what it actually returned, including the cases that error.",
+  "variants": [
+    {
+      "heading": "Sheet names with spaces or punctuation — wrap the name in single quotes",
+      "intro": "The bare SheetName!Cell form only works while the name is a single plain word. As soon as the tab is called Q1 Data, Profit & Loss or 2026 Budget, the name goes inside single quotes and the exclamation mark stays outside them: ='Q1 Data'!B2. The quotes wrap the sheet name only — never the cell reference. The runs below use a tab literally named Q1 Data holding Month in column A and Amount in column B: Jan 120 in row 2, Feb 80 in row 3, Mar 100 in row 4, with headers in row 1.",
+      "formula": "='Q1 Data'!B2",
+      "setup_sheets": {
+        "Q1 Data": {
+          "A1": "Month",
+          "B1": "Amount",
+          "A2": "Jan",
+          "B2": 120,
+          "A3": "Feb",
+          "B3": 80,
+          "A4": "Mar",
+          "B4": 100
+        }
+      },
+      "verify": [
+        {
+          "label": "Quoted name, exclamation mark outside the quotes",
+          "formula": "='Q1 Data'!B2",
+          "expected": 120
+        },
+        {
+          "label": "A range from the same quoted tab — quotes still wrap the name only",
+          "formula": "=SUM('Q1 Data'!B2:B4)",
+          "expected": 300
+        },
+        {
+          "label": "An apostrophe inside the name is doubled (tab: Jon's Data)",
+          "formula": "='Jon''s Data'!A1",
+          "expected": 7,
+          "setup_sheets": {
+            "Jon's Data": {
+              "A1": 7
+            }
+          }
+        },
+        {
+          "label": "LibreOffice's own quoted form, run in a workbook that arrived as .xlsx",
+          "formula": "=$'Q1 Data'.B2",
+          "expected": "#NAME?"
+        }
+      ],
+      "note": "Quote the name whenever it contains a space or punctuation, whenever it starts with a digit, and whenever it could be mistaken for a cell reference; an apostrophe inside the name is escaped by doubling it, as row three shows. Excel and Google Sheets document the same quoting rule. The last row is the honest divergence: $'Q1 Data'.B2 is LibreOffice Calc's own documented quoted syntax, but LibreOffice keeps a formula-syntax setting per document (Tools > Options > Calc > Formula > Formula syntax), and a workbook that came in as .xlsx is parsed as Excel A1, where a dot is not a sheet separator — so that spelling came back #NAME? in our run while ='Q1 Data'!B2 returned 120 from the very same file. In a native .ods under Calc A1 syntax the dot form is the one that works and the exclamation mark is the one that fails. The practical rule: type whichever separator the app in front of you shows in its own formula bar, and let the file format carry it across — saving to .xlsx converts LibreOffice's dots to exclamation marks and opening one converts them back for display."
+    },
+    {
+      "heading": "A whole range — or a whole column — from another sheet",
+      "intro": "A sheet prefix is not limited to one cell: any range argument inside any function can carry it, so =SUM(Data!B2:B6) totals a column that lives on the Data tab while the formula sits on your summary tab. Whole-column references work across tabs too ('Q1 Data'!B:B), which is the usual way to write a summary that keeps working as rows are added below. The runs below use the Q1 Data tab from the previous section plus a Data tab: Item / Units / Price headers in row 1, then apple 10 1.5, banana 20 0.5, cherry 30 3, date 40 2, elder 50 4 in rows 2 to 6.",
+      "formula": "=SUM(Data!B2:B6)",
+      "setup_sheets": {
+        "Data": {
+          "A1": "Item",
+          "B1": "Units",
+          "C1": "Price",
+          "A2": "apple",
+          "B2": 10,
+          "C2": 1.5,
+          "A3": "banana",
+          "B3": 20,
+          "C3": 0.5,
+          "A4": "cherry",
+          "B4": 30,
+          "C4": 3,
+          "A5": "date",
+          "B5": 40,
+          "C5": 2,
+          "A6": "elder",
+          "B6": 50,
+          "C6": 4
+        },
+        "Q1 Data": {
+          "A1": "Month",
+          "B1": "Amount",
+          "A2": "Jan",
+          "B2": 120,
+          "A3": "Feb",
+          "B3": 80,
+          "A4": "Mar",
+          "B4": 100
+        }
+      },
+      "verify": [
+        {
+          "label": "A range on another tab, summed",
+          "formula": "=SUM(Data!B2:B6)",
+          "expected": 150
+        },
+        {
+          "label": "Two ranges from that tab — each one carries its own prefix",
+          "formula": "=SUMPRODUCT(Data!B2:B6,Data!C2:C6)",
+          "expected": 395
+        },
+        {
+          "label": "The prefix left off the second range: it silently means THIS sheet, which is empty",
+          "formula": "=SUM(Data!B2:B6,C2:C6)",
+          "expected": 150
+        },
+        {
+          "label": "The same formula with both prefixes — the answer the previous row should have given",
+          "formula": "=SUM(Data!B2:B6,Data!C2:C6)",
+          "expected": 161
+        },
+        {
+          "label": "Whole column across tabs — the Amount header is text, so it is ignored",
+          "formula": "=AVERAGE('Q1 Data'!B:B)",
+          "expected": 100
+        },
+        {
+          "label": "Whole column, summed",
+          "formula": "=SUM('Q1 Data'!B:B)",
+          "expected": 300
+        },
+        {
+          "label": "Whole column, counted — five numbers, header not counted",
+          "formula": "=COUNT(Data!B:B)",
+          "expected": 5
+        }
+      ],
+      "note": "Full-column cross-sheet references execute normally: AVERAGE over 'Q1 Data'!B:B returned 100, the average of 120, 80 and 100, because the text header and the empty cells below are skipped rather than counted as zeros. The third row is the mistake worth internalising — =SUM(Data!B2:B6,C2:C6) is not an error and does not warn you; the second range has no prefix, so it points at C2:C6 of the sheet the formula is on. Ours was empty, so the answer came back 150 — 161 is what the fully-prefixed row directly beneath it returned. Prefix every range, every time. Excel and Google Sheets document the same behaviour for both the prefix rule and whole-column arguments; in LibreOffice Calc the same formulas take a dot when typed into a native document. A conditional total across tabs is the same idea with criteria attached — see the SUMIF-from-another-sheet recipe."
+    },
+    {
+      "heading": "Build the reference from a cell value with INDIRECT",
+      "intro": "When the tab name should be data rather than something typed into the formula — a dashboard with a month picker, or one summary formula filled down against a list of tab names — assemble the reference as text and hand it to INDIRECT. Put A1's contents inside single quotes as you build the string, \"'\"&A1&\"'!B2\", and the formula keeps working when the tab name contains a space. The runs below read the Q1 Data tab described above; A1 on the current sheet holds the tab name.",
+      "formula": "=INDIRECT(\"'\"&A1&\"'!B2\")",
+      "setup_cells": {
+        "A1": "Q1 Data"
+      },
+      "setup_sheets": {
+        "Q1 Data": {
+          "A1": "Month",
+          "B1": "Amount",
+          "A2": "Jan",
+          "B2": 120,
+          "A3": "Feb",
+          "B3": 80,
+          "A4": "Mar",
+          "B4": 100
+        }
+      },
+      "display_note": "A1 holds the name of the tab to read. The referenced tab, Q1 Data, holds Jan 120 in B2, Feb 80 in B3 and Mar 100 in B4.",
+      "verify": [
+        {
+          "label": "The tab named in A1, cell B2 — quotes built into the string",
+          "formula": "=INDIRECT(\"'\"&A1&\"'!B2\")",
+          "expected": 120
+        },
+        {
+          "label": "A range works the same way",
+          "formula": "=SUM(INDIRECT(\"'\"&A1&\"'!B2:B4\"))",
+          "expected": 300
+        },
+        {
+          "label": "Quotes omitted while the tab name contains a space",
+          "formula": "=INDIRECT(A1&\"!B2\")",
+          "expected": "#REF!"
+        },
+        {
+          "label": "A1 names a tab that does not exist",
+          "formula": "=INDIRECT(\"'\"&A1&\"'!B2\")",
+          "expected": "#REF!",
+          "setup_cells": {
+            "A1": "Nope"
+          }
+        },
+        {
+          "label": "IFERROR did NOT catch that #REF! in our run",
+          "formula": "=IFERROR(INDIRECT(\"'\"&A1&\"'!B2\"),\"No such tab\")",
+          "expected": "#REF!",
+          "setup_cells": {
+            "A1": "Nope"
+          }
+        },
+        {
+          "label": "Testing with ISREF first does work",
+          "formula": "=IF(ISREF(INDIRECT(\"'\"&A1&\"'!B2\")),INDIRECT(\"'\"&A1&\"'!B2\"),\"No such tab\")",
+          "expected": "No such tab",
+          "setup_cells": {
+            "A1": "Nope"
+          }
+        }
+      ],
+      "note": "INDIRECT is documented identically in Excel and Google Sheets; in LibreOffice Calc the string it is given is parsed with the document's own formula syntax, so a workbook that arrived as .xlsx takes \"'Q1 Data'!B2\" (as executed here) while a document set to Calc A1 syntax takes the dot form — INDIRECT's optional second argument chooses A1 or R1C1 notation, not the sheet separator. Three costs come with the flexibility. INDIRECT is volatile: it recalculates on every change anywhere in the workbook, which is unnoticeable in one cell and painful in ten thousand. Its reference is a string, so nothing updates it — rename the tab, or insert a row above the target cell, and the formula keeps pointing at the old name and the old address instead of following the move the way a real reference does. And error handling behaves differently from what you would expect: with A1 naming a missing tab, wrapping the call in IFERROR still returned #REF! in LibreOffice 25.8.7.3 here, while ISERROR on the same call returned TRUE — so guard with IF(ISREF(...)) as the last row does, which returned the fallback text. Excel and Google Sheets both document IFERROR as trapping #REF!. For the month-switching dashboard pattern in full, see the recipe on using a cell value as a sheet name."
+    },
+    {
+      "heading": "3-D references: the same cell on a span of consecutive tabs",
+      "intro": "First-sheet : last-sheet ! cell reaches one cell on every tab in that span at once. The runs below use three tabs sitting next to each other — Q1, Q2 and Q3 — with 100, 200 and 300 in A1 respectively.",
+      "formula": "=SUM(Q1:Q3!A1)",
+      "setup_sheets": {
+        "Q1": {
+          "A1": 100
+        },
+        "Q2": {
+          "A1": 200
+        },
+        "Q3": {
+          "A1": 300
+        }
+      },
+      "verify": [
+        {
+          "label": "A1 added across the Q1-to-Q3 span",
+          "formula": "=SUM(Q1:Q3!A1)",
+          "expected": 600
+        },
+        {
+          "label": "Any aggregate works over the span",
+          "formula": "=AVERAGE(Q1:Q3!A1)",
+          "expected": 200
+        },
+        {
+          "label": "A lookup cannot take a 3-D range as its table",
+          "formula": "=VLOOKUP(\"x\",Q1:Q3!A1:B2,2,FALSE)",
+          "expected": "#VALUE!",
+          "setup_sheets": {
+            "Q1": {
+              "A1": "x",
+              "B1": 1
+            },
+            "Q2": {
+              "A1": "x",
+              "B1": 2
+            },
+            "Q3": {
+              "A1": "x",
+              "B1": 3
+            }
+          }
+        },
+        {
+          "label": "LibreOffice's native 3-D spelling, in a workbook that arrived as .xlsx",
+          "formula": "=SUM(Q1.A1:Q3.A1)",
+          "expected": "#NAME?"
+        }
+      ],
+      "note": "The 3-D form executed here exactly as Microsoft documents it for Excel: 600 and 200 across three tabs. The span is positional, not a list of names — drag a fourth tab between Q1 and Q3 and it joins the total automatically, drag one out and it drops off, which is why the pattern is usually written with empty bookend tabs. It only works with functions that accept several areas (SUM, AVERAGE, COUNT, MIN, MAX and friends); handing one to VLOOKUP returned #VALUE!. The dot spelling failed for the same reason as in the first section — native LibreOffice syntax, Excel-syntax document — while the exclamation-mark form ran fine in that file. Google Sheets documents no support for 3-D references at all: there you add the tabs explicitly, =Q1!A1+Q2!A1+Q3!A1. The dedicated recipe on summing the same cell across multiple sheets covers the roll-up pattern, the bookend-tab trick and the Sheets workaround in full."
+    },
+    {
+      "heading": "Look a value up on another sheet (XLOOKUP and VLOOKUP)",
+      "intro": "A lookup that reads a table on another tab is an ordinary lookup with the sheet prefix on each range argument. The runs below use the Data tab — Item / Units / Price in row 1, then apple 10 1.5, banana 20 0.5, cherry 30 3, date 40 2, elder 50 4 — plus the Q1 Data tab, with the value being looked up in A2 of the current sheet.",
+      "formula": "=XLOOKUP(A2,Data!A:A,Data!C:C)",
+      "setup_cells": {
+        "A2": "cherry"
+      },
+      "setup_sheets": {
+        "Data": {
+          "A1": "Item",
+          "B1": "Units",
+          "C1": "Price",
+          "A2": "apple",
+          "B2": 10,
+          "C2": 1.5,
+          "A3": "banana",
+          "B3": 20,
+          "C3": 0.5,
+          "A4": "cherry",
+          "B4": 30,
+          "C4": 3,
+          "A5": "date",
+          "B5": 40,
+          "C5": 2,
+          "A6": "elder",
+          "B6": 50,
+          "C6": 4
+        },
+        "Q1 Data": {
+          "A1": "Month",
+          "B1": "Amount",
+          "A2": "Jan",
+          "B2": 120,
+          "A3": "Feb",
+          "B3": 80,
+          "A4": "Mar",
+          "B4": 100
+        }
+      },
+      "display_note": "A2 holds the item to look up. The Data tab holds the lookup table: item names in A, units in B, prices in C, rows 2 to 6.",
+      "verify": [
+        {
+          "label": "XLOOKUP — lookup column and return column each carry the prefix",
+          "formula": "=XLOOKUP(A2,Data!A:A,Data!C:C)",
+          "expected": 3
+        },
+        {
+          "label": "VLOOKUP — one prefixed block, column counted from ITS first column",
+          "formula": "=VLOOKUP(A2,Data!A:C,3,FALSE)",
+          "expected": 3
+        },
+        {
+          "label": "XLOOKUP's built-in not-found result, with A2 holding zzz",
+          "formula": "=XLOOKUP(A2,Data!A:A,Data!C:C,\"Not found\")",
+          "expected": "Not found",
+          "setup_cells": {
+            "A2": "zzz"
+          }
+        },
+        {
+          "label": "A quoted tab name works here too, with A2 holding Feb",
+          "formula": "=XLOOKUP(A2,'Q1 Data'!A:A,'Q1 Data'!B:B,\"Not found\")",
+          "expected": 80,
+          "setup_cells": {
+            "A2": "Feb"
+          }
+        }
+      ],
+      "note": "Two things to get right. Every range argument needs its own prefix — XLOOKUP takes two, and forgetting the second points it at the current sheet. And VLOOKUP's column number counts from the first column of the block you gave it, not from column A of the sheet: Data!A:C with index 3 is column C, whereas Data!B:C with index 3 would be off the end. Version support is the other catch. VLOOKUP is everywhere. XLOOKUP needs Excel 2021 or Microsoft 365, current Google Sheets, or LibreOffice Calc 24.8 or newer — the same formula run through our harness on LibreOffice 24.2.0.3 came back #NAME?, which is the recorded result in results/libreoffice-24.2.json; the runs on this page are LibreOffice 25.8.7.3. On older builds use INDEX/MATCH with the same prefixed ranges. The VLOOKUP-from-another-sheet and XLOOKUP-from-another-sheet recipes go into each one on its own."
+    },
+    {
+      "heading": "What actually changes between Excel, Google Sheets and LibreOffice",
+      "intro": "Within one workbook the differences are small and mostly cosmetic; between files they are real. The two runs below are the same cell of the same Data tab, from the same .xlsx-derived workbook, written with each separator.",
+      "formula": "=Data!B2",
+      "setup_sheets": {
+        "Data": {
+          "A1": "Item",
+          "B1": "Units",
+          "C1": "Price",
+          "A2": "apple",
+          "B2": 10,
+          "C2": 1.5,
+          "A3": "banana",
+          "B3": 20,
+          "C3": 0.5,
+          "A4": "cherry",
+          "B4": 30,
+          "C4": 3,
+          "A5": "date",
+          "B5": 40,
+          "C5": 2,
+          "A6": "elder",
+          "B6": 50,
+          "C6": 4
+        }
+      },
+      "verify": [
+        {
+          "label": "Exclamation mark — Excel and Google Sheets syntax, and what .xlsx stores",
+          "formula": "=Data!B2",
+          "expected": 10
+        },
+        {
+          "label": "Dot — LibreOffice's native syntax, in that Excel-syntax document",
+          "formula": "=Data.B2",
+          "expected": "#NAME?"
+        },
+        {
+          "label": "Same for a range",
+          "formula": "=SUM(Data.B2:B6)",
+          "expected": "#NAME?"
+        }
+      ],
+      "note": "Same-workbook references: Excel and Google Sheets document Sheet!A1 and nothing else; LibreOffice Calc documents Sheet.A1 as its own A1 syntax and offers Excel A1 and Excel R1C1 as alternatives, set per document, which is why the dot form returned #NAME? in the .xlsx-derived file above while the exclamation mark returned 10 from the same tab. Round-tripping handles the swap for you: save from LibreOffice to .xlsx and dots become exclamation marks, open an .xlsx in LibreOffice and it keeps working. Quoting rules for awkward names are the same in all three. 3-D references exist in Excel and LibreOffice and are documented as absent in Google Sheets. Cross-FILE references are where the three really part company, and none of these were executed here — they are the documented forms only. Excel documents ='[Budget.xlsx]Q1 Data'!A1 for an open workbook and a full path in single quotes for a closed one, refreshed through Data > Edit Links. LibreOffice Calc documents ='file:///home/you/Budget.xlsx'#$'Q1 Data'.A1, and its DDE and WEBSERVICE functions for live external data. Google Sheets has no file-path references at all: reaching another spreadsheet is IMPORTRANGE(\"url-or-key\",\"'Q1 Data'!A1\"), which needs a one-time access grant on the source file and has no Excel or LibreOffice equivalent — so a Sheets model built on IMPORTRANGE does not survive an export to .xlsx. Everything shown with a returned value on this page was executed in LibreOffice Calc 25.8.7.3 by our harness; the Excel and Google Sheets behaviour comes from each vendor's own documentation, not from a run in those apps."
+    }
+  ]
 }

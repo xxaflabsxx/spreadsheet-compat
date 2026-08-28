@@ -1804,7 +1804,235 @@
       "engine_version": "25.8.7.3",
       "formula": "=Summary!B2*Data!C5",
       "expected": 60,
-      "actual": 60
+      "actual": 60,
+      "variants": [
+        {
+          "heading": "Sheet names with spaces or punctuation \u2014 wrap the name in single quotes",
+          "checks": [
+            {
+              "label": "Quoted name, exclamation mark outside the quotes",
+              "formula": "='Q1 Data'!B2",
+              "expected": 120,
+              "actual": 120,
+              "verified": true
+            },
+            {
+              "label": "A range from the same quoted tab \u2014 quotes still wrap the name only",
+              "formula": "=SUM('Q1 Data'!B2:B4)",
+              "expected": 300,
+              "actual": 300,
+              "verified": true
+            },
+            {
+              "label": "An apostrophe inside the name is doubled (tab: Jon's Data)",
+              "formula": "='Jon''s Data'!A1",
+              "expected": 7,
+              "actual": 7,
+              "verified": true
+            },
+            {
+              "label": "LibreOffice's own quoted form, run in a workbook that arrived as .xlsx",
+              "formula": "=$'Q1 Data'.B2",
+              "expected": "#NAME?",
+              "actual": "#NAME?",
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "A whole range \u2014 or a whole column \u2014 from another sheet",
+          "checks": [
+            {
+              "label": "A range on another tab, summed",
+              "formula": "=SUM(Data!B2:B6)",
+              "expected": 150,
+              "actual": 150,
+              "verified": true
+            },
+            {
+              "label": "Two ranges from that tab \u2014 each one carries its own prefix",
+              "formula": "=SUMPRODUCT(Data!B2:B6,Data!C2:C6)",
+              "expected": 395,
+              "actual": 395,
+              "verified": true
+            },
+            {
+              "label": "The prefix left off the second range: it silently means THIS sheet, which is empty",
+              "formula": "=SUM(Data!B2:B6,C2:C6)",
+              "expected": 150,
+              "actual": 150,
+              "verified": true
+            },
+            {
+              "label": "The same formula with both prefixes \u2014 the answer the previous row should have given",
+              "formula": "=SUM(Data!B2:B6,Data!C2:C6)",
+              "expected": 161,
+              "actual": 161,
+              "verified": true
+            },
+            {
+              "label": "Whole column across tabs \u2014 the Amount header is text, so it is ignored",
+              "formula": "=AVERAGE('Q1 Data'!B:B)",
+              "expected": 100,
+              "actual": 100,
+              "verified": true
+            },
+            {
+              "label": "Whole column, summed",
+              "formula": "=SUM('Q1 Data'!B:B)",
+              "expected": 300,
+              "actual": 300,
+              "verified": true
+            },
+            {
+              "label": "Whole column, counted \u2014 five numbers, header not counted",
+              "formula": "=COUNT(Data!B:B)",
+              "expected": 5,
+              "actual": 5,
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "Build the reference from a cell value with INDIRECT",
+          "checks": [
+            {
+              "label": "The tab named in A1, cell B2 \u2014 quotes built into the string",
+              "formula": "=INDIRECT(\"'\"&A1&\"'!B2\")",
+              "expected": 120,
+              "actual": 120,
+              "verified": true
+            },
+            {
+              "label": "A range works the same way",
+              "formula": "=SUM(INDIRECT(\"'\"&A1&\"'!B2:B4\"))",
+              "expected": 300,
+              "actual": 300,
+              "verified": true
+            },
+            {
+              "label": "Quotes omitted while the tab name contains a space",
+              "formula": "=INDIRECT(A1&\"!B2\")",
+              "expected": "#REF!",
+              "actual": "#REF!",
+              "verified": true
+            },
+            {
+              "label": "A1 names a tab that does not exist",
+              "formula": "=INDIRECT(\"'\"&A1&\"'!B2\")",
+              "expected": "#REF!",
+              "actual": "#REF!",
+              "verified": true
+            },
+            {
+              "label": "IFERROR did NOT catch that #REF! in our run",
+              "formula": "=IFERROR(INDIRECT(\"'\"&A1&\"'!B2\"),\"No such tab\")",
+              "expected": "#REF!",
+              "actual": "#REF!",
+              "verified": true
+            },
+            {
+              "label": "Testing with ISREF first does work",
+              "formula": "=IF(ISREF(INDIRECT(\"'\"&A1&\"'!B2\")),INDIRECT(\"'\"&A1&\"'!B2\"),\"No such tab\")",
+              "expected": "No such tab",
+              "actual": "No such tab",
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "3-D references: the same cell on a span of consecutive tabs",
+          "checks": [
+            {
+              "label": "A1 added across the Q1-to-Q3 span",
+              "formula": "=SUM(Q1:Q3!A1)",
+              "expected": 600,
+              "actual": 600,
+              "verified": true
+            },
+            {
+              "label": "Any aggregate works over the span",
+              "formula": "=AVERAGE(Q1:Q3!A1)",
+              "expected": 200,
+              "actual": 200,
+              "verified": true
+            },
+            {
+              "label": "A lookup cannot take a 3-D range as its table",
+              "formula": "=VLOOKUP(\"x\",Q1:Q3!A1:B2,2,FALSE)",
+              "expected": "#VALUE!",
+              "actual": "#VALUE!",
+              "verified": true
+            },
+            {
+              "label": "LibreOffice's native 3-D spelling, in a workbook that arrived as .xlsx",
+              "formula": "=SUM(Q1.A1:Q3.A1)",
+              "expected": "#NAME?",
+              "actual": "#NAME?",
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "Look a value up on another sheet (XLOOKUP and VLOOKUP)",
+          "checks": [
+            {
+              "label": "XLOOKUP \u2014 lookup column and return column each carry the prefix",
+              "formula": "=XLOOKUP(A2,Data!A:A,Data!C:C)",
+              "expected": 3,
+              "actual": 3,
+              "verified": true
+            },
+            {
+              "label": "VLOOKUP \u2014 one prefixed block, column counted from ITS first column",
+              "formula": "=VLOOKUP(A2,Data!A:C,3,FALSE)",
+              "expected": 3,
+              "actual": 3,
+              "verified": true
+            },
+            {
+              "label": "XLOOKUP's built-in not-found result, with A2 holding zzz",
+              "formula": "=XLOOKUP(A2,Data!A:A,Data!C:C,\"Not found\")",
+              "expected": "Not found",
+              "actual": "Not found",
+              "verified": true
+            },
+            {
+              "label": "A quoted tab name works here too, with A2 holding Feb",
+              "formula": "=XLOOKUP(A2,'Q1 Data'!A:A,'Q1 Data'!B:B,\"Not found\")",
+              "expected": 80,
+              "actual": 80,
+              "verified": true
+            }
+          ]
+        },
+        {
+          "heading": "What actually changes between Excel, Google Sheets and LibreOffice",
+          "checks": [
+            {
+              "label": "Exclamation mark \u2014 Excel and Google Sheets syntax, and what .xlsx stores",
+              "formula": "=Data!B2",
+              "expected": 10,
+              "actual": 10,
+              "verified": true
+            },
+            {
+              "label": "Dot \u2014 LibreOffice's native syntax, in that Excel-syntax document",
+              "formula": "=Data.B2",
+              "expected": "#NAME?",
+              "actual": "#NAME?",
+              "verified": true
+            },
+            {
+              "label": "Same for a range",
+              "formula": "=SUM(Data.B2:B6)",
+              "expected": "#NAME?",
+              "actual": "#NAME?",
+              "verified": true
+            }
+          ]
+        }
+      ]
     },
     "remaining-loan-balance": {
       "verified": true,

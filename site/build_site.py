@@ -2442,15 +2442,24 @@ def main():
 
     def _related_for(rc):
         my = _recipe_fns[rc["slug"]]
+        # An optional "related" list in the recipe JSON pins the siblings that
+        # matter most for that task (the function mesh alone can't know that a
+        # cross-sheet page belongs next to the other cross-sheet pages); the
+        # shared-function scores then fill whatever slots are left.
+        picked = [s for s in rc.get("related", [])
+                  if s in _rec_by_slug and s != rc["slug"]]
+        if my:
+            scores = {}
+            for fn in my:
+                for slug in _func_to_recipes.get(fn, []):
+                    if slug != rc["slug"]:
+                        scores[slug] = scores.get(slug, 0) + 1
+            for s, _ in sorted(scores.items(), key=lambda kv: (-kv[1], kv[0])):
+                if s not in picked:
+                    picked.append(s)
+        rel_recipes = [_rec_by_slug[s] for s in picked[:5]]
         if not my:
-            return [], []
-        scores = {}
-        for fn in my:
-            for slug in _func_to_recipes.get(fn, []):
-                if slug != rc["slug"]:
-                    scores[slug] = scores.get(slug, 0) + 1
-        ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
-        rel_recipes = [_rec_by_slug[s] for s, _ in ranked]
+            return rel_recipes, []
         seen, rel_cmps = set(), []
         for fn in sorted(my):
             for cp in _func_to_cmps.get(fn, []):

@@ -5,7 +5,8 @@ results/recipes-verified.json: slug -> {verified, engine_version, actual, expect
 
 A recipe may also carry an optional "variants" list; each variant's "verify" is
 either one check dict or a list of them (each {label?, formula, expected,
-setup_cells?, check_range?}, falling back to the variant's own setup_cells).
+setup_cells?, setup_sheets?, check_range?}, falling back to the variant's own
+setup_cells / setup_sheets).
 Those are executed too and stored under the slug as
   "variants": [{"heading": ..., "checks": [{label, formula, expected, actual, verified}]}]
 
@@ -60,12 +61,13 @@ def run_case(setup, formula, check_range, setup_sheets=None):
         return [v for v in vals if v is not None]
     return norm(ws2[anchor].value)
 
-def check(v, default_setup=None):
+def check(v, default_setup=None, default_sheets=None):
     """Execute one check dict; returns (actual, ok)."""
     exp=v["expected"]; cr=v.get("check_range")
     setup=v.get("setup_cells", default_setup)
+    sheets=v.get("setup_sheets", default_sheets)   # variant-level tabs, unless the check names its own
     try:
-        actual=run_case(setup, v["formula"], cr, v.get("setup_sheets"))
+        actual=run_case(setup, v["formula"], cr, sheets)
         ok = (actual==exp) if not isinstance(exp,list) else ([str(x) for x in actual]==[str(x) for x in exp])
     except Exception as e:
         actual=f"ERR {e}"; ok=False
@@ -92,7 +94,7 @@ for f in sorted(glob.glob(os.path.join(ROOT,"data/recipes/*.json"))):
         if isinstance(checks, dict): checks=[checks]
         done=[]
         for c in checks:
-            a, o = check(c, var.get("setup_cells"))
+            a, o = check(c, var.get("setup_cells"), var.get("setup_sheets"))
             if not o: ok=False
             done.append({"label":c.get("label",""),"formula":c["formula"],
                          "expected":c["expected"],"actual":a,"verified":o})
