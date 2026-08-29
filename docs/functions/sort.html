@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SORT works in LibreOffice since 24.8 (Excel, Sheets too)</title>
-<meta name="description" content="Returned #NAME? in LibreOffice 24.2; works since 24.8 (4 executed cases pass). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
+<title>SORT gives different results in Google Sheets vs Excel (executed)</title>
+<meta name="description" content="Sheets: descending returns 1, not an array. LibreOffice matches Excel on all 4… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/sort.html">
-<meta property="og:title" content="SORT works in LibreOffice since 24.8 (Excel, Sheets too)">
-<meta property="og:description" content="Returned #NAME? in LibreOffice 24.2; works since 24.8 (4 executed cases pass). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
+<meta property="og:title" content="SORT gives different results in Google Sheets vs Excel (executed)">
+<meta property="og:description" content="Sheets: descending returns 1, not an array. LibreOffice matches Excel on all 4… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/sort.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,7 +321,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>SORT</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
 <p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-08-29</p>
@@ -370,7 +370,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
   <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
-      <span class="badge badge-unknown">Inconclusive (import serialization)</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -442,11 +442,19 @@ error: see the <a href="../spreadsheet-errors.html">error values guide</a>.)</p>
 
 
 
+<h2 class="section-title">Why isn&rsquo;t SORT working in Google Sheets?</h2>
+
+<p><code>SORT</code> runs in Google Sheets, but our executed cases show it does not match
+Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
+formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
+against those cases before assuming your data is wrong.</p>
+
+
 
 
 <div class="not-live-tested">
-  <strong>Google Sheets: 4 cases inconclusive.</strong>
-  Every Sheets case for SORT came back inconclusive, so we publish no Sheets verdict for it.
+  <strong>Google Sheets: 1 case inconclusive.</strong>
+  
   Our corpus is an Excel-authored .xlsx, and Google&rsquo;s importer does not
   map every OOXML storage prefix (<code>_xlfn.</code>, <code>_xlfn._xlws.</code>,
   <code>_xlpm.</code>) &mdash; nor does the .xlsx export preserve full float
@@ -458,6 +466,43 @@ error: see the <a href="../spreadsheet-errors.html">error values guide</a>.)</p>
 </div>
 
 
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+    
+      
+      <li>
+        <span class="formula">=SORT(A1:A5,1,-1)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">1</span>, but the documented/expected
+        result is <span class="formula">{5, 4, 3, 1, 1}</span>.
+        MISMATCH vs expected: value mismatch: expected 5, got 1
+      </li>
+      
+    
+      
+    
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -478,31 +523,31 @@ error: see the <a href="../spreadsheet-errors.html">error values guide</a>.)</p>
 <tr>
   <td class="formula mono">=SORT(A1:A5)</td>
   <td>Default sort_index=1, ascending</td>
-  <td class="result mono">{#NAME?, , , , }</td>
+  <td class="result mono">{1, 1.0, 3.0, 4.0, 5.0}</td>
   <td class="result mono">{1, 1, 3, 4, 5}</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=SORT(A1:A5,1,-1)</td>
   <td>Explicit descending sort order</td>
-  <td class="result mono">{#NAME?, , , , }</td>
+  <td class="result mono">{1, 1.0, 3.0, 4.0, 5.0}</td>
   <td class="result mono">{5, 4, 3, 1, 1}</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=SORT(A1:B3,2,1)</td>
   <td>2D range sorted by its second column ascending</td>
-  <td class="result mono">{#NAME?, , , , , }</td>
+  <td class="result mono">{y, 10.0, z, 20.0, x, 30.0}</td>
   <td class="result mono">{{y, 10}, {z, 20}, {x, 30}}</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=SORT(A1:A1)</td>
   <td>Sorting a single blank cell (degenerate case)</td>
-  <td class="result mono">#NAME?</td>
+  <td class="result mono"></td>
   <td class="result mono">0<br><span class="category-tag">Blank cell sorts as 0 in numeric context; no error expected</span></td>
   <td><span class="badge badge-unknown">Inconclusive</span></td>
 </tr>

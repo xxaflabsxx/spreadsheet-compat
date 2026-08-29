@@ -153,12 +153,12 @@ console.log('unit: classifyFunction on real compat.json entries');
   eq(c('AGGREGATE', DB.AGGREGATE, 'l', 'x').basis, 'executed', 'AGGREGATE LO basis executed');
   eq(c('GROUPBY', DB.GROUPBY, 'l', 'x').verdict, 'missing', 'GROUPBY missing in LO (executed #NAME?)');
   eq(c('FILTER', DB.FILTER, 'l', 'x').verdict, 'quirk', 'FILTER quirk in LO');
-  // FILTER's Sheets run is inconclusive (the _xlfn._xlws. prefix was not mapped
-  // on import), so it must fall back to Google's documentation, NOT to a red
-  // "unsupported" we cannot stand behind.
-  eq(DB.FILTER.gv, 'inconclusive', 'FILTER Sheets verdict is inconclusive in the dataset');
-  eq(c('FILTER', DB.FILTER, 'g', 'x').verdict, 'ok', 'FILTER ok in Sheets (documented fallback)');
-  eq(c('FILTER', DB.FILTER, 'g', 'x').basis, 'documented', 'FILTER Sheets basis is documented, not executed');
+  // FILTER's Sheets run is quirky (a plain-name re-run confirmed it works but
+  // returns #N/A instead of Excel's documented #CALC! on empty results, and
+  // ignores if_empty), so it is now an executed quirk, not a doc fallback.
+  eq(DB.FILTER.gv, 'quirky', 'FILTER Sheets verdict is quirky (executed, plain-name run)');
+  eq(c('FILTER', DB.FILTER, 'g', 'x').verdict, 'quirk', 'FILTER quirk in Sheets (executed)');
+  eq(c('FILTER', DB.FILTER, 'g', 'x').basis, 'executed', 'FILTER Sheets basis is executed, not documented');
   eq(c('SUM', DB.SUM, 'l', 'x').verdict, 'quirk', 'even SUM is an executed quirk in LO');
   eq(c('SUM', DB.SUM, 'g', 'x').verdict, 'ok', 'SUM ok in Sheets');
   eq(c('SUM', DB.SUM, 'g', 'x').basis, 'executed', 'SUM Sheets verdict is execution-based');
@@ -271,14 +271,14 @@ function formulaVerdict(rep, sheet, cell) {
 console.log('e2e: Excel -> Google Sheets (default direction)');
 {
   const rep = V.buildReport(audit, DB, 'x', 'g');
-  eq(rep.totals, { formulas: 12, sheets: 2, uniqueFunctions: 11, atRiskFormulas: 5, unknownFunctions: 1 },
+  eq(rep.totals, { formulas: 12, sheets: 2, uniqueFunctions: 11, atRiskFormulas: 6, unknownFunctions: 1 },
     'summary tiles');
   eq(fnVerdicts(rep), {
-    SUM: 'ok', VLOOKUP: 'ok', AGGREGATE: 'missing', GROUPBY: 'missing', FILTER: 'ok',
+    SUM: 'ok', VLOOKUP: 'ok', AGGREGATE: 'missing', GROUPBY: 'missing', FILTER: 'quirk',
     TEXTSPLIT: 'missing', BAHTTEXT: 'missing', GOOGLEFINANCE: 'ok', ARRAYFORMULA: 'ok',
     NOTAREALFUNCTION: 'unknown', IF: 'ok'
   }, 'per-function verdicts');
-  eq(rep.atRiskFunctions.map(r => r.fn), ['GROUPBY', 'AGGREGATE', 'BAHTTEXT', 'TEXTSPLIT'],
+  eq(rep.atRiskFunctions.map(r => r.fn), ['GROUPBY', 'AGGREGATE', 'BAHTTEXT', 'TEXTSPLIT', 'FILTER'],
     'at-risk order: count desc then name asc');
   eq(rep.atRiskFunctions.map(r => r.fn).slice(0, V.FREE_DETAIL_LIMIT),
     ['GROUPBY', 'AGGREGATE', 'BAHTTEXT'], 'free tier details these 3; TEXTSPLIT stays locked');

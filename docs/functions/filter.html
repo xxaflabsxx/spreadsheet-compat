@@ -362,7 +362,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
   <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
-      <span class="badge badge-unknown">Inconclusive (import serialization)</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -432,20 +432,15 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+<h2 class="section-title">Why isn&rsquo;t FILTER working in Google Sheets?</h2>
+
+<p><code>FILTER</code> runs in Google Sheets, but our executed cases show it does not match
+Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
+formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
+against those cases before assuming your data is wrong.</p>
 
 
-<div class="not-live-tested">
-  <strong>Google Sheets: 5 cases inconclusive.</strong>
-  Every Sheets case for FILTER came back inconclusive, so we publish no Sheets verdict for it.
-  Our corpus is an Excel-authored .xlsx, and Google&rsquo;s importer does not
-  map every OOXML storage prefix (<code>_xlfn.</code>, <code>_xlfn._xlws.</code>,
-  <code>_xlpm.</code>) &mdash; nor does the .xlsx export preserve full float
-  precision or a blank result. Where the disagreement is explained by that
-  round trip we report it as inconclusive rather than as a Sheets behavior.
-  Google documents this function, so the result is <em>not</em> evidence of
-  missing support. See the <a href="../methodology.html">methodology page</a>
-  for the full caveat and the planned re-run with plain function names.
-</div>
+
 
 
 
@@ -459,7 +454,23 @@ against the failing cases above before assuming your data is wrong.</p>
       
     
       
+      <li>
+        <span class="formula">=FILTER(A1:A3,B1:B3&gt;100,&#34;none&#34;)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">none</span>.
+        MISMATCH vs expected: expected &#39;none&#39;, got &#39;#N/A&#39;
+      </li>
+      
     
+      
+      <li>
+        <span class="formula">=FILTER(A1:A3,B1:B3&gt;100)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">#CALC!</span>.
+        MISMATCH vs expected: expected &#39;#CALC!&#39;, got &#39;#N/A&#39;
+      </li>
       
     
       
@@ -509,41 +520,41 @@ against the failing cases above before assuming your data is wrong.</p>
 <tr>
   <td class="formula mono">=FILTER(A1:A5,B1:B5&gt;2)</td>
   <td>Spill the subset of A1:A5 where the paired B value is &gt;2</td>
-  <td class="result mono">{#NAME?, , }</td>
   <td class="result mono">{c, d, e}</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td class="result mono">{c, d, e}</td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=FILTER(A1:A3,B1:B3&gt;100,&#34;none&#34;)</td>
   <td>if_empty argument is returned when no rows match</td>
-  <td class="result mono">#NAME?</td>
+  <td class="result mono">#N/A</td>
   <td class="result mono">none</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=FILTER(A1:A3,B1:B3&gt;100)</td>
   <td>No if_empty and no matches raises #CALC!</td>
-  <td class="result mono">#NAME?</td>
+  <td class="result mono">#N/A</td>
   <td class="result mono">#CALC!</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=FILTER(A1:B3,A1:A3&gt;1)</td>
   <td>Filtering a 2-column range by a condition on the first column</td>
-  <td class="result mono">{#NAME?, , , }</td>
+  <td class="result mono">{2, y, 3, z}</td>
   <td class="result mono">{{2, y}, {3, z}}</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=FILTER({1,2,3,4},{1,0,1,0})</td>
   <td>Filtering an inline array literal by an inline boolean/number mask</td>
-  <td class="result mono">{#NAME?, }</td>
   <td class="result mono">{1, 3}</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td class="result mono">{1, 3}</td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

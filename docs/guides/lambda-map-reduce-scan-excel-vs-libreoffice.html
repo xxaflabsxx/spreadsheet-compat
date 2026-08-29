@@ -344,22 +344,23 @@ formulas do not just return different numbers, they stop computing. An inline ca
     <tr><td class="formula">=LAMBDA(x,x*2)(5)</td><td>10</td><td>10</td><td class="result">#VALUE!</td></tr>
     <tr><td class="formula">=LAMBDA(x,y,x+y)(3,4)</td><td>7</td><td>7</td><td class="result">#VALUE!</td></tr>
     <tr><td class="formula">=MAP(A1:A3,LAMBDA(x,x*2))</td><td>2, 4, 6</td><td>2 &mdash; read-back 2, 4, 6</td><td class="result">#NAME?</td></tr>
-    <tr><td class="formula">=BYROW(A1:B2,LAMBDA(r,SUM(r)))</td><td>3, 7</td><td><span class="badge badge-unknown">Inconclusive</span> &mdash; the <code>_xlfn.</code> storage prefix was not mapped on import</td><td class="result">#NAME?</td></tr>
-    <tr><td class="formula">=BYCOL(A1:B2,LAMBDA(c,SUM(c)))</td><td>4, 6</td><td><span class="badge badge-unknown">Inconclusive</span> &mdash; the <code>_xlfn.</code> storage prefix was not mapped on import</td><td class="result">#NAME?</td></tr>
+    <tr><td class="formula">=BYROW(A1:B2,LAMBDA(r,SUM(r)))</td><td>3, 7</td><td>3 &mdash; read-back 3, 7 (matches)</td><td class="result">#NAME?</td></tr>
+    <tr><td class="formula">=BYCOL(A1:B2,LAMBDA(c,SUM(c)))</td><td>4, 6</td><td>4 &mdash; read-back 4, 6 (matches)</td><td class="result">#NAME?</td></tr>
     <tr><td class="formula">=SCAN(0,A1:A3,LAMBDA(a,b,a+b))</td><td>1, 3, 6</td><td>1 &mdash; read-back 1, 3, 6</td><td class="result">#NAME?</td></tr>
     <tr><td class="formula">=REDUCE(0,A1:A3,LAMBDA(a,b,a+b))</td><td>6</td><td>6</td><td class="result">#NAME?</td></tr>
-    <tr><td class="formula">=MAKEARRAY(2,2,LAMBDA(r,c,r*c))</td><td>1, 2 / 2, 4</td><td><span class="badge badge-unknown">Inconclusive</span> &mdash; the <code>_xlfn.</code> storage prefix was not mapped on import</td><td class="result">#NAME?</td></tr>
+    <tr><td class="formula">=MAKEARRAY(2,2,LAMBDA(r,c,r*c))</td><td>1, 2 / 2, 4</td><td>1 &mdash; read-back 1, 2, 2, 4 (matches)</td><td class="result">#NAME?</td></tr>
     <tr><td class="formula">=ARRAYTOTEXT({1,2,3})</td><td>1, 2, 3</td><td>#NAME?</td><td class="result">#NAME?</td></tr>
   </tbody>
 </table>
 </div>
 <p>The Excel column holds the documented-expected values recorded in our test corpus; we did not
 run Excel. The LibreOffice column is what our harness computed by recalculating each workbook in
-LibreOffice Calc 25.8.7.3. Google Sheets was executed on 2026-08-29 via Drive import: <code>LAMBDA</code>, <code>MAP</code>,
-<code>SCAN</code> and <code>REDUCE</code> all returned Excel&rsquo;s documented values.
-<code>BYROW</code>, <code>BYCOL</code> and <code>MAKEARRAY</code> came back
-<strong>inconclusive</strong> &mdash; their <code>_xlfn.</code> storage form was not mapped by
-Google&rsquo;s importer, so we make no claim about them &mdash; and <code>ARRAYTOTEXT</code>
+LibreOffice Calc 25.8.7.3. Google Sheets was executed on 2026-08-29 via Drive import using plain (unprefixed) function names:
+<code>LAMBDA</code>, <code>MAP</code>, <code>SCAN</code>, <code>REDUCE</code>, <code>BYROW</code>,
+<code>BYCOL</code> and <code>MAKEARRAY</code> all returned Excel&rsquo;s documented values. The
+<code>BYROW</code>/<code>BYCOL</code>/<code>MAKEARRAY</code> figures come from a follow-up run that
+resolved an earlier inconclusive result, where the same formulas stored with Excel&rsquo;s
+<code>_xlfn.</code> prefix were not mapped by Google&rsquo;s importer. <code>ARRAYTOTEXT</code>
 returned <code>#NAME?</code>, which is real: Google does not document it.</p>
 
 <h2 class="section-title">Consistent across LibreOffice versions</h2>
@@ -377,7 +378,12 @@ even returns the same <code>#VALUE!</code> Excel documents — but Calc does not
 that you define and immediately invoke with a trailing <code>(...)</code>, so the useful case
 collapses to <code>#VALUE!</code>. The helper functions are a harder wall: they simply are not part
 of Calc's function set, so the parser treats <code>MAP</code>, <code>SCAN</code> and the rest as
-unknown names and returns <code>#NAME?</code>.</p>
+unknown names and returns <code>#NAME?</code>. Google Sheets gives a third answer to that same
+wrong-argument-count call: our executed <code>LAMBDA_wrong_arg_count</code> case
+(<code>=LAMBDA(x,y,x+y)(3)</code>) returned <code>#N/A</code> in Sheets, not the <code>#VALUE!</code>
+Excel documents. Three engines, three different error identities for one malformed formula — a
+generic <code>ISERROR</code> guard catches all of them, but a check for one specific error code will
+not.</p>
 
 <h2 class="section-title">How to migrate safely</h2>
 <p>The durable fix is to rewrite the array logic as ordinary formulas that both engines evaluate:</p>
@@ -393,10 +399,13 @@ engines support.</p>
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel values are Microsoft's documented behaviour, not something we executed in Excel.
-Google Sheets does implement LAMBDA and these helpers, and our executed run confirms it for
-<code>LAMBDA</code>, <code>MAP</code>, <code>SCAN</code> and <code>REDUCE</code>. The
-<code>BYROW</code>/<code>BYCOL</code>/<code>MAKEARRAY</code> cells are inconclusive for the import
-reason above &mdash; that is a gap in our test file, not evidence against Sheets.</p>
+Google Sheets does implement LAMBDA and these helpers, and our executed run confirms it for all
+six: <code>LAMBDA</code>, <code>MAP</code>, <code>SCAN</code>, <code>REDUCE</code>, <code>BYROW</code>,
+<code>BYCOL</code> and <code>MAKEARRAY</code>. The <code>BYROW</code>/<code>BYCOL</code>/<code>MAKEARRAY</code>
+figures needed a follow-up run on 2026-08-29 that wrote the formulas with plain (unprefixed) function
+names — the original <code>_xlfn.</code>-prefixed pass was inconclusive because Google’s
+importer did not map that storage form, not because Sheets lacked the functions. Both runs are kept in
+our results file, with per-function provenance recorded in <code>subset_runs</code>.</p>
 
 <h2 class="section-title">Check before you migrate</h2>
 <aside class="promo-card">

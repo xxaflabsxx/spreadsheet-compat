@@ -200,9 +200,21 @@ def load_lo_versions():
 #      expected value is that rounding or that blank, the divergence is in
 #      the export, not in the engine.
 #
-# Both are reported as "inconclusive" rather than folded into a verdict. A
-# follow-up Sheets run with plain (unprefixed) function names will resolve
-# set 1.
+# Both are reported as "inconclusive" rather than folded into a verdict.
+#
+# UPDATE (2026-08-29): a follow-up Sheets run that writes the same corpus
+# with plain (unprefixed) function names resolved set 1 for the five
+# affected functions (BYCOL, BYROW, FILTER, MAKEARRAY, SORT) — their stored
+# formulas no longer carry a storage prefix, so sheets_case_inconclusive()
+# below naturally stops flagging them, and the executed values from that
+# run are now published as real verdicts. The two runs are merged into one
+# results/google-sheets.json: its top-level fields reflect the latest
+# (plain-name) run, and results["subset_runs"] is the per-function
+# provenance trail, recording which functions each run covers and which
+# earlier run (if any) it supersedes. The general caveat still holds for
+# anything not yet re-run this way: an xlsx import can still fail to map a
+# prefixed serialization, and set 1's detection logic stays in place to
+# catch that for future corpora/functions rather than guess at them.
 # --------------------------------------------------------------------------
 
 SHEETS_PREFIXES = ("_xlfn.", "_xlws.", "_xlpm.")
@@ -2114,9 +2126,9 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 <p>The same corpus runs against multiple LibreOffice releases &mdash; currently {{ versions|join(', ') }} &mdash; which is how function pages can state a precise &ldquo;supported since&rdquo; release rather than a guess. Current corpus: <strong>{{ n_funcs }} functions live-tested</strong> across <strong>{{ n_cases }} executed cases</strong> per release.</p>
 
 <h2 class="section-title" id="sheets-caveats">Google Sheets execution caveats</h2>
-<p>The Sheets run reuses the Excel-authored workbooks, and that round trip has two artifacts which are <em>not</em> Google Sheets behavior. Where a result is explained by either, we publish <strong>Inconclusive</strong> instead of a verdict &mdash; never a red &ldquo;unsupported&rdquo; badge:</p>
+<p>The Sheets run reuses the Excel-authored workbooks, and that round trip has one remaining artifact which is <em>not</em> Google Sheets behavior. Where a result is explained by it, we publish <strong>Inconclusive</strong> instead of a verdict &mdash; never a red &ldquo;unsupported&rdquo; badge:</p>
 <ul>
-<li><strong>Unmapped storage prefixes.</strong> Excel stores post-2007 functions as <code>_xlfn.NAME</code>, <code>_xlfn._xlws.NAME</code> or (for LAMBDA parameters) <code>_xlpm.NAME</code>. Google&rsquo;s importer maps some but not all: <code>_xlfn.XLOOKUP</code>, <code>_xlfn.MAP</code> and <code>_xlfn.LAMBDA</code> evaluate fine, while <code>_xlfn._xlws.FILTER</code> and <code>_xlfn._xlws.SORT</code> come back <code>#NAME?</code> and BYROW/BYCOL/MAKEARRAY come back <code>#ERROR!</code>. Google documents all of those functions, so those results say something about the import path, not about Sheets support. Affected here: <strong>BYCOL, BYROW, FILTER, MAKEARRAY and SORT</strong>. A follow-up Sheets run that writes plain, unprefixed function names will resolve them.</li>
+<li><strong>Unmapped storage prefixes (resolved for the affected functions on 2026-08-29).</strong> Excel stores post-2007 functions as <code>_xlfn.NAME</code>, <code>_xlfn._xlws.NAME</code> or (for LAMBDA parameters) <code>_xlpm.NAME</code>. Google&rsquo;s importer maps some but not all of these prefixes: <code>_xlfn.XLOOKUP</code>, <code>_xlfn.MAP</code> and <code>_xlfn.LAMBDA</code> evaluated fine even with the prefix, while <code>_xlfn._xlws.FILTER</code> and <code>_xlfn._xlws.SORT</code> came back <code>#NAME?</code> and BYROW/BYCOL/MAKEARRAY came back <code>#ERROR!</code> &mdash; despite Google documenting all of them. We ran a follow-up Sheets pass on 2026-08-29 that writes the same corpus with plain, unprefixed function names, which resolved all five: <strong>BYCOL, BYROW, FILTER, MAKEARRAY and SORT</strong> now carry real executed verdicts instead of Inconclusive. The two runs are merged into a single results file, with per-function provenance for which run produced which verdict recorded in that file&rsquo;s <code>subset_runs</code> array. The general caveat still stands for any function or corpus we have not re-run this way: an <code>.xlsx</code> import can still fail to map a prefixed serialization, and a future case that hits this is reported Inconclusive rather than guessed at.</li>
 <li><strong>Export readback.</strong> Sheets&rsquo; <code>.xlsx</code> export rounds every float to 10 significant digits (<code>PI()</code> comes back as 3.141592654) and writes an empty cell where a result is blank or zero-length. Where that rounding or that blank is the <em>only</em> disagreement with the expected value &mdash; DEGREES(1), INDIRECT to a blank cell, TRANSPOSE of a blank cell &mdash; the difference is in the export, not in the engine.</li>
 </ul>
 <p>A <code>#NAME?</code> from Sheets on a formula with <em>no</em> storage prefix, or on a function Google does not document (TEXTSPLIT, TAKE, DROP, AGGREGATE&hellip;), is a real unsupported verdict and is published as one.</p>

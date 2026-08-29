@@ -44,16 +44,22 @@ https://github.com/xxaflabsxx/spreadsheet-compat
 
 ## Google Sheets execution caveats
 
-The Sheets run reuses Excel-authored workbooks, and that round trip has two artifacts that are
-**not** Google Sheets behaviour. Where a result is explained by either, the verdict is
+The Sheets run reuses Excel-authored workbooks, and that round trip has one remaining artifact
+that is **not** Google Sheets behaviour. Where a result is explained by it, the verdict is
 `inconclusive` rather than a claim about the engine:
 
-1. **Unmapped OOXML storage prefixes.** Excel stores post-2007 functions as `_xlfn.NAME`,
-   `_xlfn._xlws.NAME` or `_xlpm.NAME`. Google's importer maps some but not all: `_xlfn.XLOOKUP`,
-   `_xlfn.MAP` and `_xlfn.LAMBDA` evaluate fine, while `_xlfn._xlws.FILTER` and
-   `_xlfn._xlws.SORT` return `#NAME?` and BYROW/BYCOL/MAKEARRAY return `#ERROR!` — all five of
-   which Google documents. Affected: **BYCOL, BYROW, FILTER, MAKEARRAY, SORT**. A follow-up run
-   writing plain, unprefixed function names will resolve them.
+1. **Unmapped OOXML storage prefixes (resolved for the affected functions on 2026-08-29).**
+   Excel stores post-2007 functions as `_xlfn.NAME`, `_xlfn._xlws.NAME` or `_xlpm.NAME`.
+   Google's importer maps some but not all: `_xlfn.XLOOKUP`, `_xlfn.MAP` and `_xlfn.LAMBDA`
+   evaluated fine even with the prefix, while `_xlfn._xlws.FILTER` and `_xlfn._xlws.SORT`
+   returned `#NAME?` and BYROW/BYCOL/MAKEARRAY returned `#ERROR!` — despite Google documenting
+   all five. A follow-up run on 2026-08-29 wrote the same corpus with plain, unprefixed function
+   names, resolving all five: **BYCOL, BYROW, FILTER, MAKEARRAY, SORT** now carry real executed
+   verdicts. The two runs are merged into one results file; per-function provenance (which run
+   produced which function's verdict) is recorded in that file's `subset_runs` array. The
+   general caveat still applies to any function or corpus not yet re-run this way: an `.xlsx`
+   import can still fail to map a prefixed serialization, and such cases are still reported
+   `inconclusive` rather than guessed at.
 2. **Export readback.** Sheets' `.xlsx` export rounds floats to 10 significant digits
    (`PI()` exports as 3.141592654) and writes an empty cell for a blank/zero-length result.
    Where that is the only disagreement with the expected value (DEGREES(1), INDIRECT to a blank
@@ -73,8 +79,11 @@ PIVOTBY, SORTBY, TEXTBEFORE, TEXTAFTER), is a real `unsupported` verdict.
   are both executed.
 - Google Sheets has no version to pin: a Sheets verdict is a dated observation
   (`google_sheets_executed`), not a release guarantee. Google ships changes continuously.
-- Five functions carry `google_sheets_verdict = inconclusive` (see caveats above). Consumers
-  should treat that as "no verdict" and fall back to `in_google_sheets`, never as "unsupported".
+- As of the 2026-08-29 plain-name re-run, no function carries `google_sheets_verdict =
+  inconclusive` — the five that did (BYCOL, BYROW, FILTER, MAKEARRAY, SORT) were resolved by
+  that run (see caveats above). The condition can recur for a function or corpus we haven't
+  re-run with plain names yet; when it does, treat `inconclusive` as "no verdict" and fall back
+  to `in_google_sheets`, never as "unsupported".
 - The executed test set covers the most-used functions; documented-only functions have empty
   `libreoffice_verdict` / `google_sheets_verdict`.
 - Corrections and additions welcome via the GitHub repository.
