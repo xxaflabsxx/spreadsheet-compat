@@ -434,16 +434,19 @@ For hand-rolled replacements of the two text functions, see
 <code>B1:B3 = 3, 1, 2</code>; <code>XLOOKUP</code> and <code>XMATCH</code> read
 <code>A1:A3 = a, b, c</code> with <code>B1:B3 = 1, 2, 3</code>. Our dataset records
 <code>FILTER</code>, <code>LET</code>, <code>RANDARRAY</code>, <code>SEQUENCE</code>, <code>SORT</code>,
-<code>UNIQUE</code> and <code>XLOOKUP</code> as documented in Google Sheets, and does not record
-<code>SORTBY</code> or <code>XMATCH</code> there. All nine have now been executed in Sheets, including a
+<code>UNIQUE</code>, <code>XLOOKUP</code> and <code>XMATCH</code> as documented in Google Sheets, and does
+not record <code>SORTBY</code> there. All nine have now been executed in Sheets, including a
 follow-up run on 2026-08-29 that writes the corpus with plain (unprefixed) function names rather
 than Excel&rsquo;s <code>_xlfn._xlws.</code> storage form. LET, RANDARRAY, SEQUENCE, UNIQUE, XLOOKUP,
 <strong>FILTER</strong> and <strong>SORT</strong> all returned their documented values &mdash; the plain-name
 run resolved FILTER and SORT, which an earlier prefixed run had left inconclusive because Sheets&rsquo;
 importer did not map that storage form. Only SORTBY returned <code>#NAME?</code>, and that is a real
-result: Google does not document SORTBY. The ninth is the
-interesting one: our inventory does <em>not</em> record XMATCH as documented in Sheets, yet it
-executed there and returned <code>2</code>. That is an inventory gap the run exposed.</p>
+result: Google does not document SORTBY. The ninth, XMATCH, executed in Sheets and returned
+<code>2</code> &mdash; and it exposed an inventory gap on our side: this dataset had recorded XMATCH as
+<em>not</em> documented in Sheets, because it is absent from the &ldquo;List of Google Sheets
+functions&rdquo; table page we originally scraped. Google does in fact publish a dedicated XMATCH help
+article, so on 2026-08-29 we fetched and verified it and corrected the inventory: XMATCH is now recorded
+as documented in Sheets, which is what the executed value said all along.</p>
 <div class="quirk-box">
 <h3>Sheets semantic split: SORT&rsquo;s third argument</h3>
 <p>Excel&rsquo;s <code>SORT(array, [sort_index], [sort_order], [by_col])</code> takes a signed

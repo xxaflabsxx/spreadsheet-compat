@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CONCAT takes exactly two arguments in Google Sheets</title>
+<meta name="description" content="Google Sheets&#39; CONCAT accepts only two scalar values - our executed run returns #N/A for =CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) and =CONCAT(A1:A3), which LibreOffice evaluates to abc and xyz. Use TEXTJOIN or CONCATENATE instead.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/concat-two-arguments-google-sheets-vs-excel-libreoffice.html">
+<meta property="og:title" content="CONCAT takes exactly two arguments in Google Sheets">
+<meta property="og:description" content="Google Sheets&#39; CONCAT accepts only two scalar values - our executed run returns #N/A for =CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) and =CONCAT(A1:A3), which LibreOffice evaluates to abc and xyz. Use TEXTJOIN or CONCATENATE instead.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/concat-two-arguments-google-sheets-vs-excel-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"CONCAT takes exactly two arguments in Google Sheets","item":"https://canispreadsheet.com/guides/concat-two-arguments-google-sheets-vs-excel-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>CONCAT in Google Sheets takes exactly two arguments (Excel and LibreOffice take many)</h1>
+
+<p>Every one of the three engines has a <code>CONCAT</code> function, all three document it, and
+our function inventory records it as present in Excel, Google Sheets and LibreOffice Calc alike.
+That inventory-level agreement hides a signature difference big enough to break a workbook.
+Excel&rsquo;s <code>CONCAT</code> takes up to 253 arguments and each one may be a range;
+Google&rsquo;s <code>CONCAT</code> takes <em>exactly two scalar values</em>. Feed Sheets the
+Excel form and it does not concatenate fewer items, or drop the extras &mdash; it returns
+<code>#N/A</code>.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>An .xlsx full of <code>=CONCAT(A2:A50)</code> opens in Google Sheets with no missing-function
+  warning at all. <code>CONCAT</code> is a real Sheets function, so there is no <code>#NAME?</code>
+  to tell you something is unsupported. Instead every such cell reads <code>#N/A</code>, our
+  executed run confirms it, and the only <code>CONCAT</code> call that survives the trip is the
+  two-argument one. LibreOffice Calc, meanwhile, accepts the Excel form unchanged in every build we
+  tested &mdash; so the workbook that migrates cleanly to Calc is the same workbook that fails in
+  Sheets.</p>
+</div>
+
+<h2 class="section-title">Executed results</h2>
+<p>Inputs, per case: <code>=CONCAT(A1:A3)</code> reads <code>A1:A3 = x, y, z</code>;
+<code>=CONCAT(A1:B2)</code> reads <code>A1:B2 = a, b / c, d</code>; the other two take literals.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Case</th><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (Drive import, 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td>CONCAT_literals</td><td class="formula">=CONCAT("a","b","c")</td><td>abc</td><td>#N/A</td><td class="result">abc</td></tr>
+    <tr><td>CONCAT_range</td><td class="formula">=CONCAT(A1:A3)</td><td>xyz</td><td>#N/A</td><td class="result">xyz</td></tr>
+    <tr><td>CONCAT_2d_range</td><td class="formula">=CONCAT(A1:B2)</td><td>abcd</td><td>#N/A</td><td class="result">abcd</td></tr>
+    <tr><td>CONCAT_mixed_types</td><td class="formula">=CONCAT("val:",5)</td><td>val:5</td><td>val:5</td><td class="result">val:5</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The split is exactly the two-argument line. <code>=CONCAT("val:",5)</code> passes two scalar
+values, and it is the one row where Excel&rsquo;s documented result, the executed Sheets value and
+the executed LibreOffice value all read <code>val:5</code>. The three-literal call passes one
+argument too many; the two range calls pass a range where Sheets wants a scalar. All three return
+<code>#N/A</code> in the Sheets run and all three return the documented string in Calc.</p>
+<p>One thing this is <em>not</em>: an import artifact. The Sheets <code>CONCAT</code> rows come
+from the 2026-08-29 plain-name run, in which the cells were written as literally
+<code>=CONCAT("a","b","c")</code> and <code>=CONCAT(A1:A3)</code> &mdash; no
+<code>_xlfn.</code> storage prefix for Google&rsquo;s importer to fail to map. Sheets received the
+plain name it documents, resolved the function, and rejected the arguments.</p>
+
+<h2 class="section-title">LibreOffice takes the Excel form, and has for four releases</h2>
+<p>There is no version cliff here of the kind that catches <code>VSTACK</code> or
+<code>TEXTSPLIT</code>. We ran the same four <code>CONCAT</code> cases through LibreOffice Calc
+24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3, and all four cases matched their documented result in
+all four builds &mdash; <code>abc</code>, <code>xyz</code>, <code>abcd</code>, <code>val:5</code>,
+with no <code>#NAME?</code> anywhere. Range arguments and long argument lists both work. Whatever
+release of Calc a reader is on within our tested range, the Excel-style <code>CONCAT</code> is
+safe there; the risk is entirely on the Sheets side.</p>
+<p>That is the mirror image of the pattern in
+<a href="../guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">which LibreOffice version you need for VSTACK, TEXTSPLIT, TAKE and DROP</a>,
+where the modern array functions are simply absent from older Calc builds and announce it with
+<code>#NAME?</code>. A missing function is loud. <code>CONCAT</code> is the quieter failure mode:
+the function is present in both engines and documented by both vendors, and only the shape of its
+argument list differs.</p>
+
+<h2 class="section-title">What the two vendors actually document</h2>
+<p>Google&rsquo;s help for <code>CONCAT</code> lists the syntax as
+<code>CONCAT(value1, value2)</code> &mdash; &ldquo;returns the concatenation of two values,
+equivalent to the <code>&amp;</code> operator&rdquo; &mdash; and states that <code>value1</code> and
+<code>value2</code> can be any <em>scalar</em> value or a reference to a scalar value. Two
+arguments, both scalars: a range is not a scalar, and there is no third slot. Google lists it in the Operator
+category rather than the Text category, alongside <code>ADD</code> and <code>MULTIPLY</code>. Many-argument and range concatenation in Sheets
+is the job of a different function: <code>CONCATENATE</code>, documented there as
+<code>CONCATENATE(string1, [string2, ...])</code>; <code>TEXTJOIN</code>, documented as
+<code>TEXTJOIN(delimiter, ignore_empty, text1, [text2], …)</code>; or the Sheets-only
+<code>JOIN</code>, documented as
+<code>JOIN(delimiter, value_or_array1, [value_or_array2, ...])</code>.</p>
+<p>Microsoft documents <code>CONCAT(text1, [text2],…)</code> with up to 253 text arguments, each
+of which may be &ldquo;a string, or array of strings, such as a range of cells&rdquo;, and ships it
+in Excel 2019 and Microsoft 365. So both descriptions are accurate for their own product; they
+simply describe different functions that happen to share a name. Nothing in an .xlsx records which
+one the author meant.</p>
+
+<h2 class="section-title">The portable alternatives, executed</h2>
+<p><code>CONCATENATE</code> and <code>TEXTJOIN</code> are in our corpus too, and unlike
+<code>CONCAT</code> they behave the same way in both engines we execute. Inputs:
+<code>A1 = Hello</code>, <code>B1 = World</code> for the cell-reference case; <code>A1 = 42</code>
+for the coercion case; <code>A1:A3 = x, y, z</code> for the <code>TEXTJOIN</code> range case; and
+<code>A1:A2 = a, b</code> with <code>B1:B2 = c, d</code> for the multi-range case.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (Drive import, 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=CONCATENATE("a","b","c")</td><td>abc</td><td>abc</td><td class="result">abc</td></tr>
+    <tr><td class="formula">=CONCATENATE(A1," ",B1)</td><td>Hello World</td><td>Hello World</td><td class="result">Hello World</td></tr>
+    <tr><td class="formula">=CONCATENATE("Item ",A1)</td><td>Item 42</td><td>Item 42</td><td class="result">Item 42</td></tr>
+    <tr><td class="formula">=TEXTJOIN(",",TRUE,"a","","b")</td><td>a,b</td><td>a,b</td><td class="result">a,b</td></tr>
+    <tr><td class="formula">=TEXTJOIN(",",FALSE,"a","","b")</td><td>a,,b</td><td>a,,b</td><td class="result">a,,b</td></tr>
+    <tr><td class="formula">=TEXTJOIN("-",TRUE,A1:A3)</td><td>x-y-z</td><td>x-y-z</td><td class="result">x-y-z</td></tr>
+    <tr><td class="formula">=TEXTJOIN(",",TRUE,A1:A2,B1:B2)</td><td>a,b,c,d</td><td>a,b,c,d</td><td class="result">a,b,c,d</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Every row above matched its documented result in both executed engines: seven cases, no
+mismatches, no errors. That includes the two that do the work <code>CONCAT</code> could not &mdash;
+<code>=TEXTJOIN("-",TRUE,A1:A3)</code> joining a range, and
+<code>=TEXTJOIN(",",TRUE,A1:A2,B1:B2)</code> flattening two ranges in order. The
+<code>ignore_empty</code> flag also behaves identically in both: <code>TRUE</code> drops the empty
+string and <code>FALSE</code> keeps it as a segment, so a delimiter-doubling <code>a,,b</code>
+means the same thing on either side of a migration.</p>
+<p>A file-format footnote worth knowing, because it is a common false alarm: in our Sheets run the
+<code>TEXTJOIN</code> cells were stored in the .xlsx under Excel&rsquo;s
+<code>_xlfn.TEXTJOIN</code> name and Google&rsquo;s importer mapped that form correctly, returning
+the documented values. So the <code>_xlfn.</code> prefix in a raw .xlsx is not by itself a sign of
+trouble &mdash; and conversely, the <code>CONCAT</code> failures above happened <em>without</em> any
+prefix in play.</p>
+
+<h2 class="section-title">How to migrate safely</h2>
+<p><strong>Search for the pattern before you open the file in Sheets.</strong> Any
+<code>CONCAT</code> call with a range argument, or with three or more arguments, is a cell that
+will read <code>#N/A</code> after the import. A single <code>=CONCAT(A1,B1)</code> is fine and
+needs no change.</p>
+<p><strong>For a range: use <code>TEXTJOIN</code> with an empty delimiter.</strong>
+<code>=CONCAT(A1:A3)</code> becomes <code>=TEXTJOIN("",TRUE,A1:A3)</code>, which joins the same three
+cells with nothing between them. Note the exact case in the table above is the delimited form,
+<code>=TEXTJOIN("-",TRUE,A1:A3)</code> &rarr; <code>x-y-z</code>; the empty-delimiter variant differs
+only in that first argument, and we did not run it as a separate case. Use
+<code>TRUE</code> for <code>ignore_empty</code> if blank cells in the range should vanish, which is
+what <code>CONCAT</code> effectively does with them; use <code>FALSE</code> only if you are also
+supplying a delimiter and want the gaps preserved.</p>
+<p><strong>For a fixed list of values: use <code>CONCATENATE</code> or <code>&amp;</code>.</strong>
+<code>=CONCAT("a","b","c")</code> becomes <code>=CONCATENATE("a","b","c")</code> or simply
+<code>="a"&amp;"b"&amp;"c"</code>. Both are portable; the ampersand operator is the most portable
+thing in this entire article, since it predates all three of these functions.</p>
+<p><strong>If the workbook is Sheets-first, <code>JOIN</code> is also available</strong> &mdash;
+<code>=JOIN("",A1:A3)</code> &mdash; but it is a Google-only function: our inventory records it as
+documented in Sheets and not in Excel or LibreOffice, so it is a one-way door. It has no case in
+our executed corpus, so we are reporting Google&rsquo;s documentation for it, not a measurement.
+<code>TEXTJOIN</code> is the better default precisely because it is the one that runs everywhere we
+tested.</p>
+<p><strong>Do not paper over it with <code>IFERROR</code>.</strong>
+<code>=IFERROR(CONCAT(A1:A3),"")</code> turns the <code>#N/A</code> into a blank cell, which is
+worse: the sheet looks healthy and silently loses the joined text. Rewrite the formula.</p>
+<p>For the wider question of which of these three joining functions to reach for in the first
+place, see
+<a href="../compare/concatenate-vs-concat-vs-textjoin.html">CONCATENATE vs CONCAT vs TEXTJOIN</a>,
+and for worked examples,
+<a href="../how-to/how-to-use-textjoin.html">how to use TEXTJOIN</a> and
+<a href="../how-to/how-to-combine-cells.html">how to combine cells</a>.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column on this page is Microsoft&rsquo;s documented behaviour as recorded in our test
+corpus &mdash; we do not run Excel, and no value in that column is a measurement. The Google Sheets
+column is executed output from a single dated run: the corpus was written to .xlsx with no cached
+results, imported to Google Drive on 2026-08-29, recalculated by Google&rsquo;s engine, and
+exported back for readback. Sheets has no version to pin, so that run is dated rather than
+versioned, and Google could change the signature of <code>CONCAT</code> tomorrow without changing a
+version number. The LibreOffice column is executed output from Calc 25.8.7.3, with the four-release
+claim above traced to results files from 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3 &mdash; the only
+builds we ran, so we cannot speak to releases outside that range.</p>
+<p>Two further limits specific to this page. First, our corpus has four <code>CONCAT</code> cases;
+they are enough to locate the boundary at two scalar arguments and consistent with Google&rsquo;s
+published signature, but we did not probe every arity or argument type. Second, our readback records
+the error <em>code</em> a cell holds, not the hover message Sheets shows beside it, so
+<code>#N/A</code> above is the value we measured and the argument-count explanation comes from
+Google&rsquo;s documentation rather than from a message we captured. <code>JOIN</code> has no
+executed case at all here. See <a href="../methodology.html">our methodology</a> for how
+recalculation is proven rather than assumed.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

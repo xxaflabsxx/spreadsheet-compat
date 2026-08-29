@@ -329,13 +329,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <thead><tr><th></th><th><a href="../functions/concatenate.html">CONCATENATE</a></th><th><a href="../functions/concat.html">CONCAT</a></th><th><a href="../functions/textjoin.html">TEXTJOIN</a></th></tr></thead>
 <tbody>
 
-<tr><td><strong>Accepts whole ranges (A2:A10)</strong></td><td>No — cell by cell</td><td>Yes</td><td>Yes</td></tr>
+<tr><td><strong>Accepts whole ranges (A2:A10)</strong></td><td>No — cell by cell</td><td>Excel &amp; LibreOffice yes — Google Sheets no (#N/A in our executed run)</td><td>Yes</td></tr>
 
 <tr><td><strong>Delimiter between values</strong></td><td>Manual — you type every separator</td><td>No</td><td>Yes — first argument</td></tr>
 
 <tr><td><strong>Skip empty cells</strong></td><td>No</td><td>No</td><td>Yes — second argument TRUE</td></tr>
 
-<tr><td><strong>Availability</strong></td><td>Everywhere (legacy, kept for compatibility)</td><td>Excel 2016+ / Sheets / LibreOffice</td><td>Excel 2016+ / Sheets / LibreOffice (verified in every LO version we test)</td></tr>
+<tr><td><strong>Availability</strong></td><td>Everywhere (legacy, kept for compatibility)</td><td>Excel 2016+ / Sheets / LibreOffice — but Sheets&#39; CONCAT is a different, two-argument function</td><td>Excel 2016+ / Sheets / LibreOffice (verified in every LO version we test)</td></tr>
 
 </tbody>
 </table>
@@ -346,14 +346,14 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <li><strong>CONCATENATE</strong> &mdash; Only when a file must open in genuinely ancient Excel (2013 or older). Otherwise there is no reason to start using it today — &amp; is shorter.</li>
 
-<li><strong>CONCAT</strong> &mdash; You want to mash a range together with NO separator, e.g. reassembling split digits.</li>
+<li><strong>CONCAT</strong> &mdash; You want to mash a range together with NO separator, e.g. reassembling split digits — and the file will stay in Excel or LibreOffice. Google Sheets documents CONCAT(value1, value2) as taking exactly two scalar values, and our executed Sheets run returns #N/A for =CONCAT(A1:A3) and for any three-argument call. Use TEXTJOIN there.</li>
 
 <li><strong>TEXTJOIN</strong> &mdash; Almost every real join: lists with commas, names with spaces, skipping blanks — =TEXTJOIN(&#34;, &#34;,TRUE,A2:A10) is the one to remember.</li>
 
 </ul>
 
 <h2 class="section-title">Compatibility (Sheets &amp; LibreOffice executed; Excel per docs)</h2>
-<p>We executed CONCATENATE and TEXTJOIN in real LibreOffice across four releases — both work in all of them (TEXTJOIN needs the _xlfn storage prefix in raw .xlsx files, a file-format quirk, not a support gap). In Google Sheets all three are available.</p>
+<p>We executed CONCATENATE and TEXTJOIN in real LibreOffice across four releases — both work in all of them (TEXTJOIN needs the _xlfn storage prefix in raw .xlsx files, a file-format quirk, not a support gap) — and both also returned their documented values in our dated Google Sheets run. CONCAT is the odd one out: it evaluated correctly in all four LibreOffice builds, but in Google Sheets only the two-argument form worked. =CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;), =CONCAT(A1:A3) and =CONCAT(A1:B2) all returned #N/A there, because Google documents CONCAT as taking exactly two scalar values. Full executed tables in the guide linked below.</p>
 
 <h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
@@ -370,6 +370,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <p>Full per-version details on each function page:
 <a href="../functions/concatenate.html">CONCATENATE</a> &middot; <a href="../functions/concat.html">CONCAT</a> &middot; <a href="../functions/textjoin.html">TEXTJOIN</a>.</p>
+
+<p>See also: <a href="../guides/concat-two-arguments-google-sheets-vs-excel-libreoffice.html">CONCAT takes exactly two arguments in Google Sheets</a>.</p>
 
 
 <h2 class="section-title">How-to recipes using these functions</h2>
