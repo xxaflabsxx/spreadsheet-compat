@@ -73,25 +73,43 @@ auditable. Merging is refused if the installed LibreOffice version does not
 match the engine_version already recorded in the file -- results from two
 different engine builds must never share one results file.
 """
-import glob
 import json
 import os
-import re
 import subprocess
 import sys
 import tempfile
 import time
 from datetime import datetime, timezone
 
-sys.path.insert(0, os.path.dirname(__file__))
-from xlfn_map import to_storage_formula_all  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from xlfn_map import to_storage_formula_all  # noqa: E402,F401
+
+# Everything below is shared verbatim with harness/run_sheets.py -- see
+# harness/corpus.py for why. These are re-exported at module level under
+# their original names so existing callers of run_lo.build_workbook(),
+# run_lo.load_test_files(), etc. keep working unchanged.
+from corpus import (  # noqa: E402,F401
+    REPO_ROOT,
+    TESTS_DIR,
+    RESULTS_DIR,
+    KNOWN_ERROR_STRINGS,
+    CANARY_ARITH_FORMULA,
+    CANARY_ARITH_EXPECTED,
+    CANARY_ANCHOR,
+    EXCEL_EPOCH,
+    load_test_files,
+    sanitize_sheet_name,
+    build_workbook,
+    anchor_for_case,
+    flatten_cases,
+    cell_addrs_in_range,
+    is_error_value,
+    normalize_readback_value,
+    values_roughly_equal,
+    compare_expected,
+)
 
 import openpyxl  # noqa: E402
-from openpyxl.worksheet.formula import ArrayFormula  # noqa: E402
-
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-TESTS_DIR = os.path.join(REPO_ROOT, "data", "tests")
-RESULTS_DIR = os.path.join(REPO_ROOT, "results")
 
 # Which soffice binary to drive. Defaults to the system "soffice" (PATH), but
 # can be overridden to point at an isolated/alternate LibreOffice install
@@ -122,194 +140,6 @@ LO_VERSION_TAG = (
     ".".join(LO_VERSION.split(".")[:2]) if LO_VERSION != "unknown" else "unknown"
 )  # major.minor for the results filename, e.g. "25.8"
 
-KNOWN_ERROR_STRINGS = {
-    "#NULL!", "#DIV/0!", "#VALUE!", "#REF!", "#NAME?", "#NUM!", "#N/A",
-    "#GETTING_DATA", "#CALC!", "#SPILL!", "#FIELD!", "#UNKNOWN!",
-    "#BLOCKED!", "#CONNECT!", "#BUSY!",
-}
-
-CANARY_ARITH_FORMULA = "=1111+2222"
-CANARY_ARITH_EXPECTED = 3333
-CANARY_ANCHOR = "Z1"  # far from any setup_cells/check_range used in data/tests
-
-
-def load_test_files(names=None):
-    """Return list of (function_name, filepath, payload)."""
-    files = sorted(glob.glob(os.path.join(TESTS_DIR, "*.json")))
-    out = []
-    for path in files:
-        fn = os.path.splitext(os.path.basename(path))[0]
-        if names and fn not in names:
-            continue
-        with open(path) as f:
-            payload = json.load(f)
-        out.append((fn, path, payload))
-    return out
-
-
-def sanitize_sheet_name(name, used):
-    """Excel/LO sheet names: <=31 chars, no []:*?/\\, must be unique."""
-    clean = re.sub(r"[\[\]:\*\?/\\]", "_", name)[:31]
-    base = clean
-    i = 2
-    while clean.lower() in used:
-        suffix = f"~{i}"
-        clean = base[: 31 - len(suffix)] + suffix
-        i += 1
-    used.add(clean.lower())
-    return clean
-
-
-def build_workbook(cases_flat):
-    """
-    cases_flat: list of dicts with keys:
-        test_id, function, formula (original), setup_cells, check_range
-    Returns (workbook, sheet_map) where sheet_map[test_id] -> sheet_name
-    """
-    wb = openpyxl.Workbook()
-    wb.remove(wb.active)
-    used_names = set()
-    sheet_map = {}
-
-    for c in cases_flat:
-        sheet_name = sanitize_sheet_name(c["test_id"], used_names)
-        sheet_map[c["test_id"]] = sheet_name
-        ws = wb.create_sheet(sheet_name)
-
-        for addr, val in (c.get("setup_cells") or {}).items():
-            ws[addr] = val
-
-        # Prefix EVERY known future-function call site (not just the function
-        # under test): nested modern calls like UNICHAR(UNICODE(...)) need
-        # both names prefixed or the whole formula is #NAME? on all engines.
-        storage_formula = to_storage_formula_all(c["formula"])
-        anchor = c["anchor"]
-        if c.get("check_range"):
-            # Functions expected to return a multi-cell array (spill/dynamic
-            # array results) are written as a legacy Ctrl+Shift+Enter style
-            # array formula covering the full check_range. This matters:
-            # older engines (and pre-365 Excel) only spill a range result
-            # when the formula is explicitly marked as an array formula --
-            # writing it as a plain scalar formula string causes even a
-            # SUPPORTED function like INDEX(range,0,col) to return #VALUE!
-            # instead of spilling. Verified empirically: wrapping
-            # INDEX(A1:C3,0,2) in ArrayFormula(ref="A30:A32") makes
-            # LibreOffice 24.2 correctly spill [2,5,8]; the identical
-            # formula as a plain string returns #VALUE!.
-            ws[anchor] = ArrayFormula(c["check_range"], storage_formula)
-        else:
-            ws[anchor] = storage_formula
-
-        # Canary: deterministic, non-cacheable arithmetic on every sheet.
-        ws[CANARY_ANCHOR] = CANARY_ARITH_FORMULA
-
-    # Dedicated meta sheet with a volatile canary for cross-run recalc proof.
-    meta = wb.create_sheet("_meta", 0)
-    meta["A1"] = "=NOW()"
-    meta["A2"] = CANARY_ARITH_FORMULA
-
-    return wb, sheet_map
-
-
-def anchor_for_case(case):
-    if case.get("check_range"):
-        # anchor is the top-left cell of the check range
-        first = case["check_range"].split(":")[0]
-        return first
-    return "F1"
-
-
-def cell_addrs_in_range(range_str):
-    """Expand 'A30:C32' into a row-major list of lists of addresses."""
-    from openpyxl.utils.cell import range_boundaries, get_column_letter
-
-    min_col, min_row, max_col, max_row = range_boundaries(range_str)
-    rows = []
-    for r in range(min_row, max_row + 1):
-        row = []
-        for c in range(min_col, max_col + 1):
-            row.append(f"{get_column_letter(c)}{r}")
-        rows.append(row)
-    return rows
-
-
-def is_error_value(v):
-    return isinstance(v, str) and v in KNOWN_ERROR_STRINGS
-
-
-EXCEL_EPOCH = datetime(1899, 12, 30)  # serial 0 in the 1900 date system
-
-
-def normalize_readback_value(v):
-    """
-    Normalize a value read back from the recalculated .xlsx into the same
-    domain the test corpus's `expected` values live in.
-
-    - datetime/date/time objects -> Excel serial numbers. LibreOffice
-      applies a date/time NUMBER FORMAT to the result cells of DATE()/
-      TIME()-style formulas; openpyxl then surfaces the cached value as a
-      Python datetime/time object instead of the underlying float serial.
-      The engine's actual computed value IS the serial -- the datetime-ness
-      is presentation, so converting back to the serial is the faithful raw
-      value, not an interpretation. (Excel 1900 system: 1899-12-30 = 0.
-      This intentionally reproduces Excel's day-59/60 Feb-29-1900
-      compatibility offset for all post-1900-03-01 dates, which is every
-      date used in this corpus.)
-    """
-    import datetime as _dt
-
-    if isinstance(v, _dt.datetime):
-        delta = v - EXCEL_EPOCH
-        return delta.days + delta.seconds / 86400 + delta.microseconds / 86400e6
-    if isinstance(v, _dt.date):
-        return (
-            _dt.datetime(v.year, v.month, v.day) - EXCEL_EPOCH
-        ).days
-    if isinstance(v, _dt.time):
-        return (v.hour * 3600 + v.minute * 60 + v.second) / 86400 + v.microsecond / 86400e6
-    return v
-
-
-def values_roughly_equal(a, b):
-    if isinstance(a, (int, float)) and isinstance(b, (int, float)) and not isinstance(a, bool) and not isinstance(b, bool):
-        return abs(a - b) < 1e-9
-    # .xlsx storage limitation: a formula legitimately returning the empty
-    # string "" round-trips through file conversion as a cell with no cached
-    # value at all, which openpyxl reads back as None. Blank-vs-empty-string
-    # is genuinely indistinguishable at this layer, so an expected "" is
-    # satisfied by a read-back None. (The raw None is still recorded in the
-    # results file; only the match verdict treats them as equivalent.)
-    if a == "" and b is None or b == "" and a is None:
-        return True
-    return a == b
-
-
-def compare_expected(expected, actual_anchor, actual_range_flat):
-    """Returns (matched: bool or None, detail: str or None)."""
-    if expected is None:
-        return None, None
-    if isinstance(expected, list):
-        if actual_range_flat is None:
-            return False, "expected a range of values but no check_range was read"
-        # flatten expected (may be nested for 2D)
-        flat_expected = []
-        for item in expected:
-            if isinstance(item, list):
-                flat_expected.extend(item)
-            else:
-                flat_expected.append(item)
-        flat_actual = actual_range_flat
-        if len(flat_expected) != len(flat_actual):
-            return False, f"length mismatch: expected {len(flat_expected)} values, got {len(flat_actual)}"
-        for e, a in zip(flat_expected, flat_actual):
-            if not values_roughly_equal(e, a):
-                return False, f"value mismatch: expected {e!r}, got {a!r}"
-        return True, None
-    else:
-        matched = values_roughly_equal(expected, actual_anchor)
-        detail = None if matched else f"expected {expected!r}, got {actual_anchor!r}"
-        return matched, detail
-
 
 def run():
     requested = set(sys.argv[1:]) or None
@@ -318,21 +148,7 @@ def run():
         print("No test files matched.", file=sys.stderr)
         sys.exit(1)
 
-    cases_flat = []
-    for fn, path, payload in test_files:
-        for case in payload["cases"]:
-            anchor = anchor_for_case(case)
-            cases_flat.append({
-                "test_id": case["id"],
-                "function": fn,
-                "formula": case["formula"],
-                "setup_cells": case.get("setup_cells"),
-                "check_range": case.get("check_range"),
-                "expected": case.get("expected"),
-                "expected_note": case.get("expected_note"),
-                "description": case["description"],
-                "anchor": anchor,
-            })
+    cases_flat = flatten_cases(test_files)
 
     print(f"Loaded {len(test_files)} function(s), {len(cases_flat)} test case(s).")
 

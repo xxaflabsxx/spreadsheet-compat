@@ -31,6 +31,13 @@ harness/xlfn_map.py         Translates modern function names to the
                             "_xlfn."/"_xlfn._xlws." prefixed form Excel
                             requires inside the raw .xlsx XML (see below).
 
+harness/corpus.py           Engine-agnostic shared machinery both runners
+                            import: test loading, sheet-name sanitizing,
+                            workbook building, read-back normalization and
+                            expected-value comparison. Lives in one place so
+                            an LO-vs-Sheets difference can never be a
+                            harness artifact.
+
 harness/run_lo.py           Engine runner for LibreOffice Calc: builds one
                             .xlsx from data/tests/*.json, forces a real
                             LibreOffice recalculation, reads back computed
@@ -46,8 +53,13 @@ scripts/gen_test_cases.py   Generator that produced the current
                             functions in bulk; hand-editing the JSON
                             directly is equally fine going forward).
 
-(Phase 2, not built yet)
-harness/run_sheets.py        Google Sheets engine runner via the Sheets API.
+harness/run_sheets.py       Engine runner for Google Sheets: builds chunked
+                            .xlsx workbooks for Drive auto-conversion,
+                            ingests the exported .xlsx readback, writes
+                            results/google-sheets.json. See "Phase 2:
+                            Google Sheets runner" below.
+
+(not built yet)
 harness/run_excel.py         Excel engine runner (see Phase-2 notes below).
 site/                        Static site generator consuming data/ + results/
                               -> deployed to GitHub Pages.
@@ -276,6 +288,182 @@ DAYS360 US-vs-European method (30 vs 29 on the same date pair), ISBLANK
 FALSE on an `=""` formula result, COUNTBLANK counting that same cell as
 blank, and TIME(27,0,0)=0.125 hour wrap-around.
 
+## Phase 2: Google Sheets runner
+
+`harness/run_sheets.py` executes the same corpus against **Google Sheets**.
+There is no headless Sheets binary and the harness holds no Google
+credentials, so the runner is split in half around one external step:
+
+> Uploading a **formula-only** `.xlsx` to Google Drive with the
+> Google-Sheets target MIME type auto-converts it into a real Google Sheet,
+> and that conversion **recalculates every formula** with Google's own
+> engine. Exporting that Sheet back out as `.xlsx` yields a workbook whose
+> cells carry Google Sheets' computed cached values.
+
+`build` emits the workbooks to upload; `ingest` reads the exported
+workbooks back and writes `results/google-sheets.json` in **exactly** the
+schema `results/libreoffice-*.json` uses. The Drive upload/export in the
+middle is done by whatever has Drive access (the orchestrator).
+
+### The orchestrator loop
+
+```
+# 1. Build the chunk workbooks + manifest (all 278 functions, ~40 per chunk)
+python3 harness/run_sheets.py build
+#    -> harness/sheets_chunks/chunk-01.xlsx ... chunk-07.xlsx
+#    -> harness/sheets_chunks/manifest.json
+
+# 2. For each chunk-NN.xlsx, via the Drive API / an MCP Drive tool:
+#      a. upload it with contentMimeType = the .xlsx MIME type and the
+#         Google-Sheets target MIME type, so Drive AUTO-CONVERTS it
+#         (this is the step that recalculates every formula)
+#      b. export that Sheet back out as .xlsx
+#      c. save it as harness/sheets_exports/chunk-NN-export.xlsx
+#         (the "chunk-NN" in the filename is how ingest identifies it)
+
+# 3. Ingest — incremental, so run it per chunk as each export lands
+python3 harness/run_sheets.py ingest \
+    --export harness/sheets_exports/chunk-01-export.xlsx \
+    --engine-label "Google Sheets (Drive import, 2026-08-29)"
+#    -> results/google-sheets.json   (merged, never clobbered)
+```
+
+Use **xlsx** for the export, not CSV: a CSV export of a Google Sheet
+returns **only the first sheet**, and every test case lives on its own
+sheet.
+
+### Why the workbooks are chunked
+
+The `.xlsx` bytes travel through the orchestrator's context as base64
+(~4/3 inflation), so the single 841-sheet ~430 KB workbook the LO runner
+builds is not transportable. `build` splits the corpus **by function**
+(never splitting one function's cases across two files, since results merge
+per-function) into chunks of ~40 functions. Measured on the current
+278-function corpus:
+
+| chunk | functions | cases | bytes |
+|-------|-----------|-------|-------|
+| chunk-01 | 40 | 126 | 67,715 |
+| chunk-02 | 40 | 107 | 59,763 |
+| chunk-03 | 40 | 119 | 64,959 |
+| chunk-04 | 40 | 137 | 73,798 |
+| chunk-05 | 40 | 108 | 60,096 |
+| chunk-06 | 40 | 123 | 67,277 |
+| chunk-07 | 38 | 121 | 66,561 |
+| **total** | **278** | **841** | **460,169** (~614 KB base64) |
+
+(Byte counts vary by a byte or two between builds — zip metadata — so the
+manifest records the actual `sha256` and `bytes` of the files it wrote.)
+
+Every chunk is comfortably under the ~150 KB per-workbook budget. Sheet
+names are the test ids, sanitized to ≤31 chars with `[ ] * ? / \ :`
+stripped — valid OOXML *and* within Google Sheets' own rules (≤100 chars,
+same forbidden characters), and `build` asserts this for every sheet
+before writing.
+
+### The canary, and how strong it actually is
+
+Same pattern as the LO runner, because it rests on the same fact: openpyxl
+**never** writes a cached `<v>` value for a formula cell, so the uploaded
+chunk contains zero cached results.
+
+- **Deterministic canary** — `=1111+2222` in `Z1` of *every* sheet. If
+  Google had not recalculated, that cell would export back **blank**
+  (`None`), because there was never a cached value to preserve. Reading
+  back exactly `3333` proves Google computed it. `ingest` checks this on
+  every sheet and reports the count.
+- **Volatile canary** — `=NOW()` on the `_meta` sheet, recorded per chunk
+  as corroboration.
+
+**Honest limitation:** the LO runner converts the same file twice a few
+seconds apart and shows `=NOW()` *differing between runs*. A single Drive
+import gives one timestamp, so that cross-run comparison is not available
+here — `canary.now_differs_across_runs` is `null` **by design**, and the
+deterministic canary is the load-bearing proof. If any deterministic canary
+fails, the whole run is `"trusted": false` and each affected case gets an
+`UNTRUSTED_RECALC` note.
+
+### The `_xlfn.` prefix: Sheets understands it (verified)
+
+Google Sheets **does** honour the OOXML `_xlfn.` storage prefix on import —
+verified empirically: `_xlfn.XLOOKUP(...)` imported and computed a real
+value, it did *not* come back `#NAME?`. So the Sheets path uses
+`harness/xlfn_map.py` **identically** to the LibreOffice path, with no
+Sheets-specific special-casing. Writing the bare unprefixed name would be
+the thing that breaks it.
+
+### Honesty labelling — Sheets has no version
+
+Google Sheets is a continuously-updated hosted product with no
+user-visible version number and none exposed through Drive. So
+`engine_version` in `results/google-sheets.json` is **not a version** — it
+is a dated label recording *when* the corpus was executed:
+
+```
+"engine":          "google_sheets",
+"engine_version":  "Google Sheets (Drive import, 2026-08-29)",
+"recalc_method":   "Drive import + xlsx export readback",
+```
+
+A Sheets result means *"this is what Google Sheets did on that date"* and
+nothing stronger. Anything presenting Sheets data must say so, and must not
+imply a pinned version the way the LibreOffice columns legitimately can.
+Merging an ingest into a file recorded under a **different** label is
+refused unless `--allow-label-change` is passed (which records both in
+`engine_version_history`), so two execution dates can never be silently
+blended.
+
+### Incremental ingestion merges, it does not overwrite
+
+Every ingest is inherently a subset (some chunks out of N), so `ingest`
+uses exactly the merge semantics `run_lo.py` uses for subset runs: only the
+functions ingested this time are replaced, every other function's result is
+preserved byte-for-byte, `generated_at` / `canary` / `recalc_method` are
+refreshed to describe the most recent execution, `trusted` becomes the AND
+of the previous flag and this run's (a merge can only downgrade trust), and
+each merge appends to `subset_runs`. An export whose sheet list does not
+match the manifest chunk it claims to be is **rejected**, so an
+out-of-order upload can't be mapped against the wrong cells.
+
+Error cells come back from Google's export as cached error strings
+(`#NUM!`, `#N/A`, `#NAME?`, `#REF!`, `#DIV/0!`, `#VALUE!`) and are handled
+exactly as the LO runner handles them, raw string kept verbatim. Sheets
+adds one token Excel has no equivalent for: `#ERROR!`, its *parse-failure*
+error — flagged with a note so it is never confused with `#NAME?`
+(unknown function). Sheets has no `#CALC!`; it returns plain `#N/A` where
+Excel 365 would say `#CALC!` (e.g. `FILTER` matching no rows).
+
+### Proving the plumbing without Google
+
+```
+python3 harness/run_sheets.py selftest --only COUNT SUM MROUND XLOOKUP DATEDIF ISNUMBER
+```
+
+`selftest` builds the chunks, stands **LibreOffice** in for Drive
+(`soffice --headless --convert-to xlsx`), and ingests the result as if it
+were a Sheets export — proving the chunk → sheet → anchor-cell → test-id
+mapping end-to-end. On the 6-function set it recovers values byte-identical
+to `results/libreoffice-25.8.json` for all 28 cases.
+
+The values it recovers are LibreOffice's, so two guards keep them out of the
+published dataset: `site/build_site.py` discovers engines by globbing
+`results/*.json` and matching the `engine` string, so selftest output (a)
+**refuses to be written anywhere inside `results/`** — it goes to
+`harness/sheets_selftest/plumbing-check.json` — and (b) carries
+`"engine": "SELFTEST_libreoffice_via_sheets_pipeline"`, never
+`"google_sheets"`. Either guard alone would prevent LibreOffice numbers
+appearing in a Google Sheets column; both are enforced.
+
+### Shared code: `harness/corpus.py`
+
+Test loading, the sheet-name sanitizer, `build_workbook`, the anchor-cell
+convention, read-back normalization and `compare_expected` live in
+`harness/corpus.py`, imported by **both** runners. If the two runners
+drifted apart even slightly, a reported LibreOffice-vs-Sheets "difference"
+could be a harness artifact rather than a real engine difference. Each
+runner owns only the engine-specific part: making the engine recalculate,
+and proving that it did.
+
 ## Offline companion: per-cell recalc diff
 
 `scripts/xlsx_recalc_diff.py` answers a narrower, sharper question than the
@@ -444,18 +632,12 @@ preserves every non-formula cell and every non-sheet zip part byte-for-byte.
 
 ## Phase 2 notes (not built yet)
 
-- **Google Sheets engine.** Use the Sheets API
-  (`spreadsheets.values.update` + `spreadsheets.get` with
-  `valueRenderOption=UNFORMATTED_VALUE`, or batchUpdate) against a
-  disposable spreadsheet: write each test case's setup cells + formula to
-  its own sheet/tab (same one-sheet-per-case layout as the LO runner),
-  then read back computed values. Google Sheets recalculates on write, so
-  the "is this really recalculated" concern is much smaller than with
-  LibreOffice, but the same canary pattern (deterministic + volatile) should
-  still be applied for parity and to catch API quirks (e.g. stale reads
-  from a cache layer). Needs a Google Cloud service account with Sheets API
-  enabled; formulas may need locale-specific argument separators depending
-  on the target spreadsheet's locale settings.
+- **Google Sheets engine.** ✅ Built — see "Phase 2: Google Sheets runner"
+  above. It takes the Drive-import route (upload a formula-only .xlsx,
+  Drive auto-converts and recalculates, export back as .xlsx) rather than
+  the Sheets API, which needs no service account and no per-cell API
+  traffic. Still to do: run the full 7-chunk sweep and wire
+  `results/google-sheets.json` into the site.
 - **Excel engine.** No good headless Linux path exists (no real Excel
   calculation engine on Linux). Two options, in order of preference:
   1. **Windows + Office Scripts / VBA automation**: a small Windows runner
@@ -489,9 +671,16 @@ preserves every non-formula cell and every non-sheet zip part byte-for-byte.
   as "what the docs say," not "what's actually implemented." (We saw one
   concrete instance of this gap: MAXIFS computes correctly in LO 24.2 but
   wasn't found on the specific help page category we scraped.)
-- Only LibreOffice has executed results so far. Excel and Google Sheets
-  columns in any future compatibility matrix must not be populated until
-  Phase 2 engines exist, per the quality bar for this project.
+- Only LibreOffice has executed results in `results/` so far. The Google
+  Sheets runner (`harness/run_sheets.py`) now exists and its plumbing is
+  proven end-to-end, but the full 7-chunk Drive sweep has not been run, so
+  `results/google-sheets.json` does not exist yet and **no Sheets column
+  anywhere may be populated from executed data until it does**. When it
+  does, remember its `engine_version` is a dated import label, not a
+  version: Sheets is a hosted product that changes under us.
+- Excel columns in any compatibility matrix must not be populated with
+  executed data until an Excel engine exists, per the quality bar for this
+  project.
 - `data/functions.json`'s per-function doc URLs point at the listing page
   each function was found on (the umbrella alphabetical/category page),
   not a dedicated per-function help article — no per-function URL was
