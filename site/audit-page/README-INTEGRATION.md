@@ -1,8 +1,15 @@
 # Migration Audit page (E2) — integration & deploy notes
 
-Status: **built, 105/105 automated tests passing** (`node test.mjs`), on top of the
+Status: **built, 174/174 automated tests passing** (`node test.mjs`), on top of the
 unchanged E1 parser (its own suite still passes 67/67). Not yet browser-smoke-tested —
 do the 2-minute manual check below before announcing.
+
+| Suite | Command | Assertions |
+|---|---|---|
+| Verdict engine + E2E | `node site/audit-page/test.mjs` | 174 |
+| Adversarial extractors (audit + built checker) | `node site/audit-page/test-adversarial.mjs` | 170 |
+| E1 parser prototype | `node site/audit-prototype/test.mjs` | 67 |
+| Sitewide honesty guard (after a rebuild) | `python3 scripts/check_honesty.py` | exit 0 |
 
 ## Files
 
@@ -10,11 +17,11 @@ do the 2-minute manual check below before announcing.
 |---|---|
 | `audit.html` | The page. Standalone (inline CSS matching the site's house style, incl. nav + footer + print stylesheet). |
 | `audit.js` | **Byte-for-byte copy of `../audit-prototype/audit.js`** (E1 parser). `test.mjs` fails if it ever drifts from the prototype. |
-| `audit-verdicts.js` | Pure verdict engine: classification, report building, at-risk ordering, CSV export, license-key format check, function→divergence-guide lookup (`guidesForFunction`). No DOM/network. |
-| `audit-app.js` | DOM glue: dropzone, direction picker, rendering, free/paid tiers, Gumroad license verify, CSV download, print, optional guide-index fetch (`data/guides.json`, silent-fail). |
+| `audit-verdicts.js` | Pure verdict engine: classification, report building, at-risk ordering, CSV export, license-key format check, function→divergence-guide lookup (`guidesForFunction`), and the per-release LibreOffice target rule (`compareVersions`, `resolveTargetVersion`, `targetLabel`). No DOM/network. |
+| `audit-app.js` | DOM glue: dropzone, direction picker, target-LibreOffice-version picker (persisted in `localStorage['csps-audit-lo-version']`), rendering, free/paid tiers, Gumroad license verify, CSV download, print, optional guide-index fetch (`data/guides.json`, silent-fail). |
 | `make_fixtures.py` | Generates `verdict-mix.xlsx` (needs openpyxl: `/home/jon/venv/bin/python make_fixtures.py`). |
 | `verdict-mix.xlsx` | E2E fixture: safe functions + dataset-verified breakers per target (see docstring in `make_fixtures.py`). |
-| `test.mjs` | 105 assertions: verdict-engine unit tests (incl. `guidesForFunction`) + E2E through the real parser for 3 directions. `node test.mjs`. |
+| `test.mjs` | 174 assertions: verdict-engine unit tests (incl. `guidesForFunction`, version comparison and the four LibreOffice target releases) + E2E through the real parser for 3 directions and 2 target versions. `node test.mjs`. |
 | `test-adversarial.mjs` | 170 assertions: hostile formulas (quoted parens, structured refs, `_xlfn.` prefixes, LET/LAMBDA names, sheet names with parens, 8k-char formulas) through BOTH extractors — `extractFunctions()` here and the checker's `funcs()` read straight out of the built `docs/checker.html`. `node test-adversarial.mjs`. |
 
 ## Deploy steps
@@ -49,6 +56,9 @@ do the 2-minute manual check below before announcing.
    12 formulas / 2 sheets / 11 unique functions; Excel→Sheets: 5 at-risk formulas,
    at-risk functions GROUPBY, AGGREGATE, BAHTTEXT (detail) + TEXTSPLIT (locked);
    Excel→LibreOffice: 7 at-risk formulas, free detail on GROUPBY/ARRAYFORMULA/GOOGLEFINANCE.
+   Then switch the direction to Excel→LibreOffice and the version select to 24.2.0.3:
+   TEXTSPLIT must flip to MISSING with a "works since 25.8.7.3" reason, the summary line
+   must read `Target: LibreOffice Calc 24.2.0.3`, and the choice must survive a reload.
    Confirm in the network tab that the only requests are the page assets +
    `data/compat.json` + `data/guides.json` (and Gumroad only when a key is submitted).
 
@@ -74,6 +84,23 @@ form-encoded body works cross-origin. So:
 
 ## Design decisions worth knowing
 
+- **Per-release LibreOffice targets**: the direction picker's LibreOffice options are
+  paired with a version select (`25.8` default / `25.2` / `24.8` / `24.2`, each labelled
+  with the exact tested build). The rule, in `classifyFunction`:
+  `lv === 'unsupported'` → MISSING for every target; otherwise `lnew` set and
+  `compareVersions(target, lnew) < 0` → MISSING with an executed reason ("returns
+  #NAME? in LibreOffice 24.2.0.3 (executed) — it works since 24.8.7.2"); otherwise the
+  `lv` verdict, unchanged. `lnew` is the earliest release we tested a function *working*
+  in, so this is an executed fact. Comparison is numeric per `major.minor.patch.build`,
+  and an unrecognized version resolves to the latest tested build — never harsher than
+  what we tested. **Default (25.8.7.3) verdicts and note wording are byte-identical to
+  the pre-feature engine**; a test walks all 600 dataset entries × 2 sources to prove it.
+  Honesty note: the dataset has no per-version presence table, so an `lnew: null`
+  function is described as "supported in every LibreOffice release we tested
+  (24.2.0.3 → 25.8.7.3)" rather than "executed in <that older build>". Quirks were
+  measured in `lver` (25.8.7.3) and the note says so when an older target is picked.
+  The same rule (same comparison, same four builds) is implemented in the checker's
+  inline JS in `build_site.py` — `cmpVer()` / `migrate()` — with a `&v=` permalink param.
 - **Verdict precedence (LibreOffice targets)**: executed `lv` always outranks the
   documentation flag — `supported`→OK, `quirky`→QUIRK ("recognized, but ≥1 executed
   case returned a different value/error than Excel"), `unsupported`→MISSING (#NAME?),
@@ -100,6 +127,10 @@ form-encoded body works cross-origin. So:
   are out of scope.
 - **Excel and Google Sheets verdicts are documentation-based** — only LibreOffice is
   execution-verified. The UI labels the basis per row; don't remove that.
+- **Per-release verdicts only cover the four builds we execute** (24.2.0.3, 24.8.7.2,
+  25.2.0.3, 25.8.7.3). Picking "24.8" means "the 24.8.7.2 build we tested", not every
+  24.8.x point release, and functions with no executed data (`lv: null`) do not vary by
+  version at all — the page says so on the row.
 - **Shared formulas**: member cells are reconstructed by reference-shifting the group
   master (E1 tested), but a malformed file with an orphan member yields an empty
   formula recorded as such, and data-table formulas are treated as plain.

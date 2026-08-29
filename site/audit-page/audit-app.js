@@ -34,6 +34,7 @@
   var GUIDES_URL = 'data/guides.json';        // relative to the deployed page
   var VERIFY_URL = 'https://api.gumroad.com/v2/licenses/verify';
   var LS_KEY = 'csps-audit-license';          // localStorage: {key, status}
+  var LS_VER = 'csps-audit-lo-version';       // localStorage: target LO build string
 
   var MAX_CELLS_PER_FUNCTION = 300;  // rendering cap; CSV export is never capped
   var MAX_FORMULA_ROWS = 2000;       // rendering cap for the full formula table
@@ -97,6 +98,36 @@
     return d || AuditVerdicts.DIRECTIONS[0];
   }
 
+  // Target LibreOffice release. Unknown/absent values fall back to the latest
+  // tested build inside the engine, so this can never fail closed.
+  function loVersion() {
+    var el = $('loversion');
+    return el ? el.value : AuditVerdicts.LO_LATEST;
+  }
+
+  // The version picker only means anything when the target IS LibreOffice.
+  function syncVersionRow() {
+    var row = $('loverrow');
+    if (row) row.style.display = direction().target === 'l' ? 'block' : 'none';
+  }
+
+  function saveVersionPref() {
+    try { localStorage.setItem(LS_VER, loVersion()); } catch (e) { /* private mode */ }
+  }
+
+  function restoreVersionPref() {
+    var saved = null;
+    try { saved = localStorage.getItem(LS_VER); } catch (e) { }
+    if (!saved) return;
+    var el = $('loversion');
+    if (!el) return;
+    // Only accept a value the select actually offers (a stale build string
+    // from an older deploy must not silently select nothing).
+    for (var i = 0; i < el.options.length; i++) {
+      if (el.options[i].value === saved) { el.value = saved; return; }
+    }
+  }
+
   /* ------------------- file handling ------------------- */
 
   function showError(msg) {
@@ -130,7 +161,7 @@
   function rebuild() {
     if (!auditResult || !db) return;
     var d = direction();
-    report = AuditVerdicts.buildReport(auditResult, db, d.source, d.target);
+    report = AuditVerdicts.buildReport(auditResult, db, d.source, d.target, loVersion());
     render();
   }
 
@@ -196,7 +227,11 @@
     $('filetitle').textContent = fileName;
     var d = direction();
     $('dirlabel').textContent = AuditVerdicts.APP_NAMES[d.source] + ' → ' +
-      AuditVerdicts.APP_NAMES[d.target];
+      r.targetLabel;
+    // Stated on-screen and in the print report: for LibreOffice this carries
+    // the exact tested build the verdicts below were computed against.
+    $('targetline').textContent = 'Target: ' + r.targetLabel +
+      (d.target === 'l' ? ' (verdicts executed per tested release)' : '');
 
     // --- summary tiles ---
     var t = r.totals;
@@ -436,7 +471,14 @@
       handleFile(f);
     });
 
-    $('direction').addEventListener('change', rebuild);
+    $('direction').addEventListener('change', function () {
+      syncVersionRow();
+      rebuild();
+    });
+    $('loversion').addEventListener('change', function () {
+      saveVersionPref();
+      rebuild();
+    });
     $('licbtn').addEventListener('click', attemptUnlock);
     $('lickey').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') attemptUnlock();
@@ -448,6 +490,8 @@
     $('price-now').textContent = PRICE_NOW;
     $('price-later').textContent = PRICE_LATER;
 
+    restoreVersionPref();
+    syncVersionRow();
     restoreLicense();
     loadDb().catch(function () { /* surfaced on first file drop instead */ });
     loadGuides(); // optional enhancement; already silent-fail internally

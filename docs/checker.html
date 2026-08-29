@@ -333,6 +333,14 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <label style="margin-left:.5rem"><input type="radio" name="tgt" value="g"> Google Sheets</label>
 <label style="margin-left:.5rem"><input type="radio" name="tgt" value="l"> LibreOffice</label>
 </p>
+<p id="lovrow" style="display:none;font-size:.9em;color:var(--text-muted,#6b7280);margin:.3rem 0 0">Target LibreOffice version:
+<select id="lov" style="font-family:inherit;font-size:1em;padding:.2rem .35rem">
+<option value="25.8.7.3" selected>25.8 (tested build 25.8.7.3) &mdash; latest tested</option>
+<option value="25.2.0.3">25.2 (tested build 25.2.0.3)</option>
+<option value="24.8.7.2">24.8 (tested build 24.8.7.2)</option>
+<option value="24.2.0.3">24.2 (tested build 24.2.0.3)</option>
+</select>
+<span style="display:block;margin-top:.2rem">Debian/Ubuntu LTS often ship older Calc. Verdicts are per tested release &mdash; we execute every tested function in 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3.</span></p>
 <div id="out"></div>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Results are linkable &mdash; the URL updates with your formula, so you can share a check directly (e.g. in a forum answer).</p>
 <script>const DATA_URL="data/compat.json"; const GUIDES_URL="data/guides.json"; const FUNC_BASE="functions/"; const CMP_BASE="compare/"; const GUIDE_BASE="guides/";</script>
@@ -416,15 +424,37 @@ const MIG={
  SORT:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: rank-and-INDEX or the menu sort.'},
  UNIQUE:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: Remove Duplicates, or COUNTIF-based formulas.',cmp:'unique-function-vs-remove-duplicates'}
 };
+// Per-release LibreOffice rule — identical to AuditVerdicts.compareVersions /
+// classifyFunction in site/audit-page/audit-verdicts.js: numeric
+// major.minor.patch.build comparison, and a function whose `lnew` (earliest
+// tested release it works in) is newer than the chosen target returns #NAME?
+// there. The four releases we execute against are 24.2.0.3, 24.8.7.2,
+// 25.2.0.3 and 25.8.7.3; an unrecognized value falls back to the latest.
+const LO_RELEASES=['24.2.0.3','24.8.7.2','25.2.0.3','25.8.7.3'];
+const LO_LATEST=LO_RELEASES[LO_RELEASES.length-1];
+function cmpVer(a,b){ const pa=String(a==null?'':a).split('.'), pb=String(b==null?'':b).split('.');
+  const n=Math.max(pa.length,pb.length);
+  for(let i=0;i<n;i++){ let x=parseInt(pa[i],10); if(isNaN(x)) x=0; let y=parseInt(pb[i],10); if(isNaN(y)) y=0;
+    if(x!==y) return x<y?-1:1; }
+  return 0; }
+function loTarget(){ const el=document.getElementById('lov');
+  const v=el?el.value:LO_LATEST; return LO_RELEASES.indexOf(v)>=0?v:LO_LATEST; }
 function migrate(fs,db,tg,gdb){
-  const okIn=(d)=> tg==='l' ? (d.lv?(d.lv!=='unsupported'):d.l) : (tg==='x'?d.x:d.g);
+  const tv=loTarget();
+  // Older than lnew = executed #NAME? in that release, so it is a blocker.
+  const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
+  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:(d.lv?(d.lv!=='unsupported'):d.l)) : (tg==='x'?d.x:d.g);
+  const tname=tg==='l'?TGT_NAME[tg]+' '+tv:TGT_NAME[tg];
   let blockers=[];
   for(const fn of fs){ const d=db[fn]; if(!d) continue; if(!okIn(d)) blockers.push(fn); }
-  let h='<h2 class="section-title" style="margin-top:1.4rem">Migration to '+TGT_NAME[tg]+'</h2>';
-  if(!blockers.length){ h+='<p style="color:#0a7a2f;font-weight:600">All recognized functions work in '+TGT_NAME[tg]+'. This formula should port cleanly.</p>'; return h; }
+  let h='<h2 class="section-title" style="margin-top:1.4rem">Migration to '+tname+'</h2>';
+  if(!blockers.length){ h+='<p style="color:#0a7a2f;font-weight:600">All recognized functions work in '+tname+'. This formula should port cleanly.</p>'; return h; }
   h+='<p style="font-weight:600;color:#c02020">'+blockers.length+' function'+(blockers.length>1?'s':'')+' need attention:</p><ul>';
-  for(const fn of blockers){ const m=MIG[fn];
-    h+='<li style="margin-bottom:.5rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> — '+(m?m.r:'not available in '+TGT_NAME[tg]+' (see its page for details).');
+  for(const fn of blockers){ const m=MIG[fn]; const d=db[fn];
+    const why=tooNew(d)
+      ? 'Returns #NAME? in LibreOffice '+tv+' (executed) — it works since '+d.lnew+', the earliest release we tested it working in. Upgrading LibreOffice to '+d.lnew+' or later is the fix.'+(m?' '+m.r:'')
+      : (m?m.r:'not available in '+tname+' (see its page for details).');
+    h+='<li style="margin-bottom:.5rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> — '+why;
     if(m&&m.cmp) h+=' <a href="'+CMP_BASE+m.cmp+'.html" style="font-size:.9em">compare →</a>';
     h+=guideLine(fn,gdb);
     h+='</li>';
@@ -448,14 +478,17 @@ async function check(){
   out.innerHTML=html;
 }
 function target(){ const r=document.querySelector('input[name=tgt]:checked'); return r?r.value:''; }
-function permalink(){ const tg=target(); return location.origin+location.pathname+'#f='+encodeURIComponent(document.getElementById('f').value)+(tg?'&t='+tg:''); }
+function syncLovRow(){ document.getElementById('lovrow').style.display=target()==='l'?'block':'none'; }
+function permalink(){ const tg=target(); return location.origin+location.pathname+'#f='+encodeURIComponent(document.getElementById('f').value)+(tg?'&t='+tg:'')+(tg==='l'?'&v='+loTarget():''); }
 function sync(){ history.replaceState(null,'',permalink()); }
 function setAndCheck(v){ document.getElementById('f').value=v; sync(); check(); }
 document.getElementById('btn').addEventListener('click',()=>{ sync(); check(); });
 document.getElementById('f').addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter') check(); });
 document.querySelectorAll('[data-ex]').forEach(b=>b.addEventListener('click',()=>setAndCheck(b.getAttribute('data-ex'))));
-document.querySelectorAll('input[name=tgt]').forEach(r=>r.addEventListener('change',()=>{ if(document.getElementById('f').value.trim()){ sync(); check(); } }));
-if(location.hash.startsWith('#f=')){ try{ const p=new URLSearchParams(location.hash.slice(1)); const v=p.get('f'); const t=p.get('t'); if(t){ const r=document.querySelector('input[name=tgt][value="'+t+'"]'); if(r) r.checked=true; } if(v){ document.getElementById('f').value=v; check(); } }catch(e){} }
+document.querySelectorAll('input[name=tgt]').forEach(r=>r.addEventListener('change',()=>{ syncLovRow(); if(document.getElementById('f').value.trim()){ sync(); check(); } }));
+document.getElementById('lov').addEventListener('change',()=>{ if(document.getElementById('f').value.trim()){ sync(); check(); } });
+if(location.hash.startsWith('#f=')){ try{ const p=new URLSearchParams(location.hash.slice(1)); const v=p.get('f'); const t=p.get('t'); const lv=p.get('v'); if(t){ const r=document.querySelector('input[name=tgt][value="'+t+'"]'); if(r) r.checked=true; } if(lv&&LO_RELEASES.indexOf(lv)>=0) document.getElementById('lov').value=lv; if(v){ document.getElementById('f').value=v; check(); } }catch(e){} }
+syncLovRow();
 </script>
 
 

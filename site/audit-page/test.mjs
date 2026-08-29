@@ -151,8 +151,14 @@ console.log('unit: reportToCsv');
   const rep = V.buildReport(audit, DB, 'x', 'g');
   const csv = V.reportToCsv(rep);
   const lines = csv.trim().split('\r\n');
-  eq(lines[0], 'sheet,cell,formula,functions,verdict', 'CSV header');
-  eq(lines[1], '"S,1",A1,"=IF(A1>2,""a,b"",""c"")",IF,ok', 'CSV row quoted correctly');
+  eq(lines[0], 'sheet,cell,formula,functions,verdict,target', 'CSV header');
+  eq(lines[1], '"S,1",A1,"=IF(A1>2,""a,b"",""c"")",IF,ok,Google Sheets',
+    'CSV row quoted correctly, target column stated');
+  // LibreOffice targets carry the exact tested build in the target column, so
+  // an exported CSV says which release the verdicts were computed for.
+  const csvLo = V.reportToCsv(V.buildReport(audit, DB, 'x', 'l', '24.8'));
+  eq(csvLo.trim().split('\r\n')[1], '"S,1",A1,"=IF(A1>2,""a,b"",""c"")",IF,ok,LibreOffice Calc 24.8.7.2',
+    'CSV target column names the LibreOffice build');
 }
 
 /* ---------- unit: license key format ---------- */
@@ -298,6 +304,165 @@ console.log('regression: _xlfn prefix + operator serializations (r/libreoffice b
   ok(/implicit-intersection operator @/.test(single.note), 'SINGLE note explains the @ operator');
   const unk = V.classifyFunction('MYMACRO', null, 'l', 'x');
   eq(unk.verdict, 'unknown', 'other unknown functions still report unknown');
+}
+
+/* ---------- unit: target LibreOffice version (per-release verdicts) ---------- */
+console.log('unit: compareVersions / resolveTargetVersion / targetLabel');
+{
+  const cmp = V.compareVersions;
+  ok(cmp('24.2.0.3', '24.8.7.2') < 0, '24.2.0.3 < 24.8.7.2');
+  ok(cmp('24.8.7.2', '25.2.0.3') < 0, '24.8.7.2 < 25.2.0.3');
+  ok(cmp('25.2.0.3', '25.8.7.3') < 0, '25.2.0.3 < 25.8.7.3');
+  ok(cmp('25.8.7.3', '25.8.7.3') === 0, 'equal builds compare equal');
+  ok(cmp('25.8.7.3', '24.2.0.3') > 0, 'newer build compares greater');
+  ok(cmp('25.10.0.0', '25.9.0.0') > 0, 'minor compared numerically, not lexically (10 > 9)');
+  ok(cmp('24.2', '24.2.0.3') < 0, 'missing segments count as 0');
+  ok(cmp('24.2.0.0', '24.2') === 0, 'trailing zero segments are equal');
+  ok(cmp('', '') === 0, 'empty strings compare equal, no throw');
+
+  const rv = V.resolveTargetVersion;
+  eq(rv('24.2'), '24.2.0.3', 'series 24.2 -> tested build');
+  eq(rv('24.8'), '24.8.7.2', 'series 24.8 -> tested build');
+  eq(rv('25.2'), '25.2.0.3', 'series 25.2 -> tested build');
+  eq(rv('25.8'), '25.8.7.3', 'series 25.8 -> tested build');
+  eq(rv('25.2.0.3'), '25.2.0.3', 'exact tested build passes through');
+  eq(rv(undefined), V.LO_LATEST, 'undefined -> latest tested build (the default)');
+  eq(rv(''), V.LO_LATEST, 'empty -> latest tested build');
+  eq(rv('7.4.1.2'), V.LO_LATEST, 'untested build -> latest (never harsher than tested)');
+  eq(V.LO_LATEST, '25.8.7.3', 'latest tested build is 25.8.7.3');
+  eq(V.LO_OLDEST, '24.2.0.3', 'oldest tested build is 24.2.0.3');
+  eq(V.LO_RELEASES, ['24.2.0.3', '24.8.7.2', '25.2.0.3', '25.8.7.3'], 'the four tested releases');
+
+  eq(V.targetLabel('l', '24.8'), 'LibreOffice Calc 24.8.7.2', 'LO target label carries the build');
+  eq(V.targetLabel('l'), 'LibreOffice Calc 25.8.7.3', 'LO target label defaults to latest');
+  eq(V.targetLabel('g', '24.2'), 'Google Sheets', 'non-LO target label ignores the version');
+  eq(V.targetLabel('x', '24.2'), 'Excel', 'Excel target label ignores the version');
+}
+
+console.log('unit: classifyFunction per target LibreOffice version');
+{
+  const c = V.classifyFunction;
+  const at = (fn, v) => c(fn, DB[fn], 'l', 'x', v).verdict;
+
+  // XLOOKUP: lnew 24.8.7.2 -> broken on 24.2 only.
+  eq(DB.XLOOKUP.lnew, '24.8.7.2', 'dataset: XLOOKUP lnew is 24.8.7.2');
+  eq(at('XLOOKUP', '24.2'), 'missing', 'XLOOKUP unsupported at target 24.2');
+  eq(at('XLOOKUP', '24.8'), 'ok', 'XLOOKUP supported at target 24.8');
+  eq(at('XLOOKUP', '25.2'), 'ok', 'XLOOKUP supported at target 25.2');
+  eq(at('XLOOKUP', '25.8'), 'ok', 'XLOOKUP supported at target 25.8');
+  const xl242 = c('XLOOKUP', DB.XLOOKUP, 'l', 'x', '24.2');
+  eq(xl242.basis, 'executed', 'the version downgrade is an executed verdict');
+  ok(/#NAME\? in LibreOffice 24\.2\.0\.3 \(executed\)/.test(xl242.note),
+    'note says it returns #NAME? in the target build, executed');
+  ok(/works since 24\.8\.7\.2/.test(xl242.note), 'note names the earliest working release');
+
+  // VSTACK: lnew 25.8.7.3 -> broken on everything older.
+  eq(DB.VSTACK.lnew, '25.8.7.3', 'dataset: VSTACK lnew is 25.8.7.3');
+  eq(at('VSTACK', '24.2'), 'missing', 'VSTACK unsupported at target 24.2');
+  eq(at('VSTACK', '24.8'), 'missing', 'VSTACK unsupported at target 24.8');
+  eq(at('VSTACK', '25.2'), 'missing', 'VSTACK unsupported at target 25.2');
+  eq(at('VSTACK', '25.8'), 'ok', 'VSTACK supported at target 25.8');
+
+  // MAP: executed unsupported in the newest build -> unsupported everywhere.
+  eq(DB.MAP.lv, 'unsupported', 'dataset: MAP is executed-unsupported');
+  eq(['24.2', '24.8', '25.2', '25.8'].map(v => at('MAP', v)),
+    ['missing', 'missing', 'missing', 'missing'], 'MAP missing for every target version');
+  ok(/not recognized in every LibreOffice release we tested/.test(
+    c('MAP', DB.MAP, 'l', 'x', '24.2').note), 'MAP note covers the whole tested range');
+
+  // SUM: lnew null (worked in the oldest build we tested) -> same verdict everywhere.
+  eq(DB.SUM.lnew, null, 'dataset: SUM lnew is null');
+  eq(['24.2', '24.8', '25.2', '25.8'].map(v => at('SUM', v)),
+    ['quirk', 'quirk', 'quirk', 'quirk'], 'SUM stays quirky for every target version');
+  ok(/quirk was measured in 25\.8\.7\.3/.test(c('SUM', DB.SUM, 'l', 'x', '24.2').note),
+    'quirk note says which build the quirk was measured in');
+
+  // lnew null + supported: we claim the tested RANGE, never "executed in 24.2".
+  const agg = c('AGGREGATE', DB.AGGREGATE, 'l', 'x', '24.2');
+  eq(agg.verdict, 'ok', 'AGGREGATE ok at target 24.2');
+  ok(/every LibreOffice release we tested \(24\.2\.0\.3 \u2192 25\.8\.7\.3\)/.test(agg.note),
+    'lnew-null note claims the tested range, not a per-version execution');
+  ok(!/Executed and verified in LibreOffice 24\.2\.0\.3/.test(agg.note),
+    'lnew-null note never claims execution in a build we cannot cite');
+
+  // Documentation-only rows do not pretend to vary by release.
+  const bt = c('BAHTTEXT', DB.BAHTTEXT, 'l', 'x', '24.2');
+  eq(bt.basis, 'documented', 'BAHTTEXT stays documentation-based at an older target');
+  ok(/no executed per-release data/.test(bt.note), 'documented row admits it has no per-release data');
+
+  // Excel / Sheets targets ignore the LibreOffice version entirely.
+  eq(c('XLOOKUP', DB.XLOOKUP, 'g', 'x', '24.2').verdict, 'ok', 'Sheets target ignores LO version');
+  eq(c('XLOOKUP', DB.XLOOKUP, 'x', 'g', '24.2').verdict, 'ok', 'Excel target ignores LO version');
+}
+
+console.log('unit: default target version is byte-identical to the pre-feature engine');
+{
+  const c = V.classifyFunction;
+  // Every dataset entry, every LO direction: omitting targetVersion must give
+  // exactly the same note (and verdict) as asking for the latest tested build,
+  // and the latest-build wording is the wording the old fixtures pin.
+  let drift = 0;
+  for (const fn of Object.keys(DB)) {
+    for (const src of ['x', 'g']) {
+      const a = c(fn, DB[fn], 'l', src);
+      const b = c(fn, DB[fn], 'l', src, '25.8.7.3');
+      const d = c(fn, DB[fn], 'l', src, '25.8');
+      if (a.verdict !== b.verdict || a.note !== b.note ||
+          a.verdict !== d.verdict || a.note !== d.note) drift++;
+    }
+  }
+  eq(drift, 0, 'no drift across all ' + Object.keys(DB).length + ' dataset entries x 2 sources');
+  ok(/Executed and verified in LibreOffice 25\.8\.7\.3 \(works since 24\.8\.7\.2/.test(
+    c('XLOOKUP', DB.XLOOKUP, 'l', 'x').note), 'default XLOOKUP note unchanged');
+}
+
+console.log('e2e: Excel -> LibreOffice at an older target version');
+{
+  const latest = V.buildReport(audit, DB, 'x', 'l');
+  const old252 = V.buildReport(audit, DB, 'x', 'l', '25.2');
+  eq(latest.targetVersion, '25.8.7.3', 'default report targets the latest tested build');
+  eq(latest.targetLabel, 'LibreOffice Calc 25.8.7.3', 'default report label');
+  eq(old252.targetVersion, '25.2.0.3', 'older report resolves the series to a tested build');
+  eq(old252.targetLabel, 'LibreOffice Calc 25.2.0.3', 'older report label');
+  eq(V.buildReport(audit, DB, 'x', 'g', '24.2').targetVersion, null,
+    'non-LibreOffice reports carry no target version');
+  eq(V.buildReport(audit, DB, 'x', 'g', '24.2').targetLabel, 'Google Sheets',
+    'non-LibreOffice report label has no version');
+
+  // TEXTSPLIT is the fixture's lnew=25.8.7.3 function: fine on 25.8, gone on 25.2.
+  eq(fnVerdicts(latest).TEXTSPLIT, 'ok', 'TEXTSPLIT ok at the default target');
+  eq(fnVerdicts(old252).TEXTSPLIT, 'missing', 'TEXTSPLIT missing at target 25.2');
+  ok(old252.totals.atRiskFormulas > latest.totals.atRiskFormulas,
+    'an older target flags at least one more at-risk formula');
+  eq(old252.totals.atRiskFormulas, 8, 'Excel -> LO 25.2: 8 at-risk formulas');
+  ok(old252.atRiskFunctions.some(r => r.fn === 'TEXTSPLIT'),
+    'TEXTSPLIT joins the at-risk list at target 25.2');
+  ok(!latest.atRiskFunctions.some(r => r.fn === 'TEXTSPLIT'),
+    'TEXTSPLIT is not at risk at the default target');
+  // Everything else in the fixture is unaffected by the version choice.
+  const lv = fnVerdicts(latest), ov = fnVerdicts(old252);
+  eq(Object.keys(lv).filter(fn => lv[fn] !== ov[fn]), ['TEXTSPLIT'],
+    'only the lnew-gated function changes verdict between 25.8 and 25.2');
+}
+
+console.log('e2e: synthetic workbook, XLOOKUP across all four target versions');
+{
+  const synth = {
+    functionCounts: { XLOOKUP: 1, SUM: 1 },
+    formulas: [
+      { sheet: 'S', cell: 'A1', formula: 'XLOOKUP(A2,B:B,C:C)', functions: ['XLOOKUP'] },
+      { sheet: 'S', cell: 'A2', formula: 'SUM(B:B)', functions: ['SUM'] }
+    ],
+    totals: { formulas: 2, sheets: 1, uniqueFunctions: 2 }
+  };
+  const verdictOf = (v) => V.buildReport(synth, DB, 'x', 'l', v)
+    .functionRows.find(r => r.fn === 'XLOOKUP').verdict;
+  eq(['24.2', '24.8', '25.2', '25.8'].map(verdictOf),
+    ['missing', 'ok', 'ok', 'ok'], 'XLOOKUP breaks only on the 24.2 target');
+  eq(V.buildReport(synth, DB, 'x', 'l', '24.2').totals.atRiskFormulas, 2,
+    '24.2: both formulas at risk (XLOOKUP missing + SUM quirk)');
+  eq(V.buildReport(synth, DB, 'x', 'l', '25.8').totals.atRiskFormulas, 1,
+    '25.8: only the SUM quirk remains');
 }
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed' +

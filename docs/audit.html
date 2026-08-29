@@ -167,12 +167,14 @@ table.matrix td.fnname { font-family: ui-monospace, SFMono-Regular, Menlo, Conso
 .licmsg.bad { background: var(--bad-bg); color: var(--bad); }
 .licmsg.good { background: var(--good-bg); color: var(--good); }
 #unlock-status { color: var(--good); font-weight: 600; margin: 0; }
-select#direction {
+select#direction, select#loversion {
   font-size: 1rem; padding: 0.5rem 0.65rem; border: 2px solid var(--border);
   border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit;
 }
-select#direction:focus { outline: none; border-color: var(--accent); }
+select#direction:focus, select#loversion:focus { outline: none; border-color: var(--accent); }
 .dirrow { margin: 0.75rem 0; }
+.verhint { display: block; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem; }
+#targetline { margin: 0.25rem 0 0.75rem; }
 
 footer.site-footer {
   border-top: 1px solid var(--border); padding: 1.5rem 0 3rem;
@@ -235,10 +237,21 @@ in real LibreOffice builds; Excel and Google Sheets verdicts are documentation-b
   <option value="l2x">LibreOffice Calc → Excel</option>
 </select></p>
 
+<p class="dirrow" id="loverrow" style="display:none"><label for="loversion"><strong>Target LibreOffice version:</strong></label>
+<select id="loversion">
+  <option value="25.8.7.3" selected>25.8 (tested build 25.8.7.3) — latest tested</option>
+  <option value="25.2.0.3">25.2 (tested build 25.2.0.3)</option>
+  <option value="24.8.7.2">24.8 (tested build 24.8.7.2)</option>
+  <option value="24.2.0.3">24.2 (tested build 24.2.0.3)</option>
+</select>
+<span class="verhint">Debian/Ubuntu LTS often ship older Calc — check <code>Help &rsaquo; About</code> on the target machine. Verdicts are per tested release.</span></p>
+
 <div id="error"></div>
 
 <div id="results">
   <h2 class="section-title"><span id="filetitle"></span> <span class="note">→ <span id="dirlabel"></span></span></h2>
+
+  <p class="note" id="targetline"></p>
 
   <div class="stats-grid" id="tiles"></div>
 
@@ -249,6 +262,9 @@ in real LibreOffice builds; Excel and Google Sheets verdicts are documentation-b
     It flags functions known to be missing or to behave differently; it does
     <strong>not</strong> recalculate your workbook in the target app, so it cannot promise
     your specific numbers survive. Use it to know where to look first.
+    <strong>LibreOffice verdicts are per tested release:</strong> we executed every tested
+    function in 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3, so picking an older target
+    version above flags functions that only exist in newer builds.
     <a href="methodology.html">How we verify.</a>
   </div>
 
@@ -316,7 +332,9 @@ in real LibreOffice builds; Excel and Google Sheets verdicts are documentation-b
     <p>Your workbook is parsed entirely in this browser tab. The only network requests this
     page makes are for our own verdict dataset and guide index and — only if you enter one —
     a license-key check with Gumroad. File contents are never transmitted.</p>
-    <p>Every LibreOffice result produced by executing real formulas &mdash; <a href="methodology.html">how we verify</a>. Open <a href="data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Every LibreOffice result produced by executing real formulas, in each of the four
+    releases we test (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) &mdash; verdicts are reported
+    per tested release &mdash; <a href="methodology.html">how we verify</a>. Open <a href="data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
     <p>Need exact per-cell ground truth instead of per-function verdicts? The free offline companion <a href="https://github.com/xxAFLabsxx/spreadsheet-compat/blob/master/scripts/README-recalc-diff.md"><code>xlsx_recalc_diff.py</code></a> diffs the results Excel saved inside your .xlsx against a forced LibreOffice recalculation of the same file, on your own machine (needs Python + LibreOffice; nothing uploaded).</p>
     <p>Built by AF Labs — <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates</a>.</p>
   </div>
