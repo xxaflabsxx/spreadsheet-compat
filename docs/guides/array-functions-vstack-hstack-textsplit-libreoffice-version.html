@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Which LibreOffice version for VSTACK, TEXTSPLIT, TAKE &amp; DROP?</title>
-<meta name="description" content="VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP return #NAME? in LibreOffice 24.2, 24.8 and 25.2 - our executed runs show all thirteen working only from 25.8.7.3. Full version map by wave.">
+<meta name="description" content="VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP return #NAME? in LibreOffice 24.2, 24.8 and 25.2 - our executed runs show all fourteen working only from 25.8.7.3. Full version map by wave.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">
 <meta property="og:title" content="Which LibreOffice version for VSTACK, TEXTSPLIT, TAKE &amp; DROP?">
-<meta property="og:description" content="VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP return #NAME? in LibreOffice 24.2, 24.8 and 25.2 - our executed runs show all thirteen working only from 25.8.7.3. Full version map by wave.">
+<meta property="og:description" content="VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP return #NAME? in LibreOffice 24.2, 24.8 and 25.2 - our executed runs show all fourteen working only from 25.8.7.3. Full version map by wave.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -328,9 +328,9 @@ runs show them computing the documented answer, or it does not, in which case ev
 returns <code>#NAME?</code>: the same error you would get from a typo.</p>
 
 <p>We ran the same corpus through four LibreOffice builds &mdash; 24.2.0.3, 24.8.7.2, 25.2.0.3 and
-25.8.7.3 &mdash; and the results sort into three clean groups. Thirteen array-shaping and text-split
-functions arrive in 25.8.7.3 and are <code>#NAME?</code> in everything older. Eight dynamic-array
-functions arrived a wave earlier, in 24.8.7.2. And nine more are still <code>#NAME?</code> in the
+25.8.7.3 &mdash; and the results sort into three clean groups. Fourteen array-shaping and text-split
+functions arrive in 25.8.7.3 and are <code>#NAME?</code> in everything older. Nine dynamic-array
+functions arrived a wave earlier, in 24.8.7.2. And a further nine are still <code>#NAME?</code> in the
 newest build we tested.</p>
 
 <div class="quirk-box">
@@ -339,20 +339,20 @@ newest build we tested.</p>
   Excel array functions, but our 25.2.0.3 run returns <code>#NAME?</code> for <code>VSTACK</code>,
   <code>HSTACK</code>, <code>TEXTSPLIT</code>, <code>TAKE</code>, <code>DROP</code>,
   <code>TOCOL</code>, <code>TOROW</code>, <code>WRAPROWS</code>, <code>WRAPCOLS</code>,
-  <code>CHOOSECOLS</code>, <code>CHOOSEROWS</code>, <code>TEXTBEFORE</code> and
-  <code>TEXTAFTER</code> &mdash; all thirteen. They only start evaluating in our 25.8.7.3 run. The
+  <code>CHOOSECOLS</code>, <code>CHOOSEROWS</code>, <code>TEXTBEFORE</code>,
+  <code>TEXTAFTER</code> and <code>EXPAND</code> &mdash; all fourteen. They only start evaluating in our 25.8.7.3 run. The
   gap between &ldquo;current-ish&rdquo; and &ldquo;new enough&rdquo; is one release, and it is the
   difference between a working workbook and a sheet full of errors.</p>
 </div>
 
 <h2 class="section-title">What this means for a migration</h2>
-<p>The practical rule from our runs is short. <strong>A workbook that uses any of the thirteen
+<p>The practical rule from our runs is short. <strong>A workbook that uses any of the fourteen
 functions in the first table below needs LibreOffice 25.8 or newer.</strong> On 24.2, 24.8 or 25.2
 those formulas do not compute a different answer &mdash; they do not compute at all, and the
 <code>#NAME?</code> flows downstream into every total, chart and lookup that reads the result.
-A workbook that stops at the second table&rsquo;s eight functions (<code>XLOOKUP</code>,
+A workbook that stops at the second table&rsquo;s nine functions (<code>XLOOKUP</code>,
 <code>FILTER</code>, <code>SORT</code>, <code>UNIQUE</code>, <code>SEQUENCE</code>,
-<code>LET</code>, <code>SORTBY</code>, <code>XMATCH</code>) needs 24.8 or newer. A workbook that
+<code>LET</code>, <code>SORTBY</code>, <code>XMATCH</code>, <code>RANDARRAY</code>) needs 24.8 or newer. A workbook that
 uses anything in the third table has no LibreOffice release in our tested range that will run it,
 and has to be rewritten.</p>
 <p>If you are checking a single formula, paste it into the free compatibility checker linked at the
@@ -361,13 +361,15 @@ foot of this page; if you are checking a whole file, the Migration Audit button 
 For the full per-function support table across all four builds, see
 <a href="../libreoffice-version-support.html">LibreOffice Calc function support by version</a>.</p>
 
-<h2 class="section-title">Wave one: thirteen functions that land in 25.8.7.3</h2>
+<h2 class="section-title">Wave one: fourteen functions that land in 25.8.7.3</h2>
 <p>Inputs, per case: <code>CHOOSECOLS</code> reads <code>A1:C1 = 1, 2, 3</code>;
 <code>CHOOSEROWS</code> reads <code>A1:A5 = 10, 20, 30, 40, 50</code>; <code>TAKE</code> and
 <code>DROP</code> read <code>A1:C3 = 1&hellip;9</code> in reading order; <code>HSTACK</code> reads
 <code>A1:A2 = 1, 2</code> and <code>B1:B2 = 3, 4</code>; <code>TOCOL</code>, <code>TOROW</code> and
 <code>VSTACK</code> read <code>A1:B2 = 1, 2 / 3, 4</code>; <code>WRAPCOLS</code> and
-<code>WRAPROWS</code> read <code>A1:D1 = 1, 2, 3, 4</code>; the text cases take string literals.</p>
+<code>WRAPROWS</code> read <code>A1:D1 = 1, 2, 3, 4</code>; <code>EXPAND</code> reads
+<code>A1:A2 = 5, 7</code> for its row-padding case and <code>A1 = 5</code> for its column-padding
+case; the text cases take string literals.</p>
 <div class="table-scroll">
 <table class="cases">
   <thead><tr><th>Function</th><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice 24.2.0.3, 24.8.7.2 &amp; 25.2.0.3 (executed)</th><th>LibreOffice 25.8.7.3 (executed)</th></tr></thead>
@@ -375,6 +377,7 @@ For the full per-function support table across all four builds, see
     <tr><td>CHOOSECOLS</td><td class="formula">=CHOOSECOLS(A1:C1,3,1)</td><td>3, 1</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">3 &mdash; read-back 3, 1 (matches)</td></tr>
     <tr><td>CHOOSEROWS</td><td class="formula">=CHOOSEROWS(A1:A5,4,2)</td><td>40, 20</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">40 &mdash; read-back 40, 20 (matches)</td></tr>
     <tr><td>DROP</td><td class="formula">=DROP(A1:C3,1,1)</td><td>5, 6 / 8, 9</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">5 &mdash; read-back 5, 6, 8, 9 (matches)</td></tr>
+    <tr><td>EXPAND</td><td class="formula">=EXPAND(A1:A2,3,1,0)</td><td>5, 7, 0</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">5 &mdash; read-back 5, 7, 0 (matches)</td></tr>
     <tr><td>HSTACK</td><td class="formula">=HSTACK(A1:A2,B1:B2)</td><td>1, 3 / 2, 4</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 3, 2, 4 (matches)</td></tr>
     <tr><td>TAKE</td><td class="formula">=TAKE(A1:C3,2,2)</td><td>1, 2 / 4, 5</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 4, 5 (matches)</td></tr>
     <tr><td>TEXTAFTER</td><td class="formula">=TEXTAFTER("a-b-c","-")</td><td>b-c</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">b-c</td></tr>
@@ -390,11 +393,11 @@ For the full per-function support table across all four builds, see
 </div>
 <p>The <code>#NAME?</code> column is one column because all three older builds agreed: every one of
 these cases returned <code>#NAME?</code> in 24.2.0.3, in 24.8.7.2 <em>and</em> in 25.2.0.3. Of the
-thirteen, our function dataset records <code>CHOOSECOLS</code>, <code>CHOOSEROWS</code>,
+fourteen, our function dataset records <code>CHOOSECOLS</code>, <code>CHOOSEROWS</code>,
 <code>HSTACK</code>, <code>TOCOL</code>, <code>TOROW</code>, <code>VSTACK</code>,
 <code>WRAPCOLS</code> and <code>WRAPROWS</code> as documented in Google Sheets&rsquo; function list;
 it does not record <code>DROP</code>, <code>TAKE</code>, <code>TEXTSPLIT</code>,
-<code>TEXTBEFORE</code> or <code>TEXTAFTER</code> there. Either way we have not run any of them in
+<code>TEXTBEFORE</code>, <code>TEXTAFTER</code> or <code>EXPAND</code> there. Either way we have not run any of them in
 Sheets, so that column says so rather than guessing.</p>
 <p>Two caveats on the 25.8.7.3 column, both covered in detail elsewhere so we will not repeat the
 tables here. <code>TEXTAFTER</code> and <code>TEXTBEFORE</code> evaluate in 25.8.7.3 but do not
@@ -405,7 +408,7 @@ both are measured and explained in
 For hand-rolled replacements of the two text functions, see
 <a href="../compare/textbefore-textafter-vs-left-mid-right.html">TEXTBEFORE/TEXTAFTER vs LEFT, MID and RIGHT</a>.</p>
 
-<h2 class="section-title">Wave two: eight functions that landed in 24.8.7.2</h2>
+<h2 class="section-title">Wave two: nine functions that landed in 24.8.7.2</h2>
 <p>These are the previous generation of dynamic-array functions. They are <code>#NAME?</code> in
 24.2.0.3 only; from 24.8.7.2 onward our runs show them computing.</p>
 <div class="table-scroll">
@@ -414,6 +417,7 @@ For hand-rolled replacements of the two text functions, see
   <tbody>
     <tr><td>FILTER</td><td class="formula">=FILTER(A1:A5,B1:B5&gt;2)</td><td>c, d, e</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">c &mdash; read-back c, d, e (matches)</td></tr>
     <tr><td>LET</td><td class="formula">=LET(x,5,x*2)</td><td>10</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">10</td></tr>
+    <tr><td>RANDARRAY</td><td class="formula">=ROWS(RANDARRAY(2,3))*10+COLUMNS(RANDARRAY(2,3))</td><td>23 (shape check only &mdash; individual values are non-deterministic)</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">23</td></tr>
     <tr><td>SEQUENCE</td><td class="formula">=SEQUENCE(5)</td><td>1, 2, 3, 4, 5</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 2, 3, 4, 5 (matches)</td></tr>
     <tr><td>SORT</td><td class="formula">=SORT(A1:A5)</td><td>1, 1, 3, 4, 5</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">1 &mdash; read-back 1, 1, 3, 4, 5 (matches)</td></tr>
     <tr><td>SORTBY</td><td class="formula">=SORTBY(A1:A3,B1:B3)</td><td>y, z, x</td><td>Not yet executed</td><td class="result">#NAME?</td><td class="result">y &mdash; read-back y, z, x (matches)</td></tr>
@@ -428,7 +432,7 @@ For hand-rolled replacements of the two text functions, see
 <code>1, 2, 2, 3, 1</code> respectively; <code>SORTBY</code> reads <code>A1:A3 = x, y, z</code> with
 <code>B1:B3 = 3, 1, 2</code>; <code>XLOOKUP</code> and <code>XMATCH</code> read
 <code>A1:A3 = a, b, c</code> with <code>B1:B3 = 1, 2, 3</code>. Our dataset records
-<code>FILTER</code>, <code>LET</code>, <code>SEQUENCE</code>, <code>SORT</code>,
+<code>FILTER</code>, <code>LET</code>, <code>RANDARRAY</code>, <code>SEQUENCE</code>, <code>SORT</code>,
 <code>UNIQUE</code> and <code>XLOOKUP</code> as documented in Google Sheets, and does not record
 <code>SORTBY</code> or <code>XMATCH</code> there; none has been executed in Sheets by us.</p>
 <p>One wrinkle inside this wave is worth stating because it cuts against the tidy story. A separate
@@ -436,6 +440,14 @@ For hand-rolled replacements of the two text functions, see
 in 24.8.7.2, <code>#VALUE!</code> in 25.2.0.3, and <code>0</code> again in 25.8.7.3. So &ldquo;landed
 in 24.8&rdquo; describes the ordinary path; one degenerate input regressed for a release and came
 back. It is a reminder that &ldquo;supported&rdquo; is per-case, not per-function.</p>
+<p><code>RANDARRAY</code> is volatile, so unlike the other rows in this table our case does not
+check a literal returned value. The row above is a shape probe: <code>=ROWS(RANDARRAY(2,3))*10+
+COLUMNS(RANDARRAY(2,3))</code> encodes &ldquo;2 rows, 3 columns&rdquo; as <code>23</code>, which is
+deterministic even though the individual cells are not. A second case in our corpus,
+<code>=AND(MIN(RANDARRAY(10,10))&gt;=0,MAX(RANDARRAY(10,10))&lt;1)</code>, checks that every value in
+a 10&times;10 spill lands in <code>[0,1)</code> rather than checking what any cell actually contains.
+Both cases return <code>#NAME?</code> in 24.2.0.3 and their expected deterministic result
+(<code>23</code> and <code>TRUE</code>) in 24.8.7.2, 25.2.0.3 and 25.8.7.3.</p>
 
 <h2 class="section-title">Still unsupported in 25.8.7.3</h2>
 <p>Nine functions returned <code>#NAME?</code> in every build we ran, including the newest. There is
@@ -457,12 +469,11 @@ than wait for an upgrade.</p>
   </tbody>
 </table>
 </div>
-<p>Seven of these nine &mdash; <code>ARRAYTOTEXT</code>, <code>BYCOL</code>, <code>BYROW</code>,
-<code>MAKEARRAY</code>, <code>MAP</code>, <code>REDUCE</code> and <code>SCAN</code> &mdash; returned
-<code>#NAME?</code> in all four builds: 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. The remaining two
-are a narrower claim: <code>GROUPBY</code> and <code>PIVOTBY</code> were added to our corpus later
-and appear only in our 25.2.0.3 and 25.8.7.3 result files, where both returned <code>#NAME?</code>.
-We make no claim about them in 24.2.0.3 or 24.8.7.2 because we did not run them there.</p>
+<p>All nine &mdash; <code>ARRAYTOTEXT</code>, <code>BYCOL</code>, <code>BYROW</code>,
+<code>GROUPBY</code>, <code>MAKEARRAY</code>, <code>MAP</code>, <code>PIVOTBY</code>,
+<code>REDUCE</code> and <code>SCAN</code> &mdash; returned <code>#NAME?</code> in all four builds:
+24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. Unlike the two waves above, there is no version in our
+tested range where any of them start working.</p>
 <p>Six of the nine are the LAMBDA helper family, and they have their own writeup with the rewrite
 recipes: see
 <a href="../guides/lambda-map-reduce-scan-excel-vs-libreoffice.html">LAMBDA, MAP &amp; SCAN: Excel vs LibreOffice</a>,
@@ -485,11 +496,12 @@ cells inside the recorded check range match value-for-value in reading order</st
 1&times;4 row indistinguishable &mdash; nor anything outside the recorded range, so a result that
 spilled further than expected would not be caught. For the scalar cases
 (<code>TEXTAFTER</code>, <code>TEXTBEFORE</code>, <code>LET</code>, <code>XLOOKUP</code>,
-<code>XMATCH</code>) there is no range: the single returned value is what was compared.</p>
+<code>XMATCH</code>, <code>RANDARRAY</code>) there is no range: the single returned value is what was
+compared.</p>
 
 <h2 class="section-title">How to migrate safely</h2>
 <p><strong>Pin the version, if you can.</strong> The cheapest fix for wave one is not a rewrite but a
-requirement: install 25.8 or newer everywhere the workbook will be opened. Our runs show all thirteen
+requirement: install 25.8 or newer everywhere the workbook will be opened. Our runs show all fourteen
 functions evaluating there, so a workbook that only uses wave one and wave two functions needs no
 formula changes at all &mdash; it needs a supported release. Where you cannot control the target
 version, treat 24.8 as the floor and rewrite wave one.</p>
