@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</title>
-<meta name="description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! in LibreOffice Calc 25.8.7.3 instead of the fallback. IFERROR traps every other #REF! we tested — including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
+<meta name="description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran — 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. IFERROR traps every other #REF! we tested, including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">
 <meta property="og:title" content="IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice">
-<meta property="og:description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! in LibreOffice Calc 25.8.7.3 instead of the fallback. IFERROR traps every other #REF! we tested — including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
+<meta property="og:description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran — 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. IFERROR traps every other #REF! we tested, including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 returning your fallback for <em>any</em> of the seven error values &mdash; <code>#N/A</code>,
 <code>#VALUE!</code>, <code>#REF!</code>, <code>#DIV/0!</code>, <code>#NUM!</code>,
 <code>#NAME?</code> and <code>#NULL!</code> &mdash; and Google Sheets documents the same blanket
-behaviour. In LibreOffice Calc 25.8.7.3 our harness found one case where it does not fire:
+behaviour. In LibreOffice Calc our harness found one case where it does not fire:
 the <code>#REF!</code> raised by <code>INDIRECT</code> when the reference string names a sheet
 that does not exist. <code>=IFERROR(INDIRECT("'Nope'!B2"),"missing")</code> returned
-<code>#REF!</code>, not <code>"missing"</code>.</p>
+<code>#REF!</code>, not <code>"missing"</code> &mdash; identically in all four builds we ran:
+24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3.</p>
 
 <div class="quirk-box">
   <h3>The surprise</h3>
@@ -341,6 +342,10 @@ that does not exist. <code>=IFERROR(INDIRECT("'Nope'!B2"),"missing")</code> retu
   produce &mdash; a tab name that has been renamed, deleted or mistyped.</p>
   <p>Stranger still, Calc agrees the value <em>is</em> an error while refusing to trap it:
   <code>=ISERROR(INDIRECT("'Nope'!B2"))</code> returned <code>TRUE</code> in the same run.</p>
+  <p>Nor is it a recent regression to wait out. We re-ran these cases under 24.2.0.3, 24.8.7.2 and
+  25.2.0.3 as well, and every one of them returned exactly what 25.8.7.3 returned. Upgrading or
+  downgrading within that range does not change the behaviour &mdash; the workaround below is the
+  fix, not a newer release.</p>
 </div>
 
 <h2 class="section-title">Executed results</h2>
@@ -348,7 +353,7 @@ that does not exist. <code>=IFERROR(INDIRECT("'Nope'!B2"),"missing")</code> retu
 <code>A1:A3 = 1, 2, 3</code>.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 24.2.0.3, 24.8.7.2, 25.2.0.3 &amp; 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=INDIRECT("'Nope'!B2")</td><td>#REF!</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
     <tr><td class="formula">=IFERROR(INDIRECT("'Nope'!B2"),"missing")</td><td>missing</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
@@ -366,8 +371,10 @@ that does not exist. <code>=IFERROR(INDIRECT("'Nope'!B2"),"missing")</code> retu
 <p>The Excel column is the documented-expected value recorded in our test corpus, taken from
 Microsoft's function reference for each function; we did not run Excel. Google Sheets has not been
 put through the harness, so that column stays honest rather than guessed. The LibreOffice column is
-what the harness computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. Nine of the
-ten rows agree with the documented Excel value. One does not, and it is row two.</p>
+what the harness computed by recalculating the workbook in each of those four LibreOffice Calc
+builds. It is a single column because all four agreed on all ten rows &mdash; every value below was
+returned by 24.2.0.3, by 24.8.7.2, by 25.2.0.3 <em>and</em> by 25.8.7.3. Nine of the ten rows agree
+with the documented Excel value. One does not, and it is row two.</p>
 <p>The last two rows are there to keep the comparison fair. <code>IFNA</code> returning
 <code>#REF!</code> is <em>not</em> a divergence &mdash; <code>IFNA</code> is documented to trap
 <code>#N/A</code> and nothing else, in every engine, which is exactly why the row below it lets a
@@ -382,7 +389,8 @@ it with <code>INDIRECT</code>.</p>
 <p>Month pickers, per-client tabs, per-region tabs, a validation dropdown of sheet names &mdash;
 they all reduce to that formula, and the <code>IFERROR</code> wrapper exists precisely because the
 tab named in <code>A1</code> may not exist. In Excel the wrapper does its job. In LibreOffice Calc
-25.8.7.3 the guarded formula shows <code>#REF!</code> anyway, and it does so at the moment the
+&mdash; in every build we ran, from 24.2.0.3 through 25.8.7.3 &mdash; the guarded formula shows
+<code>#REF!</code> anyway, and it does so at the moment the
 sheet is genuinely missing &mdash; when someone renamed a tab, deleted last quarter's sheet, or
 typed a name with a trailing space. A grid of these cells goes from "one clean fallback message"
 to "a wall of <code>#REF!</code>", and anything downstream that sums or charts the column inherits
@@ -392,7 +400,8 @@ the error.</p>
 not reveal the gap.</p>
 
 <h2 class="section-title">What to use instead</h2>
-<p>Both replacements below rest on values our harness executed in LibreOffice Calc 25.8.7.3, and
+<p>Both replacements below rest on values our harness executed in all four LibreOffice Calc builds
+(24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3), where they behaved identically, and
 the <code>ISREF</code> form was additionally executed end-to-end in a real multi-sheet workbook for
 our how-to page, where it returned the fallback text rather than an error.</p>
 <p><strong>Test with <code>ISREF</code> first.</strong> This is the most precise fix, because
@@ -423,12 +432,14 @@ quoting rules for tab names with spaces and the other <code>INDIRECT</code> cave
 before you build on it.</p>
 
 <h2 class="section-title">Honest limits</h2>
-<p>These cases were executed in LibreOffice Calc 25.8.7.3 only, through our standard
-<code>.xlsx</code> recalculation path (formulas written with no cached value, recalculated by
-LibreOffice, values read back). They were <strong>not</strong> run against our archived 24.2.0.3,
-24.8.7.2 or 25.2.0.3 builds &mdash; those are not installed on the machine that ran this batch, so
-we cannot say when this behaviour started or whether older releases share it. Treat the version
-number on this page as the exact scope of the claim.</p>
+<p>These cases were executed in four LibreOffice Calc builds &mdash; 24.2.0.3, 24.8.7.2, 25.2.0.3
+and 25.8.7.3 &mdash; through our standard <code>.xlsx</code> recalculation path (formulas written
+with no cached value, recalculated by LibreOffice, values read back). All four produced identical
+values for all ten rows, so there is no &ldquo;since&rdquo; release to report: this is long-standing
+behaviour across the range we tested, not something a recent version introduced. What we still
+cannot say is when it <em>began</em>. 24.2.0.3 is the oldest build we have run, so releases older
+than that are outside the claim, and so is any release between the four we tested &mdash; we sampled
+four points on the timeline, not every build on it.</p>
 <p>The Excel and Google Sheets columns are documentation, not execution: Microsoft documents
 <code>IFERROR</code> as trapping all seven error values including <code>#REF!</code>, and
 <code>ISREF</code> as returning <code>TRUE</code> when its argument refers to a reference. We did
