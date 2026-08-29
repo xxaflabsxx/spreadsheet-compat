@@ -656,6 +656,15 @@ def build_function_title_desc(r):
                     f"#NAME? in Google Sheets for all {n_s} executed "
                     f"case{'s' if n_s != 1 else ''}; {lo_word}."
                 )
+        elif sheets_verdict == "quirky" and verdict == "quirky":
+            first_s = sheets_mismatches[0] if sheets_mismatches else None
+            title = f"{name} differs from Excel in both Sheets and LibreOffice (executed)"
+            if first_s:
+                phrase = _case_mismatch_phrase(first_s, name, max_len=46)
+                punct = "" if phrase.endswith("\u2026") else "."
+                desc = f"Sheets: {phrase}{punct} LibreOffice differs too (executed)."
+            else:
+                desc = "Executed results differ from Excel's documented behaviour in both Google Sheets and LibreOffice."
         elif sheets_verdict == "quirky" and verdict == "supported":
             first_s = sheets_mismatches[0] if sheets_mismatches else None
             title = f"{name} gives different results in Google Sheets vs Excel (executed)"
