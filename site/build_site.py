@@ -61,17 +61,20 @@ VERDICT_LABELS = {
     "supported": "Supported, behaves as documented",
     "quirky": "Quirk found",
     "unsupported": "Unsupported (not recognized)",
+    "inconclusive": "Inconclusive (import serialization)",
 }
 VERDICT_BADGE_CLASS = {
     "supported": "badge-good",
     "quirky": "badge-quirk",
     "unsupported": "badge-bad",
+    "inconclusive": "badge-unknown",
     None: "badge-unknown",
 }
 VERDICT_SHORT = {
     "supported": "Supported",
     "quirky": "Quirk",
     "unsupported": "Unsupported",
+    "inconclusive": "Inconclusive",
     None: "n/a",
 }
 
@@ -137,9 +140,20 @@ def load_results():
 
 
 def _version_tuple(v):
-    """'25.8.7.3' -> (25, 8, 7, 3) for correct numeric version ordering."""
+    """'25.8.7.3' -> (25, 8, 7, 3) for correct numeric version ordering.
+
+    Some engines have no pinnable version at all: the Google Sheets results
+    file carries a DATE label ("Google Sheets (Drive import, 2026-08-29)")
+    because Sheets is a rolling service. Such a label is not a version and
+    must never be parsed as one (its digits would sort above every real
+    release), so anything that does not start with a numeric release string
+    sorts as (0,). There is exactly one Sheets results file, so this never
+    has to break a tie.
+    """
     if not v:
         return ()
+    if not re.match(r"^\s*\d+(\.\d+)*\s*$", str(v)):
+        return (0,)
     parts = []
     for tok in str(v).split("."):
         num = "".join(ch for ch in tok if ch.isdigit())
@@ -164,10 +178,100 @@ def load_lo_versions():
 # Build per-function records
 # --------------------------------------------------------------------------
 
-def classify_verdict(case_results):
+# --------------------------------------------------------------------------
+# Google Sheets execution caveats
+#
+# The Sheets corpus is executed by importing the SAME .xlsx the LibreOffice
+# runs use (Drive import -> Sheets recalculation -> .xlsx export readback).
+# That round trip has two known artifacts which are NOT Google Sheets
+# behaviour, and must never be published as a Sheets verdict:
+#
+#   1. "serialization" — Excel stores post-2007 functions under the OOXML
+#      storage prefixes _xlfn. / _xlfn._xlws. / _xlpm.. Sheets' xlsx importer
+#      maps some of them (plain _xlfn.XLOOKUP, _xlfn.MAP and _xlfn.LAMBDA all
+#      evaluate fine) but not others: _xlfn._xlws.FILTER and _xlfn._xlws.SORT
+#      come back #NAME?, and BYROW/BYCOL/MAKEARRAY come back #ERROR!, even
+#      though Google documents all of them. A #NAME?/#ERROR! on a
+#      prefix-carrying formula for a function Google DOES document is
+#      therefore evidence about the import path, not about Sheets support.
+#   2. "readback" — Sheets' .xlsx export rounds every float to 10 significant
+#      digits (PI() exports as 3.141592654) and writes an empty cell for a
+#      blank/zero-length result. Where the only disagreement with the
+#      expected value is that rounding or that blank, the divergence is in
+#      the export, not in the engine.
+#
+# Both are reported as "inconclusive" rather than folded into a verdict. A
+# follow-up Sheets run with plain (unprefixed) function names will resolve
+# set 1.
+# --------------------------------------------------------------------------
+
+SHEETS_PREFIXES = ("_xlfn.", "_xlws.", "_xlpm.")
+SHEETS_IMPORT_ERRORS = ("#NAME?", "#ERROR!")
+
+
+def _is_number(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _flatten(v):
+    out = []
+    for x in v:
+        if isinstance(x, list):
+            out.extend(_flatten(x))
+        else:
+            out.append(x)
+    return out
+
+
+def sheets_case_inconclusive(case, documented_in_sheets):
+    """Return 'serialization' | 'readback' | None for one executed Google
+    Sheets case. See the block comment above for why each exists."""
+    value = case.get("value")
+    rng = case.get("range_values")
+    expected = case.get("expected")
+    stored = case.get("formula_stored_xlsx") or ""
+
+    import_error = value in SHEETS_IMPORT_ERRORS or (
+        isinstance(rng, list) and rng and all(v in SHEETS_IMPORT_ERRORS for v in rng)
+    )
+    if (
+        import_error
+        and documented_in_sheets
+        and any(pfx in stored for pfx in SHEETS_PREFIXES)
+    ):
+        return "serialization"
+
+    if case.get("matched_expected") is not False:
+        return None
+    # Export rounds floats to 10 significant digits.
+    if _is_number(value) and _is_number(expected):
+        if abs(value - expected) <= 1e-9 * max(1.0, abs(expected)):
+            return "readback"
+    # Export writes an empty cell for a blank / zero-length result.
+    if value is None and rng is None and expected in (0, ""):
+        return "readback"
+    if isinstance(rng, list) and isinstance(expected, list):
+        flat = _flatten(expected)
+        if len(flat) == len(rng) and all(
+            a == b or (a is None and b in (0, "")) for a, b in zip(rng, flat)
+        ):
+            return "readback"
+    return None
+
+
+def classify_verdict(case_results, skip_ids=None):
     """case_results: list of executed-result dicts (raw from results file) for
     one engine, for one function. Returns 'supported' | 'quirky' | 'unsupported'.
     """
+    if skip_ids:
+        case_results = [
+            c for c in case_results if c.get("id") not in skip_ids
+        ]
+        if not case_results:
+            # Every case we ran was inconclusive (see sheets_case_inconclusive):
+            # we learned nothing about the engine, and say so instead of
+            # publishing a red "unsupported" badge we cannot stand behind.
+            return "inconclusive"
     if not case_results:
         return None
     # Probe cases (expected == None, e.g. volatile NOW/RAND existence checks)
@@ -190,6 +294,28 @@ def classify_verdict(case_results):
     ):
         return "unsupported"
     return "quirky"
+
+
+def engine_exec_header(engine_key, res_blob):
+    """Heading for one engine's executed test-case table.
+
+    LibreOffice has a real pinnable build number, so it reads "LibreOffice
+    Calc 25.8.7.3". Google Sheets is a rolling service with no version to
+    pin, so it is identified by the DATE it was executed and by how — never
+    by pretending the label is a version string."""
+    ver = res_blob.get("engine_version") or ""
+    date = iso_date(res_blob.get("generated_at"))
+    if engine_key == "google_sheets":
+        return f"Google Sheets (executed {date} via Drive import)"
+    return f"{ENGINE_LABELS[engine_key]} {ver} (tested {date})"
+
+
+def engine_tested_cell(engine_key, res_blob):
+    """Support-matrix "Live-tested" cell for one engine."""
+    date = iso_date(res_blob.get("generated_at"))
+    if engine_key == "google_sheets":
+        return f"Yes (Drive import, {date})"
+    return f"Yes ({res_blob.get('engine_version')}, {date})"
 
 
 def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=None):
@@ -220,16 +346,35 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "version": None,
                 "generated_at": None,
                 "cases": [],
+                "inconclusive_count": 0,
+                "exec_header": None,
+                "tested_cell": None,
             }
 
             if fn_results:
+                # Google Sheets only: mark cases whose result is an artifact of
+                # the Drive-import round trip rather than Sheets behaviour, and
+                # keep them out of the verdict, the quirk counts and the quirks
+                # page. See sheets_case_inconclusive() above.
+                inconclusive_by_id = {}
+                if ek == "google_sheets":
+                    for cid, cres in fn_results.items():
+                        reason = sheets_case_inconclusive(cres, entry["documented"])
+                        if reason:
+                            inconclusive_by_id[cid] = reason
+
                 merged_cases = []
                 for c in authored_cases or []:
                     r = fn_results.get(c["id"])
                     if not r:
                         continue
-                    merged_cases.append({**c, **r})
-                verdict = classify_verdict(list(fn_results.values()))
+                    merged_cases.append(
+                        {**c, **r, "inconclusive_reason": inconclusive_by_id.get(c["id"])}
+                    )
+                verdict = classify_verdict(
+                    [{**v, "id": k} for k, v in fn_results.items()],
+                    skip_ids=set(inconclusive_by_id),
+                )
                 entry.update(
                     tested=True,
                     verdict=verdict,
@@ -237,9 +382,12 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     generated_at=res_blob.get("generated_at"),
                     trusted=res_blob.get("trusted"),
                     cases=merged_cases,
+                    inconclusive_count=len(inconclusive_by_id),
+                    exec_header=engine_exec_header(ek, res_blob),
+                    tested_cell=engine_tested_cell(ek, res_blob),
                 )
                 for mc in merged_cases:
-                    if mc.get("matched_expected") is False:
+                    if mc.get("matched_expected") is False and not mc.get("inconclusive_reason"):
                         all_quirks.append(
                             {
                                 "function": name,
@@ -248,6 +396,14 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                                 "engine_key": ek,
                                 "engine_label": ENGINE_LABELS[ek],
                                 "engine_version": res_blob.get("engine_version"),
+                                # Human-readable "which run was this" line. For
+                                # Sheets the version label already names the
+                                # engine, so don't print the name twice.
+                                "engine_ref": (
+                                    f"Google Sheets, executed {iso_date(res_blob.get('generated_at'))} (Drive import)"
+                                    if ek == "google_sheets"
+                                    else f"{ENGINE_LABELS[ek]} {res_blob.get('engine_version')}"
+                                ),
                                 "case": mc,
                             }
                         )
@@ -299,10 +455,20 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
             1
             for e in engines.values()
             for c in e["cases"]
-            if c.get("matched_expected") is False
+            if c.get("matched_expected") is False and not c.get("inconclusive_reason")
+        )
+        inconclusive_count = sum(
+            1
+            for e in engines.values()
+            for c in e["cases"]
+            if c.get("inconclusive_reason")
         )
         tested_case_count = sum(len(e["cases"]) for e in engines.values())
-        verdicts_present = [e["verdict"] for e in engines.values() if e["verdict"]]
+        verdicts_present = [
+            e["verdict"]
+            for e in engines.values()
+            if e["verdict"] and e["verdict"] != "inconclusive"
+        ]
         if "quirky" in verdicts_present:
             primary_verdict = "quirky"
         elif "unsupported" in verdicts_present:
@@ -328,6 +494,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "has_tests": has_tests,
                 "any_tested": any_tested,
                 "quirk_count": quirk_count,
+                "inconclusive_count": inconclusive_count,
                 "tested_case_count": tested_case_count,
                 "primary_verdict": primary_verdict,
                 "last_tested": last_tested,
@@ -348,10 +515,15 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
 # read each record's OWN executed/documented data (see build_records above)
 # and put the actual verdict in the title and description instead.
 #
-# Ground truth in this dataset: LibreOffice is the only engine ever actually
-# EXECUTED (results/libreoffice-*.json); Excel and Google Sheets support is
-# known only from official documentation presence (functions.json "apps"
-# flags). Copy must never imply Excel/Sheets were executed.
+# Ground truth in this dataset: LibreOffice Calc (results/libreoffice-*.json,
+# four pinned builds) and Google Sheets (results/google-sheets.json, one dated
+# Drive-import run) are both actually EXECUTED. Microsoft Excel is NOT: its
+# support is known only from official documentation presence (functions.json
+# "apps" flags), and the Excel column of the corpus is the documented-expected
+# value each executed engine is measured against. Copy must never imply Excel
+# was executed. Google Sheets has no pinnable version — it is identified by
+# the date of the run — and cases flagged inconclusive by
+# sheets_case_inconclusive() are never published as Sheets verdicts.
 # --------------------------------------------------------------------------
 
 ENGINE_SHORT = {"excel": "Excel", "google_sheets": "Sheets", "libreoffice": "LibreOffice"}
@@ -439,22 +611,70 @@ def build_function_title_desc(r):
     other_docs = [ek for ek in ("excel", "google_sheets") if engines[ek]["documented"]]
     other_short = [ENGINE_SHORT[ek] for ek in other_docs]
 
+    ge = engines["google_sheets"]
+    sheets_verdict = ge["verdict"]
+    sheets_cases = [c for c in ge["cases"] if not c.get("inconclusive_reason")]
+    sheets_mismatches = [c for c in sheets_cases if c.get("matched_expected") is False]
+
     if r["any_tested"]:
         verdict = le["verdict"]
         total = len(le["cases"])
         mismatches = [c for c in le["cases"] if c.get("matched_expected") is False]
         passed = total - len(mismatches)
 
-        if verdict == "unsupported":
-            title = (
-                f"{name} is not supported in LibreOffice Calc ({_join_amp(other_short)} only)"
-                if other_short
-                else f"{name} is not supported in LibreOffice Calc"
-            )
+        # Sheets leads the title when Sheets has the newsworthy result: a
+        # function Google Sheets does not recognize at all, or one it runs but
+        # disagrees with Excel's docs on while LibreOffice matches. Both are
+        # executed facts about Sheets; Excel stays documentation-only.
+        if sheets_verdict == "unsupported":
+            n_s = len(sheets_cases)
+            if verdict == "unsupported":
+                title = f"{name} is not supported in Google Sheets or LibreOffice (executed)"
+                desc = (
+                    f"#NAME? in both: {n_s} executed Sheets "
+                    f"case{'s' if n_s != 1 else ''} and {total} in LibreOffice."
+                )
+            else:
+                title = f"{name} is not supported in Google Sheets (#NAME?, executed)"
+                lo_word = {
+                    "supported": f"works in LibreOffice {_short_version(le['version'])}",
+                    "quirky": f"has quirks in LibreOffice {_short_version(le['version'])}",
+                }.get(verdict, "has no LibreOffice verdict")
+                desc = (
+                    f"#NAME? in Google Sheets for all {n_s} executed "
+                    f"case{'s' if n_s != 1 else ''}; {lo_word}."
+                )
+        elif sheets_verdict == "quirky" and verdict == "supported":
+            first_s = sheets_mismatches[0] if sheets_mismatches else None
+            title = f"{name} gives different results in Google Sheets vs Excel (executed)"
+            if first_s:
+                phrase = _case_mismatch_phrase(first_s, name, max_len=46)
+                punct = "" if phrase.endswith("\u2026") else "."
+                desc = (
+                    f"Sheets: {phrase}{punct} LibreOffice matches Excel on all "
+                    f"{total} case{'s' if total != 1 else ''}."
+                )
+            else:
+                desc = (
+                    f"Sheets diverges from Excel's documented behavior; LibreOffice "
+                    f"matches on all {total} executed case{'s' if total != 1 else ''}."
+                )
+        elif verdict == "unsupported":
+            if sheets_verdict == "supported":
+                title = f"{name} is not supported in LibreOffice Calc (works in Sheets)"
+            elif other_short:
+                title = f"{name} is not supported in LibreOffice Calc ({_join_amp(other_short)} only)"
+            else:
+                title = f"{name} is not supported in LibreOffice Calc"
             desc = (
                 f"LibreOffice returns #NAME? (unrecognized) for {name} in all "
-                f"{total} executed test case{'s' if total != 1 else ''}."
+                f"{total} executed test case{'s' if total != 1 else ''}"
             )
+            if sheets_verdict == "supported":
+                n_s = len(sheets_cases)
+                desc += f"; all {n_s} Google Sheets case{'s' if n_s != 1 else ''} pass."
+            else:
+                desc += "."
         elif verdict == "quirky":
             first_mismatch = mismatches[0] if mismatches else None
             # A function whose only mismatches are error-code-vs-error-code
@@ -510,6 +730,14 @@ def build_function_title_desc(r):
                     f"Returned #NAME? in LibreOffice {from_v}; works since {short_since} "
                     f"({total} executed {case_word} {verb})."
                 )
+            elif excel_doc and sheets_doc and sheets_verdict == "supported":
+                title = f"{name} works in Excel (docs), Sheets & LibreOffice (executed)"
+                n_s = len(sheets_cases)
+                desc = (
+                    f"All {total} LibreOffice and {n_s} Google Sheets executed "
+                    f"case{'s' if n_s != 1 else ''} for {name} match Excel's documented "
+                    f"result{'s' if total != 1 else ''}."
+                )
             elif excel_doc and sheets_doc:
                 title = f"{name} works in Excel, Google Sheets and LibreOffice (LibreOffice-tested)"
                 desc = (
@@ -526,7 +754,13 @@ def build_function_title_desc(r):
                     f"{pass_verb} in LibreOffice; documented in "
                     f"{_join_and(present_full[:-1]) or 'LibreOffice'} only."
                 )
-        suffix = f" Executed in LibreOffice {le['version']}; Excel/Sheets from official docs."
+        if ge["tested"]:
+            suffix = (
+                f" Executed: LibreOffice {le['version']} + Google Sheets "
+                f"{iso_date(ge['generated_at'])}; Excel per docs."
+            )
+        else:
+            suffix = f" Executed in LibreOffice {le['version']}; Excel/Sheets from official docs."
         budget = 155 - len(suffix)
         lead = desc.rstrip()
         if len(lead) > budget:
@@ -1046,8 +1280,12 @@ INDEX_TMPL = """{% extends "base.html" %}
   traces back to a formula that was actually written into a real workbook and
   recalculated by that engine, proven with deterministic and volatile canary
   formulas on every run (see the <a href="{{ github_url }}">test harness</a>).
-  Nothing here is scraped from vendor docs and presented as tested. Functions
-  we haven't run through an engine yet are labeled <span class="badge badge-unknown">not yet live-tested</span> and show inventory data only.
+  Nothing here is scraped from vendor docs and presented as tested.
+  <strong>LibreOffice Calc</strong> (four pinned builds) and <strong>Google
+  Sheets</strong> (Drive import, {{ sheets_exec_date }}) are both executed;
+  <strong>Excel is not</strong> &mdash; its column is Microsoft&rsquo;s
+  documented behavior, which is what the executed engines are measured
+  against. Functions we haven't run through an engine yet are labeled <span class="badge badge-unknown">not yet live-tested</span> and show inventory data only.
 </div>
 
 {% if top_functions %}
@@ -1099,10 +1337,11 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 <p class="category-tag">Category: {{ r.category }}{% if r.last_tested %} &middot; Last tested {{ r.last_tested }}{% endif %}</p>
 
 {% if r.any_tested %}
-<p class="lede">Real compatibility results for the <strong>{{ r.name }}</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>{{ r.name }}</strong> function: executed in {% if r.engines['google_sheets'].tested %}Google Sheets and LibreOffice Calc{% else %}LibreOffice Calc{% endif %}, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 {% endif %}
 
 {% set le = r.engines['libreoffice'] %}
+{% set ge = r.engines['google_sheets'] %}
 {% set since = le.lo_change.since_version if le.lo_change else None %}
 {% if le.lo_change and le.lo_change.newly_supported and since %}
 <div class="newin-box">
@@ -1134,7 +1373,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 <tr>
   <td>{{ e.label }}</td>
   <td>{% if e.doc_url %}<a href="{{ e.doc_url }}">Yes</a>{% elif e.documented %}Yes{% else %}No{% endif %}</td>
-  <td>{% if e.tested %}Yes ({{ e.version }}, {{ e.generated_at|dateonly }}){% else %}Not yet{% endif %}</td>
+  <td>{% if e.tested %}{{ e.tested_cell }}{% else %}Not yet{% endif %}</td>
   <td>
     {% if e.verdict %}
       <span class="badge {{ verdict_class[e.verdict] }}">{{ verdict_label[e.verdict] }}</span>
@@ -1182,8 +1421,7 @@ error: see the <a href="{{ rel }}spreadsheet-errors.html">error values guide</a>
 executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
 settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
 available yet{% if le.documented %} despite appearing in some documentation{% endif %}.
-{% if r.engines['excel'].documented %}The same formula does work in
-{% if r.engines['google_sheets'].documented %}Excel and Google Sheets{% else %}Excel{% endif %}.{% endif %}
+{% if r.engines['excel'].documented %}The same formula is documented for Excel{% if ge.verdict == 'supported' %}, and we executed it successfully in Google Sheets on {{ ge.generated_at|dateonly }}{% elif r.engines['google_sheets'].documented %} and documented for Google Sheets{% endif %}.{% endif %}
 Watch the <a href="{{ rel }}libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
 we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
 {% elif le.verdict == 'quirky' %}
@@ -1194,13 +1432,46 @@ against the failing cases above before assuming your data is wrong.</p>
 {% endif %}
 {% endif %}
 
+{% if ge.tested and ge.verdict in ('unsupported', 'quirky') %}
+<h2 class="section-title">Why isn&rsquo;t {{ r.name }} working in Google Sheets?</h2>
+{% if ge.verdict == 'unsupported' %}
+<p>Google Sheets does not implement <code>{{ r.name }}</code>: we imported the formula into
+Sheets on {{ ge.generated_at|dateonly }} and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date{% if not ge.documented %}, and Google&rsquo;s own
+function list does not document it either{% endif %}. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="{{ rel }}excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
+{% else %}
+<p><code>{{ r.name }}</code> runs in Google Sheets, but our executed cases show it does not match
+Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
+formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
+against those cases before assuming your data is wrong.</p>
+{% endif %}
+{% endif %}
+
+{% if ge.tested and ge.inconclusive_count %}
+<div class="not-live-tested">
+  <strong>Google Sheets: {{ ge.inconclusive_count }} case{{ 's' if ge.inconclusive_count != 1 else '' }} inconclusive.</strong>
+  {% if ge.verdict == 'inconclusive' %}Every Sheets case for {{ r.name }} came back inconclusive, so we publish no Sheets verdict for it.{% endif %}
+  Our corpus is an Excel-authored .xlsx, and Google&rsquo;s importer does not
+  map every OOXML storage prefix (<code>_xlfn.</code>, <code>_xlfn._xlws.</code>,
+  <code>_xlpm.</code>) &mdash; nor does the .xlsx export preserve full float
+  precision or a blank result. Where the disagreement is explained by that
+  round trip we report it as inconclusive rather than as a Sheets behavior.
+  Google documents this function, so the result is <em>not</em> evidence of
+  missing support. See the <a href="{{ rel }}methodology.html">methodology page</a>
+  for the full caveat and the planned re-run with plain function names.
+</div>
+{% endif %}
+
 {% if r.quirk_count > 0 %}
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   {% for ek in engine_order %}
     {% for c in r.engines[ek].cases %}
-      {% if c.matched_expected == false %}
+      {% if c.matched_expected == false and not c.inconclusive_reason %}
       <li>
         <span class="formula">{{ c.formula_display or c.formula }}</span> on
         <strong>{{ r.engines[ek].label }}</strong> returned
@@ -1220,7 +1491,8 @@ against the failing cases above before assuming your data is wrong.</p>
 {% for ek in engine_order %}
 {% set e = r.engines[ek] %}
 {% if e.tested %}
-<h3>{{ e.label }} {{ e.version }} <span class="category-tag">(tested {{ e.generated_at|dateonly }})</span></h3>
+<h3>{{ e.exec_header }}</h3>
+{% if ek == 'google_sheets' %}<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>{% endif %}
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
@@ -1231,7 +1503,7 @@ against the failing cases above before assuming your data is wrong.</p>
   <td>{{ c.description }}</td>
   <td class="result mono">{{ (c.range_values if c.range_values else c.value)|fmtval }}</td>
   <td class="result mono">{{ c.expected|fmtval }}{% if c.expected_note %}<br><span class="category-tag">{{ c.expected_note }}</span>{% endif %}</td>
-  <td>{% if c.matched_expected %}<span class="verdict-ok">Matched</span>{% elif c.matched_expected is none and c.expected is none %}{% if c.error %}<span class="verdict-bad">Error</span>{% else %}<span class="verdict-ok">Ran OK</span>{% endif %}{% else %}<span class="verdict-bad">Mismatch</span>{% endif %}</td>
+  <td>{% if c.inconclusive_reason %}<span class="badge badge-unknown">Inconclusive</span>{% elif c.matched_expected %}<span class="verdict-ok">Matched</span>{% elif c.matched_expected is none and c.expected is none %}{% if c.error %}<span class="verdict-bad">Error</span>{% else %}<span class="verdict-ok">Ran OK</span>{% endif %}{% else %}<span class="verdict-bad">Mismatch</span>{% endif %}</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -1280,10 +1552,16 @@ QUIRKS_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Discovered quirks</h1>
 <p class="tagline">Every case below is a real, executed formula whose result did
-not match documented/expected behavior. This is the flagship content of
+not match Excel&rsquo;s documented/expected behavior. This is the flagship content of
 {{ site_name }}: cross-engine divergence that only shows up when you actually
-run the formula.</p>
-<p class="search-hint">{{ quirks|length }} quirks found across {{ quirk_fn_count }} functions.</p>
+run the formula. Both executed engines are represented &mdash; LibreOffice Calc
+{{ lo_version }} and Google Sheets (Drive import, {{ sheets_exec_date }}) &mdash;
+measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
+<p class="search-hint">{{ quirks|length }} quirks found across {{ quirk_fn_count }} functions
+({{ quirks_by_engine['libreoffice'] }} in LibreOffice, {{ quirks_by_engine['google_sheets'] }} in Google Sheets).
+{% if inconclusive_total %}A further {{ inconclusive_total }} Google Sheets case{{ 's' if inconclusive_total != 1 else '' }}
+{{ 'are' if inconclusive_total != 1 else 'is' }} excluded as <a href="{{ rel }}methodology.html">inconclusive</a> &mdash;
+explained by the .xlsx import/export round trip, not by Sheets.{% endif %}</p>
 
 <ul class="quirks-list">
 {% for q in quirks %}
@@ -1294,7 +1572,7 @@ run the formula.</p>
   <dl class="quirk-grid">
     <dt>Actual result</dt><dd class="mono">{{ (q.case.range_values if q.case.range_values else q.case.value)|fmtval }}</dd>
     <dt>Documented / expected</dt><dd class="mono">{{ q.case.expected|fmtval }}</dd>
-    <dt>Engine</dt><dd>{{ q.engine_label }} {{ q.engine_version }}</dd>
+    <dt>Engine</dt><dd>{{ q.engine_ref }}</dd>
     <dt>Category</dt><dd>{{ q.category }}</dd>
   </dl>
   {% if q.case.notes %}<p>{{ q.case.notes }}</p>{% endif %}
@@ -1334,7 +1612,7 @@ def fmtval_filter(v):
 RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet how-to recipes</h1>
-<p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each one <strong>executed and verified in LibreOffice Calc</strong>, with Excel and Google Sheets support from official documentation, not just guesswork.</p>
+<p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each recipe formula <strong>executed and verified in LibreOffice Calc</strong>. Function-level verdicts come from our executed Google Sheets and LibreOffice runs; the recipe formulas themselves have only been executed in LibreOffice so far, and Excel is documentation only.</p>
 <p>
 {% for cat, items in grouped %}<a href="#{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</a> ({{ items|length }}){% if not loop.last %} &middot; {% endif %}{% endfor %}
 </p>
@@ -1516,7 +1794,7 @@ RECIPE_TMPL = """{% extends "base.html" %}
 
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax.</p>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.</p>
 {% endif %}
 {% if functions_used %}
 <h2 class="section-title">Functions used</h2>
@@ -1565,7 +1843,7 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 {% endfor %}
 </ul>
 
-<h2 class="section-title">Compatibility (LibreOffice executed; Excel/Sheets per docs)</h2>
+<h2 class="section-title">Compatibility (Sheets &amp; LibreOffice executed; Excel per docs)</h2>
 <p>{{ c.compat_note }}</p>
 
 <h2 class="section-title">Example formulas</h2>
@@ -1597,7 +1875,7 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 COMPARISON_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet function comparisons</h1>
-<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (LibreOffice results executed by our test harness; Excel and Google Sheets from official documentation). For the app-level picture, see the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula guide</a>.</p>
+<p class="lede">Head-to-head guides for the functions people mix up &mdash; what actually differs, which to use when, and how support varies across Excel, Google Sheets, and LibreOffice (Google Sheets and LibreOffice results executed by our test harness; Excel from official documentation). For the app-level picture, see the <a href="{{ rel }}excel-vs-google-sheets.html">Excel vs Google Sheets formula guide</a>.</p>
 <ul class="quirks-list">
 {% for c in comparisons %}
 <li class="quirk-entry">
@@ -1655,11 +1933,11 @@ ERRORS_TMPL = """{% extends "base.html" %}
 DATASET_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Open spreadsheet compatibility dataset</h1>
-<p class="lede">The machine-verified data behind this site is free to use. It records, for {{ n_funcs }} spreadsheet functions, whether each works in Microsoft Excel and Google Sheets (from official documentation) and in LibreOffice Calc (from <a href="{{ rel }}methodology.html">actually executing the formula</a>, with per-version history). As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
+<p class="lede">The machine-verified data behind this site is free to use. It records, for {{ n_funcs }} spreadsheet functions, whether each works in Microsoft Excel (from official documentation &mdash; we do not run Excel) and what actually happened when we <a href="{{ rel }}methodology.html">executed the formula</a> in <strong>Google Sheets</strong> (Drive import, {{ sheets_exec_date }}) and in <strong>LibreOffice Calc</strong> (four pinned builds, with per-version history). As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
 
 <h2 class="section-title">Download</h2>
 <p><a href="{{ rel }}data/compat.json"><code>data/compat.json</code></a> &mdash; one JSON object, keyed by uppercase function name ({{ n_funcs }} entries, {{ kb }} KB).<br>
-<a href="{{ rel }}data/compat.csv"><code>data/compat.csv</code></a> &mdash; the same data as a CSV (one row per function, headered columns) for spreadsheets and data tools.</p>
+<a href="{{ rel }}data/compat.csv"><code>data/compat.csv</code></a> &mdash; the same data as a CSV (one row per function, headered columns) for spreadsheets and data tools. Its columns are <code>function, category, in_excel, in_google_sheets, in_libreoffice, google_sheets_verdict, google_sheets_executed, libreoffice_verdict, libreoffice_version_tested, libreoffice_newly_supported_in</code> &mdash; <code>google_sheets_verdict</code> mirrors <code>gv</code> and <code>google_sheets_executed</code> mirrors <code>gver</code> (the dated run label).</p>
 <p>The full test harness, authored test cases, and raw per-LibreOffice-version results are in the <a href="{{ github_url }}">GitHub repository</a>.</p>
 
 <h2 class="section-title">Schema</h2>
@@ -1671,6 +1949,8 @@ DATASET_TMPL = """{% extends "base.html" %}
 <tr><td><code>x</code></td><td>boolean</td><td>Documented in Microsoft Excel.</td></tr>
 <tr><td><code>g</code></td><td>boolean</td><td>Documented in Google Sheets.</td></tr>
 <tr><td><code>l</code></td><td>boolean</td><td>Documented in LibreOffice Calc.</td></tr>
+<tr><td><code>gv</code></td><td>string / null</td><td>Google Sheets <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, <code>inconclusive</code>, or null when not yet live-tested. <code>inconclusive</code> means the .xlsx round trip &mdash; not Sheets &mdash; explains the result (see <a href="{{ rel }}methodology.html#sheets-caveats">Sheets execution caveats</a>); treat it as &ldquo;no verdict&rdquo; and fall back to <code>g</code>.</td></tr>
+<tr><td><code>gver</code></td><td>string / null</td><td>Label for the Google Sheets run, e.g. <code>Google Sheets (Drive import, {{ sheets_exec_date }})</code>. This is a <strong>date, not a version</strong> &mdash; Sheets is a rolling service with nothing to pin &mdash; so never parse or compare it as one.</td></tr>
 <tr><td><code>lv</code></td><td>string / null</td><td>LibreOffice <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, or null when not yet live-tested.</td></tr>
 <tr><td><code>lver</code></td><td>string</td><td>LibreOffice version the verdict was produced on (e.g. <code>25.8.7.3</code>).</td></tr>
 <tr><td><code>lnew</code></td><td>string / null</td><td>The LibreOffice version the function first became supported in, when known (else null).</td></tr>
@@ -1685,14 +1965,21 @@ const db = await (await fetch("https://canispreadsheet.com/data/compat.json")).j
 
 db["XLOOKUP"]
 // {"cat":"Lookup and reference","x":true,"g":true,"l":true,
+//  "gv":"supported","gver":"Google Sheets (Drive import, {{ sheets_exec_date }})",
 //  "lv":"supported","lver":"25.8.7.3","lnew":"24.8.7.2"}
-//  -> documented in all three; executed as supported in LibreOffice,
-//     first working in LibreOffice 24.8.</code></pre>
+//  -> documented in all three; executed as supported in BOTH Google Sheets
+//     (on the dated run) and LibreOffice, first working in LibreOffice 24.8.
+
+// A Sheets verdict you must NOT read as "unsupported":
+db["FILTER"].gv   // "inconclusive"
+//  -> our Excel-authored .xlsx stores it as _xlfn._xlws.FILTER, which Google's
+//     importer did not map, so the run says nothing about Sheets. Fall back to
+//     db["FILTER"].g (true).</code></pre>
 </div>
 
 <h2 class="section-title">License</h2>
 <p>The compatibility dataset is released under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 (CC&nbsp;BY&nbsp;4.0)</a>. Use it freely, including commercially &mdash; just credit <strong>canispreadsheet.com</strong> with a link. If you build something with it, we&rsquo;d love to hear about it.</p>
-<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted and each vendor&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Corrections welcome via the <a href="{{ github_url }}">repository</a>.</p>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted, one dated Google Sheets run ({{ sheets_exec_date }}), and Microsoft&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Google Sheets ships changes continuously, so a Sheets verdict is a dated observation rather than a release guarantee. Corrections welcome via the <a href="{{ github_url }}">repository</a>.</p>
 {% endblock %}
 """
 
@@ -1812,10 +2099,11 @@ EXCLUSIVE_TMPL = """{% extends "base.html" %}
 METHODOLOGY_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>How we verify spreadsheet compatibility</h1>
-<p class="lede">Every LibreOffice verdict on this site comes from <strong>actually executing the formula</strong> in a real engine and checking what came back &mdash; not from reading documentation. This page explains the machinery, what &ldquo;verified&rdquo; means here, and the limits of the approach.</p>
+<p class="lede">Every Google Sheets and LibreOffice verdict on this site comes from <strong>actually executing the formula</strong> in a real engine and checking what came back &mdash; not from reading documentation. Microsoft Excel is the one engine we do <em>not</em> execute: its column is Microsoft&rsquo;s documented behavior, and it is the yardstick the executed engines are measured against. This page explains the machinery, what &ldquo;verified&rdquo; means here, and the limits of the approach.</p>
 
 <h2 class="section-title">The execution harness</h2>
 <p>For each function we author test cases: a formula, any setup cells it needs, and the result Excel documents or produces for that input. The harness writes each case into a real <code>.xlsx</code> workbook with openpyxl, then runs <strong>headless LibreOffice Calc</strong> over it (<code>soffice --convert-to xlsx</code>), which forces a full recalculation. We reload the output and compare every result against the expected value.</p>
+<p>The <strong>same workbooks</strong> are run through <strong>Google Sheets</strong>: uploaded to Google Drive with import-conversion on, opened as a Sheet (which recalculates every formula), then exported back to <code>.xlsx</code> and read with the same reader. That run is dated, not versioned &mdash; Sheets is a rolling service with no release to pin &mdash; so every Sheets result on this site is labelled &ldquo;executed {{ sheets_exec_date }} via Drive import&rdquo; rather than given a version number.</p>
 <p>Two guards make the results trustworthy:</p>
 <ul>
 <li><strong>Recalculation canaries.</strong> Every generated workbook contains sentinel formulas (deterministic arithmetic plus a volatile function) whose values prove the engine really recalculated rather than echoing stored results. A run that fails its canary is discarded, never published.</li>
@@ -1825,19 +2113,30 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 <h2 class="section-title">Version matrix</h2>
 <p>The same corpus runs against multiple LibreOffice releases &mdash; currently {{ versions|join(', ') }} &mdash; which is how function pages can state a precise &ldquo;supported since&rdquo; release rather than a guess. Current corpus: <strong>{{ n_funcs }} functions live-tested</strong> across <strong>{{ n_cases }} executed cases</strong> per release.</p>
 
+<h2 class="section-title" id="sheets-caveats">Google Sheets execution caveats</h2>
+<p>The Sheets run reuses the Excel-authored workbooks, and that round trip has two artifacts which are <em>not</em> Google Sheets behavior. Where a result is explained by either, we publish <strong>Inconclusive</strong> instead of a verdict &mdash; never a red &ldquo;unsupported&rdquo; badge:</p>
+<ul>
+<li><strong>Unmapped storage prefixes.</strong> Excel stores post-2007 functions as <code>_xlfn.NAME</code>, <code>_xlfn._xlws.NAME</code> or (for LAMBDA parameters) <code>_xlpm.NAME</code>. Google&rsquo;s importer maps some but not all: <code>_xlfn.XLOOKUP</code>, <code>_xlfn.MAP</code> and <code>_xlfn.LAMBDA</code> evaluate fine, while <code>_xlfn._xlws.FILTER</code> and <code>_xlfn._xlws.SORT</code> come back <code>#NAME?</code> and BYROW/BYCOL/MAKEARRAY come back <code>#ERROR!</code>. Google documents all of those functions, so those results say something about the import path, not about Sheets support. Affected here: <strong>BYCOL, BYROW, FILTER, MAKEARRAY and SORT</strong>. A follow-up Sheets run that writes plain, unprefixed function names will resolve them.</li>
+<li><strong>Export readback.</strong> Sheets&rsquo; <code>.xlsx</code> export rounds every float to 10 significant digits (<code>PI()</code> comes back as 3.141592654) and writes an empty cell where a result is blank or zero-length. Where that rounding or that blank is the <em>only</em> disagreement with the expected value &mdash; DEGREES(1), INDIRECT to a blank cell, TRANSPOSE of a blank cell &mdash; the difference is in the export, not in the engine.</li>
+</ul>
+<p>A <code>#NAME?</code> from Sheets on a formula with <em>no</em> storage prefix, or on a function Google does not document (TEXTSPLIT, TAKE, DROP, AGGREGATE&hellip;), is a real unsupported verdict and is published as one.</p>
+
 <h2 class="section-title">What the verdicts mean</h2>
 <ul>
 <li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result (probe cases for volatile functions like NOW/RAND assert error-free execution and deterministic invariants instead of exact values).</li>
 <li><strong>Quirk found</strong> &mdash; the function exists but at least one case returned a different value or error than Excel produces; the failing case is shown on the function&rsquo;s page.</li>
 <li><strong>Unsupported</strong> &mdash; the engine returns <code>#NAME?</code> (unrecognized function) with the storage prefix correctly applied.</li>
+<li><strong>Inconclusive</strong> (Google Sheets only) &mdash; the round trip described above explains the result, so we make no claim about the engine. See the <a href="#sheets-caveats">caveats</a>.</li>
 </ul>
 
 <h2 class="section-title">How-to recipes are verified too</h2>
-<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned.</p>
+<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned. To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.</p>
 
 <h2 class="section-title">Honest limitations</h2>
 <ul>
-<li><strong>Excel and Google Sheets are not live-executed.</strong> Their columns reflect each vendor&rsquo;s official function documentation. We can&rsquo;t headlessly run those engines (yet); where our executed LibreOffice results reveal a difference against documented Excel behavior, that&rsquo;s labeled a quirk of LibreOffice, and disputed cases are re-checked by hand.</li>
+<li><strong>Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run Excel (yet); where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
+<li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: the verdicts describe Sheets as it behaved on {{ sheets_exec_date }}. Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
+<li><strong>Some Sheets results are inconclusive.</strong> See the <a href="#sheets-caveats">Sheets execution caveats</a> above; those cases are excluded from verdicts and quirk counts rather than guessed at.</li>
 <li><strong>Coverage is partial.</strong> {{ n_funcs }} of ~600 catalog functions have executed tests; untested functions say so explicitly rather than borrowing a verdict.</li>
 <li><strong>A passing case is evidence, not proof.</strong> A function can match on our cases and still differ on inputs we haven&rsquo;t authored. When you find such an edge, please report it.</li>
 </ul>
@@ -1851,7 +2150,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 CHECKER_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet formula compatibility checker</h1>
-<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real tests executed in LibreOffice, plus each vendor&rsquo;s official documentation. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests documented alternatives.</p>
+<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real tests executed in Google Sheets and LibreOffice, plus Microsoft&rsquo;s official documentation for Excel. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests documented alternatives.</p>
 <textarea id="f" rows="3" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:1rem;padding:.6rem" placeholder='=XLOOKUP("North", B2:B6, A2:A6)'></textarea>
 <p><button id="btn" class="promo-btn" style="border:0;cursor:pointer">Check compatibility</button></p>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Try:
@@ -1918,6 +2217,16 @@ function funcs(s){ const set=new Set();
       if(fn) set.add(fn); } }
   return [...set]; }
 function yn(ok){ return ok?'<span style="color:#0a7a2f">&#10003; yes</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+// Google Sheets column. The EXECUTED verdict (gv) outranks the documentation
+// flag (g), exactly as lo() prefers lv over l. Sheets has no version to show —
+// one dated run — so we show the DATE. "inconclusive" is not a verdict: our
+// Excel-authored .xlsx did not survive Google's importer for that function, so
+// we fall back to the documentation flag and label it.
+function gs(d){ if(d.gv==='supported') return '<span style="color:#0a7a2f">&#10003; executed '+d.gver+'</span>';
+  if(d.gv==='quirky') return '<span style="color:#b8860b">&#9888; quirk (executed '+d.gver+')</span>';
+  if(d.gv==='unsupported') return '<span style="color:#c02020">&#10007; not in Sheets (executed '+d.gver+')</span>';
+  if(d.gv==='inconclusive') return d.g?'<span style="color:#888">documented (our run was inconclusive)</span>':'<span style="color:#888">inconclusive</span>';
+  return d.g?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};
 // Curated, verified portable alternatives (from the comparison pages) for
@@ -1943,13 +2252,13 @@ const MIG={
  MAKEARRAY:{r:'Excel 365 and Google Sheets only — not in LibreOffice.'},
  XLOOKUP:{r:'Needs Excel 2021+/365, current Sheets, or LibreOffice 24.8+. In older Excel/LibreOffice use INDEX/MATCH.',cmp:'vlookup-vs-index-match'},
  XMATCH:{r:'Needs Excel 2021+/365, Sheets, or LibreOffice 24.8+. Older versions: use MATCH.'},
- TEXTSPLIT:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. Older: SUBSTITUTE/MID tricks or Text-to-Columns.'},
- TEXTBEFORE:{r:'Excel 365 & Sheets; LibreOffice 25.8+ (with quirks). Older: LEFT(A,FIND(delim,A)-1).',cmp:'textbefore-textafter-vs-left-mid-right'},
- TEXTAFTER:{r:'Excel 365 & Sheets; LibreOffice 25.8+ (with quirks). Older: MID(A,FIND(delim,A)+1,...).',cmp:'textbefore-textafter-vs-left-mid-right'},
- HSTACK:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only.'},
- VSTACK:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. In Sheets you can also use {range1;range2}.'},
- TAKE:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. Older: INDEX ranges.'},
- DROP:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only.'},
+ TEXTSPLIT:{r:'Excel 365 and LibreOffice 25.8+ only - our executed Sheets run returns #NAME?; use SPLIT() in Sheets. Older LibreOffice: SUBSTITUTE/MID tricks or Text-to-Columns.'},
+ TEXTBEFORE:{r:'Excel 365 and LibreOffice 25.8+ (with quirks) - our executed Sheets run returns #NAME?. Everywhere else: LEFT(A,FIND(delim,A)-1).',cmp:'textbefore-textafter-vs-left-mid-right'},
+ TEXTAFTER:{r:'Excel 365 and LibreOffice 25.8+ (with quirks) - our executed Sheets run returns #NAME?. Everywhere else: MID(A,FIND(delim,A)+1,...).',cmp:'textbefore-textafter-vs-left-mid-right'},
+ HSTACK:{r:'Excel 365 and Google Sheets (both executed OK); LibreOffice 25.8+ only.'},
+ VSTACK:{r:'Excel 365 and Google Sheets (executed OK); LibreOffice 25.8+ only. In Sheets you can also use {range1;range2}.'},
+ TAKE:{r:'Excel 365 and LibreOffice 25.8+ only - our executed Sheets run returns #NAME?. Elsewhere: INDEX ranges.'},
+ DROP:{r:'Excel 365 and LibreOffice 25.8+ only - our executed Sheets run returns #NAME?. Elsewhere: INDEX/OFFSET ranges.'},
  LET:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older versions: inline the repeated expressions.'},
  LAMBDA:{r:'Excel 365 and Google Sheets. LibreOffice recognizes LAMBDA (no #NAME?) but every executed case returns #VALUE! in 24.2–25.8 — treat as unsupported there.'},
  SEQUENCE:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: ROW(INDIRECT(...)) tricks.'},
@@ -1976,7 +2285,11 @@ function migrate(fs,db,tg,gdb){
   const tv=loTarget();
   // Older than lnew = executed #NAME? in that release, so it is a blocker.
   const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
-  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:(d.lv?(d.lv!=='unsupported'):d.l)) : (tg==='x'?d.x:d.g);
+  // Executed verdicts win over documentation flags for both executed engines.
+  // A Sheets "inconclusive" tells us nothing, so it falls back to the doc flag.
+  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:(d.lv?(d.lv!=='unsupported'):d.l))
+    : (tg==='x' ? d.x
+      : ((d.gv && d.gv!=='inconclusive') ? (d.gv!=='unsupported') : d.g));
   const tname=tg==='l'?TGT_NAME[tg]+' '+tv:TGT_NAME[tg];
   let blockers=[];
   for(const fn of fs){ const d=db[fn]; if(!d) continue; if(!okIn(d)) blockers.push(fn); }
@@ -2000,11 +2313,13 @@ async function check(){
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
   let rows='', xAll=true,gAll=true,lAll=true, unknown=[];
   for(const fn of fs){ const d=db[fn]; if(!d){ unknown.push(fn); continue; }
-    const lok=d.lv?(d.lv!=='unsupported'):d.l; xAll=xAll&&d.x; gAll=gAll&&d.g; lAll=lAll&&lok;
-    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+yn(d.g)+'</td><td>'+lo(d)+'</td></tr>'; }
+    const lok=d.lv?(d.lv!=='unsupported'):d.l;
+    const gok=(d.gv&&d.gv!=='inconclusive')?(d.gv!=='unsupported'):d.g;
+    xAll=xAll&&d.x; gAll=gAll&&gok; lAll=lAll&&lok;
+    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }
   const say=ok=>ok?'<span style="color:#0a7a2f">works</span>':'<span style="color:#c02020">has an unsupported function</span>';
   let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
-  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel</th><th>Google Sheets</th><th>LibreOffice</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel (documented)</th><th>Google Sheets (executed)</th><th>LibreOffice (executed)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
   const tg=target(); if(tg) html+=migrate(fs,db,tg,gdb);
   html+='<p style="font-size:.9em;color:#888">Shareable link: <a href="'+permalink()+'" style="word-break:break-all">'+permalink()+'</a></p>';
@@ -2030,7 +2345,7 @@ syncLovRow();
 GUIDES_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Formula behavior guides</h1>
-<p class="lede">Executed-data writeups of specific cases where Excel, Google Sheets, and LibreOffice Calc give different results for the exact same formula &mdash; found by actually running the formula, not by comparing documentation pages. LibreOffice values shown are <strong>executed</strong> output from our test harness; Excel and Google Sheets values are each vendor&rsquo;s <strong>documented</strong> behavior unless a guide says otherwise. For the shorter, catalog-style version of these findings across every tested function, see the <a href="{{ rel }}quirks.html">quirks list</a>.</p>
+<p class="lede">Executed-data writeups of specific cases where Excel, Google Sheets, and LibreOffice Calc give different results for the exact same formula &mdash; found by actually running the formula, not by comparing documentation pages. Google Sheets and LibreOffice values shown are <strong>executed</strong> output from our test harness (Sheets via Drive import on {{ sheets_exec_date }}; LibreOffice from the pinned builds named in each table); Excel values are Microsoft&rsquo;s <strong>documented</strong> behavior &mdash; we do not run Excel. For the shorter, catalog-style version of these findings across every tested function, see the <a href="{{ rel }}quirks.html">quirks list</a>.</p>
 <ul class="quirks-list">
 {% for g in guides %}
 <li class="quirk-entry">
@@ -2298,6 +2613,12 @@ def build_env():
 # Rendering
 # --------------------------------------------------------------------------
 
+# Filled in by main() once the results files are loaded, so every template can
+# state the executed provenance without re-deriving it. Google Sheets has no
+# version — only a run DATE.
+EXEC_PROVENANCE = {"sheets_exec_date": "", "lo_version": "", "sheets_executed": False}
+
+
 def common_ctx(rel):
     return {
         "site_name": SITE_NAME,
@@ -2311,6 +2632,7 @@ def common_ctx(rel):
         "verdict_label": VERDICT_LABELS,
         "verdict_short": VERDICT_SHORT,
         "verdict_class": VERDICT_BADGE_CLASS,
+        **EXEC_PROVENANCE,
     }
 
 
@@ -2331,6 +2653,14 @@ def main():
 
     records, quirks = build_records(
         functions_doc, tests_by_fn, results_by_engine, lo_versions
+    )
+
+    _gs = results_by_engine.get("google_sheets")
+    _lo = results_by_engine.get("libreoffice")
+    EXEC_PROVENANCE.update(
+        sheets_exec_date=iso_date((_gs or {}).get("generated_at")),
+        lo_version=(_lo or {}).get("engine_version", ""),
+        sheets_executed=bool(_gs),
     )
 
     tested_functions = [r for r in records if r["any_tested"]]
@@ -2380,6 +2710,10 @@ def main():
 
     quirks.sort(key=lambda q: (q["function"], q["case"].get("id", "")))
     quirk_fn_count = len({q["function"] for q in quirks})
+    quirks_by_engine = {ek: 0 for ek in ENGINE_ORDER}
+    for _q in quirks:
+        quirks_by_engine[_q["engine_key"]] = quirks_by_engine.get(_q["engine_key"], 0) + 1
+    inconclusive_total = sum(r["inconclusive_count"] for r in records)
 
     if OUT_DIR.exists():
         shutil.rmtree(OUT_DIR)
@@ -2396,8 +2730,8 @@ def main():
         meta_description=(
             f"{stats['total_functions']} spreadsheet functions checked across Excel, "
             f"Google Sheets, and LibreOffice Calc — {stats['tested_case_count']} "
-            f"executed, recalculation-proven test cases in LibreOffice; Excel/Sheets "
-            f"from official docs. {stats['quirk_count']} quirks found."
+            f"executed test cases in Google Sheets and LibreOffice; Excel per "
+            f"official docs. {stats['quirk_count']} quirks found."
         ),
         canonical=BASE_URL,
         functions=records,
@@ -2435,16 +2769,18 @@ def main():
     ctx.update(
         page_title=(
             f"{stats['quirk_count']} spreadsheet formulas that give different results "
-            f"in LibreOffice vs Excel (executed)"
+            f"in Google Sheets or LibreOffice vs Excel (executed)"
         ),
         meta_description=(
-            f"MROUND(5,-2) returns 6, not #NUM!. COUNT(A1:A1) counts a boolean as 1, "
-            f"not 0. SUM(1,\"2\",3) errors #VALUE! not 6 — every result executed, "
-            f"not copied from docs."
+            f"MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(\"a\",\"b\",\"c\") "
+            f"is #N/A in Google Sheets. {stats['quirk_count']} divergences, every one "
+            f"executed — not copied from docs."
         ),
         canonical=BASE_URL + "quirks.html",
         quirks=quirks,
         quirk_fn_count=quirk_fn_count,
+        quirks_by_engine=quirks_by_engine,
+        inconclusive_total=inconclusive_total,
         seo_guides=load_seo_pages(),
     )
     (OUT_DIR / "quirks.html").write_text(env.get_template("quirks.html").render(**ctx))
@@ -2582,8 +2918,8 @@ def main():
             page_title="Spreadsheet how-to recipes — formulas for Excel, Google Sheets & LibreOffice",
             meta_description=(
                 "Copy-paste formulas for common spreadsheet tasks, each executed and "
-                "verified in LibreOffice Calc; Excel and Google Sheets support per "
-                "official docs."
+                "verified in LibreOffice Calc. Function verdicts also executed in "
+                "Google Sheets; Excel per official docs."
             ),
             canonical=BASE_URL + "how-to/",
             recipes=recipes,
@@ -2602,12 +2938,14 @@ def main():
             kw = ", ".join(kw_list)
             _rr, _rc = _related_for(rc)
             cx = common_ctx(rel="../")
-            # Honesty: only LibreOffice results are ever executed on this site —
-            # the meta description must say so explicitly rather than imply Excel
-            # and Google Sheets were verified too. Keywords are dropped one at a
-            # time (never mid-word truncated) to stay within the ~155-char SEO
-            # budget where possible; the honesty clause itself is never trimmed.
-            _honesty = "Executed and verified in LibreOffice Calc; Excel/Sheets per docs"
+            # Honesty: the RECIPE formulas on these pages are executed only in
+            # LibreOffice Calc (recipes-verified.json is LibreOffice-only). The
+            # site's FUNCTION verdicts are also executed in Google Sheets, but
+            # that is a different corpus and must not be claimed here. Excel is
+            # never executed. Keywords are dropped one at a time (never mid-word
+            # truncated) to stay within the ~155-char SEO budget where possible;
+            # the honesty clause itself is never trimmed.
+            _honesty = "Recipe executed in LibreOffice Calc; Excel per docs"
             _base = f"{rc['task'].rstrip()} {_honesty}"
             if kw_list:
                 _desc = f"{_base} ({kw})."
@@ -2656,8 +2994,7 @@ def main():
             meta_description=(
                 "Executed-data writeups of formulas that return different results in "
                 "Excel, Google Sheets, and LibreOffice Calc for the same input. "
-                "LibreOffice values are executed; Excel and Google Sheets are documented "
-                "unless stated otherwise."
+                "Google Sheets and LibreOffice values are executed; Excel is documented."
             ),
             canonical=BASE_URL + "guides/",
             guides=seo_pages,
@@ -2698,7 +3035,7 @@ def main():
             meta_description=(
                 "Head-to-head guides for commonly confused spreadsheet functions: real "
                 "differences, which to use when, and compatibility results executed in "
-                "LibreOffice, documented for Excel and Google Sheets."
+                "Google Sheets and LibreOffice, documented for Excel."
             ),
             canonical=BASE_URL + "compare/",
             comparisons=comparisons,
@@ -2738,6 +3075,12 @@ def main():
             "x": bool(e["excel"]["documented"]),
             "g": bool(e["google_sheets"]["documented"]),
             "l": bool(e["libreoffice"]["documented"]),
+            # EXECUTED Google Sheets verdict (null = not in our executed set;
+            # "inconclusive" = the Drive-import round trip, not Sheets, explains
+            # the result). gver is a DATE LABEL, never a version — Sheets has no
+            # pinnable version.
+            "gv": e["google_sheets"]["verdict"],
+            "gver": e["google_sheets"]["version"],
             "lv": e["libreoffice"]["verdict"],
             "lver": e["libreoffice"]["version"],
             # newly supported: the exact release it started working in (else null)
@@ -2767,6 +3110,7 @@ def main():
     _w = _csv.writer(_buf)
     _w.writerow([
         "function", "category", "in_excel", "in_google_sheets", "in_libreoffice",
+        "google_sheets_verdict", "google_sheets_executed",
         "libreoffice_verdict", "libreoffice_version_tested",
         "libreoffice_newly_supported_in",
     ])
@@ -2774,6 +3118,7 @@ def main():
         _v = compat_export[_name]
         _w.writerow([
             _name, _v["cat"], _v["x"], _v["g"], _v["l"],
+            _v["gv"] or "", _v["gver"] or "",
             _v["lv"], _v["lver"], _v["lnew"] if _v["lnew"] is not None else "",
         ])
     (OUT_DIR / "data" / "compat.csv").write_text(_buf.getvalue())
@@ -2783,7 +3128,7 @@ def main():
         meta_description=(
             "Paste a formula and instantly see whether every function works in Excel, "
             "Google Sheets, and current LibreOffice Calc. Based on tests executed in "
-            "LibreOffice plus official vendor docs."
+            "Google Sheets and LibreOffice plus Microsoft's docs."
         ),
         canonical=BASE_URL + "checker.html",
     )
@@ -2865,7 +3210,7 @@ def main():
         page_title="Open spreadsheet function compatibility dataset (CC BY) — Excel, Sheets, LibreOffice",
         meta_description=(
             "Free dataset of spreadsheet function compatibility across Excel, Google "
-            "Sheets, and LibreOffice Calc — LibreOffice executed, Excel/Sheets from "
+            "Sheets, and LibreOffice Calc — Sheets and LibreOffice executed, Excel from "
             "official docs, with per-version history. JSON, CC BY 4.0."
         ),
         canonical=BASE_URL + "data.html",

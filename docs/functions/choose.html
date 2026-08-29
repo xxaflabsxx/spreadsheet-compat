@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHOOSE works in Excel, Google Sheets and LibreOffice</title>
-<meta name="description" content="All 5 executed test cases for CHOOSE match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>CHOOSE gives different results in Google Sheets vs Excel (executed)</title>
+<meta name="description" content="Sheets: out of range error returns #NUM!, not #VALUE!. LibreOffice matches Exce… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/choose.html">
-<meta property="og:title" content="CHOOSE works in Excel, Google Sheets and LibreOffice">
-<meta property="og:description" content="All 5 executed test cases for CHOOSE match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="CHOOSE gives different results in Google Sheets vs Excel (executed)">
+<meta property="og:description" content="Sheets: out of range error returns #NUM!, not #VALUE!. LibreOffice matches Exce… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/choose.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,14 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>CHOOSE</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-08-28</p>
+<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-08-29</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CHOOSE</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CHOOSE</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -358,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -423,6 +424,59 @@ CHOOSE&rsquo;s support changed &mdash; not documentation claims, real results.</
 
 
 
+<h2 class="section-title">Why isn&rsquo;t CHOOSE working in Google Sheets?</h2>
+
+<p><code>CHOOSE</code> runs in Google Sheets, but our executed cases show it does not match
+Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
+formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
+against those cases before assuming your data is wrong.</p>
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=CHOOSE(5,&#34;a&#34;,&#34;b&#34;,&#34;c&#34;)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NUM!</span>, but the documented/expected
+        result is <span class="formula">#VALUE!</span>.
+        https://support.microsoft.com/en-us/office/choose-function-fc5c184f-cb62-4ec7-a46e-38653b98f5bc -- &#39;If index_num is less than 1 or greater than the number of the last value in the list, CHOOSE returns the #VALUE! error value.&#39;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;
+      </li>
+      
+    
+      
+    
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
 
 
 <h2 class="section-title">Executed test cases</h2>
@@ -432,10 +486,62 @@ CHOOSE&rsquo;s support changed &mdash; not documentation claims, real results.</
 
 
 
+<h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=CHOOSE(2,&#34;a&#34;,&#34;b&#34;,&#34;c&#34;)</td>
+  <td>index_num=2 selects the second value in the list</td>
+  <td class="result mono">b</td>
+  <td class="result mono">b</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHOOSE(1,10,20,30)</td>
+  <td>index_num=1 selects the first value</td>
+  <td class="result mono">10</td>
+  <td class="result mono">10</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHOOSE(5,&#34;a&#34;,&#34;b&#34;,&#34;c&#34;)</td>
+  <td>index_num beyond the number of supplied values -&gt; #VALUE!</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">https://support.microsoft.com/en-us/office/choose-function-fc5c184f-cb62-4ec7-a46e-38653b98f5bc -- &#39;If index_num is less than 1 or greater than the number of the last value in the list, CHOOSE returns the #VALUE! error value.&#39;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHOOSE(2.9,&#34;a&#34;,&#34;b&#34;,&#34;c&#34;)</td>
+  <td>Non-integer index_num is truncated toward the lowest integer before use, not rounded</td>
+  <td class="result mono">b</td>
+  <td class="result mono">b<br><span class="category-tag">Same doc as above: &#39;If index_num is a fraction, it is truncated to the lowest integer before being used.&#39; 2.9 truncates to 2, not rounded to 3</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUM(CHOOSE(2,A1:A3,B1:B3))</td>
+  <td>CHOOSE can select an entire range as its &#39;value&#39;, which is then fed to SUM</td>
+  <td class="result mono">60</td>
+  <td class="result mono">60<br><span class="category-tag">index_num=2 selects the B1:B3 range; SUM of 10+20+30=60</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-28)</span></h3>
+
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-28)</h3>
+
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>

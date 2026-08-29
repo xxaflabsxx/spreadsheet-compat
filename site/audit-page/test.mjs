@@ -64,13 +64,46 @@ console.log('unit: classifyFunction branches');
   ok(/do not guess/i.test(r.note), 'unknown note says we do not guess');
 
   // Excel/Sheets targets are documentation-based
-  r = c('F', { x: true, g: true, l: false, lv: null }, 'g', 'x');
-  eq([r.verdict, r.basis], ['ok', 'documented'], 'documented in Sheets -> ok/documented');
-  ok(/documentation-based/.test(r.note), 'Sheets ok note admits documentation basis');
+  // gv absent = no executed Sheets data for this function: documentation only.
+  r = c('F', { x: true, g: true, l: false, gv: null, lv: null }, 'g', 'x');
+  eq([r.verdict, r.basis], ['ok', 'documented'], 'documented in Sheets, not executed -> ok/documented');
+  ok(/documentation-based/.test(r.note), 'un-executed Sheets ok note admits documentation basis');
 
-  r = c('F', { x: true, g: false, l: false, lv: null }, 'g', 'x');
-  eq([r.verdict, r.basis], ['missing', 'documented'], 'g:false -> missing for Sheets target');
+  r = c('F', { x: true, g: false, l: false, gv: null, lv: null }, 'g', 'x');
+  eq([r.verdict, r.basis], ['missing', 'documented'], 'g:false, no executed data -> missing/documented');
   ok(/documented in Excel/.test(r.note), 'missing note cites source-app presence (Excel)');
+
+  // gv set = EXECUTED Google Sheets verdict, and it outranks the g flag exactly
+  // as lv outranks l. Sheets has no version, so the note names the run DATE.
+  const GVER = 'Google Sheets (Drive import, 2026-08-29)';
+  r = c('F', { x: true, g: true, l: false, gv: 'supported', gver: GVER }, 'g', 'x');
+  eq([r.verdict, r.basis], ['ok', 'executed'], 'gv supported -> ok/executed');
+  ok(r.note.includes(GVER), 'executed Sheets ok note names the dated run');
+
+  r = c('F', { x: true, g: true, l: false, gv: 'quirky', gver: GVER }, 'g', 'x');
+  eq([r.verdict, r.basis], ['quirk', 'executed'], 'gv quirky -> quirk/executed');
+
+  r = c('F', { x: true, g: true, l: false, gv: 'unsupported', gver: GVER }, 'g', 'x');
+  eq([r.verdict, r.basis], ['missing', 'executed'], 'gv unsupported -> missing/executed even with g:true');
+  ok(/#NAME\?/.test(r.note), 'executed Sheets missing note names the error it returned');
+
+  // "inconclusive" is not a verdict: the .xlsx round trip, not Sheets, explains
+  // the result, so we fall back to documentation and say so.
+  r = c('F', { x: true, g: true, l: false, gv: 'inconclusive', gver: GVER }, 'g', 'x');
+  eq([r.verdict, r.basis], ['ok', 'documented'], 'gv inconclusive + g:true -> ok/documented fallback');
+  ok(/inconclusive/.test(r.note), 'inconclusive note says so');
+  r = c('F', { x: true, g: false, l: false, gv: 'inconclusive', gver: GVER }, 'g', 'x');
+  eq([r.verdict, r.basis], ['unknown', 'documented'], 'gv inconclusive + g:false -> unknown');
+
+  // Sheets never takes a version: there is one dated run to compare against.
+  eq(c('F', { x: true, g: true, gv: 'supported', gver: GVER }, 'g', 'x', '24.2').note,
+     c('F', { x: true, g: true, gv: 'supported', gver: GVER }, 'g', 'x').note,
+     'Sheets notes ignore targetVersion entirely');
+
+  // Executed Sheets source presence, cited when the TARGET is missing it.
+  r = c('F', { x: false, g: true, l: false, gv: 'supported', gver: GVER }, 'x', 'g');
+  ok(/executed and verified in Google Sheets on /.test(r.note),
+    'Sheets-source missing note cites the executed source presence');
 
   r = c('F', { x: false, g: true, l: false, lv: null }, 'x', 'g');
   eq([r.verdict, r.basis], ['missing', 'documented'], 'x:false -> missing for Excel target');
@@ -108,13 +141,27 @@ console.log('unit: classifyFunction on real compat.json entries');
 {
   const c = V.classifyFunction;
   eq(c('AGGREGATE', DB.AGGREGATE, 'g', 'x').verdict, 'missing', 'AGGREGATE missing in Sheets');
+  eq(c('AGGREGATE', DB.AGGREGATE, 'g', 'x').basis, 'executed', 'AGGREGATE Sheets basis is executed now');
+  eq(c('TEXTSPLIT', DB.TEXTSPLIT, 'g', 'x').verdict, 'missing', 'TEXTSPLIT executed #NAME? in Sheets');
+  eq(c('TEXTSPLIT', DB.TEXTSPLIT, 'g', 'x').basis, 'executed', 'TEXTSPLIT Sheets basis is executed');
+  eq(c('MAP', DB.MAP, 'g', 'x'), {
+    verdict: 'ok', basis: 'executed', note: c('MAP', DB.MAP, 'g', 'x').note
+  }, 'MAP executes fine in Sheets even though LO returns #NAME?');
+  eq(c('CONCAT', DB.CONCAT, 'g', 'x').verdict, 'quirk', 'CONCAT is an executed Sheets quirk (#N/A)');
+  eq(c('CONCAT', DB.CONCAT, 'g', 'x').basis, 'executed', 'CONCAT Sheets quirk is execution-based');
   eq(c('AGGREGATE', DB.AGGREGATE, 'l', 'x').verdict, 'ok', 'AGGREGATE ok in LO (executed)');
   eq(c('AGGREGATE', DB.AGGREGATE, 'l', 'x').basis, 'executed', 'AGGREGATE LO basis executed');
   eq(c('GROUPBY', DB.GROUPBY, 'l', 'x').verdict, 'missing', 'GROUPBY missing in LO (executed #NAME?)');
   eq(c('FILTER', DB.FILTER, 'l', 'x').verdict, 'quirk', 'FILTER quirk in LO');
-  eq(c('FILTER', DB.FILTER, 'g', 'x').verdict, 'ok', 'FILTER ok in Sheets');
+  // FILTER's Sheets run is inconclusive (the _xlfn._xlws. prefix was not mapped
+  // on import), so it must fall back to Google's documentation, NOT to a red
+  // "unsupported" we cannot stand behind.
+  eq(DB.FILTER.gv, 'inconclusive', 'FILTER Sheets verdict is inconclusive in the dataset');
+  eq(c('FILTER', DB.FILTER, 'g', 'x').verdict, 'ok', 'FILTER ok in Sheets (documented fallback)');
+  eq(c('FILTER', DB.FILTER, 'g', 'x').basis, 'documented', 'FILTER Sheets basis is documented, not executed');
   eq(c('SUM', DB.SUM, 'l', 'x').verdict, 'quirk', 'even SUM is an executed quirk in LO');
   eq(c('SUM', DB.SUM, 'g', 'x').verdict, 'ok', 'SUM ok in Sheets');
+  eq(c('SUM', DB.SUM, 'g', 'x').basis, 'executed', 'SUM Sheets verdict is execution-based');
   eq(c('GOOGLEFINANCE', DB.GOOGLEFINANCE, 'x', 'g').verdict, 'missing', 'GOOGLEFINANCE missing in Excel');
   eq(c('BAHTTEXT', DB.BAHTTEXT, 'l', 'x'), {
     verdict: 'ok', basis: 'documented',
@@ -279,8 +326,8 @@ console.log('e2e: Google Sheets -> Excel');
   eq(rep.totals.atRiskFormulas, 2, 'only the two Sheets-only formulas at risk');
   eq(rep.atRiskFunctions.map(r => r.fn), ['ARRAYFORMULA', 'GOOGLEFINANCE'],
     'Sheets-only functions missing in Excel (tie broken by name)');
-  ok(rep.atRiskFunctions.every(r => /documented in Google Sheets/.test(r.note)),
-    'missing notes cite the Sheets source');
+  ok(rep.atRiskFunctions.every(r => /(documented in|executed and verified in) Google Sheets/.test(r.note)),
+    'missing notes cite the Sheets source (documented or executed)');
   eq(fnVerdicts(rep).GROUPBY, 'ok', 'GROUPBY fine when moving TO Excel');
 }
 

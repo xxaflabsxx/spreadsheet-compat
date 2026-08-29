@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FILTER no match: Excel #CALC! vs LibreOffice #N/A</title>
-<meta name="description" content="An empty FILTER is #CALC! in Excel but #N/A in LibreOffice, and TEXTAFTER&#39;s if_not_found fallback still errors with #VALUE!. Modern functions that change error identity.">
+<meta name="description" content="An empty FILTER is #CALC! in Excel but #N/A in LibreOffice, and TEXTAFTER&#39;s fallback still errors. Executed Google Sheets has no TEXTBEFORE/TEXTAFTER at all - it returns #NAME?.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/filter-no-results-calc-error-excel-vs-libreoffice.html">
 <meta property="og:title" content="FILTER no match: Excel #CALC! vs LibreOffice #N/A">
-<meta property="og:description" content="An empty FILTER is #CALC! in Excel but #N/A in LibreOffice, and TEXTAFTER&#39;s if_not_found fallback still errors with #VALUE!. Modern functions that change error identity.">
+<meta property="og:description" content="An empty FILTER is #CALC! in Excel but #N/A in LibreOffice, and TEXTAFTER&#39;s fallback still errors. Executed Google Sheets has no TEXTBEFORE/TEXTAFTER at all - it returns #NAME?.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/filter-no-results-calc-error-excel-vs-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -340,13 +340,13 @@ LibreOffice. Both break the error-handling patterns built around them.</p>
 <p>The FILTER rows use <code>A1:A3 = 1, 2, 3</code> and <code>B1:B3 = 1, 2, 3</code>.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=FILTER(A1:A3,B1:B3>100)</td><td>#CALC!</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
-    <tr><td class="formula">=FILTER(A1:A3,B1:B3>100,"none")</td><td>none</td><td>Not yet executed</td><td class="result">none</td></tr>
-    <tr><td class="formula">=TEXTAFTER("abc","-","none")</td><td>none</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
-    <tr><td class="formula">=TEXTBEFORE("abc","-","none")</td><td>none</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
-    <tr><td class="formula">=TEXTBEFORE("abc","-")</td><td>#N/A</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
+    <tr><td class="formula">=FILTER(A1:A3,B1:B3>100)</td><td>#CALC!</td><td><span class="badge badge-unknown">Inconclusive</span> &mdash; the <code>_xlfn.</code> storage prefix was not mapped on import</td><td class="result">#N/A</td></tr>
+    <tr><td class="formula">=FILTER(A1:A3,B1:B3>100,"none")</td><td>none</td><td><span class="badge badge-unknown">Inconclusive</span> &mdash; the <code>_xlfn.</code> storage prefix was not mapped on import</td><td class="result">none</td></tr>
+    <tr><td class="formula">=TEXTAFTER("abc","-","none")</td><td>none</td><td>#NAME?</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=TEXTBEFORE("abc","-","none")</td><td>none</td><td>#NAME?</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=TEXTBEFORE("abc","-")</td><td>#N/A</td><td>#NAME?</td><td class="result">#N/A</td></tr>
   </tbody>
 </table>
 </div>
@@ -384,8 +384,12 @@ fall back to <code>LEFT</code>/<code>RIGHT</code>/<code>MID</code> with <code>FI
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel results, including <code>#CALC!</code>, are Microsoft's documented behaviour, not values
-we executed in Excel. Google Sheets supports these functions but is not yet run through our harness,
-so that column is left honest.</p>
+we executed in Excel. Google Sheets was executed on 2026-08-29 via Drive import, and the two halves of this table came
+back differently. The <code>FILTER</code> rows are <strong>inconclusive</strong>: our Excel-authored
+file stores the function as <code>_xlfn._xlws.FILTER</code> and Google&rsquo;s importer did not map
+that prefix, so the cells say nothing about the FILTER that Sheets genuinely has. The
+<code>TEXTBEFORE</code> and <code>TEXTAFTER</code> rows returned <code>#NAME?</code>, and that is a
+real result: Google Sheets does not have those two functions at all.</p>
 
 <h2 class="section-title">Check before you migrate</h2>
 <aside class="promo-card">

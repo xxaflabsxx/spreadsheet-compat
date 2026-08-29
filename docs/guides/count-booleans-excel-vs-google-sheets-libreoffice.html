@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>COUNT counts booleans differently in LibreOffice vs Excel</title>
-<meta name="description" content="The same =COUNT(range) returns a larger number in LibreOffice than in Excel when the range holds a TRUE/FALSE cell. Why it happens and how to migrate safely.">
+<meta name="description" content="The same =COUNT(range) returns a larger number in LibreOffice than in Excel when the range holds a TRUE/FALSE cell. Executed Google Sheets agrees with Excel. Why, and how to migrate safely.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/count-booleans-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:title" content="COUNT counts booleans differently in LibreOffice vs Excel">
-<meta property="og:description" content="The same =COUNT(range) returns a larger number in LibreOffice than in Excel when the range holds a TRUE/FALSE cell. Why it happens and how to migrate safely.">
+<meta property="og:description" content="The same =COUNT(range) returns a larger number in LibreOffice than in Excel when the range holds a TRUE/FALSE cell. Executed Google Sheets agrees with Excel. Why, and how to migrate safely.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/count-booleans-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -336,10 +336,10 @@ returns a number one larger in LibreOffice. Nothing errors; the total is just qu
 <code>A3</code> blank, <code>A4=TRUE</code>, <code>A5=20</code>, <code>A6</code> blank.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=COUNT(A1:A6)</td><td>2</td><td>Not yet executed</td><td class="result">3</td></tr>
-    <tr><td class="formula">=COUNT(A1:A1) with A1=TRUE</td><td>0</td><td>Not yet executed</td><td class="result">1</td></tr>
+    <tr><td class="formula">=COUNT(A1:A6)</td><td>2</td><td>2</td><td class="result">3</td></tr>
+    <tr><td class="formula">=COUNT(A1:A1) with A1=TRUE</td><td>0</td><td>0</td><td class="result">1</td></tr>
   </tbody>
 </table>
 </div>
@@ -347,8 +347,8 @@ returns a number one larger in LibreOffice. Nothing errors; the total is just qu
 LibreOffice also counts <code>A4</code>, the boolean. In the second row the range is a single
 boolean cell: Excel counts zero numbers, LibreOffice counts one. The Excel figures are the
 documented-expected values recorded in our test corpus; the LibreOffice figures are what our
-harness actually computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. We have not yet executed this
-case in Google Sheets, so that column is left honest.</p>
+harness actually computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. Google Sheets was executed too &mdash; Drive import, 2026-08-29 &mdash; and it agrees with Excel
+exactly: 2 and 0. LibreOffice is the only one of the three that counts the boolean.</p>
 
 <h2 class="section-title">Why it happens</h2>
 <p>Microsoft's COUNT documentation draws a deliberate line between arguments you <em>type</em>

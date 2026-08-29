@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>POWER(-8,1/3) errors in Excel but returns -2 in LibreOffice</title>
-<meta name="description" content="Excel returns #NUM! for POWER(-8,1/3); LibreOffice quietly returns the real cube root -2. The reason for the fork and how to migrate so both engines agree.">
+<meta name="description" content="Excel documents #NUM! for POWER(-8,1/3); Google Sheets and LibreOffice both return the real cube root -2 when we execute it. The reason for the fork and how to migrate.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/power-negative-base-fractional-exponent-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:title" content="POWER(-8,1/3) errors in Excel but returns -2 in LibreOffice">
-<meta property="og:description" content="Excel returns #NUM! for POWER(-8,1/3); LibreOffice quietly returns the real cube root -2. The reason for the fork and how to migrate so both engines agree.">
+<meta property="og:description" content="Excel documents #NUM! for POWER(-8,1/3); Google Sheets and LibreOffice both return the real cube root -2 when we execute it. The reason for the fork and how to migrate.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/power-negative-base-fractional-exponent-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -335,14 +335,16 @@ other. This is a genuine fork: an error on one side and a finite value on the ot
 <h2 class="section-title">A minimal example</h2>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=POWER(-8,1/3)</td><td>#NUM!</td><td>Not yet executed</td><td class="result">-2</td></tr>
+    <tr><td class="formula">=POWER(-8,1/3)</td><td>#NUM!</td><td>-2</td><td class="result">-2</td></tr>
   </tbody>
 </table>
 </div>
 <p><code>#NUM!</code> is the documented-expected value in our test corpus; -2 is what our harness
-computed by recalculating in LibreOffice Calc 25.8.7.3. We have not yet executed this case in Google Sheets.</p>
+computed by recalculating in LibreOffice Calc 25.8.7.3. Google Sheets was executed too &mdash; Drive import, 2026-08-29 &mdash; and it also returns
+<code>-2</code>. So Excel is the one standing apart: both engines we can actually run give the real
+cube root where Microsoft documents <code>#NUM!</code>.</p>
 
 <h2 class="section-title">Why it happens</h2>
 <p>A negative base raised to a general non-integer exponent has no single real-valued result: the

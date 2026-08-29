@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Open spreadsheet function compatibility dataset (CC BY) — Excel, Sheets, LibreOffice</title>
-<meta name="description" content="Free dataset of spreadsheet function compatibility across Excel, Google Sheets, and LibreOffice Calc — LibreOffice executed, Excel/Sheets from official docs, with per-version history. JSON, CC BY 4.0.">
+<meta name="description" content="Free dataset of spreadsheet function compatibility across Excel, Google Sheets, and LibreOffice Calc — Sheets and LibreOffice executed, Excel from official docs, with per-version history. JSON, CC BY 4.0.">
 
 <link rel="canonical" href="https://canispreadsheet.com/data.html">
 <meta property="og:title" content="Open spreadsheet function compatibility dataset (CC BY) — Excel, Sheets, LibreOffice">
-<meta property="og:description" content="Free dataset of spreadsheet function compatibility across Excel, Google Sheets, and LibreOffice Calc — LibreOffice executed, Excel/Sheets from official docs, with per-version history. JSON, CC BY 4.0.">
+<meta property="og:description" content="Free dataset of spreadsheet function compatibility across Excel, Google Sheets, and LibreOffice Calc — Sheets and LibreOffice executed, Excel from official docs, with per-version history. JSON, CC BY 4.0.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/data.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -318,11 +318,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <main class="container">
 
 <h1>Open spreadsheet compatibility dataset</h1>
-<p class="lede">The machine-verified data behind this site is free to use. It records, for 600 spreadsheet functions, whether each works in Microsoft Excel and Google Sheets (from official documentation) and in LibreOffice Calc (from <a href="methodology.html">actually executing the formula</a>, with per-version history). As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
+<p class="lede">The machine-verified data behind this site is free to use. It records, for 600 spreadsheet functions, whether each works in Microsoft Excel (from official documentation &mdash; we do not run Excel) and what actually happened when we <a href="methodology.html">executed the formula</a> in <strong>Google Sheets</strong> (Drive import, 2026-08-29) and in <strong>LibreOffice Calc</strong> (four pinned builds, with per-version history). As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
 
 <h2 class="section-title">Download</h2>
-<p><a href="data/compat.json"><code>data/compat.json</code></a> &mdash; one JSON object, keyed by uppercase function name (600 entries, 59 KB).<br>
-<a href="data/compat.csv"><code>data/compat.csv</code></a> &mdash; the same data as a CSV (one row per function, headered columns) for spreadsheets and data tools.</p>
+<p><a href="data/compat.json"><code>data/compat.json</code></a> &mdash; one JSON object, keyed by uppercase function name (600 entries, 84 KB).<br>
+<a href="data/compat.csv"><code>data/compat.csv</code></a> &mdash; the same data as a CSV (one row per function, headered columns) for spreadsheets and data tools. Its columns are <code>function, category, in_excel, in_google_sheets, in_libreoffice, google_sheets_verdict, google_sheets_executed, libreoffice_verdict, libreoffice_version_tested, libreoffice_newly_supported_in</code> &mdash; <code>google_sheets_verdict</code> mirrors <code>gv</code> and <code>google_sheets_executed</code> mirrors <code>gver</code> (the dated run label).</p>
 <p>The full test harness, authored test cases, and raw per-LibreOffice-version results are in the <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub repository</a>.</p>
 
 <h2 class="section-title">Schema</h2>
@@ -334,6 +334,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr><td><code>x</code></td><td>boolean</td><td>Documented in Microsoft Excel.</td></tr>
 <tr><td><code>g</code></td><td>boolean</td><td>Documented in Google Sheets.</td></tr>
 <tr><td><code>l</code></td><td>boolean</td><td>Documented in LibreOffice Calc.</td></tr>
+<tr><td><code>gv</code></td><td>string / null</td><td>Google Sheets <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, <code>inconclusive</code>, or null when not yet live-tested. <code>inconclusive</code> means the .xlsx round trip &mdash; not Sheets &mdash; explains the result (see <a href="methodology.html#sheets-caveats">Sheets execution caveats</a>); treat it as &ldquo;no verdict&rdquo; and fall back to <code>g</code>.</td></tr>
+<tr><td><code>gver</code></td><td>string / null</td><td>Label for the Google Sheets run, e.g. <code>Google Sheets (Drive import, 2026-08-29)</code>. This is a <strong>date, not a version</strong> &mdash; Sheets is a rolling service with nothing to pin &mdash; so never parse or compare it as one.</td></tr>
 <tr><td><code>lv</code></td><td>string / null</td><td>LibreOffice <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, or null when not yet live-tested.</td></tr>
 <tr><td><code>lver</code></td><td>string</td><td>LibreOffice version the verdict was produced on (e.g. <code>25.8.7.3</code>).</td></tr>
 <tr><td><code>lnew</code></td><td>string / null</td><td>The LibreOffice version the function first became supported in, when known (else null).</td></tr>
@@ -348,14 +350,21 @@ const db = await (await fetch("https://canispreadsheet.com/data/compat.json")).j
 
 db["XLOOKUP"]
 // {"cat":"Lookup and reference","x":true,"g":true,"l":true,
+//  "gv":"supported","gver":"Google Sheets (Drive import, 2026-08-29)",
 //  "lv":"supported","lver":"25.8.7.3","lnew":"24.8.7.2"}
-//  -> documented in all three; executed as supported in LibreOffice,
-//     first working in LibreOffice 24.8.</code></pre>
+//  -> documented in all three; executed as supported in BOTH Google Sheets
+//     (on the dated run) and LibreOffice, first working in LibreOffice 24.8.
+
+// A Sheets verdict you must NOT read as "unsupported":
+db["FILTER"].gv   // "inconclusive"
+//  -> our Excel-authored .xlsx stores it as _xlfn._xlws.FILTER, which Google's
+//     importer did not map, so the run says nothing about Sheets. Fall back to
+//     db["FILTER"].g (true).</code></pre>
 </div>
 
 <h2 class="section-title">License</h2>
 <p>The compatibility dataset is released under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 (CC&nbsp;BY&nbsp;4.0)</a>. Use it freely, including commercially &mdash; just credit <strong>canispreadsheet.com</strong> with a link. If you build something with it, we&rsquo;d love to hear about it.</p>
-<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted and each vendor&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Corrections welcome via the <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">repository</a>.</p>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted, one dated Google Sheets run (2026-08-29), and Microsoft&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Google Sheets ships changes continuously, so a Sheets verdict is a dated observation rather than a release guarantee. Corrections welcome via the <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">repository</a>.</p>
 
 <aside class="promo-card">
   <div>

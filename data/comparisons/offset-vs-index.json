@@ -10,13 +10,13 @@
     {"aspect": "Dependency tracking", "cols": ["Opaque — audit tools can't see what it points at", "Normal, traceable references"]},
     {"aspect": "Dynamic window (last N rows)", "cols": ["Classic idiom: OFFSET(A2,COUNT(...)-n,0,n,1)", "INDEX(A:A,COUNT(...)-n+1):INDEX(A:A,COUNT(...)) — non-volatile equivalent"]},
     {"aspect": "Resizable in-place (height/width args)", "cols": ["Yes — its unique convenience", "Via the range-of-two-INDEXes pattern"]},
-    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both executed in every LibreOffice version we test; Excel/Sheets per docs)"]}
+    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both executed in every LibreOffice version we test, and in our dated Google Sheets run; Excel per docs)"]}
   ],
   "when": [
     {"func": "OFFSET", "use_when": "Small sheets where its compact height/width arguments read clearly (rolling windows, resizable named ranges) and the volatility cost is negligible."},
     {"func": "INDEX", "use_when": "Anything large or shared: the INDEX:INDEX range trick covers dynamic windows without volatile recalcs, keeps dependency tracing intact, and — combined with MATCH or with modern TAKE/DROP — replaces nearly every OFFSET construction."}
   ],
-  "compat_note": "Both execute identically in every version of Excel, Google Sheets, and LibreOffice we test, including OFFSET's height/width resizing and the INDEX:INDEX range syntax. The volatility difference is also cross-app: all three engines treat OFFSET (and INDIRECT) as volatile.",
+  "compat_note": "Ordinary use agrees everywhere — OFFSET's height/width resizing and the INDEX:INDEX range syntax behave the same in every engine we execute. The out-of-range cases do not: OFFSET off the top of the sheet returns #VALUE! in LibreOffice where Microsoft documents #REF! (our executed Google Sheets run returns #REF!), and an out-of-range INDEX returns #NUM! in our executed Google Sheets run where Excel documents, and LibreOffice returns, #REF!. Excel behavior is per Microsoft's docs — we do not run Excel. The volatility difference is cross-app: all three engines treat OFFSET (and INDIRECT) as volatile.",
   "examples": [
     {"label": "Rolling last-3 average with OFFSET (volatile)", "formula": "=AVERAGE(OFFSET(A2,COUNT(A2:A1000)-3,0,3,1))"},
     {"label": "Same window, non-volatile INDEX range", "formula": "=AVERAGE(INDEX(A:A,COUNT(A2:A1000)-1):INDEX(A:A,COUNT(A2:A1000)+1))"},

@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spreadsheet formula compatibility checker — Excel, Google Sheets &amp; LibreOffice</title>
-<meta name="description" content="Paste a formula and instantly see whether every function works in Excel, Google Sheets, and current LibreOffice Calc. Based on tests executed in LibreOffice plus official vendor docs.">
+<meta name="description" content="Paste a formula and instantly see whether every function works in Excel, Google Sheets, and current LibreOffice Calc. Based on tests executed in Google Sheets and LibreOffice plus Microsoft&#39;s docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/checker.html">
 <meta property="og:title" content="Spreadsheet formula compatibility checker — Excel, Google Sheets &amp; LibreOffice">
-<meta property="og:description" content="Paste a formula and instantly see whether every function works in Excel, Google Sheets, and current LibreOffice Calc. Based on tests executed in LibreOffice plus official vendor docs.">
+<meta property="og:description" content="Paste a formula and instantly see whether every function works in Excel, Google Sheets, and current LibreOffice Calc. Based on tests executed in Google Sheets and LibreOffice plus Microsoft&#39;s docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/checker.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -318,7 +318,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <main class="container">
 
 <h1>Spreadsheet formula compatibility checker</h1>
-<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real tests executed in LibreOffice, plus each vendor&rsquo;s official documentation. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests documented alternatives.</p>
+<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real tests executed in Google Sheets and LibreOffice, plus Microsoft&rsquo;s official documentation for Excel. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests documented alternatives.</p>
 <textarea id="f" rows="3" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:1rem;padding:.6rem" placeholder='=XLOOKUP("North", B2:B6, A2:A6)'></textarea>
 <p><button id="btn" class="promo-btn" style="border:0;cursor:pointer">Check compatibility</button></p>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Try:
@@ -385,6 +385,16 @@ function funcs(s){ const set=new Set();
       if(fn) set.add(fn); } }
   return [...set]; }
 function yn(ok){ return ok?'<span style="color:#0a7a2f">&#10003; yes</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+// Google Sheets column. The EXECUTED verdict (gv) outranks the documentation
+// flag (g), exactly as lo() prefers lv over l. Sheets has no version to show —
+// one dated run — so we show the DATE. "inconclusive" is not a verdict: our
+// Excel-authored .xlsx did not survive Google's importer for that function, so
+// we fall back to the documentation flag and label it.
+function gs(d){ if(d.gv==='supported') return '<span style="color:#0a7a2f">&#10003; executed '+d.gver+'</span>';
+  if(d.gv==='quirky') return '<span style="color:#b8860b">&#9888; quirk (executed '+d.gver+')</span>';
+  if(d.gv==='unsupported') return '<span style="color:#c02020">&#10007; not in Sheets (executed '+d.gver+')</span>';
+  if(d.gv==='inconclusive') return d.g?'<span style="color:#888">documented (our run was inconclusive)</span>':'<span style="color:#888">inconclusive</span>';
+  return d.g?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};
 // Curated, verified portable alternatives (from the comparison pages) for
@@ -410,13 +420,13 @@ const MIG={
  MAKEARRAY:{r:'Excel 365 and Google Sheets only — not in LibreOffice.'},
  XLOOKUP:{r:'Needs Excel 2021+/365, current Sheets, or LibreOffice 24.8+. In older Excel/LibreOffice use INDEX/MATCH.',cmp:'vlookup-vs-index-match'},
  XMATCH:{r:'Needs Excel 2021+/365, Sheets, or LibreOffice 24.8+. Older versions: use MATCH.'},
- TEXTSPLIT:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. Older: SUBSTITUTE/MID tricks or Text-to-Columns.'},
- TEXTBEFORE:{r:'Excel 365 & Sheets; LibreOffice 25.8+ (with quirks). Older: LEFT(A,FIND(delim,A)-1).',cmp:'textbefore-textafter-vs-left-mid-right'},
- TEXTAFTER:{r:'Excel 365 & Sheets; LibreOffice 25.8+ (with quirks). Older: MID(A,FIND(delim,A)+1,...).',cmp:'textbefore-textafter-vs-left-mid-right'},
- HSTACK:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only.'},
- VSTACK:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. In Sheets you can also use {range1;range2}.'},
- TAKE:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only. Older: INDEX ranges.'},
- DROP:{r:'Excel 365 & Sheets; LibreOffice 25.8+ only.'},
+ TEXTSPLIT:{r:'Excel 365 and LibreOffice 25.8+ only - our executed Sheets run returns #NAME?; use SPLIT() in Sheets. Older LibreOffice: SUBSTITUTE/MID tricks or Text-to-Columns.'},
+ TEXTBEFORE:{r:'Excel 365 and LibreOffice 25.8+ (with quirks) - our executed Sheets run returns #NAME?. Everywhere else: LEFT(A,FIND(delim,A)-1).',cmp:'textbefore-textafter-vs-left-mid-right'},
+ TEXTAFTER:{r:'Excel 365 and LibreOffice 25.8+ (with quirks) - our executed Sheets run returns #NAME?. Everywhere else: MID(A,FIND(delim,A)+1,...).',cmp:'textbefore-textafter-vs-left-mid-right'},
+ HSTACK:{r:'Excel 365 and Google Sheets (both executed OK); LibreOffice 25.8+ only.'},
+ VSTACK:{r:'Excel 365 and Google Sheets (executed OK); LibreOffice 25.8+ only. In Sheets you can also use {range1;range2}.'},
+ TAKE:{r:'Excel 365 and LibreOffice 25.8+ only - our executed Sheets run returns #NAME?. Elsewhere: INDEX ranges.'},
+ DROP:{r:'Excel 365 and LibreOffice 25.8+ only - our executed Sheets run returns #NAME?. Elsewhere: INDEX/OFFSET ranges.'},
  LET:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older versions: inline the repeated expressions.'},
  LAMBDA:{r:'Excel 365 and Google Sheets. LibreOffice recognizes LAMBDA (no #NAME?) but every executed case returns #VALUE! in 24.2–25.8 — treat as unsupported there.'},
  SEQUENCE:{r:'Excel 365, Sheets, LibreOffice 24.8+. Older: ROW(INDIRECT(...)) tricks.'},
@@ -443,7 +453,11 @@ function migrate(fs,db,tg,gdb){
   const tv=loTarget();
   // Older than lnew = executed #NAME? in that release, so it is a blocker.
   const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
-  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:(d.lv?(d.lv!=='unsupported'):d.l)) : (tg==='x'?d.x:d.g);
+  // Executed verdicts win over documentation flags for both executed engines.
+  // A Sheets "inconclusive" tells us nothing, so it falls back to the doc flag.
+  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:(d.lv?(d.lv!=='unsupported'):d.l))
+    : (tg==='x' ? d.x
+      : ((d.gv && d.gv!=='inconclusive') ? (d.gv!=='unsupported') : d.g));
   const tname=tg==='l'?TGT_NAME[tg]+' '+tv:TGT_NAME[tg];
   let blockers=[];
   for(const fn of fs){ const d=db[fn]; if(!d) continue; if(!okIn(d)) blockers.push(fn); }
@@ -467,11 +481,13 @@ async function check(){
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
   let rows='', xAll=true,gAll=true,lAll=true, unknown=[];
   for(const fn of fs){ const d=db[fn]; if(!d){ unknown.push(fn); continue; }
-    const lok=d.lv?(d.lv!=='unsupported'):d.l; xAll=xAll&&d.x; gAll=gAll&&d.g; lAll=lAll&&lok;
-    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+yn(d.g)+'</td><td>'+lo(d)+'</td></tr>'; }
+    const lok=d.lv?(d.lv!=='unsupported'):d.l;
+    const gok=(d.gv&&d.gv!=='inconclusive')?(d.gv!=='unsupported'):d.g;
+    xAll=xAll&&d.x; gAll=gAll&&gok; lAll=lAll&&lok;
+    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }
   const say=ok=>ok?'<span style="color:#0a7a2f">works</span>':'<span style="color:#c02020">has an unsupported function</span>';
   let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
-  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel</th><th>Google Sheets</th><th>LibreOffice</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel (documented)</th><th>Google Sheets (executed)</th><th>LibreOffice (executed)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
   const tg=target(); if(tg) html+=migrate(fs,db,tg,gdb);
   html+='<p style="font-size:.9em;color:#888">Shareable link: <a href="'+permalink()+'" style="word-break:break-all">'+permalink()+'</a></p>';

@@ -253,7 +253,7 @@
     if (!r.atRiskFunctions.length) {
       html = '<p class="allclear">No at-risk functions found for this target. Every ' +
         'recognized function in this workbook is ' +
-        (d.target === 'l' ? 'either execution-verified or documented' : 'documented') +
+        (d.target === 'x' ? 'documented' : 'either execution-verified or documented') +
         ' in ' + AuditVerdicts.APP_NAMES[d.target] + '.' +
         (r.unknownFunctions.length ? ' (But see the unknown functions below.)' : '') + '</p>';
     } else {

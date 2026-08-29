@@ -1,11 +1,11 @@
 # Show HN draft — fire at a weekday US-morning window (Tue-Thu ~13:00-15:00 UTC)
 
 Refreshed 2026-08-26 05:50 UTC from the live corpus (numbers verified against data/ + results/ at that time — re-verify before posting; every example claim below was checked against results/*.json on 8/26 — COUNT literal-vs-reference, MROUND mismatched signs, XLOOKUP/SORT since 24.8.7.2, HSTACK/TEXTSPLIT/TAKE since 25.8.7.3):
-600 functions in inventory; 277 functions / 834 test cases executed in LibreOffice 25.8.7.3 (168 in 24.2.0.3, 168 in 24.8.7.2, 194 in 25.2.0.3); 282 verified how-to recipes; 48 comparisons; 15 executed-data guides; Migration Audit live ($19 launch, free tier = full scan + top-3 detail); offline companion CLI scripts/xlsx_recalc_diff.py (23 tests).
+600 functions in inventory; 278 functions / 841 test cases executed in LibreOffice 25.8.7.3 (168 in 24.2.0.3, 168 in 24.8.7.2, 194 in 25.2.0.3) AND, since 2026-08-29, the same 278/841 executed in Google Sheets via Drive import (dated run — Sheets has no version to pin; 5 functions inconclusive on import serialization); 282 verified how-to recipes; 48 comparisons; 15 executed-data guides; Migration Audit live ($19 launch, free tier = full scan + top-3 detail); offline companion CLI scripts/xlsx_recalc_diff.py (23 tests).
 
 ## Title (pick one, <80 chars)
-- Show HN: Caniuse for spreadsheet functions – every LibreOffice result actually executed
-- Show HN: Which Excel formulas silently change in LibreOffice – tested, not documented
+- Show HN: Caniuse for spreadsheet functions – Sheets and LibreOffice results actually executed
+- Show HN: Which Excel formulas silently change in Google Sheets and LibreOffice – tested, not documented
 
 ## Submission
 - URL: https://canispreadsheet.com
@@ -21,11 +21,14 @@ that COUNT over a cell holding TRUE is 0 in Excel and 1 in Calc (a literal TRUE 
 that MROUND(5,-2) is #NUM! in Excel and silently 6 in Calc.
 
 So I built canispreadsheet.com — a compatibility DB for ~600 spreadsheet functions across Excel, Google Sheets
-and LibreOffice Calc. The twist: every LibreOffice result is *executed*, not scraped. A headless LibreOffice
-writes each formula into a real workbook, recalculates, and I read the output back — with deterministic and
-volatile canary formulas in every run to prove recalculation actually happened. 277 functions / 834 cases
-have live-run results, executed against four LibreOffice releases (24.2, 24.8, 25.2, 25.8), so pages show
-caniuse-style "supported since" versions — e.g. XLOOKUP and SORT landed in 24.8; HSTACK/TEXTSPLIT/TAKE in 25.8.
+and LibreOffice Calc. The twist: the Google Sheets and LibreOffice results are *executed*, not scraped. A
+headless LibreOffice writes each formula into a real workbook, recalculates, and I read the output back — with
+deterministic and volatile canary formulas in every run to prove recalculation actually happened. The same
+workbooks go through Google Drive's .xlsx import, which makes Sheets recalculate them, and come back out as
+.xlsx for readback. 278 functions / 841 cases have live-run results in both engines, executed against four
+LibreOffice releases (24.2, 24.8, 25.2, 25.8), so pages show caniuse-style "supported since" versions — e.g.
+XLOOKUP and SORT landed in 24.8; HSTACK/TEXTSPLIT/TAKE in 25.8. Sheets gets a date, not a version: it is a
+rolling service with nothing to pin.
 
 Things to try:
 - /checker — paste any formula; it extracts every function and says whether it works in each app, and can
@@ -45,18 +48,22 @@ on a file saved by Excel does NOT recalculate — it passes Excel's cached value
 the cached <v> values from formula cells first. There's a small offline CLI in the repo
 (scripts/xlsx_recalc_diff.py) that does exactly that diff for your own workbooks, per cell, nothing uploaded.
 
-Honest limitations: only LibreOffice is live-executed today; Excel and Google Sheets verdicts come from their
-official function lists and documented behavior (I can't headlessly run those), and the guides label which
-column is executed vs documented. Sheets-specific execution is the next thing I want to add. If you find a
-case where the engines disagree with my data, that's the most useful feedback I can get.
+Honest limitations: Excel is the one engine I still can't run — its column is Microsoft's documented behavior,
+and it's the yardstick the two executed engines are measured against. Every guide labels which column is
+executed and which is documented. The Sheets run reuses Excel-authored .xlsx files, and Google's importer
+doesn't map every OOXML storage prefix, so five functions (FILTER, SORT, BYROW, BYCOL, MAKEARRAY) come back
+*inconclusive* rather than getting a verdict I can't stand behind — a re-run with plain function names is
+queued. The how-to recipe examples are still LibreOffice-only. If you find a case where the engines disagree
+with my data, that's the most useful feedback I can get.
 
 Static site, no tracking, no ads.
 
 ## Notes
 - Be around to answer comments: check the thread every tick after posting (HN JSON API is scriptable:
   https://hacker-news.firebaseio.com/v0/item/<id>.json — no login needed for reading).
-- If asked "how do you verify Excel/Sheets?": honest answer — I don't yet; docs only. Point at the executed/
-  documented labels on every guide.
+- If asked "how do you verify Excel/Sheets?": Sheets IS executed (Drive import, dated 2026-08-29 — show
+  /methodology.html#sheets-caveats for the inconclusive set). Excel is not, and won't be until a Windows
+  runner exists; docs only. Point at the executed/documented labels on every guide.
 - If asked about the paid audit: free tier is real and useful; the paid part is the full report + Team tier
   ($79) for consultants. Don't oversell.
 - If asked who/what built it: it's an AF Labs project; be honest about heavy automation/AI assistance if the

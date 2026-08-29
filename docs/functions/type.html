@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TYPE gives different results in LibreOffice vs Excel (tested)</title>
-<meta name="description" content="3/5 match Excel&#39;s docs; logical returns 1, not 4. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="3/5 match Excel&#39;s docs; logical returns 1, not 4. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/type.html">
 <meta property="og:title" content="TYPE gives different results in LibreOffice vs Excel (tested)">
-<meta property="og:description" content="3/5 match Excel&#39;s docs; logical returns 1, not 4. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="3/5 match Excel&#39;s docs; logical returns 1, not 4. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/type.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Information &middot; Last tested 2026-08-28</p>
+<p class="category-tag">Category: Information &middot; Last tested 2026-08-29</p>
 
 
-<p class="lede">Real compatibility results for the <strong>TYPE</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>TYPE</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -358,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -431,12 +432,42 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+<h2 class="section-title">Why isn&rsquo;t TYPE working in Google Sheets?</h2>
+
+<p><code>TYPE</code> runs in Google Sheets, but our executed cases show it does not match
+Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
+formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
+against those cases before assuming your data is wrong.</p>
+
+
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
     
   
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=TYPE(A1:A3)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">1</span>, but the documented/expected
+        result is <span class="formula">64</span>.
+        MISMATCH vs expected: expected 64, got 1
+      </li>
+      
     
   
     
@@ -479,10 +510,62 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+<h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=TYPE(A1)</td>
+  <td>A number -&gt; code 1</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TYPE(A1)</td>
+  <td>Text -&gt; code 2</td>
+  <td class="result mono">2</td>
+  <td class="result mono">2</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TYPE(TRUE)</td>
+  <td>A logical/boolean value -&gt; code 4</td>
+  <td class="result mono">4</td>
+  <td class="result mono">4</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TYPE(1/0)</td>
+  <td>An error value -&gt; code 16. TYPE classifies the error&#39;s TYPE rather than propagating the error itself, matching ISERROR-style special-casing</td>
+  <td class="result mono">16</td>
+  <td class="result mono">16<br><span class="category-tag">Full 5-code table (1/2/4/16/64) confirmed via https://support.microsoft.com/en-us/office/type-function-45b4e688-4bc3-48b3-a105-ffa892995899</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TYPE(A1:A3)</td>
+  <td>A multi-cell array/range reference -&gt; code 64</td>
+  <td class="result mono">1</td>
+  <td class="result mono">64</td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-28)</span></h3>
+
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-28)</h3>
+
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>

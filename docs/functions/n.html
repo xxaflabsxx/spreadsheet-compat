@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>N works in Excel, Google Sheets and LibreOffice (LibreOffice-tested)</title>
-<meta name="description" content="All 5 executed test cases for N match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>N works in Excel (docs), Sheets &amp; LibreOffice (executed)</title>
+<meta name="description" content="All 5 LibreOffice and 5 Google Sheets executed cases for N match Excel&#39;s docume… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/n.html">
-<meta property="og:title" content="N works in Excel, Google Sheets and LibreOffice (LibreOffice-tested)">
-<meta property="og:description" content="All 5 executed test cases for N match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="N works in Excel (docs), Sheets &amp; LibreOffice (executed)">
+<meta property="og:description" content="All 5 LibreOffice and 5 Google Sheets executed cases for N match Excel&#39;s docume… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/n.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Information &middot; Last tested 2026-08-28</p>
+<p class="category-tag">Category: Information &middot; Last tested 2026-08-29</p>
 
 
-<p class="lede">Real compatibility results for the <strong>N</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>N</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -358,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -425,6 +426,10 @@ N&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
@@ -432,10 +437,62 @@ N&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+<h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=N(A1)</td>
+  <td>A number passed through unchanged -&gt; the number itself</td>
+  <td class="result mono">7</td>
+  <td class="result mono">7</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=N(TRUE)</td>
+  <td>TRUE -&gt; 1, per Microsoft&#39;s N doc example table</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Confirmed via https://support.microsoft.com/en-us/office/n-function-a624cad1-3635-4208-b54a-29733d1278c9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=N(FALSE)</td>
+  <td>FALSE -&gt; 0, per the same doc&#39;s TRUE/FALSE convention</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=N(A1)</td>
+  <td>Text (even numeric-looking text like &#34;7&#34;) -&gt; 0, per doc example N(&#34;7&#34;) = 0 and N(&#34;Even&#34;) = 0: &#39;anything else&#39; converts to 0</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=N(DATE(2024,1,1))</td>
+  <td>A date -&gt; its underlying serial number, per doc example N(4/17/2011)=40650</td>
+  <td class="result mono">45292</td>
+  <td class="result mono">45292<br><span class="category-tag">2024-01-01 is Excel serial day 45292 under the 1900 date system.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-28)</span></h3>
+
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-28)</h3>
+
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>

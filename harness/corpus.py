@@ -125,10 +125,19 @@ def assert_sheets_safe_name(name):
     return name
 
 
-def build_workbook(cases_flat):
+def build_workbook(cases_flat, plain_names=False):
     """
     cases_flat: list of dicts with keys:
         test_id, function, formula (original), setup_cells, check_range
+    plain_names: if True, write each formula EXACTLY as authored in
+        data/tests -- no _xlfn./_xlfn._xlws. storage-form translation at
+        all. Default False preserves the original (and run_lo.py's only)
+        behaviour byte-for-byte; run_lo.py always calls this positionally
+        with one argument, so it is unaffected by this parameter existing.
+        See run_sheets.py's `--plain-names` build flag for why this exists:
+        Google Sheets' xlsx importer maps plain `_xlfn.NAME` but not
+        `_xlfn._xlws.FILTER/SORT`, so those (and LAMBDA-family functions)
+        need to be tested with their bare, natural-language name instead.
     Returns (workbook, sheet_map) where sheet_map[test_id] -> sheet_name
     """
     wb = openpyxl.Workbook()
@@ -147,7 +156,7 @@ def build_workbook(cases_flat):
         # Prefix EVERY known future-function call site (not just the function
         # under test): nested modern calls like UNICHAR(UNICODE(...)) need
         # both names prefixed or the whole formula is #NAME? on all engines.
-        storage_formula = to_storage_formula_all(c["formula"])
+        storage_formula = c["formula"] if plain_names else to_storage_formula_all(c["formula"])
         anchor = c["anchor"]
         if c.get("check_range"):
             # Functions expected to return a multi-cell array (spill/dynamic

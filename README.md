@@ -71,6 +71,20 @@ engine runners (what actually happens) → results (raw truth) → site
 
 ## Status (Phase 1 + Phase-2 corpus expansion)
 
+- **Google Sheets is now EXECUTED.** `results/google-sheets.json` (2026-08-29)
+  holds the whole corpus — 278 functions / 841 cases — run through the Drive
+  import route (upload .xlsx → Sheets recalculation → .xlsx export readback),
+  canary 841/841, `trusted: true`. Two engines are executed now: LibreOffice
+  Calc (four pinned builds) and Google Sheets (one dated run — Sheets has no
+  version to pin, so its `engine_version` is a DATE LABEL and must never be
+  parsed as a version). **Microsoft Excel is still not executed** and its
+  column remains documentation-only everywhere on the site.
+  Five functions (BYCOL, BYROW, FILTER, MAKEARRAY, SORT) carry the verdict
+  `inconclusive` because Google's importer did not map the OOXML storage
+  prefix our Excel-authored workbooks use for them — see "Google Sheets
+  execution caveats" in `DATASET_CARD.md`. They are NOT reported as
+  unsupported.
+
 - `data/functions.json`: 600 distinct function names inventoried from live
   official docs. Excel: 522 documented, Google Sheets: 515, LibreOffice: 469,
   documented in all three: 421. Sources actually fetched are listed in the
@@ -550,8 +564,9 @@ labelled with their master's address.
 
 ### Honest limits
 
-- **Only LibreOffice is executed here.** The Excel side is whatever Excel
-  cached in the file. If the workbook was last saved by something other than
+- **Only LibreOffice is executed by this offline tool.** (The site's function
+  verdicts are executed in Google Sheets too; this per-cell recalc diff is
+  LibreOffice-only.) The Excel side is whatever Excel cached in the file. If the workbook was last saved by something other than
   Excel, you are not diffing against Excel.
 - **`calcMode="manual"`** in `xl/workbook.xml` means Excel was not
   recalculating automatically, so those cached values may be stale. The tool
@@ -636,8 +651,10 @@ preserves every non-formula cell and every non-sheet zip part byte-for-byte.
   above. It takes the Drive-import route (upload a formula-only .xlsx,
   Drive auto-converts and recalculates, export back as .xlsx) rather than
   the Sheets API, which needs no service account and no per-cell API
-  traffic. Still to do: run the full 7-chunk sweep and wire
-  `results/google-sheets.json` into the site.
+  traffic. ✅ The full 7-chunk sweep ran on 2026-08-29 and
+  `results/google-sheets.json` is wired into the site (verdicts, guides,
+  `compat.json` `gv`/`gver`, checker, Migration Audit). Remaining: a re-run
+  writing plain function names to resolve the five `inconclusive` verdicts.
 - **Excel engine.** No good headless Linux path exists (no real Excel
   calculation engine on Linux). Two options, in order of preference:
   1. **Windows + Office Scripts / VBA automation**: a small Windows runner
@@ -671,13 +688,22 @@ preserves every non-formula cell and every non-sheet zip part byte-for-byte.
   as "what the docs say," not "what's actually implemented." (We saw one
   concrete instance of this gap: MAXIFS computes correctly in LO 24.2 but
   wasn't found on the specific help page category we scraped.)
-- Only LibreOffice has executed results in `results/` so far. The Google
-  Sheets runner (`harness/run_sheets.py`) now exists and its plumbing is
-  proven end-to-end, but the full 7-chunk Drive sweep has not been run, so
-  `results/google-sheets.json` does not exist yet and **no Sheets column
-  anywhere may be populated from executed data until it does**. When it
-  does, remember its `engine_version` is a dated import label, not a
-  version: Sheets is a hosted product that changes under us.
+- LibreOffice and Google Sheets both have executed results in `results/`.
+  The Sheets sweep ran on 2026-08-29 via `harness/run_sheets.py`; its
+  `engine_version` is a dated import label, **not** a version — Sheets is a
+  hosted product that changes under us, so a Sheets verdict is a dated
+  observation rather than a release guarantee. `_version_tuple()` in
+  `site/build_site.py` deliberately sorts any non-numeric label as `(0,)`
+  so the label can never be compared as a version.
+- The Sheets corpus was executed from the **Excel-authored** workbooks, so a
+  handful of results describe the import path rather than Sheets. Those are
+  classified `inconclusive` (never `unsupported`): see
+  `sheets_case_inconclusive()` in `site/build_site.py` and the caveats in
+  `DATASET_CARD.md`. A follow-up Sheets run writing plain, unprefixed
+  function names is the fix.
+- The **recipe** corpus (`results/recipes-verified.json`) is LibreOffice-only.
+  How-to pages therefore carry Sheets-executed FUNCTION verdicts but a
+  LibreOffice-only worked example, and their copy says exactly that.
 - Excel columns in any compatibility matrix must not be populated with
   executed data until an Excel engine exists, per the quality bar for this
   project.

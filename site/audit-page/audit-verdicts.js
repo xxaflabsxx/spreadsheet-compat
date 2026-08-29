@@ -7,9 +7,15 @@
  *   - the parse result of XlsxAudit.auditXlsx() (see audit.js, from the E1
  *     prototype — unchanged copy);
  *   - the site's verdict dataset docs/data/compat.json:
- *       { FUNC: { cat, x:bool, g:bool, l:bool, lv, lver, lnew } }
- *     where x/g   = documented in Excel / Google Sheets (documentation-based),
- *           l     = documented in LibreOffice Calc,
+ *       { FUNC: { cat, x:bool, g:bool, l:bool, gv, gver, lv, lver, lnew } }
+ *     where x/g/l = documented in Excel / Google Sheets / LibreOffice Calc,
+ *           gv    = EXECUTED Google Sheets verdict: "supported" | "quirky" |
+ *                   "unsupported" | "inconclusive" | null (null = not in our
+ *                   executed set; "inconclusive" = the .xlsx round trip, not
+ *                   Sheets, explains the result -- see the site methodology),
+ *           gver  = the Google Sheets run LABEL. Sheets is a rolling service
+ *                   with no release to pin, so this is a DATE, never a version:
+ *                   never compare it with compareVersions().
  *           lv    = EXECUTED LibreOffice verdict: "supported" | "quirky" |
  *                   "unsupported" | null (null = not in our executed set),
  *           lver  = LibreOffice version the executed verdict comes from,
@@ -18,9 +24,15 @@
  *                   or it has no executed data at all).
  *
  * HONESTY CONTRACT (do not weaken when editing copy):
- *   - Excel and Google Sheets verdicts are documentation-based. Only
- *     LibreOffice verdicts with lv set are execution-based. The `basis` field
- *     says which, and the UI must surface it.
+ *   - Excel verdicts are documentation-based; we never execute Excel. Google
+ *     Sheets verdicts with gv set and LibreOffice verdicts with lv set are
+ *     execution-based. The `basis` field says which, and the UI must surface it.
+ *   - Google Sheets has NO version targeting: there is one dated run and
+ *     nothing to pick between, so targetVersion is ignored for Sheets targets
+ *     and the notes say "executed on <date>" rather than naming a release.
+ *   - A gv of "inconclusive" is NOT a verdict: it means our Excel-authored
+ *     .xlsx did not survive Google's importer for that function. We fall back
+ *     to the documentation flag and say so.
  *   - "quirky" means: the function IS recognized by LibreOffice, but at least
  *     one of our executed test cases returned a different value/error than
  *     Excel. It is not "broken" — it needs review, and we say exactly that.
@@ -119,8 +131,13 @@
       if (entry.l) return 'documented for LibreOffice Calc';
       return null;
     }
-    var flag = source === 'x' ? entry.x : entry.g;
-    return flag ? 'documented in ' + APP_NAMES[source] : null;
+    if (source === 'g') {
+      if (entry.gv === 'supported') return 'executed and verified in Google Sheets on ' + entry.gver;
+      if (entry.gv === 'quirky') return 'recognized (with quirks) in Google Sheets, executed on ' + entry.gver;
+      if (entry.g) return 'documented in Google Sheets';
+      return null;
+    }
+    return entry.x ? 'documented in ' + APP_NAMES.x : null;
   }
 
   /*
@@ -251,18 +268,72 @@
       };
     }
 
-    // Excel / Google Sheets targets: documentation-based only, and we say so.
-    var present = target === 'x' ? entry.x : entry.g;
-    if (present) {
+    // Google Sheets target: EXECUTED verdict (gv) outranks the documentation
+    // flag (g), exactly as lv outranks l for LibreOffice. There is no version
+    // to target — one dated run — so targetVersion is ignored here and every
+    // note names the run DATE instead of a release.
+    if (target === 'g') {
+      if (entry.gv === 'unsupported') {
+        return {
+          verdict: 'missing', basis: 'executed',
+          note: 'Executed in Google Sheets on ' + entry.gver + ' and not recognized — it ' +
+            'returns #NAME?. Google Sheets is a rolling service with no version to pin, so ' +
+            'this is what it did on that date.' + srcNote
+        };
+      }
+      if (entry.gv === 'supported') {
+        return {
+          verdict: 'ok', basis: 'executed',
+          note: 'Executed and verified in Google Sheets on ' + entry.gver +
+            ' (imported as .xlsx, recalculated by Sheets, read back).'
+        };
+      }
+      if (entry.gv === 'quirky') {
+        return {
+          verdict: 'quirk', basis: 'executed',
+          note: 'Recognized by Google Sheets (executed ' + entry.gver + '), but at least one of ' +
+            'our executed test cases returned a different value or error than Excel documents. ' +
+            'It will not error out as unknown — review the affected cells for silent differences.'
+        };
+      }
+      if (entry.gv === 'inconclusive') {
+        return {
+          verdict: entry.g ? 'ok' : 'unknown',
+          basis: 'documented',
+          note: 'Our Google Sheets run (' + entry.gver + ') was inconclusive for this function: ' +
+            'the .xlsx we import stores it under an OOXML prefix Google’s importer did not map, so ' +
+            'the result describes the import, not Sheets. ' + (entry.g
+              ? 'Falling back to Google’s own function reference, which documents it — ' +
+                'this verdict is documentation-based, not execution-verified.'
+              : 'We have no documentation flag for it either, so verify it manually.')
+        };
+      }
+      // gv null: no executed data. Documentation flag only, and we say so.
+      if (entry.g) {
+        return {
+          verdict: 'ok', basis: 'documented',
+          note: 'In Google Sheets’ official function reference, but not yet in our executed ' +
+            'test set — this verdict is documentation-based, not execution-verified.'
+        };
+      }
+      return {
+        verdict: 'missing', basis: 'documented',
+        note: 'Not in Google Sheets’ documented function set (and not in our executed test set) — ' +
+          'formulas using it typically fail with #NAME? after migration.' + srcNote
+      };
+    }
+
+    // Excel target: documentation-based only. We never execute Excel.
+    if (entry.x) {
       return {
         verdict: 'ok', basis: 'documented',
-        note: 'In ' + APP_NAMES[target] + '’s official function reference. ' +
-          '(Excel/Sheets verdicts are documentation-based; we execution-verify LibreOffice.)'
+        note: 'In ' + APP_NAMES.x + '’s official function reference. ' +
+          '(Excel verdicts are documentation-based; we execution-verify Google Sheets and LibreOffice.)'
       };
     }
     return {
       verdict: 'missing', basis: 'documented',
-      note: 'Not in ' + APP_NAMES[target] + '’s documented function set — formulas ' +
+      note: 'Not in ' + APP_NAMES.x + '’s documented function set — formulas ' +
         'using it typically fail with #NAME? after migration.' + srcNote
     };
   }

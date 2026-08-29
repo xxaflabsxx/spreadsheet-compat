@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6</title>
-<meta name="description" content="Five of Excel&#39;s seven ERROR.TYPE codes match in LibreOffice Calc. The #REF! and #NUM! cases return #N/A instead of 4 and 6 — so error-classification logic breaks on migration.">
+<meta name="description" content="LibreOffice returns #N/A where Excel documents 4 and 6; executed Google Sheets returns 4 and 6 but cannot parse the intersection operator at all. Error-classification logic breaks on migration.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/error-type-codes-excel-vs-libreoffice.html">
 <meta property="og:title" content="ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6">
-<meta property="og:description" content="Five of Excel&#39;s seven ERROR.TYPE codes match in LibreOffice Calc. The #REF! and #NUM! cases return #N/A instead of 4 and 6 — so error-classification logic breaks on migration.">
+<meta property="og:description" content="LibreOffice returns #N/A where Excel documents 4 and 6; executed Google Sheets returns 4 and 6 but cannot parse the intersection operator at all. Error-classification logic breaks on migration.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/error-type-codes-excel-vs-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -342,16 +342,16 @@ you hand it something that is not an error at all.</p>
 space intersection of two non-overlapping ranges is a genuine <code>#NULL!</code>.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=ERROR.TYPE(OFFSET(A1,-1,0))</td><td>4</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
-    <tr><td class="formula">=ERROR.TYPE(SQRT(-1))</td><td>6</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
-    <tr><td class="formula">=ERROR.TYPE(A1:A2 C1:C2)</td><td>1</td><td>Not yet executed</td><td class="result">1</td></tr>
-    <tr><td class="formula">=ERROR.TYPE(1/0)</td><td>2</td><td>Not yet executed</td><td class="result">2</td></tr>
-    <tr><td class="formula">=ERROR.TYPE("a"+1)</td><td>3</td><td>Not yet executed</td><td class="result">3</td></tr>
-    <tr><td class="formula">=ERROR.TYPE(qwertyzz)</td><td>5</td><td>Not yet executed</td><td class="result">5</td></tr>
-    <tr><td class="formula">=ERROR.TYPE(NA())</td><td>7</td><td>Not yet executed</td><td class="result">7</td></tr>
-    <tr><td class="formula">=ERROR.TYPE(5)</td><td>#N/A</td><td>Not yet executed</td><td class="result">#N/A</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(OFFSET(A1,-1,0))</td><td>4</td><td>4</td><td class="result">#N/A</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(SQRT(-1))</td><td>6</td><td>6</td><td class="result">#N/A</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(A1:A2 C1:C2)</td><td>1</td><td>#ERROR!</td><td class="result">1</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(1/0)</td><td>2</td><td>2</td><td class="result">2</td></tr>
+    <tr><td class="formula">=ERROR.TYPE("a"+1)</td><td>3</td><td>3</td><td class="result">3</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(qwertyzz)</td><td>5</td><td>5</td><td class="result">5</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(NA())</td><td>7</td><td>7</td><td class="result">7</td></tr>
+    <tr><td class="formula">=ERROR.TYPE(5)</td><td>#N/A</td><td>#N/A</td><td class="result">#N/A</td></tr>
   </tbody>
 </table>
 </div>
@@ -399,7 +399,10 @@ LibreOffice may simply be unable to see them.</p>
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel codes are Microsoft's documented mapping as recorded in our test corpus, not values we
-executed in Excel. Google Sheets is not yet run through our harness, so that column is left honest.
+executed in Excel. The Google Sheets column is executed output from a Drive import on 2026-08-29. Sheets returns
+Excel&rsquo;s documented code on seven of the eight rows &mdash; including the <code>4</code> and
+<code>6</code> that LibreOffice misses &mdash; and diverges only on the intersection row, where it
+cannot parse <code>A1:A2 C1:C2</code> at all and answers <code>#ERROR!</code>.
 The LibreOffice column is executed output from LibreOffice Calc 25.8.7.3, reproduced in our
 24.2.0.3, 24.8.7.2 and 25.2.0.3 runs.</p>
 

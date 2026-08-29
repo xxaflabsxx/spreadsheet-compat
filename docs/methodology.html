@@ -318,10 +318,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <main class="container">
 
 <h1>How we verify spreadsheet compatibility</h1>
-<p class="lede">Every LibreOffice verdict on this site comes from <strong>actually executing the formula</strong> in a real engine and checking what came back &mdash; not from reading documentation. This page explains the machinery, what &ldquo;verified&rdquo; means here, and the limits of the approach.</p>
+<p class="lede">Every Google Sheets and LibreOffice verdict on this site comes from <strong>actually executing the formula</strong> in a real engine and checking what came back &mdash; not from reading documentation. Microsoft Excel is the one engine we do <em>not</em> execute: its column is Microsoft&rsquo;s documented behavior, and it is the yardstick the executed engines are measured against. This page explains the machinery, what &ldquo;verified&rdquo; means here, and the limits of the approach.</p>
 
 <h2 class="section-title">The execution harness</h2>
 <p>For each function we author test cases: a formula, any setup cells it needs, and the result Excel documents or produces for that input. The harness writes each case into a real <code>.xlsx</code> workbook with openpyxl, then runs <strong>headless LibreOffice Calc</strong> over it (<code>soffice --convert-to xlsx</code>), which forces a full recalculation. We reload the output and compare every result against the expected value.</p>
+<p>The <strong>same workbooks</strong> are run through <strong>Google Sheets</strong>: uploaded to Google Drive with import-conversion on, opened as a Sheet (which recalculates every formula), then exported back to <code>.xlsx</code> and read with the same reader. That run is dated, not versioned &mdash; Sheets is a rolling service with no release to pin &mdash; so every Sheets result on this site is labelled &ldquo;executed 2026-08-29 via Drive import&rdquo; rather than given a version number.</p>
 <p>Two guards make the results trustworthy:</p>
 <ul>
 <li><strong>Recalculation canaries.</strong> Every generated workbook contains sentinel formulas (deterministic arithmetic plus a volatile function) whose values prove the engine really recalculated rather than echoing stored results. A run that fails its canary is discarded, never published.</li>
@@ -331,19 +332,30 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <h2 class="section-title">Version matrix</h2>
 <p>The same corpus runs against multiple LibreOffice releases &mdash; currently 24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3 &mdash; which is how function pages can state a precise &ldquo;supported since&rdquo; release rather than a guess. Current corpus: <strong>278 functions live-tested</strong> across <strong>841 executed cases</strong> per release.</p>
 
+<h2 class="section-title" id="sheets-caveats">Google Sheets execution caveats</h2>
+<p>The Sheets run reuses the Excel-authored workbooks, and that round trip has two artifacts which are <em>not</em> Google Sheets behavior. Where a result is explained by either, we publish <strong>Inconclusive</strong> instead of a verdict &mdash; never a red &ldquo;unsupported&rdquo; badge:</p>
+<ul>
+<li><strong>Unmapped storage prefixes.</strong> Excel stores post-2007 functions as <code>_xlfn.NAME</code>, <code>_xlfn._xlws.NAME</code> or (for LAMBDA parameters) <code>_xlpm.NAME</code>. Google&rsquo;s importer maps some but not all: <code>_xlfn.XLOOKUP</code>, <code>_xlfn.MAP</code> and <code>_xlfn.LAMBDA</code> evaluate fine, while <code>_xlfn._xlws.FILTER</code> and <code>_xlfn._xlws.SORT</code> come back <code>#NAME?</code> and BYROW/BYCOL/MAKEARRAY come back <code>#ERROR!</code>. Google documents all of those functions, so those results say something about the import path, not about Sheets support. Affected here: <strong>BYCOL, BYROW, FILTER, MAKEARRAY and SORT</strong>. A follow-up Sheets run that writes plain, unprefixed function names will resolve them.</li>
+<li><strong>Export readback.</strong> Sheets&rsquo; <code>.xlsx</code> export rounds every float to 10 significant digits (<code>PI()</code> comes back as 3.141592654) and writes an empty cell where a result is blank or zero-length. Where that rounding or that blank is the <em>only</em> disagreement with the expected value &mdash; DEGREES(1), INDIRECT to a blank cell, TRANSPOSE of a blank cell &mdash; the difference is in the export, not in the engine.</li>
+</ul>
+<p>A <code>#NAME?</code> from Sheets on a formula with <em>no</em> storage prefix, or on a function Google does not document (TEXTSPLIT, TAKE, DROP, AGGREGATE&hellip;), is a real unsupported verdict and is published as one.</p>
+
 <h2 class="section-title">What the verdicts mean</h2>
 <ul>
 <li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result (probe cases for volatile functions like NOW/RAND assert error-free execution and deterministic invariants instead of exact values).</li>
 <li><strong>Quirk found</strong> &mdash; the function exists but at least one case returned a different value or error than Excel produces; the failing case is shown on the function&rsquo;s page.</li>
 <li><strong>Unsupported</strong> &mdash; the engine returns <code>#NAME?</code> (unrecognized function) with the storage prefix correctly applied.</li>
+<li><strong>Inconclusive</strong> (Google Sheets only) &mdash; the round trip described above explains the result, so we make no claim about the engine. See the <a href="#sheets-caveats">caveats</a>.</li>
 </ul>
 
 <h2 class="section-title">How-to recipes are verified too</h2>
-<p>Every formula on a <a href="how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice 25.8.7.3 with the sample data shown, and the page displays the value it actually returned.</p>
+<p>Every formula on a <a href="how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice 25.8.7.3 with the sample data shown, and the page displays the value it actually returned. To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.</p>
 
 <h2 class="section-title">Honest limitations</h2>
 <ul>
-<li><strong>Excel and Google Sheets are not live-executed.</strong> Their columns reflect each vendor&rsquo;s official function documentation. We can&rsquo;t headlessly run those engines (yet); where our executed LibreOffice results reveal a difference against documented Excel behavior, that&rsquo;s labeled a quirk of LibreOffice, and disputed cases are re-checked by hand.</li>
+<li><strong>Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run Excel (yet); where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
+<li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: the verdicts describe Sheets as it behaved on 2026-08-29. Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
+<li><strong>Some Sheets results are inconclusive.</strong> See the <a href="#sheets-caveats">Sheets execution caveats</a> above; those cases are excluded from verdicts and quirk counts rather than guessed at.</li>
 <li><strong>Coverage is partial.</strong> 278 of ~600 catalog functions have executed tests; untested functions say so explicitly rather than borrowing a verdict.</li>
 <li><strong>A passing case is evidence, not proof.</strong> A function can match on our cases and still differ on inputs we haven&rsquo;t authored. When you find such an edge, please report it.</li>
 </ul>

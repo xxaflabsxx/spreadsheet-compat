@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SUM(1,&#34;2&#34;,3) returns 6 in Excel but #VALUE! in LibreOffice</title>
-<meta name="description" content="Excel adds a number typed as text when you put it straight into SUM&#39;s arguments; LibreOffice returns #VALUE! for the identical formula. Why they differ and how to migrate.">
+<meta name="description" content="Excel adds a number typed as text inside SUM&#39;s arguments and executed Google Sheets returns 6 too; LibreOffice returns #VALUE! for the identical formula. Why they differ and how to migrate.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/sum-text-numbers-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:title" content="SUM(1,&#34;2&#34;,3) returns 6 in Excel but #VALUE! in LibreOffice">
-<meta property="og:description" content="Excel adds a number typed as text when you put it straight into SUM&#39;s arguments; LibreOffice returns #VALUE! for the identical formula. Why they differ and how to migrate.">
+<meta property="og:description" content="Excel adds a number typed as text inside SUM&#39;s arguments and executed Google Sheets returns 6 too; LibreOffice returns #VALUE! for the identical formula. Why they differ and how to migrate.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/sum-text-numbers-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -334,16 +334,17 @@ Calc returns <code>#VALUE!</code> for exactly the same formula.</p>
 <h2 class="section-title">A minimal example</h2>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=SUM(1,"2",3)</td><td>6</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=SUM(1,"2",3)</td><td>6</td><td>6</td><td class="result">#VALUE!</td></tr>
   </tbody>
 </table>
 </div>
 <p>The 6 is the documented-expected value recorded in our test corpus; the <code>#VALUE!</code>
 is what our harness computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. The plain
 <code>=SUM(1,2,3)</code> without quotes returns 6 in every engine; only the quoted literal
-diverges. We have not yet executed this case in Google Sheets, so that column stays honest.</p>
+diverges. Google Sheets was executed too &mdash; Drive import, 2026-08-29 &mdash; and returns 6, matching
+Excel&rsquo;s documented coercion. LibreOffice is the only one of the three that errors.</p>
 
 <h2 class="section-title">Why it happens</h2>
 <p>Microsoft's SUM documentation states that "logical values and text representations of numbers

@@ -1,38 +1,124 @@
 #!/usr/bin/env python3
-"""Honesty guard: only LibreOffice Calc results are executed on this site.
-Fails (exit 1) if the built site claims Excel or Google Sheets were verified,
-tested, or executed. Negations ("not executed in Excel") and documentation
-statements ("documented in all three") are allowed.
+"""Honesty guard for the built site.
+
+Ground truth (see site/build_site.py and results/*.json):
+
+  * LibreOffice Calc  -- EXECUTED (four pinned builds, results/libreoffice-*.json)
+  * Google Sheets     -- EXECUTED (one dated Drive-import run,
+                         results/google-sheets.json, 2026-08-29)
+  * Microsoft Excel   -- NOT EXECUTED. Documentation only, and it is the
+                         yardstick the two executed engines are measured against.
+
+So this script fails (exit 1) on two kinds of dishonesty:
+
+  1. FALSE EXECUTION CLAIMS -- any page claiming Excel was verified, tested or
+     executed, or claiming all three engines were. Truthful claims about
+     executing Google Sheets and/or LibreOffice are allowed, because they are
+     true. Negations ("we do not run Excel") are allowed.
+  2. STALE "NOT YET EXECUTED" COPY -- any page still telling readers Google
+     Sheets has not been executed. That was true until 2026-08-29 and is now a
+     lie in the other direction. (Saying a specific CASE is "Not executed",
+     or that a Sheets result is "inconclusive", is fine -- both are still
+     true for individual cases; what must not survive is a blanket claim that
+     Sheets has not been run.)
 
 Usage: python3 scripts/check_honesty.py [docs_dir]
 """
 import re, sys, glob, os, html
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "docs")
-AFFIRMATIVE = re.compile(
+
+# (1) Claims that an engine we do NOT execute was executed.
+FALSE_EXECUTION = re.compile(
     r"(verified (?:in|across|on) all three|tested (?:in|across|on) all three|"
-    r"(?:verified|tested|executed|confirmed) (?:in|on) (?:excel|google sheets)(?! *\(documented)|"
-    r"verified formula for excel|execution-verified compatibility data(?! *\(libreoffice)|"
-    r"every result (?:is )?verified(?! in libreoffice)|machine-verified (?:excel|google sheets))",
+    r"executed (?:in|across|on) all three|"
+    r"(?:verified|tested|executed|confirmed) (?:in|on) excel(?! *\(documented)|"
+    r"verified formula for excel|"
+    r"execution-verified compatibility data(?! *\((?:libreoffice|google sheets))|"
+    r"every result (?:is )?verified(?! in (?:libreoffice|google sheets))|"
+    r"machine-verified excel|"
+    # "in every version of Excel, Google Sheets and LibreOffice we test" — the
+    # sneakiest form: it never uses the word "executed", but "we test" applied
+    # to a list containing Excel claims exactly that. (Caught a real regression
+    # in data/comparisons/*.json on 2026-08-29.)
+    r"(?:every |all )?versions? of excel[^.]{0,80}?we (?:test|ran|run|execute)|"
+    # NB: a bare "works in all Excel versions" is a documented-AVAILABILITY
+    # claim, not a testing claim, so it is deliberately not matched here.
+    r"we (?:tested|executed) (?:it )?in all excel versions|"
+    r"we (?:test|execute|ran|run)[^.]{0,40}?\bin excel\b)",
     re.I,
 )
-NEGATION = re.compile(r"(not|never|haven't|have not|didn't|did not|can't|cannot|nor|rather than|instead of|without)\W+(?:\w+\W+){0,4}$", re.I)
+NEGATION = re.compile(
+    r"(not|never|haven't|have not|didn't|did not|can't|cannot|nor|rather than|"
+    r"instead of|without|do not|don't)\W+(?:\w+\W+){0,4}$",
+    re.I,
+)
+
+# (2) Blanket "Google Sheets has not been executed" copy that is now stale.
+# Matches "Google Sheets ... not (yet) executed/run/tested" within a short
+# window, in either order, so the old phrasings ("Google Sheets is not yet run
+# through our harness", "We have not yet executed this case in Google Sheets",
+# "none has been executed in Sheets by us") are all caught.
+STALE_SHEETS = [
+    re.compile(
+        r"(?:google )?sheets\b[^.]{0,80}?\b(?:not|never)\b[^.]{0,40}?"
+        r"\b(?:yet )?(?:executed|run|tested|put through|been run)\b",
+        re.I,
+    ),
+    # "we have not (yet) executed ... in Sheets". Anchored on an auxiliary verb
+    # so the function name NOT ("the NOT function: executed in Google Sheets")
+    # cannot masquerade as a negation.
+    re.compile(
+        r"\b(?:have|has|had|is|are|was|were|do|does|did|been|we)\s+not\b"
+        r"[^.]{0,60}?\b(?:yet\s+)?(?:executed|run|tested)\b"
+        r"[^.]{0,40}?\b(?:in|through|by|for)\s+(?:google\s+)?sheets\b",
+        re.I,
+    ),
+    re.compile(
+        r"\bnot\s+yet\s+(?:executed|run|tested)\b[^.]{0,40}?\b(?:google\s+)?sheets\b",
+        re.I,
+    ),
+]
+# Per-CASE honesty that is still true and must NOT trip the stale check.
+STALE_ALLOW = re.compile(
+    r"(inconclusive|no corpus case|not in our (?:executed )?(?:test )?set|"
+    r"we do not run excel|excel (?:is )?not (?:live-)?executed|"
+    # A recipe page saying its own worked EXAMPLE was not run in Sheets is
+    # true and must stay: recipes-verified.json is LibreOffice-only. Only the
+    # blanket "Sheets has never been executed" claim is stale.
+    r"recipe formulas|recipe example)",
+    re.I,
+)
+
 
 def strip_tags(s):
     s = re.sub(r"<script.*?</script>|<style.*?</style>", " ", s, flags=re.S)
     return html.unescape(re.sub(r"<[^>]+>", " ", s))
 
+
 bad = []
+stale = []
 files = glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True)
 for f in files:
     text = strip_tags(open(f, encoding="utf-8", errors="replace").read())
-    for m in AFFIRMATIVE.finditer(text):
+    rel = os.path.relpath(f, ROOT)
+    for m in FALSE_EXECUTION.finditer(text):
         before = text[max(0, m.start() - 60):m.start()]
         if NEGATION.search(before):
             continue
-        bad.append((os.path.relpath(f, ROOT), text[max(0, m.start() - 50):m.end() + 40].replace("\n", " ")))
+        bad.append((rel, text[max(0, m.start() - 50):m.end() + 40].replace("\n", " ")))
+    for rx in STALE_SHEETS:
+        for m in rx.finditer(text):
+            ctx = text[max(0, m.start() - 90):m.end() + 90].replace("\n", " ")
+            if STALE_ALLOW.search(ctx):
+                continue
+            stale.append((rel, re.sub(r"\s+", " ", ctx)))
 
-print(f"honesty check: {len(files)} pages, {len(bad)} affirmative cross-app verification claims")
+print(f"honesty check: {len(files)} pages")
+print(f"  false execution claims (Excel / all three): {len(bad)}")
 for f, ctx in bad[:40]:
-    print(f"  {f}: …{ctx}…")
-sys.exit(1 if bad else 0)
+    print(f"    {f}: …{ctx}…")
+print(f"  stale 'Google Sheets not yet executed' copy: {len(stale)}")
+for f, ctx in stale[:40]:
+    print(f"    {f}: …{ctx}…")
+sys.exit(1 if (bad or stale) else 0)

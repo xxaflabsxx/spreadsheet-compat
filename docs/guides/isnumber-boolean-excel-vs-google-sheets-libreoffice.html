@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ISNUMBER(TRUE) is FALSE in Excel but TRUE in LibreOffice</title>
-<meta name="description" content="In Excel a logical value is not a number, so ISNUMBER(TRUE) is FALSE. LibreOffice returns TRUE. The silent divergence, the documented reason, and a safe rewrite.">
+<meta name="description" content="In Excel a logical value is not a number, so ISNUMBER(TRUE) is FALSE - executed Google Sheets agrees. LibreOffice returns TRUE. The silent divergence and a safe rewrite.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/isnumber-boolean-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:title" content="ISNUMBER(TRUE) is FALSE in Excel but TRUE in LibreOffice">
-<meta property="og:description" content="In Excel a logical value is not a number, so ISNUMBER(TRUE) is FALSE. LibreOffice returns TRUE. The silent divergence, the documented reason, and a safe rewrite.">
+<meta property="og:description" content="In Excel a logical value is not a number, so ISNUMBER(TRUE) is FALSE - executed Google Sheets agrees. LibreOffice returns TRUE. The silent divergence and a safe rewrite.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/isnumber-boolean-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -335,14 +335,16 @@ error to flag it.</p>
 <h2 class="section-title">A minimal example</h2>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=ISNUMBER(TRUE)</td><td>FALSE</td><td>Not yet executed</td><td class="result">TRUE</td></tr>
+    <tr><td class="formula">=ISNUMBER(TRUE)</td><td>FALSE</td><td>FALSE</td><td class="result">TRUE</td></tr>
   </tbody>
 </table>
 </div>
 <p>FALSE is the documented-expected value in our test corpus; TRUE is what our harness computed
-by recalculating in LibreOffice Calc 25.8.7.3. We have not yet executed this case in Google Sheets.</p>
+by recalculating in LibreOffice Calc 25.8.7.3. Google Sheets was executed too &mdash; Drive import, 2026-08-29 &mdash; and returns
+<code>FALSE</code>, matching Excel. LibreOffice is the only one of the three that says
+<code>TRUE</code>.</p>
 
 <h2 class="section-title">Why it happens</h2>
 <p>Microsoft's IS-functions documentation names <strong>ISLOGICAL</strong> as the dedicated test

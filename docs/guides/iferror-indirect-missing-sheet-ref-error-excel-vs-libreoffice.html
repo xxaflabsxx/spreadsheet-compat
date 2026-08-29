@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</title>
-<meta name="description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran — 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. IFERROR traps every other #REF! we tested, including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
+<meta name="description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran - 24.2.0.3 through 25.8.7.3. Executed Google Sheets returns the fallback.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">
 <meta property="og:title" content="IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice">
-<meta property="og:description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran — 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. IFERROR traps every other #REF! we tested, including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.">
+<meta property="og:description" content="=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran - 24.2.0.3 through 25.8.7.3. Executed Google Sheets returns the fallback.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -353,24 +353,26 @@ that does not exist. <code>=IFERROR(INDIRECT("'Nope'!B2"),"missing")</code> retu
 <code>A1:A3 = 1, 2, 3</code>.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 24.2.0.3, 24.8.7.2, 25.2.0.3 &amp; 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 24.2.0.3, 24.8.7.2, 25.2.0.3 &amp; 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=INDIRECT("'Nope'!B2")</td><td>#REF!</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
-    <tr><td class="formula">=IFERROR(INDIRECT("'Nope'!B2"),"missing")</td><td>missing</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
-    <tr><td class="formula">=IFERROR(INDIRECT("NotACell!!"),"bad")</td><td>bad</td><td>Not yet executed</td><td class="result">bad</td></tr>
-    <tr><td class="formula">=IFERROR(INDEX(A1:A3,10),"bad index")</td><td>bad index</td><td>Not yet executed</td><td class="result">bad index</td></tr>
-    <tr><td class="formula">=IFERROR(10/0,"err")</td><td>err</td><td>Not yet executed</td><td class="result">err</td></tr>
-    <tr><td class="formula">=ISERROR(INDIRECT("'Nope'!B2"))</td><td>TRUE</td><td>Not yet executed</td><td class="result">TRUE</td></tr>
-    <tr><td class="formula">=ISREF(INDIRECT("'Nope'!B2"))</td><td>FALSE</td><td>Not yet executed</td><td class="result">FALSE</td></tr>
-    <tr><td class="formula">=ISREF(INDIRECT("A1"))</td><td>TRUE</td><td>Not yet executed</td><td class="result">TRUE</td></tr>
-    <tr><td class="formula">=IFNA(INDIRECT("'Nope'!B2"),"x")</td><td>#REF!</td><td>Not yet executed</td><td class="result">#REF!</td></tr>
-    <tr><td class="formula">=IFNA(10/0,"na")</td><td>#DIV/0!</td><td>Not yet executed</td><td class="result">#DIV/0!</td></tr>
+    <tr><td class="formula">=INDIRECT("'Nope'!B2")</td><td>#REF!</td><td>#REF!</td><td class="result">#REF!</td></tr>
+    <tr><td class="formula">=IFERROR(INDIRECT("'Nope'!B2"),"missing")</td><td>missing</td><td>missing</td><td class="result">#REF!</td></tr>
+    <tr><td class="formula">=IFERROR(INDIRECT("NotACell!!"),"bad")</td><td>bad</td><td>bad</td><td class="result">bad</td></tr>
+    <tr><td class="formula">=IFERROR(INDEX(A1:A3,10),"bad index")</td><td>bad index</td><td>bad index</td><td class="result">bad index</td></tr>
+    <tr><td class="formula">=IFERROR(10/0,"err")</td><td>err</td><td>err</td><td class="result">err</td></tr>
+    <tr><td class="formula">=ISERROR(INDIRECT("'Nope'!B2"))</td><td>TRUE</td><td>TRUE</td><td class="result">TRUE</td></tr>
+    <tr><td class="formula">=ISREF(INDIRECT("'Nope'!B2"))</td><td>FALSE</td><td>FALSE</td><td class="result">FALSE</td></tr>
+    <tr><td class="formula">=ISREF(INDIRECT("A1"))</td><td>TRUE</td><td>TRUE</td><td class="result">TRUE</td></tr>
+    <tr><td class="formula">=IFNA(INDIRECT("'Nope'!B2"),"x")</td><td>#REF!</td><td>#REF!</td><td class="result">#REF!</td></tr>
+    <tr><td class="formula">=IFNA(10/0,"na")</td><td>#DIV/0!</td><td>#DIV/0!</td><td class="result">#DIV/0!</td></tr>
   </tbody>
 </table>
 </div>
 <p>The Excel column is the documented-expected value recorded in our test corpus, taken from
-Microsoft's function reference for each function; we did not run Excel. Google Sheets has not been
-put through the harness, so that column stays honest rather than guessed. The LibreOffice column is
+Microsoft's function reference for each function; we did not run Excel. Google Sheets was executed on 2026-08-29 via Drive import and behaves exactly as Microsoft
+documents on all ten rows &mdash; the one that breaks in LibreOffice included:
+<code>=IFERROR(INDIRECT("'Nope'!B2"),"missing")</code> returns <code>missing</code> in Sheets.
+LibreOffice is alone. The LibreOffice column is
 what the harness computed by recalculating the workbook in each of those four LibreOffice Calc
 builds. It is a single column because all four agreed on all ten rows &mdash; every value below was
 returned by 24.2.0.3, by 24.8.7.2, by 25.2.0.3 <em>and</em> by 25.8.7.3. Nine of the ten rows agree
@@ -440,10 +442,10 @@ behaviour across the range we tested, not something a recent version introduced.
 cannot say is when it <em>began</em>. 24.2.0.3 is the oldest build we have run, so releases older
 than that are outside the claim, and so is any release between the four we tested &mdash; we sampled
 four points on the timeline, not every build on it.</p>
-<p>The Excel and Google Sheets columns are documentation, not execution: Microsoft documents
-<code>IFERROR</code> as trapping all seven error values including <code>#REF!</code>, and
-<code>ISREF</code> as returning <code>TRUE</code> when its argument refers to a reference. We did
-not run either app. Nothing here involves dynamic-array spilling or drawing objects, so the usual
+<p>The Excel column is documentation, not execution: Microsoft documents <code>IFERROR</code> as
+trapping all seven error values including <code>#REF!</code>, and <code>ISREF</code> as returning
+<code>TRUE</code> when its argument refers to a reference. We did not run Excel. Google Sheets we
+did run, and it matched that documentation on every row here. Nothing here involves dynamic-array spilling or drawing objects, so the usual
 spill-range and shape caveats do not apply. One more scope note: the reference string in these
 cases uses Excel's <code>!</code> sheet separator, which is what an <code>.xlsx</code> workbook
 carries and what LibreOffice parses in a document that arrived in that format; a native

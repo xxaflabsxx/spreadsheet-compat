@@ -342,21 +342,21 @@ comes back when the end date precedes the start date.</p>
 <h2 class="section-title">Executed results</h2>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),"Y")</td><td>3</td><td>Not yet executed</td><td class="result">3</td></tr>
-    <tr><td class="formula">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),"M")</td><td>41</td><td>Not yet executed</td><td class="result">41</td></tr>
-    <tr><td class="formula">=DATEDIF(DATE(2024,1,1),DATE(2024,1,10),"D")</td><td>9</td><td>Not yet executed</td><td class="result">9</td></tr>
-    <tr><td class="formula">=DATEDIF(DATE(2024,1,31),DATE(2024,3,1),"MD")</td><td>-1</td><td>Not yet executed</td><td class="result">-1</td></tr>
-    <tr><td class="formula">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),"D")</td><td>#NUM!</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),"Y")</td><td>3</td><td>3</td><td class="result">3</td></tr>
+    <tr><td class="formula">=DATEDIF(DATE(2020,1,1),DATE(2023,6,15),"M")</td><td>41</td><td>41</td><td class="result">41</td></tr>
+    <tr><td class="formula">=DATEDIF(DATE(2024,1,1),DATE(2024,1,10),"D")</td><td>9</td><td>9</td><td class="result">9</td></tr>
+    <tr><td class="formula">=DATEDIF(DATE(2024,1,31),DATE(2024,3,1),"MD")</td><td>-1</td><td>-1</td><td class="result">-1</td></tr>
+    <tr><td class="formula">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),"D")</td><td>#NUM!</td><td>#NUM!</td><td class="result">#VALUE!</td></tr>
   </tbody>
 </table>
 </div>
 <p>The Excel column is the documented-expected result recorded in our test corpus from Microsoft's
 <code>DATEDIF</code> support page; we did not run Excel. The LibreOffice column is what our harness
-computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. Google Sheets has not yet been
-run through the harness, so that column stays empty rather than guessed. Four of the five rows match;
-only the last one forks.</p>
+computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. Google Sheets was executed on 2026-08-29 via Drive import and matches Excel&rsquo;s documented value
+on all five rows &mdash; the acknowledged &ldquo;MD&rdquo; result included. Four of the five
+LibreOffice rows match; only the last one forks, and it forks away from both other engines.</p>
 
 <h2 class="section-title">Consistent across LibreOffice versions</h2>
 <p>All five cases were run in four builds &mdash; 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3 &mdash;
@@ -417,9 +417,8 @@ must catch, use the broad wrapper &mdash; <code>=IFERROR(DATEDIF(start,end,"D"),
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel column is Microsoft's documented behaviour as recorded in our test corpus, not values we
-executed in Excel. Google Sheets is not yet run through our harness, so we say &ldquo;not yet
-executed&rdquo; rather than assert a result; all we record about Sheets here is that its function
-reference documents <code>DATEDIF</code>. The LibreOffice column is executed
+executed in Excel. The Google Sheets column is executed output from a Drive import on 2026-08-29; before that run all
+we recorded about Sheets was that its function reference documents <code>DATEDIF</code>. The LibreOffice column is executed
 output from LibreOffice Calc 25.8.7.3, reproduced identically in our 24.2.0.3, 24.8.7.2 and 25.2.0.3
 runs. The arithmetic offered for the <code>"MD"</code> result is an explanation consistent with the
 measured output; we have not inspected either engine's source to confirm the mechanism.</p>

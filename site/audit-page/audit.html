@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spreadsheet Migration Audit — which formulas break when you switch apps?</title>
-<meta name="description" content="Drop an .xlsx and see which formulas break or silently change in Google Sheets, LibreOffice, or Excel — matched against our LibreOffice-executed compatibility data (Excel/Sheets from docs). The file never leaves your browser.">
+<meta name="description" content="Drop an .xlsx and see which formulas break or silently change in Google Sheets, LibreOffice, or Excel — matched against our executed compatibility data (Google Sheets and LibreOffice executed; Excel from docs). The file never leaves your browser.">
 
 <link rel="canonical" href="https://canispreadsheet.com/audit.html">
 <meta property="og:title" content="Spreadsheet Migration Audit — which formulas break when you switch apps?">
-<meta property="og:description" content="Drop an .xlsx and see which formulas break or silently change in Google Sheets, LibreOffice, or Excel — matched against our LibreOffice-executed compatibility data (Excel/Sheets from docs). The file never leaves your browser.">
+<meta property="og:description" content="Drop an .xlsx and see which formulas break or silently change in Google Sheets, LibreOffice, or Excel — matched against our executed compatibility data (Google Sheets and LibreOffice executed; Excel from docs). The file never leaves your browser.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/audit.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -215,8 +215,9 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <h1>Spreadsheet Migration Audit</h1>
 <p class="lede">Drop in an .xlsx and see which of <em>your</em> formulas break — or silently
 change behavior — in the app you're moving to. Verdicts are matched against our
-compatibility dataset: LibreOffice results come from <strong>actually executing formulas</strong>
-in real LibreOffice builds; Excel and Google Sheets verdicts are documentation-based.</p>
+compatibility dataset: Google Sheets and LibreOffice results come from <strong>actually executing
+formulas</strong> &mdash; in real LibreOffice builds, and in Google Sheets via a dated Drive import.
+Excel verdicts are documentation-based; we do not run Excel.</p>
 
 <noscript><p>This tool runs entirely in your browser and requires JavaScript. Nothing works without it — and nothing is uploaded with it, either.</p></noscript>
 
@@ -258,13 +259,17 @@ in real LibreOffice builds; Excel and Google Sheets verdicts are documentation-b
   <div class="methodology">
     <strong>What this is (and isn't):</strong> function-level triage from a pre-computed
     compatibility dataset — LibreOffice verdicts from formulas we executed in real
-    LibreOffice builds, Excel and Google Sheets verdicts from official documentation.
-    It flags functions known to be missing or to behave differently; it does
+    LibreOffice builds, Google Sheets verdicts from the same formulas executed in Sheets
+    via Drive import (a dated run: Sheets has no version to pin), and Excel verdicts from
+    Microsoft's official documentation. It flags functions known to be missing or to behave differently; it does
     <strong>not</strong> recalculate your workbook in the target app, so it cannot promise
     your specific numbers survive. Use it to know where to look first.
     <strong>LibreOffice verdicts are per tested release:</strong> we executed every tested
     function in 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3, so picking an older target
-    version above flags functions that only exist in newer builds.
+    version above flags functions that only exist in newer builds. <strong>Google Sheets has
+    no version to target</strong> — one dated run, and a handful of functions whose verdict
+    is <em>inconclusive</em> because the .xlsx storage prefix we write was not mapped by
+    Google's importer; those fall back to Google's documentation and say so.
     <a href="methodology.html">How we verify.</a>
   </div>
 
@@ -334,7 +339,9 @@ in real LibreOffice builds; Excel and Google Sheets verdicts are documentation-b
     a license-key check with Gumroad. File contents are never transmitted.</p>
     <p>Every LibreOffice result produced by executing real formulas, in each of the four
     releases we test (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) &mdash; verdicts are reported
-    per tested release &mdash; <a href="methodology.html">how we verify</a>. Open <a href="data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    per tested release. Google Sheets results come from executing the same formulas via a
+    dated Drive import; Excel is documentation only &mdash;
+    <a href="methodology.html">how we verify</a>. Open <a href="data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
     <p>Need exact per-cell ground truth instead of per-function verdicts? The free offline companion <a href="https://github.com/xxAFLabsxx/spreadsheet-compat/blob/master/scripts/README-recalc-diff.md"><code>xlsx_recalc_diff.py</code></a> diffs the results Excel saved inside your .xlsx against a forced LibreOffice recalculation of the same file, on your own machine (needs Python + LibreOffice; nothing uploaded).</p>
     <p>Built by AF Labs — <a href="https://aflabs.gumroad.com" rel="sponsored">spreadsheet templates</a>.</p>
   </div>

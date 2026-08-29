@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ISREF works in Excel, Google Sheets and LibreOffice</title>
-<meta name="description" content="All 2 executed test cases for ISREF match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>ISREF works in Excel (docs), Sheets &amp; LibreOffice (executed)</title>
+<meta name="description" content="All 2 LibreOffice and 2 Google Sheets executed cases for ISREF match Excel&#39;s do… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/isref.html">
-<meta property="og:title" content="ISREF works in Excel, Google Sheets and LibreOffice">
-<meta property="og:description" content="All 2 executed test cases for ISREF match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="ISREF works in Excel (docs), Sheets &amp; LibreOffice (executed)">
+<meta property="og:description" content="All 2 LibreOffice and 2 Google Sheets executed cases for ISREF match Excel&#39;s do… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/isref.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Information &middot; Last tested 2026-08-28</p>
+<p class="category-tag">Category: Information &middot; Last tested 2026-08-29</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ISREF</strong> function: executed and verified in LibreOffice Calc, with Excel and Google Sheets behavior from each vendor&rsquo;s official documentation. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ISREF</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -358,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -425,6 +426,10 @@ ISREF&rsquo;s support changed &mdash; not documentation claims, real results.</p
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
@@ -432,10 +437,38 @@ ISREF&rsquo;s support changed &mdash; not documentation claims, real results.</p
 
 
 
+<h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ISREF(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;))</td>
+  <td>INDIRECT could not resolve to a reference (no such sheet), so ISREF is FALSE -- the basis of the IF(ISREF(...)) guard pattern</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">Microsoft documents ISREF as TRUE when value refers to a reference and FALSE otherwise; an unresolvable INDIRECT yields no reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISREF(INDIRECT(&#34;A1&#34;))</td>
+  <td>INDIRECT resolves to a real cell reference on the current sheet, so ISREF is TRUE</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft documents ISREF as TRUE when value refers to a reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 <span class="category-tag">(tested 2026-08-28)</span></h3>
+
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-28)</h3>
+
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
@@ -481,7 +514,7 @@ ISREF&rsquo;s support changed &mdash; not documentation claims, real results.</p
 
 <h2 class="section-title">Where ISREF behaves differently</h2>
 <ul>
-<li><a href="../guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</a><br><span class="category-tag">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran — 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. IFERROR traps every other #REF! we tested, including INDIRECT&#39;s malformed-string one. Executed results and the ISREF/ISERROR guards that do work.</span></li>
+<li><a href="../guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</a><br><span class="category-tag">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;) returns #REF! instead of the fallback in every LibreOffice Calc build we ran - 24.2.0.3 through 25.8.7.3. Executed Google Sheets returns the fallback.</span></li>
 </ul>
 
 

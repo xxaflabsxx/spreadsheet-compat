@@ -339,16 +339,16 @@ harness read the recalculated workbook, that cell came back as the literal seven
 <h2 class="section-title">Executed results</h2>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=CHAR(0)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">_x0000_</td></tr>
-    <tr><td class="formula">=UNICHAR(0)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">_x0000_</td></tr>
-    <tr><td class="formula">=CHAR(256)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
-    <tr><td class="formula">=UNICHAR(-1)</td><td>#VALUE!</td><td>Not yet executed</td><td class="result">#VALUE!</td></tr>
-    <tr><td class="formula">=CHAR(65)</td><td>A</td><td>Not yet executed</td><td class="result">A</td></tr>
-    <tr><td class="formula">=UNICHAR(233)</td><td>&eacute;</td><td>Not yet executed</td><td class="result">&eacute;</td></tr>
-    <tr><td class="formula">=UNICHAR(128512)</td><td>&#128512;</td><td>Not yet executed</td><td class="result">&#128512;</td></tr>
-    <tr><td class="formula">=CODE(CHAR(97))</td><td>97</td><td>Not yet executed</td><td class="result">97</td></tr>
+    <tr><td class="formula">=CHAR(0)</td><td>#VALUE!</td><td>#NUM!</td><td class="result">_x0000_</td></tr>
+    <tr><td class="formula">=UNICHAR(0)</td><td>#VALUE!</td><td>#VALUE!</td><td class="result">_x0000_</td></tr>
+    <tr><td class="formula">=CHAR(256)</td><td>#VALUE!</td><td>Ā</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=UNICHAR(-1)</td><td>#VALUE!</td><td>#VALUE!</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=CHAR(65)</td><td>A</td><td>A</td><td class="result">A</td></tr>
+    <tr><td class="formula">=UNICHAR(233)</td><td>&eacute;</td><td>é</td><td class="result">&eacute;</td></tr>
+    <tr><td class="formula">=UNICHAR(128512)</td><td>&#128512;</td><td>😀</td><td class="result">&#128512;</td></tr>
+    <tr><td class="formula">=CODE(CHAR(97))</td><td>97</td><td>97</td><td class="result">97</td></tr>
   </tbody>
 </table>
 </div>
@@ -396,7 +396,11 @@ comes from.</p>
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel column is Microsoft's documented behaviour recorded in our test corpus, not values we
-executed in Excel. Google Sheets is not yet run through our harness, so that column is left honest.
+executed in Excel. The Google Sheets column is executed output from a Drive import on 2026-08-29, and Sheets does not
+simply follow Excel: <code>=CHAR(0)</code> returns <code>#NUM!</code> where Excel documents
+<code>#VALUE!</code>, and <code>=CHAR(256)</code> returns the character <code>&#256;</code> instead
+of erroring at all. Only the two UNICHAR out-of-range rows match Excel&rsquo;s documented
+<code>#VALUE!</code>. So all three engines answer <code>CHAR(0)</code> differently.
 The LibreOffice column is executed output from LibreOffice Calc 25.8.7.3, reproduced in our three
 earlier version runs; the exact rendering of the NUL character depends on how the reading program
 handles it, and <code>_x0000_</code> is what our .xlsx reader reported.</p>

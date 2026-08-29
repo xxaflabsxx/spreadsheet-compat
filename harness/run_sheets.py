@@ -220,6 +220,9 @@ def cmd_build(args):
         if missing:
             sys.exit(f"No data/tests/*.json for: {', '.join(sorted(missing))}")
 
+    plain_names = bool(getattr(args, "plain_names", False))
+    manifest_note = getattr(args, "manifest_note", None)
+
     cases_flat = flatten_cases(test_files)
     chunks = chunk_functions(cases_flat, args.chunk_size)
 
@@ -234,7 +237,7 @@ def cmd_build(args):
     manifest_chunks = []
     for idx, (fn_group, chunk_cases) in enumerate(chunks, start=1):
         chunk_id = f"chunk-{idx:0{width}d}"
-        wb, sheet_map = build_workbook(chunk_cases)
+        wb, sheet_map = build_workbook(chunk_cases, plain_names=plain_names)
 
         # Every sheet name, including the meta sheet, must survive the Drive
         # import unmangled or the manifest's cell mapping silently breaks.
@@ -246,6 +249,10 @@ def cmd_build(args):
 
         case_entries = []
         for c in chunk_cases:
+            # Must mirror build_workbook()'s own per-case choice exactly --
+            # this is what actually got written into the sheet, and ingest
+            # trusts it verbatim for both display and provenance.
+            stored_formula = c["formula"] if plain_names else to_storage_formula_all(c["formula"])
             case_entries.append({
                 "test_id": c["test_id"],
                 "function": c["function"],
@@ -254,7 +261,8 @@ def cmd_build(args):
                 "check_range": c["check_range"],
                 "description": c["description"],
                 "formula_display": c["formula"],
-                "formula_stored_xlsx": to_storage_formula_all(c["formula"]),
+                "formula_stored_xlsx": stored_formula,
+                "serialization": "plain" if plain_names else "xlfn",
                 "expected": c["expected"],
                 "expected_note": c["expected_note"],
             })
@@ -278,6 +286,9 @@ def cmd_build(args):
         "n_functions": sum(c["n_functions"] for c in manifest_chunks),
         "n_cases": sum(c["n_cases"] for c in manifest_chunks),
         "subset_only": sorted(requested) if requested else None,
+        "plain_names": plain_names,
+        "plain_names_functions": sorted({fn for c in manifest_chunks for fn in c["functions"]}) if plain_names else None,
+        "manifest_note": manifest_note,
         "canary": {
             "arithmetic_formula": CANARY_ARITH_FORMULA,
             "arithmetic_expected": CANARY_ARITH_EXPECTED,
@@ -294,8 +305,11 @@ def cmd_build(args):
         json.dump(manifest, f, indent=2, default=str)
         f.write("\n")
 
+    mode = "PLAIN NAMES (no _xlfn./_xlfn._xlws. translation)" if plain_names else "xlfn-translated (default)"
     print(f"Built {len(chunks)} chunk(s) from {manifest['n_functions']} function(s), "
-          f"{manifest['n_cases']} case(s) -> {outdir}")
+          f"{manifest['n_cases']} case(s) -> {outdir}  [{mode}]")
+    if manifest_note:
+        print(f"Manifest note: {manifest_note}")
     total = 0
     for c in manifest_chunks:
         total += c["bytes"]
@@ -341,7 +355,23 @@ def _boolean_text_artifact(expected, actual):
 
 
 def ingest_exports(export_paths, manifest, engine_label):
-    """Read exported workbooks -> (function_results, canary, trusted, stats)."""
+    """Read exported workbooks -> (function_results, canary, trusted, stats).
+
+    Provenance: `manifest["plain_names"]` (set by `build --plain-names`)
+    records whether these chunk workbooks had formulas written EXACTLY as
+    authored in data/tests (no _xlfn./_xlfn._xlws. storage-form
+    translation) rather than the default xlfn-translated serialization.
+    Every ingested case gets a "serialization": "plain"/"xlfn" field so a
+    later merge (or a human reading results/google-sheets.json) can tell
+    which wire form produced a given result -- this matters for Google
+    Sheets specifically because its xlsx importer maps plain `_xlfn.NAME`
+    but NOT `_xlfn._xlws.FILTER/SORT` or LAMBDA-family functions, so a
+    plain-names result for those functions supersedes an earlier
+    xlfn-serialized one rather than merely re-confirming it.
+    """
+    plain_names = bool(manifest.get("plain_names", False))
+    serialization = "plain" if plain_names else "xlfn"
+    manifest_note = manifest.get("manifest_note")
     function_results = {}
     per_chunk = []
     sheet_canary_failures = []
@@ -420,6 +450,7 @@ def ingest_exports(export_paths, manifest, engine_label):
                 "description": case["description"],
                 "formula_display": case["formula_display"],
                 "formula_stored_xlsx": case["formula_stored_xlsx"],
+                "serialization": case.get("serialization", serialization),
                 "value": anchor_val,
                 "range_values": range_flat,
                 "error": error,
@@ -474,13 +505,17 @@ def ingest_exports(export_paths, manifest, engine_label):
 
     stats = {"chunks": per_chunk,
              "n_functions": len(function_results),
-             "n_cases": sum(len(v) for v in function_results.values())}
+             "n_cases": sum(len(v) for v in function_results.values()),
+             "plain_names": plain_names,
+             "serialization": serialization,
+             "manifest_note": manifest_note}
     return function_results, canary, arith_ok, stats
 
 
 def write_results(out_path, function_results, canary, trusted, engine_label,
                   allow_label_change=False, engine=ENGINE_ID,
-                  recalc_method=RECALC_METHOD):
+                  recalc_method=RECALC_METHOD, serialization=None,
+                  manifest_note=None):
     """Write (or incrementally merge into) a results file in the same schema
     results/libreoffice-*.json uses. See the module docstring."""
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -530,6 +565,15 @@ def write_results(out_path, function_results, canary, trusted, engine_label,
             "trusted_this_run": trusted,
             "engine_label": engine_label,
             "superseded_generated_at": prev.get("generated_at"),
+            # Provenance: which wire serialization produced this subset's
+            # results. A "plain" run for a function supersedes an earlier
+            # "xlfn" run for that SAME function (this merge already replaced
+            # it above); it is not merely a re-confirmation, because Google
+            # Sheets' xlsx importer treats the two serializations
+            # differently for FILTER/SORT/LAMBDA-family functions. See
+            # README.md "Phase 2: Google Sheets runner".
+            "serialization": serialization,
+            "manifest_note": manifest_note,
         })
         untouched = len(merged_fr) - len(function_results)
         print(f"Incremental ingest: merged {len(function_results)} function(s) into "
@@ -575,11 +619,16 @@ def cmd_ingest(args):
         args.export, manifest, args.engine_label)
 
     write_results(args.out, function_results, canary, trusted,
-                  args.engine_label, args.allow_label_change)
+                  args.engine_label, args.allow_label_change,
+                  serialization=stats["serialization"],
+                  manifest_note=stats["manifest_note"])
 
     n_ok, n_name, n_other = summarize(function_results)
     print(f"Ingested {len(stats['chunks'])} chunk(s): "
-          f"{stats['n_functions']} function(s), {stats['n_cases']} case(s).")
+          f"{stats['n_functions']} function(s), {stats['n_cases']} case(s). "
+          f"[serialization={stats['serialization']}]")
+    if stats["manifest_note"]:
+        print(f"Manifest note: {stats['manifest_note']}")
     print(f"Deterministic canary OK on all {canary['arithmetic_sheets_checked']} "
           f"sheet(s): {canary['arithmetic_ok']}")
     if canary["arithmetic_sheet_failures"]:
@@ -651,7 +700,9 @@ def cmd_selftest(args):
             os.remove(out)  # scratch file: always a fresh write, never a merge
         write_results(out, function_results, canary, trusted, args.engine_label,
                       engine=SELFTEST_ENGINE_ID,
-                      recalc_method=SELFTEST_RECALC_METHOD)
+                      recalc_method=SELFTEST_RECALC_METHOD,
+                      serialization=stats["serialization"],
+                      manifest_note=stats["manifest_note"])
 
     n_ok, n_name, n_other = summarize(function_results)
     print(f"\nChunks ingested       : {len(stats['chunks'])}")
@@ -700,6 +751,19 @@ def main():
                    help="build only these functions (default: all of data/tests)")
     b.add_argument("--outdir", default=DEFAULT_CHUNK_DIR,
                    help=f"output directory (default {DEFAULT_CHUNK_DIR})")
+    b.add_argument("--plain-names", action="store_true",
+                   help="write formulas EXACTLY as authored in data/tests -- no "
+                        "_xlfn./_xlfn._xlws. storage-form translation at all. Use "
+                        "for functions Google Sheets recognizes by their bare name "
+                        "but whose xlfn/xlws-prefixed storage form its xlsx "
+                        "importer does NOT map (verified: FILTER, SORT, and the "
+                        "LAMBDA-family functions), which otherwise show a false "
+                        "#NAME?/#ERROR! that looks like a real support gap. See "
+                        "README.md 'Phase 2: Google Sheets runner'.")
+    b.add_argument("--manifest-note", default=None, metavar="TEXT",
+                   help="free-text note stored in manifest.json's top-level "
+                        "'manifest_note' field and carried into ingest's results "
+                        "provenance (subset_runs entries)")
     b.set_defaults(func=cmd_build)
 
     i = sub.add_parser("ingest", help="read exported .xlsx back into results JSON")
@@ -734,6 +798,9 @@ def main():
                            "- NOT Google Sheets)")
     s.add_argument("--allow-label-change", action="store_true", default=True,
                    help=argparse.SUPPRESS)
+    s.add_argument("--plain-names", action="store_true",
+                   help="dry-run the --plain-names build path too (see `build --help`)")
+    s.add_argument("--manifest-note", default=None, metavar="TEXT", help=argparse.SUPPRESS)
     s.set_defaults(func=cmd_selftest)
 
     args = ap.parse_args()
