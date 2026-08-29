@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-29T02:13:01.583341+00:00",
+  "generated_at": "2026-08-29T05:10:43.052544+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "24.2.0.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-08-28 19:12:53.033000",
-    "now_run_2": "2026-08-28 19:12:59.778000",
+    "now_run_1": "2026-08-28 22:09:32.788000",
+    "now_run_2": "2026-08-28 22:10:20.164000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 2.36,
+    "conversion_seconds_run_1": 43.85,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -165,6 +165,20 @@
         "notes": null
       }
     },
+    "AGGREGATE": {
+      "AGGREGATE_sum_ignoring_errors": {
+        "description": "Function 9 (SUM) with option 6 (ignore errors): A3 is #DIV/0! and must be skipped, giving 10+20+40=70",
+        "formula_display": "=AGGREGATE(9,6,A1:A4)",
+        "formula_stored_xlsx": "=_xlfn.AGGREGATE(9,6,A1:A4)",
+        "value": 70,
+        "range_values": null,
+        "error": null,
+        "expected": 70,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "AND": {
       "AND_basic_true": {
         "description": "Both arguments TRUE -> TRUE",
@@ -227,6 +241,20 @@
         "notes": null
       }
     },
+    "ARABIC": {
+      "ARABIC_basic": {
+        "description": "Roman numerals back to a number",
+        "formula_display": "=ARABIC(\"MMXXVI\")",
+        "formula_stored_xlsx": "=_xlfn.ARABIC(\"MMXXVI\")",
+        "value": 2026,
+        "range_values": null,
+        "error": null,
+        "expected": 2026,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "ARRAYTOTEXT": {
       "ARRAYTOTEXT_default_format": {
         "description": "Default (concise) format joins elements with comma+space",
@@ -275,6 +303,44 @@
         "matched_expected": false,
         "canary_ok_this_sheet": true,
         "notes": "MISMATCH vs expected: expected '{\"a\",\"b\"}', got '#NAME?'"
+      }
+    },
+    "AVEDEV": {
+      "AVEDEV_basic": {
+        "description": "Average of the absolute deviations from the mean (5): (3+1+1+3)/4 = 2",
+        "formula_display": "=AVEDEV(2,4,6,8)",
+        "formula_stored_xlsx": "=AVEDEV(2,4,6,8)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "AVEDEV_from_range": {
+        "description": "Two values each one unit from their mean give an average deviation of 1",
+        "formula_display": "=AVEDEV(A1:A2)",
+        "formula_stored_xlsx": "=AVEDEV(A1:A2)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "AVEDEV_identical_values": {
+        "description": "Identical values have zero average deviation",
+        "formula_display": "=AVEDEV(7,7,7)",
+        "formula_stored_xlsx": "=AVEDEV(7,7,7)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "AVERAGE": {
@@ -427,6 +493,324 @@
         "notes": "apple and avocado match a*; average of 10,30 = 20"
       }
     },
+    "BASE": {
+      "BASE_basic": {
+        "description": "Convert 255 to hexadecimal text",
+        "formula_display": "=BASE(255,16)",
+        "formula_stored_xlsx": "=_xlfn.BASE(255,16)",
+        "value": "FF",
+        "range_values": null,
+        "error": null,
+        "expected": "FF",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BIN2DEC": {
+      "BIN2DEC_basic": {
+        "description": "Converts a binary value to its decimal number",
+        "formula_display": "=BIN2DEC(1010)",
+        "formula_stored_xlsx": "=BIN2DEC(1010)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BIN2DEC_eight": {
+        "description": "Binary 1000 is 8 in decimal",
+        "formula_display": "=BIN2DEC(1000)",
+        "formula_stored_xlsx": "=BIN2DEC(1000)",
+        "value": 8,
+        "range_values": null,
+        "error": null,
+        "expected": 8,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BIN2DEC_roundtrip": {
+        "description": "BIN2DEC reverses DEC2BIN, recovering the original number",
+        "formula_display": "=BIN2DEC(DEC2BIN(42))",
+        "formula_stored_xlsx": "=BIN2DEC(DEC2BIN(42))",
+        "value": 42,
+        "range_values": null,
+        "error": null,
+        "expected": 42,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BIN2HEX": {
+      "BIN2HEX_basic": {
+        "description": "Binary 1111 is F in hexadecimal",
+        "formula_display": "=BIN2HEX(\"1111\")",
+        "formula_stored_xlsx": "=BIN2HEX(\"1111\")",
+        "value": "F",
+        "range_values": null,
+        "error": null,
+        "expected": "F",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BIN2HEX_ten": {
+        "description": "Binary 1010 (decimal 10) is A in hexadecimal",
+        "formula_display": "=BIN2HEX(\"1010\")",
+        "formula_stored_xlsx": "=BIN2HEX(\"1010\")",
+        "value": "A",
+        "range_values": null,
+        "error": null,
+        "expected": "A",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BIN2HEX_padded": {
+        "description": "The optional places argument pads the hex result to a fixed width",
+        "formula_display": "=BIN2HEX(\"1111\",4)",
+        "formula_stored_xlsx": "=BIN2HEX(\"1111\",4)",
+        "value": "000F",
+        "range_values": null,
+        "error": null,
+        "expected": "000F",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BIN2OCT": {
+      "BIN2OCT_basic": {
+        "description": "Binary 1111 (decimal 15) is 17 in octal",
+        "formula_display": "=BIN2OCT(\"1111\")",
+        "formula_stored_xlsx": "=BIN2OCT(\"1111\")",
+        "value": "17",
+        "range_values": null,
+        "error": null,
+        "expected": "17",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BIN2OCT_eight": {
+        "description": "Binary 1000 (decimal 8) is 10 in octal",
+        "formula_display": "=BIN2OCT(\"1000\")",
+        "formula_stored_xlsx": "=BIN2OCT(\"1000\")",
+        "value": "10",
+        "range_values": null,
+        "error": null,
+        "expected": "10",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BIN2OCT_padded": {
+        "description": "The optional places argument pads the octal result to a fixed width",
+        "formula_display": "=BIN2OCT(\"111\",4)",
+        "formula_stored_xlsx": "=BIN2OCT(\"111\",4)",
+        "value": "0007",
+        "range_values": null,
+        "error": null,
+        "expected": "0007",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BITAND": {
+      "BITAND_basic": {
+        "description": "Bitwise AND of 110 and 011 keeps only shared bits: 010 = 2",
+        "formula_display": "=BITAND(6,3)",
+        "formula_stored_xlsx": "=_xlfn.BITAND(6,3)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITAND_larger": {
+        "description": "1100 AND 1010 = 1000 = 8",
+        "formula_display": "=BITAND(12,10)",
+        "formula_stored_xlsx": "=_xlfn.BITAND(12,10)",
+        "value": 8,
+        "range_values": null,
+        "error": null,
+        "expected": 8,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITAND_with_zero": {
+        "description": "ANDing with zero clears every bit",
+        "formula_display": "=BITAND(5,0)",
+        "formula_stored_xlsx": "=_xlfn.BITAND(5,0)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BITLSHIFT": {
+      "BITLSHIFT_basic": {
+        "description": "Shifting bits left by 2 multiplies by 4: 4 becomes 16",
+        "formula_display": "=BITLSHIFT(4,2)",
+        "formula_stored_xlsx": "=_xlfn.BITLSHIFT(4,2)",
+        "value": 16,
+        "range_values": null,
+        "error": null,
+        "expected": 16,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITLSHIFT_by_three": {
+        "description": "Shifting 1 left by 3 places gives 8 (2^3)",
+        "formula_display": "=BITLSHIFT(1,3)",
+        "formula_stored_xlsx": "=_xlfn.BITLSHIFT(1,3)",
+        "value": 8,
+        "range_values": null,
+        "error": null,
+        "expected": 8,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITLSHIFT_zero_shift": {
+        "description": "A shift of zero leaves the value unchanged",
+        "formula_display": "=BITLSHIFT(5,0)",
+        "formula_stored_xlsx": "=_xlfn.BITLSHIFT(5,0)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BITOR": {
+      "BITOR_basic": {
+        "description": "Bitwise OR of 110 and 011 sets any bit present in either: 111 = 7",
+        "formula_display": "=BITOR(6,3)",
+        "formula_stored_xlsx": "=_xlfn.BITOR(6,3)",
+        "value": 7,
+        "range_values": null,
+        "error": null,
+        "expected": 7,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITOR_larger": {
+        "description": "1100 OR 1010 = 1110 = 14",
+        "formula_display": "=BITOR(12,10)",
+        "formula_stored_xlsx": "=_xlfn.BITOR(12,10)",
+        "value": 14,
+        "range_values": null,
+        "error": null,
+        "expected": 14,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITOR_with_zero": {
+        "description": "ORing with zero leaves the value unchanged",
+        "formula_display": "=BITOR(5,0)",
+        "formula_stored_xlsx": "=_xlfn.BITOR(5,0)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BITRSHIFT": {
+      "BITRSHIFT_basic": {
+        "description": "Shifting bits right by 2 divides by 4: 16 becomes 4",
+        "formula_display": "=BITRSHIFT(16,2)",
+        "formula_stored_xlsx": "=_xlfn.BITRSHIFT(16,2)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITRSHIFT_by_three": {
+        "description": "Shifting 8 right by 3 places gives 1",
+        "formula_display": "=BITRSHIFT(8,3)",
+        "formula_stored_xlsx": "=_xlfn.BITRSHIFT(8,3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITRSHIFT_reverses_lshift": {
+        "description": "A right shift undoes an equal left shift, recovering the original value",
+        "formula_display": "=BITRSHIFT(BITLSHIFT(5,3),3)",
+        "formula_stored_xlsx": "=_xlfn.BITRSHIFT(_xlfn.BITLSHIFT(5,3),3)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "BITXOR": {
+      "BITXOR_basic": {
+        "description": "Bitwise XOR of 110 and 011 sets bits present in exactly one: 101 = 5",
+        "formula_display": "=BITXOR(6,3)",
+        "formula_stored_xlsx": "=_xlfn.BITXOR(6,3)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITXOR_larger": {
+        "description": "1100 XOR 1010 = 0110 = 6",
+        "formula_display": "=BITXOR(12,10)",
+        "formula_stored_xlsx": "=_xlfn.BITXOR(12,10)",
+        "value": 6,
+        "range_values": null,
+        "error": null,
+        "expected": 6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "BITXOR_self_cancels": {
+        "description": "XORing a value with itself clears every bit to 0",
+        "formula_display": "=BITXOR(5,5)",
+        "formula_stored_xlsx": "=_xlfn.BITXOR(5,5)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "BYCOL": {
       "BYCOL_colsums": {
         "description": "Reduce each column to one value (column sums)",
@@ -515,6 +899,44 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "Microsoft worked example: CEILING.MATH(-5.5,2,-1) = -6 ('rounds -5.5 down (away from 0) ... with a mode of -1'). Mode only affects negative numbers; any nonzero mode reverses the default direction."
+      }
+    },
+    "CEILING.PRECISE": {
+      "CEILING_PRECISE_basic": {
+        "description": "Rounds up to the nearest multiple of 3",
+        "formula_display": "=CEILING.PRECISE(7,3)",
+        "formula_stored_xlsx": "=_xlfn.CEILING.PRECISE(7,3)",
+        "value": 9,
+        "range_values": null,
+        "error": null,
+        "expected": 9,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CEILING_PRECISE_already_multiple": {
+        "description": "A value already on a multiple is returned unchanged",
+        "formula_display": "=CEILING.PRECISE(10,5)",
+        "formula_stored_xlsx": "=_xlfn.CEILING.PRECISE(10,5)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CEILING_PRECISE_negative_rounds_up": {
+        "description": "Unlike CEILING, PRECISE always rounds toward positive infinity regardless of the significance sign, so -7 rounds up to -6",
+        "formula_display": "=CEILING.PRECISE(-7,3)",
+        "formula_stored_xlsx": "=_xlfn.CEILING.PRECISE(-7,3)",
+        "value": -6,
+        "range_values": null,
+        "error": null,
+        "expected": -6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "CEILING": {
@@ -931,6 +1353,58 @@
         "notes": null
       }
     },
+    "COMBIN": {
+      "COMBIN_5_2": {
+        "description": "Number of 2-combinations from 5",
+        "formula_display": "=COMBIN(5,2)",
+        "formula_stored_xlsx": "=COMBIN(5,2)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "COMBINA": {
+      "COMBINA_basic": {
+        "description": "Combinations WITH repetition of 3 from 4 items: C(4+3-1,3) = C(6,3) = 20",
+        "formula_display": "=COMBINA(4,3)",
+        "formula_stored_xlsx": "=_xlfn.COMBINA(4,3)",
+        "value": 20,
+        "range_values": null,
+        "error": null,
+        "expected": 20,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "COMBINA_five_two": {
+        "description": "C(5+2-1,2) = C(6,2) = 15",
+        "formula_display": "=COMBINA(5,2)",
+        "formula_stored_xlsx": "=_xlfn.COMBINA(5,2)",
+        "value": 15,
+        "range_values": null,
+        "error": null,
+        "expected": 15,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "COMBINA_choose_zero": {
+        "description": "Choosing zero items always gives exactly one combination",
+        "formula_display": "=COMBINA(10,0)",
+        "formula_stored_xlsx": "=_xlfn.COMBINA(10,0)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "CONCAT": {
       "CONCAT_literals": {
         "description": "Basic literal concatenation",
@@ -1014,6 +1488,58 @@
         "range_values": null,
         "error": null,
         "expected": "Item 42",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "CONVERT": {
+      "CONVERT_celsius_to_fahrenheit": {
+        "description": "Temperature conversion applies the correct offset: 100 C = 212 F",
+        "formula_display": "=CONVERT(100,\"C\",\"F\")",
+        "formula_stored_xlsx": "=CONVERT(100,\"C\",\"F\")",
+        "value": 212,
+        "range_values": null,
+        "error": null,
+        "expected": 212,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CONVERT_day_to_hour": {
+        "description": "One day is 24 hours",
+        "formula_display": "=CONVERT(1,\"day\",\"hr\")",
+        "formula_stored_xlsx": "=CONVERT(1,\"day\",\"hr\")",
+        "value": 24,
+        "range_values": null,
+        "error": null,
+        "expected": 24,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "CONVERT_hour_to_minute": {
+        "description": "One hour is 60 minutes",
+        "formula_display": "=CONVERT(1,\"hr\",\"mn\")",
+        "formula_stored_xlsx": "=CONVERT(1,\"hr\",\"mn\")",
+        "value": 60,
+        "range_values": null,
+        "error": null,
+        "expected": 60,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "CORREL": {
+      "CORREL_perfect_linear": {
+        "description": "y=2x exactly, so the correlation coefficient must be exactly 1",
+        "formula_display": "=CORREL(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=CORREL(A1:A3,B1:B3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -1269,6 +1795,112 @@
         "notes": null
       }
     },
+    "COVAR": {
+      "COVAR_positive": {
+        "description": "Population covariance of two perfectly co-varying columns (B = 2A)",
+        "formula_display": "=COVAR(A1:A5,B1:B5)",
+        "formula_stored_xlsx": "=COVAR(A1:A5,B1:B5)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "COVAR_constant_column": {
+        "description": "When one variable never changes there is no covariance",
+        "formula_display": "=COVAR(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=COVAR(A1:A3,B1:B3)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "COVARIANCE.P": {
+      "COVARIANCE_P_positive": {
+        "description": "Population covariance of two perfectly co-varying columns (B = 2A); the modern equivalent of COVAR",
+        "formula_display": "=COVARIANCE.P(A1:A5,B1:B5)",
+        "formula_stored_xlsx": "=_xlfn.COVARIANCE.P(A1:A5,B1:B5)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "COVARIANCE_P_constant_column": {
+        "description": "When one variable never changes there is no covariance",
+        "formula_display": "=COVARIANCE.P(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=_xlfn.COVARIANCE.P(A1:A3,B1:B3)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "COVARIANCE.S": {
+      "COVARIANCE_S_positive": {
+        "description": "Sample covariance (divides by n-1) of two perfectly co-varying columns (B = 2A)",
+        "formula_display": "=COVARIANCE.S(A1:A5,B1:B5)",
+        "formula_stored_xlsx": "=_xlfn.COVARIANCE.S(A1:A5,B1:B5)",
+        "value": 5,
+        "range_values": null,
+        "error": null,
+        "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "COVARIANCE_S_constant_column": {
+        "description": "When one variable never changes there is no covariance",
+        "formula_display": "=COVARIANCE.S(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=_xlfn.COVARIANCE.S(A1:A3,B1:B3)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "CUMIPMT": {
+      "CUMIPMT_first_period": {
+        "description": "Cumulative interest over just period 1 (negative by cash-flow convention) = -1500",
+        "formula_display": "=ROUND(CUMIPMT(0.005,360,300000,1,1,0),2)",
+        "formula_stored_xlsx": "=ROUND(CUMIPMT(0.005,360,300000,1,1,0),2)",
+        "value": -1500,
+        "range_values": null,
+        "error": null,
+        "expected": -1500,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "CUMPRINC": {
+      "CUMPRINC_first_period": {
+        "description": "Cumulative principal over period 1 (negative by convention) = -298.65",
+        "formula_display": "=ROUND(CUMPRINC(0.005,360,300000,1,1,0),2)",
+        "formula_stored_xlsx": "=ROUND(CUMPRINC(0.005,360,300000,1,1,0),2)",
+        "value": -298.65,
+        "range_values": null,
+        "error": null,
+        "expected": -298.65,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "DATE": {
       "DATE_basic": {
         "description": "Ordinary in-range y/m/d construction",
@@ -1367,6 +1999,46 @@
         "matched_expected": false,
         "canary_ok_this_sheet": true,
         "notes": "Microsoft docs state end<start raises #NUM!; record engines' ACTUAL error code here since this is a known point of cross-engine divergence; MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
+      }
+    },
+    "DATEVALUE": {
+      "DATEVALUE_iso": {
+        "description": "Parse an ISO date string to its serial number",
+        "formula_display": "=DATEVALUE(\"2026-07-21\")",
+        "formula_stored_xlsx": "=DATEVALUE(\"2026-07-21\")",
+        "value": 46224,
+        "range_values": null,
+        "error": null,
+        "expected": 46224,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DAVERAGE": {
+      "DAVERAGE_matching_criteria": {
+        "description": "Averages the Sales column for rows matching the criteria (Region = East)",
+        "formula_display": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "value": 75,
+        "range_values": null,
+        "error": null,
+        "expected": 75,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DAVERAGE_numeric_criteria": {
+        "description": "Averages Sales for rows where Sales is greater than 75",
+        "formula_display": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DAVERAGE(A1:B4,\"Sales\",D1:D2)",
+        "value": 150,
+        "range_values": null,
+        "error": null,
+        "expected": 150,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "DAY": {
@@ -1507,6 +2179,188 @@
         "notes": "Effective dates become Jan 1 -> Jan 30 (31 clamped to 30, no next-month shift) -> (1-1)*30 + (30-1) = 29"
       }
     },
+    "DB": {
+      "DB_first_year": {
+        "description": "Fixed-declining year 1: rate = 1-(salvage/cost)^(1/life) rounded to 3 places = 0.369, so 3690",
+        "formula_display": "=DB(10000,1000,5,1)",
+        "formula_stored_xlsx": "=DB(10000,1000,5,1)",
+        "value": 3690,
+        "range_values": null,
+        "error": null,
+        "expected": 3690,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DCOUNT": {
+      "DCOUNT_matching_criteria": {
+        "description": "Counts the numeric Sales entries for rows matching the criteria (Region = East)",
+        "formula_display": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DCOUNT_all_matching": {
+        "description": "With a criteria that matches every row, counts all numeric Sales entries",
+        "formula_display": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DCOUNT(A1:B4,\"Sales\",D1:D2)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DDB": {
+      "DDB_first_year": {
+        "description": "Double-declining year 1: cost x 2/life = 4000",
+        "formula_display": "=DDB(10000,1000,5,1)",
+        "formula_stored_xlsx": "=DDB(10000,1000,5,1)",
+        "value": 4000,
+        "range_values": null,
+        "error": null,
+        "expected": 4000,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DEC2BIN": {
+      "DEC2BIN_basic": {
+        "description": "Converts a decimal number to its binary text representation",
+        "formula_display": "=DEC2BIN(10)",
+        "formula_stored_xlsx": "=DEC2BIN(10)",
+        "value": "1010",
+        "range_values": null,
+        "error": null,
+        "expected": "1010",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEC2BIN_five": {
+        "description": "5 in decimal is 101 in binary",
+        "formula_display": "=DEC2BIN(5)",
+        "formula_stored_xlsx": "=DEC2BIN(5)",
+        "value": "101",
+        "range_values": null,
+        "error": null,
+        "expected": "101",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEC2BIN_padded": {
+        "description": "The optional places argument pads the result to a fixed width with leading zeros",
+        "formula_display": "=DEC2BIN(10,8)",
+        "formula_stored_xlsx": "=DEC2BIN(10,8)",
+        "value": "00001010",
+        "range_values": null,
+        "error": null,
+        "expected": "00001010",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DEC2HEX": {
+      "DEC2HEX_basic": {
+        "description": "Converts a decimal number to its hexadecimal text representation",
+        "formula_display": "=DEC2HEX(255)",
+        "formula_stored_xlsx": "=DEC2HEX(255)",
+        "value": "FF",
+        "range_values": null,
+        "error": null,
+        "expected": "FF",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEC2HEX_sixteen": {
+        "description": "16 in decimal is 10 in hexadecimal",
+        "formula_display": "=DEC2HEX(16)",
+        "formula_stored_xlsx": "=DEC2HEX(16)",
+        "value": "10",
+        "range_values": null,
+        "error": null,
+        "expected": "10",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEC2HEX_padded": {
+        "description": "The optional second argument pads the result to a minimum number of characters with leading zeros",
+        "formula_display": "=DEC2HEX(255,4)",
+        "formula_stored_xlsx": "=DEC2HEX(255,4)",
+        "value": "00FF",
+        "range_values": null,
+        "error": null,
+        "expected": "00FF",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DEC2OCT": {
+      "DEC2OCT_basic": {
+        "description": "8 in decimal is 10 in octal",
+        "formula_display": "=DEC2OCT(8)",
+        "formula_stored_xlsx": "=DEC2OCT(8)",
+        "value": "10",
+        "range_values": null,
+        "error": null,
+        "expected": "10",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEC2OCT_fifteen": {
+        "description": "15 in decimal is 17 in octal",
+        "formula_display": "=DEC2OCT(15)",
+        "formula_stored_xlsx": "=DEC2OCT(15)",
+        "value": "17",
+        "range_values": null,
+        "error": null,
+        "expected": "17",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEC2OCT_padded": {
+        "description": "The optional places argument pads the result to a fixed width with leading zeros",
+        "formula_display": "=DEC2OCT(8,4)",
+        "formula_stored_xlsx": "=DEC2OCT(8,4)",
+        "value": "0010",
+        "range_values": null,
+        "error": null,
+        "expected": "0010",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DECIMAL": {
+      "DECIMAL_basic": {
+        "description": "Parse hexadecimal text back to a number",
+        "formula_display": "=DECIMAL(\"FF\",16)",
+        "formula_stored_xlsx": "=_xlfn.DECIMAL(\"FF\",16)",
+        "value": 255,
+        "range_values": null,
+        "error": null,
+        "expected": 255,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "DEGREES": {
       "DEGREES_pi_is_180": {
         "description": "Pi radians is exactly a half turn, i.e. 180 degrees",
@@ -1557,6 +2411,136 @@
         "notes": null
       }
     },
+    "DEVSQ": {
+      "DEVSQ_basic": {
+        "description": "Sum of squared deviations from the mean (4): 4 + 0 + 4 = 8",
+        "formula_display": "=DEVSQ(2,4,6)",
+        "formula_stored_xlsx": "=DEVSQ(2,4,6)",
+        "value": 8,
+        "range_values": null,
+        "error": null,
+        "expected": 8,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEVSQ_from_range": {
+        "description": "Sum of squared deviations of 1..5 from their mean of 3",
+        "formula_display": "=DEVSQ(A1:A5)",
+        "formula_stored_xlsx": "=DEVSQ(A1:A5)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DEVSQ_identical_values": {
+        "description": "Identical values have zero deviation",
+        "formula_display": "=DEVSQ(5,5,5)",
+        "formula_stored_xlsx": "=DEVSQ(5,5,5)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DGET": {
+      "DGET_single_match": {
+        "description": "Returns the single Sales value for the one row matching the criteria (Region = West)",
+        "formula_display": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "value": 200,
+        "range_values": null,
+        "error": null,
+        "expected": 200,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DGET_multiple_matches_error": {
+        "description": "Errors when more than one row matches (East matches two rows), because DGET must return exactly one value. Cross-app difference: Excel and Google Sheets return #NUM! here, but LibreOffice returns #VALUE!.",
+        "formula_display": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DGET(A1:B4,\"Sales\",D1:D2)",
+        "value": "#VALUE!",
+        "range_values": null,
+        "error": "#VALUE!",
+        "expected": "#VALUE!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DMAX": {
+      "DMAX_matching_criteria": {
+        "description": "Largest Sales value among rows matching the criteria (Region = East)",
+        "formula_display": "=DMAX(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DMAX(A1:B4,\"Sales\",D1:D2)",
+        "value": 100,
+        "range_values": null,
+        "error": null,
+        "expected": 100,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DMAX_all_rows": {
+        "description": "With a criteria matching every row, returns the overall maximum",
+        "formula_display": "=DMAX(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DMAX(A1:B4,\"Sales\",D1:D2)",
+        "value": 200,
+        "range_values": null,
+        "error": null,
+        "expected": 200,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DMIN": {
+      "DMIN_matching_criteria": {
+        "description": "Smallest Sales value among rows matching the criteria (Region = East)",
+        "formula_display": "=DMIN(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DMIN(A1:B4,\"Sales\",D1:D2)",
+        "value": 50,
+        "range_values": null,
+        "error": null,
+        "expected": 50,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DMIN_all_rows": {
+        "description": "With a criteria matching every row, returns the overall minimum",
+        "formula_display": "=DMIN(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DMIN(A1:B4,\"Sales\",D1:D2)",
+        "value": 50,
+        "range_values": null,
+        "error": null,
+        "expected": 50,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "DOLLAR": {
+      "DOLLAR_basic": {
+        "description": "Currency-format text with 2 decimals (en-US locale)",
+        "formula_display": "=DOLLAR(1234.567,2)",
+        "formula_stored_xlsx": "=DOLLAR(1234.567,2)",
+        "value": "$1,234.57",
+        "range_values": null,
+        "error": null,
+        "expected": "$1,234.57",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "DROP": {
       "DROP_first_row_and_col": {
         "description": "Drop the first row and first column of a 3x3 range",
@@ -1583,6 +2567,44 @@
         "matched_expected": false,
         "canary_ok_this_sheet": true,
         "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
+      }
+    },
+    "DSUM": {
+      "DSUM_matching_criteria": {
+        "description": "Sums the Sales column only for rows matching the criteria range (Region = East)",
+        "formula_display": "=DSUM(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DSUM(A1:B4,\"Sales\",D1:D2)",
+        "value": 150,
+        "range_values": null,
+        "error": null,
+        "expected": 150,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DSUM_field_by_number": {
+        "description": "The field can be given as a column number (2) instead of its header name",
+        "formula_display": "=DSUM(A1:B4,2,D1:D2)",
+        "formula_stored_xlsx": "=DSUM(A1:B4,2,D1:D2)",
+        "value": 150,
+        "range_values": null,
+        "error": null,
+        "expected": 150,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "DSUM_numeric_condition": {
+        "description": "Criteria can be a comparison expression, e.g. Sales greater than 75",
+        "formula_display": "=DSUM(A1:B4,\"Sales\",D1:D2)",
+        "formula_stored_xlsx": "=DSUM(A1:B4,\"Sales\",D1:D2)",
+        "value": 300,
+        "range_values": null,
+        "error": null,
+        "expected": 300,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "EDATE": {
@@ -1633,6 +2655,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "1.9 truncates to 1, not rounded to 2"
+      }
+    },
+    "EFFECT": {
+      "EFFECT_monthly_6pct": {
+        "description": "Effective rate of 6% nominal compounded monthly: (1.005)^12-1",
+        "formula_display": "=ROUND(EFFECT(0.06,12),6)",
+        "formula_stored_xlsx": "=ROUND(EFFECT(0.06,12),6)",
+        "value": 0.061678,
+        "range_values": null,
+        "error": null,
+        "expected": 0.061678,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "EOMONTH": {
@@ -1783,6 +2819,20 @@
         "notes": "Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: 'returns the #N/A error' for non-error input."
       }
     },
+    "EVEN": {
+      "EVEN_round_up": {
+        "description": "Rounds up to the nearest even integer",
+        "formula_display": "=EVEN(3)",
+        "formula_stored_xlsx": "=EVEN(3)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "EXACT": {
       "EXACT_case_sensitive_false": {
         "description": "EXACT is case-sensitive: differing case alone makes two otherwise-identical strings unequal",
@@ -1878,6 +2928,100 @@
         "range_values": null,
         "error": null,
         "expected": 5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "EXPAND": {
+      "EXPAND_pad_rows": {
+        "description": "Grows a 2-row array to 3 rows, padding the new cell with 0",
+        "formula_display": "=EXPAND(A1:A2,3,1,0)",
+        "formula_stored_xlsx": "=_xlfn.EXPAND(A1:A2,3,1,0)",
+        "value": "#NAME?",
+        "range_values": [
+          "#NAME?",
+          "#NAME?",
+          "#NAME?"
+        ],
+        "error": "#NAME?",
+        "expected": [
+          5,
+          7,
+          0
+        ],
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
+      },
+      "EXPAND_pad_cols": {
+        "description": "Grows a single cell to 3 columns wide, padding with 0",
+        "formula_display": "=EXPAND(A1:A1,1,3,0)",
+        "formula_stored_xlsx": "=_xlfn.EXPAND(A1:A1,1,3,0)",
+        "value": "#NAME?",
+        "range_values": [
+          "#NAME?",
+          "#NAME?",
+          "#NAME?"
+        ],
+        "error": "#NAME?",
+        "expected": [
+          5,
+          0,
+          0
+        ],
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
+      }
+    },
+    "FACT": {
+      "FACT_5": {
+        "description": "5! = 120",
+        "formula_display": "=FACT(5)",
+        "formula_stored_xlsx": "=FACT(5)",
+        "value": 120,
+        "range_values": null,
+        "error": null,
+        "expected": 120,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FACTDOUBLE": {
+      "FACTDOUBLE_even": {
+        "description": "Double factorial of an even number multiplies down by 2s: 6*4*2 = 48",
+        "formula_display": "=FACTDOUBLE(6)",
+        "formula_stored_xlsx": "=FACTDOUBLE(6)",
+        "value": 48,
+        "range_values": null,
+        "error": null,
+        "expected": 48,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "FACTDOUBLE_odd": {
+        "description": "Double factorial of an odd number: 7*5*3*1 = 105",
+        "formula_display": "=FACTDOUBLE(7)",
+        "formula_stored_xlsx": "=FACTDOUBLE(7)",
+        "value": 105,
+        "range_values": null,
+        "error": null,
+        "expected": 105,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "FACTDOUBLE_zero": {
+        "description": "The double factorial of 0 is defined as 1",
+        "formula_display": "=FACTDOUBLE(0)",
+        "formula_stored_xlsx": "=FACTDOUBLE(0)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -2061,6 +3205,20 @@
         "notes": null
       }
     },
+    "FIXED": {
+      "FIXED_basic": {
+        "description": "Fixed-decimal text with thousands separator",
+        "formula_display": "=FIXED(1234.567,1)",
+        "formula_stored_xlsx": "=FIXED(1234.567,1)",
+        "value": "1,234.6",
+        "range_values": null,
+        "error": null,
+        "expected": "1,234.6",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "FLOOR.MATH": {
       "FLOOR.MATH_basic_significance": {
         "description": "Rounds 24.3 down to the nearest multiple of 5. Source: https://support.microsoft.com/en-us/office/floor-math-function-c302b599-fbdb-4177-ba19-2c2b1249a2f5 (worked example table)",
@@ -2185,6 +3343,60 @@
         "notes": null
       }
     },
+    "FORECAST.ETS": {
+      "FORECAST_ETS_exists": {
+        "description": "Existence probe: exponential-smoothing forecast of the next point of a rising series. The AAA algorithm's exact output depends on implementation internals, so we only assert the engine recognizes the function and returns a numeric value (not #NAME?)",
+        "formula_display": "=FORECAST.ETS(A7,B1:B6,A1:A6)",
+        "formula_stored_xlsx": "=_xlfn.FORECAST.ETS(A7,B1:B6,A1:A6)",
+        "value": 70,
+        "range_values": null,
+        "error": null,
+        "expected": null,
+        "matched_expected": null,
+        "canary_ok_this_sheet": true,
+        "notes": "Non-deterministic across implementations by design (smoothing-parameter optimization differs); the key datum is whether the engine has FORECAST.ETS at all. Excel returns ~70 for this series."
+      }
+    },
+    "FORECAST.LINEAR": {
+      "FORECAST_LINEAR_two_point_interpolation": {
+        "description": "Modern renamed FORECAST (Excel 2016+): exact line through (2,10),(3,20) evaluated at 2.5 = 15",
+        "formula_display": "=FORECAST.LINEAR(2.5,B1:B2,A1:A2)",
+        "formula_stored_xlsx": "=_xlfn.FORECAST.LINEAR(2.5,B1:B2,A1:A2)",
+        "value": 15,
+        "range_values": null,
+        "error": null,
+        "expected": 15,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FORECAST": {
+      "FORECAST_two_point_interpolation": {
+        "description": "Linear fit through (2,10) and (3,20): the line is exact, so x=2.5 must give exactly 15",
+        "formula_display": "=FORECAST(2.5,B1:B2,A1:A2)",
+        "formula_stored_xlsx": "=FORECAST(2.5,B1:B2,A1:A2)",
+        "value": 15,
+        "range_values": null,
+        "error": null,
+        "expected": 15,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "FORECAST_extrapolation": {
+        "description": "Points (1,10),(2,20),(3,30) lie exactly on y=10x; extrapolating to x=5 gives 50",
+        "formula_display": "=FORECAST(5,B1:B3,A1:A3)",
+        "formula_stored_xlsx": "=FORECAST(5,B1:B3,A1:A3)",
+        "value": 50,
+        "range_values": null,
+        "error": null,
+        "expected": 50,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "FORMULATEXT": {
       "FORMULATEXT_basic_arithmetic": {
         "description": "A cell holding a plain arithmetic formula -> FORMULATEXT returns the exact formula text as typed",
@@ -2230,6 +3442,250 @@
         "range_values": null,
         "error": "#N/A",
         "expected": "#N/A",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FREQUENCY": {
+      "FREQUENCY_three_bins": {
+        "description": "Data 1..5 with bin edges 2 and 4: counts are (<=2)=2, (3..4)=2, (>4)=1, spilled vertically",
+        "formula_display": "=FREQUENCY(A1:A5,B1:B2)",
+        "formula_stored_xlsx": "=FREQUENCY(A1:A5,B1:B2)",
+        "value": 2,
+        "range_values": [
+          2,
+          2,
+          1
+        ],
+        "error": null,
+        "expected": [
+          2,
+          2,
+          1
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "FV": {
+      "FV_monthly_savings": {
+        "description": "Future value of $100/month for 10 years at 5% annual, compounded monthly",
+        "formula_display": "=ROUND(FV(0.05/12,120,-100,0),2)",
+        "formula_stored_xlsx": "=ROUND(FV(0.05/12,120,-100,0),2)",
+        "value": 15528.23,
+        "range_values": null,
+        "error": null,
+        "expected": 15528.23,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "GCD": {
+      "GCD_basic": {
+        "description": "Greatest common divisor",
+        "formula_display": "=GCD(12,18)",
+        "formula_stored_xlsx": "=GCD(12,18)",
+        "value": 6,
+        "range_values": null,
+        "error": null,
+        "expected": 6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "GEOMEAN": {
+      "GEOMEAN_1_4_16": {
+        "description": "Geometric mean = (1*4*16)^(1/3)",
+        "formula_display": "=GEOMEAN(1,4,16)",
+        "formula_stored_xlsx": "=GEOMEAN(1,4,16)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "GROUPBY": {
+      "GROUPBY_exists_sum": {
+        "description": "Existence probe: group a,b,a,b over 1,2,3,4 with SUM. In Excel 365 this spills grouped rows (a=4, b=6) plus a grand-total row by default; the exact spill layout depends on optional field_headers/total_depth arguments, so we only assert the engine recognizes the function (not #NAME?)",
+        "formula_display": "=GROUPBY(A1:A4,B1:B4,SUM)",
+        "formula_stored_xlsx": "=_xlfn.GROUPBY(A1:A4,B1:B4,SUM)",
+        "value": "#NAME?",
+        "range_values": null,
+        "error": "#NAME?",
+        "expected": null,
+        "matched_expected": null,
+        "canary_ok_this_sheet": true,
+        "notes": "Probe only: layout of the spilled result (headers/totals) varies with optional args; the key datum is whether the engine has GROUPBY at all"
+      }
+    },
+    "GROWTH": {
+      "GROWTH_exact_exponential": {
+        "description": "y=2^x data extrapolated to x=4 must give 16 (exact exponential fit)",
+        "formula_display": "=ROUND(GROWTH(B1:B3,A1:A3,4),6)",
+        "formula_stored_xlsx": "=ROUND(GROWTH(B1:B3,A1:A3,4),6)",
+        "value": 16,
+        "range_values": null,
+        "error": null,
+        "expected": 16,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "HARMEAN": {
+      "HARMEAN_basic": {
+        "description": "Harmonic mean = n divided by the sum of reciprocals; 3/(1/2+1/3+1/6) = 3",
+        "formula_display": "=HARMEAN(2,3,6)",
+        "formula_stored_xlsx": "=HARMEAN(2,3,6)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HARMEAN_all_equal": {
+        "description": "The harmonic mean of identical values is that value",
+        "formula_display": "=HARMEAN(4,4,4)",
+        "formula_stored_xlsx": "=HARMEAN(4,4,4)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HARMEAN_from_range": {
+        "description": "Harmonic mean of two values read from cells; 2/(1/1+1/3) = 1.5",
+        "formula_display": "=HARMEAN(A1:A2)",
+        "formula_stored_xlsx": "=HARMEAN(A1:A2)",
+        "value": 1.5,
+        "range_values": null,
+        "error": null,
+        "expected": 1.5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "HEX2BIN": {
+      "HEX2BIN_basic": {
+        "description": "Hex F is 1111 in binary",
+        "formula_display": "=HEX2BIN(\"F\")",
+        "formula_stored_xlsx": "=HEX2BIN(\"F\")",
+        "value": "1111",
+        "range_values": null,
+        "error": null,
+        "expected": "1111",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2BIN_ten": {
+        "description": "Hex A (decimal 10) is 1010 in binary",
+        "formula_display": "=HEX2BIN(\"A\")",
+        "formula_stored_xlsx": "=HEX2BIN(\"A\")",
+        "value": "1010",
+        "range_values": null,
+        "error": null,
+        "expected": "1010",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2BIN_padded": {
+        "description": "The optional places argument pads the binary result to a fixed width",
+        "formula_display": "=HEX2BIN(\"F\",8)",
+        "formula_stored_xlsx": "=HEX2BIN(\"F\",8)",
+        "value": "00001111",
+        "range_values": null,
+        "error": null,
+        "expected": "00001111",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "HEX2DEC": {
+      "HEX2DEC_basic": {
+        "description": "Converts a hexadecimal text value to its decimal number",
+        "formula_display": "=HEX2DEC(\"FF\")",
+        "formula_stored_xlsx": "=HEX2DEC(\"FF\")",
+        "value": 255,
+        "range_values": null,
+        "error": null,
+        "expected": 255,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2DEC_ten": {
+        "description": "The hex digit A is 10 in decimal",
+        "formula_display": "=HEX2DEC(\"A\")",
+        "formula_stored_xlsx": "=HEX2DEC(\"A\")",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2DEC_roundtrip": {
+        "description": "HEX2DEC reverses DEC2HEX, recovering the original number",
+        "formula_display": "=HEX2DEC(DEC2HEX(4095))",
+        "formula_stored_xlsx": "=HEX2DEC(DEC2HEX(4095))",
+        "value": 4095,
+        "range_values": null,
+        "error": null,
+        "expected": 4095,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "HEX2OCT": {
+      "HEX2OCT_basic": {
+        "description": "Hex F (decimal 15) is 17 in octal",
+        "formula_display": "=HEX2OCT(\"F\")",
+        "formula_stored_xlsx": "=HEX2OCT(\"F\")",
+        "value": "17",
+        "range_values": null,
+        "error": null,
+        "expected": "17",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2OCT_ten": {
+        "description": "Hex A (decimal 10) is 12 in octal",
+        "formula_display": "=HEX2OCT(\"A\")",
+        "formula_stored_xlsx": "=HEX2OCT(\"A\")",
+        "value": "12",
+        "range_values": null,
+        "error": null,
+        "expected": "12",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "HEX2OCT_larger": {
+        "description": "Hex FF (decimal 255) is 377 in octal",
+        "formula_display": "=HEX2OCT(\"FF\")",
+        "formula_stored_xlsx": "=HEX2OCT(\"FF\")",
+        "value": "377",
+        "range_values": null,
+        "error": null,
+        "expected": "377",
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -2807,6 +4263,48 @@
         "notes": null
       }
     },
+    "INTERCEPT": {
+      "INTERCEPT_exact_line": {
+        "description": "Points on y=2x+1 exactly: least-squares intercept must be exactly 1",
+        "formula_display": "=INTERCEPT(B1:B3,A1:A3)",
+        "formula_stored_xlsx": "=INTERCEPT(B1:B3,A1:A3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "IPMT": {
+      "IPMT_first_month_interest": {
+        "description": "First-month interest on the $300k/6% mortgage: exactly principal x monthly rate = 1500",
+        "formula_display": "=ROUND(IPMT(0.005,1,360,-300000),2)",
+        "formula_stored_xlsx": "=ROUND(IPMT(0.005,1,360,-300000),2)",
+        "value": 1500,
+        "range_values": null,
+        "error": null,
+        "expected": 1500,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "IRR": {
+      "IRR_simple_investment": {
+        "description": "-1000 followed by three 500s: the rate where NPV=0 is ~23.4% (mathematically determined root; all engines must converge to it)",
+        "formula_display": "=ROUND(IRR(A1:A4),3)",
+        "formula_stored_xlsx": "=ROUND(IRR(A1:A4),3)",
+        "value": 0.234,
+        "range_values": null,
+        "error": null,
+        "expected": 0.234,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "ISBLANK": {
       "ISBLANK_true_for_genuinely_empty_cell": {
         "description": "A1 is never written to at all (no setup_cells entry) -- a genuinely empty cell",
@@ -3014,6 +4512,32 @@
         "range_values": null,
         "error": "#VALUE!",
         "expected": "#VALUE!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "ISFORMULA": {
+      "ISFORMULA_true_on_formula_cell": {
+        "description": "A1 contains a live formula (=1+2), so ISFORMULA must return TRUE",
+        "formula_display": "=ISFORMULA(A1)",
+        "formula_stored_xlsx": "=_xlfn.ISFORMULA(A1)",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "ISFORMULA_false_on_literal": {
+        "description": "B1 holds a plain number, so FALSE",
+        "formula_display": "=ISFORMULA(B1)",
+        "formula_stored_xlsx": "=_xlfn.ISFORMULA(B1)",
+        "value": false,
+        "range_values": null,
+        "error": null,
+        "expected": false,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -3281,6 +4805,32 @@
         "notes": "Cross-checked against Python's datetime.date(2024,12,31).isocalendar() -> (2025, 1, 2)"
       }
     },
+    "ISREF": {
+      "ISREF_indirect_missing_sheet": {
+        "description": "INDIRECT could not resolve to a reference (no such sheet), so ISREF is FALSE -- the basis of the IF(ISREF(...)) guard pattern",
+        "formula_display": "=ISREF(INDIRECT(\"'Nope'!B2\"))",
+        "formula_stored_xlsx": "=ISREF(INDIRECT(\"'Nope'!B2\"))",
+        "value": false,
+        "range_values": null,
+        "error": null,
+        "expected": false,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents ISREF as TRUE when value refers to a reference and FALSE otherwise; an unresolvable INDIRECT yields no reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
+      },
+      "ISREF_indirect_valid": {
+        "description": "INDIRECT resolves to a real cell reference on the current sheet, so ISREF is TRUE",
+        "formula_display": "=ISREF(INDIRECT(\"A1\"))",
+        "formula_stored_xlsx": "=ISREF(INDIRECT(\"A1\"))",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents ISREF as TRUE when value refers to a reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
+      }
+    },
     "ISTEXT": {
       "ISTEXT_text": {
         "description": "A genuine text string -> TRUE",
@@ -3431,6 +4981,20 @@
         "notes": "MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
       }
     },
+    "LCM": {
+      "LCM_basic": {
+        "description": "Least common multiple",
+        "formula_display": "=LCM(4,6)",
+        "formula_stored_xlsx": "=LCM(4,6)",
+        "value": 12,
+        "range_values": null,
+        "error": null,
+        "expected": 12,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "LEFT": {
       "LEFT_default_num_chars": {
         "description": "num_chars omitted defaults to 1",
@@ -3579,6 +5143,20 @@
         "matched_expected": false,
         "canary_ok_this_sheet": true,
         "notes": "LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call; MISMATCH vs expected: expected '#VALUE!', got '#NAME?'"
+      }
+    },
+    "LINEST": {
+      "LINEST_slope_exact_line": {
+        "description": "Slope element of LINEST on exact y=2x+1 data must be exactly 2",
+        "formula_display": "=INDEX(LINEST(B1:B3,A1:A3),1,1)",
+        "formula_stored_xlsx": "=INDEX(LINEST(B1:B3,A1:A3),1,1)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "LN": {
@@ -4295,6 +5873,104 @@
         "notes": null
       }
     },
+    "MODE.MULT": {
+      "MODE_MULT_two_modes": {
+        "description": "Returns every value tied for most frequent as a spilled vertical array; 1 and 2 each appear twice",
+        "formula_display": "=MODE.MULT(A1:A5)",
+        "formula_stored_xlsx": "=_xlfn.MODE.MULT(A1:A5)",
+        "value": 1,
+        "range_values": [
+          1,
+          2
+        ],
+        "error": null,
+        "expected": [
+          1,
+          2
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_MULT_single_mode": {
+        "description": "With one clear most-frequent value, returns just that value",
+        "formula_display": "=MODE.MULT(A1:A5)",
+        "formula_stored_xlsx": "=_xlfn.MODE.MULT(A1:A5)",
+        "value": 4,
+        "range_values": [
+          4
+        ],
+        "error": null,
+        "expected": [
+          4
+        ],
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "MODE.SNGL": {
+      "MODE_SNGL_basic": {
+        "description": "Returns the single most frequently occurring value",
+        "formula_display": "=MODE.SNGL(1,2,2,3,4)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(1,2,2,3,4)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_from_range": {
+        "description": "Most frequent value read from a cell range",
+        "formula_display": "=MODE.SNGL(A1:A5)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(A1:A5)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_first_of_ties": {
+        "description": "When two values tie for most frequent, returns the one that appears first",
+        "formula_display": "=MODE.SNGL(1,1,2,2)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(1,1,2,2)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_negatives": {
+        "description": "Works with negative numbers",
+        "formula_display": "=MODE.SNGL(-4,-4,7)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(-4,-4,7)",
+        "value": -4,
+        "range_values": null,
+        "error": null,
+        "expected": -4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MODE_SNGL_no_repeats_error": {
+        "description": "Errors when no value repeats. Note a cross-app difference: Excel and Google Sheets return #N/A here, but LibreOffice returns #VALUE!",
+        "formula_display": "=MODE.SNGL(1,2,3)",
+        "formula_stored_xlsx": "=_xlfn.MODE.SNGL(1,2,3)",
+        "value": "#VALUE!",
+        "range_values": null,
+        "error": "#VALUE!",
+        "expected": "#VALUE!",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "MODE": {
       "MODE_basic_repeated_value": {
         "description": "Basic case with one clearly most-frequent value",
@@ -4445,6 +6121,44 @@
         "notes": null
       }
     },
+    "MULTINOMIAL": {
+      "MULTINOMIAL_two_groups": {
+        "description": "Ratio of the factorial of the sum to the product of factorials: 5!/(2!3!) = 10",
+        "formula_display": "=MULTINOMIAL(2,3)",
+        "formula_stored_xlsx": "=MULTINOMIAL(2,3)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MULTINOMIAL_three_groups": {
+        "description": "6!/(1!2!3!) = 720/12 = 60",
+        "formula_display": "=MULTINOMIAL(1,2,3)",
+        "formula_stored_xlsx": "=MULTINOMIAL(1,2,3)",
+        "value": 60,
+        "range_values": null,
+        "error": null,
+        "expected": 60,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "MULTINOMIAL_from_range": {
+        "description": "4!/(2!2!) = 24/4 = 6, arguments read from a range",
+        "formula_display": "=MULTINOMIAL(A1:A2)",
+        "formula_stored_xlsx": "=MULTINOMIAL(A1:A2)",
+        "value": 6,
+        "range_values": null,
+        "error": null,
+        "expected": 6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "N": {
       "N_number": {
         "description": "A number passed through unchanged -> the number itself",
@@ -4557,6 +6271,20 @@
         "notes": null
       }
     },
+    "NETWORKDAYS.INTL": {
+      "NETWORKDAYS_INTL_july": {
+        "description": "Working days in July 2026 with default weekend",
+        "formula_display": "=NETWORKDAYS.INTL(DATE(2026,7,1),DATE(2026,7,31))",
+        "formula_stored_xlsx": "=NETWORKDAYS.INTL(DATE(2026,7,1),DATE(2026,7,31))",
+        "value": 23,
+        "range_values": null,
+        "error": null,
+        "expected": 23,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "NETWORKDAYS": {
       "NETWORKDAYS_basic_week": {
         "description": "Mon Jan 1 to Fri Jan 5, 2024, no holidays -> 5 workdays",
@@ -4602,6 +6330,20 @@
         "range_values": null,
         "error": null,
         "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "NOMINAL": {
+      "NOMINAL_inverse_of_effect": {
+        "description": "Inverting EFFECT recovers the 6% nominal rate",
+        "formula_display": "=ROUND(NOMINAL(0.061678,12),4)",
+        "formula_stored_xlsx": "=ROUND(NOMINAL(0.061678,12),4)",
+        "value": 0.06,
+        "range_values": null,
+        "error": null,
+        "expected": 0.06,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -4669,6 +6411,72 @@
         "notes": null
       }
     },
+    "NOW": {
+      "NOW_exists_and_plausible": {
+        "description": "Existence probe only: NOW() is volatile (changes every recalculation), so there is no fixed expected value",
+        "formula_display": "=NOW()",
+        "formula_stored_xlsx": "=NOW()",
+        "value": 46262.92350326389,
+        "range_values": null,
+        "error": null,
+        "expected": null,
+        "matched_expected": null,
+        "canary_ok_this_sheet": true,
+        "notes": "Non-deterministic by design; only check the engine recognizes the function and returns a plausible date-time serial"
+      },
+      "NOW_self_difference_is_deterministic": {
+        "description": "Two NOW() calls inside one cell evaluate in the same recalculation pass, so their difference is exactly 0 \u2014 a deterministic assertion about a volatile function (N() keeps the result a plain number instead of a duration-formatted cell)",
+        "formula_display": "=N(NOW()-NOW())",
+        "formula_stored_xlsx": "=N(NOW()-NOW())",
+        "value": -1.01863425925926e-10,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "NOW_on_or_after_today": {
+        "description": "NOW() includes today's date plus a time fraction, so it is always >= TODAY() within one recalculation",
+        "formula_display": "=NOW()>=TODAY()",
+        "formula_stored_xlsx": "=NOW()>=TODAY()",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "NPER": {
+      "NPER_payoff_periods": {
+        "description": "Years to pay off 5000 at 10% with 1000/period: -ln(1-r*PV/pmt)/ln(1+r) = 7.2725",
+        "formula_display": "=ROUND(NPER(0.1,-1000,5000),4)",
+        "formula_stored_xlsx": "=ROUND(NPER(0.1,-1000,5000),4)",
+        "value": 7.2725,
+        "range_values": null,
+        "error": null,
+        "expected": 7.2725,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "NPV": {
+      "NPV_three_cashflows": {
+        "description": "100/1.1 + 200/1.1^2 + 300/1.1^3 = 481.59 (NPV discounts the FIRST argument one period)",
+        "formula_display": "=ROUND(NPV(0.1,100,200,300),2)",
+        "formula_stored_xlsx": "=ROUND(NPV(0.1,100,200,300),2)",
+        "value": 481.59,
+        "range_values": null,
+        "error": null,
+        "expected": 481.59,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "NUMBERVALUE": {
       "NUMBERVALUE_basic": {
         "description": "Basic numeric text conversion with explicit US-style decimal_separator and group_separator arguments",
@@ -4717,6 +6525,134 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "Source: https://support.microsoft.com/en-us/office/numbervalue-function-1b05c8cf-2bfa-4437-af70-596c7ea7d879 - decimal separator used multiple times is explicitly called out as an error condition"
+      }
+    },
+    "OCT2BIN": {
+      "OCT2BIN_basic": {
+        "description": "Octal 17 (decimal 15) is 1111 in binary",
+        "formula_display": "=OCT2BIN(17)",
+        "formula_stored_xlsx": "=OCT2BIN(17)",
+        "value": "1111",
+        "range_values": null,
+        "error": null,
+        "expected": "1111",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "OCT2BIN_three": {
+        "description": "Octal 3 is 11 in binary",
+        "formula_display": "=OCT2BIN(3)",
+        "formula_stored_xlsx": "=OCT2BIN(3)",
+        "value": "11",
+        "range_values": null,
+        "error": null,
+        "expected": "11",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "OCT2BIN_padded": {
+        "description": "The optional places argument pads the binary result to a fixed width",
+        "formula_display": "=OCT2BIN(7,4)",
+        "formula_stored_xlsx": "=OCT2BIN(7,4)",
+        "value": "0111",
+        "range_values": null,
+        "error": null,
+        "expected": "0111",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "OCT2DEC": {
+      "OCT2DEC_basic": {
+        "description": "Octal 17 is 15 in decimal (1*8 + 7)",
+        "formula_display": "=OCT2DEC(17)",
+        "formula_stored_xlsx": "=OCT2DEC(17)",
+        "value": 15,
+        "range_values": null,
+        "error": null,
+        "expected": 15,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "OCT2DEC_ten": {
+        "description": "Octal 12 is 10 in decimal (1*8 + 2)",
+        "formula_display": "=OCT2DEC(12)",
+        "formula_stored_xlsx": "=OCT2DEC(12)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "OCT2DEC_roundtrip": {
+        "description": "OCT2DEC reverses DEC2OCT, recovering the original number",
+        "formula_display": "=OCT2DEC(DEC2OCT(64))",
+        "formula_stored_xlsx": "=OCT2DEC(DEC2OCT(64))",
+        "value": 64,
+        "range_values": null,
+        "error": null,
+        "expected": 64,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "OCT2HEX": {
+      "OCT2HEX_basic": {
+        "description": "Octal 17 (decimal 15) is F in hexadecimal",
+        "formula_display": "=OCT2HEX(17)",
+        "formula_stored_xlsx": "=OCT2HEX(17)",
+        "value": "F",
+        "range_values": null,
+        "error": null,
+        "expected": "F",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "OCT2HEX_ten": {
+        "description": "Octal 12 (decimal 10) is A in hexadecimal",
+        "formula_display": "=OCT2HEX(12)",
+        "formula_stored_xlsx": "=OCT2HEX(12)",
+        "value": "A",
+        "range_values": null,
+        "error": null,
+        "expected": "A",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "OCT2HEX_larger": {
+        "description": "Octal 777 (decimal 511) is 1FF in hexadecimal",
+        "formula_display": "=OCT2HEX(777)",
+        "formula_stored_xlsx": "=OCT2HEX(777)",
+        "value": "1FF",
+        "range_values": null,
+        "error": null,
+        "expected": "1FF",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "ODD": {
+      "ODD_round_up": {
+        "description": "Rounds up to the nearest odd integer",
+        "formula_display": "=ODD(2)",
+        "formula_stored_xlsx": "=ODD(2)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "OFFSET": {
@@ -4831,6 +6767,44 @@
         "notes": null
       }
     },
+    "PEARSON": {
+      "PEARSON_perfect_positive": {
+        "description": "Perfectly linear, same-direction data gives a correlation of 1",
+        "formula_display": "=PEARSON(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=PEARSON(A1:A3,B1:B3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "PEARSON_perfect_negative": {
+        "description": "Perfectly linear, opposite-direction data gives a correlation of -1",
+        "formula_display": "=PEARSON(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=PEARSON(A1:A3,B1:B3)",
+        "value": -1,
+        "range_values": null,
+        "error": null,
+        "expected": -1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "PEARSON_no_correlation": {
+        "description": "A symmetric pattern with no linear trend gives a correlation of 0. PEARSON returns the identical coefficient as CORREL.",
+        "formula_display": "=PEARSON(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=PEARSON(A1:A3,B1:B3)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "PERCENTILE.EXC": {
       "PERCENTILE.EXC_k_zero_error": {
         "description": "Documented divergence from PERCENTILE.INC: PERCENTILE.EXC requires k strictly between 0 and 1 (and more precisely between 1/(n+1) and n/(n+1)); k=0 -> #NUM!. Confirmed via Microsoft's PERCENTILE.EXC docs (https://support.microsoft.com/en-us/office/percentile-exc-function-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba): \"If k is <=0 or if k >=1, PERCENTILE.EXC returns the #NUM! error value.\" PERCENTILE.INC_k_zero on identical data returns 1, not an error.",
@@ -4931,6 +6905,70 @@
         "notes": "MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
       }
     },
+    "PERCENTILE": {
+      "PERCENTILE_median_equivalent": {
+        "description": "50th percentile of 1,2,3,4 by linear interpolation = 2.5 (matches MEDIAN)",
+        "formula_display": "=PERCENTILE(A1:A4,0.5)",
+        "formula_stored_xlsx": "=PERCENTILE(A1:A4,0.5)",
+        "value": 2.5,
+        "range_values": null,
+        "error": null,
+        "expected": 2.5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "PERCENTRANK": {
+      "PERCENTRANK_middle": {
+        "description": "Rank of a value that sits at the third of four points (2/3 of the way up)",
+        "formula_display": "=PERCENTRANK(A1:A4,30)",
+        "formula_stored_xlsx": "=PERCENTRANK(A1:A4,30)",
+        "value": 0.667,
+        "range_values": null,
+        "error": null,
+        "expected": 0.667,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "PERCENTRANK_min": {
+        "description": "The smallest value ranks at 0",
+        "formula_display": "=PERCENTRANK(A1:A4,10)",
+        "formula_stored_xlsx": "=PERCENTRANK(A1:A4,10)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "PERCENTRANK_max": {
+        "description": "The largest value ranks at 1",
+        "formula_display": "=PERCENTRANK(A1:A4,40)",
+        "formula_stored_xlsx": "=PERCENTRANK(A1:A4,40)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "PERCENTRANK_interpolated": {
+        "description": "A value between two data points is interpolated (25 sits halfway between the 20 and 30 ranks)",
+        "formula_display": "=PERCENTRANK(A1:A4,25)",
+        "formula_stored_xlsx": "=PERCENTRANK(A1:A4,25)",
+        "value": 0.5,
+        "range_values": null,
+        "error": null,
+        "expected": 0.5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "PI": {
       "PI_value": {
         "description": "PI() takes no arguments and returns the double-precision approximation of pi",
@@ -4964,6 +7002,34 @@
         "range_values": null,
         "error": null,
         "expected": 6.283185307179586,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "PIVOTBY": {
+      "PIVOTBY_exists_sum": {
+        "description": "Existence probe: pivot rows a/b vs columns x/y summing 1..4. In Excel 365 this spills a small pivot table (row+column headers and totals by default); exact layout depends on optional args, so we only assert the engine recognizes the function (not #NAME?)",
+        "formula_display": "=PIVOTBY(A1:A4,B1:B4,C1:C4,SUM)",
+        "formula_stored_xlsx": "=_xlfn.PIVOTBY(A1:A4,B1:B4,C1:C4,SUM)",
+        "value": "#NAME?",
+        "range_values": null,
+        "error": "#NAME?",
+        "expected": null,
+        "matched_expected": null,
+        "canary_ok_this_sheet": true,
+        "notes": "Probe only: spilled pivot layout (headers/totals) varies with optional args; the key datum is whether the engine has PIVOTBY at all"
+      }
+    },
+    "PMT": {
+      "PMT_standard_mortgage": {
+        "description": "Monthly payment on a $300k 30-year loan at 6% annual: the standard amortization formula gives $1,798.65",
+        "formula_display": "=ROUND(PMT(0.06/12,360,-300000),2)",
+        "formula_stored_xlsx": "=ROUND(PMT(0.06/12,360,-300000),2)",
+        "value": 1798.65,
+        "range_values": null,
+        "error": null,
+        "expected": 1798.65,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -5031,6 +7097,34 @@
         "notes": "Real Excel (the worksheet function, and even the '^' operator) has a long-standing, Microsoft-acknowledged bug -- reproduced in Excel 2007 and 2010 and still reported unresolved -- where both '=0^0' and '=POWER(0,0)' incorrectly return #NUM! instead of 1, even though VBA's own 'x = 0 ^ 0' correctly evaluates to 1 in the same product. Recording the spec/cross-engine-consensus value (1) as 'expected' here so this exact Excel quirk shows up as a flagged divergence rather than being silently baked in as 'correct' -- https://learn.microsoft.com/en-us/answers/questions/4850441/excel-formula-bug-00-gives-num"
       }
     },
+    "PPMT": {
+      "PPMT_first_month_principal": {
+        "description": "First-month principal: total payment 1798.65 minus 1500 interest",
+        "formula_display": "=ROUND(PPMT(0.005,1,360,-300000),2)",
+        "formula_stored_xlsx": "=ROUND(PPMT(0.005,1,360,-300000),2)",
+        "value": 298.65,
+        "range_values": null,
+        "error": null,
+        "expected": 298.65,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "PRODUCT": {
+      "PRODUCT_basic": {
+        "description": "Multiply all arguments",
+        "formula_display": "=PRODUCT(2,3,4)",
+        "formula_stored_xlsx": "=PRODUCT(2,3,4)",
+        "value": 24,
+        "range_values": null,
+        "error": null,
+        "expected": 24,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "PROPER": {
       "PROPER_basic_sentence": {
         "description": "Basic multi-word capitalization: the first letter of each word is capitalized, the rest lowercased",
@@ -5064,6 +7158,58 @@
         "range_values": null,
         "error": null,
         "expected": "O'Brien",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "PV": {
+      "PV_annuity": {
+        "description": "Present value of $1,000/year for 5 years at 10%: 1000*(1-1.1^-5)/0.1",
+        "formula_display": "=ROUND(PV(0.1,5,-1000),2)",
+        "formula_stored_xlsx": "=ROUND(PV(0.1,5,-1000),2)",
+        "value": 3790.79,
+        "range_values": null,
+        "error": null,
+        "expected": 3790.79,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "QUARTILE.EXC": {
+      "QUARTILE_EXC_median": {
+        "description": "The second quartile is the median; for 1..5 that is 3",
+        "formula_display": "=QUARTILE.EXC(A1:A5,2)",
+        "formula_stored_xlsx": "=_xlfn.QUARTILE.EXC(A1:A5,2)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "QUARTILE_EXC_first": {
+        "description": "The exclusive first quartile interpolates at rank 0.25*(n+1); for 1..5 that is 1.5",
+        "formula_display": "=QUARTILE.EXC(A1:A5,1)",
+        "formula_stored_xlsx": "=_xlfn.QUARTILE.EXC(A1:A5,1)",
+        "value": 1.5,
+        "range_values": null,
+        "error": null,
+        "expected": 1.5,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "QUARTILE_EXC_third": {
+        "description": "The exclusive third quartile for 1..5 is 4.5",
+        "formula_display": "=QUARTILE.EXC(A1:A5,3)",
+        "formula_stored_xlsx": "=_xlfn.QUARTILE.EXC(A1:A5,3)",
+        "value": 4.5,
+        "range_values": null,
+        "error": null,
+        "expected": 4.5,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -5131,6 +7277,34 @@
         "notes": "MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
       }
     },
+    "QUARTILE": {
+      "QUARTILE_first_quartile": {
+        "description": "Q1 of 1,2,3,4 under the inclusive linear-interpolation method Excel uses = 1.75",
+        "formula_display": "=QUARTILE(A1:A4,1)",
+        "formula_stored_xlsx": "=QUARTILE(A1:A4,1)",
+        "value": 1.75,
+        "range_values": null,
+        "error": null,
+        "expected": 1.75,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "QUOTIENT": {
+      "QUOTIENT_integer_division": {
+        "description": "Integer part of 17/5, discarding the remainder",
+        "formula_display": "=QUOTIENT(17,5)",
+        "formula_stored_xlsx": "=QUOTIENT(17,5)",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "RADIANS": {
       "RADIANS_180_is_pi": {
         "description": "180 degrees is exactly pi radians",
@@ -5186,7 +7360,7 @@
         "description": "Existence probe only: RAND() is non-deterministic; we just confirm the engine recognizes the function (not #NAME?) and returns a plausible value",
         "formula_display": "=RAND()",
         "formula_stored_xlsx": "=RAND()",
-        "value": 0.825356145627851,
+        "value": 0.103833603524121,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5195,12 +7369,38 @@
         "notes": "Non-deterministic by design; harness should only check 0<=value<1 and absence of #NAME?"
       }
     },
+    "RANDARRAY": {
+      "RANDARRAY_shape_is_deterministic": {
+        "description": "Values are random but the requested shape is not: a 2x3 RANDARRAY must have 2 rows and 3 columns (encoded as 23)",
+        "formula_display": "=ROWS(RANDARRAY(2,3))*10+COLUMNS(RANDARRAY(2,3))",
+        "formula_stored_xlsx": "=ROWS(_xlfn.RANDARRAY(2,3))*10+COLUMNS(_xlfn.RANDARRAY(2,3))",
+        "value": "#NAME?",
+        "range_values": null,
+        "error": "#NAME?",
+        "expected": 23,
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "MISMATCH vs expected: expected 23, got '#NAME?'"
+      },
+      "RANDARRAY_default_unit_range": {
+        "description": "With no min/max arguments, every value is a decimal in [0,1) \u2014 deterministic bounds on non-deterministic values",
+        "formula_display": "=AND(MIN(RANDARRAY(10,10))>=0,MAX(RANDARRAY(10,10))<1)",
+        "formula_stored_xlsx": "=AND(MIN(_xlfn.RANDARRAY(10,10))>=0,MAX(_xlfn.RANDARRAY(10,10))<1)",
+        "value": "#NAME?",
+        "range_values": null,
+        "error": "#NAME?",
+        "expected": true,
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "MISMATCH vs expected: expected True, got '#NAME?'"
+      }
+    },
     "RANDBETWEEN": {
       "RANDBETWEEN_exists_bounds": {
         "description": "Existence probe: confirm recognized and result plausible (integer 1..10)",
         "formula_display": "=RANDBETWEEN(1,10)",
         "formula_stored_xlsx": "=RANDBETWEEN(1,10)",
-        "value": 5,
+        "value": 1,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5224,7 +7424,7 @@
         "description": "Existence probe with an all-negative range",
         "formula_display": "=RANDBETWEEN(-5,-1)",
         "formula_stored_xlsx": "=RANDBETWEEN(-5,-1)",
-        "value": -2,
+        "value": -3,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -5345,6 +7545,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "Two values (30,40) exceed 20, so both 20s tie for rank 3; rank 4 is skipped entirely"
+      }
+    },
+    "RATE": {
+      "RATE_recover_annual_rate": {
+        "description": "Inverting the PMT mortgage case: 360 payments of $1,798.65 on $300k recovers the 6% annual rate (iterative solver; all engines must converge)",
+        "formula_display": "=ROUND(RATE(360,-1798.65,300000)*12,4)",
+        "formula_stored_xlsx": "=ROUND(RATE(360,-1798.65,300000)*12,4)",
+        "value": 0.06,
+        "range_values": null,
+        "error": null,
+        "expected": 0.06,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "REDUCE": {
@@ -5506,6 +7720,20 @@
         "range_values": null,
         "error": null,
         "expected": "",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "ROMAN": {
+      "ROMAN_basic": {
+        "description": "Classic-form Roman numerals",
+        "formula_display": "=ROMAN(2026)",
+        "formula_stored_xlsx": "=ROMAN(2026)",
+        "value": "MMXXVI",
+        "range_values": null,
+        "error": null,
+        "expected": "MMXXVI",
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -5749,6 +7977,32 @@
         "notes": null
       }
     },
+    "RSQ": {
+      "RSQ_perfect_fit": {
+        "description": "A perfectly linear relationship has an R-squared of 1 (all variance explained)",
+        "formula_display": "=RSQ(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=RSQ(A1:A3,B1:B3)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "RSQ_no_fit": {
+        "description": "Data with no linear relationship has an R-squared of 0. RSQ equals CORREL squared.",
+        "formula_display": "=RSQ(A1:A3,B1:B3)",
+        "formula_stored_xlsx": "=RSQ(A1:A3,B1:B3)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "SCAN": {
       "SCAN_running_sum": {
         "description": "Running accumulation across a range",
@@ -5959,6 +8213,34 @@
         "notes": "MISMATCH vs expected: value mismatch: expected 5, got '#NAME?'"
       }
     },
+    "SHEET": {
+      "SHEET_returns_positive_index": {
+        "description": "SHEET() returns the current sheet's 1-based index; the absolute number depends on workbook structure (our harness batches many test sheets into one workbook), so we assert the invariant instead",
+        "formula_display": "=SHEET()>=1",
+        "formula_stored_xlsx": "=_xlfn.SHEET()>=1",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SHEETS": {
+      "SHEETS_returns_positive_count": {
+        "description": "SHEETS() counts sheets in the workbook; the harness workbook holds one sheet per test case, so we assert the invariant rather than a fixed count",
+        "formula_display": "=SHEETS()>=1",
+        "formula_stored_xlsx": "=_xlfn.SHEETS()>=1",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "SIGN": {
       "SIGN_positive": {
         "description": "Positive number returns 1",
@@ -6004,6 +8286,34 @@
         "range_values": null,
         "error": null,
         "expected": -1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SLN": {
+      "SLN_straight_line": {
+        "description": "(cost-salvage)/life: (10000-1000)/5 = 1800/year",
+        "formula_display": "=SLN(10000,1000,5)",
+        "formula_stored_xlsx": "=SLN(10000,1000,5)",
+        "value": 1800,
+        "range_values": null,
+        "error": null,
+        "expected": 1800,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SLOPE": {
+      "SLOPE_exact_line": {
+        "description": "Points on y=2x+1 exactly: least-squares slope must be exactly 2",
+        "formula_display": "=SLOPE(B1:B3,A1:A3)",
+        "formula_stored_xlsx": "=SLOPE(B1:B3,A1:A3)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -6225,6 +8535,44 @@
         "notes": "Same doc page above shows an example using '=SQRT(ABS(A2))' specifically to sidestep the negative-input #NUM! case"
       }
     },
+    "STANDARDIZE": {
+      "STANDARDIZE_above_mean": {
+        "description": "Converts a value to a z-score: 50 is two standard deviations above a mean of 40",
+        "formula_display": "=STANDARDIZE(50,40,5)",
+        "formula_stored_xlsx": "=STANDARDIZE(50,40,5)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STANDARDIZE_at_mean": {
+        "description": "A value equal to the mean has a z-score of 0",
+        "formula_display": "=STANDARDIZE(40,40,5)",
+        "formula_stored_xlsx": "=STANDARDIZE(40,40,5)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STANDARDIZE_below_mean": {
+        "description": "A value below the mean gives a negative z-score",
+        "formula_display": "=STANDARDIZE(30,40,5)",
+        "formula_stored_xlsx": "=STANDARDIZE(30,40,5)",
+        "value": -2,
+        "range_values": null,
+        "error": null,
+        "expected": -2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "STDEV.P": {
       "STDEV.P_diverges_from_sample_same_data": {
         "description": "Population standard deviation on the SAME dataset {2,4,4,4,5,5,7,9} used for STDEV/STDEV.S - divides by n instead of n-1, giving a smaller, exact result (2) vs the sample stdev's 2.138089935299395",
@@ -6339,6 +8687,120 @@
         "notes": "n-1=0 with a single supplied value, causing division by zero"
       }
     },
+    "STDEVA": {
+      "STDEVA_numbers_only": {
+        "description": "For pure numbers STDEVA equals STDEV (sample standard deviation)",
+        "formula_display": "=STDEVA(2,4,6)",
+        "formula_stored_xlsx": "=STDEVA(2,4,6)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVA_counts_text_as_zero": {
+        "description": "Unlike STDEV, STDEVA counts text as 0, so {2,4,\"x\"} is treated as {2,4,0}: sample standard deviation 2",
+        "formula_display": "=STDEVA(A1:A3)",
+        "formula_stored_xlsx": "=STDEVA(A1:A3)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVA_identical_values": {
+        "description": "Identical values have zero standard deviation",
+        "formula_display": "=STDEVA(9,9,9)",
+        "formula_stored_xlsx": "=STDEVA(9,9,9)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "STDEVP": {
+      "STDEVP_textbook": {
+        "description": "Population standard deviation of the classic 8-value example (mean 5, variance 4)",
+        "formula_display": "=STDEVP(2,4,4,4,5,5,7,9)",
+        "formula_stored_xlsx": "=STDEVP(2,4,4,4,5,5,7,9)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVP_two_values": {
+        "description": "Two values equidistant from their mean of 3 give a population standard deviation of 1",
+        "formula_display": "=STDEVP(2,4)",
+        "formula_stored_xlsx": "=STDEVP(2,4)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVP_from_range": {
+        "description": "Identical values have zero spread",
+        "formula_display": "=STDEVP(A1:A4)",
+        "formula_stored_xlsx": "=STDEVP(A1:A4)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVP_ignores_text": {
+        "description": "Text and blank cells are ignored, not treated as zero",
+        "formula_display": "=STDEVP(A1:A4)",
+        "formula_stored_xlsx": "=STDEVP(A1:A4)",
+        "value": 1,
+        "range_values": null,
+        "error": null,
+        "expected": 1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "STDEVPA": {
+      "STDEVPA_textbook": {
+        "description": "For pure numbers STDEVPA equals STDEVP (population standard deviation): the classic example gives 2",
+        "formula_display": "=STDEVPA(2,4,4,4,5,5,7,9)",
+        "formula_stored_xlsx": "=STDEVPA(2,4,4,4,5,5,7,9)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "STDEVPA_counts_text_as_zero": {
+        "description": "Unlike STDEVP, STDEVPA counts text as 0, so {5,5,5,5,\"x\"} is treated as {5,5,5,5,0}: population standard deviation 2",
+        "formula_display": "=STDEVPA(A1:A5)",
+        "formula_stored_xlsx": "=STDEVPA(A1:A5)",
+        "value": 2,
+        "range_values": null,
+        "error": null,
+        "expected": 2,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "SUBSTITUTE": {
       "SUBSTITUTE_all_occurrences": {
         "description": "Without instance_num, every occurrence of old_text is replaced",
@@ -6384,6 +8846,44 @@
         "range_values": null,
         "error": null,
         "expected": "Apple",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SUBTOTAL": {
+      "SUBTOTAL_sum_code9": {
+        "description": "Function code 9 = SUM over visible rows (none hidden here)",
+        "formula_display": "=SUBTOTAL(9,A1:A4)",
+        "formula_stored_xlsx": "=SUBTOTAL(9,A1:A4)",
+        "value": 100,
+        "range_values": null,
+        "error": null,
+        "expected": 100,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "SUBTOTAL_counta_code3": {
+        "description": "Function code 3 = COUNTA",
+        "formula_display": "=SUBTOTAL(3,A1:A4)",
+        "formula_stored_xlsx": "=SUBTOTAL(3,A1:A4)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "SUBTOTAL_ignores_nested_subtotal": {
+        "description": "A5 contains its own SUBTOTAL over A1:A4; the outer SUBTOTAL must skip it (no double-count), so the answer is 100, not 200",
+        "formula_display": "=SUBTOTAL(9,A1:A5)",
+        "formula_stored_xlsx": "=SUBTOTAL(9,A1:A5)",
+        "value": 100,
+        "range_values": null,
+        "error": null,
+        "expected": 100,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -6613,6 +9113,20 @@
         "notes": "Microsoft docs: array arguments must have the same dimensions, otherwise SUMPRODUCT returns #VALUE!"
       }
     },
+    "SUMSQ": {
+      "SUMSQ_3_4": {
+        "description": "Sum of squares: 9+16",
+        "formula_display": "=SUMSQ(3,4)",
+        "formula_stored_xlsx": "=SUMSQ(3,4)",
+        "value": 25,
+        "range_values": null,
+        "error": null,
+        "expected": 25,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "SWITCH": {
       "SWITCH_basic_match": {
         "description": "Matches the second value/result pair",
@@ -6658,6 +9172,20 @@
         "range_values": null,
         "error": null,
         "expected": "B",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "SYD": {
+      "SYD_first_year": {
+        "description": "Sum-of-years digits year 1: 9000 x 5/15 = 3000",
+        "formula_display": "=SYD(10000,1000,5,1)",
+        "formula_stored_xlsx": "=SYD(10000,1000,5,1)",
+        "value": 3000,
+        "range_values": null,
+        "error": null,
+        "expected": 3000,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -7061,6 +9589,20 @@
         "notes": "27 mod 24 = 3 -> TIME(3,0,0) = 3/24 = 0.125, matching the cited doc example verbatim"
       }
     },
+    "TIMEVALUE": {
+      "TIMEVALUE_6am": {
+        "description": "6 AM is a quarter of the way through the day",
+        "formula_display": "=TIMEVALUE(\"6:00 AM\")",
+        "formula_stored_xlsx": "=TIMEVALUE(\"6:00 AM\")",
+        "value": 0.25,
+        "range_values": null,
+        "error": null,
+        "expected": 0.25,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "TOCOL": {
       "TOCOL_flatten_by_row": {
         "description": "Flatten a 2x2 range into a single column, scanning by row",
@@ -7090,7 +9632,7 @@
         "description": "Existence probe only: TODAY() is non-deterministic (changes daily), so there is no fixed 'expected' value",
         "formula_display": "=TODAY()",
         "formula_stored_xlsx": "=TODAY()",
-        "value": 46221.0,
+        "value": 46262.0,
         "range_values": null,
         "error": null,
         "expected": null,
@@ -7247,6 +9789,20 @@
         "notes": "B1 is left unset (blank); its transposed position reads back as 0"
       }
     },
+    "TREND": {
+      "TREND_extrapolate_exact_line": {
+        "description": "y=2x data extrapolated to x=5 must give exactly 10",
+        "formula_display": "=TREND(B1:B3,A1:A3,5)",
+        "formula_stored_xlsx": "=TREND(B1:B3,A1:A3,5)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "TRIM": {
       "TRIM_collapse_and_strip": {
         "description": "Leading/trailing spaces are stripped and multiple interior spaces collapse to a single space",
@@ -7292,6 +9848,20 @@
         "range_values": null,
         "error": null,
         "expected": "No Extra Spaces",
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "TRIMMEAN": {
+      "TRIMMEAN_drop_extremes": {
+        "description": "Trim 40% (one from each end), average the rest",
+        "formula_display": "=TRIMMEAN(A1:A5,0.4)",
+        "formula_stored_xlsx": "=TRIMMEAN(A1:A5,0.4)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
@@ -7773,6 +10343,144 @@
         "notes": null
       }
     },
+    "VAR": {
+      "VAR_basic": {
+        "description": "Sample variance (divides by n-1) of three evenly spaced values",
+        "formula_display": "=VAR(2,4,6)",
+        "formula_stored_xlsx": "=VAR(2,4,6)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VAR_from_range": {
+        "description": "Sample variance read from a cell range",
+        "formula_display": "=VAR(A1:A5)",
+        "formula_stored_xlsx": "=VAR(A1:A5)",
+        "value": 10,
+        "range_values": null,
+        "error": null,
+        "expected": 10,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VAR_two_values": {
+        "description": "Two values 5 either side of the mean give a sample variance of 50",
+        "formula_display": "=VAR(10,20)",
+        "formula_stored_xlsx": "=VAR(10,20)",
+        "value": 50,
+        "range_values": null,
+        "error": null,
+        "expected": 50,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VAR_ignores_text": {
+        "description": "Text and blank cells are ignored rather than counted",
+        "formula_display": "=VAR(A1:A4)",
+        "formula_stored_xlsx": "=VAR(A1:A4)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "VARA": {
+      "VARA_numbers_only": {
+        "description": "For pure numbers VARA equals VAR (sample variance dividing by n-1)",
+        "formula_display": "=VARA(2,4,6)",
+        "formula_stored_xlsx": "=VARA(2,4,6)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VARA_counts_text_as_zero": {
+        "description": "Unlike VAR, VARA counts text as 0, so {2,4,\"x\"} is treated as {2,4,0}: sample variance 4",
+        "formula_display": "=VARA(A1:A3)",
+        "formula_stored_xlsx": "=VARA(A1:A3)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VARA_identical_values": {
+        "description": "Identical values have zero variance",
+        "formula_display": "=VARA(9,9,9)",
+        "formula_stored_xlsx": "=VARA(9,9,9)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
+    "VARP": {
+      "VARP_textbook": {
+        "description": "Population variance (divides by n) of the classic 8-value example; equals STDEVP squared",
+        "formula_display": "=VARP(2,4,4,4,5,5,7,9)",
+        "formula_stored_xlsx": "=VARP(2,4,4,4,5,5,7,9)",
+        "value": 4,
+        "range_values": null,
+        "error": null,
+        "expected": 4,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VARP_from_range": {
+        "description": "Population variance read from a cell range",
+        "formula_display": "=VARP(A1:A5)",
+        "formula_stored_xlsx": "=VARP(A1:A5)",
+        "value": 8,
+        "range_values": null,
+        "error": null,
+        "expected": 8,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VARP_two_values": {
+        "description": "Population variance of two values divides the summed squared deviations by n",
+        "formula_display": "=VARP(10,20)",
+        "formula_stored_xlsx": "=VARP(10,20)",
+        "value": 25,
+        "range_values": null,
+        "error": null,
+        "expected": 25,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      },
+      "VARP_identical_values": {
+        "description": "Identical values have zero variance",
+        "formula_display": "=VARP(A1:A4)",
+        "formula_stored_xlsx": "=VARP(A1:A4)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "VLOOKUP": {
       "VLOOKUP_exact_match": {
         "description": "Exact match mode (range_lookup=FALSE)",
@@ -7999,6 +10707,20 @@
         "notes": "Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023"
       }
     },
+    "WORKDAY.INTL": {
+      "WORKDAY_INTL_next_workday": {
+        "description": "1 working day after Fri Jul 24 = Mon Jul 27 (default Sat/Sun weekend)",
+        "formula_display": "=WORKDAY.INTL(DATE(2026,7,24),1)=DATE(2026,7,27)",
+        "formula_stored_xlsx": "=WORKDAY.INTL(DATE(2026,7,24),1)=DATE(2026,7,27)",
+        "value": true,
+        "range_values": null,
+        "error": null,
+        "expected": true,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "WORKDAY": {
       "WORKDAY_basic_no_holidays": {
         "description": "5 working days after Mon Jan 1, 2024, no holidays supplied",
@@ -8105,6 +10827,20 @@
         "notes": "MISMATCH vs expected: value mismatch: expected 1, got '#NAME?'"
       }
     },
+    "XIRR": {
+      "XIRR_one_year_10pct": {
+        "description": "-1000 on 2026-01-01, +1100 exactly 365 days later: annualized return is exactly 10% (dates given as serials)",
+        "formula_display": "=ROUND(XIRR(B1:B2,A1:A2),3)",
+        "formula_stored_xlsx": "=ROUND(XIRR(B1:B2,A1:A2),3)",
+        "value": 0.1,
+        "range_values": null,
+        "error": null,
+        "expected": 0.1,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
+      }
+    },
     "XLOOKUP": {
       "XLOOKUP_exact_match": {
         "description": "Basic exact-match lookup returns the corresponding value",
@@ -8191,6 +10927,20 @@
         "matched_expected": false,
         "canary_ok_this_sheet": true,
         "notes": "MISMATCH vs expected: expected 2, got '#NAME?'"
+      }
+    },
+    "XNPV": {
+      "XNPV_zero_at_irr": {
+        "description": "Discounting the same two dated cashflows at their XIRR (10%) must give NPV = 0",
+        "formula_display": "=ROUND(XNPV(0.1,B1:B2,A1:A2),2)",
+        "formula_stored_xlsx": "=ROUND(XNPV(0.1,B1:B2,A1:A2),2)",
+        "value": 0,
+        "range_values": null,
+        "error": null,
+        "expected": 0,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": null
       }
     },
     "XOR": {
@@ -8366,46 +11116,6 @@
         "canary_ok_this_sheet": true,
         "notes": "Microsoft docs: 'invalid basis values (< 0 or > 4) return a #NUM! error.'; MISMATCH vs expected: expected '#NUM!', got '#VALUE!'"
       }
-    },
-    "ISREF": {
-      "ISREF_indirect_missing_sheet": {
-        "description": "INDIRECT could not resolve to a reference (no such sheet), so ISREF is FALSE -- the basis of the IF(ISREF(...)) guard pattern",
-        "formula_display": "=ISREF(INDIRECT(\"'Nope'!B2\"))",
-        "formula_stored_xlsx": "=ISREF(INDIRECT(\"'Nope'!B2\"))",
-        "value": false,
-        "range_values": null,
-        "error": null,
-        "expected": false,
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": "Microsoft documents ISREF as TRUE when value refers to a reference and FALSE otherwise; an unresolvable INDIRECT yields no reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
-      },
-      "ISREF_indirect_valid": {
-        "description": "INDIRECT resolves to a real cell reference on the current sheet, so ISREF is TRUE",
-        "formula_display": "=ISREF(INDIRECT(\"A1\"))",
-        "formula_stored_xlsx": "=ISREF(INDIRECT(\"A1\"))",
-        "value": true,
-        "range_values": null,
-        "error": null,
-        "expected": true,
-        "matched_expected": true,
-        "canary_ok_this_sheet": true,
-        "notes": "Microsoft documents ISREF as TRUE when value refers to a reference: https://support.microsoft.com/en-us/office/is-functions-0f2d7971-6019-40a0-a171-f2d869135665"
-      }
     }
-  },
-  "subset_runs": [
-    {
-      "generated_at": "2026-08-29T02:13:01.583341+00:00",
-      "functions": [
-        "IFERROR",
-        "IFNA",
-        "INDIRECT",
-        "ISERROR",
-        "ISREF"
-      ],
-      "trusted_this_run": true,
-      "superseded_generated_at": "2026-07-19T06:27:03.596048+00:00"
-    }
-  ]
+  }
 }
