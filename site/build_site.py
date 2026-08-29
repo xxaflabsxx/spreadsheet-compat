@@ -2017,6 +2017,46 @@ SEO_PAGE_TMPL = """{% extends "base.html" %}
 {{ body_html | safe }}
 {% endblock %}"""
 
+
+def _stability_stats():
+    """Cross-release stability of executed results (non-volatile functions):
+    how many cases, once a function works in some tested LibreOffice build,
+    keep the same executed value in every later tested build - and which do not."""
+    import glob as _glob, json as _json, os as _os
+    files = sorted(_glob.glob(_os.path.join(ROOT, "results", "libreoffice-*.json")))
+    runs = []
+    for f in files:
+        d = _json.load(open(f))
+        runs.append((d.get("engine_version"), d.get("function_results", {})))
+    runs.sort(key=lambda t: [int(x) for x in str(t[0]).split(".")])
+    versions = [v for v, _ in runs]
+    volatile = {"RAND", "RANDBETWEEN", "RANDARRAY", "TODAY", "NOW"}
+    def vals(d):
+        cs = d.get("cases") or d.get("results") or d
+        items = cs.items() if isinstance(cs, dict) else [(c.get("id"), c) for c in cs]
+        return {k: str(v.get("value")) for k, v in items}
+    stable, changed, fns = 0, [], set()
+    for fn in runs[-1][1]:
+        if fn in volatile:
+            continue
+        per = [vals(r[fn]) for _, r in runs if fn in r]
+        if len(per) < len(runs):
+            continue
+        for cid in per[-1]:
+            seq = [pv.get(cid) for pv in per]
+            if None in seq:
+                continue
+            tail = [x for i, x in enumerate(seq) if not all(y == "#NAME?" for y in seq[: i + 1])]
+            if len(tail) < 2:
+                continue
+            fns.add(fn)
+            if len(set(tail)) > 1:
+                changed.append({"function": fn, "name_lower": fn.lower(), "case": cid, "seq": seq})
+            else:
+                stable += 1
+    return {"versions": versions, "stable": stable, "changed": changed,
+            "functions": len(fns), "volatile": sorted(volatile)}
+
 WHATSNEW_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>LibreOffice Calc function support by version</h1>
@@ -2068,6 +2108,29 @@ newly recognized but with an edge-case quirk rather than full support.</p>
 </tbody>
 </table>
 </div>
+{% endif %}
+
+{% if stability %}
+<h2 class="section-title">Stability across releases (executed)</h2>
+<p>Once a function works in one tested LibreOffice build, does it keep giving the same answer in
+the next? For every non-volatile test case that ran in all of
+{{ stability.versions|join(', ') }}: <strong>{{ stability.stable }}</strong> cases across
+<strong>{{ stability.functions }}</strong> functions returned the identical executed value in every
+build after the first one that supported them. <strong>{{ stability.changed|length }}</strong>
+{% if stability.changed|length == 1 %}case{% else %}cases{% endif %} did not:</p>
+{% if stability.changed %}
+<ul>
+{% for c in stability.changed %}
+<li><a href="{{ rel }}functions/{{ c.name_lower }}.html">{{ c.function }}</a> &mdash;
+<code>{{ c.case }}</code>: {% for v in c.seq %}<code>{{ v }}</code>{% if not loop.last %} &rarr; {% endif %}{% endfor %}
+({{ stability.versions|join(' &rarr; ') }})</li>
+{% endfor %}
+</ul>
+{% endif %}
+<p class="note">Volatile functions ({{ stability.volatile|join(', ') }}) are excluded because their
+values legitimately differ between runs. &ldquo;Newly supported&rdquo; transitions
+(<code>#NAME?</code> &rarr; working) are counted in the tables above, not here. This is measured on
+the releases we sampled, not every point release.</p>
 {% endif %}
 
 <h2 class="section-title">How we know</h2>
@@ -2976,6 +3039,7 @@ def main():
             from_version=from_v,
             to_version=to_v,
             newly_supported=newly,
+            stability=_stability_stats(),
             other_changes=other,
             versions_tested=lo_ver_list,
         )

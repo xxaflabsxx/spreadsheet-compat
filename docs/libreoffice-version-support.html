@@ -519,6 +519,29 @@ newly recognized but with an edge-case quirk rather than full support.</p>
 </div>
 
 
+
+<h2 class="section-title">Stability across releases (executed)</h2>
+<p>Once a function works in one tested LibreOffice build, does it keep giving the same answer in
+the next? For every non-volatile test case that ran in all of
+24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3: <strong>791</strong> cases across
+<strong>250</strong> functions returned the identical executed value in every
+build after the first one that supported them. <strong>1</strong>
+case did not:</p>
+
+<ul>
+
+<li><a href="functions/sort.html">SORT</a> &mdash;
+<code>SORT_empty_range_error</code>: <code>#NAME?</code> &rarr; <code>0</code> &rarr; <code>#VALUE!</code> &rarr; <code>0</code>
+(24.2.0.3 &amp;rarr; 24.8.7.2 &amp;rarr; 25.2.0.3 &amp;rarr; 25.8.7.3)</li>
+
+</ul>
+
+<p class="note">Volatile functions (NOW, RAND, RANDARRAY, RANDBETWEEN, TODAY) are excluded because their
+values legitimately differ between runs. &ldquo;Newly supported&rdquo; transitions
+(<code>#NAME?</code> &rarr; working) are counted in the tables above, not here. This is measured on
+the releases we sampled, not every point release.</p>
+
+
 <h2 class="section-title">How we know</h2>
 <p>For each LibreOffice release, we build a workbook of test formulas with no cached values,
 force a full headless recalculation, and read back the computed results &mdash; with volatile
