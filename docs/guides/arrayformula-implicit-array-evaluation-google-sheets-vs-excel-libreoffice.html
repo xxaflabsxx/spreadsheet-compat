@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARRAYFORMULA in Google Sheets: when you need it, and when it can&#39;t help</title>
+<meta name="description" content="Google Sheets uses only the first element of an array passed to a scalar function - our executed run returns 140 for =SUM(SUMIFS(C2:C6,A2:A6,{&#34;North&#34;,&#34;South&#34;})) against 220 in LibreOffice. ARRAYFORMULA fixes six of nine cases; for SUMIFS criteria it does not, and SUMPRODUCT is the portable form.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/arrayformula-implicit-array-evaluation-google-sheets-vs-excel-libreoffice.html">
+<meta property="og:title" content="ARRAYFORMULA in Google Sheets: when you need it, and when it can&#39;t help">
+<meta property="og:description" content="Google Sheets uses only the first element of an array passed to a scalar function - our executed run returns 140 for =SUM(SUMIFS(C2:C6,A2:A6,{&#34;North&#34;,&#34;South&#34;})) against 220 in LibreOffice. ARRAYFORMULA fixes six of nine cases; for SUMIFS criteria it does not, and SUMPRODUCT is the portable form.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/arrayformula-implicit-array-evaluation-google-sheets-vs-excel-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"ARRAYFORMULA in Google Sheets: when you need it, and when it can't help","item":"https://canispreadsheet.com/guides/arrayformula-implicit-array-evaluation-google-sheets-vs-excel-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>Google Sheets does not array-evaluate inside a scalar function: when you need ARRAYFORMULA, and when it doesn&#39;t help</h1>
+
+<p>Here is a rule that decides whether a whole class of Excel and LibreOffice formulas survives a
+move to Google Sheets, stated as our executed runs show it: <strong>when an array expression is
+handed to a function that returns a single value, Google Sheets uses only the first element of that
+array</strong> &mdash; unless the expression is wrapped in <code>ARRAYFORMULA</code>, or unless the
+outer function is one that takes arrays natively, such as <code>SUMPRODUCT</code> or
+<code>FILTER</code>. Excel and LibreOffice Calc expand the array instead, and compute over all of
+it.</p>
+
+<p>That difference is not an error message. In six of the nine divergent rows below, Google Sheets
+returns a value rather than an error; in four of those six it returns a <em>number</em>, and the
+number is wrong. Our run of
+<code>=SUM(SUMIFS(C2:C6,A2:A6,{"North","South"}))</code> returned <code>140</code> in Google Sheets
+against <code>220</code> in LibreOffice Calc 25.8.7.3. Nothing about <code>140</code> looks broken.
+It is the North subtotal on its own, sitting in a cell that is supposed to hold North plus
+South.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>Most of these formulas can be rescued. Seven of the nine divergent rows below have an
+  executed rewrite that returns the documented answer in Google Sheets, and four of those seven are
+  <code>ARRAYFORMULA</code> wraps. But
+  <code>SUMIFS</code> and <code>SUMIF</code> criteria are the exception, and this is the finding we
+  most want on the record, because the internet is full of advice to the contrary:
+  <code>=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{"North","South"})))</code> returned
+  <code>140</code> in our Google Sheets run too &mdash; the same wrong subtotal as the unwrapped
+  form. Adding <code>ARRAYFORMULA</code> to a criteria array changes nothing measurable. The
+  portable rewrite is <code>SUMPRODUCT</code>, and we executed it: <code>220</code> in both
+  engines.</p>
+</div>
+
+<h2 class="section-title">Executed results: nine formulas that change value or break</h2>
+<p>Every row is a formula from one of our how-to recipe pages. The Excel column is Microsoft&rsquo;s
+documented behaviour, which is also the value our corpus expects; the Google Sheets column is the
+value that engine returned on 2026-08-30; the LibreOffice column is Calc 25.8.7.3. The last column
+is a rewrite executed in Google Sheets on the same run &mdash; the formula that gets the right
+answer there, quoted exactly as we ran it.</p>
+<p>Inputs, per recipe. The two <code>SUMIFS</code> rows read <code>A1:C1 = Region, Product,
+Amount</code> with <code>A2:C6 = North/Widget/100, South/Widget/50, East/Widget/25,
+North/Gadget/40, South/Gadget/30</code>. The <code>SUMIF</code> row reads
+<code>A2:B6 = East/100, West/50, North/25, East/10, South/5</code>. The <code>LARGE</code> row reads
+<code>A2:A6 = 60, 90, 70, 85, 95</code>. The first <code>LOOKUP</code> row reads
+<code>A2 = apple</code>, <code>A3 = banana</code>, <code>A5 = cherry</code>, with A4 and everything
+below A5 blank. The second reads <code>A2:B5 = apple/10, banana/20, apple/30, cherry/40</code> with
+<code>D2 = apple</code>. The <code>XLOOKUP</code> row reads <code>A2:C6 = North/Q1/100,
+North/Q2/250, South/Q2/300, South/Q1/150, North/Q3/400</code>. The reverse-a-string row takes
+literals, and the digit-extraction row reads <code>A2 = Order #4092 (qty 15)</code>.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Recipe</th><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-30)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th><th>Sheets with the alternative (executed 2026-08-30)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><a href="../how-to/sum-with-multiple-criteria.html">sum-with-multiple-criteria</a> <span class="category-tag">v1c0</span></td>
+      <td class="formula">=SUM(SUMIFS(C2:C6,A2:A6,{"North","South"}))</td>
+      <td>220</td><td class="result">140</td><td class="result">220</td>
+      <td class="result">140 &mdash; <span class="formula">=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{"North","South"})))</span> still returns the same wrong subtotal</td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/sum-with-multiple-criteria.html">sum-with-multiple-criteria</a> <span class="category-tag">v1c2</span></td>
+      <td class="formula">=SUM(SUMIFS(C2:C6,A2:A6,{"North","South"},B2:B6,"Widget"))</td>
+      <td>150</td><td class="result">100</td><td class="result">150</td>
+      <td class="result">100 &mdash; <span class="formula">=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{"North","South"},B2:B6,"Widget")))</span> still returns the same wrong subtotal</td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/sum-with-multiple-criteria.html">sum-with-multiple-criteria</a> <span class="category-tag">v1c1</span></td>
+      <td class="formula">=SUMPRODUCT((A2:A6="North")+(A2:A6="South"),C2:C6)</td>
+      <td>220</td><td class="result">220</td><td class="result">220</td>
+      <td>&mdash; already agrees, no rewrite needed</td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/sumif-with-or-criteria.html">sumif-with-or-criteria</a></td>
+      <td class="formula">=SUM(SUMIF(A2:A6,{"East","West"},B2:B6))</td>
+      <td>160</td><td class="result">110</td><td class="result">160</td>
+      <td class="result">160 &mdash; <span class="formula">=SUMPRODUCT((A2:A6="East")+(A2:A6="West"),B2:B6)</span></td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/average-of-the-top-n-scores.html">average-of-the-top-n-scores</a></td>
+      <td class="formula">=AVERAGE(LARGE(A2:A6,{1,2,3}))</td>
+      <td>90</td><td class="result">95</td><td class="result">90</td>
+      <td class="result">90 &mdash; <span class="formula">=AVERAGE(ARRAYFORMULA(LARGE(A2:A6,{1,2,3})))</span></td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/find-the-last-value-in-a-column.html">find-the-last-value-in-a-column</a></td>
+      <td class="formula">=LOOKUP(2,1/(A2:A100&lt;&gt;""),A2:A100)</td>
+      <td>cherry</td><td class="result">#N/A</td><td class="result">cherry</td>
+      <td class="result">cherry &mdash; <span class="formula">=ARRAYFORMULA(LOOKUP(2,1/(A2:A100&lt;&gt;""),A2:A100))</span></td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/look-up-the-last-matching-value.html">look-up-the-last-matching-value</a></td>
+      <td class="formula">=LOOKUP(2,1/(A2:A5=D2),B2:B5)</td>
+      <td>30</td><td class="result">#N/A</td><td class="result">30</td>
+      <td class="result">30 &mdash; <span class="formula">=XLOOKUP(D2,A2:A6,B2:B6,,0,-1)</span> (a native Sheets rewrite, not an ARRAYFORMULA wrap)</td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/lookup-two-criteria.html">lookup-two-criteria</a></td>
+      <td class="formula">=XLOOKUP("North|Q2",A2:A6&amp;"|"&amp;B2:B6,C2:C6)</td>
+      <td>250</td><td class="result">#VALUE!</td><td class="result">250</td>
+      <td class="result">250 &mdash; <span class="formula">=XLOOKUP("North|Q2",ARRAYFORMULA(A2:A6&amp;"|"&amp;B2:B6),C2:C6)</span></td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/reverse-a-text-string.html">reverse-a-text-string</a></td>
+      <td class="formula">=TEXTJOIN("",TRUE,MID("abc",SEQUENCE(LEN("abc"),1,LEN("abc"),-1),1))</td>
+      <td>cba</td><td class="result">c</td><td class="result">cba</td>
+      <td class="result">cba &mdash; <span class="formula">=TEXTJOIN("",TRUE,ARRAYFORMULA(MID("abc",SEQUENCE(LEN("abc"),1,LEN("abc"),-1),1)))</span></td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/extract-numbers-from-text.html">extract-numbers-from-text</a></td>
+      <td class="formula">=TEXTJOIN("",TRUE,IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,""))</td>
+      <td>409215</td><td class="result">blank</td><td class="result">409215</td>
+      <td class="result">409215 &mdash; <span class="formula">=REGEXREPLACE(A2,"[^0-9]","")</span> (a native Sheets rewrite, not an ARRAYFORMULA wrap)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Read down the Google Sheets column and the pattern is the rule, case by case. The
+<code>SUMIFS</code> row totals only the <code>North</code> rows, <code>100 + 40 = 140</code>: the
+first element of <code>{"North","South"}</code> and nothing else. The <code>SUMIF</code> row totals
+only the <code>East</code> rows, <code>100 + 10 = 110</code>. <code>=AVERAGE(LARGE(A2:A6,{1,2,3}))</code>
+averages a single number, <code>LARGE(A2:A6,1) = 95</code>, so it reports the top score dressed up as
+the average of the top three. <code>MID("abc",SEQUENCE(3,1,3,-1),1)</code> yields
+<code>MID("abc",3,1) = "c"</code> alone, and <code>TEXTJOIN</code> joins that one character. In the
+digit-extraction row the first character of <code>Order #4092 (qty 15)</code> is <code>O</code>,
+<code>"O"*1</code> is an error, <code>IFERROR</code> turns it into an empty string, and the cell
+comes back blank.</p>
+<p>The three remaining rows are the ones that fail loudly rather than quietly, and they share a
+shape: the array is built by an <em>operator</em> applied across a range &mdash;
+<code>1/(A2:A100&lt;&gt;"")</code>, <code>1/(A2:A5=D2)</code>, and the concatenation
+<code>A2:A6&amp;"|"&amp;B2:B6</code>. Those expressions do not expand into arrays on their way into
+<code>LOOKUP</code> and <code>XLOOKUP</code>, and the measured results are <code>#N/A</code>,
+<code>#N/A</code> and <code>#VALUE!</code>. Our readback records the error code a cell holds, not
+the hover text beside it, so those three codes are the measurement and the explanation above is our
+reading of the same rule that produces the six quiet rows.</p>
+
+<h2 class="section-title">What Google&rsquo;s own help says ARRAYFORMULA is for</h2>
+<p>We fetched Google&rsquo;s <a href="https://support.google.com/docs/answer/3093275">ARRAYFORMULA
+help article</a> on 2026-08-30. Its one-line description is the rule from the other side: the
+function &ldquo;enables the display of values returned from an array formula into multiple rows
+and/or columns and the use of non-array functions with arrays.&rdquo; That second clause is the
+whole subject of this page &mdash; <em>the use of non-array functions with arrays</em> is presented
+by Google as something you switch on, not as the default. The article&rsquo;s argument description
+is equally telling: <code>array_formula</code> is &ldquo;a range, mathematical expression using one
+cell range or multiple ranges of the same size, or a function that returns a result greater than one
+cell.&rdquo; Our three loud rows are exactly that middle category, a mathematical expression over
+ranges of the same size. Google also notes that many array formulas expand into neighbouring cells
+automatically, &ldquo;obviating the explicit use of <code>ARRAYFORMULA</code>&rdquo;, and that
+<kbd>Ctrl+Shift+Enter</kbd> inserts the wrapper for you.</p>
+<p>What the help article does not say anywhere is that a <code>SUMIFS</code> criteria argument is
+excluded. That gap is what our executed rows fill in.</p>
+
+<h2 class="section-title">The exception: SUMIFS and SUMIF criteria arrays, where ARRAYFORMULA does not help</h2>
+<p>The <code>SUM(SUMIFS(&hellip;,{"North","South"}))</code> idiom is the standard Excel answer to
+&ldquo;OR across one column&rdquo;: hand the criteria argument an array constant, get one subtotal
+per value back, and let the outer <code>SUM</code> add them. It is documented brace syntax in all
+three products, and our LibreOffice run computes it. In Google Sheets it returns the first subtotal
+only, and adding the wrapper the rule would predict changes nothing:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula (all four executed in Google Sheets, 2026-08-30)</th><th>Expected</th><th>Google Sheets returned</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=SUM(SUMIFS(C2:C6,A2:A6,{"North","South"}))</td><td>220</td><td class="result">140</td></tr>
+    <tr><td class="formula">=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{"North","South"})))</td><td>220</td><td class="result">140</td></tr>
+    <tr><td class="formula">=SUM(SUMIFS(C2:C6,A2:A6,{"North","South"},B2:B6,"Widget"))</td><td>150</td><td class="result">100</td></tr>
+    <tr><td class="formula">=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{"North","South"},B2:B6,"Widget")))</td><td>150</td><td class="result">100</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Wrapped and unwrapped return the same value, twice over. On this evidence
+<code>SUMIFS</code>&rsquo;s criteria argument is not array-expanded in Google Sheets even inside
+<code>ARRAYFORMULA</code>, and the same goes for <code>SUMIF</code>: the
+<code>=SUM(SUMIF(A2:A6,{"East","West"},B2:B6))</code> row above returned <code>110</code>, and the
+rewrite our corpus records for it is not a wrapper at all but a different function.</p>
+<p><strong><code>SUMPRODUCT</code> is the portable form.</strong> It takes arrays as a matter of
+signature, so nothing needs switching on:
+<code>=SUMPRODUCT((A2:A6="North")+(A2:A6="South"),C2:C6)</code> returned <code>220</code> in the
+Google Sheets run <em>and</em> <code>220</code> in LibreOffice Calc 25.8.7.3, against a documented
+<code>220</code>. The <code>+</code> between two boolean comparisons is the OR; multiply instead of
+adding and you get AND. The same recipe&rsquo;s two-dimensional cases are built the same way and
+also matched in both engines: <code>=SUMPRODUCT((A2:A4="South")*(B1:D1="Q2")*B2:D4)</code> returned
+<code>50</code>, and <code>=SUMPRODUCT(((A2:A4="South")+(A2:A4="East"))*(B1:D1="Q2")*B2:D4)</code>
+returned <code>130</code>.</p>
+<p>Our separate function corpus, executed in Google Sheets on 2026-08-29, backs the general point
+that the classic <code>SUMPRODUCT</code> array idioms are safe there.
+<code>=SUMPRODUCT(--(A1:A5&gt;2))</code>, the double-unary-minus counting trick, returned
+<code>3</code> as documented; <code>=SUMPRODUCT((A1:A5&gt;2)*B1:B5)</code>, the
+<code>SUMIF</code> replacement, returned <code>120</code>; and
+<code>=SUMPRODUCT(A1:A3,B1:B3)</code> returned <code>140</code>. Sheets is not refusing to do array
+arithmetic. It is refusing to do it in one specific place: inside the argument list of a function
+that returns a scalar.</p>
+<p><code>FILTER</code> makes the same point from the other direction. It is array-native, and in the
+same function corpus <code>=FILTER({1,2,3,4},{1,0,1,0})</code> &mdash; two brace arrays, no
+<code>ARRAYFORMULA</code> anywhere &mdash; read back <code>1, 3</code>, matching its documented
+result, while <code>=FILTER(A1:A5,B1:B5&gt;2)</code> read back <code>c, d, e</code>. A brace array
+handed to <code>FILTER</code> is used in full; the identical brace array handed to
+<code>SUMIFS</code> is truncated to its first element. That is the whole rule in two rows.</p>
+<p>A caution on the reverse reading: an array-native outer function is not a promise that everything
+about it matches. Our <code>=FILTER(A1:A3,B1:B3&gt;100,"none")</code> case returned
+<code>#N/A</code> rather than the documented <code>none</code> in the same Sheets run, and
+<code>SORT</code>&rsquo;s third argument means something different in Sheets than in Excel. Those are
+separate divergences with their own writeups &mdash; see
+<a href="../guides/filter-no-results-calc-error-excel-vs-libreoffice.html">FILTER with no results</a>
+and the SORT section of
+<a href="../guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">which LibreOffice version you need for VSTACK, TEXTSPLIT, TAKE and DROP</a>.</p>
+
+<h2 class="section-title">Which idioms break silently on the way into Sheets</h2>
+<p><em>Silently</em> is the word that matters. A workbook full of <code>#NAME?</code> announces
+itself; a workbook where four cells quietly hold the first subtotal instead of the total does not.
+Of the nine divergent rows above, six return a value Sheets is perfectly happy with, and four of
+those six are plain numbers that will sum, chart and reconcile like any other number. Before you move
+a file, search the formula text for these shapes.</p>
+<p><strong>A brace array in a criteria argument.</strong> Anything matching
+<code>SUMIFS(&hellip;,{</code> or <code>SUMIF(&hellip;,{</code> &mdash; and by extension the
+<code>COUNTIFS</code>/<code>AVERAGEIFS</code> family, which we have not measured &mdash;
+is the highest-risk pattern on this page, because it is the one <code>ARRAYFORMULA</code> does not
+fix. Rewrite it as <code>SUMPRODUCT</code> with added boolean tests before the migration, not after.
+If the wanted values live in cells rather than in braces, the recipe page&rsquo;s note points at
+<code>=SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3))</code> instead &mdash; that one is written guidance on
+our side, with no executed case behind it.</p>
+<p><strong>An array constant as the <em>k</em> of LARGE or SMALL.</strong>
+<code>=AVERAGE(LARGE(range,{1,2,3}))</code> is the canonical &ldquo;average the top three&rdquo;
+formula and it degrades to &ldquo;the top one&rdquo;. Wrapping the inner call fixes it:
+<code>=AVERAGE(ARRAYFORMULA(LARGE(A2:A6,{1,2,3})))</code> returned the documented <code>90</code>.</p>
+<p><strong>Arithmetic or concatenation applied across a whole range.</strong>
+<code>1/(range&lt;&gt;"")</code>, <code>1/(range=value)</code> and <code>rangeA&amp;"|"&amp;rangeB</code>
+are the building blocks of the last-value, last-match and two-criteria-lookup idioms. These fail
+with an error rather than a wrong number, so they are the easy ones to find; wrap the expression, or
+the whole formula, in <code>ARRAYFORMULA</code>. Both LOOKUP rows and the XLOOKUP row were fixed
+that way or by a native rewrite in our run.</p>
+<p><strong>Per-character work built on SEQUENCE and MID.</strong> Reversing a string, extracting
+digits, and anything else that walks a string one character at a time collapses to the first
+character. Wrapping the <code>MID</code> call restores it; but where Sheets has a purpose-built
+function, that is usually the better answer, and our corpus records
+<code>=REGEXREPLACE(A2,"[^0-9]","")</code> returning <code>409215</code> for the digit-extraction
+case &mdash; shorter, and no wrapper to forget.</p>
+<p><strong>Do not reach for <code>IFERROR</code>.</strong> The three loud rows are the ones a
+migration can actually catch. Wrapping them in <code>IFERROR</code> converts the only visible
+symptom into a blank cell, which puts them in the same category as the quiet four. Rewrite the
+formula instead.</p>
+<p>A practical note on where the wrapper goes. Our executed alternatives put
+<code>ARRAYFORMULA</code> in two different places: around the whole formula
+(<code>=ARRAYFORMULA(LOOKUP(&hellip;))</code>) and around just the array-producing sub-expression
+(<code>=AVERAGE(ARRAYFORMULA(LARGE(&hellip;)))</code>,
+<code>=XLOOKUP("North|Q2",ARRAYFORMULA(A2:A6&amp;"|"&amp;B2:B6),C2:C6)</code>). Both worked in the
+cases we ran. Wrapping the inner expression is the more surgical choice, since it leaves the outer
+scalar function to do its scalar job.</p>
+
+<h2 class="section-title">Where each of these formulas is explained in full</h2>
+<p>Every row in the main table is the worked example of a how-to page, each with its own inputs,
+alternatives and per-engine notes:
+<a href="../how-to/sum-with-multiple-criteria.html">how to sum with multiple criteria (SUMIFS)</a>,
+<a href="../how-to/sumif-with-or-criteria.html">how to SUMIF with OR criteria</a>,
+<a href="../how-to/average-of-the-top-n-scores.html">how to average the top N scores</a>,
+<a href="../how-to/find-the-last-value-in-a-column.html">how to find the last value in a column</a>,
+<a href="../how-to/look-up-the-last-matching-value.html">how to look up the last matching value</a>,
+<a href="../how-to/lookup-two-criteria.html">how to look up a value with two criteria</a>,
+<a href="../how-to/reverse-a-text-string.html">how to reverse a text string</a> and
+<a href="../how-to/extract-numbers-from-text.html">how to extract numbers from text in a cell</a>.</p>
+<p>Two neighbouring guides cover the other ways Google Sheets and LibreOffice diverge on arrays and
+text-joining:
+<a href="../guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">which LibreOffice version you need for VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP</a>,
+which maps the array-shaping functions across four Calc builds and records which of them Sheets runs
+at all, and
+<a href="../guides/concat-two-arguments-google-sheets-vs-excel-libreoffice.html">CONCAT takes exactly two arguments in Google Sheets</a>,
+which is the same species of problem &mdash; a function present in both engines with a narrower
+argument contract in Sheets &mdash; except that <code>CONCAT</code> fails loudly with
+<code>#N/A</code> where the rule on this page mostly fails quietly. For the function-by-function
+picture, see <a href="../excel-vs-google-sheets.html">Excel vs Google Sheets formulas</a>.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus, and it
+is what every case is measured against. We do not run Excel, and no value in that column is a
+measurement.</p>
+<p>The Google Sheets columns hold executed output from dated runs rather than from a pinned
+version, because Sheets has no version number to pin. Every recipe value on this page comes from the run labelled Google
+Sheets (Drive import, 2026-08-30): the corpus was written to .xlsx with no cached results, imported
+to Google Drive, recalculated by Google&rsquo;s engine, and exported back for readback, with a
+deterministic <code>=1111+2222</code> canary in every sheet proving the recalculation happened. The
+<code>SUMPRODUCT</code> and <code>FILTER</code> rows drawn from our separate function corpus come
+from the 2026-08-29 run of that corpus and are labelled as such above. Google could change any of
+this tomorrow without changing a version number.</p>
+<p>The LibreOffice column is executed output from Calc 25.8.7.3 only. This page makes no claim about
+older Calc builds.</p>
+<p>The alternatives in the last column were executed in Google Sheets alone. They are scoped to that
+engine in our corpus on purpose &mdash; <code>ARRAYFORMULA</code> and <code>REGEXREPLACE</code> are
+not LibreOffice functions, and the harness therefore skips those checks for Calc, which is why the
+LibreOffice cell of every such row on those how-to pages reads <code>n/a</code> rather than a
+number. There is no measurement of these rewrites outside Google Sheets on this page.</p>
+<p>Three further limits. First, the last-matching-value rewrite
+<code>=XLOOKUP(D2,A2:A6,B2:B6,,0,-1)</code> reads one row further than the original
+<code>=LOOKUP(2,1/(A2:A5=D2),B2:B5)</code>; row 6 is empty in that recipe&rsquo;s inputs, and both
+returned <code>30</code>. Second, six of the Sheets checks cited on this page carry a provenance
+note. They were written into the .xlsx with plain function names, while the LibreOffice reference
+run executed the <code>_xlfn.</code> storage form of the same formula, so the two runs did receive
+different input files, even though the formula text is identical. Third, this page generalises a
+rule from nine executed recipe rows and a handful of function-corpus cases. It is consistent across
+all of them, and consistent with what Google documents <code>ARRAYFORMULA</code> to be for, but we
+have not enumerated every scalar function or every array-producing expression. See
+<a href="../methodology.html">our methodology</a> for how recalculation is proven rather than
+assumed.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
