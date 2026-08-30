@@ -27,5 +27,16 @@
     "formula": "=TEXTJOIN(\"\",TRUE,MID(\"abc\",SEQUENCE(LEN(\"abc\"),1,LEN(\"abc\"),-1),1))",
     "expected": "cba"
   },
-  "explanation": "None of the three apps has a REVERSE function, so the trick is to read the characters back to front and rejoin them. SEQUENCE(LEN(A2),1,LEN(A2),-1) builds the position list from the last character down to the first — for \"abc\" that's {3;2;1}; MID(A2, that, 1) grabs one character at each position, giving {\"c\";\"b\";\"a\"}; and TEXTJOIN(\"\",TRUE,...) concatenates them into \"cba\". It's a spilling array formula, so it needs dynamic arrays (Excel 365, LibreOffice 24.8+) — and in Google Sheets the ARRAYFORMULA wrapper shown above, because the plain version returned just \"c\" when we executed it there; on legacy Excel enter it with Ctrl+Shift+Enter and swap SEQUENCE for LEN(A2)-ROW(INDIRECT(\"1:\"&LEN(A2)))+1. To reverse the ORDER OF ITEMS in a list rather than characters in a string, that's a different job — see reverse-the-order-of-a-list. A common use is testing for palindromes: compare A2 to its reverse with EXACT."
+  "explanation": "None of the three apps has a REVERSE function, so the trick is to read the characters back to front and rejoin them. SEQUENCE(LEN(A2),1,LEN(A2),-1) builds the position list from the last character down to the first — for \"abc\" that's {3;2;1}; MID(A2, that, 1) grabs one character at each position, giving {\"c\";\"b\";\"a\"}; and TEXTJOIN(\"\",TRUE,...) concatenates them into \"cba\". It's a spilling array formula, so it needs dynamic arrays (Excel 365, LibreOffice 24.8+) — and in Google Sheets the ARRAYFORMULA wrapper shown above, because the plain version returned just \"c\" when we executed it there; on legacy Excel enter it with Ctrl+Shift+Enter and swap SEQUENCE for LEN(A2)-ROW(INDIRECT(\"1:\"&LEN(A2)))+1. To reverse the ORDER OF ITEMS in a list rather than characters in a string, that's a different job — see reverse-the-order-of-a-list. A common use is testing for palindromes: compare A2 to its reverse with EXACT.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "ARRAYFORMULA around the MID array (over this page's literal \"abc\", where the general form uses A2)",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=TEXTJOIN(\"\",TRUE,ARRAYFORMULA(MID(\"abc\",SEQUENCE(LEN(\"abc\"),1,LEN(\"abc\"),-1),1)))",
+      "expected": "cba"
+    }
+  ]
 }

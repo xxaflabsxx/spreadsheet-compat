@@ -8,7 +8,16 @@ either one check dict or a list of them (each {label?, formula, expected,
 setup_cells?, setup_sheets?, check_range?}, falling back to the variant's own
 setup_cells / setup_sheets).
 Those are executed too and stored under the slug as
-  "variants": [{"heading": ..., "checks": [{label, formula, expected, actual, verified}]}]
+  "variants": [{"heading": ..., "checks": [{key, label, formula, expected, actual, verified}]}]
+and a top-level "extra_checks" list (checks belonging to the recipe but to no
+variant) is stored the same way under "extra_checks".
+
+A check may carry "engines": ["google_sheets"] (or ["libreoffice"]); absent
+means all engines. This script executes ONLY the checks scoped to LibreOffice,
+and the recipe's "verified" flag is therefore the AND over the LibreOffice-
+scoped checks alone -- a Sheets-only alternative formula neither runs here nor
+counts here. Every stored check carries its stable "key" (see
+harness/recipe_corpus.py) so consumers merge by key rather than by position.
 
 The corpus-shaped parts of this script -- which checks exist, how a variant
 check inherits setup_cells/setup_sheets, the read-back normalization, and the
@@ -32,7 +41,11 @@ SOFF = "soffice"
 import sys
 sys.path.insert(0, os.path.join(ROOT, "harness"))
 from xlfn_map import to_storage_formula_all  # prefix modern funcs (_xlfn.) for OOXML
-from recipe_corpus import norm, run_check      # shared with the Sheets recipe runner
+from recipe_corpus import (                    # shared with the Sheets recipe runner
+    LIBREOFFICE, iter_checks, norm, run_check)
+
+ENGINE = LIBREOFFICE   # the engine identity this script executes as; checks
+                       # scoped to any other engine are skipped, not failed
 
 def lo_version():
     out = subprocess.run([SOFF,"--version"],capture_output=True,text=True,timeout=30).stdout
@@ -72,8 +85,24 @@ def check(v, default_setup=None, default_sheets=None):
     The setup-inheritance, comparison and error-capture rules are
     recipe_corpus.run_check()'s (moved there verbatim from this function);
     run_case above is the LibreOffice engine plugged into it.
+
+    ENGINE is passed so a check scoped to another engine (`"engines":
+    ["google_sheets"]`) is never executed here: LibreOffice would happily run
+    a Sheets-only alternative formula, fail it, and drag the recipe's
+    LibreOffice badge down with it. Checks reach this function already
+    filtered by iter_checks(..., engine=ENGINE); the argument is the second
+    lock on the same door.
     """
-    return run_check(v, run_case, default_setup, default_sheets)
+    return run_check(v, run_case, default_setup, default_sheets, engine=ENGINE)
+
+def _key_of(c, default):
+    """The stable key of a raw JSON check dict (explicit "id" wins)."""
+    return str(c.get("id") or default)
+
+def _main_setup(v):
+    """Default (setup_cells, setup_sheets) an extra_check inherits: the main
+    example's, matching recipe_corpus.iter_checks()."""
+    return v.get("setup_cells"), v.get("setup_sheets")
 
 RESULTS=os.path.join(ROOT,"results/recipes-verified.json")
 only=set(sys.argv[1:])
@@ -85,26 +114,58 @@ for f in sorted(glob.glob(os.path.join(ROOT,"data/recipes/*.json"))):
     r=json.load(open(f))
     if only and r["slug"] not in only: continue
     n_run+=1
+    # Enumerate through the shared corpus module, filtered to THIS engine, so
+    # that a check carrying "engines": ["google_sheets"] is skipped entirely
+    # rather than executed and failed here. Keys come from iter_checks and are
+    # written onto every payload: the site merges results by key, not by
+    # position, so appending a Sheets-only check to a variant cannot shift an
+    # older stored value onto the wrong formula.
+    scoped = {c["key"]: c for c in iter_checks(r, engine=ENGINE)}
     v=r["verify"]
+    main = next((c for c in scoped.values() if c["kind"]=="main"), None)
+    if main is None:
+        # A recipe whose worked example is scoped away from LibreOffice has
+        # nothing for this script to report; skipping it keeps the results
+        # file free of empty half-records.
+        print(f"  -- {r['slug']:42} main example not scoped to {ENGINE}; skipped")
+        n_run-=1
+        continue
     actual, ok = check(v)
     rec={"verified":ok,"engine":"LibreOffice Calc","engine_version":ver,
-         "formula":v["formula"],"expected":v["expected"],"actual":actual}
+         "formula":v["formula"],"expected":v["expected"],"actual":actual,
+         "key":main["key"]}
     print(f"  {'OK ' if ok else 'XX '} {r['slug']:42} got={actual} want={v['expected']}")
     variants=[]
-    for var in (r.get("variants") or []):
+    for vi, var in enumerate(r.get("variants") or []):
         checks = var.get("verify") or []
         if isinstance(checks, dict): checks=[checks]
         done=[]
-        for c in checks:
+        for ci, c in enumerate(checks):
+            chk = scoped.get(_key_of(c, f"v{vi}c{ci}"))
+            if chk is None: continue          # scoped to another engine
             a, o = check(c, var.get("setup_cells"), var.get("setup_sheets"))
             if not o: ok=False
             done.append({"label":c.get("label",""),"formula":c["formula"],
-                         "expected":c["expected"],"actual":a,"verified":o})
+                         "expected":c["expected"],"actual":a,"verified":o,
+                         "key":chk["key"]})
             print(f"    {'ok ' if o else 'XX '} {c['formula'][:64]:66} got={a} want={c['expected']}")
         variants.append({"heading":var.get("heading",""),"checks":done})
     if variants:
         rec["variants"]=variants
         rec["verified"]=ok   # recipe counts as verified only if every variant check passes too
+    extra=[]
+    for xi, c in enumerate(r.get("extra_checks") or []):
+        chk = scoped.get(_key_of(c, f"x{xi}"))
+        if chk is None: continue              # scoped to another engine
+        a, o = check(c, *_main_setup(v))
+        if not o: ok=False
+        extra.append({"label":c.get("label",""),"formula":c["formula"],
+                      "expected":c["expected"],"actual":a,"verified":o,
+                      "key":chk["key"]})
+        print(f"    {'ok ' if o else 'XX '} {c['formula'][:64]:66} got={a} want={c['expected']}")
+    if extra:
+        rec["extra_checks"]=extra
+        rec["verified"]=ok
     out[r["slug"]]=rec
 if only and not n_run:
     print("no recipe matched:", ", ".join(sorted(only))); sys.exit(2)

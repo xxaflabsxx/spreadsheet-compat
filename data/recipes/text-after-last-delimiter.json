@@ -29,5 +29,16 @@
     "formula": "=TEXTAFTER(A2,\".\",-1)",
     "expected": "xlsx"
   },
-  "explanation": "TEXTAFTER(text, delimiter, -1) returns everything after the LAST occurrence of the delimiter. For 'report.final.xlsx' that is 'xlsx'. The negative instance number counts from the end."
+  "explanation": "TEXTAFTER(text, delimiter, -1) returns everything after the LAST occurrence of the delimiter. For 'report.final.xlsx' that is 'xlsx'. The negative instance number counts from the end.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "REGEXEXTRACT with [^.]+$ takes everything after the last dot — Google Sheets has no TEXTAFTER",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=REGEXEXTRACT(A2,\"[^.]+$\")",
+      "expected": "xlsx"
+    }
+  ]
 }

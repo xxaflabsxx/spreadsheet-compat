@@ -33,5 +33,16 @@
     "formula": "=AGGREGATE(9,6,A2:A6)",
     "expected": 60
   },
-  "explanation": "A plain SUM propagates any error — one #DIV/0! in the range makes the whole total an error. AGGREGATE(9,6,range) sums (function code 9) while ignoring errors (option 6), so the two good-plus-good rows total 10+20+30 = 60 despite the #DIV/0! and #N/A in between. AGGREGATE lives in Excel and LibreOffice but NOT Google Sheets — there, filter the errors out with =SUM(FILTER(A2:A6,ISNUMBER(A2:A6))), or wrap the values in IFERROR — =ARRAYFORMULA(SUM(IFERROR(A2:A6,0))), since Sheets needs ARRAYFORMULA to iterate over the range (in older Excel the same IFERROR wrap is entered with Ctrl+Shift+Enter). The same AGGREGATE trick does error-ignoring AVERAGE (code 1), MAX (4), COUNT (2) and more."
+  "explanation": "A plain SUM propagates any error — one #DIV/0! in the range makes the whole total an error. AGGREGATE(9,6,range) sums (function code 9) while ignoring errors (option 6), so the two good-plus-good rows total 10+20+30 = 60 despite the #DIV/0! and #N/A in between. AGGREGATE lives in Excel and LibreOffice but NOT Google Sheets — there, filter the errors out with =SUM(FILTER(A2:A6,ISNUMBER(A2:A6))), or wrap the values in IFERROR — =ARRAYFORMULA(SUM(IFERROR(A2:A6,0))), since Sheets needs ARRAYFORMULA to iterate over the range (in older Excel the same IFERROR wrap is entered with Ctrl+Shift+Enter). The same AGGREGATE trick does error-ignoring AVERAGE (code 1), MAX (4), COUNT (2) and more.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "FILTER + ISNUMBER drops the error cells before SUM sees them — Google Sheets has no AGGREGATE",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=SUM(FILTER(A2:A6,ISNUMBER(A2:A6)))",
+      "expected": 60
+    }
+  ]
 }

@@ -32,5 +32,21 @@
       "c"
     ]
   },
-  "explanation": "TEXTSPLIT takes three key arguments: the text, a column delimiter, and a row delimiter. Splitting into COLUMNS uses the 2nd argument; splitting into ROWS uses the 3rd. Leaving the column delimiter empty and passing your delimiter as the row delimiter — =TEXTSPLIT(A2,,\",\") — spills the pieces vertically, so \"a,b,c\" becomes a,b,c stacked down three cells. In Google Sheets, which lacks TEXTSPLIT, the idiom is TRANSPOSE(SPLIT(A2,\",\")) since SPLIT only spills horizontally. To flatten a whole delimited grid into one column, wrap it: TOCOL(TEXTSPLIT(A2,\",\")). Handy extras: TEXTSPLIT's later arguments let you ignore empty results and pad missing values, and you can pass an array of delimiters like {\",\",\";\"} to split on several characters at once. All of this needs dynamic arrays, and TEXTSPLIT itself — Excel 365 or LibreOffice 24.8+; in Google Sheets the SPLIT/TRANSPOSE idiom above is the equivalent."
+  "explanation": "TEXTSPLIT takes three key arguments: the text, a column delimiter, and a row delimiter. Splitting into COLUMNS uses the 2nd argument; splitting into ROWS uses the 3rd. Leaving the column delimiter empty and passing your delimiter as the row delimiter — =TEXTSPLIT(A2,,\",\") — spills the pieces vertically, so \"a,b,c\" becomes a,b,c stacked down three cells. In Google Sheets, which lacks TEXTSPLIT, the idiom is TRANSPOSE(SPLIT(A2,\",\")) since SPLIT only spills horizontally. To flatten a whole delimited grid into one column, wrap it: TOCOL(TEXTSPLIT(A2,\",\")). Handy extras: TEXTSPLIT's later arguments let you ignore empty results and pad missing values, and you can pass an array of delimiters like {\",\",\";\"} to split on several characters at once. All of this needs dynamic arrays, and TEXTSPLIT itself — Excel 365 or LibreOffice 24.8+; in Google Sheets the SPLIT/TRANSPOSE idiom above is the equivalent.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "SPLIT across columns, TRANSPOSE down into rows — Google Sheets has no TEXTSPLIT (over this page's literal \"a,b,c\", where the general form uses A2)",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=TRANSPOSE(SPLIT(\"a,b,c\",\",\"))",
+      "expected": [
+        "a",
+        "b",
+        "c"
+      ],
+      "check_range": "H1:H3"
+    }
+  ]
 }

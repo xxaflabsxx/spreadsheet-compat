@@ -33,5 +33,16 @@
     "formula": "=AGGREGATE(1,6,A2:A6)",
     "expected": 20
   },
-  "explanation": "A plain AVERAGE returns an error if any cell in the range is an error. AGGREGATE(1,6,range) averages (function code 1) while ignoring errors (option 6), so it takes the mean of just the three valid numbers: (10+20+30)/3 = 20, skipping the #DIV/0! and #N/A. AGGREGATE is in Excel and LibreOffice but NOT Google Sheets — there, use AVERAGEIF to exclude #N/A, or filter the errors out with =AVERAGE(FILTER(A2:A6,ISNUMBER(A2:A6))) — an IFERROR wrap needs ARRAYFORMULA around it in Sheets to iterate over the range. The same AGGREGATE approach ignores errors for SUM (code 9), MAX (4), MIN (5), COUNT (2) and more — see the sum-a-column-ignoring-errors recipe."
+  "explanation": "A plain AVERAGE returns an error if any cell in the range is an error. AGGREGATE(1,6,range) averages (function code 1) while ignoring errors (option 6), so it takes the mean of just the three valid numbers: (10+20+30)/3 = 20, skipping the #DIV/0! and #N/A. AGGREGATE is in Excel and LibreOffice but NOT Google Sheets — there, use AVERAGEIF to exclude #N/A, or filter the errors out with =AVERAGE(FILTER(A2:A6,ISNUMBER(A2:A6))) — an IFERROR wrap needs ARRAYFORMULA around it in Sheets to iterate over the range. The same AGGREGATE approach ignores errors for SUM (code 9), MAX (4), MIN (5), COUNT (2) and more — see the sum-a-column-ignoring-errors recipe.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "FILTER + ISNUMBER drops the error cells before AVERAGE sees them — Google Sheets has no AGGREGATE",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=AVERAGE(FILTER(A2:A6,ISNUMBER(A2:A6)))",
+      "expected": 20
+    }
+  ]
 }

@@ -31,5 +31,16 @@
     "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
     "expected": "cherry"
   },
-  "explanation": "The classic LOOKUP trick: (A2:A100<>\"\") is an array of TRUE/FALSE, and 1 divided by it gives 1 for filled cells and a #DIV/0! error for blanks. LOOKUP searches for 2 — larger than anything in the array — so it scans to the end and returns the value beside the last 1, i.e. the last non-blank cell. It skips gaps: in the sample, A4 is empty but the result is still \"cherry\" from A5."
+  "explanation": "The classic LOOKUP trick: (A2:A100<>\"\") is an array of TRUE/FALSE, and 1 divided by it gives 1 for filled cells and a #DIV/0! error for blanks. LOOKUP searches for 2 — larger than anything in the array — so it scans to the end and returns the value beside the last 1, i.e. the last non-blank cell. It skips gaps: in the sample, A4 is empty but the result is still \"cherry\" from A5.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "ARRAYFORMULA wrap, so 1/(A2:A100<>\"\") stays an array on its way into LOOKUP",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=ARRAYFORMULA(LOOKUP(2,1/(A2:A100<>\"\"),A2:A100))",
+      "expected": "cherry"
+    }
+  ]
 }

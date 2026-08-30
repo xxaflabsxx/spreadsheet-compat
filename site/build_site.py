@@ -28,10 +28,24 @@ live-tested" badge — never implied to be tested.
 import json
 import re
 import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 from jinja2 import Environment, DictLoader, select_autoescape
+
+# The how-to recipe corpus's shape -- which checks exist, their STABLE KEYS,
+# and which engines each is scoped to -- is defined once, in the module both
+# runners import. The site merges executed results BY KEY using the same
+# enumeration, so a check appended to a variant cannot slide an older stored
+# value onto a neighbouring formula.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "harness"))
+from recipe_corpus import (  # noqa: E402
+    GOOGLE_SHEETS,
+    LIBREOFFICE,
+    iter_checks,
+    result_checks_by_key,
+)
 
 # --------------------------------------------------------------------------
 # Config — change branding/deployment details here, nowhere else.
@@ -1716,6 +1730,14 @@ def _functions_used(recipe, by_name):
                 name = tok.upper()
                 if name in by_name and name not in seen:
                     seen[name] = by_name[name]["name_lower"]
+    # Top-level "extra_checks" (e.g. an engine-scoped alternative formula) are
+    # scanned on the same footing as variant checks -- they are part of what
+    # the recipe documents, whatever engine executes them.
+    for c in (recipe.get("extra_checks") or []):
+        for tok in _FUNC_CALL_RE.findall(re.sub(r'"[^"]*"', "", c.get("formula", "") or "")):
+            name = tok.upper()
+            if name in by_name and name not in seen:
+                seen[name] = by_name[name]["name_lower"]
     return [{"name": n, "name_lower": nl} for n, nl in seen.items()]
 
 
@@ -1759,6 +1781,29 @@ def openpyxl_col_index(letters):
 
 RECIPE_TMPL = """{% extends "base.html" %}
 {% block content %}
+{#- One executed-checks table. Used for a variant's checks and for the
+    top-level extra_checks section, so the two can never drift apart.
+
+    The LibreOffice column shows a value ONLY for a check LibreOffice
+    actually ran. A check scoped to Google Sheets alone gets
+    "n/a (Sheets-only formula)" there -- no value, no badge -- and its
+    executed Sheets value is labelled as the alternative it is. Rows whose
+    engine has not executed them yet never reach this macro (build_site's
+    _merge_check drops them), so no row here is a promise. -#}
+{% macro checks_table(r, rows) -%}
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Formula</th><th>What it does</th><th>{% if r.engine_version %}Returned by LibreOffice {{ r.engine_version }}{% else %}Result{% endif %}</th>{% if r.sheets_has %}<th>Returned by Google Sheets (executed {{ r.sheets_date }})</th>{% endif %}</tr></thead>
+<tbody>
+{% for ch in rows %}
+<tr><td><code>{{ ch.formula }}</code></td><td>{{ ch.label }}</td>
+<td>{% if not ch.lo_scoped %}<span style="color:var(--text-muted)">n/a (Sheets-only formula)</span>{% elif ch.verified %}<strong>{{ ch.actual }}</strong>{% else %}&mdash;{% endif %}</td>{% if r.sheets_has %}
+<td>{% if ch.sheets_has %}<strong>{{ ch.sheets_actual }}</strong>{% if ch.sheets_only %} <span class="badge badge-good">Google Sheets alternative (executed {{ r.sheets_date }})</span>{% elif ch.sheets_differs %} <span class="badge badge-quirk">differs from LibreOffice</span>{% endif %}{% else %}<span style="color:var(--text-muted)">not run in Sheets</span>{% endif %}</td>{% endif %}</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{%- endmacro %}
 <a class="back-link" href="{{ rel }}how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
   <h1>{{ r.title }}</h1>
@@ -1801,25 +1846,19 @@ RECIPE_TMPL = """{% extends "base.html" %}
 {% if v.display_note %}<p style="color:var(--text-muted);font-size:0.9rem;margin-top:-0.5rem">{{ v.display_note }}</p>{% endif %}
 {% endif %}
 {% if v.checks %}
-<div class="table-scroll">
-<table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>{% if r.engine_version %}Returned by LibreOffice {{ r.engine_version }}{% else %}Result{% endif %}</th>{% if r.sheets_has %}<th>Returned by Google Sheets (executed {{ r.sheets_date }})</th>{% endif %}</tr></thead>
-<tbody>
-{% for ch in v.checks %}
-<tr><td><code>{{ ch.formula }}</code></td><td>{{ ch.label }}</td>
-<td>{% if ch.verified %}<strong>{{ ch.actual }}</strong>{% else %}&mdash;{% endif %}</td>{% if r.sheets_has %}
-<td>{% if ch.sheets_has %}<strong>{{ ch.sheets_actual }}</strong>{% if ch.sheets_differs %} <span class="badge badge-quirk">differs from LibreOffice</span>{% endif %}{% else %}<span style="color:var(--text-muted)">not run in Sheets</span>{% endif %}</td>{% endif %}</tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
+{{ checks_table(r, v.checks) }}
 {% endif %}
 {% if v.note %}<p>{{ v.note }}</p>{% endif %}
 {% endfor -%}
+{%- if r.extra_rows %}
+<h2 class="section-title">The Google Sheets alternative</h2>
+<p>Google Sheets needs different syntax for this task. The formula below is Sheets-specific &mdash; it was executed in Google Sheets ({{ r.sheets_date }}) against the same sample data as the worked example, and the value beside it is what Google returned. The LibreOffice column reads n/a because the formula is outside LibreOffice&rsquo;s dialect, so there is nothing of ours to report there.</p>
+{{ checks_table(r, r.extra_rows) }}
+{%- endif -%}
 
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %}{% if r.sheets_has %} We then ran the same formulas in <strong>Google Sheets</strong>, executed {{ r.sheets_date }}: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed.{% if r.sheets_differs %} For the worked example Google Sheets returned <code>{{ r.sheets_actual }}</code>, which is <strong>not</strong> what LibreOffice returned (<code>{{ r.example_actual }}</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding.{% else %} It returned <code>{{ r.sheets_actual }}</code> for the worked example, the same value LibreOffice produced.{% endif %}{% if r.sheets_check_count %} The {{ r.sheets_check_count }} further formulas above were run through Sheets the same way and have their own column;{% if r.sheets_diff_count %} {{ r.sheets_diff_count }} of them came back with a value different from LibreOffice&rsquo;s, flagged in that column.{% else %} every one of them matched LibreOffice.{% endif %}{% endif %} Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.{% else %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.{% endif %}</p>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %}{% if r.sheets_has %} We then ran the same formulas in <strong>Google Sheets</strong>, executed {{ r.sheets_date }}: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed.{% if r.sheets_differs %} For the worked example Google Sheets returned <code>{{ r.sheets_actual }}</code>, which is <strong>not</strong> what LibreOffice returned (<code>{{ r.example_actual }}</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding.{% else %} It returned <code>{{ r.sheets_actual }}</code> for the worked example, the same value LibreOffice produced.{% endif %}{% if r.sheets_check_count %} The {{ r.sheets_check_count }} further formulas above were run through Sheets the same way and have their own column;{% if r.sheets_diff_count %} {{ r.sheets_diff_count }} of them came back with a value different from LibreOffice&rsquo;s, flagged in that column.{% else %} every one of them matched LibreOffice.{% endif %}{% endif %}{% if r.sheets_alt_count %} A further {{ r.sheets_alt_count }} {% if r.sheets_alt_count == 1 %}row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only{% else %}rows are Google Sheets alternatives: Sheets-specific syntax, executed in Google Sheets only{% endif %}, so the LibreOffice column reads n/a for {% if r.sheets_alt_count == 1 %}it{% else %}them{% endif %}.{% endif %} Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.{% else %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.{% endif %}</p>
 {% endif %}
 {% if functions_used %}
 <h2 class="section-title">Functions used</h2>
@@ -2623,50 +2662,97 @@ def load_recipes():
         # That is the interesting content, not an error to be hidden.
         d["sheets_differs"] = bool(
             d["sheets_has"] and str(d["sheets_actual"]) != str(act))
-        sheets_variants = (sv.get("variants") or []) if d["sheets_has"] else []
+        # ---- KEYED MERGE ------------------------------------------------
+        # Both results files store every check under its stable key (files
+        # written before keys existed have theirs derived positionally by
+        # result_checks_by_key, which uses iter_checks' own rule -- so an old
+        # file merges identically to a new one). Merging by key rather than
+        # by position is what lets a recipe gain an engine-scoped check in
+        # the middle of a variant without any stored value shifting.
+        lo_by_key = result_checks_by_key(v)
+        sheets_by_key = result_checks_by_key(sv) if d["sheets_has"] else {}
+        spec_by_key = {c["key"]: c for c in iter_checks(d)}
+
+        def _merge_check(key, ch):
+            """One rendered row, or None if it must not be rendered at all.
+
+            A check scoped to an engine that has NOT executed it yet is
+            HIDDEN rather than rendered with a placeholder: an empty
+            "Google Sheets alternative" row would be stale copy the day the
+            run happens, and a visible row promising a pending result is a
+            claim we cannot yet back with a value.
+            """
+            spec = spec_by_key.get(key) or {}
+            engines = spec.get("engines")            # None = every engine
+            sheets_only = engines is not None and engines == [GOOGLE_SHEETS]
+            lo_scoped = engines is None or LIBREOFFICE in engines
+            g = (lo_by_key.get(key) or {}) if lo_scoped else {}
+            a = _fmt_actual(g.get("actual", ""))
+            sg = sheets_by_key.get(key) or {}
+            s_has = bool(sg) and sg.get("formula") == ch.get("formula")
+            s_a = _fmt_actual(sg.get("actual", "")) if s_has else ""
+            if not lo_scoped and not s_has:
+                return None                          # hidden until executed
+            return {
+                "formula": ch.get("formula", ""),
+                "label": ch.get("label", ""),
+                # LibreOffice side. `lo_scoped` False means the LibreOffice
+                # column must show "n/a (Sheets-only formula)" -- never a
+                # value, never a badge: LibreOffice did not run this formula.
+                "lo_scoped": lo_scoped,
+                "actual": a,
+                "verified": (lo_scoped and bool(g.get("verified"))
+                             and g.get("formula") == ch.get("formula")),
+                # Google Sheets side.
+                "sheets_only": sheets_only,
+                "sheets_has": s_has,
+                "sheets_actual": s_a,
+                "sheets_verified": bool(sg.get("verified")),
+                # A Sheets-only alternative has no LibreOffice value to
+                # disagree with, so it can never be a "differs" row.
+                "sheets_differs": bool(s_has and lo_scoped and str(s_a) != str(a)),
+            }
+
         # Optional "variants": extra worked sections, each with its own sample grid
-        # and its own executed checks. Merge the values LibreOffice actually
-        # returned (results/recipes-verified.json) onto each check, by position.
-        vres = v.get("variants") or []
+        # and its own executed checks.
         for i, var in enumerate(d.get("variants") or []):
             checks = var.get("verify") or []
             if isinstance(checks, dict):
                 checks = [checks]
-            got = (vres[i].get("checks") if i < len(vres) else []) or []
-            sgot = ((sheets_variants[i].get("checks")
-                     if i < len(sheets_variants) else []) or [])
             merged = []
             for j, ch in enumerate(checks):
-                g = got[j] if j < len(got) else {}
-                a = _fmt_actual(g.get("actual", ""))
-                sg = sgot[j] if j < len(sgot) else {}
-                s_has = bool(sg) and sg.get("formula") == ch.get("formula")
-                s_a = _fmt_actual(sg.get("actual", "")) if s_has else ""
-                merged.append({
-                    "formula": ch.get("formula", ""),
-                    "label": ch.get("label", ""),
-                    "actual": a,
-                    "verified": bool(g.get("verified")) and g.get("formula") == ch.get("formula"),
-                    "sheets_has": s_has,
-                    "sheets_actual": s_a,
-                    "sheets_verified": bool(sg.get("verified")),
-                    "sheets_differs": bool(s_has and str(s_a) != str(a)),
-                })
+                row = _merge_check(str(ch.get("id") or f"v{i}c{j}"), ch)
+                if row is not None:
+                    merged.append(row)
             var["checks"] = merged
             var["grid"] = _variant_grid(var.get("setup_cells"), var.get("display_cells"))
-        d["variant_check_count"] = sum(
-            len(var.get("checks") or []) for var in (d.get("variants") or [])
-        )
-        d["sheets_check_count"] = sum(
-            1 for var in (d.get("variants") or [])
-            for c in (var.get("checks") or []) if c.get("sheets_has")
-        )
+        # Top-level "extra_checks": checks that belong to the recipe but to no
+        # variant -- where a Sheets-only alternative lives on a recipe that has
+        # no variant sections. Rendered as their own table, and only once at
+        # least one of them has an executed result.
+        extra_rows = []
+        for k, ch in enumerate(d.get("extra_checks") or []):
+            row = _merge_check(str(ch.get("id") or f"x{k}"), ch)
+            if row is not None:
+                extra_rows.append(row)
+        d["extra_rows"] = extra_rows
+
+        def _rows(pred):
+            n = sum(1 for var in (d.get("variants") or [])
+                    for c in (var.get("checks") or []) if pred(c))
+            return n + sum(1 for c in extra_rows if pred(c))
+
+        # Counts are PER ENGINE, because the two engines no longer execute the
+        # same set of formulas on a page: LibreOffice's sentence counts the
+        # checks LibreOffice ran, Sheets' sentence counts the ones Sheets ran.
+        d["variant_check_count"] = _rows(lambda c: c["lo_scoped"])
+        d["sheets_check_count"] = _rows(
+            lambda c: c["sheets_has"] and c["lo_scoped"])
+        d["sheets_alt_count"] = _rows(
+            lambda c: c["sheets_has"] and c["sheets_only"])
         # How many of the executed formulas on this page Sheets answered
         # differently from LibreOffice. Shown, never suppressed.
-        d["sheets_diff_count"] = sum(
-            1 for var in (d.get("variants") or [])
-            for c in (var.get("checks") or []) if c.get("sheets_differs")
-        )
+        d["sheets_diff_count"] = _rows(lambda c: c["sheets_differs"])
         recs.append(d)
     return recs
 

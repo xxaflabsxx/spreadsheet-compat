@@ -36,5 +36,21 @@
     ],
     "check_range": "D1:D3"
   },
-  "explanation": "SORTBY sorts one range by another: here the list is sorted by its own row numbers in descending order (-1), which simply flips it — cherry, banana, apple. Unlike SORT, this preserves the original arrangement in reverse rather than alphabetizing. In older versions without SORTBY, =INDEX($A$2:$A$4,COUNTA($A$2:$A$4)-ROWS($A$2:A2)+1) filled down does the same."
+  "explanation": "SORTBY sorts one range by another: here the list is sorted by its own row numbers in descending order (-1), which simply flips it — cherry, banana, apple. Unlike SORT, this preserves the original arrangement in reverse rather than alphabetizing. In older versions without SORTBY, =INDEX($A$2:$A$4,COUNTA($A$2:$A$4)-ROWS($A$2:A2)+1) filled down does the same.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "SORT on the row numbers with a boolean third argument — Google Sheets has no SORTBY",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=SORT(A2:A4,ROW(A2:A4),FALSE)",
+      "expected": [
+        "cherry",
+        "banana",
+        "apple"
+      ],
+      "check_range": "D1:D3"
+    }
+  ]
 }

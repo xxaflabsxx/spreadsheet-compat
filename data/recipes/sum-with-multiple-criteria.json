@@ -128,6 +128,24 @@
           "label": "(North OR South) AND Widget — OR inside, AND across",
           "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\"))",
           "expected": 150
+        },
+        {
+          "id": "v1c0-gs-alt",
+          "label": "North OR South, with ARRAYFORMULA forcing the brace array",
+          "engines": [
+            "google_sheets"
+          ],
+          "formula": "=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"})))",
+          "expected": 220
+        },
+        {
+          "id": "v1c2-gs-alt",
+          "label": "(North OR South) AND Widget, with ARRAYFORMULA forcing the brace array",
+          "engines": [
+            "google_sheets"
+          ],
+          "formula": "=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\")))",
+          "expected": 150
         }
       ],
       "note": "Array-constant behaviour to know about: the braces hold literal values typed into the formula, separated by commas for a horizontal array — you cannot put a cell range inside them (use the SUMPRODUCT form, or SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3)), if the wanted values live in cells). This pattern is only safe for OR over EXACT values in ONE column, because a row cannot equal two different values, so nothing is double-counted; OR across two different columns can overlap and needs the SUMPRODUCT form. Excel, Google Sheets and LibreOffice Calc all document the same brace syntax; in Google Sheets a semicolon separates rows and a comma separates columns, same as Excel. In pre-dynamic-array Excel the SUM(SUMIFS(...)) wrapper may need to be entered with Ctrl+Shift+Enter (documented); modern Excel takes it as a normal formula. Google Sheets is the real divergence here, and the executed column above shows it: =SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"})) returned 140 there, the North subtotal alone, against 220 in LibreOffice, and the (North OR South) AND Widget row returned 100 against 150. Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so SUMIFS sees only the first value of the brace array. The SUMPRODUCT row above returned 220 in both engines, which makes it the portable choice; =ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))) is Google’s documented way to force the array, and it carries no executed result of its own here."

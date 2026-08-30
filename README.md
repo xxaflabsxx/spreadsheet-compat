@@ -64,8 +64,13 @@ harness/run_sheets.py       Engine runner for Google Sheets: builds chunked
 data/recipes/<slug>.json   One file per how-to recipe: the task, the
                             per-app formulas, the explanation, a "verify"
                             block {setup_cells, setup_sheets?, formula,
-                            expected, check_range?} and optional variants[]
-                            carrying their own checks. A second corpus,
+                            expected, check_range?}, optional variants[]
+                            carrying their own checks, and optional
+                            extra_checks[] (checks belonging to the recipe
+                            but to no variant). ANY check may carry
+                            "engines": ["google_sheets"] / ["libreoffice"]
+                            to scope it to one engine (absent = all) and an
+                            "id" to pin its stable key. A second corpus,
                             independent of data/tests/.
 
 harness/recipe_corpus.py    Engine-agnostic shared machinery for the RECIPE
@@ -556,6 +561,50 @@ LibreOffice reference run executed is flagged
 results file, and is reported as **not comparable** (rather than as a pass
 or a failure) by `selftest-recipes`.
 
+**Engine-scoped checks, and results merged by key.** A check may name the
+engines that should execute it:
+
+```json
+{ "id": "gs-alt",
+  "label": "SUMPRODUCT does the whole OR in one pass",
+  "engines": ["google_sheets"],
+  "formula": "=SUMPRODUCT((A2:A6=\"East\")+(A2:A6=\"West\"),B2:B6)",
+  "expected": 160 }
+```
+
+Absent (or empty) `engines` means **all** engines, so every check authored
+before the field existed is untouched by it. `verify_recipes.py` runs as
+`libreoffice` and `build-recipes` runs as `google_sheets` (override with
+`--engine`; `selftest-recipes` forces `libreoffice`, because there
+LibreOffice really is the engine standing in for Drive), and each filters
+the corpus through `iter_checks(recipe, engine=...)`. That is what makes it
+safe to publish a Sheets-only alternative formula: LibreOffice would run one
+anyway — sometimes computing a different answer, sometimes failing to parse
+it at all — and either outcome would drag the recipe's LibreOffice badge
+down with it. A recipe's `verified` flag is therefore the AND over **that
+engine's** checks only.
+
+Every check also has a **stable key** — `main`, `v<vi>c<ci>`, `x<i>`, or an
+explicit `"id"` — computed from the check's position in the *unfiltered*
+JSON, so a filtered build keys its results exactly as a full build would.
+Both results files store the key on every payload and every consumer merges
+**by key, not by position**, so appending an engine-scoped check to a
+variant cannot slide an older stored value onto a neighbouring formula.
+Results files written before keys existed still load: their keys are derived
+positionally by the same rule (`recipe_corpus.result_checks_by_key`).
+
+On the site, a Sheets-only check renders in the Google Sheets column only —
+labelled "Google Sheets alternative (executed `<date>`)" beside the value
+Google returned — while the LibreOffice column reads `n/a (Sheets-only
+formula)`, never a value and never a badge. Per-engine counts follow ("the N
+further formulas ... executed" is counted separately for each engine). A
+scoped check whose engine has not executed it yet is **hidden**, not
+rendered as pending, so no page ever carries copy that goes stale the day
+the run lands. `scripts/check_honesty.py` enforces the pairing: the number of
+"Google Sheets alternative (executed …)" labels on a page must equal the
+number of "n/a (Sheets-only formula)" cells, and such a label may only
+appear on a page that carries real Sheets execution provenance.
+
 Measured on the current 282-recipe corpus (`--chunk-size 60`):
 
 | chunk | recipes | checks | bytes |
@@ -609,6 +658,10 @@ so any drift in enumeration or comparison between the two paths would
 manufacture a fake engine divergence. The move out of `verify_recipes.py`
 was behaviour-preserving: a full 282-recipe / 325-check LibreOffice re-run
 after the refactor reproduced `results/recipes-verified.json` byte for byte.
+The later engine-scoping + stable-key change was proved the same way, one
+notch looser: a full re-run reproduced every `verified` flag, every `actual`
+and every `expected` in that file, the only difference being the `"key"`
+field newly written onto each check.
 
 ### How the site renders a Sheets recipe result
 
@@ -628,12 +681,21 @@ pages are byte-identical to before. With it, and only when the file's
   result keeps the LibreOffice-only wording, so the skipped multi-sheet
   recipes never over-claim;
 - the how-to index lede and the methodology page state how many recipes have
-  been through Sheets, and why the rest have not.
+  been through Sheets, and why the rest have not;
+- a check scoped to Google Sheets alone (`"engines": ["google_sheets"]`)
+  renders in that column only — labelled **"Google Sheets alternative
+  (executed `<date>`)"** beside the value Google returned — while the
+  LibreOffice column reads `n/a (Sheets-only formula)`. It is hidden
+  entirely until Sheets has actually executed it, and the "N further
+  formulas executed" sentences are counted per engine.
 
 `scripts/check_honesty.py` guards the new wording: it fails on an engine
 list that ends "... and Excel" after an execution verb (the regression the
-two-engine phrasing newly makes possible), and on any single page that both
-shows a Sheets result and still carries the LibreOffice-only disclaimer.
+two-engine phrasing newly makes possible), on any single page that both
+shows a Sheets result and still carries the LibreOffice-only disclaimer, and
+on a Sheets-only row whose LibreOffice column shows anything other than
+`n/a (Sheets-only formula)` (or that claims an alternative was executed on a
+page with no Sheets provenance at all).
 
 ## Offline companion: per-cell recalc diff
 

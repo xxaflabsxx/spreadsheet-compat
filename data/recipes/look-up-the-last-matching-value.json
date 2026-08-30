@@ -37,5 +37,16 @@
     "formula": "=LOOKUP(2,1/(A2:A5=D2),B2:B5)",
     "expected": 30
   },
-  "explanation": "A normal VLOOKUP/XLOOKUP returns the FIRST match, but when rows are in date order you often want the LAST — the most recent price or status. Two ways: XLOOKUP with a search-mode of -1 scans from the bottom up and returns the last match directly. In any version, the classic LOOKUP trick does it too: (A2:A5=D2) is an array of TRUE/FALSE, 1 divided by it gives 1 for matches and errors for non-matches, and LOOKUP searching for 2 (bigger than any value) scans to the end and returns the value beside the LAST 1. For \"apple\" that's the second apple's price, 30. Sort your data chronologically first so 'last' means 'most recent'."
+  "explanation": "A normal VLOOKUP/XLOOKUP returns the FIRST match, but when rows are in date order you often want the LAST — the most recent price or status. Two ways: XLOOKUP with a search-mode of -1 scans from the bottom up and returns the last match directly. In any version, the classic LOOKUP trick does it too: (A2:A5=D2) is an array of TRUE/FALSE, 1 divided by it gives 1 for matches and errors for non-matches, and LOOKUP searching for 2 (bigger than any value) scans to the end and returns the value beside the LAST 1. For \"apple\" that's the second apple's price, 30. Sort your data chronologically first so 'last' means 'most recent'.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "Native XLOOKUP with search mode -1 (scan from the last row up)",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=XLOOKUP(D2,A2:A6,B2:B6,,0,-1)",
+      "expected": 30
+    }
+  ]
 }

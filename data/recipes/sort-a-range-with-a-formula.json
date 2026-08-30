@@ -36,5 +36,21 @@
     ],
     "check_range": "D1:D3"
   },
-  "explanation": "SORT spills a sorted copy while the source stays put — edit a value and the copy re-orders instantly, unlike menu sorting which is one-time and destructive. Mind the argument dialect: Excel and LibreOffice use 1/-1 for direction, Google Sheets uses TRUE/FALSE — one of the few places the same function has different signatures. Sort whole tables by widening the range (=SORT(A2:C100,3,-1) orders by the third column), and wrap FILTER output in SORT for filtered-and-ordered views."
+  "explanation": "SORT spills a sorted copy while the source stays put — edit a value and the copy re-orders instantly, unlike menu sorting which is one-time and destructive. Mind the argument dialect: Excel and LibreOffice use 1/-1 for direction, Google Sheets uses TRUE/FALSE — one of the few places the same function has different signatures. Sort whole tables by widening the range (=SORT(A2:C100,3,-1) orders by the third column), and wrap FILTER output in SORT for filtered-and-ordered views.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "FALSE, not -1, for descending (the documented form, over this page's A2:A4 instead of A2:A100)",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=SORT(A2:A4,1,FALSE)",
+      "expected": [
+        50,
+        20,
+        10
+      ],
+      "check_range": "D1:D3"
+    }
+  ]
 }

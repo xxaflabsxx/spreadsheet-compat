@@ -43,5 +43,16 @@
     "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
     "expected": 250
   },
-  "explanation": "Concatenate the two key columns (A&\"|\"&B) into a single combined key, then XLOOKUP that combined key. 'North|Q2' matches row 3, returning 250. The pipe separator avoids accidental collisions between key parts."
+  "explanation": "Concatenate the two key columns (A&\"|\"&B) into a single combined key, then XLOOKUP that combined key. 'North|Q2' matches row 3, returning 250. The pipe separator avoids accidental collisions between key parts.",
+  "extra_checks": [
+    {
+      "id": "gs-alt",
+      "label": "ARRAYFORMULA around the concatenated key A2:A6&\"|\"&B2:B6",
+      "engines": [
+        "google_sheets"
+      ],
+      "formula": "=XLOOKUP(\"North|Q2\",ARRAYFORMULA(A2:A6&\"|\"&B2:B6),C2:C6)",
+      "expected": 250
+    }
+  ]
 }

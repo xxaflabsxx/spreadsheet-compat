@@ -110,6 +110,8 @@ USAGE
     python3 harness/run_sheets.py build-recipes --only how-to-use-xlookup add-days-to-a-date
     python3 harness/run_sheets.py build-recipes --outdir harness/recipe_chunks
     python3 harness/run_sheets.py build-recipes --xlfn-names   # opt out of plain names
+    #    checks carrying "engines": [...] are filtered to the engine the
+    #    chunks are built FOR (google_sheets by default; --engine to change it)
 
     # 2. (external) upload each chunk to Drive, export back as
     #    harness/recipe_exports/chunk-NN-export.xlsx
@@ -178,10 +180,13 @@ from corpus import (  # noqa: E402
 # inheritance, normalization and comparison rules with
 # scripts/verify_recipes.py -- see harness/recipe_corpus.py.
 from recipe_corpus import (  # noqa: E402
+    GOOGLE_SHEETS,
+    LIBREOFFICE,
     compare_check,
     iter_checks,
     load_recipe_files,
     norm,
+    result_checks_by_key,
     setup_sheet_names,
     uses_setup_sheets,
 )
@@ -841,12 +846,27 @@ def recipe_sheet_name(recipe_index, check_key, slug, used):
     return assert_sheets_safe_name(sanitize_sheet_name(name, used))
 
 
-def collect_recipe_checks(only=None):
+def collect_recipe_checks(only=None, engine=GOOGLE_SHEETS):
     """Return (buildable, skipped, missing).
 
     buildable: [{slug, title, index, checks:[check dicts from iter_checks]}]
     skipped:   multi-sheet recipes, which v1 does not build (see below)
     missing:   requested slugs with no data/recipes/*.json
+
+    ENGINE SCOPING
+    --------------
+    `engine` is the engine the built workbook will be executed by, and the
+    check list is filtered to it: a check carrying `"engines":
+    ["google_sheets"]` (a Sheets-only alternative formula) is built ONLY for
+    Sheets, and a check carrying `["libreoffice"]` never is. Checks with no
+    `engines` key are built for every engine, so this is a no-op for every
+    recipe authored before the field existed. `selftest-recipes` passes
+    "libreoffice", because there the engine really is LibreOffice standing in
+    for Drive and the reference values it compares against are LibreOffice's.
+
+    Sheet naming and manifest keys come from iter_checks' STABLE KEYS, which
+    are positional over the UNFILTERED JSON, so a filtered build lands each
+    check on exactly the sheet a full build would.
 
     WHY MULTI-SHEET RECIPES ARE SKIPPED (v1 decision, deliberate)
     -------------------------------------------------------------
@@ -886,7 +906,10 @@ def collect_recipe_checks(only=None):
     for slug, _path, recipe in all_recipes:
         if wanted and slug not in wanted:
             continue
-        checks = list(iter_checks(recipe))
+        checks = list(iter_checks(recipe, engine=engine))
+        if not checks:
+            # Every one of this recipe's checks is scoped to another engine.
+            continue
         entry = {
             "slug": slug,
             "title": recipe.get("title", ""),
@@ -950,7 +973,8 @@ def build_recipe_workbook(recipes, plain_names=True):
 
 def cmd_build_recipes(args):
     plain_names = bool(getattr(args, "plain_names", True))
-    buildable, skipped, missing = collect_recipe_checks(args.only)
+    engine = getattr(args, "engine", GOOGLE_SHEETS)
+    buildable, skipped, missing = collect_recipe_checks(args.only, engine=engine)
     if missing:
         sys.exit(f"No data/recipes/*.json for: {', '.join(missing)}")
     if not buildable:
@@ -998,6 +1022,10 @@ def cmd_build_recipes(args):
                         stored != to_storage_formula_all(chk["formula"]),
                     "serialization": "plain" if plain_names else "xlfn",
                     "expected": chk["expected"],
+                    # None = all engines. Recorded so an ingest (and a human
+                    # reading the manifest) can see that a check is an
+                    # engine-scoped alternative rather than a shared formula.
+                    "engines": chk["engines"],
                 })
             recipe_entries.append({
                 "slug": rec["slug"],
@@ -1025,6 +1053,9 @@ def cmd_build_recipes(args):
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "corpus": "recipes",
         "corpus_source": "data/recipes/*.json",
+        # The engine this chunk set was built FOR. Checks carrying an
+        # "engines" list that excludes it were left out of the workbooks.
+        "engine_scope": engine,
         "chunk_size": args.chunk_size,
         "n_chunks": len(chunks),
         "n_recipes": sum(c["n_recipes"] for c in manifest_chunks),
@@ -1067,6 +1098,10 @@ def cmd_build_recipes(args):
             "names)" if plain_names else "xlfn-translated")
     print(f"Built {len(chunks)} chunk(s) from {manifest['n_recipes']} recipe(s), "
           f"{manifest['n_checks']} check(s) -> {outdir}  [{mode}]")
+    n_scoped = sum(1 for c in manifest_chunks for r in c["recipes"]
+                   for chk in r["checks"] if chk.get("engines"))
+    print(f"Engine scope: {engine} -- {n_scoped} of {manifest['n_checks']} check(s) "
+          f"are engine-scoped, the rest run in every engine")
     if manifest["manifest_note"]:
         print(f"Manifest note: {manifest['manifest_note']}")
     total = 0
@@ -1171,6 +1206,7 @@ def ingest_recipe_exports(export_paths, manifest, engine_label):
         for rec in chunk["recipes"]:
             main = None
             variants = {}
+            extra = []
             recipe_ok = True
             for entry in rec["checks"]:
                 ws = wb[entry["sheet"]]
@@ -1214,6 +1250,10 @@ def ingest_recipe_exports(export_paths, manifest, engine_label):
                     recipe_ok = False
 
                 payload = {
+                    # Stable key: what the site merges this result by, so a
+                    # later-appended engine-scoped check cannot shift this
+                    # value onto a neighbouring formula.
+                    "key": entry["key"],
                     "label": entry["label"],
                     "formula": entry["formula_display"],
                     "formula_stored_xlsx": entry["formula_stored_xlsx"],
@@ -1225,8 +1265,12 @@ def ingest_recipe_exports(export_paths, manifest, engine_label):
                     "canary_ok_this_sheet": canary_ok,
                     "notes": "; ".join(notes) if notes else None,
                 }
+                if entry.get("engines"):
+                    payload["engines"] = entry["engines"]
                 if entry["kind"] == "main":
                     main = payload
+                elif entry["kind"] == "extra":
+                    extra.append(payload)
                 else:
                     variants.setdefault(
                         entry["variant_index"],
@@ -1241,6 +1285,7 @@ def ingest_recipe_exports(export_paths, manifest, engine_label):
                 "engine": "Google Sheets",
                 "engine_label": engine_label,
                 "serialization": serialization,
+                "key": main["key"],
                 "formula": main["formula"],
                 "formula_stored_xlsx": main["formula_stored_xlsx"],
                 "expected": main["expected"],
@@ -1252,6 +1297,8 @@ def ingest_recipe_exports(export_paths, manifest, engine_label):
             }
             if variants:
                 record["variants"] = [variants[i] for i in sorted(variants)]
+            if extra:
+                record["extra_checks"] = extra
             recipes_out[rec["slug"]] = record
 
         per_chunk.append({
@@ -1452,6 +1499,13 @@ def cmd_selftest_recipes(args):
     nothing about Google Sheets: the values recovered are LibreOffice's, which
     is exactly why they can be checked against the LibreOffice reference run.
     It writes to a scratch file and never into results/."""
+    # Build the LIBREOFFICE check set, not the Google Sheets one: the engine
+    # standing in for Drive here IS LibreOffice, and the reference values this
+    # command proves the mapping against are LibreOffice's. Building the Sheets
+    # set would hand soffice the Sheets-only alternative formulas, which have
+    # no LibreOffice reference value to compare with (and several of which
+    # LibreOffice cannot evaluate at all).
+    args.engine = LIBREOFFICE
     print("=== selftest-recipes: build ===")
     manifest = cmd_build_recipes(args)
 
@@ -1521,12 +1575,8 @@ def cmd_selftest_recipes(args):
         ref = reference.get(slug)
         if ref is None:
             return None
-        flat = {"main": {"formula": ref.get("formula"), "actual": ref.get("actual")}}
-        for vi, var in enumerate(ref.get("variants") or []):
-            for ci, ch in enumerate(var.get("checks") or []):
-                flat[f"v{vi}c{ci}"] = {"formula": ch.get("formula"),
-                                       "actual": ch.get("actual")}
-        return flat
+        return {k: {"formula": p.get("formula"), "actual": p.get("actual")}
+                for k, p in result_checks_by_key(ref).items()}
 
     print("\n=== selftest-recipes: values vs results/recipes-verified.json ===")
     n_match = n_diff = n_skipped = 0
@@ -1536,10 +1586,8 @@ def cmd_selftest_recipes(args):
             print(f"  {slug}: NOT in the LibreOffice reference run -- cannot compare")
             n_diff += 1
             continue
-        got = {"main": recipes[slug]["actual"]}
-        for vi, var in enumerate(recipes[slug].get("variants") or []):
-            for ci, ch in enumerate(var.get("checks") or []):
-                got[f"v{vi}c{ci}"] = ch["actual"]
+        got = {k: p["actual"]
+               for k, p in result_checks_by_key(recipes[slug]).items()}
         for key in sorted(got, key=lambda k: (k != "main", k)):
             entry = stored_by_key[(slug, key)]
             mine, theirs = got[key], ref.get(key, {}).get("actual")
@@ -1690,6 +1738,11 @@ def main():
     br.add_argument("--manifest-note", default=None, metavar="TEXT",
                     help="free-text note stored in the manifest and carried into "
                          "ingest provenance")
+    br.add_argument("--engine", default=GOOGLE_SHEETS,
+                    choices=[GOOGLE_SHEETS, LIBREOFFICE],
+                    help="engine the chunks are built FOR; checks carrying an "
+                         "\"engines\" list that excludes it are left out "
+                         "(default %(default)s)")
     br.set_defaults(func=cmd_build_recipes)
 
     ir = sub.add_parser("ingest-recipes",
@@ -1733,7 +1786,8 @@ def main():
                     help=argparse.SUPPRESS)
     sr.add_argument("--manifest-note", default=None, metavar="TEXT",
                     help=argparse.SUPPRESS)
-    sr.set_defaults(func=cmd_selftest_recipes)
+    # cmd_selftest_recipes overrides this anyway; the default documents intent.
+    sr.set_defaults(func=cmd_selftest_recipes, engine=LIBREOFFICE)
 
     args = ap.parse_args()
     args.func(args)
