@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SORT descending in Google Sheets: is_ascending vs sort_order</title>
+<meta name="description" content="Excel&#39;s SORT takes a numeric sort_order (1/-1); Google Sheets&#39; third argument is a boolean is_ascending. Executed, =SORT(A2:A4,1,-1) returns 10, 20, 50 in Google Sheets against 50, 20, 10 in LibreOffice 25.8.7.3 - ascending, with no error anywhere. The fix is FALSE.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/sort-function-google-sheets-vs-excel-libreoffice-sort-order.html">
+<meta property="og:title" content="SORT descending in Google Sheets: is_ascending vs sort_order">
+<meta property="og:description" content="Excel&#39;s SORT takes a numeric sort_order (1/-1); Google Sheets&#39; third argument is a boolean is_ascending. Executed, =SORT(A2:A4,1,-1) returns 10, 20, 50 in Google Sheets against 50, 20, 10 in LibreOffice 25.8.7.3 - ascending, with no error anywhere. The fix is FALSE.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/sort-function-google-sheets-vs-excel-libreoffice-sort-order.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"SORT descending in Google Sheets: is_ascending vs sort_order","item":"https://canispreadsheet.com/guides/sort-function-google-sheets-vs-excel-libreoffice-sort-order.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>SORT means two different things: Excel&#39;s sort_order vs Google Sheets&#39; is_ascending</h1>
+
+<p>Two spreadsheet vendors gave the third argument of <code>SORT</code> two different jobs, and the
+argument accepts the other one&rsquo;s value without complaining. Excel&rsquo;s third argument is a
+signed <code>sort_order</code>: <code>1</code> ascending, <code>-1</code> descending. Google
+Sheets&rsquo; third argument is a boolean <code>is_ascending</code>: <code>TRUE</code> ascending,
+<code>FALSE</code> descending. Hand Sheets the Excel value <code>-1</code> and you do not get an
+error &mdash; you get the list sorted the wrong way up.</p>
+
+<p>We executed it. Our how-to corpus&rsquo;s <code>=SORT(A2:A4,1,-1)</code> over
+<code>A2:A4 = 20, 50, 10</code> returned <code>50, 20, 10</code> in LibreOffice Calc 25.8.7.3 and
+<code>10, 20, 50</code> in the Google Sheets run of 2026-08-30. Same formula, opposite order, no
+error message on either side.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>This breaks in exactly one direction, which is what makes it hard to spot. A formula that
+  sorts <em>ascending</em> travels fine: Excel writes <code>1</code> for ascending, and
+  <code>1</code> is also truthy, so Sheets reads it as <code>is_ascending = TRUE</code> and agrees
+  by accident. Our <code>=SORT(A1:B3,2,1)</code> case matched in both engines for exactly that
+  reason. Only the <em>descending</em> formulas invert &mdash; because <code>-1</code>, the Excel
+  value that means &ldquo;descending&rdquo;, is a nonzero number and therefore reads as
+  &ldquo;true&rdquo;, which in Sheets means ascending. Half your sorts survive the trip and half
+  of them silently reverse, and nothing anywhere says so.</p>
+</div>
+
+<h2 class="section-title">What each vendor documents the third argument to be</h2>
+<p>Neither engine is misbehaving. Both are doing precisely what their own help page says, and the
+help pages disagree. We fetched both on 2026-08-30.</p>
+<p><strong>Google Sheets.</strong> The
+<a href="https://support.google.com/docs/answer/3093150">SORT function help article</a> gives the
+signature as <code>SORT(range, sort_column, is_ascending, [sort_column2, is_ascending2, ...])</code>
+and describes the third argument as &ldquo;<code>TRUE</code> or <code>FALSE</code> indicating
+whether to sort <code>sort_column</code> in ascending order. <code>FALSE</code> sorts in descending
+order.&rdquo; Its sample usage is <code>SORT(A2:B26, 1, TRUE)</code>. There is no mention of
+<code>1</code> or <code>-1</code> anywhere on the page, and no note about what happens if you pass
+a number.</p>
+<p><strong>Microsoft Excel.</strong> The
+<a href="https://support.microsoft.com/en-us/office/sort-function-22f63bd0-ccc8-492f-953d-c20e8e44b86c">SORT
+function page</a> gives the signature as <code>=SORT(array,[sort_index],[sort_order],[by_col])</code>
+and describes the third argument as &ldquo;A number indicating the desired sort order; 1 for
+ascending order (default), -1 for descending order.&rdquo; The <em>fourth</em> argument,
+<code>[by_col]</code>, is the boolean one there: &ldquo;A logical value indicating the desired sort
+direction; <code>FALSE</code> to sort by row (default), <code>TRUE</code> to sort by column.&rdquo;</p>
+<p>So the two signatures put a number and a boolean in the same slot, and Excel&rsquo;s boolean sits
+one position further right, where Sheets expects <code>sort_column2</code>. We have executed cases
+for the three-argument form only; the four-argument collision is what the two documented signatures
+imply, not something we measured, and we are not claiming a result for it.</p>
+
+<h2 class="section-title">Executed: the SORT function corpus across four LibreOffice builds and Google Sheets</h2>
+<p>These are the four <code>SORT</code> cases in our function corpus, run as written. Inputs:
+the first two cases read <code>A1:A5 = 3, 1, 4, 1, 5</code>; the third reads
+<code>A1:B3 = x/30, y/10, z/20</code>; the fourth has no setup cells at all, so <code>A1</code> is
+blank. The Excel column is Microsoft&rsquo;s documented behaviour and is the value every case is
+measured against &mdash; we do not run Excel. Because these formulas spill, each executed cell
+shows the anchor value followed by the read-back of the whole recorded check range.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Case</th><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (Drive import, 2026-08-29)</th><th>LibreOffice 24.2.0.3 (executed)</th><th>LibreOffice 24.8.7.2, 25.2.0.3 &amp; 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>SORT_default_ascending</td>
+      <td class="formula">=SORT(A1:A5)</td>
+      <td>1, 1, 3, 4, 5</td>
+      <td class="result">1 &mdash; read-back 1, 1, 3, 4, 5 (matches)</td>
+      <td class="result">#NAME?</td>
+      <td class="result">1 &mdash; read-back 1, 1, 3, 4, 5 (matches)</td>
+    </tr>
+    <tr>
+      <td>SORT_descending</td>
+      <td class="formula">=SORT(A1:A5,1,-1)</td>
+      <td>5, 4, 3, 1, 1</td>
+      <td class="result">1 &mdash; read-back <strong>1, 1, 3, 4, 5</strong> (ascending; does not match)</td>
+      <td class="result">#NAME?</td>
+      <td class="result">5 &mdash; read-back 5, 4, 3, 1, 1 (matches)</td>
+    </tr>
+    <tr>
+      <td>SORT_by_second_column</td>
+      <td class="formula">=SORT(A1:B3,2,1)</td>
+      <td>y, 10 / z, 20 / x, 30</td>
+      <td class="result">y &mdash; read-back y, 10, z, 20, x, 30 (matches)</td>
+      <td class="result">#NAME?</td>
+      <td class="result">y &mdash; read-back y, 10, z, 20, x, 30 (matches)</td>
+    </tr>
+    <tr>
+      <td>SORT_empty_range_error</td>
+      <td class="formula">=SORT(A1:A1)</td>
+      <td>0 (a blank cell sorts as 0 in numeric context; no error documented)</td>
+      <td class="result">blank &mdash; the exported cell carried no value and no error</td>
+      <td class="result">#NAME?</td>
+      <td class="result">0 (24.8.7.2) &rarr; #VALUE! (25.2.0.3) &rarr; 0 (25.8.7.3)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>Row two is the whole page in one line. The Excel column and the LibreOffice column both read
+<code>5, 4, 3, 1, 1</code>; the Google Sheets column reads <code>1, 1, 3, 4, 5</code> &mdash; the
+identical output the <em>ascending</em> case produced one row above. Sheets did not refuse the
+<code>-1</code>, did not warn about it, and did not return a partial result. It sorted ascending.</p>
+<p>Row three is the accidental agreement. <code>=SORT(A1:B3,2,1)</code> asks for &ldquo;sort by the
+second column, ascending&rdquo; in Excel&rsquo;s dialect, and the same <code>1</code> is a truthy
+<code>is_ascending</code> in Sheets&rsquo; dialect, so both engines return
+<code>y, 10 / z, 20 / x, 30</code>. It is the same coincidence that makes the divergence hard to
+find: a workbook full of ascending sorts imports perfectly and tells you nothing about the
+descending ones.</p>
+<p>Reading &ldquo;<code>-1</code> is nonzero, therefore truthy, therefore <code>TRUE</code>,
+therefore ascending&rdquo; is our explanation of the measurement, not itself a measurement. What we
+executed is the value: <code>1, 1, 3, 4, 5</code>, where <code>5, 4, 3, 1, 1</code> was asked for.</p>
+<p>The <code>#NAME?</code> column is a separate story: <code>SORT</code> does not exist in
+LibreOffice 24.2.0.3 at all, and arrives in 24.8.7.2. That version map, for <code>SORT</code> and
+the rest of the dynamic-array family, is in
+<a href="../guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">which LibreOffice
+version you need for VSTACK, HSTACK, TEXTSPLIT, TAKE and DROP</a>.</p>
+
+<h2 class="section-title">Executed: the same collision in two how-to recipes</h2>
+<p>Our how-to corpus is a second, independent body of executed formulas, run in LibreOffice Calc
+25.8.7.3 and imported to Google Sheets on 2026-08-30. Two of its pages turn on this argument. The
+<code>gs-alt</code> rows are Google Sheets alternatives: formulas scoped to that engine in our
+corpus and executed there only, which is why their LibreOffice cell reads <code>n/a</code> rather
+than a value.</p>
+<p>Inputs: the sort recipe reads <code>A2:A4 = 20, 50, 10</code>; the reverse recipe reads
+<code>A2:A4 = apple, banana, cherry</code>.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Recipe</th><th>Formula</th><th>Excel (documented)</th><th>Returned by Google Sheets (executed 2026-08-30)</th><th>LibreOffice 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><a href="../how-to/sort-a-range-with-a-formula.html">sort-a-range-with-a-formula</a> <span class="category-tag">main</span></td>
+      <td class="formula">=SORT(A2:A4,1,-1)</td>
+      <td>50, 20, 10</td>
+      <td class="result"><strong>10, 20, 50</strong></td>
+      <td class="result">50, 20, 10</td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/sort-a-range-with-a-formula.html">sort-a-range-with-a-formula</a> <span class="category-tag">gs-alt</span></td>
+      <td class="formula">=SORT(A2:A4,1,FALSE)</td>
+      <td>&mdash; Sheets-only rewrite, no Excel claim</td>
+      <td class="result">50, 20, 10 &mdash; Google Sheets alternative (executed 2026-08-30)</td>
+      <td class="result">n/a (Sheets-only formula)</td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/reverse-the-order-of-a-list.html">reverse-the-order-of-a-list</a> <span class="category-tag">main</span></td>
+      <td class="formula">=SORTBY(A2:A4,ROW(A2:A4),-1)</td>
+      <td>cherry, banana, apple</td>
+      <td class="result">#NAME?</td>
+      <td class="result">cherry, banana, apple</td>
+    </tr>
+    <tr>
+      <td><a href="../how-to/reverse-the-order-of-a-list.html">reverse-the-order-of-a-list</a> <span class="category-tag">gs-alt</span></td>
+      <td class="formula">=SORT(A2:A4,ROW(A2:A4),FALSE)</td>
+      <td>&mdash; Sheets-only rewrite, no Excel claim</td>
+      <td class="result">cherry, banana, apple &mdash; Google Sheets alternative (executed 2026-08-30)</td>
+      <td class="result">n/a (Sheets-only formula)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p><strong>The fix is one argument, and we ran it.</strong> Replace <code>-1</code> with
+<code>FALSE</code>: <code>=SORT(A2:A4,1,FALSE)</code> returned <code>50, 20, 10</code> in the same
+Google Sheets run that gave <code>10, 20, 50</code> for the <code>-1</code> form. Nothing else about
+the formula changes &mdash; same range, same sort column, same spill.</p>
+<p>The reverse-a-list pair shows the argument doing a second job. <code>SORTBY</code> is the natural
+Excel and LibreOffice way to flip a list without alphabetising it &mdash; sort the range by its own
+row numbers, descending &mdash; and it executed to <code>cherry, banana, apple</code> in Calc
+25.8.7.3. In Google Sheets it returned <code>#NAME?</code>, which is a real result rather than an
+import artefact: our function inventory records <code>SORTBY</code> as undocumented in Sheets, and
+the corpus&rsquo;s own <code>=SORTBY(A1:A3,B1:B3)</code> case likewise returned <code>#NAME?</code>
+there on 2026-08-29. The Sheets rewrite is <code>SORT</code> itself with a range as its second
+argument &mdash; <code>=SORT(A2:A4,ROW(A2:A4),FALSE)</code> &mdash; because Google documents
+<code>sort_column</code> as either a column index <em>or</em> &ldquo;a range outside of
+<code>range</code> containing the values by which to sort&rdquo;. That executed to
+<code>cherry, banana, apple</code>. So Sheets can sort by an arbitrary key; it just spells it
+<code>SORT</code>, and the direction flag is still the boolean.</p>
+<p>Google also ships <code>SORTN</code>, a top-<em>n</em> sorter that Excel and LibreOffice do not
+have at all. Our inventory records it as documented in Google Sheets only, and we have authored no
+test cases for it &mdash; it is mentioned here as documentation, with no executed result behind
+it.</p>
+
+<h2 class="section-title">The blank-cell case, and one LibreOffice release that disagreed with itself</h2>
+<p>The fourth corpus case, <code>=SORT(A1:A1)</code> over a single empty cell, is not about the
+third argument, but it is the other thing our <code>SORT</code> runs turned up and it is worth
+recording honestly.</p>
+<p>In LibreOffice it is the only cross-release instability in the whole executed corpus. Our
+<a href="../libreoffice-version-support.html">LibreOffice version support page</a> reports that of
+791 non-volatile cases across 250 functions that ran in all four tested builds, exactly one did not
+return the identical value in every build after the first that supported it &mdash; and it is this
+one: <code>#NAME?</code> in 24.2.0.3, <code>0</code> in 24.8.7.2, <code>#VALUE!</code> in 25.2.0.3,
+and <code>0</code> again in 25.8.7.3. A degenerate input regressed for one release and came back.
+&ldquo;Supported&rdquo; is per case, not per function.</p>
+<p>In Google Sheets the same case came back as an empty cell: our readback recorded no value and no
+error code for it, against a documented <code>0</code>. Be careful how much weight that carries. Our
+Sheets measurement is an export-and-readback &mdash; the workbook goes to Drive, Google recalculates
+it, and the file comes back as .xlsx &mdash; and an exported cell holding nothing is
+indistinguishable from a formula that produced nothing. We can say the cell contained no value and
+no error; we cannot separate &ldquo;<code>SORT</code> returned blank&rdquo; from &ldquo;the export
+wrote no cell&rdquo;. What we can say is that the sheet did recalculate: its arithmetic canary
+passed. Treat it as blank-not-zero with that caveat attached, and do not build on it.</p>
+
+<h2 class="section-title">Finding this in a workbook before it costs you</h2>
+<p><strong>Search the formula text for <code>,-1)</code> next to <code>SORT</code>.</strong> That is
+the entire signature of the bug. A workbook moving from Excel or LibreOffice to Google Sheets needs
+every <code>SORT(...,-1)</code> rewritten to <code>SORT(...,FALSE)</code>; every
+<code>SORT(...,1)</code> and every argument-less <code>SORT(range)</code> can be left alone, on the
+evidence above.</p>
+<p><strong>Do not trust the eyeball test on a sorted column.</strong> A reversed sort still looks
+like a sorted list. If the column is a leaderboard, the top row is now the worst performer; if it
+feeds an <code>INDEX</code>/<code>MATCH</code> or a &ldquo;first row&rdquo; reference, the number
+downstream is wrong and plausible. Check the first value against the maximum, not against your
+sense of tidiness.</p>
+<p><strong>Going the other way is a hard failure, which is better.</strong> A Sheets formula written
+<code>=SORT(A2:A4,1,FALSE)</code> and opened in Excel or LibreOffice hands a boolean to an argument
+documented to take a number. We have no executed case for that direction &mdash; our corpus does not
+run Sheets-dialect formulas in Calc &mdash; so we make no claim about what it returns, only that the
+rewrite in this page&rsquo;s table is scoped to Sheets on purpose and is not portable back.</p>
+<p><strong>Rebuild descending sorts on <code>SORTBY</code> only if the target has it.</strong>
+<code>SORTBY</code> works in LibreOffice from 24.8.7.2 in our runs and returns <code>#NAME?</code>
+in Google Sheets, so it is a fine Excel/Calc idiom and a dead end for Sheets. The portable-by-hand
+alternative for reversing a list, recorded on the how-to page, is an
+<code>INDEX</code>-with-<code>COUNTA</code> fill-down.</p>
+<p>This belongs to the same family as the other quiet Google Sheets divergences we have executed:
+<a href="../guides/arrayformula-implicit-array-evaluation-google-sheets-vs-excel-libreoffice.html">Google
+Sheets does not array-evaluate inside a scalar function</a>, where four of the divergent rows come
+back as plain wrong numbers, is the largest one. <code>SORT</code>&rsquo;s third argument is
+narrower but sharper: there is no error to catch anywhere in the chain, and the result is still a
+correctly-formed, correctly-typed, fully-populated column.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column throughout is Microsoft&rsquo;s documented behaviour as recorded in our test
+corpus. We do not run Excel, and no value in that column is a measurement.</p>
+<p>The Google Sheets columns are executed output from dated runs, because Sheets has no version
+number to pin. The function-corpus values carry the label Google Sheets (Drive import, 2026-08-29);
+the recipe values come from the 2026-08-30 run of the recipe corpus. In both, a formula-only .xlsx
+with no cached results goes to Google Drive, is recalculated by Google&rsquo;s engine, and is
+exported back for readback, with a deterministic <code>=1111+2222</code> canary proving the
+recalculation happened. Google could change any of this tomorrow without changing a version
+number.</p>
+<p>The Sheets cases on this page were written into the .xlsx with plain function names, while the
+LibreOffice reference run executed the <code>_xlfn.</code> storage form of the same formulas. The
+formula text is identical, but the two runs did receive different input files, and our results
+record that note per case. That serialization difference is why the 2026-08-29 Sheets values for
+<code>SORT</code> exist at all: an earlier prefixed run left them inconclusive.</p>
+<p>The LibreOffice columns are executed output from four builds &mdash; 24.2.0.3, 24.8.7.2,
+25.2.0.3 and 25.8.7.3 &mdash; and those four are the only ones we tested. A behaviour we describe as
+arriving in 24.8.7.2 may have arrived in any release after 24.2.0.3.</p>
+<p>Finally, scope. Everything above is measured on the three-argument form of <code>SORT</code> over
+small ranges. We have no executed case for the fourth argument, for multiple sort keys, for
+<code>sort_column</code> ranges in Excel or LibreOffice, or for what a boolean does to
+<code>sort_order</code> outside Sheets. See <a href="../methodology.html">our methodology</a> for how
+recalculation is proven rather than assumed, and
+<a href="../functions/sort.html">the SORT function page</a> for the per-engine support matrix.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
