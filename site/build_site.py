@@ -1633,7 +1633,7 @@ def fmtval_filter(v):
 RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet how-to recipes</h1>
-<p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each recipe formula <strong>executed and verified in LibreOffice Calc</strong>. Function-level verdicts come from our executed Google Sheets and LibreOffice runs; the recipe formulas themselves have only been executed in LibreOffice so far, and Excel is documentation only.</p>
+<p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each recipe formula <strong>executed and verified in LibreOffice Calc</strong>.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of them have also been <strong>executed in Google Sheets</strong> ({{ recipe_sheets_date }}), and those pages show what each engine actually returned side by side; the rest are LibreOffice-executed only.{% else %} Function-level verdicts come from our executed Google Sheets and LibreOffice runs; the recipe formulas themselves have only been executed in LibreOffice so far,{% endif %} {% if recipe_sheets_count %}Excel is documentation only.{% else %}and Excel is documentation only.{% endif %}</p>
 <p>
 {% for cat, items in grouped %}<a href="#{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</a> ({{ items|length }}){% if not loop.last %} &middot; {% endif %}{% endfor %}
 </p>
@@ -1641,7 +1641,7 @@ RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 <h2 class="section-title" id="{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</h2>
 <ul class="recipe-list">
 {% for r in items %}
-<li><a href="{{ rel }}how-to/{{ r.slug }}.html">{{ r.title }}</a>{% if r.verified %} <span class="badge badge-good">LibreOffice-verified</span>{% endif %}</li>
+<li><a href="{{ rel }}how-to/{{ r.slug }}.html">{{ r.title }}</a>{% if r.verified %} <span class="badge badge-good">LibreOffice-verified</span>{% endif %}{% if r.sheets_has %} <span class="badge badge-good">Sheets-executed</span>{% endif %}</li>
 {% endfor %}
 </ul>
 {% endfor %}
@@ -1761,7 +1761,9 @@ RECIPE_TMPL = """{% extends "base.html" %}
 <a class="back-link" href="{{ rel }}how-to/">&larr; All how-to recipes</a>
 <div class="func-header">
   <h1>{{ r.title }}</h1>
-  {% if r.verified %}<span class="badge badge-good">&#10003; Verified in LibreOffice {{ r.engine_version }}</span>{% endif %}
+  {% if r.verified %}<span class="badge badge-good">&#10003; Verified in LibreOffice {{ r.engine_version }}</span>{% endif %}{% if r.sheets_has and r.sheets_verified %}
+  <span class="badge badge-good">&#10003; Verified in Google Sheets ({{ r.sheets_date }})</span>{% elif r.sheets_has %}
+  <span class="badge badge-quirk">Google Sheets returned something else ({{ r.sheets_date }})</span>{% endif %}
 </div>
 <p class="lede">{{ r.task }}</p>
 
@@ -1800,11 +1802,12 @@ RECIPE_TMPL = """{% extends "base.html" %}
 {% if v.checks %}
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>{% if r.engine_version %}Returned by LibreOffice {{ r.engine_version }}{% else %}Result{% endif %}</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>{% if r.engine_version %}Returned by LibreOffice {{ r.engine_version }}{% else %}Result{% endif %}</th>{% if r.sheets_has %}<th>Returned by Google Sheets (executed {{ r.sheets_date }})</th>{% endif %}</tr></thead>
 <tbody>
 {% for ch in v.checks %}
 <tr><td><code>{{ ch.formula }}</code></td><td>{{ ch.label }}</td>
-<td>{% if ch.verified %}<strong>{{ ch.actual }}</strong>{% else %}&mdash;{% endif %}</td></tr>
+<td>{% if ch.verified %}<strong>{{ ch.actual }}</strong>{% else %}&mdash;{% endif %}</td>{% if r.sheets_has %}
+<td>{% if ch.sheets_has %}<strong>{{ ch.sheets_actual }}</strong>{% if ch.sheets_differs %} <span class="badge badge-quirk">differs from LibreOffice</span>{% endif %}{% else %}<span style="color:var(--text-muted)">not run in Sheets</span>{% endif %}</td>{% endif %}</tr>
 {% endfor %}
 </tbody>
 </table>
@@ -1815,7 +1818,7 @@ RECIPE_TMPL = """{% extends "base.html" %}
 
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.</p>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %}{% if r.sheets_has %} We then ran the same formulas in <strong>Google Sheets</strong>, executed {{ r.sheets_date }}: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed.{% if r.sheets_differs %} For the worked example Google Sheets returned <code>{{ r.sheets_actual }}</code>, which is <strong>not</strong> what LibreOffice returned (<code>{{ r.example_actual }}</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding.{% else %} It returned <code>{{ r.sheets_actual }}</code> for the worked example, the same value LibreOffice produced.{% endif %}{% if r.sheets_check_count %} The {{ r.sheets_check_count }} further formulas above were run through Sheets the same way and have their own column;{% if r.sheets_diff_count %} {{ r.sheets_diff_count }} of them came back with a value different from LibreOffice&rsquo;s, flagged in that column.{% else %} every one of them matched LibreOffice.{% endif %}{% endif %} Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.{% else %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.{% endif %}</p>
 {% endif %}
 {% if functions_used %}
 <h2 class="section-title">Functions used</h2>
@@ -2151,7 +2154,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 </ul>
 
 <h2 class="section-title">How-to recipes are verified too</h2>
-<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned. To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.</p>
+<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of the {{ recipe_total }} recipes have additionally been executed in <strong>Google Sheets</strong> ({{ recipe_sheets_date }}) by the same Drive-import round-trip used for the function corpus &mdash; those pages carry a second column showing what Google actually returned, including where it disagrees with LibreOffice. The other {{ recipe_total - recipe_sheets_count }} are executed in <strong>LibreOffice only</strong>{% if recipe_multisheet_count %}, among them the {{ recipe_multisheet_count }} whose worked examples need extra worksheets to exist: those formulas resolve tab names out of cell values, span a run of consecutive tabs, or exist precisely to produce an error for a wrong-syntax reference, so there is no rewrite into one shared workbook that would still be testing the same thing{% endif %}. Their pages say so.{% else %} To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.{% endif %}</p>
 
 <h2 class="section-title">Honest limitations</h2>
 <ul>
@@ -2529,25 +2532,97 @@ def load_seo_pages():
     return pages
 
 
+def _sheets_exec_date(label):
+    """'Google Sheets (Drive import, 2026-08-29)' -> '2026-08-29'.
+
+    Google Sheets has no version number, so every Sheets result is labelled
+    with the DATE it was executed. That date is what the page shows."""
+    m = re.search(r"\d{4}-\d{2}-\d{2}", label or "")
+    return m.group(0) if m else (label or "")
+
+
+def _fmt_actual(v):
+    """Render an executed value for display; a range result is a list."""
+    if isinstance(v, list):
+        return ", ".join(str(x) for x in v)
+    return v
+
+
+def _recipe_needs_extra_sheets(d):
+    """True if any of this recipe's checks needs extra worksheets to exist
+    (`setup_sheets`). Those are the recipes harness/run_sheets.py's
+    build-recipes deliberately skips -- their formulas resolve tab names out
+    of cell VALUES (INDIRECT), span consecutive tabs (3-D refs), or exist to
+    assert #NAME?/#REF! for a wrong-syntax or missing tab, so there is no
+    rewrite into a shared workbook that preserves what they test. Counting
+    them here lets the methodology page say WHY a recipe is LibreOffice-only
+    instead of implying every unrun recipe is merely pending."""
+    v = d.get("verify") or {}
+    if v.get("setup_sheets"):
+        return True
+    for var in d.get("variants") or []:
+        if var.get("setup_sheets"):
+            return True
+        checks = var.get("verify") or []
+        if isinstance(checks, dict):
+            checks = [checks]
+        if any(c.get("setup_sheets") for c in checks):
+            return True
+    return False
+
+
 def load_recipes():
     recs = []
     verif = {}
     vpath = RESULTS_DIR / "recipes-verified.json"
     if vpath.exists():
         verif = json.loads(vpath.read_text()).get("recipes", {})
+    # OPTIONAL second executed engine for the SAME recipe corpus: Google
+    # Sheets, via harness/run_sheets.py build-recipes / ingest-recipes. The
+    # file is absent until an orchestrator has done the Drive round-trip, and
+    # the site must render exactly as before when it is (every `sheets_*` key
+    # below is falsy, and every template branch that uses them is guarded).
+    #
+    # Two deliberate gates before any Sheets value reaches a page:
+    #   * the whole file must be `trusted` (its per-sheet =1111+2222 canaries
+    #     all read back 3333, i.e. Google really did recalculate); an
+    #     untrusted ingest is ignored rather than published,
+    #   * a per-check value is only used when the stored formula matches the
+    #     recipe's formula, so a stale results file cannot put a value beside
+    #     the wrong formula.
+    sheets_recipes, sheets_label = {}, ""
+    spath = RESULTS_DIR / "recipes-verified-sheets.json"
+    if spath.exists():
+        _sheets = json.loads(spath.read_text())
+        sheets_label = _sheets.get("engine_label", "")
+        if _sheets.get("trusted"):
+            sheets_recipes = _sheets.get("recipes") or {}
     rdir = DATA_DIR / "recipes"
     if not rdir.exists():
         return recs
     for p in sorted(rdir.glob("*.json")):
         d = json.loads(p.read_text())
         v = verif.get(d["slug"], {})
-        act = v.get("actual", "")
-        if isinstance(act, list):
-            act = ", ".join(str(x) for x in act)
+        act = _fmt_actual(v.get("actual", ""))
         d["verified"] = bool(v.get("verified"))
         d["engine_version"] = v.get("engine_version", "")
         d["example_formula"] = (d.get("verify") or {}).get("formula", "")
         d["example_actual"] = act
+
+        sv = sheets_recipes.get(d["slug"]) or {}
+        # Only claim a Sheets result for the main example if the file records
+        # the same formula this page prints.
+        d["sheets_has"] = bool(sv) and sv.get("formula") == d["example_formula"]
+        d["sheets_label"] = sv.get("engine_label", sheets_label)
+        d["sheets_date"] = _sheets_exec_date(d["sheets_label"])
+        d["sheets_actual"] = _fmt_actual(sv.get("actual", "")) if d["sheets_has"] else ""
+        d["sheets_verified"] = bool(sv.get("main_verified", sv.get("verified")))
+        d["needs_extra_sheets"] = _recipe_needs_extra_sheets(d)
+        # Did Sheets return something OTHER than what LibreOffice returned?
+        # That is the interesting content, not an error to be hidden.
+        d["sheets_differs"] = bool(
+            d["sheets_has"] and str(d["sheets_actual"]) != str(act))
+        sheets_variants = (sv.get("variants") or []) if d["sheets_has"] else []
         # Optional "variants": extra worked sections, each with its own sample grid
         # and its own executed checks. Merge the values LibreOffice actually
         # returned (results/recipes-verified.json) onto each check, by position.
@@ -2557,22 +2632,39 @@ def load_recipes():
             if isinstance(checks, dict):
                 checks = [checks]
             got = (vres[i].get("checks") if i < len(vres) else []) or []
+            sgot = ((sheets_variants[i].get("checks")
+                     if i < len(sheets_variants) else []) or [])
             merged = []
             for j, ch in enumerate(checks):
                 g = got[j] if j < len(got) else {}
-                a = g.get("actual", "")
-                if isinstance(a, list):
-                    a = ", ".join(str(x) for x in a)
+                a = _fmt_actual(g.get("actual", ""))
+                sg = sgot[j] if j < len(sgot) else {}
+                s_has = bool(sg) and sg.get("formula") == ch.get("formula")
+                s_a = _fmt_actual(sg.get("actual", "")) if s_has else ""
                 merged.append({
                     "formula": ch.get("formula", ""),
                     "label": ch.get("label", ""),
                     "actual": a,
                     "verified": bool(g.get("verified")) and g.get("formula") == ch.get("formula"),
+                    "sheets_has": s_has,
+                    "sheets_actual": s_a,
+                    "sheets_verified": bool(sg.get("verified")),
+                    "sheets_differs": bool(s_has and str(s_a) != str(a)),
                 })
             var["checks"] = merged
             var["grid"] = _variant_grid(var.get("setup_cells"), var.get("display_cells"))
         d["variant_check_count"] = sum(
             len(var.get("checks") or []) for var in (d.get("variants") or [])
+        )
+        d["sheets_check_count"] = sum(
+            1 for var in (d.get("variants") or [])
+            for c in (var.get("checks") or []) if c.get("sheets_has")
+        )
+        # How many of the executed formulas on this page Sheets answered
+        # differently from LibreOffice. Shown, never suppressed.
+        d["sheets_diff_count"] = sum(
+            1 for var in (d.get("variants") or [])
+            for c in (var.get("checks") or []) if c.get("sheets_differs")
         )
         recs.append(d)
     return recs
@@ -2932,6 +3024,17 @@ def main():
         ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:6]
         return [_rec_by_slug[s] for s, _ in ranked]
 
+    # How many recipes carry an executed Google Sheets result, and from which
+    # dated run. Zero until an orchestrator has done the Drive round-trip and
+    # `ingest-recipes` has written results/recipes-verified-sheets.json; every
+    # template branch keyed off these is guarded so the site is unchanged then.
+    recipe_sheets_count = sum(1 for r in recipes if r.get("sheets_has"))
+    recipe_sheets_date = next(
+        (r["sheets_date"] for r in recipes if r.get("sheets_has")), "")
+    recipe_multisheet_count = sum(
+        1 for r in recipes
+        if r.get("needs_extra_sheets") and not r.get("sheets_has"))
+
     if recipes:
         (OUT_DIR / "how-to").mkdir(parents=True, exist_ok=True)
         rctx = common_ctx(rel="../")
@@ -2944,6 +3047,8 @@ def main():
             ),
             canonical=BASE_URL + "how-to/",
             recipes=recipes,
+            recipe_sheets_count=recipe_sheets_count,
+            recipe_sheets_date=recipe_sheets_date,
             grouped=[
                 (cat, [r for r in recipes if _recipe_category(r["slug"]) == cat])
                 for cat in [c for c, _ in _RECIPE_CATEGORIES] + ["More tasks"]
@@ -2959,14 +3064,20 @@ def main():
             kw = ", ".join(kw_list)
             _rr, _rc = _related_for(rc)
             cx = common_ctx(rel="../")
-            # Honesty: the RECIPE formulas on these pages are executed only in
-            # LibreOffice Calc (recipes-verified.json is LibreOffice-only). The
-            # site's FUNCTION verdicts are also executed in Google Sheets, but
-            # that is a different corpus and must not be claimed here. Excel is
-            # never executed. Keywords are dropped one at a time (never mid-word
-            # truncated) to stay within the ~155-char SEO budget where possible;
-            # the honesty clause itself is never trimmed.
-            _honesty = "Recipe executed in LibreOffice Calc; Excel per docs"
+            # Honesty: the RECIPE formulas on these pages are executed in
+            # LibreOffice Calc (results/recipes-verified.json) and, for the
+            # recipes that have been through the Drive round-trip, in Google
+            # Sheets too (results/recipes-verified-sheets.json). The claim is
+            # made PER RECIPE from that recipe's own executed result -- a
+            # recipe with no Sheets result keeps the LibreOffice-only wording,
+            # so this never over-claims for the multi-sheet recipes the Sheets
+            # builder skips. Excel is never executed. Keywords are dropped one
+            # at a time (never mid-word truncated) to stay within the ~155-char
+            # SEO budget where possible; the honesty clause itself is never
+            # trimmed.
+            _honesty = ("Recipe executed in LibreOffice Calc and Google Sheets; "
+                        "Excel per docs" if rc.get("sheets_has")
+                        else "Recipe executed in LibreOffice Calc; Excel per docs")
             _base = f"{rc['task'].rstrip()} {_honesty}"
             if kw_list:
                 _desc = f"{_base} ({kw})."
@@ -3356,6 +3467,10 @@ def main():
             current_version=lo_versions[-1][0],
             n_funcs=len(fr),
             n_cases=sum(len(v) for v in fr.values()),
+            recipe_total=len(recipes),
+            recipe_sheets_count=recipe_sheets_count,
+            recipe_sheets_date=recipe_sheets_date,
+            recipe_multisheet_count=recipe_multisheet_count,
         )
         (OUT_DIR / "methodology.html").write_text(
             env.get_template("methodology.html").render(**mctx)

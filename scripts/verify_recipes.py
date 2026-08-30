@@ -10,6 +10,14 @@ setup_cells / setup_sheets).
 Those are executed too and stored under the slug as
   "variants": [{"heading": ..., "checks": [{label, formula, expected, actual, verified}]}]
 
+The corpus-shaped parts of this script -- which checks exist, how a variant
+check inherits setup_cells/setup_sheets, the read-back normalization, and the
+expected-vs-actual rule -- live in harness/recipe_corpus.py so that the Google
+Sheets recipe runner (harness/run_sheets.py build-recipes / ingest-recipes)
+enumerates and judges EXACTLY the same checks the same way. This script keeps
+only the LibreOffice-specific part: actually making Calc calculate. The move
+was behaviour-preserving; results/recipes-verified.json is unchanged by it.
+
 Usage:
   python3 scripts/verify_recipes.py              # all recipes (rewrites the file)
   python3 scripts/verify_recipes.py <slug> ...   # only those slugs, merged into
@@ -24,16 +32,13 @@ SOFF = "soffice"
 import sys
 sys.path.insert(0, os.path.join(ROOT, "harness"))
 from xlfn_map import to_storage_formula_all  # prefix modern funcs (_xlfn.) for OOXML
+from recipe_corpus import norm, run_check      # shared with the Sheets recipe runner
 
 def lo_version():
     out = subprocess.run([SOFF,"--version"],capture_output=True,text=True,timeout=30).stdout
     for t in out.split():
         if t[:1].isdigit() and "." in t: return t
     return "unknown"
-
-def norm(v):
-    if isinstance(v,float) and v.is_integer(): return int(v)
-    return v
 
 def run_case(setup, formula, check_range, setup_sheets=None):
     wb=openpyxl.Workbook(); ws=wb.active
@@ -62,16 +67,13 @@ def run_case(setup, formula, check_range, setup_sheets=None):
     return norm(ws2[anchor].value)
 
 def check(v, default_setup=None, default_sheets=None):
-    """Execute one check dict; returns (actual, ok)."""
-    exp=v["expected"]; cr=v.get("check_range")
-    setup=v.get("setup_cells", default_setup)
-    sheets=v.get("setup_sheets", default_sheets)   # variant-level tabs, unless the check names its own
-    try:
-        actual=run_case(setup, v["formula"], cr, sheets)
-        ok = (actual==exp) if not isinstance(exp,list) else ([str(x) for x in actual]==[str(x) for x in exp])
-    except Exception as e:
-        actual=f"ERR {e}"; ok=False
-    return actual, bool(ok)
+    """Execute one check dict in LibreOffice; returns (actual, ok).
+
+    The setup-inheritance, comparison and error-capture rules are
+    recipe_corpus.run_check()'s (moved there verbatim from this function);
+    run_case above is the LibreOffice engine plugged into it.
+    """
+    return run_check(v, run_case, default_setup, default_sheets)
 
 RESULTS=os.path.join(ROOT,"results/recipes-verified.json")
 only=set(sys.argv[1:])

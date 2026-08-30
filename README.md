@@ -57,7 +57,29 @@ harness/run_sheets.py       Engine runner for Google Sheets: builds chunked
                             .xlsx workbooks for Drive auto-conversion,
                             ingests the exported .xlsx readback, writes
                             results/google-sheets.json. See "Phase 2:
-                            Google Sheets runner" below.
+                            Google Sheets runner" below. Its
+                            build-recipes / ingest-recipes / selftest-recipes
+                            subcommands do the same for the RECIPE corpus.
+
+data/recipes/<slug>.json   One file per how-to recipe: the task, the
+                            per-app formulas, the explanation, a "verify"
+                            block {setup_cells, setup_sheets?, formula,
+                            expected, check_range?} and optional variants[]
+                            carrying their own checks. A second corpus,
+                            independent of data/tests/.
+
+harness/recipe_corpus.py    Engine-agnostic shared machinery for the RECIPE
+                            corpus, the counterpart of harness/corpus.py:
+                            recipe loading, check enumeration, variant setup
+                            inheritance, read-back norm() and the
+                            expected-vs-actual rule. Imported by BOTH
+                            scripts/verify_recipes.py (LibreOffice) and
+                            harness/run_sheets.py (Google Sheets).
+
+scripts/verify_recipes.py   Engine runner for the RECIPE corpus in headless
+                            LibreOffice -> results/recipes-verified.json.
+                            The Google Sheets counterpart writes
+                            results/recipes-verified-sheets.json.
 
 (not built yet)
 harness/run_excel.py         Excel engine runner (see Phase-2 notes below).
@@ -478,6 +500,141 @@ could be a harness artifact rather than a real engine difference. Each
 runner owns only the engine-specific part: making the engine recalculate,
 and proving that it did.
 
+## Phase 2b: Google Sheets runner for the how-to RECIPE corpus
+
+The 282 how-to recipes in `data/recipes/*.json` are a **second corpus**,
+separate from the function corpus in `data/tests/*.json`. They have been
+executed in headless LibreOffice since day one
+(`scripts/verify_recipes.py` -> `results/recipes-verified.json`, which is
+what the "Verified, not just documented" block on every how-to page
+renders). `run_sheets.py` now gives them the same Drive-import treatment:
+
+```
+# 1. Build the chunk workbooks + manifest (all recipes, 60 per chunk)
+python3 harness/run_sheets.py build-recipes
+python3 harness/run_sheets.py build-recipes --chunk-size 40
+python3 harness/run_sheets.py build-recipes --only how-to-use-xlookup add-days-to-a-date
+python3 harness/run_sheets.py build-recipes --outdir harness/recipe_chunks
+#    -> harness/recipe_chunks/chunk-01.xlsx ... chunk-05.xlsx
+#    -> harness/recipe_chunks/manifest.json
+
+# 2. Same Drive step as the function corpus: upload each chunk with the
+#    Google-Sheets target MIME type so Drive auto-converts (and recalculates),
+#    then export the Sheet back as .xlsx into
+#    harness/recipe_exports/chunk-NN-export.xlsx
+
+# 3. Ingest — incremental, run it per chunk as each export lands
+python3 harness/run_sheets.py ingest-recipes \
+    --export harness/recipe_exports/chunk-01-export.xlsx \
+    --out results/recipes-verified-sheets.json
+
+# Dry run of the whole loop with LibreOffice standing in for Drive. Every
+# value must come back equal to results/recipes-verified.json or it exits 1.
+python3 harness/run_sheets.py selftest-recipes
+```
+
+**One worksheet per CHECK.** A recipe contributes its main worked example
+plus one check per `variants[].verify` entry, so 276 recipes become 291
+sheets. Sheet names are `r<index>_<slug>` / `r<index>v<n>c<n>_<slug>`
+truncated to 31 chars — the index prefix makes them unique and stable (a
+`--only` build puts a check on the same sheet a full build would), the slug
+tail is so a human opening the workbook in Drive can tell what they are
+looking at. Each sheet carries that check's `setup_cells`, the formula at
+the same anchor `verify_recipes.py` uses (`H1`, or the top-left cell of
+`check_range` written as a real array formula), and the deterministic
+`=1111+2222` canary in `Z1`. `=NOW()` sits on the `_meta` sheet, exactly as
+for the function corpus.
+
+**Plain function names by default.** Unlike the function corpus, recipe
+chunks are written with formulas **exactly as authored** (`--plain-names`,
+on unless you pass `--xlfn-names`). Google Sheets' xlsx importer maps bare
+modern names but not the `_xlfn._xlws.FILTER/SORT` storage form, and a
+recipe is by definition the formula a user types into the app. The cost is
+recorded, not hidden: any check whose stored bytes differ from what the
+LibreOffice reference run executed is flagged
+`differs_from_lo_serialization` in the manifest, carries a note in the
+results file, and is reported as **not comparable** (rather than as a pass
+or a failure) by `selftest-recipes`.
+
+Measured on the current 282-recipe corpus (`--chunk-size 60`):
+
+| chunk | recipes | checks | bytes |
+|-------|---------|--------|-------|
+| chunk-01 | 60 | 60 | 36,734 |
+| chunk-02 | 60 | 60 | 36,986 |
+| chunk-03 | 60 | 60 | 37,554 |
+| chunk-04 | 60 | 60 | 37,503 |
+| chunk-05 | 36 | 51 | 34,885 |
+| **total** | **276** | **291** | **183,662** (~245 KB base64) |
+
+Every chunk is roughly a quarter of the ~150 KB per-workbook budget.
+
+### Multi-sheet recipes are skipped, and listed
+
+Six recipes need extra worksheets to exist (`setup_sheets`). `build-recipes`
+does **not** build them; it lists them in the manifest under
+`skipped_multi_sheet` (with the tab names each one wants) and prints them at
+the end of the build. They stay LibreOffice-executed only.
+
+That is the *simpler correct* option here, not a shortcut. The obvious
+alternative — give every check its own copy of the tabs, prefixed to avoid
+collisions, and rewrite the formula's sheet references — silently breaks the
+very things these recipes test:
+
+- `=INDIRECT(A1&"!B2")` builds the reference out of a **cell value**, so
+  renaming a tab changes the answer unless the setup data is rewritten too —
+  and one check exists specifically to assert `#REF!` for a tab that does
+  *not* exist.
+- `=SUM(Q1:Q3!A1)` is a 3-D reference over a **span of consecutive tabs**;
+  it depends on sheet order as well as on names.
+- `=$'Q1 Data'.B2` and `=Data.B2` are there to assert `#NAME?` — the
+  LibreOffice-syntax forms Excel and Sheets reject. A rewriter that "fixed"
+  those references would destroy the test.
+- Tab names collide **within a single recipe**: one variant defines
+  `Q1`/`Q2`/`Q3` as numbers and a check inside that same variant redefines
+  them with different contents, so even one-workbook-per-recipe does not
+  de-collide them.
+
+A future version that uploads one workbook per **check** would cover all six
+honestly with no rewriting at all, at the cost of ~34 more Drive round-trips.
+
+### Shared code: `harness/recipe_corpus.py`
+
+Which checks exist, how a variant check inherits `setup_cells` /
+`setup_sheets`, the read-back `norm()`, and the expected-vs-actual rule live
+in `harness/recipe_corpus.py`, imported by **both** `verify_recipes.py` and
+`run_sheets.py` — the recipe-corpus counterpart to `harness/corpus.py`. The
+site prints "LibreOffice returned X, Google Sheets returned Y" side by side,
+so any drift in enumeration or comparison between the two paths would
+manufacture a fake engine divergence. The move out of `verify_recipes.py`
+was behaviour-preserving: a full 282-recipe / 325-check LibreOffice re-run
+after the refactor reproduced `results/recipes-verified.json` byte for byte.
+
+### How the site renders a Sheets recipe result
+
+`results/recipes-verified-sheets.json` is optional. Without it the how-to
+pages are byte-identical to before. With it, and only when the file's
+`trusted` flag is set (all per-sheet canaries read back 3333):
+
+- each recipe that has a Sheets result gains a second executed column,
+  **"Returned by Google Sheets (executed `<date>`)"**, beside the
+  LibreOffice one, plus a header badge;
+- a value Sheets returned that differs from LibreOffice's is shown **as
+  Sheets returned it**, flagged `differs from LibreOffice`, and called out
+  in prose — the disagreement is the interesting content, not an error to
+  hide;
+- that recipe's meta description becomes *"Recipe executed in LibreOffice
+  Calc and Google Sheets; Excel per docs"*. A recipe **without** a Sheets
+  result keeps the LibreOffice-only wording, so the skipped multi-sheet
+  recipes never over-claim;
+- the how-to index lede and the methodology page state how many recipes have
+  been through Sheets, and why the rest have not.
+
+`scripts/check_honesty.py` guards the new wording: it fails on an engine
+list that ends "... and Excel" after an execution verb (the regression the
+two-engine phrasing newly makes possible), and on any single page that both
+shows a Sheets result and still carries the LibreOffice-only disclaimer.
+
 ## Offline companion: per-cell recalc diff
 
 `scripts/xlsx_recalc_diff.py` answers a narrower, sharper question than the
@@ -591,6 +748,17 @@ labelled with their master's address.
 
 ```
 python3 scripts/test_xlsx_recalc_diff.py -v     # 23 tests, runs real soffice
+```
+
+Harness plumbing has its own end-to-end dry runs, both of which stand
+LibreOffice in for the Drive round-trip and write to scratch files outside
+`results/`:
+
+```
+python3 harness/run_sheets.py selftest --only COUNT SUM MROUND
+python3 harness/run_sheets.py selftest-recipes   # exits 1 on any value that
+                                                 # does not match
+                                                 # results/recipes-verified.json
 ```
 
 Since we cannot run Excel, the "Excel-saved" side of each fixture is
