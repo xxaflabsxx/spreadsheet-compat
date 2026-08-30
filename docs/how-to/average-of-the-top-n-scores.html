@@ -345,8 +345,22 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p>LARGE with the array constant {1,2,3} returns the three best values (95, 90, 85), and AVERAGE collapses them: 90. The complementary drop-the-lowest phrasing is arithmetic instead: =(SUM(range)-MIN(range))/(COUNT(range)-1) drops exactly one worst score. SMALL with the same array pattern averages the bottom N, and SUMPRODUCT(LARGE(range,{1,2,3})) is the total-of-best-3 variant already in the sum-top-n recipe.</p>
 
 
+<h2 class="section-title">The Google Sheets alternative</h2>
+<p>Google Sheets needs different syntax for this task. The formula below is Sheets-specific &mdash; it was executed in Google Sheets (2026-08-30) against the same sample data as the worked example, and the value beside it is what Google returned. The LibreOffice column reads n/a because the formula is outside LibreOffice&rsquo;s dialect, so there is nothing of ours to report there.</p>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
+<tbody>
+
+<tr><td><code>=AVERAGE(ARRAYFORMULA(LARGE(A2:A6,{1,2,3})))</code></td><td>ARRAYFORMULA forces the whole {1,2,3} array through LARGE</td>
+<td><span style="color:var(--text-muted)">n/a (Sheets-only formula)</span></td>
+<td><strong>90</strong> <span class="badge badge-good">Google Sheets alternative (executed 2026-08-30)</span></td></tr>
+
+</tbody>
+</table>
+</div>
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=AVERAGE(LARGE(A2:A6,{1,2,3}))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>90</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>95</code>, which is <strong>not</strong> what LibreOffice returned (<code>90</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
+<p>We ran <code>=AVERAGE(LARGE(A2:A6,{1,2,3}))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>90</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>95</code>, which is <strong>not</strong> what LibreOffice returned (<code>90</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. A further 1 row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only, so the LibreOffice column reads n/a for it. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
 
 
 <h2 class="section-title">Functions used</h2>

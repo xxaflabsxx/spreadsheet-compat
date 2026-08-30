@@ -131,7 +131,7 @@
         },
         {
           "id": "v1c0-gs-alt",
-          "label": "North OR South, with ARRAYFORMULA forcing the brace array",
+          "label": "North OR South wrapped in ARRAYFORMULA — executed: still only the first subtotal",
           "engines": [
             "google_sheets"
           ],
@@ -140,7 +140,7 @@
         },
         {
           "id": "v1c2-gs-alt",
-          "label": "(North OR South) AND Widget, with ARRAYFORMULA forcing the brace array",
+          "label": "(North OR South) AND Widget wrapped in ARRAYFORMULA — executed: still only the first subtotal",
           "engines": [
             "google_sheets"
           ],
@@ -148,7 +148,7 @@
           "expected": 150
         }
       ],
-      "note": "Array-constant behaviour to know about: the braces hold literal values typed into the formula, separated by commas for a horizontal array — you cannot put a cell range inside them (use the SUMPRODUCT form, or SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3)), if the wanted values live in cells). This pattern is only safe for OR over EXACT values in ONE column, because a row cannot equal two different values, so nothing is double-counted; OR across two different columns can overlap and needs the SUMPRODUCT form. Excel, Google Sheets and LibreOffice Calc all document the same brace syntax; in Google Sheets a semicolon separates rows and a comma separates columns, same as Excel. In pre-dynamic-array Excel the SUM(SUMIFS(...)) wrapper may need to be entered with Ctrl+Shift+Enter (documented); modern Excel takes it as a normal formula. Google Sheets is the real divergence here, and the executed column above shows it: =SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"})) returned 140 there, the North subtotal alone, against 220 in LibreOffice, and the (North OR South) AND Widget row returned 100 against 150. Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so SUMIFS sees only the first value of the brace array. The SUMPRODUCT row above returned 220 in both engines, which makes it the portable choice; =ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))) is Google’s documented way to force the array, and it carries no executed result of its own here."
+      "note": "Array-constant behaviour to know about: the braces hold literal values typed into the formula, separated by commas for a horizontal array — you cannot put a cell range inside them (use the SUMPRODUCT form, or SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3)), if the wanted values live in cells). This pattern is only safe for OR over EXACT values in ONE column, because a row cannot equal two different values, so nothing is double-counted; OR across two different columns can overlap and needs the SUMPRODUCT form. Excel, Google Sheets and LibreOffice Calc all document the same brace syntax; in Google Sheets a semicolon separates rows and a comma separates columns, same as Excel. In pre-dynamic-array Excel the SUM(SUMIFS(...)) wrapper may need to be entered with Ctrl+Shift+Enter (documented); modern Excel takes it as a normal formula. Google Sheets is the real divergence here, and the executed column above shows it: =SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"})) returned 140 there, the North subtotal alone, against 220 in LibreOffice, and the (North OR South) AND Widget row returned 100 against 150. Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so SUMIFS sees only the first value of the brace array. The SUMPRODUCT row above returned 220 in both engines, which makes it the portable choice; Wrapping it in ARRAYFORMULA does not rescue it: =ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))) still returned 140, and the (North OR South) AND Widget form still returned 100, when executed in Google Sheets on 2026-08-30 — SUMIFS’s criteria argument is not array-expanded there even inside ARRAYFORMULA. Use the SUMPRODUCT row (220 in both engines), or SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3)) when the wanted values live in cells."
     },
     {
       "heading": "Criteria on a column AND a row at the same time (2-D block)",

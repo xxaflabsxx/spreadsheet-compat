@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-30T05:50:55.156366+00:00",
+  "generated_at": "2026-08-30T11:38:39.622493+00:00",
   "corpus": "recipes",
   "engine": "google_sheets",
   "engine_label": "Google Sheets (Drive import, 2026-08-30)",
@@ -10,22 +10,14 @@
     "arithmetic_expected": 3333,
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
-    "arithmetic_sheets_checked": 291,
+    "arithmetic_sheets_checked": 48,
     "arithmetic_sheet_failures": [],
     "meta_arithmetic_per_chunk": {
-      "chunk-01": 3333,
-      "chunk-02": 3333,
-      "chunk-03": 3333,
-      "chunk-04": 3333,
-      "chunk-05": 3333
+      "chunk-01": 3333
     },
     "volatile_formula": "=NOW()",
     "volatile_per_chunk": {
-      "chunk-01": "2026-08-29 22:48:43.200000",
-      "chunk-02": "2026-08-29 22:48:43.200000",
-      "chunk-03": "2026-08-29 22:48:43.200000",
-      "chunk-04": "2026-08-29 22:48:43.200000",
-      "chunk-05": "2026-08-29 22:48:43.200000"
+      "chunk-01": "2026-08-30 04:38:28.032000"
     },
     "now_differs_across_runs": null,
     "method": "openpyxl writes formulas with NO cached <v> value, so the uploaded chunk workbooks contain zero cached results. Google Drive's auto-conversion to a Google Sheet recalculates every formula with Google's engine; exporting that Sheet back to .xlsx carries those computed values out. The deterministic canary =1111+2222 in Z1 of EVERY check's sheet reading back exactly 3333 therefore proves genuine computation -- without recalculation the cell would read back blank (None), since nothing was ever cached. The volatile =NOW() canary is recorded per chunk as corroboration, but a single Drive import yields one timestamp, so no cross-run volatile comparison is possible: now_differs_across_runs is null by design.",
@@ -241,6 +233,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=AGGREGATE(1,6,A2:A6)",
       "formula_stored_xlsx": "=AGGREGATE(1,6,A2:A6)",
       "expected": 20,
@@ -248,7 +241,25 @@
       "main_verified": false,
       "sheet": "r015_average-ignoring-errors",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 20, got '#NAME?'"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 20, got '#NAME?'",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "FILTER + ISNUMBER drops the error cells before AVERAGE sees them \u2014 Google Sheets has no AGGREGATE",
+          "formula": "=AVERAGE(FILTER(A2:A6,ISNUMBER(A2:A6)))",
+          "formula_stored_xlsx": "=AVERAGE(FILTER(A2:A6,ISNUMBER(A2:A6)))",
+          "serialization": "plain",
+          "expected": 20,
+          "actual": 20,
+          "verified": true,
+          "sheet": "r015gs-alt_average-ignoring-err",
+          "canary_ok_this_sheet": true,
+          "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs",
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "average-ignoring-zeros": {
       "verified": true,
@@ -269,6 +280,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=AVERAGE(LARGE(A2:A6,{1,2,3}))",
       "formula_stored_xlsx": "=AVERAGE(LARGE(A2:A6,{1,2,3}))",
       "expected": 90,
@@ -276,7 +288,25 @@
       "main_verified": false,
       "sheet": "r017_average-of-the-top-n-score",
       "canary_ok_this_sheet": true,
-      "notes": "MISMATCH vs expected: expected 90, got 95"
+      "notes": "MISMATCH vs expected: expected 90, got 95",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "ARRAYFORMULA forces the whole {1,2,3} array through LARGE",
+          "formula": "=AVERAGE(ARRAYFORMULA(LARGE(A2:A6,{1,2,3})))",
+          "formula_stored_xlsx": "=AVERAGE(ARRAYFORMULA(LARGE(A2:A6,{1,2,3})))",
+          "serialization": "plain",
+          "expected": 90,
+          "actual": 90,
+          "verified": true,
+          "sheet": "r017gs-alt_average-of-the-top-n",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "average-the-last-n-values": {
       "verified": true,
@@ -1721,6 +1751,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=TEXTJOIN(\"\",TRUE,IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,\"\"))",
       "formula_stored_xlsx": "=TEXTJOIN(\"\",TRUE,IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,\"\"))",
       "expected": "409215",
@@ -1728,7 +1759,25 @@
       "main_verified": false,
       "sheet": "r118_extract-numbers-from-text",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected '409215', got None"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected '409215', got None",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "REGEXREPLACE strips every non-digit \u2014 Sheets-native, no per-character array",
+          "formula": "=REGEXREPLACE(A2,\"[^0-9]\",\"\")",
+          "formula_stored_xlsx": "=REGEXREPLACE(A2,\"[^0-9]\",\"\")",
+          "serialization": "plain",
+          "expected": "409215",
+          "actual": "409215",
+          "verified": true,
+          "sheet": "r118gs-alt_extract-numbers-from",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "extract-text-before-space": {
       "verified": true,
@@ -1881,6 +1930,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
       "formula_stored_xlsx": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
       "expected": "cherry",
@@ -1888,7 +1938,25 @@
       "main_verified": false,
       "sheet": "r129_find-the-last-value-in-a-c",
       "canary_ok_this_sheet": true,
-      "notes": "MISMATCH vs expected: expected 'cherry', got '#N/A'"
+      "notes": "MISMATCH vs expected: expected 'cherry', got '#N/A'",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "ARRAYFORMULA wrap, so 1/(A2:A100<>\"\") stays an array on its way into LOOKUP",
+          "formula": "=ARRAYFORMULA(LOOKUP(2,1/(A2:A100<>\"\"),A2:A100))",
+          "formula_stored_xlsx": "=ARRAYFORMULA(LOOKUP(2,1/(A2:A100<>\"\"),A2:A100))",
+          "serialization": "plain",
+          "expected": "cherry",
+          "actual": "cherry",
+          "verified": true,
+          "sheet": "r129gs-alt_find-the-last-value-",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "find-the-latest-date": {
       "verified": true,
@@ -1941,6 +2009,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=FIND(CHAR(1),SUBSTITUTE(\"a-b-c-d\",\"-\",CHAR(1),3))",
       "formula_stored_xlsx": "=FIND(CHAR(1),SUBSTITUTE(\"a-b-c-d\",\"-\",CHAR(1),3))",
       "expected": 6,
@@ -1948,7 +2017,25 @@
       "main_verified": false,
       "sheet": "r133_find-the-nth-occurrence-of",
       "canary_ok_this_sheet": true,
-      "notes": "MISMATCH vs expected: expected 6, got 1"
+      "notes": "MISMATCH vs expected: expected 6, got 1",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "A \u00a7 marker the text cannot contain, instead of CHAR(1)",
+          "formula": "=FIND(\"\u00a7\",SUBSTITUTE(A2,\"-\",\"\u00a7\",3))",
+          "formula_stored_xlsx": "=FIND(\"\u00a7\",SUBSTITUTE(A2,\"-\",\"\u00a7\",3))",
+          "serialization": "plain",
+          "expected": 6,
+          "actual": 6,
+          "verified": true,
+          "sheet": "r133gs-alt_find-the-nth-occurre",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "find-the-original-price-before-a-discount": {
       "verified": true,
@@ -2725,6 +2812,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=LOOKUP(2,1/(A2:A5=D2),B2:B5)",
       "formula_stored_xlsx": "=LOOKUP(2,1/(A2:A5=D2),B2:B5)",
       "expected": 30,
@@ -2732,13 +2820,32 @@
       "main_verified": false,
       "sheet": "r187_look-up-the-last-matching-",
       "canary_ok_this_sheet": true,
-      "notes": "MISMATCH vs expected: expected 30, got '#N/A'"
+      "notes": "MISMATCH vs expected: expected 30, got '#N/A'",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "Native XLOOKUP with search mode -1 (scan from the last row up)",
+          "formula": "=XLOOKUP(D2,A2:A6,B2:B6,,0,-1)",
+          "formula_stored_xlsx": "=XLOOKUP(D2,A2:A6,B2:B6,,0,-1)",
+          "serialization": "plain",
+          "expected": 30,
+          "actual": 30,
+          "verified": true,
+          "sheet": "r187gs-alt_look-up-the-last-mat",
+          "canary_ok_this_sheet": true,
+          "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs",
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "lookup-two-criteria": {
       "verified": false,
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
       "formula_stored_xlsx": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
       "expected": 250,
@@ -2746,7 +2853,25 @@
       "main_verified": false,
       "sheet": "r188_lookup-two-criteria",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 250, got '#VALUE!'"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 250, got '#VALUE!'",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "ARRAYFORMULA around the concatenated key A2:A6&\"|\"&B2:B6",
+          "formula": "=XLOOKUP(\"North|Q2\",ARRAYFORMULA(A2:A6&\"|\"&B2:B6),C2:C6)",
+          "formula_stored_xlsx": "=XLOOKUP(\"North|Q2\",ARRAYFORMULA(A2:A6&\"|\"&B2:B6),C2:C6)",
+          "serialization": "plain",
+          "expected": 250,
+          "actual": 250,
+          "verified": true,
+          "sheet": "r188gs-alt_lookup-two-criteria",
+          "canary_ok_this_sheet": true,
+          "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs",
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "lookup-with-a-partial-match": {
       "verified": true,
@@ -3309,6 +3434,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=TEXTJOIN(\"\",TRUE,MID(\"abc\",SEQUENCE(LEN(\"abc\"),1,LEN(\"abc\"),-1),1))",
       "formula_stored_xlsx": "=TEXTJOIN(\"\",TRUE,MID(\"abc\",SEQUENCE(LEN(\"abc\"),1,LEN(\"abc\"),-1),1))",
       "expected": "cba",
@@ -3316,7 +3442,25 @@
       "main_verified": false,
       "sheet": "r228_reverse-a-text-string",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 'cba', got 'c'"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 'cba', got 'c'",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "ARRAYFORMULA around the MID array (over this page's literal \"abc\", where the general form uses A2)",
+          "formula": "=TEXTJOIN(\"\",TRUE,ARRAYFORMULA(MID(\"abc\",SEQUENCE(LEN(\"abc\"),1,LEN(\"abc\"),-1),1)))",
+          "formula_stored_xlsx": "=TEXTJOIN(\"\",TRUE,ARRAYFORMULA(MID(\"abc\",SEQUENCE(LEN(\"abc\"),1,LEN(\"abc\"),-1),1)))",
+          "serialization": "plain",
+          "expected": "cba",
+          "actual": "cba",
+          "verified": true,
+          "sheet": "r228gs-alt_reverse-a-text-strin",
+          "canary_ok_this_sheet": true,
+          "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs",
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "reverse-percentage-find-the-total": {
       "verified": true,
@@ -3337,6 +3481,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
       "formula_stored_xlsx": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
       "expected": [
@@ -3350,7 +3495,33 @@
       "main_verified": false,
       "sheet": "r230_reverse-the-order-of-a-lis",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected ['cherry', 'banana', 'apple'], got ['#NAME?']"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected ['cherry', 'banana', 'apple'], got ['#NAME?']",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "SORT on the row numbers with a boolean third argument \u2014 Google Sheets has no SORTBY",
+          "formula": "=SORT(A2:A4,ROW(A2:A4),FALSE)",
+          "formula_stored_xlsx": "=SORT(A2:A4,ROW(A2:A4),FALSE)",
+          "serialization": "plain",
+          "expected": [
+            "cherry",
+            "banana",
+            "apple"
+          ],
+          "actual": [
+            "cherry",
+            "banana",
+            "apple"
+          ],
+          "verified": true,
+          "sheet": "r230gs-alt_reverse-the-order-of",
+          "canary_ok_this_sheet": true,
+          "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs",
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "round-line-items-before-summing": {
       "verified": true,
@@ -3497,6 +3668,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=SORT(A2:A4,1,-1)",
       "formula_stored_xlsx": "=SORT(A2:A4,1,-1)",
       "expected": [
@@ -3512,7 +3684,33 @@
       "main_verified": false,
       "sheet": "r241_sort-a-range-with-a-formul",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected [50, 20, 10], got [10, 20, 50]"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected [50, 20, 10], got [10, 20, 50]",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "FALSE, not -1, for descending (the documented form, over this page's A2:A4 instead of A2:A100)",
+          "formula": "=SORT(A2:A4,1,FALSE)",
+          "formula_stored_xlsx": "=SORT(A2:A4,1,FALSE)",
+          "serialization": "plain",
+          "expected": [
+            50,
+            20,
+            10
+          ],
+          "actual": [
+            50,
+            20,
+            10
+          ],
+          "verified": true,
+          "sheet": "r241gs-alt_sort-a-range-with-a-",
+          "canary_ok_this_sheet": true,
+          "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs",
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "split-a-bill-with-tip": {
       "verified": true,
@@ -3533,6 +3731,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=TEXTSPLIT(\"a,b,c\",,\",\")",
       "formula_stored_xlsx": "=TEXTSPLIT(\"a,b,c\",,\",\")",
       "expected": [
@@ -3546,13 +3745,40 @@
       "main_verified": false,
       "sheet": "r243_split-text-into-rows",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected ['a', 'b', 'c'], got ['#NAME?']"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected ['a', 'b', 'c'], got ['#NAME?']",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "SPLIT across columns, TRANSPOSE down into rows \u2014 Google Sheets has no TEXTSPLIT (over this page's literal \"a,b,c\", where the general form uses A2)",
+          "formula": "=TRANSPOSE(SPLIT(\"a,b,c\",\",\"))",
+          "formula_stored_xlsx": "=TRANSPOSE(SPLIT(\"a,b,c\",\",\"))",
+          "serialization": "plain",
+          "expected": [
+            "a",
+            "b",
+            "c"
+          ],
+          "actual": [
+            "a",
+            "b",
+            "c"
+          ],
+          "verified": true,
+          "sheet": "r243gs-alt_split-text-into-rows",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "split-text-to-columns": {
       "verified": false,
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=TEXTSPLIT(A2,\",\")",
       "formula_stored_xlsx": "=TEXTSPLIT(A2,\",\")",
       "expected": [
@@ -3566,7 +3792,33 @@
       "main_verified": false,
       "sheet": "r244_split-text-to-columns",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected ['a', 'b', 'c'], got ['#NAME?']"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected ['a', 'b', 'c'], got ['#NAME?']",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "SPLIT \u2014 Google Sheets' name for what Excel 365 and LibreOffice 25.8+ call TEXTSPLIT",
+          "formula": "=SPLIT(A2,\",\")",
+          "formula_stored_xlsx": "=SPLIT(A2,\",\")",
+          "serialization": "plain",
+          "expected": [
+            "a",
+            "b",
+            "c"
+          ],
+          "actual": [
+            "a",
+            "b",
+            "c"
+          ],
+          "verified": true,
+          "sheet": "r244gs-alt_split-text-to-column",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "stop-scientific-notation": {
       "verified": true,
@@ -3601,6 +3853,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=AGGREGATE(9,6,A2:A6)",
       "formula_stored_xlsx": "=AGGREGATE(9,6,A2:A6)",
       "expected": 60,
@@ -3608,7 +3861,25 @@
       "main_verified": false,
       "sheet": "r247_sum-a-column-ignoring-erro",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 60, got '#NAME?'"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 60, got '#NAME?'",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "FILTER + ISNUMBER drops the error cells before SUM sees them \u2014 Google Sheets has no AGGREGATE",
+          "formula": "=SUM(FILTER(A2:A6,ISNUMBER(A2:A6)))",
+          "formula_stored_xlsx": "=SUM(FILTER(A2:A6,ISNUMBER(A2:A6)))",
+          "serialization": "plain",
+          "expected": 60,
+          "actual": 60,
+          "verified": true,
+          "sheet": "r247gs-alt_sum-a-column-ignorin",
+          "canary_ok_this_sheet": true,
+          "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs",
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "sum-a-column": {
       "verified": true,
@@ -3811,6 +4082,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=SUMIFS(C2:C6,A2:A6,\"East\",B2:B6,\"Widget\")",
       "formula_stored_xlsx": "=SUMIFS(C2:C6,A2:A6,\"East\",B2:B6,\"Widget\")",
       "expected": 60,
@@ -3824,6 +4096,7 @@
           "heading": "\u201cSUMIF with multiple criteria\u201d \u2014 SUMIF takes one, SUMIFS takes many",
           "checks": [
             {
+              "key": "v0c0",
               "label": "SUMIF \u2014 one criterion only (region), sum range LAST",
               "formula": "=SUMIF(A2:A7,\"North\",C2:C7)",
               "formula_stored_xlsx": "=SUMIF(A2:A7,\"North\",C2:C7)",
@@ -3836,6 +4109,7 @@
               "notes": null
             },
             {
+              "key": "v0c1",
               "label": "SUMIFS \u2014 region AND product, sum range FIRST",
               "formula": "=SUMIFS(C2:C7,A2:A7,\"North\",B2:B7,\"Widget\")",
               "formula_stored_xlsx": "=SUMIFS(C2:C7,A2:A7,\"North\",B2:B7,\"Widget\")",
@@ -3853,6 +4127,7 @@
           "heading": "Multiple criteria in the SAME column (OR logic)",
           "checks": [
             {
+              "key": "v1c0",
               "label": "North OR South, via an array constant",
               "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))",
               "formula_stored_xlsx": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"}))",
@@ -3865,6 +4140,7 @@
               "notes": "MISMATCH vs expected: expected 220, got 140"
             },
             {
+              "key": "v1c1",
               "label": "Same answer with SUMPRODUCT (+ is OR)",
               "formula": "=SUMPRODUCT((A2:A6=\"North\")+(A2:A6=\"South\"),C2:C6)",
               "formula_stored_xlsx": "=SUMPRODUCT((A2:A6=\"North\")+(A2:A6=\"South\"),C2:C6)",
@@ -3877,6 +4153,7 @@
               "notes": null
             },
             {
+              "key": "v1c2",
               "label": "(North OR South) AND Widget \u2014 OR inside, AND across",
               "formula": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\"))",
               "formula_stored_xlsx": "=SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\"))",
@@ -3887,6 +4164,38 @@
               "sheet": "r263v1c2_sum-with-multiple-crit",
               "canary_ok_this_sheet": true,
               "notes": "MISMATCH vs expected: expected 150, got 100"
+            },
+            {
+              "key": "v1c0-gs-alt",
+              "label": "North OR South, with ARRAYFORMULA forcing the brace array",
+              "formula": "=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"})))",
+              "formula_stored_xlsx": "=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"})))",
+              "serialization": "plain",
+              "expected": 220,
+              "actual": 140,
+              "verified": false,
+              "sheet": "r263v1c0-gs-alt_sum-with-multip",
+              "canary_ok_this_sheet": true,
+              "notes": "MISMATCH vs expected: expected 220, got 140",
+              "engines": [
+                "google_sheets"
+              ]
+            },
+            {
+              "key": "v1c2-gs-alt",
+              "label": "(North OR South) AND Widget, with ARRAYFORMULA forcing the brace array",
+              "formula": "=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\")))",
+              "formula_stored_xlsx": "=ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{\"North\",\"South\"},B2:B6,\"Widget\")))",
+              "serialization": "plain",
+              "expected": 150,
+              "actual": 100,
+              "verified": false,
+              "sheet": "r263v1c2-gs-alt_sum-with-multip",
+              "canary_ok_this_sheet": true,
+              "notes": "MISMATCH vs expected: expected 150, got 100",
+              "engines": [
+                "google_sheets"
+              ]
             }
           ]
         },
@@ -3894,6 +4203,7 @@
           "heading": "Criteria on a column AND a row at the same time (2-D block)",
           "checks": [
             {
+              "key": "v2c0",
               "label": "One row label AND one column label (South \u00d7 Q2)",
               "formula": "=SUMPRODUCT((A2:A4=\"South\")*(B1:D1=\"Q2\")*B2:D4)",
               "formula_stored_xlsx": "=SUMPRODUCT((A2:A4=\"South\")*(B1:D1=\"Q2\")*B2:D4)",
@@ -3906,6 +4216,7 @@
               "notes": null
             },
             {
+              "key": "v2c1",
               "label": "One row, two columns (South \u00d7 Q2 or Q3)",
               "formula": "=SUMPRODUCT((A2:A4=\"South\")*((B1:D1=\"Q2\")+(B1:D1=\"Q3\"))*B2:D4)",
               "formula_stored_xlsx": "=SUMPRODUCT((A2:A4=\"South\")*((B1:D1=\"Q2\")+(B1:D1=\"Q3\"))*B2:D4)",
@@ -3918,6 +4229,7 @@
               "notes": null
             },
             {
+              "key": "v2c2",
               "label": "Two rows, one column (South or East \u00d7 Q2)",
               "formula": "=SUMPRODUCT(((A2:A4=\"South\")+(A2:A4=\"East\"))*(B1:D1=\"Q2\")*B2:D4)",
               "formula_stored_xlsx": "=SUMPRODUCT(((A2:A4=\"South\")+(A2:A4=\"East\"))*(B1:D1=\"Q2\")*B2:D4)",
@@ -3935,6 +4247,7 @@
           "heading": "Mixing number, text and date criteria in one SUMIFS",
           "checks": [
             {
+              "key": "v3c0",
               "label": "Date lower bound only \u2014 everything from 1 Feb 2026",
               "formula": "=SUMIFS(C2:C6,A2:A6,\">=\"&DATE(2026,2,1))",
               "formula_stored_xlsx": "=SUMIFS(C2:C6,A2:A6,\">=\"&DATE(2026,2,1))",
@@ -3947,6 +4260,7 @@
               "notes": null
             },
             {
+              "key": "v3c1",
               "label": "Text (North) + number (>=100) + a Feb\u2013Mar date window",
               "formula": "=SUMIFS(C2:C6,B2:B6,\"North\",C2:C6,\">=100\",A2:A6,\">=\"&DATE(2026,2,1),A2:A6,\"<\"&DATE(2026,4,1))",
               "formula_stored_xlsx": "=SUMIFS(C2:C6,B2:B6,\"North\",C2:C6,\">=100\",A2:A6,\">=\"&DATE(2026,2,1),A2:A6,\"<\"&DATE(2026,4,1))",
@@ -3964,6 +4278,7 @@
           "heading": "Wildcards, and what does (and doesn\u2019t) carry across apps",
           "checks": [
             {
+              "key": "v4c0",
               "label": "Starts with \u2014 and matching is case-insensitive",
               "formula": "=SUMIFS(C2:C5,A2:A5,\"Widget*\")",
               "formula_stored_xlsx": "=SUMIFS(C2:C5,A2:A5,\"Widget*\")",
@@ -3976,6 +4291,7 @@
               "notes": null
             },
             {
+              "key": "v4c1",
               "label": "Wildcard plus a second criterion",
               "formula": "=SUMIFS(C2:C5,A2:A5,\"Widget*\",B2:B5,\"North\")",
               "formula_stored_xlsx": "=SUMIFS(C2:C5,A2:A5,\"Widget*\",B2:B5,\"North\")",
@@ -3988,6 +4304,7 @@
               "notes": null
             },
             {
+              "key": "v4c2",
               "label": "Contains",
               "formula": "=SUMIFS(C2:C5,A2:A5,\"*get*\")",
               "formula_stored_xlsx": "=SUMIFS(C2:C5,A2:A5,\"*get*\")",
@@ -4000,6 +4317,7 @@
               "notes": null
             },
             {
+              "key": "v4c3",
               "label": "Not equal to",
               "formula": "=SUMIFS(C2:C5,A2:A5,\"<>Widget A\")",
               "formula_stored_xlsx": "=SUMIFS(C2:C5,A2:A5,\"<>Widget A\")",
@@ -4012,6 +4330,7 @@
               "notes": null
             },
             {
+              "key": "v4c4",
               "label": "FILTER alternative, written portably (one combined condition)",
               "formula": "=SUM(FILTER(C2:C5,(B2:B5=\"North\")*(A2:A5<>\"Gadget B\")))",
               "formula_stored_xlsx": "=SUM(FILTER(C2:C5,(B2:B5=\"North\")*(A2:A5<>\"Gadget B\")))",
@@ -4046,6 +4365,7 @@
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=SUM(SUMIF(A2:A6,{\"East\",\"West\"},B2:B6))",
       "formula_stored_xlsx": "=SUM(SUMIF(A2:A6,{\"East\",\"West\"},B2:B6))",
       "expected": 160,
@@ -4053,13 +4373,32 @@
       "main_verified": false,
       "sheet": "r266_sumif-with-or-criteria",
       "canary_ok_this_sheet": true,
-      "notes": "MISMATCH vs expected: expected 160, got 110"
+      "notes": "MISMATCH vs expected: expected 160, got 110",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "SUMPRODUCT with added boolean tests does the whole OR in one pass",
+          "formula": "=SUMPRODUCT((A2:A6=\"East\")+(A2:A6=\"West\"),B2:B6)",
+          "formula_stored_xlsx": "=SUMPRODUCT((A2:A6=\"East\")+(A2:A6=\"West\"),B2:B6)",
+          "serialization": "plain",
+          "expected": 160,
+          "actual": 160,
+          "verified": true,
+          "sheet": "r266gs-alt_sumif-with-or-criter",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "text-after-last-delimiter": {
       "verified": false,
       "engine": "Google Sheets",
       "engine_label": "Google Sheets (Drive import, 2026-08-30)",
       "serialization": "plain",
+      "key": "main",
       "formula": "=TEXTAFTER(A2,\".\",-1)",
       "formula_stored_xlsx": "=TEXTAFTER(A2,\".\",-1)",
       "expected": "xlsx",
@@ -4067,7 +4406,25 @@
       "main_verified": false,
       "sheet": "r267_text-after-last-delimiter",
       "canary_ok_this_sheet": true,
-      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 'xlsx', got '#NAME?'"
+      "notes": "NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs; MISMATCH vs expected: expected 'xlsx', got '#NAME?'",
+      "extra_checks": [
+        {
+          "key": "gs-alt",
+          "label": "REGEXEXTRACT with [^.]+$ takes everything after the last dot \u2014 Google Sheets has no TEXTAFTER",
+          "formula": "=REGEXEXTRACT(A2,\"[^.]+$\")",
+          "formula_stored_xlsx": "=REGEXEXTRACT(A2,\"[^.]+$\")",
+          "serialization": "plain",
+          "expected": "xlsx",
+          "actual": "xlsx",
+          "verified": true,
+          "sheet": "r267gs-alt_text-after-last-deli",
+          "canary_ok_this_sheet": true,
+          "notes": null,
+          "engines": [
+            "google_sheets"
+          ]
+        }
+      ]
     },
     "tiered-sales-commission": {
       "verified": true,
@@ -5104,6 +5461,32 @@
       "serialization": "plain",
       "manifest_note": null,
       "superseded_generated_at": "2026-08-30T05:50:14.981703+00:00"
+    },
+    {
+      "generated_at": "2026-08-30T11:38:39.622493+00:00",
+      "recipes": [
+        "average-ignoring-errors",
+        "average-of-the-top-n-scores",
+        "extract-numbers-from-text",
+        "find-the-last-value-in-a-column",
+        "find-the-nth-occurrence-of-a-character",
+        "look-up-the-last-matching-value",
+        "lookup-two-criteria",
+        "reverse-a-text-string",
+        "reverse-the-order-of-a-list",
+        "sort-a-range-with-a-formula",
+        "split-text-into-rows",
+        "split-text-to-columns",
+        "sum-a-column-ignoring-errors",
+        "sum-with-multiple-criteria",
+        "sumif-with-or-criteria",
+        "text-after-last-delimiter"
+      ],
+      "trusted_this_run": true,
+      "engine_label": "Google Sheets (Drive import, 2026-08-30)",
+      "serialization": "plain",
+      "manifest_note": "Sheets-only alternative checks (engines filter)",
+      "superseded_generated_at": "2026-08-30T05:50:55.156366+00:00"
     }
   ]
 }

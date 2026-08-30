@@ -345,8 +345,22 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p>Plain FIND and SEARCH only ever return the FIRST match, so the trick is to make the Nth match unique first. SUBSTITUTE(text, &#34;-&#34;, CHAR(1), 3) replaces just the third hyphen with CHAR(1) — a control character that never occurs in normal text — leaving the rest untouched; FIND then reports where that marker sits. In &#34;a-b-c-d&#34; the hyphens are at positions 2, 4 and 6, so the third is 6. Swap the 3 for any occurrence number, and use CHAR(1) (or any character you&#39;re sure is absent) as the marker. This position is the launchpad for extraction: feed it into MID or LEFT to grab the text after the Nth delimiter, or combine with LEN to pull the final segment. If the character appears fewer than N times, FIND returns #VALUE! — wrap in IFERROR to handle short strings.</p>
 
 
+<h2 class="section-title">The Google Sheets alternative</h2>
+<p>Google Sheets needs different syntax for this task. The formula below is Sheets-specific &mdash; it was executed in Google Sheets (2026-08-30) against the same sample data as the worked example, and the value beside it is what Google returned. The LibreOffice column reads n/a because the formula is outside LibreOffice&rsquo;s dialect, so there is nothing of ours to report there.</p>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
+<tbody>
+
+<tr><td><code>=FIND(&#34;§&#34;,SUBSTITUTE(A2,&#34;-&#34;,&#34;§&#34;,3))</code></td><td>A § marker the text cannot contain, instead of CHAR(1)</td>
+<td><span style="color:var(--text-muted)">n/a (Sheets-only formula)</span></td>
+<td><strong>6</strong> <span class="badge badge-good">Google Sheets alternative (executed 2026-08-30)</span></td></tr>
+
+</tbody>
+</table>
+</div>
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=FIND(CHAR(1),SUBSTITUTE(&#34;a-b-c-d&#34;,&#34;-&#34;,CHAR(1),3))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>6</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>1</code>, which is <strong>not</strong> what LibreOffice returned (<code>6</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
+<p>We ran <code>=FIND(CHAR(1),SUBSTITUTE(&#34;a-b-c-d&#34;,&#34;-&#34;,CHAR(1),3))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>6</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>1</code>, which is <strong>not</strong> what LibreOffice returned (<code>6</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. A further 1 row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only, so the LibreOffice column reads n/a for it. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
 
 
 <h2 class="section-title">Functions used</h2>

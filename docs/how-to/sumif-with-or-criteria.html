@@ -345,8 +345,22 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p>SUMIF against the array constant {&#34;East&#34;,&#34;West&#34;} evaluates once per value — producing {110, 50} — and the outer SUM collapses them: 160. That is Excel and LibreOffice; Google Sheets returned 110 when we executed it, the East subtotal alone, so use the SUMPRODUCT form (or an ARRAYFORMULA wrap) there. This is safe for OR-of-EXACT-values because one row can&#39;t match two different values, so nothing double-counts (unlike adding overlapping condition SUMIFs). For OR across different COLUMNS&#39; conditions, where overlap is possible, use the SUMPRODUCT pattern from the sumif-vs-sumproduct comparison instead.</p>
 
 
+<h2 class="section-title">The Google Sheets alternative</h2>
+<p>Google Sheets needs different syntax for this task. The formula below is Sheets-specific &mdash; it was executed in Google Sheets (2026-08-30) against the same sample data as the worked example, and the value beside it is what Google returned. The LibreOffice column reads n/a because the formula is outside LibreOffice&rsquo;s dialect, so there is nothing of ours to report there.</p>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
+<tbody>
+
+<tr><td><code>=SUMPRODUCT((A2:A6=&#34;East&#34;)+(A2:A6=&#34;West&#34;),B2:B6)</code></td><td>SUMPRODUCT with added boolean tests does the whole OR in one pass</td>
+<td><span style="color:var(--text-muted)">n/a (Sheets-only formula)</span></td>
+<td><strong>160</strong> <span class="badge badge-good">Google Sheets alternative (executed 2026-08-30)</span></td></tr>
+
+</tbody>
+</table>
+</div>
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=SUM(SUMIF(A2:A6,{&#34;East&#34;,&#34;West&#34;},B2:B6))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>160</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>110</code>, which is <strong>not</strong> what LibreOffice returned (<code>160</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
+<p>We ran <code>=SUM(SUMIF(A2:A6,{&#34;East&#34;,&#34;West&#34;},B2:B6))</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>160</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>110</code>, which is <strong>not</strong> what LibreOffice returned (<code>160</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. A further 1 row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only, so the LibreOffice column reads n/a for it. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
 
 
 <h2 class="section-title">Functions used</h2>
