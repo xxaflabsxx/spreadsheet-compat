@@ -15,7 +15,7 @@
     },
     "google_sheets": {
       "formula": "=REGEXREPLACE(A2,\"[^0-9]\",\"\")",
-      "note": "Sheets has REGEXREPLACE, the cleanest way. The Excel formula also works."
+      "note": "REGEXREPLACE is Sheets-native and the cleanest way here. Skip the MID+SEQUENCE form in Sheets: executed 2026-08-30 it came back blank against 409215 in LibreOffice, because Google Sheets does no implicit array evaluation inside a scalar function’s arguments. =TEXTJOIN(\"\",TRUE,ARRAYFORMULA(IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,\"\"))) is the documented wrap of it. Both are documented Sheets syntax, carrying no executed result of their own."
     },
     "libreoffice": {
       "formula": "=TEXTJOIN(\"\",TRUE,IFERROR(MID(A2,SEQUENCE(LEN(A2)),1)*1,\"\"))",

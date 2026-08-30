@@ -14,8 +14,8 @@
       "note": "SUBSTITUTE's 4th argument swaps only the Nth match for a marker (CHAR(1), which never appears in text); FIND then locates that marker. Change 3 to any N."
     },
     "google_sheets": {
-      "formula": "=FIND(CHAR(1),SUBSTITUTE(A2,\"-\",CHAR(1),3))",
-      "note": "Identical. Regex fans can use =REGEXEXTRACT-style position logic, but this is the portable way."
+      "formula": "=FIND(\"§\",SUBSTITUTE(A2,\"-\",\"§\",3))",
+      "note": "Executed 2026-08-30: =FIND(CHAR(1),SUBSTITUTE(\"a-b-c-d\",\"-\",CHAR(1),3)) returned 1 in Google Sheets against 6 in LibreOffice. 1 is what FIND gives for an empty search string, so the CHAR(1) marker appears to reach FIND as nothing findable; Google’s CHAR page documents only “convert a number into a character according to the current Unicode table” and says nothing about control characters, so the divergence is undocumented. Use a marker your text lacks instead — § here, or CHAR(160). Documented Sheets syntax, carrying no executed result of its own."
     },
     "libreoffice": {
       "formula": "=FIND(CHAR(1),SUBSTITUTE(A2,\"-\",CHAR(1),3))",

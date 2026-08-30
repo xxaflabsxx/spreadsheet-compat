@@ -14,8 +14,8 @@
       "note": "Excel 365 alternative: =TAKE(FILTER(A2:A100,A2:A100<>\"\"),-1)."
     },
     "google_sheets": {
-      "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",
-      "note": "Identical; Sheets also has =INDEX(A2:A100,COUNTA(A2:A100)) for gap-free columns."
+      "formula": "=ARRAYFORMULA(LOOKUP(2,1/(A2:A100<>\"\"),A2:A100))",
+      "note": "Executed 2026-08-30: the unwrapped =LOOKUP(2,1/(A2:A100<>\"\"),A2:A100) returned #N/A in Google Sheets against cherry in LibreOffice. Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so 1/(A2:A100<>\"\") reduces to a single value before LOOKUP sees it; ARRAYFORMULA around the whole formula is the documented fix, and =INDEX(A2:A100,COUNTA(A2:A100)) is simpler for a gap-free column. Both are documented Sheets syntax, carrying no executed result of their own."
     },
     "libreoffice": {
       "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)",

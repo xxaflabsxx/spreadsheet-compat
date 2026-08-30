@@ -85,6 +85,17 @@ def load_recipe_files(only=None):
 
 
 def norm(v):
+    # Readback artifact: Google Sheets' xlsx export applies a date/time number
+    # format to some numeric results, so openpyxl hands back a datetime for what
+    # is really a plain serial number. Convert back with openpyxl's own epoch
+    # logic (it honours the 1900 leap-year bug for serials < 61) so a numeric
+    # expectation compares against the original number.
+    import datetime as _dt
+    if isinstance(v, (_dt.datetime, _dt.date)):
+        from openpyxl.utils.datetime import to_excel as _to_excel
+        v = _to_excel(v)
+        if abs(v - round(v)) < 1e-9:
+            v = int(round(v))
     """Normalize a read-back cell value. Verbatim from verify_recipes.py."""
     if isinstance(v, float) and v.is_integer():
         return int(v)

@@ -14,8 +14,8 @@
       "note": "Excel 365/2021. Works for any values — it reverses position, not sort order."
     },
     "google_sheets": {
-      "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
-      "note": "Identical; SORT(A2:A4,ROW(A2:A4),FALSE) also works in Sheets."
+      "formula": "=SORT(A2:A4,ROW(A2:A4),FALSE)",
+      "note": "Google Sheets has no SORTBY — executed 2026-08-30, =SORTBY(A2:A4,ROW(A2:A4),-1) returned #NAME? there against cherry, banana, apple in LibreOffice. Sheets’ own signature is SORT(range, sort_column, is_ascending), whose third argument is a boolean, so FALSE reverses the row numbers. Documented Sheets syntax, carrying no executed result of its own."
     },
     "libreoffice": {
       "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
@@ -29,7 +29,11 @@
       "A4": "cherry"
     },
     "formula": "=SORTBY(A2:A4,ROW(A2:A4),-1)",
-    "expected": ["cherry", "banana", "apple"],
+    "expected": [
+      "cherry",
+      "banana",
+      "apple"
+    ],
     "check_range": "D1:D3"
   },
   "explanation": "SORTBY sorts one range by another: here the list is sorted by its own row numbers in descending order (-1), which simply flips it — cherry, banana, apple. Unlike SORT, this preserves the original arrangement in reverse rather than alphabetizing. In older versions without SORTBY, =INDEX($A$2:$A$4,COUNTA($A$2:$A$4)-ROWS($A$2:A2)+1) filled down does the same."

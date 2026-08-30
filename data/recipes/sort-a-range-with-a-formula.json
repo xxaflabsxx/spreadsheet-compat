@@ -15,7 +15,7 @@
     },
     "google_sheets": {
       "formula": "=SORT(A2:A100,1,FALSE)",
-      "note": "Sheets' SORT takes TRUE/FALSE for ascending instead of 1/-1 — a real cross-app argument difference."
+      "note": "Sheets’ SORT takes TRUE/FALSE for is_ascending where Excel and LibreOffice take 1/-1 — a real cross-app argument difference, and executed 2026-08-30 it bites silently: =SORT(A2:A4,1,-1) returned 10, 20, 50 in Google Sheets against 50, 20, 10 in LibreOffice. Sheets read the nonzero -1 as TRUE and sorted the other way with no error at all, so use FALSE for descending. Documented Sheets syntax, carrying no executed result of its own."
     },
     "libreoffice": {
       "formula": "=SORT(A2:A100,1,-1)",
@@ -29,7 +29,11 @@
       "A4": 10
     },
     "formula": "=SORT(A2:A4,1,-1)",
-    "expected": [50, 20, 10],
+    "expected": [
+      50,
+      20,
+      10
+    ],
     "check_range": "D1:D3"
   },
   "explanation": "SORT spills a sorted copy while the source stays put — edit a value and the copy re-orders instantly, unlike menu sorting which is one-time and destructive. Mind the argument dialect: Excel and LibreOffice use 1/-1 for direction, Google Sheets uses TRUE/FALSE — one of the few places the same function has different signatures. Sort whole tables by widening the range (=SORT(A2:C100,3,-1) orders by the third column), and wrap FILTER output in SORT for filtered-and-ordered views."

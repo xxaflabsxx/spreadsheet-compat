@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How to sum with multiple criteria (SUMIFS)</title>
-<meta name="description" content="Sum values only when several conditions are all true. Recipe executed in LibreOffice Calc; Excel per docs (excel sumif multiple criteria).">
+<meta name="description" content="Sum values only when several conditions are all true. Recipe executed in LibreOffice Calc and Google Sheets; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/how-to/sum-with-multiple-criteria.html">
 <meta property="og:title" content="How to sum with multiple criteria (SUMIFS)">
-<meta property="og:description" content="Sum values only when several conditions are all true. Recipe executed in LibreOffice Calc; Excel per docs (excel sumif multiple criteria).">
+<meta property="og:description" content="Sum values only when several conditions are all true. Recipe executed in LibreOffice Calc and Google Sheets; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/how-to/sum-with-multiple-criteria.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,6 +321,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>How to sum with multiple criteria (SUMIFS)</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
+  <span class="badge badge-good">&#10003; Verified in Google Sheets (2026-08-30)</span>
 </div>
 <p class="lede">Sum values only when several conditions are all true.</p>
 
@@ -332,7 +333,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <tr><td>Excel</td><td><code>=SUMIFS(C2:C6,A2:A6,&#34;East&#34;,B2:B6,&#34;Widget&#34;)</code></td><td>Sum range first, then criteria pairs. Add more pairs for more conditions.</td></tr>
 
-<tr><td>Google Sheets</td><td><code>=SUMIFS(C2:C6,A2:A6,&#34;East&#34;,B2:B6,&#34;Widget&#34;)</code></td><td>Identical.</td></tr>
+<tr><td>Google Sheets</td><td><code>=SUMIFS(C2:C6,A2:A6,&#34;East&#34;,B2:B6,&#34;Widget&#34;)</code></td><td>Same syntax, and executed 2026-08-30 Google Sheets returned 60 for it, the same value LibreOffice returned. One caveat further down this page: the OR-with-an-array-constant trick returned only the first subtotal in Sheets (140 against 220, and 100 against 150) — see that section for the portable form.</td></tr>
 
 <tr><td>LibreOffice Calc</td><td><code>=SUMIFS(C2:C6,A2:A6,&#34;East&#34;,B2:B6,&#34;Widget&#34;)</code></td><td>Identical.</td></tr>
 
@@ -369,13 +370,15 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=SUMIF(A2:A7,&#34;North&#34;,C2:C7)</code></td><td>SUMIF — one criterion only (region), sum range LAST</td>
+<td><strong>165</strong></td>
 <td><strong>165</strong></td></tr>
 
 <tr><td><code>=SUMIFS(C2:C7,A2:A7,&#34;North&#34;,B2:B7,&#34;Widget&#34;)</code></td><td>SUMIFS — region AND product, sum range FIRST</td>
+<td><strong>125</strong></td>
 <td><strong>125</strong></td></tr>
 
 </tbody>
@@ -385,7 +388,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p>SUMIF totals all three North rows (100 + 40 + 25). Adding the product test with SUMIFS drops the North/Gadget row and leaves 100 + 25. Written the SUMIF way round — =SUMIFS(A2:A7,&#34;North&#34;,B2:B7,&#34;Widget&#34;,C2:C7) — the formula is an error, not a wrong number, because SUMIFS reads the first argument as the range to add. Excel, Google Sheets and LibreOffice Calc all document the same signature and the same argument order.</p>
 
 <h2 class="section-title">Multiple criteria in the SAME column (OR logic)</h2>
-<p>Extra SUMIFS pairs narrow the result, so you cannot ask for “North OR South” by adding a second region pair — no row is both, and the answer is 0. Feed SUMIFS an array constant of the values instead: it then returns one subtotal per value, and an outer SUM adds them up. SUMPRODUCT with added boolean tests is the equivalent that also works with a range of criteria in cells.</p>
+<p>Extra SUMIFS pairs narrow the result, so you cannot ask for “North OR South” by adding a second region pair — no row is both, and the answer is 0. Feed SUMIFS an array constant of the values instead: in Excel and LibreOffice it then returns one subtotal per value, and an outer SUM adds them up (Google Sheets is the exception — see the note under the table). SUMPRODUCT with added boolean tests is the equivalent that also works with a range of criteria in cells.</p>
 <p><code>=SUM(SUMIFS(C2:C6,A2:A6,{&#34;North&#34;,&#34;South&#34;}))</code></p>
 
 <div class="table-scroll">
@@ -408,23 +411,26 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=SUM(SUMIFS(C2:C6,A2:A6,{&#34;North&#34;,&#34;South&#34;}))</code></td><td>North OR South, via an array constant</td>
-<td><strong>220</strong></td></tr>
+<td><strong>220</strong></td>
+<td><strong>140</strong> <span class="badge badge-quirk">differs from LibreOffice</span></td></tr>
 
 <tr><td><code>=SUMPRODUCT((A2:A6=&#34;North&#34;)+(A2:A6=&#34;South&#34;),C2:C6)</code></td><td>Same answer with SUMPRODUCT (+ is OR)</td>
+<td><strong>220</strong></td>
 <td><strong>220</strong></td></tr>
 
 <tr><td><code>=SUM(SUMIFS(C2:C6,A2:A6,{&#34;North&#34;,&#34;South&#34;},B2:B6,&#34;Widget&#34;))</code></td><td>(North OR South) AND Widget — OR inside, AND across</td>
-<td><strong>150</strong></td></tr>
+<td><strong>150</strong></td>
+<td><strong>100</strong> <span class="badge badge-quirk">differs from LibreOffice</span></td></tr>
 
 </tbody>
 </table>
 </div>
 
-<p>Array-constant behaviour to know about: the braces hold literal values typed into the formula, separated by commas for a horizontal array — you cannot put a cell range inside them (use the SUMPRODUCT form, or SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3)), if the wanted values live in cells). This pattern is only safe for OR over EXACT values in ONE column, because a row cannot equal two different values, so nothing is double-counted; OR across two different columns can overlap and needs the SUMPRODUCT form. Excel, Google Sheets and LibreOffice Calc all document the same brace syntax; in Google Sheets a semicolon separates rows and a comma separates columns, same as Excel. In pre-dynamic-array Excel the SUM(SUMIFS(...)) wrapper may need to be entered with Ctrl+Shift+Enter (documented); modern Excel and Sheets take it as a normal formula.</p>
+<p>Array-constant behaviour to know about: the braces hold literal values typed into the formula, separated by commas for a horizontal array — you cannot put a cell range inside them (use the SUMPRODUCT form, or SUMPRODUCT(SUMIFS(C2:C6,A2:A6,E2:E3)), if the wanted values live in cells). This pattern is only safe for OR over EXACT values in ONE column, because a row cannot equal two different values, so nothing is double-counted; OR across two different columns can overlap and needs the SUMPRODUCT form. Excel, Google Sheets and LibreOffice Calc all document the same brace syntax; in Google Sheets a semicolon separates rows and a comma separates columns, same as Excel. In pre-dynamic-array Excel the SUM(SUMIFS(...)) wrapper may need to be entered with Ctrl+Shift+Enter (documented); modern Excel takes it as a normal formula. Google Sheets is the real divergence here, and the executed column above shows it: =SUM(SUMIFS(C2:C6,A2:A6,{&#34;North&#34;,&#34;South&#34;})) returned 140 there, the North subtotal alone, against 220 in LibreOffice, and the (North OR South) AND Widget row returned 100 against 150. Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so SUMIFS sees only the first value of the brace array. The SUMPRODUCT row above returned 220 in both engines, which makes it the portable choice; =ARRAYFORMULA(SUM(SUMIFS(C2:C6,A2:A6,{&#34;North&#34;,&#34;South&#34;}))) is Google’s documented way to force the array, and it carries no executed result of its own here.</p>
 
 <h2 class="section-title">Criteria on a column AND a row at the same time (2-D block)</h2>
 <p>When the labels run down the side AND across the top — regions in column A, quarters in row 1, numbers in the middle — SUMIFS cannot help: every criteria range it takes must be the same shape and orientation as the sum range, and a matrix has labels on two axes. SUMPRODUCT does it: multiply a vertical TRUE/FALSE mask for the rows by a horizontal mask for the columns, and the two broadcast into a rectangle of 1s and 0s over the block.</p>
@@ -448,16 +454,19 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=SUMPRODUCT((A2:A4=&#34;South&#34;)*(B1:D1=&#34;Q2&#34;)*B2:D4)</code></td><td>One row label AND one column label (South × Q2)</td>
+<td><strong>50</strong></td>
 <td><strong>50</strong></td></tr>
 
 <tr><td><code>=SUMPRODUCT((A2:A4=&#34;South&#34;)*((B1:D1=&#34;Q2&#34;)+(B1:D1=&#34;Q3&#34;))*B2:D4)</code></td><td>One row, two columns (South × Q2 or Q3)</td>
+<td><strong>110</strong></td>
 <td><strong>110</strong></td></tr>
 
 <tr><td><code>=SUMPRODUCT(((A2:A4=&#34;South&#34;)+(A2:A4=&#34;East&#34;))*(B1:D1=&#34;Q2&#34;)*B2:D4)</code></td><td>Two rows, one column (South or East × Q2)</td>
+<td><strong>130</strong></td>
 <td><strong>130</strong></td></tr>
 
 </tbody>
@@ -490,13 +499,15 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=SUMIFS(C2:C6,A2:A6,&#34;&gt;=&#34;&amp;DATE(2026,2,1))</code></td><td>Date lower bound only — everything from 1 Feb 2026</td>
+<td><strong>1240</strong></td>
 <td><strong>1240</strong></td></tr>
 
 <tr><td><code>=SUMIFS(C2:C6,B2:B6,&#34;North&#34;,C2:C6,&#34;&gt;=100&#34;,A2:A6,&#34;&gt;=&#34;&amp;DATE(2026,2,1),A2:A6,&#34;&lt;&#34;&amp;DATE(2026,4,1))</code></td><td>Text (North) + number (&gt;=100) + a Feb–Mar date window</td>
+<td><strong>750</strong></td>
 <td><strong>750</strong></td></tr>
 
 </tbody>
@@ -528,32 +539,37 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=SUMIFS(C2:C5,A2:A5,&#34;Widget*&#34;)</code></td><td>Starts with — and matching is case-insensitive</td>
+<td><strong>135</strong></td>
 <td><strong>135</strong></td></tr>
 
 <tr><td><code>=SUMIFS(C2:C5,A2:A5,&#34;Widget*&#34;,B2:B5,&#34;North&#34;)</code></td><td>Wildcard plus a second criterion</td>
+<td><strong>110</strong></td>
 <td><strong>110</strong></td></tr>
 
 <tr><td><code>=SUMIFS(C2:C5,A2:A5,&#34;*get*&#34;)</code></td><td>Contains</td>
+<td><strong>185</strong></td>
 <td><strong>185</strong></td></tr>
 
 <tr><td><code>=SUMIFS(C2:C5,A2:A5,&#34;&lt;&gt;Widget A&#34;)</code></td><td>Not equal to</td>
+<td><strong>85</strong></td>
 <td><strong>85</strong></td></tr>
 
 <tr><td><code>=SUM(FILTER(C2:C5,(B2:B5=&#34;North&#34;)*(A2:A5&lt;&gt;&#34;Gadget B&#34;)))</code></td><td>FILTER alternative, written portably (one combined condition)</td>
+<td><strong>110</strong></td>
 <td><strong>110</strong></td></tr>
 
 </tbody>
 </table>
 </div>
 
-<p>Things to watch. LibreOffice Calc can interpret criteria as regular expressions instead of wildcards (Tools &gt; Options &gt; Calc &gt; Calculate); wildcards are the default for spreadsheets opened from .xlsx, which is the setting our run above used. Under the regex setting the same criterion is documented to be read as a regular expression matched against the whole cell, so &#34;Widget*&#34; would mean “Widge” followed by any number of t’s and would match none of these products. To match a literal * or ? put a tilde in front of it (~*). Google Sheets users often reach for FILTER or QUERY instead. FILTER is not Sheets-only: Excel 2021/365 and LibreOffice 24.8+ document it too, and the SUM(FILTER(...)) row above was executed here. Only Sheets’ FILTER takes several separate condition arguments, though — in Excel and LibreOffice Calc you multiply the conditions into one, as that row does (the multi-argument form returned #VALUE! when we ran it in LibreOffice 25.8.7.3). QUERY() is documented for Google Sheets alone, with no Excel or LibreOffice Calc equivalent, so keep to SUMIFS/SUMPRODUCT (or FILTER) if the file has to travel. Everything on this page was executed in LibreOffice Calc by our harness; the Excel and Google Sheets syntax comes from each vendor’s official documentation, because these recipe formulas were not run in those apps. (Our function-level Google Sheets verdicts elsewhere on the site ARE executed — see the methodology page; the recipe corpus is LibreOffice-only.)</p>
+<p>Things to watch. LibreOffice Calc can interpret criteria as regular expressions instead of wildcards (Tools &gt; Options &gt; Calc &gt; Calculate); wildcards are the default for spreadsheets opened from .xlsx, which is the setting our run above used. Under the regex setting the same criterion is documented to be read as a regular expression matched against the whole cell, so &#34;Widget*&#34; would mean “Widge” followed by any number of t’s and would match none of these products. To match a literal * or ? put a tilde in front of it (~*). Google Sheets users often reach for FILTER or QUERY instead. FILTER is not Sheets-only: Excel 2021/365 and LibreOffice 24.8+ document it too, and the SUM(FILTER(...)) row above was executed here. Only Sheets’ FILTER takes several separate condition arguments, though — in Excel and LibreOffice Calc you multiply the conditions into one, as that row does (the multi-argument form returned #VALUE! when we ran it in LibreOffice 25.8.7.3). QUERY() is documented for Google Sheets alone, with no Excel or LibreOffice Calc equivalent, so keep to SUMIFS/SUMPRODUCT (or FILTER) if the file has to travel. Everything on this page was executed in LibreOffice Calc by our harness, and every formula in these tables went through Google Sheets too (Drive import, 2026-08-30) — the second column of each table is what Google returned, including the two rows where it disagrees. The Excel syntax comes from Microsoft’s official documentation; we do not run Excel.</p>
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=SUMIFS(C2:C6,A2:A6,&#34;East&#34;,B2:B6,&#34;Widget&#34;)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>60</code> &mdash; exactly the expected result. The 15 further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result. The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.</p>
+<p>We ran <code>=SUMIFS(C2:C6,A2:A6,&#34;East&#34;,B2:B6,&#34;Widget&#34;)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>60</code> &mdash; exactly the expected result. The 15 further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. It returned <code>60</code> for the worked example, the same value LibreOffice produced. The 15 further formulas above were run through Sheets the same way and have their own column; 2 of them came back with a value different from LibreOffice&rsquo;s, flagged in that column. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
 
 
 <h2 class="section-title">Functions used</h2>
@@ -562,7 +578,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <h2 class="section-title">Related recipes</h2>
 <ul>
-<li><a href="../how-to/reference-a-cell-on-another-sheet.html">How to reference a cell on another sheet</a></li><li><a href="../how-to/sumif-with-or-criteria.html">How to SUMIF with OR criteria (this value or that one)</a></li><li><a href="../how-to/weighted-average.html">How to calculate a weighted average</a></li><li><a href="../how-to/year-to-date-total.html">How to calculate a year-to-date (YTD) total</a></li><li><a href="../how-to/check-if-a-cell-contains-any-word-from-a-list.html">How to check if a cell contains any word from a list</a></li>
+<li><a href="../how-to/sumif-with-or-criteria.html">How to SUMIF with OR criteria (this value or that one)</a></li><li><a href="../how-to/reference-a-cell-on-another-sheet.html">How to reference a cell on another sheet</a></li><li><a href="../how-to/sum-a-column-ignoring-errors.html">How to sum a column that contains errors</a></li><li><a href="../how-to/weighted-average.html">How to calculate a weighted average</a></li><li><a href="../how-to/year-to-date-total.html">How to calculate a year-to-date (YTD) total</a></li>
 </ul>
 
 

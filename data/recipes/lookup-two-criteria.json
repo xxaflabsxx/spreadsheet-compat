@@ -14,8 +14,8 @@
       "note": "Excel 365; concatenate the keys."
     },
     "google_sheets": {
-      "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",
-      "note": "Native XLOOKUP."
+      "formula": "=XLOOKUP(\"North|Q2\",ARRAYFORMULA(A2:A6&\"|\"&B2:B6),C2:C6)",
+      "note": "Executed 2026-08-30: the unwrapped =XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6) returned #VALUE! in Google Sheets against 250 in LibreOffice. The concatenated key A2:A6&\"|\"&B2:B6 is an array expression, and Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so ARRAYFORMULA has to force it; =FILTER(C2:C6,A2:A6=\"North\",B2:B6=\"Q2\") sidesteps the whole issue. Both are documented Sheets syntax, carrying no executed result of their own."
     },
     "libreoffice": {
       "formula": "=XLOOKUP(\"North|Q2\",A2:A6&\"|\"&B2:B6,C2:C6)",

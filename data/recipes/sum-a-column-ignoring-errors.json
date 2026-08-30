@@ -14,8 +14,8 @@
       "note": "Function 9 = SUM, option 6 = ignore errors. Excel/LibreOffice; not in Google Sheets."
     },
     "google_sheets": {
-      "formula": "=SUMIF(A2:A6,\"<>#N/A\")",
-      "note": "Sheets has no AGGREGATE. This handles #N/A; for all error types use =SUM(IFERROR(A2:A6,0)) entered as an array."
+      "formula": "=SUM(FILTER(A2:A6,ISNUMBER(A2:A6)))",
+      "note": "Google Sheets has no AGGREGATE — executed 2026-08-30, =AGGREGATE(9,6,A2:A6) returned #NAME? there against 60 in LibreOffice. FILTER keeps only the numeric cells, so error cells drop out before SUM sees them; =SUMIF(A2:A6,\"<>#N/A\") handles #N/A alone. Documented Sheets syntax, carrying no executed result of its own."
     },
     "libreoffice": {
       "formula": "=AGGREGATE(9,6,A2:A6)",
@@ -33,5 +33,5 @@
     "formula": "=AGGREGATE(9,6,A2:A6)",
     "expected": 60
   },
-  "explanation": "A plain SUM propagates any error — one #DIV/0! in the range makes the whole total an error. AGGREGATE(9,6,range) sums (function code 9) while ignoring errors (option 6), so the two good-plus-good rows total 10+20+30 = 60 despite the #DIV/0! and #N/A in between. AGGREGATE lives in Excel and LibreOffice but NOT Google Sheets — there, wrap the values in IFERROR (=SUM(IFERROR(A2:A6,0)) entered with Ctrl+Shift+Enter in older versions, or it just spills in modern ones), or SUMIF around specific error types. The same AGGREGATE trick does error-ignoring AVERAGE (code 1), MAX (4), COUNT (2) and more."
+  "explanation": "A plain SUM propagates any error — one #DIV/0! in the range makes the whole total an error. AGGREGATE(9,6,range) sums (function code 9) while ignoring errors (option 6), so the two good-plus-good rows total 10+20+30 = 60 despite the #DIV/0! and #N/A in between. AGGREGATE lives in Excel and LibreOffice but NOT Google Sheets — there, filter the errors out with =SUM(FILTER(A2:A6,ISNUMBER(A2:A6))), or wrap the values in IFERROR — =ARRAYFORMULA(SUM(IFERROR(A2:A6,0))), since Sheets needs ARRAYFORMULA to iterate over the range (in older Excel the same IFERROR wrap is entered with Ctrl+Shift+Enter). The same AGGREGATE trick does error-ignoring AVERAGE (code 1), MAX (4), COUNT (2) and more."
 }

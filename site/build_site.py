@@ -1634,7 +1634,8 @@ RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet how-to recipes</h1>
 <p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each recipe formula <strong>executed and verified in LibreOffice Calc</strong>.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of them have also been <strong>executed in Google Sheets</strong> ({{ recipe_sheets_date }}), and those pages show what each engine actually returned side by side; the rest are LibreOffice-executed only.{% else %} Function-level verdicts come from our executed Google Sheets and LibreOffice runs; the recipe formulas themselves have only been executed in LibreOffice so far,{% endif %} {% if recipe_sheets_count %}Excel is documentation only.{% else %}and Excel is documentation only.{% endif %}</p>
-<p>
+{% if recipe_sheets_count %}<p>What the two engines did with the same {{ recipe_total }} recipes: {{ recipe_sheets_count }} had their worked example &mdash; and every extra formula on the page &mdash; executed in Google Sheets ({{ recipe_sheets_date }}, Drive import) as well as LibreOffice. {{ recipe_sheets_same_count }} came back with exactly the values LibreOffice produced. {{ recipe_sheets_diff_count }} disagreed on at least one formula, and those are the interesting ones: a function Google Sheets lacks, an argument that means something else there, or an array expression it declines to expand inside a scalar function. Each of those pages prints both engines&rsquo; values side by side and flags the disagreement rather than picking a winner. The remaining {{ recipe_total - recipe_sheets_count }} recipes stay LibreOffice-executed{% if recipe_multisheet_count %}: their worked examples need extra worksheets, and the Sheets runner packs many recipes into one shared workbook, so there is no rewrite that would still be testing the same thing{% endif %}.</p>
+{% endif %}<p>
 {% for cat, items in grouped %}<a href="#{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</a> ({{ items|length }}){% if not loop.last %} &middot; {% endif %}{% endfor %}
 </p>
 {% for cat, items in grouped %}
@@ -2154,7 +2155,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 </ul>
 
 <h2 class="section-title">How-to recipes are verified too</h2>
-<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of the {{ recipe_total }} recipes have additionally been executed in <strong>Google Sheets</strong> ({{ recipe_sheets_date }}) by the same Drive-import round-trip used for the function corpus &mdash; those pages carry a second column showing what Google actually returned, including where it disagrees with LibreOffice. The other {{ recipe_total - recipe_sheets_count }} are executed in <strong>LibreOffice only</strong>{% if recipe_multisheet_count %}, among them the {{ recipe_multisheet_count }} whose worked examples need extra worksheets to exist: those formulas resolve tab names out of cell values, span a run of consecutive tabs, or exist precisely to produce an error for a wrong-syntax reference, so there is no rewrite into one shared workbook that would still be testing the same thing{% endif %}. Their pages say so.{% else %} To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.{% endif %}</p>
+<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of the {{ recipe_total }} recipes have additionally been executed in <strong>Google Sheets</strong> ({{ recipe_sheets_date }}) by the same Drive-import round-trip used for the function corpus &mdash; those pages carry a second column showing what Google actually returned, including where it disagrees with LibreOffice &mdash; {{ recipe_sheets_same_count }} of them returned exactly the LibreOffice values and {{ recipe_sheets_diff_count }} returned something different on at least one formula. The other {{ recipe_total - recipe_sheets_count }} are executed in <strong>LibreOffice only</strong>{% if recipe_multisheet_count %}, among them the {{ recipe_multisheet_count }} whose worked examples need extra worksheets to exist: those formulas resolve tab names out of cell values, span a run of consecutive tabs, or exist precisely to produce an error for a wrong-syntax reference, so there is no rewrite into one shared workbook that would still be testing the same thing{% endif %}. Their pages say so.{% else %} To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.{% endif %}</p>
 
 <h2 class="section-title">Honest limitations</h2>
 <ul>
@@ -3034,6 +3035,15 @@ def main():
     recipe_multisheet_count = sum(
         1 for r in recipes
         if r.get("needs_extra_sheets") and not r.get("sheets_has"))
+    # Of the Sheets-executed recipes, how many agreed with LibreOffice on EVERY
+    # formula on the page (main example + variant checks) and how many carry at
+    # least one value Google returned differently. Computed from the merged
+    # per-recipe flags, never hard-coded: the two always sum to
+    # recipe_sheets_count, and a re-ingest of a new Sheets run moves them.
+    recipe_sheets_diff_count = sum(
+        1 for r in recipes
+        if r.get("sheets_has") and (r.get("sheets_differs") or r.get("sheets_diff_count")))
+    recipe_sheets_same_count = recipe_sheets_count - recipe_sheets_diff_count
 
     if recipes:
         (OUT_DIR / "how-to").mkdir(parents=True, exist_ok=True)
@@ -3049,6 +3059,10 @@ def main():
             recipes=recipes,
             recipe_sheets_count=recipe_sheets_count,
             recipe_sheets_date=recipe_sheets_date,
+            recipe_total=len(recipes),
+            recipe_sheets_same_count=recipe_sheets_same_count,
+            recipe_sheets_diff_count=recipe_sheets_diff_count,
+            recipe_multisheet_count=recipe_multisheet_count,
             grouped=[
                 (cat, [r for r in recipes if _recipe_category(r["slug"]) == cat])
                 for cat in [c for c, _ in _RECIPE_CATEGORIES] + ["More tasks"]
@@ -3471,6 +3485,8 @@ def main():
             recipe_sheets_count=recipe_sheets_count,
             recipe_sheets_date=recipe_sheets_date,
             recipe_multisheet_count=recipe_multisheet_count,
+            recipe_sheets_same_count=recipe_sheets_same_count,
+            recipe_sheets_diff_count=recipe_sheets_diff_count,
         )
         (OUT_DIR / "methodology.html").write_text(
             env.get_template("methodology.html").render(**mctx)

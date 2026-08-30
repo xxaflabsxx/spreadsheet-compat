@@ -14,8 +14,8 @@
       "note": "The array constant makes SUMIF return one subtotal per value; SUM adds them."
     },
     "google_sheets": {
-      "formula": "=SUM(SUMIF(A2:A6,{\"East\",\"West\"},B2:B6))",
-      "note": "Identical (Sheets array constants use the same braces)."
+      "formula": "=SUMPRODUCT((A2:A6=\"East\")+(A2:A6=\"West\"),B2:B6)",
+      "note": "Executed 2026-08-30: =SUM(SUMIF(A2:A6,{\"East\",\"West\"},B2:B6)) returned 110 in Google Sheets against 160 in LibreOffice — 110 is the East subtotal alone, because Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so only the first value of the array constant reaches SUMIF. SUMPRODUCT with added boolean tests gets the whole OR in one pass; =ARRAYFORMULA(SUM(SUMIF(A2:A6,{\"East\",\"West\"},B2:B6))) is the documented wrap of the original. Both are documented Sheets syntax, carrying no executed result of their own."
     },
     "libreoffice": {
       "formula": "=SUM(SUMIF(A2:A6,{\"East\",\"West\"},B2:B6))",
@@ -24,14 +24,19 @@
   },
   "verify": {
     "setup_cells": {
-      "A2": "East",  "B2": 100,
-      "A3": "West",  "B3": 50,
-      "A4": "North", "B4": 25,
-      "A5": "East",  "B5": 10,
-      "A6": "South", "B6": 5
+      "A2": "East",
+      "B2": 100,
+      "A3": "West",
+      "B3": 50,
+      "A4": "North",
+      "B4": 25,
+      "A5": "East",
+      "B5": 10,
+      "A6": "South",
+      "B6": 5
     },
     "formula": "=SUM(SUMIF(A2:A6,{\"East\",\"West\"},B2:B6))",
     "expected": 160
   },
-  "explanation": "SUMIF against the array constant {\"East\",\"West\"} evaluates once per value — producing {110, 50} — and the outer SUM collapses them: 160. This is safe for OR-of-EXACT-values because one row can't match two different values, so nothing double-counts (unlike adding overlapping condition SUMIFs). For OR across different COLUMNS' conditions, where overlap is possible, use the SUMPRODUCT pattern from the sumif-vs-sumproduct comparison instead."
+  "explanation": "SUMIF against the array constant {\"East\",\"West\"} evaluates once per value — producing {110, 50} — and the outer SUM collapses them: 160. That is Excel and LibreOffice; Google Sheets returned 110 when we executed it, the East subtotal alone, so use the SUMPRODUCT form (or an ARRAYFORMULA wrap) there. This is safe for OR-of-EXACT-values because one row can't match two different values, so nothing double-counts (unlike adding overlapping condition SUMIFs). For OR across different COLUMNS' conditions, where overlap is possible, use the SUMPRODUCT pattern from the sumif-vs-sumproduct comparison instead."
 }

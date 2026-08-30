@@ -77,8 +77,16 @@ NEGATION = re.compile(
 # "none has been executed in Sheets by us") are all caught.
 STALE_SHEETS = [
     re.compile(
+        # The verb may not be the tail of a hyphenated compound: the how-to
+        # index renders per-recipe badges as "Sheets-executed", and a recipe
+        # TITLE containing "not" ("How to sum where another column is not
+        # blank") sitting between two such badges is not a claim about
+        # anything -- "Sheets-executed ... not ... Sheets-executed" is three
+        # unrelated tokens. A real stale claim reads "has not been executed",
+        # never "-executed", so requiring a non-hyphen before the verb drops
+        # the false positive without weakening the guard.
         r"(?:google )?sheets\b[^.]{0,80}?\b(?:not|never)\b[^.]{0,40}?"
-        r"\b(?:yet )?(?:executed|run|tested|put through|been run)\b",
+        r"(?<!-)\b(?:yet )?(?:executed|run|tested|put through|been run)\b",
         re.I,
     ),
     # "we have not (yet) executed ... in Sheets". Anchored on an auxiliary verb

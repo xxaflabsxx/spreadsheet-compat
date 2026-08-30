@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How to look up a value with two criteria (multi-condition lookup)</title>
-<meta name="description" content="Return a value that matches on two columns at once, e.g. the amount for Region = North AND Quarter = Q2. Recipe executed in LibreOffice Calc; Excel per docs.">
+<meta name="description" content="Return a value that matches on two columns at once, e.g. the amount for Region = North AND Quarter = Q2. Recipe executed in LibreOffice Calc and Google Sheets; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/how-to/lookup-two-criteria.html">
 <meta property="og:title" content="How to look up a value with two criteria (multi-condition lookup)">
-<meta property="og:description" content="Return a value that matches on two columns at once, e.g. the amount for Region = North AND Quarter = Q2. Recipe executed in LibreOffice Calc; Excel per docs.">
+<meta property="og:description" content="Return a value that matches on two columns at once, e.g. the amount for Region = North AND Quarter = Q2. Recipe executed in LibreOffice Calc and Google Sheets; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/how-to/lookup-two-criteria.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,6 +321,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>How to look up a value with two criteria (multi-condition lookup)</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
+  <span class="badge badge-quirk">Google Sheets returned something else (2026-08-30)</span>
 </div>
 <p class="lede">Return a value that matches on two columns at once, e.g. the amount for Region = North AND Quarter = Q2.</p>
 
@@ -332,7 +333,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <tr><td>Excel</td><td><code>=XLOOKUP(&#34;North|Q2&#34;,A2:A6&amp;&#34;|&#34;&amp;B2:B6,C2:C6)</code></td><td>Excel 365; concatenate the keys.</td></tr>
 
-<tr><td>Google Sheets</td><td><code>=XLOOKUP(&#34;North|Q2&#34;,A2:A6&amp;&#34;|&#34;&amp;B2:B6,C2:C6)</code></td><td>Native XLOOKUP.</td></tr>
+<tr><td>Google Sheets</td><td><code>=XLOOKUP(&#34;North|Q2&#34;,ARRAYFORMULA(A2:A6&amp;&#34;|&#34;&amp;B2:B6),C2:C6)</code></td><td>Executed 2026-08-30: the unwrapped =XLOOKUP(&#34;North|Q2&#34;,A2:A6&amp;&#34;|&#34;&amp;B2:B6,C2:C6) returned #VALUE! in Google Sheets against 250 in LibreOffice. The concatenated key A2:A6&amp;&#34;|&#34;&amp;B2:B6 is an array expression, and Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so ARRAYFORMULA has to force it; =FILTER(C2:C6,A2:A6=&#34;North&#34;,B2:B6=&#34;Q2&#34;) sidesteps the whole issue. Both are documented Sheets syntax, carrying no executed result of their own.</td></tr>
 
 <tr><td>LibreOffice Calc</td><td><code>=XLOOKUP(&#34;North|Q2&#34;,A2:A6&amp;&#34;|&#34;&amp;B2:B6,C2:C6)</code></td><td>LibreOffice 25.8 (XLOOKUP added 24.8).</td></tr>
 
@@ -345,16 +346,16 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=XLOOKUP(&#34;North|Q2&#34;,A2:A6&amp;&#34;|&#34;&amp;B2:B6,C2:C6)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>250</code> &mdash; exactly the expected result. The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.</p>
+<p>We ran <code>=XLOOKUP(&#34;North|Q2&#34;,A2:A6&amp;&#34;|&#34;&amp;B2:B6,C2:C6)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>250</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>#VALUE!</code>, which is <strong>not</strong> what LibreOffice returned (<code>250</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
 
 
 <h2 class="section-title">Functions used</h2>
-<p><a href="../functions/xlookup.html">XLOOKUP</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
+<p><a href="../functions/xlookup.html">XLOOKUP</a> &middot; <a href="../functions/arrayformula.html">ARRAYFORMULA</a> &mdash; see full Excel, Google Sheets &amp; LibreOffice compatibility for each.</p>
 
 
 <h2 class="section-title">Related recipes</h2>
 <ul>
-<li><a href="../how-to/how-to-use-xlookup.html">How to use XLOOKUP</a></li><li><a href="../how-to/look-up-the-last-matching-value.html">How to look up the LAST matching value (not the first)</a></li><li><a href="../how-to/reference-a-cell-on-another-sheet.html">How to reference a cell on another sheet</a></li><li><a href="../how-to/xlookup-from-another-sheet.html">How to XLOOKUP from another sheet</a></li><li><a href="../how-to/xlookup-with-a-default-if-not-found.html">How to return a default value when a lookup finds nothing</a></li>
+<li><a href="../how-to/average-of-the-top-n-scores.html">How to average the top N scores (drop the lowest)</a></li><li><a href="../how-to/find-the-last-value-in-a-column.html">How to find the last value in a column</a></li><li><a href="../how-to/how-to-use-xlookup.html">How to use XLOOKUP</a></li><li><a href="../how-to/look-up-the-last-matching-value.html">How to look up the LAST matching value (not the first)</a></li><li><a href="../how-to/reference-a-cell-on-another-sheet.html">How to reference a cell on another sheet</a></li>
 </ul>
 
 
