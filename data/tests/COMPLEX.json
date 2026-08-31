@@ -1,0 +1,47 @@
+{
+  "function": "COMPLEX",
+  "cases": [
+    {
+      "id": "COMPLEX_doc_3_plus_4i",
+      "formula": "=COMPLEX(3,4)",
+      "description": "Microsoft's documented worked example: real coefficient 3 and imaginary coefficient 4, default suffix",
+      "expected": "3+4i",
+      "expected_note": "Microsoft's page publishes this example's result as the text 3+4i. Follows directly from the documented conversion \"real and imaginary coefficients into a complex number of the form x + yi\", with the documented default suffix \"i\"; the result is a text string, not a number, so there is nothing to round"
+    },
+    {
+      "id": "COMPLEX_doc_j_suffix",
+      "formula": "=COMPLEX(3,4,\"j\")",
+      "description": "Microsoft's documented worked example with the alternate engineering suffix j",
+      "expected": "3+4j",
+      "expected_note": "Microsoft's page publishes this example's result as the text 3+4j. The documentation states all complex-number functions accept \"i\" and \"j\" for suffix"
+    },
+    {
+      "id": "COMPLEX_doc_pure_imaginary",
+      "formula": "=COMPLEX(0,1)",
+      "description": "Microsoft's documented worked example: a pure imaginary unit, where the zero real part is suppressed",
+      "expected": "i",
+      "expected_note": "Microsoft's page publishes this example's result as the text i (not 0+1i): a zero real coefficient and a unit imaginary coefficient are both elided in the canonical form. This case pins the elision rule, which is pure formatting behaviour and not derivable from arithmetic"
+    },
+    {
+      "id": "COMPLEX_doc_pure_real",
+      "formula": "=COMPLEX(1,0)",
+      "description": "Microsoft's documented worked example: a zero imaginary part, where the imaginary term is suppressed entirely",
+      "expected": "1",
+      "expected_note": "Microsoft's page publishes this example's result as the text 1 (not 1+0i). The mirror image of the previous case: a zero imaginary coefficient drops the whole imaginary term, leaving a bare real coefficient as text"
+    },
+    {
+      "id": "COMPLEX_uppercase_suffix_value",
+      "formula": "=COMPLEX(3,4,\"I\")",
+      "description": "An uppercase I suffix",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"All complex number functions accept \\\"i\\\" and \\\"j\\\" for suffix, but neither \\\"I\\\" nor \\\"J\\\". Using uppercase results in the #VALUE! error value.\""
+    },
+    {
+      "id": "COMPLEX_text_real_value",
+      "formula": "=COMPLEX(\"abc\",4)",
+      "description": "A non-numeric real coefficient",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If real_num is nonnumeric, COMPLEX returns the #VALUE! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "function": "CHISQ.DIST",
+  "cases": [
+    {
+      "id": "CHISQ.DIST_doc_cumulative",
+      "formula": "=ROUND(CHISQ.DIST(0.5,1,TRUE),8)",
+      "description": "Microsoft's first documented worked example: the cumulative chi-squared distribution at x=0.5 with 1 degree of freedom",
+      "expected": 0.52049988,
+      "expected_note": "Microsoft's page publishes this example's result as 0.52049988. Independently derived from the documented cumulative form: scipy.stats.chi2.cdf(0.5, 1) = 0.5204998778130466 -> 0.52049988 at 8 dp. Equivalently 2*Phi(sqrt(0.5)) - 1, since a chi-squared variate with 1 degree of freedom is the square of a standard normal"
+    },
+    {
+      "id": "CHISQ.DIST_doc_density",
+      "formula": "=ROUND(CHISQ.DIST(2,3,FALSE),8)",
+      "description": "Microsoft's second documented worked example: the chi-squared probability density at x=2 with 3 degrees of freedom",
+      "expected": 0.20755375,
+      "expected_note": "Microsoft's page publishes this example's result as 0.20755375. Independently derived from the documented density form: scipy.stats.chi2.pdf(2, 3) = 0.2075537487102974 -> 0.20755375 at 8 dp. Equivalently x^(df/2-1)*e^(-x/2) / (2^(df/2)*Gamma(df/2)) = sqrt(2)*e^(-1)/(2^1.5*Gamma(1.5))"
+    },
+    {
+      "id": "CHISQ.DIST_deg_freedom_truncated",
+      "formula": "=ROUND(CHISQ.DIST(2,3.7,FALSE),8)",
+      "description": "A non-integer degrees-of-freedom argument, which the documentation says is truncated",
+      "expected": 0.20755375,
+      "expected_note": "Excel documents \"If deg_freedom is not an integer, it is truncated\", so 3.7 must behave exactly as 3 and return the documented 0.20755375. Independently checked that this discriminates: a genuine 3.7 degrees of freedom would give chi2.pdf(2, 3.7) = 0.194519"
+    },
+    {
+      "id": "CHISQ.DIST_negative_x_num",
+      "formula": "=CHISQ.DIST(-1,3,TRUE)",
+      "description": "A negative x value",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x is negative, CHISQ.DIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHISQ.DIST_zero_deg_freedom_num",
+      "formula": "=CHISQ.DIST(0.5,0,TRUE)",
+      "description": "Zero degrees of freedom",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom < 1 or deg_freedom > 10^10, CHISQ.DIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHISQ.DIST_text_argument_value",
+      "formula": "=CHISQ.DIST(\"abc\",3,TRUE)",
+      "description": "A non-numeric x argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, CHISQ.DIST returns the #VALUE! error value.\""
+    }
+  ]
+}

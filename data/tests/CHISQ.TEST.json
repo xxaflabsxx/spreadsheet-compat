@@ -1,0 +1,89 @@
+{
+  "function": "CHISQ.TEST",
+  "cases": [
+    {
+      "id": "CHISQ.TEST_doc_example",
+      "formula": "=ROUND(CHISQ.TEST(A2:B4,A6:B8),7)",
+      "description": "Microsoft's documented worked example: chi-squared test of independence on a 3x2 agree/neutral/disagree by men/women table",
+      "setup_cells": {
+        "A2": 58,
+        "B2": 35,
+        "A3": 11,
+        "B3": 25,
+        "A4": 10,
+        "B4": 23,
+        "A6": 45.35,
+        "B6": 47.65,
+        "A7": 17.56,
+        "B7": 18.44,
+        "A8": 16.09,
+        "B8": 16.91
+      },
+      "expected": 0.0003082,
+      "expected_note": "Microsoft's page publishes this example's result as 0.0003082 and states the underlying statistic is 16.16957 with 2 degrees of freedom. Both figures were re-derived independently: sum over cells of (A-E)^2/E for the documented 3x2 tables gives 16.16957507479688, and with df = (r-1)*(c-1) = (3-1)*(2-1) = 2 the right-tail probability is scipy.stats.chi2.sf(16.16957507479688, 2) = 0.0003081920170083095 -> 0.0003082 at 7 dp"
+    },
+    {
+      "id": "CHISQ.TEST_identical_ranges",
+      "formula": "=ROUND(CHISQ.TEST(A2:B4,A2:B4),9)",
+      "description": "Actual and expected ranges identical, so the chi-squared statistic is exactly 0",
+      "setup_cells": {
+        "A2": 58,
+        "B2": 35,
+        "A3": 11,
+        "B3": 25,
+        "A4": 10,
+        "B4": 23,
+        "A6": 45.35,
+        "B6": 47.65,
+        "A7": 17.56,
+        "B7": 18.44,
+        "A8": 16.09,
+        "B8": 16.91
+      },
+      "expected": 1.0,
+      "expected_note": "Excel documents that the statistic \"is 0 only if Aij = Eij for every i,j\". With a statistic of 0 on 2 degrees of freedom the right-tail probability is exactly 1: scipy.stats.chi2.sf(0, 2) = 1.0. This case checks the documented statistic definition at its degenerate point without depending on any published figure"
+    },
+    {
+      "id": "CHISQ.TEST_mismatched_sizes_na",
+      "formula": "=CHISQ.TEST(A2:B4,A6:B7)",
+      "description": "Actual and expected ranges with different numbers of data points",
+      "setup_cells": {
+        "A2": 58,
+        "B2": 35,
+        "A3": 11,
+        "B3": 25,
+        "A4": 10,
+        "B4": 23,
+        "A6": 45.35,
+        "B6": 47.65,
+        "A7": 17.56,
+        "B7": 18.44,
+        "A8": 16.09,
+        "B8": 16.91
+      },
+      "expected": "#N/A",
+      "expected_note": "Excel documents: \"If actual_range and expected_range have a different number of data points, CHISQ.TEST returns the #N/A error value.\" Here the actual range holds 6 values and the expected range 4"
+    },
+    {
+      "id": "CHISQ.TEST_single_cell_ranges_na",
+      "formula": "=CHISQ.TEST(A2,A6)",
+      "description": "Single-cell actual and expected ranges, i.e. r = c = 1",
+      "setup_cells": {
+        "A2": 58,
+        "B2": 35,
+        "A3": 11,
+        "B3": 25,
+        "A4": 10,
+        "B4": 23,
+        "A6": 45.35,
+        "B6": 47.65,
+        "A7": 17.56,
+        "B7": 18.44,
+        "A8": 16.09,
+        "B8": 16.91
+      },
+      "expected": "#N/A",
+      "expected_note": "Excel documents: \"r = c= 1 is not allowed and #N/A is returned.\" With one row and one column there are no degrees of freedom left after conditioning on the margins, so CHISQ.TEST has no distribution to evaluate"
+    }
+  ]
+}

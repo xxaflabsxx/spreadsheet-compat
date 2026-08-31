@@ -1,0 +1,33 @@
+{
+  "function": "COTH",
+  "cases": [
+    {
+      "id": "COTH_doc_2",
+      "formula": "=ROUND(COTH(2),9)",
+      "description": "Microsoft's documented worked example: the hyperbolic cotangent of 2",
+      "expected": 1.037314721,
+      "expected_note": "Microsoft's page publishes this example's result to three decimals as 1.037. Independently derived from the documented relationship coth(x) = 1/tanh(x) = (e^x + e^-x)/(e^x - e^-x): 1/math.tanh(2) = 1.0373147207275482 -> 1.037314721 at 9 dp, agreeing with the published 1.037 at the depth the page prints"
+    },
+    {
+      "id": "COTH_is_odd",
+      "formula": "=ROUND(COTH(-2),9)",
+      "description": "The hyperbolic cotangent of -2, which must be the negative of that of +2",
+      "expected": -1.037314721,
+      "expected_note": "coth is an odd function: (e^-x + e^x)/(e^-x - e^x) is the negative of (e^x + e^-x)/(e^x - e^-x), so COTH(-2) must be exactly -COTH(2). Verified independently: 1/math.tanh(-2) = -1.0373147207275482"
+    },
+    {
+      "id": "COTH_out_of_range_num",
+      "formula": "=COTH(2^27)",
+      "description": "An argument at the documented magnitude limit of 2^27",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"The absolute value of Number must be less than 2^27\" and \"If Number is outside its constraints, COTH returns the #NUM! error value.\" 2^27 = 134217728 is exactly the excluded boundary. Mathematically coth(134217728) is indistinguishable from 1, so this case tests the documented range check rather than the arithmetic. EXECUTED RESULT: all four LibreOffice builds return 1 instead of the documented error, i.e. they answer the mathematics and ignore the range check"
+    },
+    {
+      "id": "COTH_text_argument_value",
+      "formula": "=COTH(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If Number is a non-numeric value, COTH returns the #VALUE! error value.\""
+    }
+  ]
+}

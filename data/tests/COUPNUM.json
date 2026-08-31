@@ -1,0 +1,70 @@
+{
+  "function": "COUPNUM",
+  "cases": [
+    {
+      "id": "COUPNUM_doc_example",
+      "formula": "=COUPNUM(A2,A3,A4,A5)",
+      "description": "Microsoft's documented worked example: number of coupons payable between settlement and maturity, semiannual",
+      "setup_cells": {
+        "A2": 39107,
+        "A3": 39767,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": 4,
+      "expected_note": "Microsoft's page publishes this example's result as 4. Setup serials are the dates the page prints: 39107 = 2007-01-25 (settlement) and 39767 = 2008-11-15 (maturity). Counting coupon dates back from maturity in six-month steps gives 2008-11-15, 2008-05-15, 2007-11-15, 2007-05-15, 2006-11-15; exactly four of them fall after the 2007-01-25 settlement, which is the documented 4"
+    },
+    {
+      "id": "COUPNUM_annual_frequency",
+      "formula": "=COUPNUM(A2,A3,1,A5)",
+      "description": "The same bond paying annually instead of semiannually",
+      "setup_cells": {
+        "A2": 39107,
+        "A3": 39767,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": 2,
+      "expected_note": "With frequency 1 the coupon dates are 2008-11-15 and 2007-11-15 (and 2006-11-15 before settlement), so exactly 2 coupons fall after the 2007-01-25 settlement -- half the semiannual count, as it must be for the same term. This discriminates the frequency argument"
+    },
+    {
+      "id": "COUPNUM_bad_frequency_num",
+      "formula": "=COUPNUM(A2,A3,3,A5)",
+      "description": "A frequency of 3, which is not one of the permitted values",
+      "setup_cells": {
+        "A2": 39107,
+        "A3": 39767,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If frequency is any number other than 1, 2, or 4, COUPNUM returns the #NUM! error value.\""
+    },
+    {
+      "id": "COUPNUM_bad_basis_num",
+      "formula": "=COUPNUM(A2,A3,A4,5)",
+      "description": "A day-count basis of 5, above the documented maximum of 4",
+      "setup_cells": {
+        "A2": 39107,
+        "A3": 39767,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If basis < 0 or if basis > 4, COUPNUM returns the #NUM! error value.\""
+    },
+    {
+      "id": "COUPNUM_settlement_after_maturity_num",
+      "formula": "=COUPNUM(A3,A2,A4,A5)",
+      "description": "Settlement and maturity swapped, so settlement is after maturity",
+      "setup_cells": {
+        "A2": 39107,
+        "A3": 39767,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If settlement >= maturity, COUPNUM returns the #NUM! error value.\""
+    }
+  ]
+}

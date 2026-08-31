@@ -1,0 +1,33 @@
+{
+  "function": "COS",
+  "cases": [
+    {
+      "id": "COS_doc_radians",
+      "formula": "=ROUND(COS(1.047),7)",
+      "description": "Microsoft's documented worked example: the cosine of 1.047 radians",
+      "expected": 0.5001711,
+      "expected_note": "Microsoft's page publishes this example's result as 0.5001711. Independently derived: math.cos(1.047) = 0.5001710745970701 -> 0.5001711 at 7 dp. 1.047 is a decimal approximation of pi/3, which is why the result sits just above 0.5"
+    },
+    {
+      "id": "COS_doc_degrees_via_pi",
+      "formula": "=ROUND(COS(60*PI()/180),9)",
+      "description": "Microsoft's documented worked example: 60 degrees converted to radians by multiplying by PI()/180",
+      "expected": 0.5,
+      "expected_note": "Microsoft's page publishes this example's result as 0.5, and cos(60 degrees) = cos(pi/3) = 1/2 exactly. In IEEE double arithmetic math.cos(math.pi/3) evaluates to 0.5000000000000001, one unit in the last place above 0.5, so the assertion is made at 9 dp where the exact and floating-point values agree"
+    },
+    {
+      "id": "COS_doc_degrees_via_radians_fn",
+      "formula": "=ROUND(COS(RADIANS(60)),9)",
+      "description": "Microsoft's documented worked example: the same 60 degrees converted with the RADIANS function instead",
+      "expected": 0.5,
+      "expected_note": "Microsoft's page publishes this example's result as 0.5 as well. Exactly the same mathematics as the previous case; the point of running both is that Excel documents RADIANS and the explicit PI()/180 multiplication as interchangeable, so a divergence between the two rows would be an engine quirk in RADIANS rather than in COS"
+    },
+    {
+      "id": "COS_at_zero",
+      "formula": "=COS(0)",
+      "description": "The cosine at zero",
+      "expected": 1.0,
+      "expected_note": "Follows from the definition of the cosine, cos(0) = 1 exactly, with no rounding needed: this anchors the function at a point where any floating-point implementation must be exact"
+    }
+  ]
+}

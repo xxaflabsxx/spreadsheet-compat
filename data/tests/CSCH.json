@@ -1,0 +1,33 @@
+{
+  "function": "CSCH",
+  "cases": [
+    {
+      "id": "CSCH_doc_1_5",
+      "formula": "=ROUND(CSCH(1.5),9)",
+      "description": "Microsoft's documented worked example: the hyperbolic cosecant of 1.5",
+      "expected": 0.469642441,
+      "expected_note": "Microsoft's page publishes this example's result to four decimals as 0.4696. Independently derived from csch(x) = 1/sinh(x) = 2/(e^x - e^-x): 1/math.sinh(1.5) = 0.46964244059522464 -> 0.469642441 at 9 dp, agreeing with the published 0.4696"
+    },
+    {
+      "id": "CSCH_is_odd",
+      "formula": "=ROUND(CSCH(-1.5),9)",
+      "description": "The hyperbolic cosecant of -1.5, which must be the negative of that of +1.5",
+      "expected": -0.469642441,
+      "expected_note": "sinh is odd, so csch = 1/sinh is odd as well: CSCH(-1.5) must be exactly -CSCH(1.5). Verified independently: 1/math.sinh(-1.5) = -0.46964244059522464"
+    },
+    {
+      "id": "CSCH_out_of_range_num",
+      "formula": "=CSCH(2^27)",
+      "description": "An argument at the documented magnitude limit of 2^27",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"The absolute value of Number must be less than 2^27\" and \"If Number is outside its constraints, CSCH returns the #NUM! error value.\" 2^27 = 134217728 is exactly the excluded boundary. Mathematically csch(134217728) underflows to 0, so this case tests the documented range check rather than the arithmetic. EXECUTED RESULT: all four LibreOffice builds return 0 instead of the documented error, i.e. they answer the mathematics and ignore the range check"
+    },
+    {
+      "id": "CSCH_text_argument_value",
+      "formula": "=CSCH(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If Number is a non-numeric value, CSCH returns the #VALUE! error value.\""
+    }
+  ]
+}

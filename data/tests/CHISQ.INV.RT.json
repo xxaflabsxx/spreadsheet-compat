@@ -1,0 +1,71 @@
+{
+  "function": "CHISQ.INV.RT",
+  "cases": [
+    {
+      "id": "CHISQ.INV.RT_doc_example",
+      "formula": "=ROUND(CHISQ.INV.RT(A2,A3),6)",
+      "description": "Microsoft's documented worked example: inverse of the right-tailed chi-squared probability 0.050001 at 10 degrees of freedom",
+      "setup_cells": {
+        "A2": 0.050001,
+        "A3": 10
+      },
+      "expected": 18.306973,
+      "expected_note": "Microsoft's page publishes this example's result as 18.306973. Independently derived from the documented definition CHISQ.INV.RT(p,df) = x such that CHISQ.DIST.RT(x,df) = p, i.e. the inverse survival function: scipy.stats.chi2.isf(0.050001, 10) = 18.30697345696106 -> 18.306973 at 6 dp. Round-trip cross-check: chi2.sf(18.30697345696106, 10) = 0.050001"
+    },
+    {
+      "id": "CHISQ.INV.RT_second_point",
+      "formula": "=ROUND(CHISQ.INV.RT(0.5,4),8)",
+      "description": "A second point on the inverse: the median of the chi-squared distribution with 4 degrees of freedom",
+      "setup_cells": {
+        "A2": 0.050001,
+        "A3": 10
+      },
+      "expected": 3.35669398,
+      "expected_note": "Derived from the same documented inverse-survival definition: scipy.stats.chi2.isf(0.5, 4) = 3.3566939800333224 -> 3.35669398 at 8 dp. Not a figure published by Microsoft, so it tests the function against mathematics rather than against the page"
+    },
+    {
+      "id": "CHISQ.INV.RT_deg_freedom_truncated",
+      "formula": "=ROUND(CHISQ.INV.RT(A2,10.9),6)",
+      "description": "A non-integer degrees-of-freedom argument, which the documentation says is truncated",
+      "setup_cells": {
+        "A2": 0.050001,
+        "A3": 10
+      },
+      "expected": 18.306973,
+      "expected_note": "Excel documents \"If deg_freedom is not an integer, it is truncated\", so 10.9 must behave exactly as 10 and return the documented 18.306973. Independently checked that this discriminates: a genuine 10.9 degrees of freedom would give chi2.isf(0.050001, 10.9) = 19.539074"
+    },
+    {
+      "id": "CHISQ.INV.RT_negative_probability_num",
+      "formula": "=CHISQ.INV.RT(-0.5,A3)",
+      "description": "A negative probability argument",
+      "setup_cells": {
+        "A2": 0.050001,
+        "A3": 10
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability < 0 or probability > 1, CHISQ.INV.RT returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHISQ.INV.RT_zero_deg_freedom_num",
+      "formula": "=CHISQ.INV.RT(A2,0)",
+      "description": "Zero degrees of freedom",
+      "setup_cells": {
+        "A2": 0.050001,
+        "A3": 10
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom < 1, CHISQ.INV.RT returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHISQ.INV.RT_text_argument_value",
+      "formula": "=CHISQ.INV.RT(\"abc\",A3)",
+      "description": "A non-numeric probability argument",
+      "setup_cells": {
+        "A2": 0.050001,
+        "A3": 10
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If either argument is nonnumeric, CHISQ.INV.RT returns the #VALUE! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "function": "CHISQ.DIST.RT",
+  "cases": [
+    {
+      "id": "CHISQ.DIST.RT_doc_example",
+      "formula": "=ROUND(CHISQ.DIST.RT(A2,A3),7)",
+      "description": "Microsoft's documented worked example: right-tailed chi-squared probability at x=18.307 with 10 degrees of freedom",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": 0.0500006,
+      "expected_note": "Microsoft's page publishes this example's result as 0.0500006. Independently derived from the documented right-tail definition P(X > x): scipy.stats.chi2.sf(18.307, 10) = 0.05000058909139812 -> 0.0500006 at 7 dp"
+    },
+    {
+      "id": "CHISQ.DIST.RT_one_degree_of_freedom",
+      "formula": "=ROUND(CHISQ.DIST.RT(3,1),7)",
+      "description": "A second point on the distribution, at 1 degree of freedom",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": 0.0832645,
+      "expected_note": "Derived from the same documented right-tail definition: scipy.stats.chi2.sf(3, 1) = 0.08326451666355042 -> 0.0832645 at 7 dp. Equivalently 2*(1 - Phi(sqrt(3)))"
+    },
+    {
+      "id": "CHISQ.DIST.RT_deg_freedom_truncated",
+      "formula": "=ROUND(CHISQ.DIST.RT(A2,10.9),7)",
+      "description": "A non-integer degrees-of-freedom argument, which the documentation says is truncated",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": 0.0500006,
+      "expected_note": "Excel documents \"If deg_freedom is not an integer, it is truncated\", so 10.9 must behave exactly as 10 and return the documented 0.0500006. Independently checked that this discriminates: a genuine 10.9 degrees of freedom would give chi2.sf(18.307, 10.9) = 0.0719365"
+    },
+    {
+      "id": "CHISQ.DIST.RT_zero_deg_freedom_num",
+      "formula": "=CHISQ.DIST.RT(A2,0)",
+      "description": "Zero degrees of freedom",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom < 1 or deg_freedom > 10^10, CHISQ.DIST.RT returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHISQ.DIST.RT_text_argument_value",
+      "formula": "=CHISQ.DIST.RT(\"abc\",A3)",
+      "description": "A non-numeric x argument",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If either argument is nonnumeric, CHISQ.DIST.RT function returns the #VALUE! error value.\""
+    }
+  ]
+}

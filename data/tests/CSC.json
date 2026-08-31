@@ -1,0 +1,33 @@
+{
+  "function": "CSC",
+  "cases": [
+    {
+      "id": "CSC_doc_15",
+      "formula": "=ROUND(CSC(15),9)",
+      "description": "Microsoft's documented worked example: the cosecant of 15 radians",
+      "expected": 1.537780562,
+      "expected_note": "Microsoft's page publishes this example's result to three decimals as 1.538. Independently derived from the documented identity CSC(n) = 1/SIN(n): 1/math.sin(15) = 1.5377805615408537 -> 1.537780562 at 9 dp, agreeing with the published 1.538. The argument is 15 RADIANS, not degrees"
+    },
+    {
+      "id": "CSC_is_odd",
+      "formula": "=ROUND(CSC(-15),9)",
+      "description": "The cosecant of -15, which must be the negative of that of +15",
+      "expected": -1.537780562,
+      "expected_note": "sin is odd, so by the documented identity CSC(n) = 1/SIN(n) the cosecant is odd too: CSC(-15) must be exactly -CSC(15). Verified independently: 1/math.sin(-15) = -1.5377805615408537"
+    },
+    {
+      "id": "CSC_out_of_range_num",
+      "formula": "=CSC(2^27)",
+      "description": "An argument at the documented magnitude limit of 2^27",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"The absolute value of Number must be less than 2^27\" and \"If Number is outside its constraints, CSC returns the #NUM! error value.\" 2^27 = 134217728 is exactly the excluded boundary. EXECUTED RESULT: all four LibreOffice builds return -1.30992372349448 instead of the documented error; csc(2^27) re-derived with mpmath at 60 digits is -1.3099237234944811929, so the value is correct to full double precision and only the documented range check is missing"
+    },
+    {
+      "id": "CSC_text_argument_value",
+      "formula": "=CSC(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If Number is a non-numeric value, CSC returns the #VALUE! error value.\""
+    }
+  ]
+}

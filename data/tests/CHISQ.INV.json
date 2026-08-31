@@ -1,0 +1,47 @@
+{
+  "function": "CHISQ.INV",
+  "cases": [
+    {
+      "id": "CHISQ.INV_doc_example_1",
+      "formula": "=ROUND(CHISQ.INV(0.93,1),8)",
+      "description": "Microsoft's first documented worked example: inverse of the left-tailed chi-squared probability 0.93 at 1 degree of freedom",
+      "expected": 3.28302029,
+      "expected_note": "Microsoft's page publishes this example's result as 3.283020286, which is a TRUNCATION rather than a rounding of the true value. Independently derived from the documented left-tail inverse: scipy.stats.chi2.ppf(0.93, 1) = 3.283020286759539, whose correct 9-decimal rounding is 3.283020287, not the published 3.283020286. Asserting at 8 dp (3.28302029) is the deepest precision at which the published figure and the mathematically correct value agree, so this case tests the function rather than the page's truncation"
+    },
+    {
+      "id": "CHISQ.INV_doc_example_2",
+      "formula": "=ROUND(CHISQ.INV(0.6,2),9)",
+      "description": "Microsoft's second documented worked example: inverse of the left-tailed chi-squared probability 0.6 at 2 degrees of freedom",
+      "expected": 1.832581464,
+      "expected_note": "Microsoft's page publishes this example's result as 1.832581464. Independently derived two ways: scipy.stats.chi2.ppf(0.6, 2) = 1.83258146374831, and in closed form, since the chi-squared distribution with 2 degrees of freedom is exponential with mean 2, the inverse is -2*ln(1-0.6) = -2*ln(0.4) = 1.83258146374831 -> 1.832581464 at 9 dp"
+    },
+    {
+      "id": "CHISQ.INV_deg_freedom_truncated",
+      "formula": "=ROUND(CHISQ.INV(0.6,2.9),9)",
+      "description": "A non-integer degrees-of-freedom argument, which the documentation says is truncated",
+      "expected": 1.832581464,
+      "expected_note": "Excel documents \"If deg_freedom is not an integer, it is truncated\", so 2.9 must behave exactly as 2 and return the documented 1.832581464. Independently checked that this discriminates: a genuine 2.9 degrees of freedom would give chi2.ppf(0.6, 2.9) = 2.835555"
+    },
+    {
+      "id": "CHISQ.INV_probability_above_one_num",
+      "formula": "=CHISQ.INV(1.5,1)",
+      "description": "A probability argument greater than 1",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability < 0 or probability > 1, CHISQ.INV returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHISQ.INV_zero_deg_freedom_num",
+      "formula": "=CHISQ.INV(0.93,0)",
+      "description": "Zero degrees of freedom",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom < 1 or deg_freedom > 10^10, CHISQ.INV returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHISQ.INV_text_argument_value",
+      "formula": "=CHISQ.INV(\"abc\",1)",
+      "description": "A non-numeric probability argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If argument is nonnumeric, CHISQ.INV returns the #VALUE! error value.\""
+    }
+  ]
+}

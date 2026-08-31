@@ -1,0 +1,77 @@
+{
+  "function": "CONFIDENCE.NORM",
+  "cases": [
+    {
+      "id": "CONFIDENCE.NORM_doc_example",
+      "formula": "=ROUND(CONFIDENCE.NORM(A2,A3,A4),9)",
+      "description": "Microsoft's documented worked example: 95% confidence half-width for a population standard deviation of 2.5 and a sample of 50",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": 0.692951912,
+      "expected_note": "Microsoft's CONFIDENCE.NORM page publishes this example's result rounded to 0.692952; its CONFIDENCE page publishes the identical calculation to more digits as 0.692951912, and the two agree. Independently derived from the documented normal-distribution half-width z_(1-alpha/2) * standard_dev / sqrt(size): scipy.stats.norm.isf(0.05/2) = 1.9599639845400545, so 1.9599639845400545 * 2.5 / sqrt(50) = 0.6929519121748391 -> 0.692951912 at 9 dp. Asserted at 9 dp rather than the page's 6 because the deeper figure is derived, not merely copied"
+    },
+    {
+      "id": "CONFIDENCE.NORM_size_truncated",
+      "formula": "=ROUND(CONFIDENCE.NORM(A2,A3,50.9),9)",
+      "description": "A non-integer sample size, which the documentation says is truncated",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": 0.692951912,
+      "expected_note": "Excel documents \"If size is not an integer, it is truncated\", so 50.9 must behave exactly as 50. Independently checked that this discriminates: a genuine size of 50.9 would give 1.9599639845400545 * 2.5 / sqrt(50.9) = 0.686798"
+    },
+    {
+      "id": "CONFIDENCE.NORM_alpha_one_num",
+      "formula": "=CONFIDENCE.NORM(1,A3,A4)",
+      "description": "A significance level of exactly 1",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If alpha <= 0 or alpha >= 1, CONFIDENCE.NORM returns the #NUM! error value.\""
+    },
+    {
+      "id": "CONFIDENCE.NORM_negative_standard_dev_num",
+      "formula": "=CONFIDENCE.NORM(A2,-1,A4)",
+      "description": "A negative population standard deviation",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If standard_dev <= 0, CONFIDENCE.NORM returns the #NUM! error value.\""
+    },
+    {
+      "id": "CONFIDENCE.NORM_size_below_one_num",
+      "formula": "=CONFIDENCE.NORM(A2,A3,0)",
+      "description": "A sample size below 1",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If size < 1, CONFIDENCE.NORM returns the #NUM! error value.\""
+    },
+    {
+      "id": "CONFIDENCE.NORM_text_argument_value",
+      "formula": "=CONFIDENCE.NORM(\"abc\",A3,A4)",
+      "description": "A non-numeric alpha argument",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, CONFIDENCE.NORM returns the #VALUE! error value.\""
+    }
+  ]
+}

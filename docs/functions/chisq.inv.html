@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHISQ.INV: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="CHISQ.INV (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>CHISQ.INV matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="4/6 match; probability above one num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/chisq.inv.html">
-<meta property="og:title" content="CHISQ.INV: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="CHISQ.INV (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="CHISQ.INV matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="4/6 match; probability above one num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/chisq.inv.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>CHISQ.INV</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>CHISQ.INV</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for CHISQ.INV yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060181.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,102 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+CHISQ.INV&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't CHISQ.INV working in LibreOffice?</h2>
+
+<p><code>CHISQ.INV</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=CHISQ.INV(1.5,1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, CHISQ.INV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=CHISQ.INV(0.93,0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If deg_freedom &lt; 1 or deg_freedom &gt; 10^10, CHISQ.INV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +489,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for CHISQ.INV yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQ.INV(0.93,1),8)</td>
+  <td>Microsoft&#39;s first documented worked example: inverse of the left-tailed chi-squared probability 0.93 at 1 degree of freedom</td>
+  <td class="result mono">3.28302029</td>
+  <td class="result mono">3.28302029<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 3.283020286, which is a TRUNCATION rather than a rounding of the true value. Independently derived from the documented left-tail inverse: scipy.stats.chi2.ppf(0.93, 1) = 3.283020286759539, whose correct 9-decimal rounding is 3.283020287, not the published 3.283020286. Asserting at 8 dp (3.28302029) is the deepest precision at which the published figure and the mathematically correct value agree, so this case tests the function rather than the page&#39;s truncation</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQ.INV(0.6,2),9)</td>
+  <td>Microsoft&#39;s second documented worked example: inverse of the left-tailed chi-squared probability 0.6 at 2 degrees of freedom</td>
+  <td class="result mono">1.832581464</td>
+  <td class="result mono">1.832581464<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 1.832581464. Independently derived two ways: scipy.stats.chi2.ppf(0.6, 2) = 1.83258146374831, and in closed form, since the chi-squared distribution with 2 degrees of freedom is exponential with mean 2, the inverse is -2*ln(1-0.6) = -2*ln(0.4) = 1.83258146374831 -&gt; 1.832581464 at 9 dp</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQ.INV(0.6,2.9),9)</td>
+  <td>A non-integer degrees-of-freedom argument, which the documentation says is truncated</td>
+  <td class="result mono">1.832581464</td>
+  <td class="result mono">1.832581464<br><span class="category-tag">Excel documents &#34;If deg_freedom is not an integer, it is truncated&#34;, so 2.9 must behave exactly as 2 and return the documented 1.832581464. Independently checked that this discriminates: a genuine 2.9 degrees of freedom would give chi2.ppf(0.6, 2.9) = 2.835555</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHISQ.INV(1.5,1)</td>
+  <td>A probability argument greater than 1</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, CHISQ.INV returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHISQ.INV(0.93,0)</td>
+  <td>Zero degrees of freedom</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If deg_freedom &lt; 1 or deg_freedom &gt; 10^10, CHISQ.INV returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHISQ.INV(&#34;abc&#34;,1)</td>
+  <td>A non-numeric probability argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If argument is nonnumeric, CHISQ.INV returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

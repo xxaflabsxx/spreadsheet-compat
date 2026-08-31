@@ -1,0 +1,12 @@
+{
+  "function": "CUBESET",
+  "cases": [
+    {
+      "id": "CUBESET_no_cube_connection_probe",
+      "formula": "=CUBESET(\"NoSuchConnection\",\"[Product].[All Products].Children\",\"Products\")",
+      "description": "Existence probe only: the set-definition form from Microsoft's own example, against a connection name that does not exist in this workbook. No OLAP connection can exist in a flat workbook, so this records what the engine actually returns rather than asserting a documented value",
+      "expected": null,
+      "expected_note": "NOT EXECUTABLE AS DOCUMENTED, and deliberately recorded as a probe rather than a support claim. Microsoft documents this function as returning data from an OLAP cube reached through a named workbook connection -- the CUBEKPIMEMBER page states outright that the cube functions are \"supported only when the workbook is connected to a Microsoft SQL Server 2005 Analysis Services or later data source\". A flat .xlsx carries no such connection, and neither LibreOffice Calc nor Google Sheets can supply one, so the documented behaviour cannot be reproduced by this harness in any engine. Microsoft's page documents that \"if the connection name is not a valid workbook connection stored in the workbook, CUBESET returns a #NAME? error value\", and the same for an OLAP server that is not running. The trap this case exists to avoid: Excel itself documents that an invalid connection name yields #NAME?, which is the SAME token an engine emits for a function it has never heard of. A #NAME? here therefore does NOT distinguish \"present but unconnected\" from \"absent\", and this case is recorded with no asserted expected value so it can never be scored as documented behaviour. What the run does establish is recorded separately: probing all four pinned LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) with the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form returned #NAME? for all three spellings on every build, which is the signature of a name the engine does not implement at all rather than of a missing data connection"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "function": "CONFIDENCE",
+  "cases": [
+    {
+      "id": "CONFIDENCE_doc_example",
+      "formula": "=ROUND(CONFIDENCE(A2,A3,A4),9)",
+      "description": "Microsoft's documented worked example: 95% confidence half-width for a population standard deviation of 2.5 and a sample of 50",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": 0.692951912,
+      "expected_note": "Microsoft's page publishes this example's result as 0.692951912. Independently derived from the documented normal-distribution confidence half-width z_(1-alpha/2) * standard_dev / sqrt(size): scipy.stats.norm.isf(0.05/2) = 1.9599639845400545 (the +/-1.96 the page names in prose), so 1.9599639845400545 * 2.5 / sqrt(50) = 0.6929519121748391 -> 0.692951912 at 9 dp"
+    },
+    {
+      "id": "CONFIDENCE_size_truncated",
+      "formula": "=ROUND(CONFIDENCE(A2,A3,50.9),9)",
+      "description": "A non-integer sample size, which the documentation says is truncated",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": 0.692951912,
+      "expected_note": "Excel documents \"If Size is not an integer, it is truncated\", so 50.9 must behave exactly as 50 and return the documented 0.692951912. Independently checked that this discriminates: a genuine size of 50.9 would give 1.9599639845400545 * 2.5 / sqrt(50.9) = 0.686798"
+    },
+    {
+      "id": "CONFIDENCE_alpha_zero_num",
+      "formula": "=CONFIDENCE(0,A3,A4)",
+      "description": "A zero significance level",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Alpha is <= 0 or >= 1, CONFIDENCE returns the #NUM! error value.\""
+    },
+    {
+      "id": "CONFIDENCE_zero_standard_dev_num",
+      "formula": "=CONFIDENCE(A2,0,A4)",
+      "description": "A zero population standard deviation",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Standard_dev <= 0, CONFIDENCE returns the #NUM! error value.\""
+    },
+    {
+      "id": "CONFIDENCE_size_below_one_num",
+      "formula": "=CONFIDENCE(A2,A3,0)",
+      "description": "A sample size below 1",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Size < 1, CONFIDENCE returns the #NUM! error value.\""
+    },
+    {
+      "id": "CONFIDENCE_text_argument_value",
+      "formula": "=CONFIDENCE(\"abc\",A3,A4)",
+      "description": "A non-numeric alpha argument",
+      "setup_cells": {
+        "A2": 0.05,
+        "A3": 2.5,
+        "A4": 50
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is non-numeric, CONFIDENCE returns the #VALUE! error value.\""
+    }
+  ]
+}

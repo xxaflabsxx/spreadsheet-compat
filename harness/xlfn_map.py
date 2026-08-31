@@ -97,6 +97,22 @@ _XLFN_FUNCTIONS = {
     # legacy forms predate 2007 and correctly need no prefix.
     "ACOT", "ACOTH",
     "BETA.DIST", "BETA.INV",
+    # Excel 2013 trigonometric additions from the alphabetical corpus batch
+    # CHIINV..CUBEVALUE. COT/COTH/CSC/CSCH are the direct siblings of the
+    # ACOT/ACOTH already listed above and are on XlsxWriter's future-function
+    # table for the same reason. Verified empirically on all four pinned
+    # builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3): "=_xlfn.COT(30)"
+    # returns -0.156119952161659 while the unprefixed "=COT(30)" returns
+    # #NAME?, and likewise for COTH/CSC/CSCH -- LO DOES implement all four,
+    # so without these entries the harness would have recorded four
+    # supported functions as unsupported.
+    "COT", "COTH", "CSC", "CSCH",
+    # COPILOT (Excel 2025, Frontier/Insider only) is post-2007 and therefore
+    # takes the prefix by the same rule. Recorded here for storage-form
+    # correctness only: the probe run found #NAME? on all four LibreOffice
+    # builds under the plain name, the _xlfn. form AND the COM.MICROSOFT.
+    # form, so LO has no such function under any spelling.
+    "COPILOT",
     "BINOM.DIST", "BINOM.DIST.RANGE", "BINOM.INV",
     "CHISQ.DIST", "CHISQ.DIST.RT", "CHISQ.INV", "CHISQ.INV.RT", "CHISQ.TEST",
     "CONFIDENCE.NORM", "CONFIDENCE.T",

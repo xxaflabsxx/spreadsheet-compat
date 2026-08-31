@@ -1,0 +1,70 @@
+{
+  "function": "COUPDAYSNC",
+  "cases": [
+    {
+      "id": "COUPDAYSNC_doc_example",
+      "formula": "=COUPDAYSNC(A2,A3,A4,A5)",
+      "description": "Microsoft's documented worked example: days from settlement to the next coupon date, semiannual, actual/actual",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": 110,
+      "expected_note": "Microsoft's page publishes this example's result as 110. Setup serials are the dates Microsoft's page prints: 40568 = 2011-01-25 (settlement), 40862 = 2011-11-15 (maturity), frequency 2 (semiannual), basis 1 (actual/actual). Counting coupon dates back from maturity in six-month steps gives 2011-11-15, 2011-05-15, 2010-11-15, so the settlement date falls in the coupon period 2010-11-15 to 2011-05-15. On basis 1 the count is the actual number of days from 2011-01-25 to the next coupon date 2011-05-15, which Python date subtraction gives as 110. Consistency cross-check: 71 days before settlement + 110 days after = the 181-day period length COUPDAYS reports for the same bond"
+    },
+    {
+      "id": "COUPDAYSNC_annual_frequency",
+      "formula": "=COUPDAYSNC(A2,A3,1,A5)",
+      "description": "The same bond paying annually instead of semiannually",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": 294,
+      "expected_note": "With frequency 1 the coupon dates are 2011-11-15 and 2010-11-15, so the next coupon after the 2011-01-25 settlement is 2011-11-15 rather than 2011-05-15. The actual day count from 2011-01-25 to 2011-11-15 is 294 (Python date subtraction), which discriminates the frequency argument"
+    },
+    {
+      "id": "COUPDAYSNC_bad_frequency_num",
+      "formula": "=COUPDAYSNC(A2,A3,3,A5)",
+      "description": "A frequency of 3, which is not one of the permitted values",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If frequency is any number other than 1, 2, or 4, COUPDAYSNC returns the #NUM! error value.\""
+    },
+    {
+      "id": "COUPDAYSNC_bad_basis_num",
+      "formula": "=COUPDAYSNC(A2,A3,A4,5)",
+      "description": "A day-count basis of 5, above the documented maximum of 4",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If basis < 0 or if basis > 4, COUPDAYSNC returns the #NUM! error value.\""
+    },
+    {
+      "id": "COUPDAYSNC_settlement_after_maturity_num",
+      "formula": "=COUPDAYSNC(A3,A2,A4,A5)",
+      "description": "Settlement and maturity swapped, so settlement is after maturity",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If settlement >= maturity, COUPDAYSNC returns the #NUM! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "function": "COT",
+  "cases": [
+    {
+      "id": "COT_doc_30",
+      "formula": "=ROUND(COT(30),9)",
+      "description": "Microsoft's documented worked example: the cotangent of 30 radians",
+      "setup_cells": {
+        "A5": 45
+      },
+      "expected": -0.156119952,
+      "expected_note": "Microsoft's page publishes this example's result to three decimals as -0.156. Independently derived from the documented identity COT(n) = 1/TAN(n): 1/math.tan(30) = -0.15611995216165922 -> -0.156119952 at 9 dp, which agrees with the published -0.156 at the depth the page prints. Asserted at 9 dp because the deeper figure is derived rather than copied. Note the argument is 30 RADIANS, not 30 degrees, which is why the value is negative"
+    },
+    {
+      "id": "COT_doc_cell_reference_45",
+      "formula": "=ROUND(COT(A5),9)",
+      "description": "Microsoft's documented worked example: the cotangent of the value 45 held in a cell",
+      "setup_cells": {
+        "A5": 45
+      },
+      "expected": 0.617369624,
+      "expected_note": "Microsoft's page publishes this example's result to three decimals as 0.617. Independently derived: 1/math.tan(45) = 0.6173696237835551 -> 0.617369624 at 9 dp, which agrees with the published 0.617"
+    },
+    {
+      "id": "COT_zero_div0",
+      "formula": "=COT(0)",
+      "description": "The cotangent at zero",
+      "setup_cells": {
+        "A5": 45
+      },
+      "expected": "#DIV/0!",
+      "expected_note": "Excel documents: \"COT(0) returns the #DIV/0! error value.\" This follows from the documented identity COT(n) = 1/TAN(n) with TAN(0) = 0, and is a different error class from the #NUM! the same page specifies for out-of-range arguments. EXECUTED RESULT: all four LibreOffice builds return #NUM! here, i.e. they collapse the two documented error classes onto the out-of-range one"
+    },
+    {
+      "id": "COT_out_of_range_num",
+      "formula": "=COT(2^27)",
+      "description": "An argument at the documented magnitude limit of 2^27",
+      "setup_cells": {
+        "A5": 45
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"The absolute value of Number must be less than 2^27\" and \"If Number is outside its constraints, COT returns the #NUM! error value.\" 2^27 = 134217728 is exactly the excluded boundary. EXECUTED RESULT: all four LibreOffice builds ignore this range check and return -0.846108835418734 instead of the documented error -- and that number is not garbage: cot(2^27) re-derived with mpmath at 60 digits is -0.84610883541873383485, so LibreOffice's argument reduction is accurate to full double precision here and it simply declines to refuse an input Excel refuses"
+    },
+    {
+      "id": "COT_text_argument_value",
+      "formula": "=COT(\"abc\")",
+      "description": "A non-numeric argument",
+      "setup_cells": {
+        "A5": 45
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If Number is a non-numeric value, COT returns the #VALUE! error value.\""
+    }
+  ]
+}

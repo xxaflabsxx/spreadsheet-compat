@@ -1,0 +1,70 @@
+{
+  "function": "COUPDAYBS",
+  "cases": [
+    {
+      "id": "COUPDAYBS_doc_example",
+      "formula": "=COUPDAYBS(A2,A3,A4,A5)",
+      "description": "Microsoft's documented worked example: days from the start of the coupon period to settlement, semiannual, actual/actual",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": 71,
+      "expected_note": "Microsoft's page publishes this example's result as 71. Setup serials are the dates Microsoft's page prints: 40568 = 2011-01-25 (settlement), 40862 = 2011-11-15 (maturity), frequency 2 (semiannual), basis 1 (actual/actual). Counting coupon dates back from maturity in six-month steps gives 2011-11-15, 2011-05-15, 2010-11-15, so the settlement date falls in the coupon period 2010-11-15 to 2011-05-15. On basis 1 the count is the actual number of days from 2010-11-15 to 2011-01-25: 15 remaining days in November + 31 in December + 25 in January = 71, confirmed by Python date subtraction"
+    },
+    {
+      "id": "COUPDAYBS_basis_0_30_360",
+      "formula": "=COUPDAYBS(A2,A3,A4,0)",
+      "description": "The same bond on the US (NASD) 30/360 basis instead of actual/actual",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": 70,
+      "expected_note": "Basis 0 is documented as US (NASD) 30/360, which counts every month as 30 days: from 2010-11-15 to 2011-01-25 that is (2011-2010)*360 + (1-11)*30 + (25-15) = 360 - 300 + 10 = 70, one day fewer than the actual/actual 71. This case discriminates the basis argument, which the documented example alone does not"
+    },
+    {
+      "id": "COUPDAYBS_bad_frequency_num",
+      "formula": "=COUPDAYBS(A2,A3,3,A5)",
+      "description": "A frequency of 3, which is not one of the permitted values",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If frequency is any number other than 1, 2, or 4, COUPDAYBS returns the #NUM! error value.\""
+    },
+    {
+      "id": "COUPDAYBS_bad_basis_num",
+      "formula": "=COUPDAYBS(A2,A3,A4,5)",
+      "description": "A day-count basis of 5, above the documented maximum of 4",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If basis < 0 or if basis > 4, COUPDAYBS returns the #NUM! error value.\""
+    },
+    {
+      "id": "COUPDAYBS_settlement_after_maturity_num",
+      "formula": "=COUPDAYBS(A3,A2,A4,A5)",
+      "description": "Settlement and maturity swapped, so settlement is after maturity",
+      "setup_cells": {
+        "A2": 40568,
+        "A3": 40862,
+        "A4": 2,
+        "A5": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If settlement >= maturity, COUPDAYBS returns the #NUM! error value.\""
+    }
+  ]
+}

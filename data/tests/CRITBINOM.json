@@ -1,0 +1,77 @@
+{
+  "function": "CRITBINOM",
+  "cases": [
+    {
+      "id": "CRITBINOM_doc_example",
+      "formula": "=CRITBINOM(A2,A3,A4)",
+      "description": "Microsoft's documented worked example: smallest k whose cumulative binomial probability over 6 fair trials reaches 0.75",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 0.5,
+        "A4": 0.75
+      },
+      "expected": 4,
+      "expected_note": "Microsoft's page publishes this example's result as 4. Independently derived by summing the binomial probabilities explicitly: with trials 6 and probability 0.5 the cumulative sums are 0.015625, 0.109375, 0.34375, 0.65625, 0.890625, 0.984375, 1.0 for k = 0..6. The first sum that is >= the criterion 0.75 is 0.890625 at k = 4, which is the documented answer"
+    },
+    {
+      "id": "CRITBINOM_higher_alpha",
+      "formula": "=CRITBINOM(A2,A3,0.9)",
+      "description": "The same trials and probability at a stricter criterion of 0.9",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 0.5,
+        "A4": 0.75
+      },
+      "expected": 5,
+      "expected_note": "From the same explicit cumulative sums, the first value >= 0.9 is 0.984375 at k = 5 (the cumulative sum at k = 4 is 0.890625, just short). This case discriminates the alpha argument and pins the >= comparison direction"
+    },
+    {
+      "id": "CRITBINOM_trials_truncated",
+      "formula": "=CRITBINOM(6.9,A3,0.6)",
+      "description": "A non-integer number of trials, which the documentation says is truncated",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 0.5,
+        "A4": 0.75
+      },
+      "expected": 3,
+      "expected_note": "Excel documents \"If trials is not an integer, it is truncated\", so 6.9 must behave exactly as 6. With 6 trials the cumulative sums are 0.015625, 0.109375, 0.34375, 0.65625, ...; the first one >= the criterion 0.6 is 0.65625 at k = 3. The criterion 0.6 was chosen precisely because it discriminates: with 7 trials the sums are 0.0078125, 0.0625, 0.2265625, 0.5, 0.7734375, ... and the first >= 0.6 is at k = 4, so an engine that rounded 6.9 up to 7 instead of truncating would return 4 here. (At the page's own criterion of 0.75 both 6 and 7 trials give 4, which is why this case does not reuse it)"
+    },
+    {
+      "id": "CRITBINOM_probability_zero_num",
+      "formula": "=CRITBINOM(A2,0,A4)",
+      "description": "A success probability of exactly 0",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 0.5,
+        "A4": 0.75
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability_s is <= 0 or probability_s => 1, CRITBINOM returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds return 0 rather than the documented error -- a plausible-looking answer for an input the documentation excludes. The same silent substitution was already recorded for CRITBINOM's modern replacement BINOM.INV elsewhere in this corpus, so it is the function family's behaviour and not a one-off"
+    },
+    {
+      "id": "CRITBINOM_alpha_one_num",
+      "formula": "=CRITBINOM(A2,A3,1)",
+      "description": "A criterion value of exactly 1",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 0.5,
+        "A4": 0.75
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If alpha <= 0 or alpha => 1, CRITBINOM returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds return 6 -- the trial count itself, since no cumulative probability strictly exceeds a criterion of exactly 1 until the last one -- rather than the documented error. As with the probability_s case, the modern BINOM.INV shows the same behaviour elsewhere in this corpus"
+    },
+    {
+      "id": "CRITBINOM_negative_trials_num",
+      "formula": "=CRITBINOM(-1,A3,A4)",
+      "description": "A negative number of trials",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 0.5,
+        "A4": 0.75
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If trials < 0, CRITBINOM returns the #NUM! error value.\""
+    }
+  ]
+}
