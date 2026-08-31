@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LENB and CJK text: byte counts that don&#39;t match the docs</title>
+<meta name="description" content="Microsoft&#39;s archived LEN/LENB page says LENB counts 2 bytes per character only under a DBCS default language, otherwise 1. Executed under a non-DBCS locale, =LENB(&#34;日本&#34;) returned 4 in both LibreOffice 25.8.7.3 and Google Sheets, not the documented 2 - and not the 6 bytes UTF-8 actually uses.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:title" content="LENB and CJK text: byte counts that don&#39;t match the docs">
+<meta property="og:description" content="Microsoft&#39;s archived LEN/LENB page says LENB counts 2 bytes per character only under a DBCS default language, otherwise 1. Executed under a non-DBCS locale, =LENB(&#34;日本&#34;) returned 4 in both LibreOffice 25.8.7.3 and Google Sheets, not the documented 2 - and not the 6 bytes UTF-8 actually uses.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"LENB and CJK text: byte counts that don't match the docs","item":"https://canispreadsheet.com/guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>LENB counts 2 bytes per CJK character everywhere — the docs say 1 outside DBCS locales</h1>
+
+<p><code>LENB</code> is supposed to count bytes where <code>LEN</code> counts characters. For
+<code>"Phoenix, AZ"</code> they are both 11 and nobody thinks about it. The whole point of the
+function is what happens with Japanese, Chinese or Korean text, where a character is not a byte
+&mdash; and that is exactly where the documented rule and the executed behaviour part company.</p>
+
+<p>We ran <code>=LENB("日本")</code> &mdash; two CJK characters, no spaces, nothing else. LibreOffice
+Calc 25.8.7.3 returned <strong>4</strong>. Google Sheets returned <strong>4</strong>.
+Microsoft&rsquo;s documented rule, applied to the locale our harness runs under, gives
+<strong>2</strong>.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>This is one of the few pages on this site where <em>both</em> engines we execute diverge from the
+  documented answer, and they diverge to the same number. Microsoft&rsquo;s archived LEN/LENB page
+  says, verbatim: &ldquo;LENB counts 2 bytes per character <em>only when a DBCS language is set as the
+  default language</em>. Otherwise LENB behaves the same as LEN, counting 1 byte per character.&rdquo;
+  Our harness VM&rsquo;s default language is <code>en_US.UTF-8</code>, which is not a DBCS language, so
+  the documented answer here is 2. Both engines returned 4 &mdash; two bytes per character, as though a
+  DBCS language were always in force. All four LibreOffice builds we tested (24.2.0.3, 24.8.7.2,
+  25.2.0.3 and 25.8.7.3) returned 4.</p>
+</div>
+
+<h2 class="section-title">4 is not the UTF-8 byte count</h2>
+<p>It is worth being precise about which wrong answer this is, because &ldquo;LENB counts raw
+bytes&rdquo; is the natural guess and it does not fit the measurement.</p>
+<p>The string <code>日本</code> encodes as <strong>6</strong> bytes in UTF-8 (three per character) and
+<strong>4</strong> bytes in UTF-16 (two per character). Neither engine returned 6. Both returned 4. So
+what is being counted is not the storage the file actually uses &mdash; both LibreOffice and Google
+Sheets store text as UTF-8 &mdash; but two bytes per character, which is the DBCS rule applied
+unconditionally rather than only under a DBCS default language.</p>
+<p>That matters for a migration because it changes what the number means. A <code>LENB</code> result
+of 4 is not a promise about how many bytes anything occupies anywhere; it is a character count
+multiplied by two for the characters an engine considers wide. If you are sizing a database column, a
+fixed-width export record or an API payload against real UTF-8 bytes, <code>LENB</code> is not
+measuring the thing you think it is measuring in <em>any</em> of the three engines.</p>
+
+<h2 class="section-title">Executed: the LENB corpus</h2>
+<p>All six <code>LENB</code> cases, run as written. The Excel column is Microsoft&rsquo;s documented
+behaviour as recorded in our test corpus &mdash; we do not run Excel. The Google Sheets column is
+executed output from the dated Drive-import run of 2026-08-31. The LibreOffice column is Calc
+25.8.7.3, with 24.2.0.3, 24.8.7.2 and 25.2.0.3 returning the identical value on every row.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented, non-DBCS default language)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=LENB("Phoenix, AZ")</td><td>11</td><td class="result">11</td><td class="result">11</td></tr>
+    <tr><td class="formula">=LENB("")</td><td>0</td><td class="result">0</td><td class="result">0</td></tr>
+    <tr><td class="formula">=LENB("  One   ")</td><td>8</td><td class="result">8</td><td class="result">8</td></tr>
+    <tr><td class="formula">=LENB(1234)</td><td>4</td><td class="result">4</td><td class="result">4</td></tr>
+    <tr><td class="formula">=LENB("日本")</td><td>2</td><td class="result"><strong>4</strong></td><td class="result"><strong>4</strong></td></tr>
+    <tr><td class="formula">=LENB(1/0)</td><td>#DIV/0!</td><td class="result">#DIV/0!</td><td class="result">#DIV/0!</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Five of the six rows agree everywhere, and they are the rows where the DBCS rule cannot change the
+answer: every character in <code>"Phoenix, AZ"</code>, <code>"  One   "</code> and the coerced number
+<code>1234</code> is single-byte under either reading, an empty string has no bytes under either, and
+an error argument propagates before <code>LENB</code> ever sees a character. The single CJK row is the
+whole divergence.</p>
+<p>Two smaller things the table settles. Spaces count &mdash; leading and trailing &mdash; so
+<code>"  One   "</code> is 8 and not 3, in both engines as documented. And a numeric argument is
+converted to its text form first, so <code>=LENB(1234)</code> is 4 rather than an error or a byte
+width of the underlying double.</p>
+<p>For context on whether this batch of text functions is broadly trustworthy: <code>T</code>, the
+other text function executed in the same 2026-08-31 run, matched the documented result on all six of
+its cases in both engines &mdash; including the two that catch a naive implementation,
+<code>=T(19)</code> and <code>=T(TRUE)</code>, which both correctly returned empty text rather than
+<code>"19"</code> or <code>"TRUE"</code>. The <code>LENB</code> divergence is a specific finding, not
+noise from a bad run.</p>
+
+<h2 class="section-title">Microsoft has deprecated LENB</h2>
+<p>There is a second reason not to build on this function, and it is on the help page itself. The
+current live LEN/LENB article states that <strong>the LENB function is deprecated</strong>, and it has
+dropped the DBCS explanation entirely &mdash; the &ldquo;2 bytes per character only when a DBCS
+language is set as the default language&rdquo; wording that our test case is measured against now
+survives only in the archived version of the page.</p>
+<p>So the documented behaviour this page compares against is documentation Microsoft has retired. That
+cuts both ways honestly: it means our Excel column for the CJK row rests on an archived rule rather
+than a current one, and it means a workbook whose logic depends on <code>LENB</code> is depending on a
+function its own vendor has stopped explaining. Both are reasons to migrate away from it rather than
+to reason carefully about it.</p>
+
+<h2 class="section-title">What this means for a CJK migration</h2>
+<p><strong>The risk depends on the locale the workbook was built under, not on the workbook.</strong>
+This is the unusual part. If the original Excel file was authored and run under a Japanese, Simplified
+Chinese, Traditional Chinese or Korean default language, then under the documented rule Excel counted
+2 bytes per CJK character &mdash; the same 4 that LibreOffice and Google Sheets returned for us. Those
+workbooks migrate without a change in value. If the original ran under a non-DBCS default language
+such as <code>en-US</code>, the documented rule gives 1 byte per character, and every
+<code>LENB</code> over CJK text <em>doubles</em> on migration. The formula is identical in both cases;
+only the machine it used to run on differs.</p>
+<p><strong>The failure is silent and directional.</strong> A doubled byte count does not error. It
+overstates width, so the typical symptoms are a validation rule that starts rejecting valid input, a
+&ldquo;field too long&rdquo; flag that fires on rows that were fine yesterday, a truncation
+<code>LEFT</code>/<code>MID</code> that cuts short, or a padding calculation that pads to the wrong
+width in a fixed-width export.</p>
+<p><strong>Find the exposure by searching for the B-suffix family.</strong> <code>LENB</code> is the
+one we executed, but Excel ships a whole set of byte-oriented twins &mdash; <code>LEFTB</code>,
+<code>RIGHTB</code>, <code>MIDB</code>, <code>FINDB</code>, <code>SEARCHB</code>,
+<code>REPLACEB</code> &mdash; that carry the same DBCS wording. None of those has a case in our
+corpus, so we make no claim at all about how any engine implements them; we mention them because a
+workbook that uses one usually uses several, and they are what you should be grepping for.</p>
+<p><strong>Prefer <code>LEN</code> unless you genuinely need bytes.</strong> Most real uses of
+<code>LENB</code> in the wild are counting characters for a display or a validation and reaching for
+the byte version out of habit or copied code. <code>LEN</code> is portable, current, and means one
+thing everywhere.</p>
+<p><strong>If you genuinely need UTF-8 bytes, compute them.</strong> No engine&rsquo;s
+<code>LENB</code> gave us the UTF-8 byte count in this test, so a workbook that needs real byte
+budgets has to build the number rather than ask for it &mdash; typically by classifying characters and
+weighting them. We have no executed case for such a construction and are not going to publish one as
+though we had; the point is only that <code>LENB</code> is not it.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus, and for
+the CJK row that documentation is the archived LEN/LENB page &mdash; the current page has removed the
+DBCS rule and marks the function deprecated. We do not run Excel, and no value in that column is a
+measurement. In particular we cannot tell you what a real Excel returns for <code>=LENB("日本")</code>
+under any locale; we can only tell you what its documentation said it would.</p>
+<p>The locale question cuts into our own results too, and this is the biggest caveat on the page. Our
+LibreOffice runs happen on a VM whose default language is <code>en_US.UTF-8</code>, which is what makes
+the documented answer 2 rather than 4 for that row. We did not re-run the corpus under a DBCS default
+language, so we cannot say whether LibreOffice&rsquo;s answer would change if we did &mdash; only that
+under a non-DBCS default it returns 4 where the documented rule says 1 byte per character. For Google
+Sheets the document and account locale are Google&rsquo;s to decide and we did not control them, so
+treat the Sheets 4 as &ldquo;what the Drive-import run returned&rdquo; and not as a locale-controlled
+experiment.</p>
+<p>Scope. This is one probe, on one two-character string, in one function. <code>LENB</code> is the
+only B-suffix function in our corpus, and our <code>LEN</code> cases are all ASCII, so we have no
+executed value for <code>=LEN("日本")</code> to sit beside the <code>LENB</code> one. Mixed
+ASCII-and-CJK strings, emoji and other astral-plane characters, combining marks, and non-CJK
+non-ASCII text are all untested here.</p>
+<p>The Google Sheets column is executed output from a dated run, because Sheets has no version number
+to pin: a formula-only .xlsx carrying no cached results goes to Google Drive, is recalculated by
+Google&rsquo;s engine, and comes back as .xlsx for readback, with a deterministic
+<code>=1111+2222</code> canary in every sheet proving the recalculation happened. These six cases ran
+on 2026-08-31. See <a href="../methodology.html">our methodology</a> for how recalculation is proven
+rather than assumed, and the function pages for <a href="../functions/lenb.html">LENB</a>,
+<a href="../functions/len.html">LEN</a> and <a href="../functions/t.html">T</a> for the per-engine
+support matrices.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

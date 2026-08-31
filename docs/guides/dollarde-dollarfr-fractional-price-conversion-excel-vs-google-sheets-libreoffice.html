@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOLLARDE and DOLLARFR: fractional bond prices across engines</title>
+<meta name="description" content="Executed: all eight valid DOLLARDE/DOLLARFR conversions match Microsoft&#39;s documented values in LibreOffice 25.8.7.3 and Google Sheets, including the documented truncation of a non-integer fraction. All four error cases return #VALUE! in LibreOffice where #DIV/0! or #NUM! is documented; Google Sheets returns the documented code.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/dollarde-dollarfr-fractional-price-conversion-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:title" content="DOLLARDE and DOLLARFR: fractional bond prices across engines">
+<meta property="og:description" content="Executed: all eight valid DOLLARDE/DOLLARFR conversions match Microsoft&#39;s documented values in LibreOffice 25.8.7.3 and Google Sheets, including the documented truncation of a non-integer fraction. All four error cases return #VALUE! in LibreOffice where #DIV/0! or #NUM! is documented; Google Sheets returns the documented code.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/dollarde-dollarfr-fractional-price-conversion-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"DOLLARDE and DOLLARFR: fractional bond prices across engines","item":"https://canispreadsheet.com/guides/dollarde-dollarfr-fractional-price-conversion-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>DOLLARDE and DOLLARFR agree on every price — and disagree on every error</h1>
+
+<p>US bond and note prices are quoted in fractions, not decimals. A price of <code>1.02</code> in
+sixteenths does not mean one dollar and two cents; it means one and two-sixteenths, which is
+<code>1.125</code>. <code>DOLLARDE</code> converts that notation into a decimal you can do arithmetic
+with, and <code>DOLLARFR</code> converts it back for display. Any sheet that reads a price feed and
+then multiplies by a face value has one of each somewhere in the chain.</p>
+
+<p>We executed the whole corpus for both functions in LibreOffice Calc 25.8.7.3 and Google Sheets. The
+result splits cleanly in two: <strong>every conversion agrees, and every error disagrees.</strong> All
+eight valid cases &mdash; including Microsoft&rsquo;s own documented examples, a negative price, a
+round trip, and the documented truncation of a non-integer fraction &mdash; returned the documented
+value in both engines. All four error cases returned <code>#VALUE!</code> in LibreOffice where
+Microsoft documents <code>#DIV/0!</code> or <code>#NUM!</code>, and Google Sheets returned the
+documented code on all four.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>The arithmetic is not the risk here &mdash; it is exact and it travels. The risk is that a
+  price sheet built around <code>DOLLARDE</code> and <code>DOLLARFR</code> almost always has guard
+  logic wrapped around it, because a fraction denominator arriving as zero or negative is a real thing
+  that happens when a feed hiccups or a lookup misses. That guard is what breaks. A branch keyed on
+  <code>#DIV/0!</code> or on <code>ERROR.TYPE(...)=6</code> stops firing in LibreOffice, because both
+  conditions arrive as <code>#VALUE!</code> instead. All four LibreOffice builds we tested (24.2.0.3,
+  24.8.7.2, 25.2.0.3 and 25.8.7.3) behave identically.</p>
+</div>
+
+<h2 class="section-title">Executed: all twelve cases</h2>
+<p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus &mdash;
+it is the yardstick, and we do not run Excel. The Google Sheets column is executed output from the
+dated Drive-import run of 2026-08-31. The LibreOffice column is Calc 25.8.7.3, and every row returned
+the identical result in 24.2.0.3, 24.8.7.2 and 25.2.0.3.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>What it asks</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ROUND(DOLLARDE(1.02,16),7)</td><td>1 and 2/16 as a decimal</td><td>1.125</td><td class="result">1.125</td><td class="result">1.125</td></tr>
+    <tr><td class="formula">=ROUND(DOLLARDE(1.1,32),7)</td><td>1 and 10/32 as a decimal</td><td>1.3125</td><td class="result">1.3125</td><td class="result">1.3125</td></tr>
+    <tr><td class="formula">=ROUND(DOLLARDE(1.02,16.9),7)</td><td>a non-integer fraction argument</td><td>1.125</td><td class="result">1.125</td><td class="result">1.125</td></tr>
+    <tr><td class="formula">=ROUND(DOLLARDE(-1.02,16),7)</td><td>a negative price</td><td>-1.125</td><td class="result">-1.125</td><td class="result">-1.125</td></tr>
+    <tr><td class="formula">=DOLLARDE(1.02,0)</td><td>fraction of zero</td><td>#DIV/0!</td><td class="result">#DIV/0!</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=DOLLARDE(1.02,-4)</td><td>a negative fraction</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=ROUND(DOLLARFR(1.125,16),7)</td><td>1.125 back into sixteenths</td><td>1.02</td><td class="result">1.02</td><td class="result">1.02</td></tr>
+    <tr><td class="formula">=ROUND(DOLLARFR(1.125,32),7)</td><td>1.125 back into thirty-seconds</td><td>1.04</td><td class="result">1.04</td><td class="result">1.04</td></tr>
+    <tr><td class="formula">=ROUND(DOLLARFR(DOLLARDE(1.02,16),16),7)</td><td>a full round trip</td><td>1.02</td><td class="result">1.02</td><td class="result">1.02</td></tr>
+    <tr><td class="formula">=ROUND(DOLLARFR(1.125,16.9),7)</td><td>a non-integer fraction argument</td><td>1.02</td><td class="result">1.02</td><td class="result">1.02</td></tr>
+    <tr><td class="formula">=DOLLARFR(1.125,0)</td><td>fraction of zero</td><td>#DIV/0!</td><td class="result">#DIV/0!</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=DOLLARFR(1.125,-4)</td><td>a negative fraction</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result"><strong>#VALUE!</strong></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">The fraction argument is truncated, not rounded</h2>
+<p>Microsoft states it in one line on both pages: &ldquo;If fraction is not an integer, it is
+truncated.&rdquo; That is a rule worth having an executed case for, because the two plausible
+behaviours give different money. We ran <code>=DOLLARDE(1.02,16.9)</code>, which under truncation is
+<code>=DOLLARDE(1.02,16)</code> and therefore <code>1.125</code>, and under rounding would be
+<code>=DOLLARDE(1.02,17)</code> and something else entirely. Both engines returned
+<code>1.125</code>. The paired <code>DOLLARFR</code> case returned <code>1.02</code>, likewise the
+truncated answer.</p>
+<p>This matters more than it looks. A fraction denominator is rarely typed as a literal in a real
+sheet &mdash; it usually comes out of a lookup, a division, or a cell someone formatted to zero
+decimal places while the underlying value still carries a fraction. If that cell holds
+<code>15.999999</code> because of a floating-point round trip, truncation makes it 15 and every price
+in the column converts against the wrong denominator, silently and consistently. The behaviour is
+portable across both engines we executed, so migration does not introduce this &mdash; but if you are
+already auditing these formulas, the denominator is the argument to look at.</p>
+
+<h2 class="section-title">Microsoft documents the #DIV/0! condition two different ways</h2>
+<p>The two pages describe the same failure with different boundaries, and this is a documentation
+asymmetry rather than an engine one.</p>
+<p><strong><code>DOLLARDE</code></strong>: &ldquo;If fraction is greater than or equal to 0 and less
+than 1, DOLLARDE returns the #DIV/0! error value.&rdquo; That is a band: <code>0 &le; fraction &lt;
+1</code>.</p>
+<p><strong><code>DOLLARFR</code></strong>: &ldquo;If fraction is 0, DOLLARFR returns the #DIV/0! error
+value.&rdquo; That is a single point.</p>
+<p>In practice the two are equivalent, because the truncation rule fires first: any fraction in
+<code>[0, 1)</code> truncates to <code>0</code>, so <code>DOLLARFR</code>&rsquo;s narrower wording
+reaches the same set of inputs by a different route. The wider <code>DOLLARDE</code> wording is
+arguably the clearer description of what both functions do. But they are published differently, and if
+you are reading the documentation to decide what a guard should catch, you will get a different answer
+depending on which of the two pages you happen to open.</p>
+<p>Our corpus probes only the endpoints of that band &mdash; <code>fraction = 0</code> and
+<code>fraction = -4</code>. We have no executed case for an interior value such as
+<code>fraction = 0.5</code>, so which of the two documented readings each engine actually implements
+there is untested here and we are not going to infer it from the truncation rule.</p>
+
+<h2 class="section-title">The error rows, and what they break</h2>
+<p>Four rows, four <code>#VALUE!</code>s in LibreOffice, and two distinct documented codes underneath
+them. That is worth separating out, because it means <em>neither</em> of the two obvious targeted
+guards survives:</p>
+<p><strong>A <code>#DIV/0!</code>-specific check misses.</strong> <code>=DOLLARDE(price,0)</code> and
+<code>=DOLLARFR(price,0)</code> are documented <code>#DIV/0!</code>, are <code>#DIV/0!</code> in
+Sheets, and are <code>#VALUE!</code> in LibreOffice. Anything written as
+<code>=IF(ERROR.TYPE(x)=2,"no denominator",x)</code> stops firing.</p>
+<p><strong>A <code>#NUM!</code>-specific check misses too.</strong> The negative-fraction rows are
+documented <code>#NUM!</code> &mdash; <code>ERROR.TYPE</code> code 6 &mdash; and arrive as
+<code>#VALUE!</code>, code 3.</p>
+<p><strong><code>IFERROR</code> and <code>ISERROR</code> are unaffected</strong>, because they catch
+every code. If your price sheet wraps these calls in <code>IFERROR</code> and shows a dash, nothing on
+this page will change its behaviour.</p>
+<p>The trap is specifically the sheet that wants to distinguish &ldquo;the feed sent no
+denominator&rdquo; from &ldquo;the denominator is nonsense&rdquo; and encodes that distinction in
+error codes. Those two conditions are genuinely different operationally &mdash; one is a missing
+value, one is bad data &mdash; and Excel and Sheets let you tell them apart while LibreOffice does
+not.</p>
+<p>These four rows are part of a much larger pattern: across our corpus, 41 executed cases in 29
+functions return <code>#VALUE!</code> in LibreOffice where Microsoft documents a different error code.
+The full list, the counts, and the exceptions that run the other way are in
+<a href="../guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">every error
+code LibreOffice reports as #VALUE!</a>.</p>
+
+<h2 class="section-title">Migrating a price sheet</h2>
+<p><strong>The prices themselves are safe.</strong> This is the good news and it is worth stating
+plainly: every conversion in the table above matched to seven decimal places in both executed engines,
+including the round trip. <code>DOLLARDE</code> and <code>DOLLARFR</code> are not functions whose
+numbers you need to re-verify after a migration.</p>
+<p><strong>Audit the guards, not the conversions.</strong> Grep for <code>ERROR.TYPE</code>,
+<code>ISNA(</code>, <code>IFNA(</code> and <code>ISERR(</code> in the neighbourhood of every
+<code>DOLLARDE</code> and <code>DOLLARFR</code>. Those are the formulas whose meaning changes.</p>
+<p><strong>Validate the denominator before the call.</strong> The portable version of the guard tests
+the input rather than the wreckage: something in the shape of
+<code>=IF(NOT(ISNUMBER(f)),"bad feed",IF(INT(f)&lt;1,"no denominator",DOLLARDE(p,f)))</code> gives the
+same answer in every engine, and it also catches the truncation hazard in the same breath, since it
+tests <code>INT(f)</code> rather than <code>f</code>. That is a construction we are describing from the
+documented and executed behaviour above, not a case we ran &mdash; treat it as a suggested shape, not
+as a measured result.</p>
+<p><strong>Watch out for the round trip in reporting.</strong> A common pattern is to convert to
+decimal for arithmetic and back to fractional for display. Our round-trip case matched everywhere on a
+value with an exact binary representation (<code>0.125</code>). Prices that are not exact
+sixteenths or thirty-seconds &mdash; anything with a real floating-point remainder &mdash; are not
+covered by our corpus, so if your sheet round-trips computed averages or interpolated prices rather
+than quoted ones, that is worth checking directly.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column throughout, including both wordings of the <code>#DIV/0!</code> condition, the
+truncation rule and the <code>ERROR.TYPE</code> code numbers, is Microsoft&rsquo;s documented
+behaviour as recorded in our test corpus. We do not run Excel, and no value in that column is a
+measurement.</p>
+<p>The Google Sheets column is executed output from a dated run, because Sheets has no version number
+to pin: a formula-only .xlsx carrying no cached results goes to Google Drive, is recalculated by
+Google&rsquo;s engine, and comes back as .xlsx for readback, with a deterministic
+<code>=1111+2222</code> canary in every sheet proving the recalculation happened. These twelve cases
+ran on 2026-08-31.</p>
+<p>The LibreOffice column is executed output from Calc 25.8.7.3; all twelve cases returned the
+identical results in 24.2.0.3, 24.8.7.2 and 25.2.0.3. Those four builds are the only ones we
+tested.</p>
+<p>Scope. Twelve cases is the entire <code>DOLLARDE</code>/<code>DOLLARFR</code> corpus, and it is
+small. Untested here: fractions strictly between 0 and 1, fraction denominators that are not powers of
+two, text or logical arguments to either function, very large fractions, and prices whose fractional
+part exceeds the denominator (a quote like <code>1.20</code> in sixteenths, which asks for twenty
+sixteenths). See <a href="../methodology.html">our methodology</a> for how recalculation is proven
+rather than assumed, and the function pages for
+<a href="../functions/dollarde.html">DOLLARDE</a> and
+<a href="../functions/dollarfr.html">DOLLARFR</a> for the per-engine support matrices.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

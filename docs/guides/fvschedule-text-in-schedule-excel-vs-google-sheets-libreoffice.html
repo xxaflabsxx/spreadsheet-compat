@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FVSCHEDULE: LibreOffice drops text in the rate schedule</title>
+<meta name="description" content="Microsoft documents any non-numeric value in FVSCHEDULE&#39;s schedule as #VALUE!. Executed, LibreOffice 25.8.7.3 returns 1.09 for =FVSCHEDULE(1,A1:A2) with A2 = &#34;x&#34; - a compounding period silently dropped - while Google Sheets returns #VALUE! as documented.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/fvschedule-text-in-schedule-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:title" content="FVSCHEDULE: LibreOffice drops text in the rate schedule">
+<meta property="og:description" content="Microsoft documents any non-numeric value in FVSCHEDULE&#39;s schedule as #VALUE!. Executed, LibreOffice 25.8.7.3 returns 1.09 for =FVSCHEDULE(1,A1:A2) with A2 = &#34;x&#34; - a compounding period silently dropped - while Google Sheets returns #VALUE! as documented.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/fvschedule-text-in-schedule-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"FVSCHEDULE: LibreOffice drops text in the rate schedule","item":"https://canispreadsheet.com/guides/fvschedule-text-in-schedule-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>FVSCHEDULE silently drops a text rate in LibreOffice, where Excel documents #VALUE!</h1>
+
+<p><code>FVSCHEDULE</code> compounds a principal through a list of period rates: hand it 1 and the
+schedule <code>9%, 11%, 10%</code> and it returns <code>1.33089</code>, because
+<code>1 &times; 1.09 &times; 1.11 &times; 1.10</code> is 1.33089. It is the function you reach for
+when the rate changes every period &mdash; a floating-rate loan, a stepped-discount schedule, a
+year-by-year inflation series read out of a column.</p>
+
+<p>Microsoft is unusually explicit about what happens if that column contains something that is not a
+number. From the <code>FVSCHEDULE</code> page, verbatim: &ldquo;The values in schedule can be numbers
+or blank cells; any other value produces the #VALUE! error value for FVSCHEDULE. Blank cells are taken
+as zeros (no interest).&rdquo; Two rules in one sentence: a blank is a 0% period, and anything else is
+a hard error.</p>
+
+<p>LibreOffice implements the first rule and not the second. We executed
+<code>=FVSCHEDULE(1,A1:A2)</code> with <code>A1 = 0.09</code> and <code>A2 = "x"</code>. Calc 25.8.7.3
+returned <strong>1.09</strong>. Google Sheets returned <strong>#VALUE!</strong>, as documented.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>The error that was supposed to stop the calculation is the thing that goes missing, and what
+  replaces it is a plausible number. <code>1.09</code> is exactly what you get from a one-period
+  schedule &mdash; the text period contributed no growth at all. A schedule of twelve rates with one
+  bad cell in it does not fail in LibreOffice; it quietly compounds eleven periods and hands you a
+  future value that is too low, in a cell that looks completely normal. All four LibreOffice builds we
+  tested (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returned 1.09.</p>
+</div>
+
+<h2 class="section-title">Executed: the whole FVSCHEDULE corpus</h2>
+<p>These are all five <code>FVSCHEDULE</code> cases in our function corpus, run as written. The Excel
+column is Microsoft&rsquo;s documented behaviour and is the value both executed engines are measured
+against &mdash; we do not run Excel. The Google Sheets column is executed output from the dated
+Drive-import run of 2026-08-31. The LibreOffice column is Calc 25.8.7.3, and every row returned the
+identical value in 24.2.0.3, 24.8.7.2 and 25.2.0.3 as well.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Schedule</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ROUND(FVSCHEDULE(1,A1:A3),7)</td><td>0.09, 0.11, 0.1</td><td>1.33089</td><td class="result">1.33089</td><td class="result">1.33089</td></tr>
+    <tr><td class="formula">=ROUND(FVSCHEDULE(10000,A1:A2),4)</td><td>0.05, 0.05</td><td>11025</td><td class="result">11025</td><td class="result">11025</td></tr>
+    <tr><td class="formula">=ROUND(FVSCHEDULE(1000,A1:A3),4)</td><td>0.1, <em>blank</em>, 0.1</td><td>1210</td><td class="result">1210</td><td class="result">1210</td></tr>
+    <tr><td class="formula">=ROUND(FVSCHEDULE(1000,A1:A2),4)</td><td>-0.1, 0.1</td><td>990</td><td class="result">990</td><td class="result">990</td></tr>
+    <tr><td class="formula">=FVSCHEDULE(1,A1:A2)</td><td>0.09, "x"</td><td>#VALUE!</td><td class="result">#VALUE!</td><td class="result"><strong>1.09</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p>Four rows out of five are perfect agreement, including the two that carry the arithmetic:
+Microsoft&rsquo;s own documented example and a negative rate that shrinks the principal. The
+blank-cell row is worth its own sentence, because it is the rule that <em>does</em> hold everywhere:
+<code>1000 &times; 1.1 &times; 1.0 &times; 1.1 = 1210</code>, so the empty cell in the middle of the
+schedule really is a 0% period in both executed engines, not a skipped one. That is the opposite of
+how most statistical functions treat a blank, and it is documented.</p>
+
+<h2 class="section-title">What 1.09 does and does not tell us</h2>
+<p>Be precise about what the measurement proves. The executed value is <code>1.09</code>, from a
+principal of 1 and a schedule of <code>0.09</code> followed by <code>"x"</code>. There are two ways to
+get there:</p>
+<p><strong>The text was treated as a blank</strong> &mdash; that is, a 0% period.
+<code>1 &times; 1.09 &times; 1.00 = 1.09</code>.</p>
+<p><strong>The text was skipped entirely</strong>, leaving a one-period schedule.
+<code>1 &times; 1.09 = 1.09</code>.</p>
+<p>Our corpus cannot separate those two readings, because on this input they produce the same number,
+and we are not going to assert one over the other from a single case. What we can say is the part that
+matters to a migration: <em>the documented error did not occur, and the period contributed no
+growth.</em> Under either reading the future value comes out as if that period had a rate of zero, so
+the financial consequence is identical &mdash; a compounding period silently dropped out of the
+calculation.</p>
+
+<h2 class="section-title">This is a rare kind of divergence</h2>
+<p>Most of the ways LibreOffice diverges from Microsoft&rsquo;s documentation are error-code
+substitutions: the formula still fails, and only the label on the failure changes. We have executed
+41 such cases; they are collected in
+<a href="../guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">every error
+code LibreOffice reports as #VALUE!</a>. Those are a real migration problem, but they are a
+<em>visible</em> one.</p>
+<p>Cases where LibreOffice returns an ordinary value where Microsoft documents an error are much
+rarer. Across our whole corpus &mdash; 954 executed cases over 299 functions &mdash; 108 cases have a
+documented result that is an error, and in LibreOffice Calc 25.8.7.3 exactly <strong>five</strong> of
+them come back as a value instead of any error at all:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th><th>Written up in</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=FVSCHEDULE(1,A1:A2) with A2 = "x"</td><td>#VALUE!</td><td class="result">1.09</td><td>this page</td></tr>
+    <tr><td class="formula">=MROUND(5,-2)</td><td>#NUM!</td><td class="result">6</td><td><a href="../guides/mround-negative-multiple-excel-vs-libreoffice.html">MROUND with a negative multiple</a></td></tr>
+    <tr><td class="formula">=POWER(-8,1/3)</td><td>#NUM!</td><td class="result">-2</td><td><a href="../guides/power-negative-base-fractional-exponent-excel-vs-google-sheets-libreoffice.html">POWER with a negative base</a></td></tr>
+    <tr><td class="formula">=CHAR(0)</td><td>#VALUE!</td><td class="result">the escape string _x0000_</td><td><a href="../guides/char-unichar-zero-excel-vs-libreoffice.html">CHAR and UNICHAR of zero</a></td></tr>
+    <tr><td class="formula">=UNICHAR(0)</td><td>#VALUE!</td><td class="result">the escape string _x0000_</td><td><a href="../guides/char-unichar-zero-excel-vs-libreoffice.html">CHAR and UNICHAR of zero</a></td></tr>
+  </tbody>
+</table>
+</div>
+<p><code>FVSCHEDULE</code> is the only finance function in that list, and it is the only one of the
+five whose silent result is a plain, believable amount of money. <code>MROUND(5,-2) = 6</code> and
+<code>POWER(-8,1/3) = -2</code> are at least arguable answers to a question the documentation calls
+invalid; <code>_x0000_</code> is visibly wrong the moment you look at the cell. A future value that
+is 9% too low after one dropped period is none of those things.</p>
+
+<h2 class="section-title">A migration checklist for rate schedules</h2>
+<p><strong>1. Find every <code>FVSCHEDULE</code> and look at the range, not the formula.</strong> The
+formula is fine. The hazard is entirely in what the schedule range contains on the day it runs.
+Search the workbook for <code>FVSCHEDULE(</code> and note the second argument of each hit.</p>
+<p><strong>2. Assume the schedule column has text in it until you have checked.</strong> The
+usual sources, in rough order of how often they turn up: a placeholder like <code>n/a</code>,
+<code>TBD</code>, <code>&mdash;</code> or <code>?</code> left in a future period; a header row or
+label caught inside the range when someone extended it; a rate pasted from a PDF or a web page and
+stored as text; an apostrophe-prefixed cell. Any of these produces <code>#VALUE!</code> in Excel and
+Google Sheets, and a quiet under-compounding in LibreOffice.</p>
+<p><strong>3. Count the periods that actually compounded.</strong> The cheapest independent check is a
+second cell that does not use <code>FVSCHEDULE</code> at all:
+<code>=SUMPRODUCT(--ISNUMBER(schedule))</code> against <code>=ROWS(schedule)</code>. If those two
+disagree, some period in your schedule is contributing nothing, whatever the future-value cell says.
+This is arithmetic we are describing rather than a case we executed &mdash; treat it as a suggested
+guard, not as a measured result.</p>
+<p><strong>4. Guard the input rather than the output.</strong> Wrapping the call in
+<code>IFERROR</code> is exactly the wrong move here: in Excel and Sheets it swallows the
+<code>#VALUE!</code> that was warning you, and in LibreOffice there is no error to catch in the first
+place, so it changes nothing. If you want the workbook to behave the same in all three, test the
+schedule explicitly &mdash; something in the shape of
+<code>=IF(SUMPRODUCT(--ISNUMBER(schedule))&lt;&gt;ROWS(schedule),NA(),FVSCHEDULE(p,schedule))</code>
+&mdash; so the failure is yours and not the engine&rsquo;s. Again: a suggestion derived from the
+documented and executed behaviour above, not a formula we ran.</p>
+<p><strong>5. Watch the direction of travel.</strong> A workbook authored and sanity-checked in
+LibreOffice can carry a text cell in a schedule for years without anyone noticing, because it never
+complains. Open that same file in Excel or Google Sheets and the cell turns into <code>#VALUE!</code>,
+which then propagates into every total that touches it. The migration does not create the bug; it
+reveals one that was already producing wrong numbers.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus, quoted
+from the <code>FVSCHEDULE</code> page. We do not run Excel, and no value in that column is a
+measurement.</p>
+<p>The Google Sheets column is executed output from a dated run, because Sheets has no version number
+to pin. A formula-only .xlsx carrying no cached results goes to Google Drive, is recalculated by
+Google&rsquo;s engine, and comes back as .xlsx for readback, with a deterministic
+<code>=1111+2222</code> canary in every sheet proving the recalculation happened. These five cases ran
+on 2026-08-31.</p>
+<p>The LibreOffice column is executed output from Calc 25.8.7.3; the same five cases returned the same
+five values in 24.2.0.3, 24.8.7.2 and 25.2.0.3. Those four builds are the only ones we tested.</p>
+<p>Scope. Our text probe is the literal string <code>"x"</code> in a two-cell schedule. We have no
+corpus case for a <em>numeric</em> string such as a rate stored as text, for an error value inside a
+schedule, for a logical value inside a schedule, or for a schedule passed as an array constant rather
+than a range &mdash; so we make no claim about any of those, and a workbook whose real-world hazard is
+&ldquo;numbers stored as text&rdquo; should be checked directly rather than assumed to match the
+<code>"x"</code> result. See <a href="../methodology.html">our methodology</a> for how recalculation is
+proven rather than assumed, and <a href="../functions/fvschedule.html">the FVSCHEDULE function
+page</a> for the per-engine support matrix.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Every error code LibreOffice reports as #VALUE!</title>
+<meta name="description" content="Across our 954-case executed corpus, 41 cases in 29 functions return #VALUE! in LibreOffice Calc 25.8.7.3 where Microsoft documents #NUM! (32), #DIV/0! (4), #REF! (3) or #N/A (2). Google Sheets returns the documented code on 40 of the 41. Identical in all four LibreOffice builds tested.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">
+<meta property="og:title" content="Every error code LibreOffice reports as #VALUE!">
+<meta property="og:description" content="Across our 954-case executed corpus, 41 cases in 29 functions return #VALUE! in LibreOffice Calc 25.8.7.3 where Microsoft documents #NUM! (32), #DIV/0! (4), #REF! (3) or #N/A (2). Google Sheets returns the documented code on 40 of the 41. Identical in all four LibreOffice builds tested.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"Every error code LibreOffice reports as #VALUE!","item":"https://canispreadsheet.com/guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>LibreOffice collapses 41 documented error conditions into #VALUE!</h1>
+
+<p>Excel has five everyday error codes and uses them to mean different things. <code>#NUM!</code> is
+a number that is out of the function&rsquo;s domain. <code>#DIV/0!</code> is a divisor of zero.
+<code>#REF!</code> is a reference that points nowhere. <code>#N/A</code> is a lookup that found
+nothing. <code>#VALUE!</code> is the wrong <em>type</em> of thing entirely.</p>
+
+<p>LibreOffice Calc has all five codes too, and returns them correctly most of the time. But there is
+a large, systematic class of conditions where it returns <code>#VALUE!</code> and the documentation
+says something else. We have now executed enough of the corpus to put a number on it.</p>
+
+<div class="quirk-box">
+  <h3>The count</h3>
+  <p>Our corpus holds 954 executed cases across 299 functions. <strong>108</strong> of those cases
+  have a documented result that is an error rather than a value. In LibreOffice Calc 25.8.7.3:</p>
+  <ul>
+    <li><strong>60</strong> return the documented error code.</li>
+    <li><strong>41</strong> return <code>#VALUE!</code> instead &mdash; 32 where <code>#NUM!</code> is
+    documented, 4 where <code>#DIV/0!</code> is, 3 where <code>#REF!</code> is, and 2 where
+    <code>#N/A</code> is. They span <strong>29 different functions</strong>.</li>
+    <li><strong>2</strong> return some other non-matching error code.</li>
+    <li><strong>5</strong> return an ordinary value and no error at all.</li>
+  </ul>
+  <p>All 41 of the <code>#VALUE!</code> substitutions returned <code>#VALUE!</code> in every one of
+  the four LibreOffice builds we keep pinned &mdash; 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. This
+  is not a regression anyone is going to fix out from under you; it is how Calc reports invalid
+  arguments.</p>
+</div>
+
+<p>Google Sheets, executed against the same cases, returned the documented error code on
+<strong>40 of the 41</strong>. So this is not a two-against-one disagreement about what an error
+&ldquo;should&rdquo; be. On this particular axis LibreOffice is the outlier, and Sheets and
+Microsoft&rsquo;s documentation agree with each other almost perfectly.</p>
+
+<h2 class="section-title">Executed: all 41 cases</h2>
+<p>Grouped by the error code Microsoft documents, then by function. The Excel column is
+Microsoft&rsquo;s documented behaviour as recorded in our test corpus &mdash; it is the yardstick, and
+we do not run Excel. The Google Sheets column is executed output from dated Drive-import runs; rows
+marked &dagger; ran on 2026-08-31 and the rest on 2026-08-29. The LibreOffice column is Calc 25.8.7.3,
+and every row returned <code>#VALUE!</code> in the other three builds too.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Function</th><th>Formula</th><th>Inputs</th><th>Excel (documented)</th><th>Google Sheets (executed)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td>DATEDIF</td><td class="formula">=DATEDIF(DATE(2024,1,10),DATE(2024,1,1),&quot;D&quot;)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>DGET</td><td class="formula">=DGET(A1:B4,&quot;Sales&quot;,D1:D2)</td><td>A1 = &quot;Region&quot;, A2 = &quot;East&quot;, A3 = &quot;West&quot;, A4 = &quot;East&quot;, B1 = &quot;Sales&quot;, B2 = 100, B3 = 200, B4 = 50, D1 = &quot;Region&quot;, D2 = &quot;East&quot;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>DOLLARDE</td><td class="formula">=DOLLARDE(1.02,-4)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>DOLLARFR</td><td class="formula">=DOLLARFR(1.125,-4)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>FLOOR</td><td class="formula">=FLOOR(2.5,-2)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LARGE</td><td class="formula">=LARGE(A1:A3,0)</td><td>A1:A3 = 5, 3, 8</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LARGE</td><td class="formula">=LARGE(A1:A5,6)</td><td>A1:A5 = 5, 3, 8, 1, 9</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LN</td><td class="formula">=LN(-5)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LN</td><td class="formula">=LN(0)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LOG</td><td class="formula">=LOG(-10)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LOG</td><td class="formula">=LOG(0)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LOG10</td><td class="formula">=LOG10(-5)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>LOG10</td><td class="formula">=LOG10(0)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>NORM.DIST</td><td class="formula">=NORM.DIST(42,40,0,TRUE)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>NORM.INV</td><td class="formula">=NORM.INV(0,40,1.5)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>NORM.INV</td><td class="formula">=NORM.INV(0.5,40,-1)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>NORM.S.INV</td><td class="formula">=NORM.S.INV(-0.5)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>NORM.S.INV</td><td class="formula">=NORM.S.INV(1)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>PDURATION</td><td class="formula">=PDURATION(0,2000,2200)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>PDURATION</td><td class="formula">=PDURATION(0.025,2000,-2200)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>PERCENTILE.EXC</td><td class="formula">=PERCENTILE.EXC(A1:A10,0)</td><td>A1:A10 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>PERCENTILE.EXC</td><td class="formula">=PERCENTILE.EXC(A1:A10,1)</td><td>A1:A10 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>PERCENTILE.INC</td><td class="formula">=PERCENTILE.INC(A1:A3,1.5)</td><td>A1:A3 = 1, 2, 3</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>QUARTILE.INC</td><td class="formula">=QUARTILE.INC(A1:A3,5)</td><td>A1:A3 = 1, 2, 3</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>RRI</td><td class="formula">=RRI(0,10000,11000)</td><td>&mdash;</td><td>#NUM!</td><td class="result"><strong>#DIV/0!</strong> &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>RRI</td><td class="formula">=RRI(96,0,11000)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>SMALL</td><td class="formula">=SMALL(A1:A3,0)</td><td>A1:A3 = 5, 3, 8</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>SMALL</td><td class="formula">=SMALL(A1:A5,6)</td><td>A1:A5 = 5, 3, 8, 1, 9</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>SQRT</td><td class="formula">=SQRT(-16)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>VDB</td><td class="formula">=VDB(2400,300,-10,0,1)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>WEEKDAY</td><td class="formula">=WEEKDAY(DATE(2008,2,14),99)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>YEARFRAC</td><td class="formula">=YEARFRAC(DATE(2012,1,1),DATE(2012,7,30),9)</td><td>&mdash;</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>DOLLARDE</td><td class="formula">=DOLLARDE(1.02,0)</td><td>&mdash;</td><td>#DIV/0!</td><td class="result">#DIV/0! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>DOLLARFR</td><td class="formula">=DOLLARFR(1.125,0)</td><td>&mdash;</td><td>#DIV/0!</td><td class="result">#DIV/0! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>MIRR</td><td class="formula">=MIRR(A1:A3,0.1,0.12)</td><td>A1:A3 = 100, 200, 300</td><td>#DIV/0!</td><td class="result">#DIV/0! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>SKEW</td><td class="formula">=SKEW(A1:A4)</td><td>A1:A4 = 5, 5, 5, 5</td><td>#DIV/0!</td><td class="result">#DIV/0! &dagger;</td><td class="result">#VALUE!</td></tr>
+    <tr><td>HLOOKUP</td><td class="formula">=HLOOKUP(&quot;a&quot;,A1:C2,5,FALSE)</td><td>A1 = &quot;a&quot;, A2 = 1, B1 = &quot;b&quot;, B2 = 2, C1 = &quot;c&quot;, C2 = 3</td><td>#REF!</td><td class="result">#REF!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>OFFSET</td><td class="formula">=OFFSET(A1,-1,0)</td><td>&mdash;</td><td>#REF!</td><td class="result">#REF!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>VLOOKUP</td><td class="formula">=VLOOKUP(&quot;a&quot;,A1:B3,5,FALSE)</td><td>A1 = &quot;a&quot;, A2 = &quot;b&quot;, A3 = &quot;c&quot;, B1 = 1, B2 = 2, B3 = 3</td><td>#REF!</td><td class="result">#REF!</td><td class="result">#VALUE!</td></tr>
+    <tr><td>MODE</td><td class="formula">=MODE(A1:A4)</td><td>A1:A4 = 1, 2, 3, 4</td><td>#N/A</td><td class="result">#N/A</td><td class="result">#VALUE!</td></tr>
+    <tr><td>MODE.SNGL</td><td class="formula">=MODE.SNGL(1,2,3)</td><td>&mdash;</td><td>#N/A</td><td class="result">#N/A</td><td class="result">#VALUE!</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">The one row where Google Sheets is not the documented answer</h2>
+<p><code>=RRI(0,10000,11000)</code> is a three-way split, and it is the only one in the table.
+<code>RRI</code> computes the equivalent interest rate for the growth of an investment;
+Microsoft documents <code>#NUM!</code> when <code>nper</code> is zero. Google Sheets returned
+<code>#DIV/0!</code> on 2026-08-31. LibreOffice 25.8.7.3 returned <code>#VALUE!</code>. Three engines,
+three different codes for the same degenerate input.</p>
+<p>Sheets&rsquo; answer is arguably the more honest description of what happened &mdash; the
+rate formula divides by <code>nper</code> &mdash; but it is not the documented one, and a branch
+keyed on either code will misfire in one engine or the other. The companion case
+<code>=RRI(96,0,11000)</code>, a present value of zero, does return the documented <code>#NUM!</code>
+in Sheets, so this is a per-condition difference rather than a whole function behaving differently.</p>
+
+<h2 class="section-title">And the two rows that go the other way</h2>
+<p>LibreOffice is not simply funnelling every failure into <code>#VALUE!</code>. Two executed cases in
+the corpus return a non-matching error that is <em>not</em> <code>#VALUE!</code>, and one of them
+inverts the pattern on this page exactly:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ISPMT(0.1,1,0,8000000)</td><td>#DIV/0!</td><td class="result">#DIV/0! &dagger;</td><td class="result"><strong>#NUM!</strong></td></tr>
+    <tr><td class="formula">=FILTER(A1:A3,B1:B3&gt;100) with no matching rows</td><td>#CALC!</td><td class="result">#N/A</td><td class="result"><strong>#N/A</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p><code>ISPMT</code> with <code>nper = 0</code> is documented as <code>#DIV/0!</code>, is
+<code>#DIV/0!</code> in Sheets, and is <code>#NUM!</code> in LibreOffice &mdash; the exact reverse of
+the substitution the rest of this page is about. (Microsoft&rsquo;s <code>ISPMT</code> page documents
+no error condition at all; the <code>#DIV/0!</code> in that row is derived from the interest formula
+the page does publish, which divides by <code>nper</code>, and our corpus marks it as derived rather
+than quoted.) So &ldquo;LibreOffice always says
+<code>#VALUE!</code>&rdquo; is a useful rule of thumb and a false statement; you cannot predict the
+code, you can only look it up. The <code>FILTER</code> row is a different story again, about an error
+code that LibreOffice does not have at all, and it has its own write-up:
+<a href="../guides/filter-no-results-calc-error-excel-vs-libreoffice.html">FILTER with no results
+returns #CALC! in Excel and #N/A in LibreOffice</a>.</p>
+
+<h2 class="section-title">Why it happens</h2>
+<p>Internally LibreOffice maps a broad class of out-of-domain and invalid-argument conditions onto a
+single error state &mdash; err:502, &ldquo;invalid argument&rdquo; &mdash; which surfaces to the sheet
+as <code>#VALUE!</code>. Excel and Google Sheets keep the domain failure (<code>#NUM!</code>), the
+divisor failure (<code>#DIV/0!</code>), the reference failure (<code>#REF!</code>) and the
+not-found failure (<code>#N/A</code>) as distinct outcomes.</p>
+<p>All three engines agree that these formulas are invalid. They disagree only on which word to print,
+and every valid input to the same functions matches exactly &mdash; <code>=LN(1)</code>,
+<code>=SQRT(16)</code>, <code>=LARGE(A1:A5,2)</code>, <code>=VLOOKUP("a",A1:B3,2,FALSE)</code>,
+Microsoft&rsquo;s own documented <code>MIRR</code>, <code>VDB</code>, <code>NORM.DIST</code> and
+<code>PDURATION</code> examples. It is strictly the error path that diverges. That is what makes this
+easy to miss and expensive to hit: a workbook&rsquo;s happy path travels perfectly, and only the
+edge-case branches change meaning.</p>
+
+<h2 class="section-title">What actually breaks: error-branch logic</h2>
+<p>Nothing on this page changes a number. What changes is which branch of an error handler fires.</p>
+<p><strong><code>IFERROR</code> and <code>ISERROR</code> are safe.</strong> They catch every error
+code, so they behave identically before and after migration. <code>=IFERROR(LN(x),0)</code> returns
+<code>0</code> whether the inner failure was <code>#NUM!</code> or <code>#VALUE!</code>. If a workbook
+uses nothing but these two, this whole page is trivia.</p>
+<p><strong><code>ERROR.TYPE</code> is where it bites.</strong> Microsoft documents
+<code>ERROR.TYPE</code> as returning 1 for <code>#NULL!</code>, 2 for <code>#DIV/0!</code>, 3 for
+<code>#VALUE!</code>, 4 for <code>#REF!</code>, 5 for <code>#NAME?</code>, 6 for <code>#NUM!</code>
+and 7 for <code>#N/A</code>. A formula written
+<code>=IF(ERROR.TYPE(x)=6,"out of range",...)</code> is keyed on <code>#NUM!</code>. Run it in
+LibreOffice against any of the 32 <code>#NUM!</code> rows above and the error arrives as
+<code>#VALUE!</code> &mdash; type 3 &mdash; so the branch silently never fires and the formula falls
+through to whatever the <code>ELSE</code> was. The code numbers themselves have their own
+divergences, which we cover in
+<a href="../guides/error-type-codes-excel-vs-libreoffice.html">ERROR.TYPE codes across engines</a>.</p>
+<p><strong><code>ISNA</code> and <code>IFNA</code> are the sharpest case.</strong> Both
+<code>MODE</code> rows are documented as <code>#N/A</code> &mdash; the &ldquo;no repeated value&rdquo;
+condition &mdash; and both come back as <code>#VALUE!</code> in LibreOffice. A guard written
+<code>=IF(ISNA(MODE(range)),"no mode",MODE(range))</code> works in Excel and Sheets and stops working
+in Calc, where the <code>#VALUE!</code> sails straight past <code>ISNA</code> and lands in the
+user&rsquo;s face. Same for <code>=IFNA(VLOOKUP(...),"not found")</code> over the
+out-of-range-column case, which is documented <code>#REF!</code> and executes as <code>#VALUE!</code>.</p>
+<p><strong>Conditional formatting and data validation inherit the problem</strong>, because they are
+usually built on the same <code>ISERROR</code>/<code>ISNA</code>/<code>ERROR.TYPE</code> vocabulary.
+A red-highlight rule keyed on <code>#N/A</code> simply stops highlighting.</p>
+
+<h2 class="section-title">How to migrate safely</h2>
+<p><strong>Search for the discriminating functions, not for the failing ones.</strong> The 29
+functions in the table are not the risk &mdash; they fail in every engine. The risk is wherever a
+formula asks <em>which</em> error it got. Grep the workbook for <code>ERROR.TYPE</code>,
+<code>ISNA(</code>, <code>IFNA(</code>, and <code>ISERR(</code> (which excludes <code>#N/A</code> and
+so is also code-sensitive). Those hits are the migration work; everything else is noise.</p>
+<p><strong>Rewrite discriminating guards as broad ones where the distinction does not earn its
+keep.</strong> Most <code>ISNA</code> wrappers exist to mean &ldquo;if this did not work, show a
+dash&rdquo;, not to distinguish a missing lookup from a bad argument. <code>IFERROR</code> expresses
+that and is portable.</p>
+<p><strong>Where the distinction genuinely matters, test the input instead of the error.</strong> If
+a model really needs to tell &ldquo;out of range&rdquo; apart from &ldquo;wrong type&rdquo;, check the
+condition before the call &mdash; <code>=IF(k&gt;COUNT(range),"out of range",LARGE(range,k))</code>
+&mdash; rather than inspecting the wreckage afterwards. That is portable by construction, and it is
+also the only approach that survives an engine changing its mind later.</p>
+<p><strong>Do not build on the substitution.</strong> It would be tempting to key a
+LibreOffice-targeted workbook on <code>ERROR.TYPE(x)=3</code> now that you know the code. Two of the
+cases on this site show why that is a bad bet: <code>ISPMT</code> already goes the other way, and
+<code>=SORT(A1:A1)</code> over an empty cell returned <code>0</code>, then <code>#VALUE!</code>, then
+<code>0</code> again across three consecutive LibreOffice releases. Error identity is the least stable
+thing in a spreadsheet engine.</p>
+
+<h2 class="section-title">Related pages on this site</h2>
+<p>This page is the systematic count. Several individual slices of it have their own write-ups with
+more detail on the function in question:</p>
+<ul>
+  <li><a href="../guides/num-error-vs-value-error-excel-vs-libreoffice.html">Excel&rsquo;s #NUM!
+  errors arrive as #VALUE! in LibreOffice</a> &mdash; the first sixteen cases we found, covering the
+  logarithm, square-root and rank functions.</li>
+  <li><a href="../guides/vlookup-hlookup-out-of-range-index-excel-vs-libreoffice.html">VLOOKUP and
+  HLOOKUP with an out-of-range index</a> &mdash; two of the three <code>#REF!</code> rows.</li>
+  <li><a href="../guides/offset-off-sheet-edge-ref-vs-value-error-excel-vs-libreoffice.html">OFFSET
+  off the edge of the sheet</a> &mdash; the third.</li>
+  <li><a href="../guides/dget-mode-sngl-value-error-excel-vs-google-sheets-libreoffice.html">DGET and
+  MODE.SNGL</a> &mdash; the multiple-match and no-repeats conditions.</li>
+  <li><a href="../guides/datedif-excel-vs-google-sheets-libreoffice.html">DATEDIF across engines</a>
+  &mdash; the reversed-date row, plus DATEDIF&rsquo;s other quirks.</li>
+  <li><a href="../guides/ceiling-floor-mround-rounding-to-multiple-excel-vs-libreoffice.html">CEILING,
+  FLOOR and MROUND</a> &mdash; the mismatched-sign row.</li>
+  <li><a href="../guides/dollarde-dollarfr-fractional-price-conversion-excel-vs-google-sheets-libreoffice.html">DOLLARDE
+  and DOLLARFR</a> &mdash; four of the rows above, in a bond-pricing context.</li>
+  <li><a href="../guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR
+  around INDIRECT to a missing sheet</a> &mdash; the same theme from the wrapper&rsquo;s side.</li>
+</ul>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The counts on this page are counts of <em>our corpus</em>, not of Excel. 954 cases over 299
+functions is a lot of ground but it is not every function and it is nowhere near every input. A
+function with no error-condition case in our set contributes nothing to the 41, and its absence is not
+evidence of good behaviour.</p>
+<p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded per case in our test corpus,
+and the <code>ERROR.TYPE</code> code numbers quoted above are documented too. We do not run Excel, and
+no value in that column is a measurement. A handful of the documented error values in our corpus are
+marked as derived rather than quoted &mdash; where Microsoft&rsquo;s page documents no error condition
+at all and the error follows from the rules the page does state &mdash; and each such case says so in
+its own note.</p>
+<p>The Google Sheets column is executed output from dated runs, because Sheets has no version number
+to pin. A formula-only .xlsx carrying no cached results goes to Google Drive, is recalculated by
+Google&rsquo;s engine, and comes back as .xlsx for readback, with a deterministic
+<code>=1111+2222</code> canary in every sheet proving the recalculation happened. Sixteen of the rows
+above ran on 2026-08-31 and are marked &dagger;; the other twenty-five ran on 2026-08-29.</p>
+<p>The LibreOffice column is executed output from Calc 25.8.7.3, with 24.2.0.3, 24.8.7.2 and 25.2.0.3
+agreeing on every row. Those four builds are the only ones we tested, so &ldquo;stable across
+versions&rdquo; means stable across those four.</p>
+<p>Finally, the err:502 explanation is our reading of why the engine behaves this way, not something we
+measured. What we measured is the code each formula returned. See
+<a href="../methodology.html">our methodology</a> for how recalculation is proven rather than assumed,
+<a href="../libreoffice-version-support.html">the LibreOffice version support page</a> for the
+cross-release picture, and <a href="../spreadsheet-errors.html">the spreadsheet error reference</a>
+for what each code means.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
