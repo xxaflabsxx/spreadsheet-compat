@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>288 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 288 divergences, every one executed — not copied from docs.">
+<title>305 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 305 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="288 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 288 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="305 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 305 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">288 quirks found across 133 functions
-(205 in LibreOffice, 83 in Google Sheets).
+<p class="search-hint">305 quirks found across 136 functions
+(205 in LibreOffice, 100 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -2232,6 +2232,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DBCS(&#34;ＥＸＣＥＬ&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">ＥＸＣＥＬ</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. This case is unambiguous under either reading of the page: the argument contains no half-width English letters or katakana, so the documented no-change clause applies and the result is the argument itself. EXECUTED RESULT: #NAME? on all four LibreOffice builds; see DBCS_halfwidth_latin_to_fullwidth for the three-spelling probe and for LibreOffice&#39;s JIS equivalent.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=DBCS(&#34;ＥＸＣＥＬ&#34;)</div>
   <dl class="quirk-grid">
@@ -2241,6 +2254,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. This case is unambiguous under either reading of the page: the argument contains no half-width English letters or katakana, so the documented no-change clause applies and the result is the argument itself. EXECUTED RESULT: #NAME? on all four LibreOffice builds; see DBCS_halfwidth_latin_to_fullwidth for the three-spelling probe and for LibreOffice&#39;s JIS equivalent.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DBCS(&#34;EXCEL&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">ＥＸＣＥＬ</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. PUBLISHED EXAMPLE CONTRADICTS THE PUBLISHED RULE: the page&#39;s first worked example reads &#39;=DBCS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39;, i.e. it shows the argument coming back unchanged -- which is the documented behaviour of the INVERSE function ASC, whose page carries the identical line, and is impossible under DBCS&#39;s own stated rule because &#34;EXCEL&#34; is five half-width English letters. The value asserted here is derived from the rule instead: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), exactly the inverse of the mapping batch A&#39;s ASC cases assert in the other direction. The page&#39;s second example, which does show a conversion, is rendered as inline GIF images (media/fe337.gif ...) so no literal argument can be copied from it. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? -- and a name-form probe confirms this is a genuine gap rather than a storage-prefix artefact: the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form all return #NAME? on every build. LibreOffice nevertheless PERFORMS this conversion under a different name: on all four builds &#39;=JIS(&#34;EXCEL&#34;)&#39; returns exactly the full-width string asserted here, which independently confirms both the derived expected value and that the gap is a missing alias, not a missing capability.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -2258,6 +2284,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=LEN(DBCS(&#34;EXCEL&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">5</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents DBCS as changing half-width characters to full-width characters -- a one-for-one character mapping, not an encoding change -- so a five-character input yields a five-character result whether or not the mapping fires. This is the mirror of batch A&#39;s ASC_length_preserved case and separates a genuine width conversion from a byte-level reinterpretation. EXECUTED RESULT: #NAME? on all four LibreOffice builds -- LEN is supported, so the unrecognized name is DBCS.; MISMATCH vs expected: expected 5, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=LEN(DBCS(&#34;EXCEL&#34;))</div>
   <dl class="quirk-grid">
@@ -2271,6 +2310,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ASC(DBCS(&#34;EXCEL&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">EXCEL</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Deliberately locale-independent, and the reason this case exists. If DBCS converts (the documented rule), ASC converts back and the result is &#34;EXCEL&#34;; if DBCS is a no-op under a non-DBCS default language, ASC leaves the already-half-width text alone and the result is still &#34;EXCEL&#34;. Both readings of Microsoft&#39;s page agree here, so a failure of this case cannot be blamed on the harness locale -- it can only mean the engine lacks one of the two functions or mangles the text. EXECUTED RESULT: #NAME? on all four LibreOffice builds. Because ASC itself is supported there (batch A executed it), the failure is entirely DBCS&#39;s, which is what this locale-independent case was built to establish.; MISMATCH vs expected: expected &#39;EXCEL&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ASC(DBCS(&#34;EXCEL&#34;))</div>
   <dl class="quirk-grid">
@@ -2280,6 +2332,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Deliberately locale-independent, and the reason this case exists. If DBCS converts (the documented rule), ASC converts back and the result is &#34;EXCEL&#34;; if DBCS is a no-op under a non-DBCS default language, ASC leaves the already-half-width text alone and the result is still &#34;EXCEL&#34;. Both readings of Microsoft&#39;s page agree here, so a failure of this case cannot be blamed on the harness locale -- it can only mean the engine lacks one of the two functions or mangles the text. EXECUTED RESULT: #NAME? on all four LibreOffice builds. Because ASC itself is supported there (batch A executed it), the failure is entirely DBCS&#39;s, which is what this locale-independent case was built to establish.; MISMATCH vs expected: expected &#39;EXCEL&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dcounta.html">DCOUNTA</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DCOUNTA(A6:E12,,A3:F4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Database</dd>
+  </dl>
+  <p>Microsoft documents: &#34;The field argument is optional. If field is omitted, DCOUNTA counts all records in the database that match the criteria.&#34; The same criteria as the documented example match exactly one record, so the count is 1 with or without the field. This case exists because an engine that treats the middle argument as required fails here while passing the documented example. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.; MISMATCH vs expected: expected 1, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -2306,6 +2371,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Excel documents five bases (0-4) and: &#34;If basis &lt; 0 or if basis &gt; 4, DISC returns the #NUM! error value.&#34; 5 is the first excluded value. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/disc.html">DISC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(DISC(DATE(2018,7,1),DATE(2048,1,1),97.975,100,1),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.000686345065</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.000686384169</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>MICROSOFT-PUBLISHED RESULT CORRECTED. The page&#39;s example data is settlement 07/01/2018, maturity 01/01/2048, price 97.975, redemption 100, basis 1 (actual/actual), and it publishes the result 0.001038. That figure does not belong to those inputs. Derived independently from the formula the page itself states, DISC = ((redemption - pr)/redemption) * (B/DSM): (100 - 97.975)/100 = 0.02025, DSM = 10776 actual days from 2018-07-01 to 2048-01-01, and B under the documented actual/actual basis is the average length of the calendar years spanned, giving a year fraction of 29.50242868497748 and a discount rate of 0.0006863841691213483. The published 0.001038 is reproducible only by moving the maturity back ten years: with maturity 01/01/2038 the same arithmetic gives 0.0010381908237747707, which rounds to exactly the printed 0.001038. The published number is therefore a stale figure left behind when the example&#39;s dates were rolled forward, not a rounding of the correct answer, so the correct value is asserted here and the discrepancy recorded rather than buried. Asserted at 12 decimal places (0.000686384169), which is roughly 9 significant digits of the independently derived value and well inside double precision; the ROUND() wrapper keeps the assertion free of last-bit formatting differences. EXECUTED RESULT: all four LibreOffice builds return 0.000686384169121348, matching the independently derived value to full double precision -- so LibreOffice agrees with the derivation and with the page&#39;s stated inputs, and it is Microsoft&#39;s printed 0.001038 that stands alone.; MISMATCH vs expected: expected 0.000686384169, got 0.000686345065</p>
 </li>
 
 <li class="quirk-entry">
@@ -2543,6 +2621,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/euroconvert.html">EUROCONVERT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EUROCONVERT(1.2,&#34;DEM&#34;,&#34;EUR&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.61</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in and Automation</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=EUROCONVERT(A2,B2,C2)&#39; over the data 1.20 / DEM / EUR with the result 0.61 and the note &#34;by using a calculation and display precision of 2 decimal places&#34;. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1.20 / 1.95583 = 0.6135502574354622, and with full_precision omitted the documented default is FALSE, which applies the currency-specific rounding from the page&#39;s own table -- EUR display precision 2 -- giving 0.61.; MISMATCH vs expected: expected 0.61, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/euroconvert.html">EUROCONVERT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EUROCONVERT(1,&#34;FRF&#34;,&#34;EUR&#34;,FALSE,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.15</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in and Automation</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=EUROCONVERT(A4,B4,C4,FALSE,3)&#39; with the result 0.15 and the note &#34;by using a calculation and display precision of 2 decimal places&#34;. Derived: the same 0.152 intermediate as the previous case, then rounded to the EUR display precision of 2 from the page&#39;s rounding table, giving 0.15. This case and the previous one differ only in the full_precision flag, which is the whole point -- an engine that ignores that argument returns the same number for both.; MISMATCH vs expected: expected 0.15, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/euroconvert.html">EUROCONVERT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EUROCONVERT(1,&#34;FRF&#34;,&#34;EUR&#34;,TRUE,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.152</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in and Automation</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=EUROCONVERT(A3,B3,C3,TRUE,3)&#39; with the result 0.152. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, and the documented triangulation_precision of 3 rounds the intermediate euro value to 3 significant digits, giving 0.152; full_precision TRUE then displays all significant digits of that value rather than re-rounding to the EUR display precision.; MISMATCH vs expected: expected 0.152, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/euroconvert.html">EUROCONVERT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EUROCONVERT(1,&#34;XYZ&#34;,&#34;EUR&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in and Automation</dd>
+  </dl>
+  <p>Excel documents fourteen accepted ISO codes (BEF, LUF, DEM, ESP, FRF, IEP, ITL, NLG, ATS, PTE, FIM, GRD, SIT, EUR) and the blanket remark &#34;Invalid parameters return #VALUE.&#34; XYZ is not among them.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/euroconvert.html">EUROCONVERT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EUROCONVERT(1,&#34;FRF&#34;,&#34;DEM&#34;,TRUE,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.29728616</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in and Automation</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=EUROCONVERT(A5,B5,C5,TRUE,3)&#39; with the result 0.29728616 and the note &#34;by using an intermediate calculation precision of 3 and displaying all significant digits&#34;. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, rounded to the documented 3 significant digits of triangulation precision = 0.152, then multiplied by the DEM rate 1.95583 = 0.29728616 exactly. This is the case that proves the intermediate rounding really happens: without it the answer would be 0.1524490172374104 * 1.95583 = 0.2981650... , nowhere near the published figure.; MISMATCH vs expected: expected 0.29728616, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/expand.html">EXPAND</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=EXPAND(A1:A1,1,3,0)</div>
@@ -2752,6 +2895,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/fdist.html">FDIST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FDIST(15.20686486,10000000000,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.007926514992</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents a constraint the modern F.DIST.RT page drops: &#34;If deg_freedom1 &lt; 1 or deg_freedom1 &gt;= 10^10, FDIST returns the #NUM! error value.&#34; 10^10 = 10000000000 is exactly the excluded boundary. This is the one place the legacy and modern spellings are documented to differ, which is why the case is here rather than on F.DIST.RT. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Worth noting separately: LibreOffice does REJECT the 10^10 degrees of freedom the legacy page excludes -- it just reports the rejection with the wrong token.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0.007926514992</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/fdist.html">FDIST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FDIST(15.20686486,10000000000,4)</div>
   <dl class="quirk-grid">
@@ -2826,6 +2982,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>MISMATCH vs expected: expected &#39;none&#39;, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/filterxml.html">FILTERXML</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FILTERXML(A2,&#34;//rc/@title&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">Excel</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Web</dd>
+  </dl>
+  <p>Microsoft&#39;s page documents its live example as &#34;Cells B3:B5 contain the formula =FILTERXML(B3,&#34;//rc/@title&#34;)&#34;, i.e. an attribute selection on rc elements. This case keeps that exact XPath and supplies a literal &lt;rc title=&#34;Excel&#34; .../&gt; element in place of the unreachable Wikipedia feed, so the documented attribute form is exercised deterministically. Re-derived with ElementTree.; MISMATCH vs expected: expected &#39;Excel&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/filterxml.html">FILTERXML</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FILTERXML(A4,&#34;//x:t&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Web</dd>
+  </dl>
+  <p>Excel documents this as a separate failure mode from malformed XML: &#34;If xml contains a namespace with a prefix that is not valid, FILTERXML returns the #VALUE! error value.&#34; A4 holds &lt;r&gt;&lt;x:t&gt;alpha&lt;/x:t&gt;&lt;/r&gt;, where the prefix x is bound to no namespace; ElementTree rejects it with &#34;unbound prefix&#34;, confirming the condition the documentation describes.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/filterxml.html">FILTERXML</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FILTERXML(A1,&#34;//t[2]&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">beta</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Web</dd>
+  </dl>
+  <p>Microsoft&#39;s page gives no self-contained worked example -- its only example pipes live output of WEBSERVICE into FILTERXML, which no offline harness can reproduce -- so this case supplies literal XML and asserts what the documented contract requires: &#34;returns specific data from XML content by using the specified xpath&#34;, with xpath documented as &#34;A string in standard XPath format&#34;. Against &lt;r&gt;&lt;t&gt;alpha&lt;/t&gt;&lt;t&gt;beta&lt;/t&gt;&lt;/r&gt; the standard XPath //t[2] selects the second t element, whose string value is &#34;beta&#34;; re-derived with Python&#39;s ElementTree, which is an independent XPath implementation from either spreadsheet engine&#39;s.; MISMATCH vs expected: expected &#39;beta&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/filterxml.html">FILTERXML</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FILTERXML(A3,&#34;//t&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Web</dd>
+  </dl>
+  <p>Excel documents: &#34;If xml is not valid, FILTERXML returns the #VALUE! error value.&#34; A3 holds &lt;r&gt;&lt;t&gt;alpha&lt;/t&gt; with no closing &lt;/r&gt;, which is not well-formed XML; ElementTree rejects it with a ParseError, confirming the input really is invalid rather than merely unusual.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/findb.html">FINDB</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FINDB(&#34;b&#34;,A3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">5</dd>
+    <dt>Documented / expected</dt><dd class="mono">3</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>A3 holds the three-character string U+65E5 U+672C followed by an ASCII b. Verbatim from Microsoft&#39;s FIND, FINDB page: &#34;FINDB counts each double-byte character as 2 when you have enabled the editing of a language that supports DBCS and then set it as the default language. Otherwise, FINDB counts each character as 1&#34;, with the DBCS languages listed as Japanese, Chinese (Simplified), Chinese (Traditional) and Korean. This harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, so the documented answer is the one-byte-per-character reading -- the same treatment the corpus&#39;s LENB cases already use, and stated here rather than assumed away. Under that non-DBCS reading the b is the third character and the documented answer is 3; under a DBCS default language the two CJK characters would count 2 bytes each and the answer would be 5. Recording which of the two each engine produces is the whole point of the case -- exactly as for the corpus&#39;s LENB_non_ascii_characters probe. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return 5, i.e. they apply the double-byte count (2 bytes per CJK character) even though the default language is not a DBCS one, where the documentation&#39;s &#34;Otherwise, FINDB counts each character as 1&#34; clause gives 3. No error is raised; a formula that slices text by this position silently cuts in a different place. This is the same shape as the divergence the corpus already records for LENB, and it is the only one of the six FINDB cases that diverges -- every ASCII case matches, so LibreOffice&#39;s FINDB is correct except for exactly this locale rule.; MISMATCH vs expected: expected 3, got 5</p>
 </li>
 
 <li class="quirk-entry">
