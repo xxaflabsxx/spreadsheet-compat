@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>536 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 536 divergences, every one executed — not copied from docs.">
+<title>595 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 595 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="536 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 536 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="595 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 595 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,9 +324,9 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">536 quirks found across 195 functions
-(376 in LibreOffice, 160 in Google Sheets).
-A further 4 Google Sheets cases
+<p class="search-hint">595 quirks found across 196 functions
+(376 in LibreOffice, 219 in Google Sheets).
+A further 8 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
 
@@ -5494,6 +5494,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/munit.html">MUNIT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=MUNIT(-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>The same documented clause -- &#34;equal to or smaller than zero (0)&#34; -- exercised below the boundary rather than on it. Asserted separately because an engine can guard the equality and not the inequality.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/munit.html">MUNIT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=MUNIT(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If dimension is a value that&#39;s equal to or smaller than zero (0), MUNIT returns the #VALUE! error value&#34;, and separately &#34;The dimension has to be greater than zero.&#34; OpenFormula 1.3 section 6.5.5 states the same constraint (&#34;The dimension has to be greater than zero&#34;). Zero is the boundary the words &#34;equal to&#34; include. Note this family uses #VALUE! rather than the #NUM! that most out-of-range numeric arguments produce elsewhere in Excel, which is exactly why it is worth asserting.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/negbinom.dist.html">NEGBINOM.DIST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=NEGBINOM.DIST(A2,A3,1.5,TRUE)</div>
@@ -5664,6 +5690,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/normsinv.html">NORMSINV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(NORMSINV(0.9088),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1.33340174</dd>
+    <dt>Documented / expected</dt><dd class="mono">1.33340175</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Four published decimals cannot tell a well-converged inverse from a rough one, so the root-found value is asserted at eight places: 1.33340175. Microsoft documents the iteration -- &#34;NORMSINV uses an iterative search technique. If the search has not converged after 100 iterations, the function returns the #N/A error value&#34; -- which is exactly the behaviour this precision is aimed at.; MISMATCH vs expected: expected 1.33340175, got 1.33340174</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/normsinv.html">NORMSINV</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=NORMSINV(1)</div>
   <dl class="quirk-grid">
@@ -5742,6 +5781,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDFPRICE returns the #NUM! error value.&#34; The basis table stops at 4 (European 30/360).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,5)</div>
   <dl class="quirk-grid">
@@ -5751,6 +5803,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDFPRICE returns the #NUM! error value.&#34; The basis table stops at 4 (European 30/360).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDFPRICE(A5,A3,A4,A2,A6,A7,A8,A9,A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDFPRICE returns the #NUM! error value: maturity &gt; first_coupon &gt; settlement &gt; issue.&#34; Swapping the settlement and first-coupon arguments puts settlement (2009-03-01) after first_coupon (2008-11-11) and also before issue, breaking the chain in two places at once.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5768,6 +5833,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">113.59771747</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Two published decimals cannot distinguish a correct odd-period price from one whose quasi-coupon schedule is off by a day, so the derived value is asserted at eight places: 113.59771747. This is the assertion that actually constrains the day counts.; MISMATCH vs expected: expected 113.59771747, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</div>
   <dl class="quirk-grid">
@@ -5777,6 +5855,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Two published decimals cannot distinguish a correct odd-period price from one whose quasi-coupon schedule is off by a day, so the derived value is asserted at eight places: 113.59771747. This is the assertion that actually constrains the day counts.; MISMATCH vs expected: expected 113.59771747, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">113.6</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft publishes =ODDFPRICE(A2, A3, A4, A5, A6, A7, A8, A9, A10) = $ 113.60 for a bond settled 2008-11-11, maturing 2021-03-01, issued 2008-10-15, first coupon 2009-03-01, 7.85% coupon, 6.25% yield, redemption 100, semiannual, actual/actual basis. DERIVATION, clean-room, from the odd-short-first-coupon formula Microsoft prints as an image on the page: price = redemption/(1+yld/f)^(N-1+DSC/E) + 100*(rate/f)*(DFC/E)/(1+yld/f)^(DSC/E) + sum over k = 2..N of 100*(rate/f)/(1+yld/f)^(k-1+DSC/E) - 100*(rate/f)*(A/E), with A = days from the start of the coupon period to settlement, DSC = days from settlement to the next coupon, DFC = days from the start of the odd first coupon to the first coupon date, E = days in the coupon period, and N = coupons payable between settlement and redemption. The quasi-coupon period is generated by walking BACK from first_coupon on the frequency grid, which puts the period at 2008-09-01 to 2009-03-01. On basis 1 (actual/actual) that is E = 181 actual days, with A = 27 (2008-10-15 to 2008-11-11), DSC = 110 (2008-11-11 to 2009-03-01), DFC = 137 (2008-10-15 to 2009-03-01) and N = 25 semiannual coupons from 2009-03-01 through 2021-03-01. The odd first period is SHORT -- 137 days against a 181-day quasi-period -- which is what selects this branch of the formula over the odd-long-first-coupon branch. The day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 -- Procedure A for US (NASD) 30/360 with its four order-dependent endpoint adjustments, Procedure B for actual days, Procedure C for European 30/360, and Procedures D/E/F for days-in-year -- written for this batch and used by no engine; the arithmetic is mpmath at 50 digits over exact rational day-count ratios. The independent computation gives 113.5977174740789..., which is 113.60 at the two decimals Microsoft prints -- the published figure, reproduced from the formula rather than copied. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddfprice-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- NOT IMPLEMENTED, AND NOT SIGNALLED AS SUCH: LibreOffice returns #VALUE! on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case -- for this case, for every other case in this file, and for every argument combination probed while preparing the batch (five bases, three frequencies, settlement before and after the first coupon, dates as serials, as DATE() calls and as text, and a bond whose first period is deliberately regular). Not one input produced a number. The name is RECOGNISED -- the plain spelling parses, while _xlfn.ODDFPRICE, COM.MICROSOFT.ODDFPRICE and ORG.OPENOFFICE.ODDFPRICE are all #NAME? -- so this is not a storage-form artefact, and it is not an .xlsx import artefact either: the same #VALUE! comes back when the formula is parsed natively by LibreOffice&#39;s own parser rather than read from OOXML, on a run where ODDLPRICE and PRICE in the same file computed correctly. LibreOffice&#39;s source says why, in as many words: scaddins/source/analysis/analysishelper.cxx defines GetOddfprice() and GetOddfyield() as bodies that do nothing but `throw uno::RuntimeException()`, and financial.cxx wraps both call sites in SAL_WNOUNREACHABLE_CODE_PUSH under the comment &#34;Encapsulation violation: We *know* that GetOddfprice() always throws.&#34; The argument validation in front of them is real (rate &lt; 0, frequency, date ordering are all checked) but every path that survives it ends in the same exception, which is why the error cases in this file also come back #VALUE! instead of the documented #NUM!. So: the function is listed, documented in LibreOffice&#39;s own help, and computes nothing. Its ODDL* siblings, by contrast, compute the documented values exactly.; MISMATCH vs expected: expected 113.6, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5794,6 +5885,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDFPRICE(&#34;not a date&#34;,A3,A4,A5,A6,A7,A8,A9,A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If settlement, maturity, issue, or first_coupon is not a valid date, ODDFPRICE returns the #VALUE! error value.&#34; The page uses #VALUE! for a malformed date and #NUM! for every out-of-range or mis-ordered argument, so the two codes are asserted separately.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDFPRICE(A2,A3,A4,A5,-0.0785,A7,A8,A9,A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, ODDFPRICE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ODDFPRICE(A2,A3,A4,A5,-0.0785,A7,A8,A9,A10)</div>
   <dl class="quirk-grid">
@@ -5803,6 +5920,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, ODDFPRICE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfprice.html">ODDFPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,0),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">113.59920583</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The same bond on basis 0, where every day count is taken under Procedure A instead of actual days: E = 180, A = 26, DSC = 106, DFC = 136. The derived price is 113.5992058282384..., asserted at eight places. The two bases MUST differ here -- unlike the MDURATION case in batch E, settlement does not fall on a coupon date, so the ratios genuinely change -- and the pair of cases pins which basis the engine applied. A basis argument that is silently ignored produces the basis-0 number for the basis-1 case, and this file catches that.; MISMATCH vs expected: expected 113.59920583, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5820,6 +5950,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDFYIELD returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,5)</div>
   <dl class="quirk-grid">
@@ -5829,6 +5972,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDFYIELD returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDFYIELD(A5,A3,A4,A2,A6,A7,A8,A9,A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDFYIELD returns the #NUM! error value: maturity &gt; first_coupon &gt; settlement &gt; issue.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5846,6 +6002,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.07724554</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Four published decimals leave the iteration untested, so the root is asserted at eight places: 0.07724554. Microsoft states the convergence rule loosely -- &#34;The yield is changed through 100 iterations until the estimated price with the given yield is close to the price&#34; -- without defining &#34;close&#34;, so this is exactly the kind of case where two conforming implementations can legitimately differ in the last digit or two; eight places is deliberately short of the fifteen a double carries.; MISMATCH vs expected: expected 0.07724554, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</div>
   <dl class="quirk-grid">
@@ -5855,6 +6024,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Four published decimals leave the iteration untested, so the root is asserted at eight places: 0.07724554. Microsoft states the convergence rule loosely -- &#34;The yield is changed through 100 iterations until the estimated price with the given yield is close to the price&#34; -- without defining &#34;close&#34;, so this is exactly the kind of case where two conforming implementations can legitimately differ in the last digit or two; eight places is deliberately short of the fifteen a double carries.; MISMATCH vs expected: expected 0.07724554, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.0772</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft publishes =ODDFYIELD(A2, A3, A4, A5, A6, A7, A8, A9, A10) = 7.72% for a bond settled 2008-11-11, maturing 2021-03-01, issued 2008-10-15, first coupon 2009-03-01, 5.75% coupon, price 84.50, redemption 100, semiannual, 30/360 basis, and the page&#39;s own description spells the same figure as &#34;(0.0772, or 7.72%)&#34;. DERIVATION: Microsoft publishes no closed form -- &#34;Excel uses an iterative technique to calculate ODDFYIELD. This function uses the Newton method based on the formula used for the function ODDFPRICE&#34; -- so the value here is obtained by root-finding on this batch&#39;s own clean-room ODDFPRICE implementation (see data/tests/ODDFPRICE.json for its derivation), solving price(yield) = 84.5 with mpmath at 50 digits. The root is 0.07724554159781..., which is 0.0772 at four places -- Microsoft&#39;s published figure. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddfyield-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- NOT IMPLEMENTED, AND NOT SIGNALLED AS SUCH: LibreOffice returns #VALUE! on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case -- for this case, for every other case in this file, and for every argument combination probed while preparing the batch (five bases, three frequencies, settlement before and after the first coupon, dates as serials, as DATE() calls and as text, and a bond whose first period is deliberately regular). Not one input produced a number. The name is RECOGNISED -- the plain spelling parses, while _xlfn.ODDFPRICE, COM.MICROSOFT.ODDFPRICE and ORG.OPENOFFICE.ODDFPRICE are all #NAME? -- so this is not a storage-form artefact, and it is not an .xlsx import artefact either: the same #VALUE! comes back when the formula is parsed natively by LibreOffice&#39;s own parser rather than read from OOXML, on a run where ODDLPRICE and PRICE in the same file computed correctly. LibreOffice&#39;s source says why, in as many words: scaddins/source/analysis/analysishelper.cxx defines GetOddfyield() and GetOddfprice() as bodies that do nothing but `throw uno::RuntimeException()`, and financial.cxx wraps both call sites in SAL_WNOUNREACHABLE_CODE_PUSH under the comment &#34;Encapsulation violation: We *know* that GetOddfprice() always throws.&#34; The argument validation in front of them is real (rate &lt; 0, frequency, date ordering are all checked) but every path that survives it ends in the same exception, which is why the error cases in this file also come back #VALUE! instead of the documented #NUM!. So: the function is listed, documented in LibreOffice&#39;s own help, and computes nothing. Its ODDL* siblings, by contrast, compute the documented values exactly.; MISMATCH vs expected: expected 0.0772, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5872,6 +6054,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,0.0785,ODDFPRICE(A2,A3,A4,A5,0.0785,0.0625,100,2,1),100,2,1),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.0625</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft&#39;s page says outright that ODDFYIELD inverts ODDFPRICE (&#34;See ODDFPRICE for the formula that ODDFYIELD uses&#34;), so composing the two on one bond must return the yield it started from. This assertion contains NO derived constant -- 0.0625 is an input -- which makes it immune to any disagreement about day counts or quasi-coupon schedules: an engine with an unusual but self-consistent odd-period model still passes, and one whose yield solver does not invert its own price function fails. The bond is ODDFPRICE&#39;s documented example (7.85% coupon, basis 1), evaluated entirely inside the engine.; MISMATCH vs expected: expected 0.0625, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,0.0785,ODDFPRICE(A2,A3,A4,A5,0.0785,0.0625,100,2,1),100,2,1),8)</div>
   <dl class="quirk-grid">
@@ -5881,6 +6076,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Microsoft&#39;s page says outright that ODDFYIELD inverts ODDFPRICE (&#34;See ODDFPRICE for the formula that ODDFYIELD uses&#34;), so composing the two on one bond must return the yield it started from. This assertion contains NO derived constant -- 0.0625 is an input -- which makes it immune to any disagreement about day counts or quasi-coupon schedules: an engine with an unusual but self-consistent odd-period model still passes, and one whose yield solver does not invert its own price function fails. The bond is ODDFPRICE&#39;s documented example (7.85% coupon, basis 1), evaluated entirely inside the engine.; MISMATCH vs expected: expected 0.0625, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddfyield.html">ODDFYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDFYIELD(A2,A3,A4,A5,A6,0,A8,A9,A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If rate &lt; 0 or if pr &lt;= 0, ODDFYIELD returns the #NUM! error value.&#34; Note the asymmetry with ODDFPRICE, whose corresponding clause reads &#34;rate &lt; 0 or yld &lt; 0&#34;: the price argument is excluded AT zero, the yield argument only BELOW it. Zero is the boundary the &lt;= includes.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5898,6 +6106,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDLPRICE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,5)</div>
   <dl class="quirk-grid">
@@ -5907,6 +6128,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDLPRICE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLPRICE(A4,A3,A2,A5,A6,A7,A8,A9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDLPRICE returns the #NUM! error value: maturity &gt; settlement &gt; last_interest.&#34; Swapping the two puts settlement (2007-10-15) before the last interest date (2008-02-07).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5924,6 +6158,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,A9),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">99.8782860147</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Two published decimals cannot see a day-count error of a day or two, so the inverted-formula value is asserted at ten places: 99.8782860147.; MISMATCH vs expected: expected 99.8782860147, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,A9),2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">99.88</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft publishes =ODDLPRICE(A2, A3, A4, A5, A6, A7, A8, A9) = $99.88 for a bond settled 2008-02-07, maturing 2008-06-15, last interest 2007-10-15, 3.75% coupon, 4.05% yield, redemption 100, semiannual, 30/360 basis. DERIVATION, clean-room. Microsoft publishes NO formula for ODDLPRICE -- the page has no &#39;calculated as follows&#39; section and no equation image at all, which is the single biggest documentation gap in this batch -- and OpenFormula 1.3 section 6.12.33 gives only a parameter glossary. So the price here is obtained by ALGEBRAICALLY INVERTING the closed form Microsoft DOES publish, on the ODDLYIELD page, solving that equation for the price: pr = (redemption + (sum DCi/NLi)*100*rate/f) / (1 + (sum DSCi/NLi)*yld/f) - (sum Ai/NLi)*100*rate/f. For this bond the odd last period runs from the last interest date 2007-10-15 to maturity 2008-06-15 and spans two quasi-coupon periods on the semiannual grid, so on basis 0 the ratios are sum DCi/NLi = 240/180, sum Ai/NLi = 112/180 (2007-10-15 to settlement 2008-02-07) and sum DSCi/NLi = 128/180 (settlement to maturity). With a coupon of 100*0.0375/2 = 1.875 that gives (100 + 2.5)/(1 + (128/180)*0.02025) - 1.1666... = 99.87828601472134... The day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 -- Procedure A for US (NASD) 30/360 with its four order-dependent endpoint adjustments, Procedure B for actual days, Procedure C for European 30/360, and Procedures D/E/F for days-in-year -- written for this batch and used by no engine; the arithmetic is mpmath at 50 digits over exact rational day-count ratios. At two decimals that is 99.88 -- the published figure, reproduced from an inverted formula rather than copied. (Microsoft&#39;s own prose on this page says the arguments come from &#34;cells A2:A10&#34; while the formula it prints takes eight arguments from A2:A9; the same off-by-one appears on the ODDLYIELD page. It is a typo in the prose, not in the figure.) Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddlprice-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).; MISMATCH vs expected: expected 99.88, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLPRICE(&#34;not a date&#34;,A3,A4,A5,A6,A7,A8,A9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If settlement, maturity, or last_interest is not a valid date, ODDLPRICE returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,A9),5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">99.87829</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>A SECOND VENDOR&#39;S PUBLISHED FIGURE, on a second set of dates. LibreOffice&#39;s help (help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html) prints &#39;=ODDLPRICE(&#34;1999-02-07&#34;;&#34;1999-06-15&#34;;&#34;1998-10-15&#34;; 0.0375; 0.0405;100;2;0) returns 99.87829&#39; -- Microsoft&#39;s example shifted back exactly nine years, same month-and-day, same rates. Running the clean-room derivation on the 1999 dates gives 99.87828601472134..., identical to the 2008 answer, because every 30/360 day count in the calculation depends only on the month-and-day differences: 99.87829 at five places. Two independent vendors&#39; documentation and one independent derivation agreeing on the same number is stronger evidence than any of the three alone, and this case is here to make that agreement executable.; MISMATCH vs expected: expected 99.87829, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLPRICE(A2,A3,A4,A5,-0.0405,A7,A8,A9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, ODDLPRICE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlprice.html">ODDLPRICE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ODDLPRICE(A2,A3,A4,A5,-0.0405,A7,A8,A9)</div>
   <dl class="quirk-grid">
@@ -5933,6 +6232,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, ODDLPRICE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDLYIELD returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5950,6 +6262,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLYIELD(A4,A3,A2,A5,A6,A7,A8,A9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDLYIELD returns the #NUM! error value: maturity &gt; settlement &gt; last_interest.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ODDLYIELD(A4,A3,A2,A5,A6,A7,A8,A9)</div>
   <dl class="quirk-grid">
@@ -5959,6 +6284,84 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDLYIELD returns the #NUM! error value: maturity &gt; settlement &gt; last_interest.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,A9),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.0451922356</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Five published decimals are asserted again at ten: 0.0451922356. Unlike ODDFYIELD, this function has a closed form and no iteration, so there is no convergence tolerance to excuse a difference -- two conforming engines should agree to the last bit.; MISMATCH vs expected: expected 0.0451922356, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,A9),5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.04519</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft publishes =ODDLYIELD(A2, A3, A4, A5, A6, A7, A8, A9) = 4.52% for a bond settled 2008-04-20, maturing 2008-06-15, last interest 2007-12-24, 3.75% coupon, price 99.875, redemption 100, semiannual, 30/360 basis, and the page&#39;s description gives the same figure at five places as &#34;0.04519&#34;. DERIVATION, clean-room, from the closed form Microsoft prints as an image on the page: yield = ((redemption + (sum DCi/NLi)*100*rate/f) - (pr + (sum Ai/NLi)*100*rate/f)) / (pr + (sum Ai/NLi)*100*rate/f) * f / (sum DSCi/NLi), where Ai is the accrued days in the ith quasi-coupon period counting forward from the last interest date, DCi the days counted in that period, and NLi its normal length. (Two symbols in Microsoft&#39;s artwork are never defined in the page&#39;s own symbol list: &#39;par&#39;, which the algebra forces to be the pr price argument under a third name, and DSCi, which must be the settlement-to-maturity day counts per quasi-period. Both readings are confirmed by the fact that they reproduce Microsoft&#39;s own published figure below.) For this bond the odd last period runs 2007-12-24 to 2008-06-15 and fits inside a single semiannual quasi-period, so on basis 0 the ratios are DC/NL = 171/180, A/NL = 116/180 and DSC/NL = 55/180; with a coupon of 1.875 that gives ((100 + 1.78125) - (99.875 + 1.20833...))/(99.875 + 1.20833...) * 2/(55/180) = 0.045192235629168917... The day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 -- Procedure A for US (NASD) 30/360 with its four order-dependent endpoint adjustments, Procedure B for actual days, Procedure C for European 30/360, and Procedures D/E/F for days-in-year -- written for this batch and used by no engine; the arithmetic is mpmath at 50 digits over exact rational day-count ratios. At five places that is 0.04519 -- the published figure, reproduced from the formula. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddlyield-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).; MISMATCH vs expected: expected 0.04519, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLYIELD(&#34;not a date&#34;,A3,A4,A5,A6,A7,A8,A9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If settlement, maturity, or last_interest is not a valid date, ODDLYIELD returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDLYIELD(A2,A3,A4,A5,ODDLPRICE(A2,A3,A4,A5,0.0405,A7,A8,A9),A7,A8,A9),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.0405</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The two functions are algebraic inverses of one another -- ODDLPRICE has no published formula precisely because it IS the ODDLYIELD equation solved for price -- so composing them on one bond must return the yield it started from, 0.0405. No derived constant appears in this assertion at all, so it holds for any engine whose two odd-last-period routines agree with each other, whatever day-count reading they share. The bond is ODDLPRICE&#39;s documented example.; MISMATCH vs expected: expected 0.0405, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,A9),6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.044873</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>A SECOND VENDOR&#39;S PUBLISHED FIGURE ON A GENUINELY DIFFERENT BOND. LibreOffice&#39;s help prints &#39;=ODDLYIELD(&#34;1999-04-20&#34;;&#34;1999-06-15&#34;; &#34;1998-10-15&#34;; 0.0375; 99.875; 100;2;0) returns 0.044873 or 4.4873%&#39;. This is NOT Microsoft&#39;s example shifted nine years: the last interest date is 1998-10-15, where Microsoft&#39;s is 2007-12-24, so the odd last period spans TWO quasi-coupon periods instead of one and the answer is a different number. That makes it a second, independent test vector -- and the more demanding one, because the multi-period sums are exactly where a hand-rolled odd-period implementation goes wrong. The clean-room derivation on these dates gives 0.04487316633024..., which is 0.044873 at six places, matching LibreOffice&#39;s published figure exactly.; MISMATCH vs expected: expected 0.044873, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/oddlyield.html">ODDLYIELD</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ODDLYIELD(A2,A3,A4,A5,0,A7,A8,A9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If rate &lt; 0 or if pr &lt;= 0, ODDLYIELD returns the #NUM! error value.&#34; Zero is the boundary the &lt;= includes.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -6054,6 +6457,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/percentof.html">PERCENTOF</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5)-SUM(A2:A3)/SUM(A2:A5),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Microsoft&#39;s own equivalence claim made checkable: the difference between PERCENTOF and the SUM(subset)/SUM(all) it is &#34;logically equivalent to&#34; must be exactly zero. This needs no derived constant, and it catches an implementation that, say, averages instead of summing, or that divides by the count.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentof.html">PERCENTOF</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5)-SUM(A2:A3)/SUM(A2:A5),12)</div>
   <dl class="quirk-grid">
@@ -6063,6 +6479,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Math and trigonometry</dd>
   </dl>
   <p>Microsoft&#39;s own equivalence claim made checkable: the difference between PERCENTOF and the SUM(subset)/SUM(all) it is &#34;logically equivalent to&#34; must be exactly zero. This needs no derived constant, and it catches an implementation that, say, averages instead of summing, or that divides by the count.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentof.html">PERCENTOF</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(PERCENTOF(A2,A2:A5),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>1/10 = 0.1 exactly. A single cell is a legitimate data_subset -- Microsoft&#39;s argument table asks only for &#34;The values that in the data subset&#34; (the page&#39;s own wording, printed with that grammatical slip) -- so this case checks that a scalar reference is accepted where a range is expected.; MISMATCH vs expected: expected 0.1, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -6080,6 +6509,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/percentof.html">PERCENTOF</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.3</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Microsoft&#39;s page states the definition outright: &#34;PERCENTOF is logically equivalent to =SUM(data_subset)/SUM(data_all)&#34; and &#34;The PERCENTOF function sums the values in the subset and divides it by all the values.&#34; DERIVATION in exact arithmetic: (1 + 2)/(1 + 2 + 3 + 4) = 3/10 = 0.3 exactly. The data is chosen so the answer is a terminating decimal, so no rounding question arises; the ROUND wrapper only pins the comparison. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentof-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all FOUR spellings probed before the run -- the plain name PERCENTOF, the storage form _xlfn.PERCENTOF, the add-in form COM.MICROSOFT.PERCENTOF and ORG.OPENOFFICE.PERCENTOF. No LibreOffice release tested here has this function under any name, so the gap is real and not a prefix artefact of the kind that batch E&#39;s ISO.CEILING episode was.; MISMATCH vs expected: expected 0.3, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentof.html">PERCENTOF</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5),12)</div>
   <dl class="quirk-grid">
@@ -6089,6 +6531,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Math and trigonometry</dd>
   </dl>
   <p>Microsoft&#39;s page states the definition outright: &#34;PERCENTOF is logically equivalent to =SUM(data_subset)/SUM(data_all)&#34; and &#34;The PERCENTOF function sums the values in the subset and divides it by all the values.&#34; DERIVATION in exact arithmetic: (1 + 2)/(1 + 2 + 3 + 4) = 3/10 = 0.3 exactly. The data is chosen so the answer is a terminating decimal, so no rounding question arises; the ROUND wrapper only pins the comparison. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentof-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all FOUR spellings probed before the run -- the plain name PERCENTOF, the storage form _xlfn.PERCENTOF, the add-in form COM.MICROSOFT.PERCENTOF and ORG.OPENOFFICE.PERCENTOF. No LibreOffice release tested here has this function under any name, so the gap is real and not a prefix artefact of the kind that batch E&#39;s ISO.CEILING episode was.; MISMATCH vs expected: expected 0.3, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentof.html">PERCENTOF</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(PERCENTOF(A2:A5,A2:A5),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>When the subset IS the set, the documented definition gives SUM(x)/SUM(x) = 1 exactly, for any data. Structural rather than derived, and it pins the argument order: an engine that divided all-by-subset would also return 1 here, which is why the 0.3 case above is asserted as well.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -6106,6 +6561,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/percentrank.exc.html">PERCENTRANK.EXC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.4</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.3</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.; MISMATCH vs expected: expected 0.3, got 0.4</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentrank.exc.html">PERCENTRANK.EXC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43,1)</div>
   <dl class="quirk-grid">
@@ -6115,6 +6583,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.; MISMATCH vs expected: expected 0.3, got 0.4</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentrank.exc.html">PERCENTRANK.EXC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERCENTRANK.EXC(D20:D25,7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#N/A&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -6132,6 +6613,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/percentrank.exc.html">PERCENTRANK.EXC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERCENTRANK.EXC(A2:A10,7,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.7</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0.7</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentrank.exc.html">PERCENTRANK.EXC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=PERCENTRANK.EXC(A2:A10,7,0)</div>
   <dl class="quirk-grid">
@@ -6141,6 +6635,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentrank.inc.html">PERCENTRANK.INC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERCENTRANK.INC(A2:A11,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.556</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.555</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft publishes =PERCENTRANK.INC(A2:A11,4) = 0.555. THIS IS THE SHARPEST CASE IN THE FILE. Five of the ten values are below 4, so the exact rank is 5/9 = 0.55555... To three significant digits that is 0.555 if the significance argument TRUNCATES and 0.556 if it ROUNDS, and Microsoft publishes 0.555 -- so the documented behaviour is truncation. Microsoft&#39;s next row is the same test again in the other direction: =PERCENTRANK.INC(A2:A11,8) = 0.666, where 6/9 = 0.6666... truncates to 0.666 and would round to 0.667. An engine that rounds instead of truncating produces a plausible-looking number that differs from Excel in the third decimal on the most ordinary inputs imaginable, and only a case whose exact value is a repeating decimal can see it. EXECUTED RESULT -- A SILENT WRONG ANSWER, AND THE HEADLINE FINDING OF THIS BATCH: LibreOffice returns 0.556 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents and publishes 0.555. LibreOffice ROUNDS the result to the significance digits; Excel TRUNCATES it. Nothing errors, nothing warns, and the answer is wrong in the third decimal on the most ordinary input imaginable -- a percentile rank of a small integer list. The companion case in this file (rank of 8, exact value 6/9) shows the same split, 0.667 against Microsoft&#39;s published 0.666, and PERCENTRANK.EXC&#39;s significance-1 row shows it a third time, 0.4 against Microsoft&#39;s published 0.3. The corpus&#39;s legacy PERCENTRANK file never caught this because every value it asserts is exact at three digits.; MISMATCH vs expected: expected 0.555, got 0.556</p>
 </li>
 
 <li class="quirk-entry">
@@ -6158,6 +6665,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/percentrank.inc.html">PERCENTRANK.INC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERCENTRANK.INC(A2:A11,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.667</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.666</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft publishes =PERCENTRANK.INC(A2:A11,8) = 0.666. Six of the ten values are below 8, so the exact rank is 6/9 = 0.66666..., truncated to three significant digits by the default significance: 0.666, not 0.667. Asserted alongside the 5/9 case because the two together make the truncation reading unambiguous -- a single repeating-decimal row could be dismissed as a typo on Microsoft&#39;s page, two cannot. EXECUTED RESULT: LibreOffice returns 0.667 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.666. The second of three demonstrations in this batch that LibreOffice rounds where Excel truncates; see the 5/9 case above.; MISMATCH vs expected: expected 0.666, got 0.667</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentrank.inc.html">PERCENTRANK.INC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=PERCENTRANK.INC(A2:A11,8)</div>
   <dl class="quirk-grid">
@@ -6171,6 +6691,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/percentrank.inc.html">PERCENTRANK.INC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERCENTRANK.INC(D20:D25,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If array is empty, PERCENTRANK.INC returns the #NUM! error value.&#34; D20:D25 is deliberately empty; nothing is written into it by design.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentrank.inc.html">PERCENTRANK.INC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=PERCENTRANK.INC(D20:D25,2)</div>
   <dl class="quirk-grid">
@@ -6180,6 +6713,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Microsoft documents: &#34;If array is empty, PERCENTRANK.INC returns the #NUM! error value.&#34; D20:D25 is deliberately empty; nothing is written into it by design.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/percentrank.inc.html">PERCENTRANK.INC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERCENTRANK.INC(A2:A11,2,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.333</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.INC returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0.333</p>
 </li>
 
 <li class="quirk-entry">
@@ -6210,6 +6756,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/permut.html">PERMUT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERMUT(0,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If number &lt;= 0 or if number_chosen &lt; 0, PERMUT returns the #NUM! error value.&#34; Zero is the boundary the &lt;= includes, so PERMUT(0,0) is an error even though the empty arrangement of an empty set is mathematically 1 -- and note that PERMUTATIONA, the sibling function, documents the opposite treatment of the same input. That disagreement between two Microsoft pages is itself worth pinning. EXECUTED RESULT -- A SILENT WRONG ANSWER: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents #NUM!. Mathematically 1 is defensible -- there is exactly one arrangement of nothing -- but it is not what Microsoft&#39;s page specifies, and the disagreement is invisible: no error, no warning, just a number where Excel gives an error. Note that LibreOffice is here MORE permissive than Excel, the opposite direction from most of this batch&#39;s divergences.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/permut.html">PERMUT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=PERMUT(0,0)</div>
   <dl class="quirk-grid">
@@ -6232,6 +6791,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Microsoft documents: &#34;If numeric arguments are values that are not valid, for example, when the total number is zero (0) and the chosen number is larger than zero (0), PERMUTATIONA returns the #NUM! error value.&#34; This is the page&#39;s own worked-out example of an invalid argument, quoted exactly. EXECUTED RESULT -- A SILENT WRONG ANSWER: LibreOffice returns 0 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents #NUM! for exactly this input (Microsoft names it as its own example of an invalid argument). 0^1 = 0 is what the bare formula gives, so LibreOffice has applied the equation without the guard the page describes. Together with PERMUT(0,0) returning 1 above, this shows the same pattern twice in one sibling pair: LibreOffice evaluates the closed form where Excel raises the documented error.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/permutationa.html">PERMUTATIONA</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PERMUTATIONA(0,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>OpenFormula 1.3 section 6.18.60 is explicit: &#34;The result is 1 if Total = 0 and Chosen = 0, otherwise the result is Total^Chosen.&#34; Microsoft&#39;s page does not print this row but its error clause is consistent with it -- it names an error only &#34;when the total number is zero (0) and the chosen number is larger than zero (0)&#34;, which pointedly does not cover chosen = 0. Note this is the exact input on which PERMUT is documented to return #NUM!, so the two sibling functions are specified to disagree here and this corpus asserts both.; MISMATCH vs expected: expected 1, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/phonetic.html">PHONETIC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PHONETIC((A2,C2))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#ERROR!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If the reference is a range of nonadjacent cells, the #N/A error value is returned.&#34; This is the ONLY behaviour of PHONETIC this corpus can assert a value for, and that is why it is the only asserted case in this file. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/phonetic-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). LibreOffice has no PHONETIC function at all, so the two probe cases in this file return #NAME? as well -- which is the only reading of them the corpus offers: they assert nothing about a value, and here they record an absence rather than a difference.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#ERROR!&#39;; NOTE: #ERROR! is Google Sheets&#39; parse-failure error (no Excel equivalent); it means Sheets could not parse the formula, which is not the same as #NAME?</p>
 </li>
 
 <li class="quirk-entry">
@@ -6457,6 +7042,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/prob.html">PROB</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PROB(A3:A6,C3:C6,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If the sum of the values in prob_range is not equal to 1, PROB returns the #NUM! error value.&#34; The C column sums to 0.9. OpenFormula 1.3 section 6.18.63 states the same constraint.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/prob.html">PROB</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=PROB(A3:A6,C3:C6,2)</div>
   <dl class="quirk-grid">
@@ -6466,6 +7064,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Microsoft documents: &#34;If the sum of the values in prob_range is not equal to 1, PROB returns the #NUM! error value.&#34; The C column sums to 0.9. OpenFormula 1.3 section 6.18.63 states the same constraint.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/prob.html">PROB</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=PROB(A3:A6,D3:D6,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.1</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents: &#34;If any value in prob_range &lt;= 0 or if any value in prob_range &gt; 1, PROB returns the #NUM! error value.&#34; The D column is deliberately built to sum to exactly 1 (1.5 + 0.3 + 0.1 - 0.9 = 1.0) so that the OTHER documented constraint is satisfied and only the per-value range rule can fire -- otherwise a passing result would not say which rule the engine enforced.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0.1</p>
 </li>
 
 <li class="quirk-entry">
@@ -6561,6 +7172,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regexextract.html">REGEXEXTRACT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXEXTRACT(&#34;abcDEF&#34;,&#34;[A-Z]+&#34;,0,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">abc</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (the default) and &#34;1: Case insensitive&#34;. With matching made case-insensitive, [A-Z]+ also matches lower-case letters, so the FIRST match in &#34;abcDEF&#34; is the leading run &#34;abc&#34; -- not &#34;DEF&#34;, which is what the same call returns with the default sensitivity. The two readings give different answers on the same string, which is what makes this a real test of the argument rather than a decoration.; MISMATCH vs expected: expected &#39;abc&#39;, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regexextract.html">REGEXEXTRACT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=REGEXEXTRACT(&#34;abcDEF&#34;,&#34;[A-Z]+&#34;,0,1)</div>
   <dl class="quirk-grid">
@@ -6574,6 +7198,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regexextract.html">REGEXEXTRACT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=COUNTA(REGEXEXTRACT(A2,&#34;[A-Z][a-z]+&#34;,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s Example 1 runs the same data a second time with return_mode 1, documented as &#34;1: Return all strings that match the pattern as an array&#34;. &#34;DylanWilliams&#34; contains exactly two capitalised words, so the array has two elements. The result is wrapped in COUNTA DELIBERATELY: Microsoft&#39;s page shows the array only as a screenshot and never states whether it spills down a column or across a row, so asserting INDEX(...,2) would be asserting an orientation this corpus cannot source. COUNTA is orientation-blind and still distinguishes return_mode 1 from return_mode 0, which returns a single string and would count 1. EXECUTED RESULT -- READ THIS ONE CAREFULLY: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, not #NAME?. That is NOT a partially-working REGEXEXTRACT. COUNTA counts non-empty cells, and an error value is not empty, so COUNTA(#NAME?) is 1: the wrapper this case uses to avoid asserting an array orientation also swallows the #NAME? underneath it. The other four cases in this file show the raw #NAME?, and the function is absent under all four spellings probed. The count of 1 here is an artefact of the wrapper, not evidence of anything the engine computed.; MISMATCH vs expected: expected 2, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regexextract.html">REGEXEXTRACT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=COUNTA(REGEXEXTRACT(A2,&#34;[A-Z][a-z]+&#34;,1))</div>
   <dl class="quirk-grid">
@@ -6583,6 +7220,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft&#39;s Example 1 runs the same data a second time with return_mode 1, documented as &#34;1: Return all strings that match the pattern as an array&#34;. &#34;DylanWilliams&#34; contains exactly two capitalised words, so the array has two elements. The result is wrapped in COUNTA DELIBERATELY: Microsoft&#39;s page shows the array only as a screenshot and never states whether it spills down a column or across a row, so asserting INDEX(...,2) would be asserting an orientation this corpus cannot source. COUNTA is orientation-blind and still distinguishes return_mode 1 from return_mode 0, which returns a single string and would count 1. EXECUTED RESULT -- READ THIS ONE CAREFULLY: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, not #NAME?. That is NOT a partially-working REGEXEXTRACT. COUNTA counts non-empty cells, and an error value is not empty, so COUNTA(#NAME?) is 1: the wrapper this case uses to avoid asserting an array orientation also swallows the #NAME? underneath it. The other four cases in this file show the raw #NAME?, and the function is absent under all four spellings probed. The count of 1 here is an artefact of the wrapper, not evidence of anything the engine computed.; MISMATCH vs expected: expected 2, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regexextract.html">REGEXEXTRACT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXEXTRACT(&#34;2024-08-31&#34;,&#34;-([0-9]{2})-&#34;,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">08</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents return_mode &#34;2: Return capturing groups from the first match as an array&#34; and explains: &#34;Capturing groups are parts of a regex pattern surrounded by parentheses &#39;(...)&#39;. They allow you to return separate parts of a single match individually.&#34; The pattern here has exactly ONE group, so the returned array has one element and coerces to the scalar string &#34;08&#34; -- chosen that way so the case tests the group extraction without depending on how a multi-element array is laid out. The match itself is &#34;-08-&#34; and the group inside it is &#34;08&#34;. Note the documented remark that &#34;REGEXEXTRACT always return text values&#34; (Microsoft&#39;s own grammar): the expected value is the two-character STRING &#34;08&#34;, not the number 8.; MISMATCH vs expected: expected &#39;08&#39;, got &#39;#N/A&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -6626,6 +7276,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regexreplace.html">REGEXREPLACE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXREPLACE(&#34;Apple apple&#34;,&#34;apple&#34;,&#34;X&#34;,0,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">X X</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the literal pattern &#34;apple&#34; matches both &#34;Apple&#34; and &#34;apple&#34;, so both are replaced and the answer is &#34;X X&#34;; with the default it would be &#34;Apple X&#34;. Note the fifth argument requires the fourth, so occurrence is passed explicitly as its documented default of 0.; MISMATCH vs expected: expected &#39;X X&#39;, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regexreplace.html">REGEXREPLACE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=REGEXREPLACE(&#34;Apple apple&#34;,&#34;apple&#34;,&#34;X&#34;,0,1)</div>
   <dl class="quirk-grid">
@@ -6665,6 +7328,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regexreplace.html">REGEXREPLACE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#N/A</dd>
+    <dt>Documented / expected</dt><dd class="mono">a1b2c#</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents: &#34;A negative number replaces that instance, searching from the end.&#34; So -1 is the LAST digit, the 3, and only it is replaced: &#34;a1b2c#&#34;. This is an unusual convention -- most regex APIs have no notion of it at all -- which makes it a good probe of whether an engine implemented Excel&#39;s documented argument or borrowed a host language&#39;s replace-all/replace-first semantics.; MISMATCH vs expected: expected &#39;a1b2c#&#39;, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regexreplace.html">REGEXREPLACE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;,-1)</div>
   <dl class="quirk-grid">
@@ -6691,6 +7367,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXTEST(&#34;ALFALFA&#34;,&#34;alfalfa&#34;,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the lower-case literal pattern matches the upper-case string, so TRUE; with the default it would be FALSE.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=REGEXTEST(&#34;ALFALFA&#34;,&#34;alfalfa&#34;,1)</div>
   <dl class="quirk-grid">
@@ -6700,6 +7389,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the lower-case literal pattern matches the upper-case string, so TRUE; with the default it would be FALSE.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXTEST(A2,&#34;a&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s Example 1 checks &#34;various aspects of the string &#39;alfalfa&#39;&#34;, and its first row is =REGEXTEST(A2,&#34;a&#34;) with the question &#34;Does it contain the letter &#39;a&#39;?&#34;. The documented return is &#34;TRUE if there is a match and FALSE if there is not&#34;, and &#34;alfalfa&#34; plainly contains an &#39;a&#39;, so the answer is TRUE. (The page shows the result column only as a screenshot, so the TRUE/FALSE values in this file are read off the questions Microsoft prints in text, each of which has one and only one correct answer for the string &#39;alfalfa&#39;.) REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regextest-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -6717,6 +7419,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXTEST(A2,&#34;[0-9]&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">False</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s fifth documented row, question &#34;Does it contain any number digits?&#34;. No digits, so FALSE. Asserted alongside the TRUE rows so that an engine that always returns TRUE (or that returns a truthy string) is caught.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=REGEXTEST(A2,&#34;[0-9]&#34;)</div>
   <dl class="quirk-grid">
@@ -6726,6 +7441,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft&#39;s fifth documented row, question &#34;Does it contain any number digits?&#34;. No digits, so FALSE. Asserted alongside the TRUE rows so that an engine that always returns TRUE (or that returns a truthy string) is caught.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXTEST(A2,&#34;[a-z]&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s second documented row, question &#34;Does it contain any lower case letters?&#34;. Every character of &#34;alfalfa&#34; is lower case, so TRUE.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -6743,6 +7471,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s Example 2 checks &#34;whether phone numbers have the specific format &#39;(###) ###-####&#39;&#34; using the pattern ^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$, and notes: &#34;Backslash &#39;\&#39; is used to &#39;escape&#39; parentheses &#39;()&#39; and some other characters. In this pattern, &#39;\(&#39; is interpreted as &#39;(&#39; and &#39;\)&#39; is interpreted as &#39;)&#39;.&#34; The string &#34;(378) 555-4195&#34; is Microsoft&#39;s own first data row and matches the pattern end to end -- three digits in literal parentheses, a space, three digits, a hyphen, four digits -- so TRUE. This case also exercises the anchors and the escaping, which are the parts of a pattern most likely to be mangled on the way into a stored .xlsx.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</div>
   <dl class="quirk-grid">
@@ -6756,6 +7497,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">False</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s second data row for the same example is &#34;+1(878) 555-8622&#34;. The pattern is anchored at both ends with ^ and $, so the leading &#34;+1&#34; makes the whole string fail to match: FALSE. The pair of phone cases is the sharpest test in this file -- an engine that ignored the anchors would return TRUE for both.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</div>
   <dl class="quirk-grid">
@@ -6765,6 +7519,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft&#39;s second data row for the same example is &#34;+1(878) 555-8622&#34;. The pattern is anchored at both ends with ^ and $, so the leading &#34;+1&#34; makes the whole string fail to match: FALSE. The pair of phone cases is the sharpest test in this file -- an engine that ignored the anchors would return TRUE for both.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regextest.html">REGEXTEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEXTEST(A2,&#34;[A-Z]&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">False</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s third documented row, question &#34;Does it contain any upper case letters?&#34;. It does not, so FALSE -- and this is the row that proves matching is case-SENSITIVE by default, since a case-insensitive engine would answer TRUE here and every subsequent case-sensitivity assertion in this batch would be meaningless.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">

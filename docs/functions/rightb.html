@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RIGHTB works in Excel &amp; Sheets (docs), LibreOffice (tested)</title>
-<meta name="description" content="All 6 executed test cases for RIGHTB match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>RIGHTB works in Excel (docs), Sheets &amp; LibreOffice (executed)</title>
+<meta name="description" content="All 6 LibreOffice and 6 Google Sheets executed cases for RIGHTB match Excel&#39;s d… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/rightb.html">
-<meta property="og:title" content="RIGHTB works in Excel &amp; Sheets (docs), LibreOffice (tested)">
-<meta property="og:description" content="All 6 executed test cases for RIGHTB match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="RIGHTB works in Excel (docs), Sheets &amp; LibreOffice (executed)">
+<meta property="og:description" content="All 6 LibreOffice and 6 Google Sheets executed cases for RIGHTB match Excel&#39;s d… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/rightb.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>RIGHTB</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>RIGHTB</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -436,6 +436,65 @@ RIGHTB&rsquo;s support changed &mdash; not documentation claims, real results.</
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=RIGHTB(A2,5)</td>
+  <td>Microsoft&#39;s documented RIGHT example, on ASCII where bytes are characters</td>
+  <td class="result mono">Price</td>
+  <td class="result mono">Price<br><span class="category-tag">The RIGHT page publishes =RIGHT(A2,5) = Price for A2 = &#34;Sale Price&#34; (&#34;Last 5 characters of the first string&#34;). &#34;Sale Price&#34; is pure ASCII, so five bytes from the right are five characters from the right and RIGHTB must return the same string. RIGHTB HAS NO PAGE OF ITS OWN: it is documented on the combined RIGHT, RIGHTB page, whose only mention of it is the Important box -- &#34;The RIGHTB function is deprecated. RIGHT now supports Unicode surrogates via the Compatibility Version, Version 2.&#34; Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/right-rightb-functions-240267ee-9afa-4639-a02b-f19e1786cf2f (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=RIGHTB(A3)</td>
+  <td>Microsoft&#39;s second documented row: the argument omitted</td>
+  <td class="result mono">r</td>
+  <td class="result mono">r<br><span class="category-tag">The RIGHT page publishes =RIGHT(A3) = r for A3 = &#34;Stock Number&#34; (&#34;Last character of the second string&#34;) and documents the rule: &#34;If num_chars is omitted, it is assumed to be 1.&#34; One byte of ASCII is one character, so RIGHTB with no count returns the final &#34;r&#34;.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=RIGHTB(A3,99)</td>
+  <td>A count larger than the text, which the page says returns everything</td>
+  <td class="result mono">Stock Number</td>
+  <td class="result mono">Stock Number<br><span class="category-tag">The RIGHT page documents: &#34;If num_chars is greater than the length of text, RIGHT returns all of text.&#34; No padding, no error -- &#34;Stock Number&#34; is twelve ASCII bytes, so ninety-nine bytes returns the whole string.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=RIGHTB(A3,0)</td>
+  <td>A count of zero, which is inside the documented range</td>
+  <td class="result mono"></td>
+  <td class="result mono"><br><span class="category-tag">The RIGHT page documents: &#34;Num_chars must be greater than or equal to zero.&#34; Zero is inside that range, so it must produce a result rather than an error, and zero bytes of text is the empty string. NOTE ON READ-BACK: a formula returning &#34;&#34; round-trips through .xlsx as a cell with no cached value at all, which openpyxl reads back as None; harness/corpus.py treats an expected &#34;&#34; as satisfied by a read-back None for exactly this reason, and the raw None is still recorded in the results file.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=RIGHTB(A3,-1)</td>
+  <td>A negative count, which is outside the documented range</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The RIGHT page documents: &#34;Num_chars must be greater than or equal to zero.&#34; A negative count is outside that range; #VALUE! is Excel&#39;s error for an argument of the wrong kind, and the sibling MID/MIDB page states it explicitly for its own negative-count case (&#34;If num_chars is negative, MID returns the #VALUE! error value&#34;), so the same code is asserted for the same condition here -- the same reading batch E&#39;s LEFTB file used.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=RIGHTB(&#34;ＡＢＣ&#34;,2)</td>
+  <td>Full-width (double-byte) characters, where byte and character counting diverge</td>
+  <td class="result mono">Ｃ</td>
+  <td class="result mono"><br><span class="category-tag">DELIBERATELY ASSERTS NOTHING, for the reason given in the LEFTB, MIDB and REPLACEB files: byte counting in the B functions historically applied only when the default language was a DBCS language, this harness runs under en_US.UTF-8, and Microsoft&#39;s current page documents nothing about REPLACEB/RIGHTB beyond their deprecation. Two bytes from the right is the last full-width character under DBCS rules and the last two characters otherwise; the case records what each engine returns rather than scoring it.</span></td>
+  <td><span class="verdict-ok">Ran OK</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

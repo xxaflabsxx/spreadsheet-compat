@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NORMDIST matches Excel in LibreOffice except error codes (tested)</title>
-<meta name="description" content="5/6 match; zero standard deviation returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="5/6 match; zero standard deviation returns #VALUE!, Excel: #NUM! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/normdist.html">
 <meta property="og:title" content="NORMDIST matches Excel in LibreOffice except error codes (tested)">
-<meta property="og:description" content="5/6 match; zero standard deviation returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="5/6 match; zero standard deviation returns #VALUE!, Excel: #NUM! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/normdist.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>NORMDIST</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>NORMDIST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -443,6 +443,18 @@ against the failing cases above before assuming your data is wrong.</p>
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -477,6 +489,65 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(NORMDIST(A2,A3,A4,TRUE),7)</td>
+  <td>Microsoft&#39;s documented worked example, cumulative form</td>
+  <td class="result mono">0.9087888</td>
+  <td class="result mono">0.9087888<br><span class="category-tag">Microsoft publishes =NORMDIST(A2,A3,A4,TRUE) = 0.9087888 for x = 42, mean = 40, standard deviation = 1.5. DERIVATION, from the definition rather than from a statistics library: the documented cumulative normal is the integral of the density up to x, which in terms of the complementary error function is Phi(z) = erfc(-z/sqrt(2))/2 with z = (x - mean)/sd. Here z = (42 - 40)/1.5 = 4/3 exactly, and erfc(-(4/3)/sqrt(2))/2 evaluated with mpmath at 50 digits is 0.90878878027413213... No normal-distribution routine was called anywhere: erfc is a different function computed by a different algorithm, which is the point. At seven places that is 0.9087888 -- the published figure, reproduced exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/normdist-function -- the older /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and even the working path returns an 87 KB stub for roughly half of all requests, so the page was fetched with retries until the payload exceeded 150 KB.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(NORMDIST(A2,A3,A4,FALSE),5)</td>
+  <td>The same example in its non-cumulative (density) form</td>
+  <td class="result mono">0.10934</td>
+  <td class="result mono">0.10934<br><span class="category-tag">Microsoft publishes =NORMDIST(A2,A3,A4,FALSE) = 0.10934, describing it as the &#34;Probability mass function for the terms above&#34; -- Microsoft&#39;s own wording, though a normal distribution is continuous and this is a density, not a mass. DERIVATION from the documented density exp(-((x-mean)/sd)^2/2)/(sd*sqrt(2*pi)): exp(-(4/3)^2/2)/(1.5*sqrt(2*pi)) = 0.10934004978399... which is 0.10934 at five places.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(NORMDIST(A2,A3,A4,TRUE),12)</td>
+  <td>The same cumulative value carried to twelve decimal places</td>
+  <td class="result mono">0.9087887803</td>
+  <td class="result mono">0.908788780274<br><span class="category-tag">Seven published decimals cannot separate a good normal CDF from a mediocre rational approximation to it, so the erfc-derived value is asserted at twelve places: 0.908788780274. This is the assertion that actually constrains the tail algorithm.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(NORMDIST(1.333333,0,1,TRUE)-NORMSDIST(1.333333),12)</td>
+  <td>The documented identity between NORMDIST at mean 0, sd 1 and NORMSDIST</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft documents: &#34;If mean = 0, standard_dev = 1, and cumulative = TRUE, NORMDIST returns the standard normal distribution, NORMSDIST.&#34; This case checks that claim inside the engine instead of against a constant -- the difference of the two calls must be exactly zero -- so an engine whose two code paths disagree fails here even if each separately rounds to a published figure.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=NORMDIST(A2,A3,0,TRUE)</td>
+  <td>A standard deviation of zero, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If standard_dev &lt;= 0, NORMDIST returns the #NUM! error value.&#34; Zero is the boundary the &lt;= includes. OpenFormula 1.3 section 6.18.52 states the same constraint (&#34;StandardDeviation &gt; 0&#34;).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=NORMDIST(A2,&#34;x&#34;,A4,TRUE)</td>
+  <td>A non-numeric mean</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If mean or standard_dev is nonnumeric, NORMDIST returns the #VALUE! error value.&#34; The page uses #VALUE! for a wrong-typed argument and #NUM! for an out-of-range one, so the two codes are asserted separately.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

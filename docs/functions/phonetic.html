@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PHONETIC is not supported in LibreOffice Calc (Excel only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for PHONETIC in all 3 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>PHONETIC is not supported in Google Sheets or LibreOffice (executed)</title>
+<meta name="description" content="#NAME? in both: 3 executed Sheets cases and 3 in LibreOffice. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/phonetic.html">
-<meta property="og:title" content="PHONETIC is not supported in LibreOffice Calc (Excel only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for PHONETIC in all 3 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="PHONETIC is not supported in Google Sheets or LibreOffice (executed)">
+<meta property="og:description" content="#NAME? in both: 3 executed Sheets cases and 3 in LibreOffice. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/phonetic.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>PHONETIC</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>PHONETIC</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -435,6 +435,17 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+<h2 class="section-title">Why isn&rsquo;t PHONETIC working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>PHONETIC</code>: we imported the formula into
+Sheets on 2026-08-31 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
+
+
 
 
 
@@ -445,6 +456,20 @@ we re-run every test on each new release, so it will flip to Supported here as s
   
     
   
+    
+      
+      <li>
+        <span class="formula">=PHONETIC((A2,C2))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#ERROR!</span>, but the documented/expected
+        result is <span class="formula">#N/A</span>.
+        Microsoft documents: &#34;If the reference is a range of nonadjacent cells, the #N/A error value is returned.&#34; This is the ONLY behaviour of PHONETIC this corpus can assert a value for, and that is why it is the only asserted case in this file. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/phonetic-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). LibreOffice has no PHONETIC function at all, so the two probe cases in this file return #NAME? as well -- which is the only reading of them the corpus offers: they assert nothing about a value, and here they record an absence rather than a difference.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#ERROR!&#39;; NOTE: #ERROR! is Google Sheets&#39; parse-failure error (no Excel equivalent); it means Sheets could not parse the formula, which is not the same as #NAME?
+      </li>
+      
+    
+      
+    
+      
     
   
     
@@ -474,6 +499,41 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=PHONETIC((A2,C2))</td>
+  <td>A reference to nonadjacent cells, which the page documents as an error</td>
+  <td class="result mono">#ERROR!</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Microsoft documents: &#34;If the reference is a range of nonadjacent cells, the #N/A error value is returned.&#34; This is the ONLY behaviour of PHONETIC this corpus can assert a value for, and that is why it is the only asserted case in this file. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/phonetic-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). LibreOffice has no PHONETIC function at all, so the two probe cases in this file return #NAME? as well -- which is the only reading of them the corpus offers: they assert nothing about a value, and here they record an absence rather than a difference.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PHONETIC(A2)</td>
+  <td>Plain Latin text with no furigana attached -- recorded, not asserted</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">DELIBERATELY ASSERTS NOTHING ABOUT THE VALUE. PHONETIC &#34;extracts the phonetic (furigana) characters from a text string&#34; -- it reads phonetic metadata that Excel stores alongside a cell when text is typed with a Japanese IME, and Microsoft&#39;s worked example is a pair of cells containing Japanese place names whose furigana it returns. That metadata cannot be created by a formula, by openpyxl, or by any file this harness can write, and Microsoft&#39;s page does not document what the function returns for a string that carries none. So this case is a PROBE: it asserts only that the engine HAS the function and does not fail on it, and the value each engine returns is recorded in the results file for the reader to see rather than being scored against a number this corpus cannot source.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PHONETIC(A2:B3)</td>
+  <td>A rectangular range, where the documented rule is that the upper-left cell wins</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">Microsoft documents: &#34;If reference is a range of cells, the furigana text string in the upper-left corner cell of the range is returned.&#34; The rule is about WHICH cell is read, not about what the phonetic content of that cell is, and without furigana metadata (see the previous case) there is no value to assert -- so this too is a probe that records the engine&#39;s answer without scoring it.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

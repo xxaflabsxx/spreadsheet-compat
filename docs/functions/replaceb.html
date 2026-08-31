@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>REPLACEB works in Excel &amp; Sheets (docs), LibreOffice (tested)</title>
-<meta name="description" content="All 5 executed test cases for REPLACEB match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>REPLACEB works in Excel (docs), Sheets &amp; LibreOffice (executed)</title>
+<meta name="description" content="All 5 LibreOffice and 5 Google Sheets executed cases for REPLACEB match Excel&#39;s… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/replaceb.html">
-<meta property="og:title" content="REPLACEB works in Excel &amp; Sheets (docs), LibreOffice (tested)">
-<meta property="og:description" content="All 5 executed test cases for REPLACEB match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="REPLACEB works in Excel (docs), Sheets &amp; LibreOffice (executed)">
+<meta property="og:description" content="All 5 LibreOffice and 5 Google Sheets executed cases for REPLACEB match Excel&#39;s… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/replaceb.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>REPLACEB</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>REPLACEB</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -436,6 +436,57 @@ REPLACEB&rsquo;s support changed &mdash; not documentation claims, real results.
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=REPLACEB(A2,6,5,&#34;*&#34;)</td>
+  <td>Microsoft&#39;s documented REPLACE example, on pure ASCII where bytes are characters</td>
+  <td class="result mono">abcde*k</td>
+  <td class="result mono">abcde*k<br><span class="category-tag">The REPLACE page publishes =REPLACE(A2,6,5,&#34;*&#34;) = abcde*k for A2 = &#34;abcdefghijk&#34;: &#34;Replaces five characters in abcdefghijk with a single * character, starting with the sixth character (f).&#34; &#34;abcdefghijk&#34; is pure ASCII, so its bytes and its characters are the same things and REPLACEB must return the same string. REPLACEB HAS NO PAGE OF ITS OWN: Microsoft documents it on the combined REPLACE, REPLACEB page, which now carries only an Important box about it -- &#34;The REPLACEB function is deprecated. In workbooks set to Compatibility Version 2, REPLACE has improved behavior with Surrogate Pairs, counting them as one character instead of two. Variation Selectors (commonly used with emojis) will still be counted as separate characters.&#34; Every worked example on that page is written with REPLACE, which is why the ASCII cases here are the honest way to test REPLACEB against documented behaviour. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/replace-replaceb-functions-8d799074-2425-4a8a-84bc-82472868878a (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REPLACEB(A3,3,2,&#34;10&#34;)</td>
+  <td>Microsoft&#39;s second documented row: replacing the last two digits of a year</td>
+  <td class="result mono">2010</td>
+  <td class="result mono">2010<br><span class="category-tag">The REPLACE page publishes =REPLACE(A3,3,2,&#34;10&#34;) = 2010 for A3 = 2009: &#34;Replaces the last two digits (09) of 2009 with 10.&#34; Note the source cell holds the NUMBER 2009, not the text &#34;2009&#34; -- Microsoft&#39;s example data is a number -- so this case also exercises the implicit number-to-text conversion. The result is the four-character string &#34;2010&#34;, not the number 2010.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REPLACEB(A4,1,3,&#34;@&#34;)</td>
+  <td>Microsoft&#39;s third documented row</td>
+  <td class="result mono">@456</td>
+  <td class="result mono">@456<br><span class="category-tag">The REPLACE page publishes =REPLACE(A4,1,3,&#34;@&#34;) = @456 for A4 = 123456: &#34;Replaces the first three characters of 123456 with a single @ character.&#34; Start position 1 is the first byte, which is the boundary case for a one-based index.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REPLACEB(&#34;abcdef&#34;,3,0,&#34;XY&#34;)</td>
+  <td>A replacement of zero bytes, which inserts rather than replaces</td>
+  <td class="result mono">abXYcdef</td>
+  <td class="result mono">abXYcdef<br><span class="category-tag">Replacing zero bytes at position 3 removes nothing and inserts &#34;XY&#34; before the third byte, giving &#34;abXYcdef&#34;. The behaviour follows directly from the documented meaning of the arguments -- start_num is where to begin and num_chars/num_bytes is how many to take out -- and it is worth asserting because an off-by-one in the insertion point is invisible in every case where something is actually replaced.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REPLACEB(&#34;ＡＢＣ&#34;,1,2,&#34;x&#34;)</td>
+  <td>Full-width (double-byte) characters, where byte and character counting diverge</td>
+  <td class="result mono">xＢＣ</td>
+  <td class="result mono"><br><span class="category-tag">DELIBERATELY ASSERTS NOTHING. This is the one thing REPLACEB does that REPLACE does not, and it is also the one thing Microsoft no longer documents: the combined page&#39;s only mention of REPLACEB is that it is deprecated. Historically the B functions counted BYTES only when the default language was a DBCS language (Japanese, Chinese, Korean) and behaved exactly like their non-B siblings otherwise -- so under this harness&#39;s en_US.UTF-8 environment the two readings give different answers (two bytes is the first full-width character under DBCS rules, the first TWO characters otherwise) and neither can be called wrong without knowing which rule the engine applied. The case therefore records what each engine returns instead of scoring it, exactly as the LEFTB and MIDB files from batch E do.</span></td>
+  <td><span class="verdict-ok">Ran OK</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

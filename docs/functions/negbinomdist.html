@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEGBINOMDIST gives different results in LibreOffice vs Excel (tested)</title>
-<meta name="description" content="3/5 match Excel&#39;s docs; probability above one returns #VALUE!, not #NUM!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="3/5 match Excel&#39;s docs; probability above one returns #VALUE!, not #NUM!. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/negbinomdist.html">
 <meta property="og:title" content="NEGBINOMDIST gives different results in LibreOffice vs Excel (tested)">
-<meta property="og:description" content="3/5 match Excel&#39;s docs; probability above one returns #VALUE!, not #NUM!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="3/5 match Excel&#39;s docs; probability above one returns #VALUE!, not #NUM!. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/negbinomdist.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>NEGBINOMDIST</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>NEGBINOMDIST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -443,6 +443,16 @@ against the failing cases above before assuming your data is wrong.</p>
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -483,6 +493,57 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(NEGBINOMDIST(A2,A3,A4),8)</td>
+  <td>Microsoft&#39;s documented worked example for the compatibility function</td>
+  <td class="result mono">0.05504866</td>
+  <td class="result mono">0.05504866<br><span class="category-tag">Microsoft publishes =NEGBINOMDIST(A2,A3,A4) = 0.05504866 for 10 failures, a threshold of 5 successes and a success probability of 0.25 -- the same data as NEGBINOM.DIST&#39;s page, printed to eight places instead of seven. DERIVATION, in exact rational arithmetic with no statistics library: the documented mass function is P(X = x) = C(x + r - 1, r - 1) * p^r * (1 - p)^x with x = number_f, r = number_s and p = probability_s, which for x = 10, r = 5, p = 1/4 is C(14,4) * (1/4)^5 * (3/4)^10 = 1001 * 59049 / 1073741824 = 59108049/1073741824 exactly, = 0.05504866037517786... The cumulative value is the exact sum of that expression over x = 0..10, which is 336633157/1073741824 = 0.3135140584781766... Both are terminating binary fractions -- the denominators are powers of two -- so an engine using IEEE doubles can represent them exactly and there is no rounding anywhere in the derivation. Rounded to eight places, 0.05504866037517786 is 0.05504866. NEGBINOMDIST takes no `cumulative` argument at all: it is the mass function only, which is why its published figure matches NEGBINOM.DIST&#39;s FALSE row and not its TRUE row. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/negbinomdist-function -- note the path: the older /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URLs were returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body all through this batch (confirmed with curl, with the r.jina.ai reader and with a real headless Firefox), while the /en-us/excel/functions/&lt;name&gt;-function path serves the same article intermittently -- roughly one request in two returns an 87 KB stub, so every page cited in this batch was fetched with retries until the payload exceeded 150 KB.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(NEGBINOMDIST(10,5,0.25)-NEGBINOM.DIST(10,5,0.25,FALSE),12)</td>
+  <td>The old and new spellings must agree exactly on the same inputs</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft&#39;s compatibility notice says NEGBINOMDIST &#34;has been replaced with one or more new functions that may provide improved accuracy&#34; and points at NEGBINOM.DIST. This case checks the two against each other inside the engine rather than against a constant: the difference of the two calls must be exactly zero, so an engine whose legacy path and modern path disagree fails here even if each of them individually rounds to a published figure. Both names are computed on identical arguments in one formula, so no intermediate rounding is involved.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=NEGBINOMDIST(A2,A3,1.5)</td>
+  <td>A success probability above 1, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If probability_s &lt; 0 or if probability &gt; 1, NEGBINOMDIST returns the #NUM! error value.&#34; (Quoted as printed, including the dropped _s.)</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=NEGBINOMDIST(-1,A3,A4)</td>
+  <td>A negative number of failures, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If number_f &lt; 0 or number_s &lt; 1, NEGBINOMDIST returns the #NUM! error value.&#34; EXECUTED RESULT -- A SILENT WRONG ANSWER: LibreOffice returns 0.0009765625 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents #NUM!. That number is (1/4)^5, the mass at ZERO failures: the engine has taken a documented-invalid -1 and evaluated the distribution as though 0 had been passed. A user who lands a negative value in this argument gets a plausible probability back instead of an error. NEGBINOM.DIST, the modern spelling of the same function, rejects the same input on the same builds (with #VALUE! rather than the documented #NUM!), so the two spellings do not even agree with each other about whether the input is legal.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=NEGBINOMDIST(&#34;x&#34;,A3,A4)</td>
+  <td>A non-numeric first argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If any argument is nonnumeric, NEGBINOMDIST returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

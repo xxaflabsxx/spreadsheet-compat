@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>REGEXEXTRACT is not supported in LibreOffice (Excel &amp; Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for REGEXEXTRACT in all 5 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for REGEXEXTRACT in all 5 executed te… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/regexextract.html">
 <meta property="og:title" content="REGEXEXTRACT is not supported in LibreOffice (Excel &amp; Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for REGEXEXTRACT in all 5 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for REGEXEXTRACT in all 5 executed te… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/regexextract.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>REGEXEXTRACT</h1>
   
-    <span class="badge badge-bad">Unsupported (not recognized)</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
 <p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>REGEXEXTRACT</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>REGEXEXTRACT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -435,6 +435,14 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+<h2 class="section-title">Why isn&rsquo;t REGEXEXTRACT working in Google Sheets?</h2>
+
+<p><code>REGEXEXTRACT</code> runs in Google Sheets, but our executed cases show it does not match
+Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
+formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
+against those cases before assuming your data is wrong.</p>
+
+
 
 
 
@@ -445,6 +453,40 @@ we re-run every test on each new release, so it will flip to Supported here as s
   
     
   
+    
+      
+    
+      
+      <li>
+        <span class="formula">=COUNTA(REGEXEXTRACT(A2,&#34;[A-Z][a-z]+&#34;,1))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">1</span>, but the documented/expected
+        result is <span class="formula">2</span>.
+        Microsoft&#39;s Example 1 runs the same data a second time with return_mode 1, documented as &#34;1: Return all strings that match the pattern as an array&#34;. &#34;DylanWilliams&#34; contains exactly two capitalised words, so the array has two elements. The result is wrapped in COUNTA DELIBERATELY: Microsoft&#39;s page shows the array only as a screenshot and never states whether it spills down a column or across a row, so asserting INDEX(...,2) would be asserting an orientation this corpus cannot source. COUNTA is orientation-blind and still distinguishes return_mode 1 from return_mode 0, which returns a single string and would count 1. EXECUTED RESULT -- READ THIS ONE CAREFULLY: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, not #NAME?. That is NOT a partially-working REGEXEXTRACT. COUNTA counts non-empty cells, and an error value is not empty, so COUNTA(#NAME?) is 1: the wrapper this case uses to avoid asserting an array orientation also swallows the #NAME? underneath it. The other four cases in this file show the raw #NAME?, and the function is absent under all four spellings probed. The count of 1 here is an artefact of the wrapper, not evidence of anything the engine computed.; MISMATCH vs expected: expected 2, got 1
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXEXTRACT(&#34;2024-08-31&#34;,&#34;-([0-9]{2})-&#34;,2)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">08</span>.
+        Microsoft documents return_mode &#34;2: Return capturing groups from the first match as an array&#34; and explains: &#34;Capturing groups are parts of a regex pattern surrounded by parentheses &#39;(...)&#39;. They allow you to return separate parts of a single match individually.&#34; The pattern here has exactly ONE group, so the returned array has one element and coerces to the scalar string &#34;08&#34; -- chosen that way so the case tests the group extraction without depending on how a multi-element array is laid out. The match itself is &#34;-08-&#34; and the group inside it is &#34;08&#34;. Note the documented remark that &#34;REGEXEXTRACT always return text values&#34; (Microsoft&#39;s own grammar): the expected value is the two-character STRING &#34;08&#34;, not the number 8.; MISMATCH vs expected: expected &#39;08&#39;, got &#39;#N/A&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXEXTRACT(&#34;abcDEF&#34;,&#34;[A-Z]+&#34;,0,1)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">abc</span>.
+        Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (the default) and &#34;1: Case insensitive&#34;. With matching made case-insensitive, [A-Z]+ also matches lower-case letters, so the FIRST match in &#34;abcDEF&#34; is the leading run &#34;abc&#34; -- not &#34;DEF&#34;, which is what the same call returns with the default sensitivity. The two readings give different answers on the same string, which is what makes this a real test of the argument rather than a decoration.; MISMATCH vs expected: expected &#39;abc&#39;, got &#39;#N/A&#39;
+      </li>
+      
+    
+      
     
   
     
@@ -510,6 +552,57 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=REGEXEXTRACT(A2,&#34;[A-Z][a-z]+&#34;)</td>
+  <td>Microsoft&#39;s documented example: the first match of a capitalised-word pattern</td>
+  <td class="result mono">Dylan</td>
+  <td class="result mono">Dylan<br><span class="category-tag">Microsoft&#39;s Example 1 is exactly this: the data &#34;DylanWilliams&#34; with the pattern &#34;[A-Z][a-z]+&#34;, described as &#34;Extract names based on capital letters&#34;. DERIVATION: the pattern matches one upper-case letter followed by one or more lower-case letters; scanning from the left, the first such run in &#34;DylanWilliams&#34; is &#34;Dylan&#34; (it stops at the W, which is not in [a-z]). With return_mode omitted the documented behaviour is &#34;0: Return the first string that matches the pattern&#34;, so the answer is the single string &#34;Dylan&#34;. REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regexextract-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=COUNTA(REGEXEXTRACT(A2,&#34;[A-Z][a-z]+&#34;,1))</td>
+  <td>The same pattern with return_mode 1, counted rather than indexed</td>
+  <td class="result mono">1</td>
+  <td class="result mono">2<br><span class="category-tag">Microsoft&#39;s Example 1 runs the same data a second time with return_mode 1, documented as &#34;1: Return all strings that match the pattern as an array&#34;. &#34;DylanWilliams&#34; contains exactly two capitalised words, so the array has two elements. The result is wrapped in COUNTA DELIBERATELY: Microsoft&#39;s page shows the array only as a screenshot and never states whether it spills down a column or across a row, so asserting INDEX(...,2) would be asserting an orientation this corpus cannot source. COUNTA is orientation-blind and still distinguishes return_mode 1 from return_mode 0, which returns a single string and would count 1. EXECUTED RESULT -- READ THIS ONE CAREFULLY: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, not #NAME?. That is NOT a partially-working REGEXEXTRACT. COUNTA counts non-empty cells, and an error value is not empty, so COUNTA(#NAME?) is 1: the wrapper this case uses to avoid asserting an array orientation also swallows the #NAME? underneath it. The other four cases in this file show the raw #NAME?, and the function is absent under all four spellings probed. The count of 1 here is an artefact of the wrapper, not evidence of anything the engine computed.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXEXTRACT(&#34;2024-08-31&#34;,&#34;-([0-9]{2})-&#34;,2)</td>
+  <td>return_mode 2, which returns the capturing groups of the first match</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">08<br><span class="category-tag">Microsoft documents return_mode &#34;2: Return capturing groups from the first match as an array&#34; and explains: &#34;Capturing groups are parts of a regex pattern surrounded by parentheses &#39;(...)&#39;. They allow you to return separate parts of a single match individually.&#34; The pattern here has exactly ONE group, so the returned array has one element and coerces to the scalar string &#34;08&#34; -- chosen that way so the case tests the group extraction without depending on how a multi-element array is laid out. The match itself is &#34;-08-&#34; and the group inside it is &#34;08&#34;. Note the documented remark that &#34;REGEXEXTRACT always return text values&#34; (Microsoft&#39;s own grammar): the expected value is the two-character STRING &#34;08&#34;, not the number 8.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXEXTRACT(&#34;abcDEF&#34;,&#34;[A-Z]+&#34;,0,1)</td>
+  <td>The documented case_sensitivity argument set to case-insensitive</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">abc<br><span class="category-tag">Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (the default) and &#34;1: Case insensitive&#34;. With matching made case-insensitive, [A-Z]+ also matches lower-case letters, so the FIRST match in &#34;abcDEF&#34; is the leading run &#34;abc&#34; -- not &#34;DEF&#34;, which is what the same call returns with the default sensitivity. The two readings give different answers on the same string, which is what makes this a real test of the argument rather than a decoration.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXEXTRACT(&#34;abc&#34;,&#34;[0-9]+&#34;)</td>
+  <td>A pattern that matches nothing</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">There is no digit in &#34;abc&#34;, so nothing matches. #N/A -- &#34;not available&#34; -- is Excel&#39;s error for a lookup that found nothing, and it is what this function family returns on no match; the value is asserted here so that an engine returning an empty string, a zero or #VALUE! instead is recorded as different.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
