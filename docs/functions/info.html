@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>INFO: Excel and LibreOffice — not in Sheets</title>
-<meta name="description" content="INFO (Information) is documented for Excel and LibreOffice, not for Google Sheets. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>INFO gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="8/10 match Excel&#39;s docs; directory is text returns False, not True. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/info.html">
-<meta property="og:title" content="INFO: Excel and LibreOffice — not in Sheets">
-<meta property="og:description" content="INFO (Information) is documented for Excel and LibreOffice, not for Google Sheets. Not yet live-tested by any engine.">
+<meta property="og:title" content="INFO gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="8/10 match Excel&#39;s docs; directory is text returns False, not True. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/info.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>INFO</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Information</p>
+<p class="category-tag">Category: Information &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>INFO</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for INFO yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060104.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,110 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+INFO&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't INFO working in LibreOffice?</h2>
+
+<p><code>INFO</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=ISTEXT(INFO(&#34;directory&#34;))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">False</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        Excel&#39;s type_text table documents &#34;directory&#34; as &#34;Path of the current directory or folder specified in the Excel option, At startup, open all files in&#34;. A path is text, so ISTEXT is the documented promise. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected True, got False
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=LEFT(INFO(&#34;origin&#34;),3)=&#34;$A:&#34;</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        Excel&#39;s type_text table documents &#34;origin&#34; as returning &#34;the absolute cell reference of the top and leftmost cell visible in the window ... as text prepended with \&#34;$A:\&#34;&#34;, and gives worked forms for both reference styles (&#34;$A:$D$9&#34; in A1 style, &#34;$A:R9C4&#34; in R1C1 style). The scroll position is not fixed, but the &#34;$A:&#34; prefix is documented for BOTH styles, so the prefix is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected True, got &#39;#N/A&#39;
+      </li>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +497,98 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for INFO yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=OR(INFO(&#34;recalc&#34;)=&#34;Automatic&#34;,INFO(&#34;recalc&#34;)=&#34;Manual&#34;)</td>
+  <td>Microsoft&#39;s second documented worked example: recalculation mode, which the page says is one of exactly two strings</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Excel&#39;s type_text table documents &#34;recalc&#34; as &#34;Current recalculation mode; returns \&#34;Automatic\&#34; or \&#34;Manual\&#34;&#34;, and the page&#39;s own Result column for =INFO(&#34;recalc&#34;) reads &#39;\&#34;Automatic\&#34; or \&#34;Manual\&#34; depending on the current state of your calculation options&#39;. The documentation therefore fixes a two-value enumeration, not a value, so the enumeration is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISNUMBER(INFO(&#34;numfile&#34;))</td>
+  <td>Microsoft&#39;s first documented worked example: the sheet count, which the page says is a number</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Excel&#39;s type_text table documents &#34;numfile&#34; as &#34;Number of worksheets in the open workbooks&#34;, and the page&#39;s Result column for =INFO(&#34;numfile&#34;) reads &#39;a number indicating how many sheets are in the currently open workbooks&#39; -- Microsoft publishes that sentence INSTEAD of a figure, because the figure depends on what is open. So the documented promise is &#34;a number&#34;, and ISNUMBER is the exact assertion of it. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISTEXT(INFO(&#34;osversion&#34;))</td>
+  <td>The operating system version, which the page says is returned as text</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Excel&#39;s type_text table documents &#34;osversion&#34; as &#34;Current operating system version, as text&#34;. The words &#34;as text&#34; are the documented guarantee, and ISTEXT asserts precisely that. The string itself is machine-specific (all four builds here return &#34;Linux 7.0&#34;). WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISTEXT(INFO(&#34;release&#34;))</td>
+  <td>The application version, which the page says is returned as text</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Excel&#39;s type_text table documents &#34;release&#34; as &#34;Version of Microsoft Excel, as text&#34;. Again &#34;as text&#34; is the documented guarantee. The string is emphatically build-specific and is NOT assertable: the four pinned LibreOffice builds return four different strings here, and three of them are not version numbers at all but 40-character git commit hashes (24.2.0.3 -&gt; da48488a73ddd66ea24cf16bbc4f7b9c08e9bea1, 24.8.7.2 -&gt; e07d0a63a46349d29051da79b1fde8160bab2a89, 25.2.0.3 -&gt; e1cf4a87eb02d755bce1a01209907ea5ddc8f069), while 25.8.7.3 returns &#34;580(Build:3)&#34;. A workbook that parses INFO(&#34;release&#34;) to branch on version -- the obvious reason to call it -- gets nothing parseable from three of these four releases. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISTEXT(INFO(&#34;directory&#34;))</td>
+  <td>The current directory, which the page documents as a path</td>
+  <td class="result mono">False</td>
+  <td class="result mono">True<br><span class="category-tag">Excel&#39;s type_text table documents &#34;directory&#34; as &#34;Path of the current directory or folder specified in the Excel option, At startup, open all files in&#34;. A path is text, so ISTEXT is the documented promise. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures. EXECUTED RESULT: FALSE on all four LibreOffice builds -- INFO(&#34;directory&#34;) returns #N/A there, and because the IS functions inspect rather than propagate, ISTEXT reports a clean FALSE instead of surfacing the error. So a workbook asking LibreOffice where it is gets no answer and no complaint.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEFT(INFO(&#34;origin&#34;),3)=&#34;$A:&#34;</td>
+  <td>The top-left visible cell, which the page says is returned as text prepended with &#34;$A:&#34;</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">True<br><span class="category-tag">Excel&#39;s type_text table documents &#34;origin&#34; as returning &#34;the absolute cell reference of the top and leftmost cell visible in the window ... as text prepended with \&#34;$A:\&#34;&#34;, and gives worked forms for both reference styles (&#34;$A:$D$9&#34; in A1 style, &#34;$A:R9C4&#34; in R1C1 style). The scroll position is not fixed, but the &#34;$A:&#34; prefix is documented for BOTH styles, so the prefix is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures. EXECUTED RESULT: #N/A on all four LibreOffice builds, propagated from INFO(&#34;origin&#34;) itself. &#34;directory&#34; and &#34;origin&#34; are the two documented type_text codes LibreOffice does not implement; every other code in this file it answers.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INFO(&#34;memavail&#34;)</td>
+  <td>A retired memory code, which the page says now returns #N/A</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Excel documents, in an Important box: &#34;In previous versions of Microsoft Excel, the \&#34;memavail\&#34;, \&#34;memused\&#34;, and \&#34;totmem\&#34; type_text values, returned memory information. These type_text values are no longer supported and now return a #N/A error value.&#34; That makes #N/A the documented CORRECT answer here, not a failure -- one of the few places in this corpus where an error value is the specification. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INFO(&#34;memused&#34;)</td>
+  <td>The second of the three retired memory codes</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Same documented Important box as INFO(&#34;memavail&#34;): &#34;memavail&#34;, &#34;memused&#34; and &#34;totmem&#34; &#34;are no longer supported and now return a #N/A error value&#34;. All three are asserted separately because the documentation names all three separately, and an engine could easily retire one spelling and not the others. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INFO(&#34;totmem&#34;)</td>
+  <td>The third of the three retired memory codes</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Same documented Important box: &#34;totmem&#34; is one of the three type_text values that &#34;are no longer supported and now return a #N/A error value&#34;. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INFO(&#34;system&#34;)</td>
+  <td>PROBE: the operating environment name, whose documented enumeration has no entry for Linux</td>
+  <td class="result mono">LINUX</td>
+  <td class="result mono"><br><span class="category-tag">Excel&#39;s type_text table documents &#34;system&#34; as &#34;Name of the operating environment: Macintosh = \&#34;mac\&#34; Windows = \&#34;pcdos\&#34;&#34; -- a closed two-value enumeration with no third option. The harness runs on Linux, which the documentation simply does not cover, so no expected value can be derived and none is invented: this is recorded as a probe. FOR THE RECORD, all four LibreOffice builds return the string &#34;LINUX&#34; here. That is neither of the two documented values, and it is also not an error, so a workbook that tests INFO(&#34;system&#34;)=&#34;pcdos&#34; to detect Windows gets a clean FALSE rather than anything that signals the question was unanswerable. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.</span></td>
+  <td><span class="verdict-ok">Ran OK</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

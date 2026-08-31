@@ -1,0 +1,101 @@
+{
+  "function": "LOGNORM.DIST",
+  "cases": [
+    {
+      "id": "LOGNORM.DIST_cumulative_documented",
+      "formula": "=ROUND(LOGNORM.DIST(A2,A3,A4,TRUE),7)",
+      "description": "Microsoft's first documented worked example: the cumulative lognormal distribution at 4",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 0.0390836,
+      "expected_note": "Microsoft publishes '=LOGNORM.DIST(A2,A3,A4,TRUE)' with the result 0.0390836. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library's normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4. Rounded to the seven decimal places Microsoft prints, 0.039083555706800473 is 0.0390836. ROUND is applied in the sheet so the comparison is against the published decimal rather than against one engine's last floating-point bit."
+    },
+    {
+      "id": "LOGNORM.DIST_cumulative_full_precision",
+      "formula": "=ROUND(LOGNORM.DIST(A2,A3,A4,TRUE),10)",
+      "description": "The same cumulative value carried to ten decimal places",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 0.0390835557,
+      "expected_note": "The published figure is only given to seven places, which cannot distinguish an engine that is right from one that is right to six. Derived independently to 50 digits as 0.039083555706800473296 (see the derivation on the previous case), which is 0.0390835557 at ten places. This is the assertion that actually constrains the implementation."
+    },
+    {
+      "id": "LOGNORM.DIST_density_documented",
+      "formula": "=ROUND(LOGNORM.DIST(A2,A3,A4,FALSE),7)",
+      "description": "Microsoft's second documented worked example: the probability density at 4",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 0.0176176,
+      "expected_note": "Microsoft publishes '=LOGNORM.DIST(A2,A3,A4,FALSE)' with the result 0.0176176. The cumulative argument is documented as \"A logical value that determines the form of the function. If cumulative is TRUE, LOGNORM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.\" Derived from the closed-form density rather than by differencing the CDF: exp(-(ln 4 - 3.5)^2/(2 x 1.44)) / (4 x 1.2 x sqrt(2 pi)) = 0.017617596681819223728, which is 0.0176176 at seven places."
+    },
+    {
+      "id": "LOGNORM.DIST_density_full_precision",
+      "formula": "=ROUND(LOGNORM.DIST(A2,A3,A4,FALSE),10)",
+      "description": "The same density carried to ten decimal places",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 0.0176175967,
+      "expected_note": "0.017617596681819223728 at ten places, derived as on the previous case. Together with the ten-place cumulative assertion this pins both branches of the cumulative argument at a precision the published figures cannot."
+    },
+    {
+      "id": "LOGNORM.DIST_x_not_positive",
+      "formula": "=LOGNORM.DIST(0,A3,A4,TRUE)",
+      "description": "An x of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x <= 0 or if standard_dev <= 0, LOGNORM.DIST returns the #NUM! error value.\" The exclusion is not cosmetic -- ln(x) is undefined at and below zero, so there is no value to return. Zero is the boundary the <= sign includes. EXECUTED RESULT -- A SILENT WRONG ANSWER: all four LibreOffice builds return the NUMBER 0 here instead of the documented #NUM!. Zero is a perfectly plausible value for a cumulative distribution, so a column of non-positive inputs comes back as a column of zeros rather than a visible column of errors -- the same shape batch C found in EXPON.DIST and batch D in GAMMADIST. Both spellings, the legacy LOGNORMDIST and the modern LOGNORM.DIST, do it, so unlike batch D's GAMMADIST/GAMMA.DIST split there is no correct sibling to fall back on."
+    },
+    {
+      "id": "LOGNORM.DIST_x_negative",
+      "formula": "=LOGNORM.DIST(-1,A3,A4,TRUE)",
+      "description": "A negative x, well inside the excluded region",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "The same documented sentence, asserted a second time strictly inside the excluded range rather than on its boundary. An engine that guards only the exact value 0 -- or that guards nothing and lets the underlying maths return something -- is distinguished from a conforming one here. EXECUTED RESULT: 0 on all four builds, the same silent zero as at x = 0 -- so the guard is not merely mis-set at the boundary, it is absent. ln(x) does not exist here at all."
+    },
+    {
+      "id": "LOGNORM.DIST_standard_dev_zero",
+      "formula": "=LOGNORM.DIST(A2,A3,0,TRUE)",
+      "description": "A standard deviation of zero, the other half of the same documented exclusion",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x <= 0 or if standard_dev <= 0, LOGNORM.DIST returns the #NUM! error value.\" Zero standard deviation is also the denominator of the documented standardisation (ln(x)-mu)/sigma."
+    },
+    {
+      "id": "LOGNORM.DIST_nonnumeric",
+      "formula": "=LOGNORM.DIST(\"x\",A3,A4,TRUE)",
+      "description": "A non-numeric argument, which the page gives a DIFFERENT error code",
+      "setup_cells": {
+        "A2": 4,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, LOGNORM.DIST returns the #VALUE! error value.\" Asserted alongside the #NUM! cases because the page deliberately distinguishes the two: a malformed argument is #VALUE!, an out-of-range one is #NUM!."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "function": "MDETERM",
+  "cases": [
+    {
+      "id": "MDETERM_documented_range",
+      "formula": "=MDETERM(A2:D5)",
+      "description": "Microsoft's first documented worked example: the determinant of a 4x4 range",
+      "setup_cells": {
+        "A2": 1,
+        "B2": 3,
+        "C2": 8,
+        "D2": 5,
+        "A3": 1,
+        "B3": 3,
+        "C3": 6,
+        "D3": 1,
+        "A4": 1,
+        "B4": 1,
+        "C4": 1,
+        "D4": 0,
+        "A5": 7,
+        "B5": 3,
+        "C5": 10,
+        "D5": 2
+      },
+      "expected": 88,
+      "expected_note": "Microsoft publishes '=MDETERM(A2:D5)' with the result 88 for the 4x4 block {1,3,8,5; 1,3,6,1; 1,1,1,0; 7,3,10,2}. Derived independently by cofactor expansion in EXACT INTEGER arithmetic -- Python ints, no floating point anywhere, no numpy or other linear-algebra library -- which gives exactly 88. Integer arithmetic matters here: the page itself warns that \"MDETERM is calculated with an accuracy of approximately 16 digits, which may lead to a small numeric error when the calculation is not complete\", so an exact reference value is the only way to tell a correct answer from a nearly correct one."
+    },
+    {
+      "id": "MDETERM_documented_array_constant_3x3",
+      "formula": "=MDETERM({3,6,1;1,1,0;3,10,2})",
+      "description": "Microsoft's second documented worked example: the same function given an array constant",
+      "expected": 1,
+      "expected_note": "Microsoft publishes '=MDETERM({3,6,1;1,1,0;3,10,2})' with the result 1. Verified by exact cofactor expansion: 3(1*2 - 0*10) - 6(1*2 - 0*3) + 1(1*10 - 1*3) = 6 - 12 + 7 = 1. The case is carried separately from the range form because the page documents both input forms explicitly (\"Array can be given as a cell range, for example, A1:C3; as an array constant, such as {1,2,3;4,5,6;7,8,9}; or as a name to either of these\") and an engine can support one and not the other."
+    },
+    {
+      "id": "MDETERM_documented_array_constant_2x2",
+      "formula": "=MDETERM({3,6;1,1})",
+      "description": "Microsoft's third documented worked example: a 2x2 array constant",
+      "expected": -3,
+      "expected_note": "Microsoft publishes '=MDETERM({3,6;1,1})' with the result -3. Exact: 3*1 - 6*1 = -3. The smallest non-trivial determinant, and a negative one, so a sign error cannot hide."
+    },
+    {
+      "id": "MDETERM_not_square",
+      "formula": "=MDETERM({1,3,8,5;1,3,6,1})",
+      "description": "Microsoft's fourth documented worked example: a 2x4 array, which is not square",
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft publishes '=MDETERM({1,3,8,5;1,3,6,1})' with the result #VALUE! and the description \"Returns an error because the array does not have an equal number of rows and columns\". The page states the rule twice, listing \"Array does not have an equal number of rows and columns\" among the conditions under which \"MDETERM returns the #VALUE! error\". One of the few places where Microsoft publishes an ERROR as a worked example's result."
+    },
+    {
+      "id": "MDETERM_contains_text",
+      "formula": "=MDETERM(A2:B3)",
+      "description": "A square range in which one cell holds text, which the page excludes",
+      "setup_cells": {
+        "A2": "a",
+        "B2": 1,
+        "A3": 2,
+        "B3": 3
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"MDETERM returns the #VALUE! error when: Any cells in array are empty or contain text.\" A2 holds the text \"a\" while the other three cells are numbers, so the array is square and the only defect is the text cell."
+    },
+    {
+      "id": "MDETERM_singular_matrix",
+      "formula": "=MDETERM({1,2;2,4})",
+      "description": "A singular matrix, whose determinant is exactly zero",
+      "expected": 0,
+      "expected_note": "Exact: 1*4 - 2*2 = 0, since the second row is twice the first. Asserted because the page singles this case out as the one where its 16-digit accuracy shows: \"the determinant of a singular matrix may differ from zero by 1E-16\". The corpus compares numbers with a 1e-9 tolerance, so a result of 1E-16 still counts as zero here -- what this case would catch is an engine whose singular determinant is wrong by more than that."
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "function": "MIDB",
+  "cases": [
+    {
+      "id": "MIDB_documented_first_five",
+      "formula": "=MIDB(A2,1,5)",
+      "description": "Microsoft's first worked example on the MID page, run through the byte-counting spelling",
+      "setup_cells": {
+        "A2": "Fluid Flow"
+      },
+      "expected": "Fluid",
+      "expected_note": "The MID page publishes =MID(A2,1,5) = Fluid for A2 = \"Fluid Flow\", described as \"Returns 5 characters from the string in A2, starting at the 1st character\". \"Fluid Flow\" is pure ASCII, so bytes and characters coincide. MIDB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's MID page -- the page that historically documented MID and MIDB together -- now carries only an Important box reading \"The MIDB function is deprecated\", and every worked example and argument rule on it is written for MID. MIDB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with MID: for text in which every character occupies one byte, a byte count and a character count are the same number, so MIDB must return what MID returns. Those are the cases asserted here, each traced to a specific sentence on the MID page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "MIDB_count_runs_past_end",
+      "formula": "=MIDB(A2,7,20)",
+      "description": "Microsoft's second worked example: a count that overruns the end of the string",
+      "setup_cells": {
+        "A2": "Fluid Flow"
+      },
+      "expected": "Flow",
+      "expected_note": "The MID page publishes =MID(A2,7,20) = Flow and explains it: \"Because the number of characters to return (20) is greater than the length of the string (10), all characters, beginning with the 7th, are returned. No empty characters (spaces) are added to the end.\" The documented rule is also stated in the arguments section: \"If start_num is less than the length of text, but start_num plus num_chars exceeds the length of text, MID returns the characters up to the end of text.\" MIDB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's MID page -- the page that historically documented MID and MIDB together -- now carries only an Important box reading \"The MIDB function is deprecated\", and every worked example and argument rule on it is written for MID. MIDB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with MID: for text in which every character occupies one byte, a byte count and a character count are the same number, so MIDB must return what MID returns. Those are the cases asserted here, each traced to a specific sentence on the MID page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "MIDB_start_beyond_end",
+      "formula": "=MIDB(A2,20,5)",
+      "description": "Microsoft's third worked example: a start position past the end of the string",
+      "setup_cells": {
+        "A2": "Fluid Flow"
+      },
+      "expected": "",
+      "expected_note": "The MID page publishes this example with an empty Result cell and the explanation \"Because the starting point is greater than the length (10) of the string, empty text is returned\", matching the documented rule \"If start_num is greater than the length of text, MID returns \\\"\\\" (empty text)\". Empty text, not an error and not a space. MIDB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's MID page -- the page that historically documented MID and MIDB together -- now carries only an Important box reading \"The MIDB function is deprecated\", and every worked example and argument rule on it is written for MID. MIDB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with MID: for text in which every character occupies one byte, a byte count and a character count are the same number, so MIDB must return what MID returns. Those are the cases asserted here, each traced to a specific sentence on the MID page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "MIDB_start_below_one",
+      "formula": "=MIDB(A2,0,5)",
+      "description": "A start position of zero, which the page excludes",
+      "setup_cells": {
+        "A2": "Fluid Flow"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The MID page documents: \"If start_num is less than 1, MID returns the #VALUE! error value.\" Positions are 1-based -- \"The first character in text has start_num 1\" -- so 0 is outside the range rather than a synonym for the beginning. MIDB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's MID page -- the page that historically documented MID and MIDB together -- now carries only an Important box reading \"The MIDB function is deprecated\", and every worked example and argument rule on it is written for MID. MIDB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with MID: for text in which every character occupies one byte, a byte count and a character count are the same number, so MIDB must return what MID returns. Those are the cases asserted here, each traced to a specific sentence on the MID page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "MIDB_negative_count",
+      "formula": "=MIDB(A2,1,-1)",
+      "description": "A negative count, which the page also excludes",
+      "setup_cells": {
+        "A2": "Fluid Flow"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The MID page documents: \"If num_chars is negative, MID returns the #VALUE! error value.\" Asserted separately from the start_num exclusion because they are two different documented sentences about two different arguments. MIDB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's MID page -- the page that historically documented MID and MIDB together -- now carries only an Important box reading \"The MIDB function is deprecated\", and every worked example and argument rule on it is written for MID. MIDB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with MID: for text in which every character occupies one byte, a byte count and a character count are the same number, so MIDB must return what MID returns. Those are the cases asserted here, each traced to a specific sentence on the MID page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "MIDB_double_byte_probe",
+      "formula": "=MIDB(\"ＥＸＣＥＬ\",2,2)",
+      "description": "PROBE: a byte window that falls in the MIDDLE of a double-byte character",
+      "expected": null,
+      "expected_note": "The sharpest question a byte-counting text function can be asked, and one Microsoft no longer publishes a rule for: bytes 2 and 3 of a string of double-byte characters are the second half of the first character and the first half of the second, so a byte-counting implementation cannot return whole characters at all. Under a character-counting reading the answer would simply be \"ＸＣ\". No expected value is invented. FOR THE RECORD, all four LibreOffice builds return two SPACE characters here -- the historical Excel behaviour for a split double-byte character, where each severed half becomes a space -- while MIDB(\"ＥＸＣＥＬ\",3,4) returns \"ＸＣ\", i.e. an odd-numbered byte offset lands cleanly on a character boundary. Both are consistent with genuine byte counting, and neither is consistent with the character-counting reading."
+    }
+  ]
+}

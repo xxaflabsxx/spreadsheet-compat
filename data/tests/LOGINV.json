@@ -1,0 +1,84 @@
+{
+  "function": "LOGINV",
+  "cases": [
+    {
+      "id": "LOGINV_documented_example",
+      "formula": "=ROUND(LOGINV(A2,A3,A4),7)",
+      "description": "Microsoft's documented worked example: the inverse lognormal CDF at p = 0.039084",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 4.0000252,
+      "expected_note": "Microsoft publishes '=LOGINV(A2, A3, A4)' with the result 4.0000252 -- the same figure its modern replacement LOGNORM.INV publishes for the same three arguments. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library's normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4."
+    },
+    {
+      "id": "LOGINV_full_precision",
+      "formula": "=ROUND(LOGINV(A2,A3,A4),10)",
+      "description": "The same value carried to ten decimal places",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 4.0000252187,
+      "expected_note": "4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly."
+    },
+    {
+      "id": "LOGINV_roundtrip_with_LOGNORMDIST",
+      "formula": "=ROUND(LOGINV(LOGNORMDIST(4,3.5,1.2),3.5,1.2),10)",
+      "description": "The documented identity: LOGINV inverts LOGNORMDIST exactly",
+      "expected": 4.0,
+      "expected_note": "The page's Description states \"If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x\". Feeding the legacy CDF's full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings."
+    },
+    {
+      "id": "LOGINV_probability_zero",
+      "formula": "=LOGINV(0,A3,A4)",
+      "description": "A probability of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability <= 0 or probability >= 1, LOGINV returns the #NUM! error value.\""
+    },
+    {
+      "id": "LOGINV_probability_one",
+      "formula": "=LOGINV(1,A3,A4)",
+      "description": "A probability of one, the other excluded endpoint",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "The same documented sentence at the upper endpoint."
+    },
+    {
+      "id": "LOGINV_standard_dev_zero",
+      "formula": "=LOGINV(0.5,A3,0)",
+      "description": "A standard deviation of zero, which the page also excludes",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If standard_dev <= 0, LOGINV returns the #NUM! error value.\""
+    },
+    {
+      "id": "LOGINV_nonnumeric",
+      "formula": "=LOGINV(\"x\",A3,A4)",
+      "description": "A non-numeric argument, which the page gives a different error code",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, LOGINV returns the #VALUE! error value.\""
+    }
+  ]
+}

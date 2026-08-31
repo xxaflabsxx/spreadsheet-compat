@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MDURATION: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="MDURATION (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>MDURATION gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="2/9 match Excel&#39;s docs; documented example published precision returns 5.734, not 5… Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/mduration.html">
-<meta property="og:title" content="MDURATION: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="MDURATION (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="MDURATION gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="2/9 match Excel&#39;s docs; documented example published precision returns 5.734, not 5… Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/mduration.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>MDURATION</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>MDURATION</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for MDURATION yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060119.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,148 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+MDURATION&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't MDURATION working in LibreOffice?</h2>
+
+<p><code>MDURATION</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),3)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">5.734</span>, but the documented/expected
+        result is <span class="formula">5.736</span>.
+        Microsoft publishes &#39;=MDURATION(A2,A3,A4,A5,A6,A7)&#39; with the result 5.736 for a bond settled 2008-01-01, maturing 2016-01-01, 8% coupon, 9% yield, semiannual, actual/actual basis. DERIVATION, done from the definition rather than from any finance library. Modified duration is Macaulay duration divided by (1 + yld/frequency), and Macaulay duration is the cash-flow-weighted average time to payment, discounted at the yield. Serial 39448 = 2008-01-01 (settlement) and 42370 = 2016-01-01 (maturity), 8 years at frequency 2, so there are exactly 16 semiannual coupon dates, 2008-07-01 through 2016-01-01. THE SETTLEMENT DATE FALLS EXACTLY ON A COUPON DATE, which is what makes this example computable in closed form: the days from settlement to the next coupon equal the days in that coupon period, so their ratio is 1 on every documented day-count basis that measures both with the same ruler, and the k-th cash flow sits at exactly k/2 years. With a coupon of 100 x 0.08/2 = 4 per period, 100 returned at the end, and a per-period yield of 0.09/2 = 0.045, the price per 100 face is 94.382992475446753, the Macaulay duration is 5.9937749555451836 years, and the modified duration is 5.9937749555451836 / 1.045 = 5.7356698139188359. Computed with mpmath at 50 digits, from the sixteen individual discounted cash flows, not from a closed-form annuity shortcut -- and cross-checked against LibreOffice&#39;s own PRICE and DURATION on the same bond, which return 94.3829924754 and 5.9937749555. Rounded to three places, 5.7356698139188359 is 5.736 -- Microsoft&#39;s published figure, reproduced exactly.; MISMATCH vs expected: expected 5.736, got 5.734
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),10)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">5.7339235771</span>, but the documented/expected
+        result is <span class="formula">5.7356698139</span>.
+        Three published decimals cannot distinguish a correct duration from one that is off in the third significant figure, so the same computation is asserted at ten places: 5.7356698139, from the derivation on the previous case. This is the assertion that actually constrains the coupon-schedule and day-count handling.; MISMATCH vs expected: expected 5.7356698139, got 5.7339235771
+      </li>
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=MDURATION(A2,A3,A4,A5,3,A7)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If frequency is any number other than 1, 2, or 4, MDURATION returns the #NUM! error value.&#34; Three coupons a year is not one of the three permitted values.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=MDURATION(A2,A3,A4,-0.09,A6,A7)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If yld &lt; 0 or if coupon &lt; 0, MDURATION returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=MDURATION(A2,A3,-0.08,A5,A6,A7)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If yld &lt; 0 or if coupon &lt; 0, MDURATION returns the #NUM! error value.&#34; Asserted separately from the negative-yield case because the sentence names two arguments and an engine can guard one and not the other.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=MDURATION(A2,A3,A4,A5,A6,5)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If basis &lt; 0 or if basis &gt; 4, MDURATION returns the #NUM! error value.&#34; The basis table stops at 4 (European 30/360).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=MDURATION(A3,A3,A4,A5,A6,A7)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If settlement &gt;= maturity, MDURATION returns the #NUM! error value.&#34; Equality is the boundary the &gt;= sign includes.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +535,90 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for MDURATION yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),3)</td>
+  <td>Microsoft&#39;s documented worked example, rounded to the three decimals Microsoft publishes</td>
+  <td class="result mono">5.734</td>
+  <td class="result mono">5.736<br><span class="category-tag">Microsoft publishes &#39;=MDURATION(A2,A3,A4,A5,A6,A7)&#39; with the result 5.736 for a bond settled 2008-01-01, maturing 2016-01-01, 8% coupon, 9% yield, semiannual, actual/actual basis. DERIVATION, done from the definition rather than from any finance library. Modified duration is Macaulay duration divided by (1 + yld/frequency), and Macaulay duration is the cash-flow-weighted average time to payment, discounted at the yield. Serial 39448 = 2008-01-01 (settlement) and 42370 = 2016-01-01 (maturity), 8 years at frequency 2, so there are exactly 16 semiannual coupon dates, 2008-07-01 through 2016-01-01. THE SETTLEMENT DATE FALLS EXACTLY ON A COUPON DATE, which is what makes this example computable in closed form: the days from settlement to the next coupon equal the days in that coupon period, so their ratio is 1 on every documented day-count basis that measures both with the same ruler, and the k-th cash flow sits at exactly k/2 years. With a coupon of 100 x 0.08/2 = 4 per period, 100 returned at the end, and a per-period yield of 0.09/2 = 0.045, the price per 100 face is 94.382992475446753, the Macaulay duration is 5.9937749555451836 years, and the modified duration is 5.9937749555451836 / 1.045 = 5.7356698139188359. Computed with mpmath at 50 digits, from the sixteen individual discounted cash flows, not from a closed-form annuity shortcut -- and cross-checked against LibreOffice&#39;s own PRICE and DURATION on the same bond, which return 94.3829924754 and 5.9937749555. Rounded to three places, 5.7356698139188359 is 5.736 -- Microsoft&#39;s published figure, reproduced exactly.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),10)</td>
+  <td>The same example carried to ten decimal places</td>
+  <td class="result mono">5.7339235771</td>
+  <td class="result mono">5.7356698139<br><span class="category-tag">Three published decimals cannot distinguish a correct duration from one that is off in the third significant figure, so the same computation is asserted at ten places: 5.7356698139, from the derivation on the previous case. This is the assertion that actually constrains the coupon-schedule and day-count handling. EXECUTED RESULT -- A SILENT WRONG ANSWER: all four LibreOffice builds return 5.7339235771, against the derived and published 5.7356698139. At the three decimals Microsoft prints, that is 5.734 where Microsoft publishes 5.736. It is a plausible-looking duration, off by 0.0017 years (about 0.03%), with no error and no warning. The defect is isolated to the actual/actual path: the SAME engine, on the SAME bond, returns exactly 5.7356698139 on basis 0 and on basis 4 (see the 30/360 case in this file), so LibreOffice&#39;s two day-count routines disagree about a bond whose settlement falls on a coupon date -- the one configuration in which they cannot legitimately disagree. LibreOffice&#39;s DURATION shows the same split on the same inputs (5.991950138 on basis 1 against 5.9937749555 on basis 0), so the error is in the shared coupon-period code, not in MDURATION&#39;s final division.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(MDURATION(A2,A3,A4,A5,A6,0),10)</td>
+  <td>The same bond on basis 0 (US 30/360), which must give the same duration</td>
+  <td class="result mono">5.7356698139</td>
+  <td class="result mono">5.7356698139<br><span class="category-tag">The basis argument enters the documented duration calculation only through the ratio of days from settlement to the next coupon over days in that coupon period. Settlement here falls exactly ON a coupon date, so that ratio is 1 under 30/360 (180 days of 180) exactly as it is under actual/actual (182 days of 182), and the discount exponents -- and therefore the duration -- are identical. The equality is forced, not empirical, which is what makes it a useful assertion: an engine whose two day-count paths disagree on a bond where they cannot disagree has a bug in one of them, and this case and the one above between them say which.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDURATION(A2,A3,A4,A5,3,A7)</td>
+  <td>A frequency of 3, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If frequency is any number other than 1, 2, or 4, MDURATION returns the #NUM! error value.&#34; Three coupons a year is not one of the three permitted values.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDURATION(A2,A3,A4,-0.09,A6,A7)</td>
+  <td>A negative yield, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If yld &lt; 0 or if coupon &lt; 0, MDURATION returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDURATION(A2,A3,-0.08,A5,A6,A7)</td>
+  <td>A negative coupon, the other half of the same documented exclusion</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If yld &lt; 0 or if coupon &lt; 0, MDURATION returns the #NUM! error value.&#34; Asserted separately from the negative-yield case because the sentence names two arguments and an engine can guard one and not the other.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDURATION(A2,A3,A4,A5,A6,5)</td>
+  <td>A basis of 5, one past the documented range</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If basis &lt; 0 or if basis &gt; 4, MDURATION returns the #NUM! error value.&#34; The basis table stops at 4 (European 30/360).</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDURATION(A3,A3,A4,A5,A6,A7)</td>
+  <td>Settlement equal to maturity, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If settlement &gt;= maturity, MDURATION returns the #NUM! error value.&#34; Equality is the boundary the &gt;= sign includes.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDURATION(&#34;not a date&#34;,A3,A4,A5,A6,A7)</td>
+  <td>A settlement date that is not a date</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If settlement or maturity is not a valid date, MDURATION returns the #VALUE! error value.&#34; Note the page uses #VALUE! for a malformed date and #NUM! for every out-of-range argument, so the two codes are asserted separately.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

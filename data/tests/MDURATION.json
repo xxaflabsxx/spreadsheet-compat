@@ -1,0 +1,140 @@
+{
+  "function": "MDURATION",
+  "cases": [
+    {
+      "id": "MDURATION_documented_example_published_precision",
+      "formula": "=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),3)",
+      "description": "Microsoft's documented worked example, rounded to the three decimals Microsoft publishes",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": 5.736,
+      "expected_note": "Microsoft publishes '=MDURATION(A2,A3,A4,A5,A6,A7)' with the result 5.736 for a bond settled 2008-01-01, maturing 2016-01-01, 8% coupon, 9% yield, semiannual, actual/actual basis. DERIVATION, done from the definition rather than from any finance library. Modified duration is Macaulay duration divided by (1 + yld/frequency), and Macaulay duration is the cash-flow-weighted average time to payment, discounted at the yield. Serial 39448 = 2008-01-01 (settlement) and 42370 = 2016-01-01 (maturity), 8 years at frequency 2, so there are exactly 16 semiannual coupon dates, 2008-07-01 through 2016-01-01. THE SETTLEMENT DATE FALLS EXACTLY ON A COUPON DATE, which is what makes this example computable in closed form: the days from settlement to the next coupon equal the days in that coupon period, so their ratio is 1 on every documented day-count basis that measures both with the same ruler, and the k-th cash flow sits at exactly k/2 years. With a coupon of 100 x 0.08/2 = 4 per period, 100 returned at the end, and a per-period yield of 0.09/2 = 0.045, the price per 100 face is 94.382992475446753, the Macaulay duration is 5.9937749555451836 years, and the modified duration is 5.9937749555451836 / 1.045 = 5.7356698139188359. Computed with mpmath at 50 digits, from the sixteen individual discounted cash flows, not from a closed-form annuity shortcut -- and cross-checked against LibreOffice's own PRICE and DURATION on the same bond, which return 94.3829924754 and 5.9937749555. Rounded to three places, 5.7356698139188359 is 5.736 -- Microsoft's published figure, reproduced exactly."
+    },
+    {
+      "id": "MDURATION_documented_example_full_precision",
+      "formula": "=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),10)",
+      "description": "The same example carried to ten decimal places",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": 5.7356698139,
+      "expected_note": "Three published decimals cannot distinguish a correct duration from one that is off in the third significant figure, so the same computation is asserted at ten places: 5.7356698139, from the derivation on the previous case. This is the assertion that actually constrains the coupon-schedule and day-count handling. EXECUTED RESULT -- A SILENT WRONG ANSWER: all four LibreOffice builds return 5.7339235771, against the derived and published 5.7356698139. At the three decimals Microsoft prints, that is 5.734 where Microsoft publishes 5.736. It is a plausible-looking duration, off by 0.0017 years (about 0.03%), with no error and no warning. The defect is isolated to the actual/actual path: the SAME engine, on the SAME bond, returns exactly 5.7356698139 on basis 0 and on basis 4 (see the 30/360 case in this file), so LibreOffice's two day-count routines disagree about a bond whose settlement falls on a coupon date -- the one configuration in which they cannot legitimately disagree. LibreOffice's DURATION shows the same split on the same inputs (5.991950138 on basis 1 against 5.9937749555 on basis 0), so the error is in the shared coupon-period code, not in MDURATION's final division."
+    },
+    {
+      "id": "MDURATION_thirty_360_basis_agrees",
+      "formula": "=ROUND(MDURATION(A2,A3,A4,A5,A6,0),10)",
+      "description": "The same bond on basis 0 (US 30/360), which must give the same duration",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": 5.7356698139,
+      "expected_note": "The basis argument enters the documented duration calculation only through the ratio of days from settlement to the next coupon over days in that coupon period. Settlement here falls exactly ON a coupon date, so that ratio is 1 under 30/360 (180 days of 180) exactly as it is under actual/actual (182 days of 182), and the discount exponents -- and therefore the duration -- are identical. The equality is forced, not empirical, which is what makes it a useful assertion: an engine whose two day-count paths disagree on a bond where they cannot disagree has a bug in one of them, and this case and the one above between them say which."
+    },
+    {
+      "id": "MDURATION_invalid_frequency",
+      "formula": "=MDURATION(A2,A3,A4,A5,3,A7)",
+      "description": "A frequency of 3, which the page excludes",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If frequency is any number other than 1, 2, or 4, MDURATION returns the #NUM! error value.\" Three coupons a year is not one of the three permitted values."
+    },
+    {
+      "id": "MDURATION_negative_yield",
+      "formula": "=MDURATION(A2,A3,A4,-0.09,A6,A7)",
+      "description": "A negative yield, which the page excludes",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If yld < 0 or if coupon < 0, MDURATION returns the #NUM! error value.\""
+    },
+    {
+      "id": "MDURATION_negative_coupon",
+      "formula": "=MDURATION(A2,A3,-0.08,A5,A6,A7)",
+      "description": "A negative coupon, the other half of the same documented exclusion",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If yld < 0 or if coupon < 0, MDURATION returns the #NUM! error value.\" Asserted separately from the negative-yield case because the sentence names two arguments and an engine can guard one and not the other."
+    },
+    {
+      "id": "MDURATION_basis_out_of_range",
+      "formula": "=MDURATION(A2,A3,A4,A5,A6,5)",
+      "description": "A basis of 5, one past the documented range",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If basis < 0 or if basis > 4, MDURATION returns the #NUM! error value.\" The basis table stops at 4 (European 30/360)."
+    },
+    {
+      "id": "MDURATION_settlement_not_before_maturity",
+      "formula": "=MDURATION(A3,A3,A4,A5,A6,A7)",
+      "description": "Settlement equal to maturity, which the page excludes",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If settlement >= maturity, MDURATION returns the #NUM! error value.\" Equality is the boundary the >= sign includes."
+    },
+    {
+      "id": "MDURATION_invalid_date",
+      "formula": "=MDURATION(\"not a date\",A3,A4,A5,A6,A7)",
+      "description": "A settlement date that is not a date",
+      "setup_cells": {
+        "A2": 39448,
+        "A3": 42370,
+        "A4": 0.08,
+        "A5": 0.09,
+        "A6": 2,
+        "A7": 1
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If settlement or maturity is not a valid date, MDURATION returns the #VALUE! error value.\" Note the page uses #VALUE! for a malformed date and #NUM! for every out-of-range argument, so the two codes are asserted separately."
+    }
+  ]
+}

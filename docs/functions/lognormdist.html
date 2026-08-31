@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOGNORMDIST: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="LOGNORMDIST (Compatibility) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>LOGNORMDIST gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="3/6 match Excel&#39;s docs; x not positive returns 0, not #NUM!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/lognormdist.html">
-<meta property="og:title" content="LOGNORMDIST: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="LOGNORMDIST (Compatibility) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="LOGNORMDIST gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="3/6 match Excel&#39;s docs; x not positive returns 0, not #NUM!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/lognormdist.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>LOGNORMDIST</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Compatibility</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>LOGNORMDIST</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for LOGNORMDIST yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060183.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,110 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+LOGNORMDIST&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't LOGNORMDIST working in LibreOffice?</h2>
+
+<p><code>LOGNORMDIST</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=LOGNORMDIST(0,A3,A4)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">0</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If x &lt;= 0 or if Standard_dev &lt;= 0, LOGNORMDIST returns the #NUM! error value.&#34; Word for word the same exclusion its replacement LOGNORM.DIST documents, so the two spellings are required to behave identically here.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=LOGNORMDIST(-1,A3,A4)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">0</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The same documented sentence, asserted away from the boundary so that an engine guarding only the exact value zero is caught.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=LOGNORMDIST(A2,A3,0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If x &lt;= 0 or if Standard_dev &lt;= 0, LOGNORMDIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +497,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for LOGNORMDIST yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(LOGNORMDIST(A2,A3,A4),7)</td>
+  <td>Microsoft&#39;s documented worked example: the cumulative lognormal distribution at 4</td>
+  <td class="result mono">0.0390836</td>
+  <td class="result mono">0.0390836<br><span class="category-tag">Microsoft publishes &#39;=LOGNORMDIST(A2,A3,A4)&#39; with the result 0.0390836 -- the same figure its modern replacement LOGNORM.DIST publishes for the same three arguments, since LOGNORMDIST is the cumulative form only and takes no cumulative flag. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library&#39;s normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(LOGNORMDIST(A2,A3,A4),10)</td>
+  <td>The same value carried to ten decimal places</td>
+  <td class="result mono">0.0390835557</td>
+  <td class="result mono">0.0390835557<br><span class="category-tag">0.039083555706800473296 at ten places. The legacy alias must agree with the modern spelling here to ten places, which is the point of asserting both: this corpus has already found several cases (GAMMADIST vs GAMMA.DIST in batch D, FTEST vs F.TEST in batches C and D) where the legacy name and its replacement disagree about the same documented behaviour.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LOGNORMDIST(0,A3,A4)</td>
+  <td>An x of zero, which the page excludes</td>
+  <td class="result mono">0</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If x &lt;= 0 or if Standard_dev &lt;= 0, LOGNORMDIST returns the #NUM! error value.&#34; Word for word the same exclusion its replacement LOGNORM.DIST documents, so the two spellings are required to behave identically here. EXECUTED RESULT -- A SILENT WRONG ANSWER: all four LibreOffice builds return the NUMBER 0 here instead of the documented #NUM!. Zero is a perfectly plausible value for a cumulative distribution, so a column of non-positive inputs comes back as a column of zeros rather than a visible column of errors -- the same shape batch C found in EXPON.DIST and batch D in GAMMADIST. Both spellings, the legacy LOGNORMDIST and the modern LOGNORM.DIST, do it, so unlike batch D&#39;s GAMMADIST/GAMMA.DIST split there is no correct sibling to fall back on.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LOGNORMDIST(-1,A3,A4)</td>
+  <td>A negative x, strictly inside the excluded region</td>
+  <td class="result mono">0</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The same documented sentence, asserted away from the boundary so that an engine guarding only the exact value zero is caught. EXECUTED RESULT: 0 on all four builds, the same silent zero as at x = 0 -- so the guard is not merely mis-set at the boundary, it is absent. ln(x) does not exist here at all.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LOGNORMDIST(A2,A3,0)</td>
+  <td>A standard deviation of zero, the other half of the same exclusion</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If x &lt;= 0 or if Standard_dev &lt;= 0, LOGNORMDIST returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LOGNORMDIST(&#34;x&#34;,A3,A4)</td>
+  <td>A non-numeric argument, which the page gives a different error code</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If any argument is non-numeric, LOGNORMDIST returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

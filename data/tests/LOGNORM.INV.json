@@ -1,0 +1,84 @@
+{
+  "function": "LOGNORM.INV",
+  "cases": [
+    {
+      "id": "LOGNORM.INV_documented_example",
+      "formula": "=ROUND(LOGNORM.INV(A2,A3,A4),7)",
+      "description": "Microsoft's documented worked example: the inverse lognormal CDF at p = 0.039084",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 4.0000252,
+      "expected_note": "Microsoft publishes '=LOGNORM.INV(A2, A3, A4)' with the result 4.0000252. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library's normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4. The page states the defining relationship in its own Description: \"If p = LOGNORM.DIST(x,...) then LOGNORM.INV(p,...) = x.\" That is what makes the round-trip case in this file an assertion rather than a convenience."
+    },
+    {
+      "id": "LOGNORM.INV_full_precision",
+      "formula": "=ROUND(LOGNORM.INV(A2,A3,A4),10)",
+      "description": "The same value carried to ten decimal places",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": 4.0000252187,
+      "expected_note": "4.0000252186806350759 at ten places, from the root-finding derivation described on the previous case. Microsoft's seven-place figure cannot distinguish an accurate inverse from a crude one; this can."
+    },
+    {
+      "id": "LOGNORM.INV_roundtrip_with_LOGNORM.DIST",
+      "formula": "=ROUND(LOGNORM.INV(LOGNORM.DIST(4,3.5,1.2,TRUE),3.5,1.2),10)",
+      "description": "The documented identity itself: the inverse of the distribution returns the original x",
+      "expected": 4.0,
+      "expected_note": "The page's Description states \"If p = LOGNORM.DIST(x,...) then LOGNORM.INV(p,...) = x\". Feeding the CDF's own FULL-PRECISION output straight back in -- rather than the six-place 0.039084 the example table uses -- must therefore return 4 exactly, to ten places. This is the strongest assertion in the file because it depends on no derived constant at all: any inaccuracy in either direction shows up as a departure from 4."
+    },
+    {
+      "id": "LOGNORM.INV_probability_zero",
+      "formula": "=LOGNORM.INV(0,A3,A4)",
+      "description": "A probability of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability <= 0 or probability >= 1, LOGNORM.INV returns the #NUM! error value.\" The interval is open at both ends, which matters: the lognormal has no finite quantile at 0 or 1."
+    },
+    {
+      "id": "LOGNORM.INV_probability_one",
+      "formula": "=LOGNORM.INV(1,A3,A4)",
+      "description": "A probability of one, the other excluded endpoint",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "The same documented sentence, asserted at the upper endpoint. Batch D found FORECAST.ETS.CONFINT guarding one end of a documented open interval and not the other, so both ends are always asserted separately in this corpus."
+    },
+    {
+      "id": "LOGNORM.INV_standard_dev_zero",
+      "formula": "=LOGNORM.INV(0.5,A3,0)",
+      "description": "A standard deviation of zero, which the page also excludes",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If standard_dev <= 0, LOGNORM.INV returns the #NUM! error value.\""
+    },
+    {
+      "id": "LOGNORM.INV_nonnumeric",
+      "formula": "=LOGNORM.INV(\"x\",A3,A4)",
+      "description": "A non-numeric argument, which the page gives a different error code",
+      "setup_cells": {
+        "A2": 0.039084,
+        "A3": 3.5,
+        "A4": 1.2
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, LOGNORM.INV returns the #VALUE! error value.\""
+    }
+  ]
+}

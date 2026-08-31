@@ -94,7 +94,8 @@ LO_STORAGE_FORM_GAP = {
         "for it, so an Excel-authored workbook opens here with <code>#NAME?</code>. "
         "The gap is in the file-format mapping, not in the function."
     )
-    for name in ("IMCOSH", "IMCOT", "IMCSC", "IMCSCH")
+    for name in ("IMCOSH", "IMCOT", "IMCSC", "IMCSCH",
+                 "IMSEC", "IMSECH", "IMSINH", "IMTAN")
 }
 
 VERDICT_LABELS = {

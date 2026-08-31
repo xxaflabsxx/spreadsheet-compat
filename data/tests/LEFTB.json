@@ -1,0 +1,67 @@
+{
+  "function": "LEFTB",
+  "cases": [
+    {
+      "id": "LEFTB_documented_four_characters",
+      "formula": "=LEFTB(A2,4)",
+      "description": "Microsoft's first worked example on the LEFT page, run through the byte-counting spelling",
+      "setup_cells": {
+        "A2": "Sale Price",
+        "A3": "Sweden"
+      },
+      "expected": "Sale",
+      "expected_note": "The LEFT page publishes =LEFT(A2,4) = Sale for A2 = \"Sale Price\". \"Sale Price\" is pure ASCII, so its first four BYTES are its first four CHARACTERS and LEFTB must return the same string. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading \"The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2\", and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "LEFTB_num_bytes_omitted",
+      "formula": "=LEFTB(A3)",
+      "description": "The count argument omitted, which the page documents as defaulting to 1",
+      "setup_cells": {
+        "A2": "Sale Price",
+        "A3": "Sweden"
+      },
+      "expected": "S",
+      "expected_note": "The LEFT page documents \"If num_chars is omitted, it is assumed to be 1\" and publishes =LEFT(A3) = S for A3 = \"Sweden\". One byte of ASCII is one character. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading \"The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2\", and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "LEFTB_count_exceeds_length",
+      "formula": "=LEFTB(A3,99)",
+      "description": "A count larger than the string, which the page says returns all of it",
+      "setup_cells": {
+        "A2": "Sale Price",
+        "A3": "Sweden"
+      },
+      "expected": "Sweden",
+      "expected_note": "The LEFT page documents \"If num_chars is greater than the length of text, LEFT returns all of text\" -- no padding, no error. \"Sweden\" is six ASCII bytes, so 99 bytes returns the whole string. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading \"The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2\", and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "LEFTB_zero_count",
+      "formula": "=LEFTB(A3,0)",
+      "description": "A count of zero, the lower end of the documented range",
+      "setup_cells": {
+        "A2": "Sale Price",
+        "A3": "Sweden"
+      },
+      "expected": "",
+      "expected_note": "The LEFT page documents \"Num_chars must be greater than or equal to zero\", so zero is inside the valid range and must produce a result rather than an error: zero bytes of text is the empty string. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading \"The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2\", and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "LEFTB_negative_count",
+      "formula": "=LEFTB(A3,-1)",
+      "description": "A negative count, which the documented range excludes",
+      "setup_cells": {
+        "A2": "Sale Price",
+        "A3": "Sweden"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The LEFT page documents \"Num_chars must be greater than or equal to zero\". A negative count is outside that range; #VALUE! is Excel's error for an argument of the wrong kind, and is what the sibling MID/MIDB page states explicitly for its own negative-count case (\"If num_chars is negative, MID returns the #VALUE! error value\"), so the same code is asserted for the same condition here. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft's LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading \"The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2\", and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it."
+    },
+    {
+      "id": "LEFTB_double_byte_probe",
+      "formula": "=LEFTB(\"ＥＸＣＥＬ\",2)",
+      "description": "PROBE: two BYTES of a string made of double-byte characters, where no current rule is published",
+      "expected": null,
+      "expected_note": "This is the one thing LEFTB does that LEFT does not, and it is also the one thing Microsoft no longer documents: the LEFT page's only mention of LEFTB is that it is deprecated. Historically LEFTB counted bytes only when the default language was a DBCS language (Japanese, Chinese, Korean) and behaved exactly like LEFT otherwise -- so under this harness's en_US.UTF-8 environment the two readings give DIFFERENT answers (\"Ｅ\" if bytes are counted, \"ＥＸ\" if characters are), and the documentation does not say which is correct. No expected value is invented. FOR THE RECORD, all four LibreOffice builds return \"Ｅ\", i.e. they count the full-width characters as two bytes each regardless of locale; LENB(\"ＥＸＣＥＬ\") is 10 on all four builds against LEN 5, which is consistent."
+    }
+  ]
+}

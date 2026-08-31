@@ -1,0 +1,103 @@
+{
+  "function": "INTRATE",
+  "cases": [
+    {
+      "id": "INTRATE_documented_example",
+      "formula": "=ROUND(INTRATE(A2,A3,A4,A5,A6),10)",
+      "description": "Microsoft's documented worked example: $1,000,000 invested 2008-02-15, redeemed at $1,014,420 on 2008-05-15, actual/360 basis",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 1014420,
+        "A6": 2
+      },
+      "expected": 0.05768,
+      "expected_note": "Microsoft publishes this example's result as 5.77% and spells the underlying figure out in the Description column: \"Discount rate, for the terms of the bond (0.05768 or 5.77%)\". Derived independently and exactly, in rational arithmetic rather than floating point. The page states the formula in full: INTRATE = ((redemption - investment) / investment) x (B / DIM), where \"B = number of days in a year, depending on the year basis\" and \"DIM = number of days from settlement to maturity\". Serial 39493 = 2008-02-15 and 39583 = 2008-05-15, so on basis 2 (actual/360) DIM is the actual day count 39583-39493 = 90 and B = 360. The rate is therefore (1014420-1000000)/1000000 x 360/90 = 0.01442 x 4 = 721/12500 = 0.05768 EXACTLY -- a terminating decimal, no rounding of any kind involved. Wrapped in ROUND(...,10) so the comparison is against a decimal figure rather than against one engine's last floating-point bit."
+    },
+    {
+      "id": "INTRATE_default_basis_thirty_360",
+      "formula": "=ROUND(INTRATE(A2,A3,A4,A5,0),10)",
+      "description": "The same security on the DEFAULT basis 0 (US 30/360), where the day count is also 90",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 1014420,
+        "A6": 2
+      },
+      "expected": 0.05768,
+      "expected_note": "The basis table documents 0 as \"US (NASD) 30/360\", and this is the basis a user gets by omitting the argument. Derived exactly: under 30/360 the days from 2008-02-15 to 2008-05-15 are (5-2) x 30 + (15-15) = 90 -- the same 90 as the actual count, because the two dates share a day-of-month and neither is the 31st -- and B = 360. So the rate is again 0.01442 x 360/90 = 0.05768, identical to Microsoft's published basis-2 figure. The case exists precisely because the answer is forced to agree with the published one: an engine that gets basis 2 right and basis 0 wrong has a day-count bug and nothing else can explain it. LibreOffice's own DAYS360 agrees, returning 90 for these two dates on all four builds, and its YEARFRAC(...,0) returns 0.25. EXECUTED RESULT -- A SILENT WRONG ANSWER, no error: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 0.0583280899 here, against Microsoft's own 0.05768 for the identical security one basis over. The gap is 1.1% of the rate, and nothing in the result says so. Working backwards through the documented formula, 0.01442 x 360/DIM = 0.0583280899 puts LibreOffice's DIM at 89 rather than 90 -- it is losing one day somewhere in its 30/360 count, even though its own DAYS360 on the same two dates returns 90 on every build and its YEARFRAC(...,0) returns 0.25. The same engine returns Microsoft's 0.05768 exactly on bases 2 and 4, so this is not a rounding artefact: one day-count path out of three is wrong, and it is the DEFAULT one."
+    },
+    {
+      "id": "INTRATE_basis_omitted_defaults_to_zero",
+      "formula": "=ROUND(INTRATE(A2,A3,A4,A5),10)",
+      "description": "The optional basis argument left out entirely, which the page documents as defaulting to 0",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 1014420,
+        "A6": 2
+      },
+      "expected": 0.05768,
+      "expected_note": "The basis table's first row reads \"0 or omitted | US (NASD) 30/360\", so omitting the argument must give exactly the same answer as passing 0 -- and, as derived in the basis-0 case above, that answer is 0.05768, the same figure Microsoft publishes for basis 2. This is the form most real formulas take, since basis is the argument users leave off. EXECUTED RESULT: 0.0583280899 on all four builds -- identical to the explicit basis-0 case above, which confirms the default really is basis 0 and that the defect is in the 30/360 day count rather than in argument defaulting. It also means the wrong answer is the one a user gets by writing the shortest correct formula."
+    },
+    {
+      "id": "INTRATE_zero_investment",
+      "formula": "=INTRATE(A2,A3,0,A5,A6)",
+      "description": "An investment of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 1014420,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If investment <= 0 or if redemption <= 0, INTRATE returns the #NUM! error value.\" Zero investment is also the denominator of the documented formula, so the exclusion is not arbitrary."
+    },
+    {
+      "id": "INTRATE_basis_out_of_range",
+      "formula": "=INTRATE(A2,A3,A4,A5,5)",
+      "description": "A basis of 5, one past the documented range",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 1014420,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If basis < 0 or if basis > 4, INTRATE returns the #NUM! error value.\" The basis table stops at 4 (European 30/360), so 5 is the first invalid value."
+    },
+    {
+      "id": "INTRATE_settlement_not_before_maturity",
+      "formula": "=INTRATE(A3,A3,A4,A5,A6)",
+      "description": "Settlement equal to maturity, which the page excludes",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 1014420,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If settlement >= maturity, INTRATE returns the #NUM! error value.\" Equality is the boundary the >= sign includes, and it is also the case that would make DIM zero in the documented formula."
+    },
+    {
+      "id": "INTRATE_invalid_date",
+      "formula": "=INTRATE(\"not a date\",A3,A4,A5,A6)",
+      "description": "A settlement date that is not a date at all",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 1014420,
+        "A6": 2
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If settlement or maturity is not a valid date, INTRATE returns the #VALUE! error value.\" Note this branch is documented as #VALUE! while every other exclusion on the same page is #NUM! -- the page distinguishes a malformed argument from an out-of-range one, so both codes are asserted separately."
+    }
+  ]
+}

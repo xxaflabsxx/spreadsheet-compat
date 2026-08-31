@@ -1,0 +1,103 @@
+{
+  "function": "MINVERSE",
+  "cases": [
+    {
+      "id": "MINVERSE_2x2_exact",
+      "formula": "=MINVERSE(A2:B3)",
+      "description": "The inverse of a 2x2 matrix whose inverse has exact decimal entries",
+      "setup_cells": {
+        "A2": 4,
+        "B2": -2,
+        "A3": -1,
+        "B3": 1
+      },
+      "check_range": "H30:I31",
+      "expected": [
+        [
+          0.5,
+          1.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
+      ],
+      "expected_note": "Derived exactly, in rational arithmetic, from the formula the page itself tabulates for a two-row two-column matrix: for {a,b;c,d} the inverse is {d/(ad-bc), b/(bc-ad); c/(bc-ad), a/(ad-bc)}. Here a=4, b=-2, c=-1, d=1, so ad-bc = 4 - 2 = 2 and the inverse is {1/2, 2/2; 1/2, 4/2} = {0.5, 1; 0.5, 2}. Every entry is an exact binary fraction, so a conforming engine must reproduce them bit for bit -- no tolerance is being leaned on. ENTERED AS AN ARRAY FORMULA. The page is explicit -- \"the formula must be entered as a legacy array formula by first selecting the output range, entering the formula in the top-left-cell of the output range, and then pressing CTRL+SHIFT+ENTER\" -- so the harness writes it as a legacy CSE array formula covering the whole result range, not as a plain scalar formula. Writing it as a scalar string makes even a fully supported matrix function return a single cell or #VALUE!, which would be a harness artefact rather than a finding."
+    },
+    {
+      "id": "MINVERSE_3x3_integer_inverse",
+      "formula": "=MINVERSE(A2:C4)",
+      "description": "A 3x3 matrix of determinant 1, whose inverse is therefore all integers",
+      "setup_cells": {
+        "A2": 1,
+        "B2": 2,
+        "C2": 3,
+        "A3": 0,
+        "B3": 1,
+        "C3": 4,
+        "A4": 5,
+        "B4": 6,
+        "C4": 0
+      },
+      "check_range": "H30:J32",
+      "expected": [
+        [
+          -24.0,
+          18.0,
+          5.0
+        ],
+        [
+          20.0,
+          -15.0,
+          -4.0
+        ],
+        [
+          -5.0,
+          4.0,
+          1.0
+        ]
+      ],
+      "expected_note": "The matrix {1,2,3; 0,1,4; 5,6,0} has determinant 1*(1*0-4*6) - 2*(0*0-4*5) + 3*(0*6-1*5) = -24 + 40 - 15 = 1. Because the determinant is exactly 1 and every entry is an integer, the inverse is the adjugate and is ITSELF all integers: {-24,18,5; 20,-15,-4; -5,4,1}, derived here by exact cofactor expansion in rational arithmetic. That is the whole point of choosing this matrix: the page warns that \"MINVERSE is calculated with an accuracy of approximately 16 digits, which may lead to a small numeric error when the cancellation is not complete\", and an all-integer target leaves nowhere for such an error to hide. Verified by multiplying back: the product with the original matrix is the exact 3x3 identity. ENTERED AS AN ARRAY FORMULA. The page is explicit -- \"the formula must be entered as a legacy array formula by first selecting the output range, entering the formula in the top-left-cell of the output range, and then pressing CTRL+SHIFT+ENTER\" -- so the harness writes it as a legacy CSE array formula covering the whole result range, not as a plain scalar formula. Writing it as a scalar string makes even a fully supported matrix function return a single cell or #VALUE!, which would be a harness artefact rather than a finding."
+    },
+    {
+      "id": "MINVERSE_times_original_is_identity",
+      "formula": "=INDEX(MMULT(A2:B3,MINVERSE(A2:B3)),1,1)",
+      "description": "The documented defining property: a matrix times its inverse is the identity",
+      "setup_cells": {
+        "A2": 4,
+        "B2": -2,
+        "A3": -1,
+        "B3": 1
+      },
+      "expected": 1,
+      "expected_note": "The page states it directly: \"The product of a matrix and its inverse is the identity matrix -- the square array in which the diagonal values equal 1, and all other values equal 0.\" This case asserts that property on the same 2x2 matrix as the first case, reading the top-left entry of the product, which must be exactly 1. It depends on no derived constant at all, so it holds for any conforming engine regardless of how it computes the inverse."
+    },
+    {
+      "id": "MINVERSE_singular_matrix",
+      "formula": "=INDEX(MINVERSE({1,2;2,4}),1,1)",
+      "description": "A singular matrix, which cannot be inverted",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"Some square matrices cannot be inverted and will return the #NUM! error value with MINVERSE. The determinant for a noninvertable matrix is 0.\" The matrix {1,2;2,4} has determinant exactly zero (the second row is twice the first), so it is precisely the case the page describes. Note the documented code here is #NUM!, while the empty/text/non-square conditions on the same page are documented as #VALUE! -- the page distinguishes \"this matrix has no inverse\" from \"this is not a matrix\", so both codes are asserted."
+    },
+    {
+      "id": "MINVERSE_not_square",
+      "formula": "=INDEX(MINVERSE({1,2,3;4,5,6}),1,1)",
+      "description": "A 2x3 array, which is not square",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"MINVERSE also returns a #VALUE! error if array does not have an equal number of rows and columns.\" Contrast with the singular case above, which is documented as #NUM!."
+    },
+    {
+      "id": "MINVERSE_contains_text",
+      "formula": "=INDEX(MINVERSE(A2:B3),1,1)",
+      "description": "A square range containing a text cell, which the page excludes",
+      "setup_cells": {
+        "A2": "a",
+        "B2": 1,
+        "A3": 2,
+        "B3": 3
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any cells in array are empty or contain text, MINVERSE returns a #VALUE! error.\""
+    }
+  ]
+}

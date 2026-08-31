@@ -1,0 +1,50 @@
+{
+  "function": "ISNONTEXT",
+  "cases": [
+    {
+      "id": "ISNONTEXT_number_is_true",
+      "formula": "=ISNONTEXT(4)",
+      "description": "A number, which is not text",
+      "expected": true,
+      "expected_note": "A number is \"any item that is not text\", so the documented answer is TRUE. Paired deliberately with the page's own ISNUMBER(4) = TRUE example: ISNONTEXT and ISTEXT partition every value, so ISNONTEXT must be the complement of ISTEXT on the same argument. ISNONTEXT is documented on Microsoft's shared \"IS functions\" page rather than on a page of its own. Its whole specification is one table row -- \"ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)\" -- plus the page's shared Remarks paragraph. Every case here is taken from those two sentences."
+    },
+    {
+      "id": "ISNONTEXT_text_is_false",
+      "formula": "=ISNONTEXT(\"Region1\")",
+      "description": "A text string, the one thing that makes this function FALSE",
+      "expected": false,
+      "expected_note": "The page's Example 2 asserts =ISTEXT(A3) = TRUE for the cell containing Region1; ISNONTEXT is the negation, so the same argument must give FALSE. This is the only branch of ISNONTEXT that returns FALSE at all. ISNONTEXT is documented on Microsoft's shared \"IS functions\" page rather than on a page of its own. Its whole specification is one table row -- \"ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)\" -- plus the page's shared Remarks paragraph. Every case here is taken from those two sentences."
+    },
+    {
+      "id": "ISNONTEXT_blank_cell_is_true",
+      "formula": "=ISNONTEXT(A2)",
+      "description": "A reference to an empty cell, which the documentation singles out in a parenthesis",
+      "setup_cells": {
+        "A3": 1
+      },
+      "expected": true,
+      "expected_note": "The table row carries its own parenthetical: \"(Note that this function returns TRUE if the value refers to a blank cell.)\" Microsoft called this out because it is the case people get wrong -- a blank is not text, so it is non-text. A2 is deliberately left unset by this case's setup. ISNONTEXT is documented on Microsoft's shared \"IS functions\" page rather than on a page of its own. Its whole specification is one table row -- \"ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)\" -- plus the page's shared Remarks paragraph. Every case here is taken from those two sentences."
+    },
+    {
+      "id": "ISNONTEXT_logical_is_true",
+      "formula": "=ISNONTEXT(TRUE)",
+      "description": "A logical value, which is not text",
+      "expected": true,
+      "expected_note": "The value argument is documented as accepting \"a blank (empty cell), error, logical value, text, number, or reference value\". A logical value is not text, so TRUE. The page's own ISLOGICAL examples establish that TRUE is a logical and \"TRUE\" (quoted) is not. ISNONTEXT is documented on Microsoft's shared \"IS functions\" page rather than on a page of its own. Its whole specification is one table row -- \"ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)\" -- plus the page's shared Remarks paragraph. Every case here is taken from those two sentences."
+    },
+    {
+      "id": "ISNONTEXT_error_is_true",
+      "formula": "=ISNONTEXT(NA())",
+      "description": "An error value, which is not text either",
+      "expected": true,
+      "expected_note": "Errors are explicitly in the documented list of things value may be, and an error is not text, so the answer is TRUE. Worth asserting because it is the one case where a function returns a clean TRUE/FALSE about an error instead of propagating it -- the IS functions are the error-inspection tools, so they must not themselves error. ISNONTEXT is documented on Microsoft's shared \"IS functions\" page rather than on a page of its own. Its whole specification is one table row -- \"ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)\" -- plus the page's shared Remarks paragraph. Every case here is taken from those two sentences."
+    },
+    {
+      "id": "ISNONTEXT_quoted_number_is_false",
+      "formula": "=ISNONTEXT(\"19\")",
+      "description": "A number written in quotation marks, which the page's Remarks say is text",
+      "expected": false,
+      "expected_note": "The shared Remarks paragraph is explicit: \"The value arguments of the IS functions are not converted. Any numeric values that are enclosed in double quotation marks are treated as text. For example, in most other functions where a number is required, the text value \\\"19\\\" is converted to the number 19. However, in the formula ISNUMBER(\\\"19\\\"), \\\"19\\\" is not converted from a text value to a number value, and the ISNUMBER function returns FALSE.\" The same non-conversion rule makes ISNONTEXT(\"19\") FALSE. Microsoft's example uses ISNUMBER; the complement is asserted here for the function actually under test. ISNONTEXT is documented on Microsoft's shared \"IS functions\" page rather than on a page of its own. Its whole specification is one table row -- \"ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)\" -- plus the page's shared Remarks paragraph. Every case here is taken from those two sentences."
+    }
+  ]
+}

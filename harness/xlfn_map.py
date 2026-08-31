@@ -80,7 +80,7 @@ _XLFN_FUNCTIONS = {
     "RANK.EQ", "RANK.AVG",
     "PERCENTILE.INC", "PERCENTILE.EXC", "QUARTILE.INC",
     "PERCENTRANK.INC", "PERCENTRANK.EXC", "QUARTILE.EXC",
-    "CEILING.PRECISE", "FLOOR.PRECISE", "ISO.CEILING",
+    "CEILING.PRECISE", "FLOOR.PRECISE",
     "COVARIANCE.P", "COVARIANCE.S",
     "UNICHAR", "UNICODE",
     "FORMULATEXT",
@@ -172,6 +172,48 @@ _XLFN_FUNCTIONS = {
     "BINOM.DIST", "BINOM.DIST.RANGE", "BINOM.INV",
     "CHISQ.DIST", "CHISQ.DIST.RT", "CHISQ.INV", "CHISQ.INV.RT", "CHISQ.TEST",
     "CONFIDENCE.NORM", "CONFIDENCE.T",
+    # Excel 2010 renames and Excel 2013 additions from the alphabetical corpus
+    # batch E (IMLOG10..MMULT). All six are on the MS XLSX-extensions
+    # future-function list, [MS-XLSX] section 2.2.3 "Functions", which spells
+    # them _xlfn.LOGNORM.DIST, _xlfn.LOGNORM.INV, _xlfn.IMSEC, _xlfn.IMSECH,
+    # _xlfn.IMSINH and _xlfn.IMTAN. Verified empirically on all four pinned
+    # builds: "=_xlfn.LOGNORM.DIST(4,3.5,1.2,TRUE)" returns 0.0390835557068005
+    # and "=_xlfn.LOGNORM.INV(0.039084,3.5,1.2)" returns 4.00002521868064 while
+    # the unprefixed spellings are #NAME?, so those two would have been recorded
+    # as unsupported without an entry here.
+    #
+    # THE FOUR IM* ENTRIES GO THE OTHER WAY, exactly as batch D's IMCOSH/IMCOT/
+    # IMCSC/IMCSCH do: the PLAIN name evaluates in LibreOffice and the _xlfn.
+    # form -- the one real Excel writes into a .xlsx -- is #NAME? on every
+    # build, as are COM.MICROSOFT.IMSEC, ORG.OPENOFFICE.IMSEC and
+    # _xlfn.ORG.OPENOFFICE.IMSEC (five spellings probed, four dead). This
+    # module records the storage-form token Excel writes, not whichever
+    # spelling makes a given engine answer, so the spec-faithful token stays
+    # and the resulting interop gap is reported case by case in
+    # data/tests/IMSEC.json, IMSECH.json, IMSINH.json and IMTAN.json.
+    "LOGNORM.DIST", "LOGNORM.INV",
+    "IMSEC", "IMSECH", "IMSINH", "IMTAN",
+    # ISO.CEILING WAS REMOVED FROM THIS SET BY BATCH E -- it was wrong, and it
+    # would have published a false "unsupported" verdict. ISO.CEILING IS a
+    # future function (it is absent from ISO/IEC 29500's predefined list), but
+    # it is one of exactly FOUR future functions that MS-XLSX section 2.2.3
+    # spells WITHOUT the prefix: ECMA.CEILING, ISO.CEILING, NETWORKDAYS.INTL
+    # and WORKDAY.INTL, each listed there as a bare name while its 155
+    # neighbours carry "_xlfn.". LibreOffice's own OOXML filter draws the same
+    # line: sc/source/filter/oox/formulabase.cxx tags ISO.CEILING with plain
+    # FuncFlags::MACROCALL ("stored as macro call in BIFF Excel"), i.e. the
+    # prefix is added for the old binary format only, whereas CEILING.PRECISE,
+    # LOGNORM.DIST/INV and IMSEC/IMSECH/IMSINH/IMTAN are tagged
+    # MACROCALL_NEW (= MACROCALL | MACROCALL_FN), which is what adds the
+    # prefix to the OOXML name as well. Confirmed empirically both ways: on
+    # all four pinned builds "=ISO.CEILING(4.3)" returns 5 while
+    # "=_xlfn.ISO.CEILING(4.3)" and "=COM.MICROSOFT.ISO.CEILING(4.3)" are
+    # #NAME?, and round-tripping a workbook through LibreOffice's own xlsx
+    # EXPORT writes the formula back out as the bare token ISO.CEILING.
+    # (XlsxWriter's table, this module's usual mirror, simply drops the
+    # ISO.CEILING row -- it keeps the other three unprefixed names at their
+    # correct alphabetical slots -- which is how the wrong entry got here.
+    # The same author's Perl and C ports both list it unprefixed.)
     # BAHTTEXT is NOT on XlsxWriter's future-function table and predates 2007,
     # but it is nevertheless stored prefixed: LibreOffice's own OOXML function
     # table (sc/source/filter/oox/formulabase.cxx) tags BAHTTEXT

@@ -1,0 +1,75 @@
+{
+  "function": "INFO",
+  "cases": [
+    {
+      "id": "INFO_recalc_is_one_of_two_documented_values",
+      "formula": "=OR(INFO(\"recalc\")=\"Automatic\",INFO(\"recalc\")=\"Manual\")",
+      "description": "Microsoft's second documented worked example: recalculation mode, which the page says is one of exactly two strings",
+      "expected": true,
+      "expected_note": "Excel's type_text table documents \"recalc\" as \"Current recalculation mode; returns \\\"Automatic\\\" or \\\"Manual\\\"\", and the page's own Result column for =INFO(\"recalc\") reads '\\\"Automatic\\\" or \\\"Manual\\\" depending on the current state of your calculation options'. The documentation therefore fixes a two-value enumeration, not a value, so the enumeration is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    },
+    {
+      "id": "INFO_numfile_is_a_number",
+      "formula": "=ISNUMBER(INFO(\"numfile\"))",
+      "description": "Microsoft's first documented worked example: the sheet count, which the page says is a number",
+      "expected": true,
+      "expected_note": "Excel's type_text table documents \"numfile\" as \"Number of worksheets in the open workbooks\", and the page's Result column for =INFO(\"numfile\") reads 'a number indicating how many sheets are in the currently open workbooks' -- Microsoft publishes that sentence INSTEAD of a figure, because the figure depends on what is open. So the documented promise is \"a number\", and ISNUMBER is the exact assertion of it. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    },
+    {
+      "id": "INFO_osversion_is_text",
+      "formula": "=ISTEXT(INFO(\"osversion\"))",
+      "description": "The operating system version, which the page says is returned as text",
+      "expected": true,
+      "expected_note": "Excel's type_text table documents \"osversion\" as \"Current operating system version, as text\". The words \"as text\" are the documented guarantee, and ISTEXT asserts precisely that. The string itself is machine-specific (all four builds here return \"Linux 7.0\"). WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    },
+    {
+      "id": "INFO_release_is_text",
+      "formula": "=ISTEXT(INFO(\"release\"))",
+      "description": "The application version, which the page says is returned as text",
+      "expected": true,
+      "expected_note": "Excel's type_text table documents \"release\" as \"Version of Microsoft Excel, as text\". Again \"as text\" is the documented guarantee. The string is emphatically build-specific and is NOT assertable: the four pinned LibreOffice builds return four different strings here, and three of them are not version numbers at all but 40-character git commit hashes (24.2.0.3 -> da48488a73ddd66ea24cf16bbc4f7b9c08e9bea1, 24.8.7.2 -> e07d0a63a46349d29051da79b1fde8160bab2a89, 25.2.0.3 -> e1cf4a87eb02d755bce1a01209907ea5ddc8f069), while 25.8.7.3 returns \"580(Build:3)\". A workbook that parses INFO(\"release\") to branch on version -- the obvious reason to call it -- gets nothing parseable from three of these four releases. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    },
+    {
+      "id": "INFO_directory_is_text",
+      "formula": "=ISTEXT(INFO(\"directory\"))",
+      "description": "The current directory, which the page documents as a path",
+      "expected": true,
+      "expected_note": "Excel's type_text table documents \"directory\" as \"Path of the current directory or folder specified in the Excel option, At startup, open all files in\". A path is text, so ISTEXT is the documented promise. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures. EXECUTED RESULT: FALSE on all four LibreOffice builds -- INFO(\"directory\") returns #N/A there, and because the IS functions inspect rather than propagate, ISTEXT reports a clean FALSE instead of surfacing the error. So a workbook asking LibreOffice where it is gets no answer and no complaint."
+    },
+    {
+      "id": "INFO_origin_has_documented_prefix",
+      "formula": "=LEFT(INFO(\"origin\"),3)=\"$A:\"",
+      "description": "The top-left visible cell, which the page says is returned as text prepended with \"$A:\"",
+      "expected": true,
+      "expected_note": "Excel's type_text table documents \"origin\" as returning \"the absolute cell reference of the top and leftmost cell visible in the window ... as text prepended with \\\"$A:\\\"\", and gives worked forms for both reference styles (\"$A:$D$9\" in A1 style, \"$A:R9C4\" in R1C1 style). The scroll position is not fixed, but the \"$A:\" prefix is documented for BOTH styles, so the prefix is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures. EXECUTED RESULT: #N/A on all four LibreOffice builds, propagated from INFO(\"origin\") itself. \"directory\" and \"origin\" are the two documented type_text codes LibreOffice does not implement; every other code in this file it answers."
+    },
+    {
+      "id": "INFO_memavail_is_na",
+      "formula": "=INFO(\"memavail\")",
+      "description": "A retired memory code, which the page says now returns #N/A",
+      "expected": "#N/A",
+      "expected_note": "Excel documents, in an Important box: \"In previous versions of Microsoft Excel, the \\\"memavail\\\", \\\"memused\\\", and \\\"totmem\\\" type_text values, returned memory information. These type_text values are no longer supported and now return a #N/A error value.\" That makes #N/A the documented CORRECT answer here, not a failure -- one of the few places in this corpus where an error value is the specification. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    },
+    {
+      "id": "INFO_memused_is_na",
+      "formula": "=INFO(\"memused\")",
+      "description": "The second of the three retired memory codes",
+      "expected": "#N/A",
+      "expected_note": "Same documented Important box as INFO(\"memavail\"): \"memavail\", \"memused\" and \"totmem\" \"are no longer supported and now return a #N/A error value\". All three are asserted separately because the documentation names all three separately, and an engine could easily retire one spelling and not the others. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    },
+    {
+      "id": "INFO_totmem_is_na",
+      "formula": "=INFO(\"totmem\")",
+      "description": "The third of the three retired memory codes",
+      "expected": "#N/A",
+      "expected_note": "Same documented Important box: \"totmem\" is one of the three type_text values that \"are no longer supported and now return a #N/A error value\". WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    },
+    {
+      "id": "INFO_system_probe",
+      "formula": "=INFO(\"system\")",
+      "description": "PROBE: the operating environment name, whose documented enumeration has no entry for Linux",
+      "expected": null,
+      "expected_note": "Excel's type_text table documents \"system\" as \"Name of the operating environment: Macintosh = \\\"mac\\\" Windows = \\\"pcdos\\\"\" -- a closed two-value enumeration with no third option. The harness runs on Linux, which the documentation simply does not cover, so no expected value can be derived and none is invented: this is recorded as a probe. FOR THE RECORD, all four LibreOffice builds return the string \"LINUX\" here. That is neither of the two documented values, and it is also not an error, so a workbook that tests INFO(\"system\")=\"pcdos\" to detect Windows gets a clean FALSE rather than anything that signals the question was unanswerable. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures."
+    }
+  ]
+}

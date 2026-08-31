@@ -1,0 +1,100 @@
+{
+  "function": "MMULT",
+  "cases": [
+    {
+      "id": "MMULT_2x2_by_2x2",
+      "formula": "=MMULT(A2:B3,D2:E3)",
+      "description": "The matrix product of two 2x2 ranges",
+      "setup_cells": {
+        "A2": 1,
+        "B2": 3,
+        "A3": 7,
+        "B3": 2,
+        "D2": 2,
+        "E2": 0,
+        "D3": 0,
+        "E3": 2
+      },
+      "check_range": "H30:I31",
+      "expected": [
+        [
+          2.0,
+          6.0
+        ],
+        [
+          14.0,
+          4.0
+        ]
+      ],
+      "expected_note": "Derived by hand from the documented definition -- the page gives the product as the sum over the shared index, a[i][j] = sum_k b[i][k]*c[k][j] -- in exact integer arithmetic: {1,3; 7,2} x {2,0; 0,2} = {1*2+3*0, 1*0+3*2; 7*2+2*0, 7*0+2*2} = {2,6; 14,4}. The second operand is deliberately a scaling matrix, so every entry of the answer is an obvious multiple of an entry of the first -- an engine that transposed an operand or summed along the wrong index cannot land on this result by accident. The page's own note that \"The result is an array with the same number of rows as array1 and the same number of columns as array2\" is what fixes the 2x2 shape of the check range. ENTERED AS AN ARRAY FORMULA. The page is explicit -- \"the formula must be entered as a legacy array formula by first selecting the output range, entering the formula in the top-left-cell of the output range, and then pressing CTRL+SHIFT+ENTER\" -- so the harness writes it as a legacy CSE array formula covering the whole result range, not as a plain scalar formula. Writing it as a scalar string makes even a fully supported matrix function return a single cell or #VALUE!, which would be a harness artefact rather than a finding."
+    },
+    {
+      "id": "MMULT_2x3_by_3x2",
+      "formula": "=MMULT(A2:C3,A6:B8)",
+      "description": "A non-square product: a 2x3 array times a 3x2 array gives a 2x2 result",
+      "setup_cells": {
+        "A2": 1,
+        "B2": 2,
+        "C2": 3,
+        "A3": 4,
+        "B3": 5,
+        "C3": 6,
+        "A6": 7,
+        "B6": 8,
+        "A7": 9,
+        "B7": 10,
+        "A8": 11,
+        "B8": 12
+      },
+      "check_range": "H30:I31",
+      "expected": [
+        [
+          58.0,
+          64.0
+        ],
+        [
+          139.0,
+          154.0
+        ]
+      ],
+      "expected_note": "Exact integer arithmetic on {1,2,3; 4,5,6} x {7,8; 9,10; 11,12}: 1*7+2*9+3*11 = 58, 1*8+2*10+3*12 = 64, 4*7+5*9+6*11 = 139, 4*8+5*10+6*12 = 154. This is the case that actually tests the documented shape rule -- \"The number of columns in array1 must be the same as the number of rows in array2\", and the result has array1's rows and array2's columns -- because unlike the square case the two operands are not interchangeable and the answer's dimensions differ from both inputs'. ENTERED AS AN ARRAY FORMULA. The page is explicit -- \"the formula must be entered as a legacy array formula by first selecting the output range, entering the formula in the top-left-cell of the output range, and then pressing CTRL+SHIFT+ENTER\" -- so the harness writes it as a legacy CSE array formula covering the whole result range, not as a plain scalar formula. Writing it as a scalar string makes even a fully supported matrix function return a single cell or #VALUE!, which would be a harness artefact rather than a finding."
+    },
+    {
+      "id": "MMULT_dimension_mismatch",
+      "formula": "=INDEX(MMULT({1,3;7,2},{2,0,1}),1,1)",
+      "description": "Operands whose inner dimensions do not match",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"MMULT returns the #VALUE! error when: ... The number of columns in array1 is different from the number of rows in array2.\" Array1 is 2x2 and array2 is 1x3, so the shared index is 2 on one side and 1 on the other and the product is undefined."
+    },
+    {
+      "id": "MMULT_contains_text",
+      "formula": "=INDEX(MMULT(A2:B3,A2:B3),1,1)",
+      "description": "A range containing a text cell, which the page excludes",
+      "setup_cells": {
+        "A2": "a",
+        "B2": 1,
+        "A3": 2,
+        "B3": 3
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"MMULT returns the #VALUE! error when: Any cells are empty or contain text\", and separately that \"both arrays must contain only numbers\"."
+    },
+    {
+      "id": "MMULT_identity_matrix_leaves_operand_unchanged",
+      "formula": "=INDEX(MMULT(A2:B3,D2:E3),2,1)",
+      "description": "Multiplying by the identity matrix, which must return the operand unchanged",
+      "setup_cells": {
+        "A2": 1,
+        "B2": 3,
+        "A3": 7,
+        "B3": 2,
+        "D2": 1,
+        "E2": 0,
+        "D3": 0,
+        "E3": 1
+      },
+      "expected": 7,
+      "expected_note": "Exact and structural: {1,3; 7,2} x {1,0; 0,1} = {1,3; 7,2}, so the entry at row 2 column 1 is 7. Nothing here depends on a derived constant -- the identity is the multiplicative unit of matrix multiplication -- so any conforming engine returns 7, and an engine that swapped its operands or its indices returns something else."
+    }
+  ]
+}
