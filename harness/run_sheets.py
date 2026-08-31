@@ -125,6 +125,35 @@ USAGE
     # every value must match results/recipes-verified.json or it exits 1
     python3 harness/run_sheets.py selftest-recipes
 
+    # ---- the six MULTI-SHEET recipes (one workbook per check) ----
+    # `build-recipes` cannot carry the recipes whose checks declare
+    # setup_sheets: their formulas name the data tabs literally, two checks
+    # want a tab called Data with different contents, one names a tab that
+    # must NOT exist, and a 3-D reference depends on tab ORDER. So each CHECK
+    # gets its own workbook holding exactly the tabs it asks for -- nothing
+    # renamed, nothing rewritten -- at one Drive round-trip per check.
+
+    # 1. build (34 workbooks across the 6 recipes)
+    python3 harness/run_sheets.py build-recipes-multisheet
+    python3 harness/run_sheets.py build-recipes-multisheet --only vlookup-from-another-sheet
+
+    # 2. (external) upload every harness/recipe_chunks_multisheet/ms-*.xlsx to
+    #    Drive with convert-on, then download each converted Sheet back as
+    #    .xlsx into harness/recipe_exports_multisheet/ -- keep the names, they
+    #    already carry the ms-NNN id the manifest is keyed by
+
+    # 3. ingest the whole folder (the manifest's "mode" selects this reader)
+    python3 harness/run_sheets.py ingest-recipes \
+        --chunkdir harness/recipe_chunks_multisheet \
+        --export-dir harness/recipe_exports_multisheet \
+        --engine-label "Google Sheets (Drive import, YYYY-MM-DD)"
+
+    # dry run: build + expected values synthesized into the builder's own
+    # workbooks + ingest, asserting the mapping, the keyed merge, the
+    # engine-label guard, canary detection and the partial-download refusal.
+    # Executes no engine at all -- no LibreOffice, no Drive.
+    python3 harness/run_sheets.py selftest-recipes-multisheet
+
 INCREMENTAL INGESTION MERGES, IT DOES NOT OVERWRITE
 ---------------------------------------------------
 Every ingest is inherently a subset (one or more chunks out of N), so if
@@ -899,11 +928,11 @@ def collect_recipe_checks(only=None, engine=GOOGLE_SHEETS):
         different contents, so even one-recipe-per-workbook does not
         de-collide them.
 
-    Skipping is therefore the simpler CORRECT option: they stay
-    LibreOffice-executed, the site keeps their existing LibreOffice-only
-    wording, and the manifest lists them by name with their extra tabs so
-    the omission is visible rather than silent. A v2 that runs one workbook
-    per CHECK (not per recipe) would cover them honestly with no rewriting
+    Splitting them out is therefore the simpler CORRECT option, and the
+    manifest lists them by name with their extra tabs so the omission is
+    visible rather than silent. They are no longer unexecutable, though: the
+    v2 hinted at here exists as `build-recipes-multisheet`, which runs one
+    workbook per CHECK (not per recipe) and so covers them with no rewriting
     at all, at the cost of ~34 more Drive round-trips.
     """
     all_recipes = load_recipe_files()
@@ -1084,9 +1113,12 @@ def cmd_build_recipes(args):
             "consecutive tabs (3-D refs), or deliberately assert #NAME?/#REF! for "
             "a wrong-syntax or missing tab, and a single recipe can define the "
             "same tab name twice with different contents -- so neither prefix-"
-            "renaming nor one-workbook-per-recipe is correct. They remain "
-            "LibreOffice-executed only (results/recipes-verified.json)."
+            "renaming nor one-workbook-per-recipe is correct. They are built by "
+            "`build-recipes-multisheet` instead, which gives each CHECK its own "
+            "workbook with exactly the tabs it declares, in the recipe's own "
+            "order, renaming nothing."
         ),
+        "skipped_multi_sheet_built_by": "build-recipes-multisheet",
         "canary": {
             "arithmetic_formula": CANARY_ARITH_FORMULA,
             "arithmetic_expected": CANARY_ARITH_EXPECTED,
@@ -1446,23 +1478,82 @@ def _load_recipe_manifest(args):
     return manifest
 
 
-def cmd_ingest_recipes(args):
-    manifest = _load_recipe_manifest(args)
-    for p in args.export:
+def _resolve_recipe_exports(args):
+    """The exported workbooks to ingest, from --export files and/or --export-dir.
+
+    A directory is accepted because the MULTI-SHEET build emits one workbook
+    per check: a human who has just downloaded 34 converted Sheets wants to
+    point at the folder, not type 34 paths. Every file still has to identify
+    itself through the manifest (`ms-NNN` / `chunk-NN` in its name, then its
+    sheet list), so widening the input never widens what can be mis-ingested.
+    """
+    paths = list(getattr(args, "export", None) or [])
+    for d in (getattr(args, "export_dir", None) or []):
+        if not os.path.isdir(d):
+            sys.exit(f"--export-dir is not a directory: {d}")
+        found = sorted(p for p in glob.glob(os.path.join(d, "*.xlsx"))
+                       if not os.path.basename(p).startswith("~$"))
+        if not found:
+            sys.exit(f"No .xlsx files in {d}")
+        paths.extend(found)
+    if not paths:
+        sys.exit("Nothing to ingest: pass --export FILE ... and/or --export-dir DIR")
+    seen, uniq = set(), []
+    for p in paths:
+        ap = os.path.abspath(p)
+        if ap in seen:
+            continue
+        seen.add(ap)
+        uniq.append(p)
+    for p in uniq:
         if not os.path.exists(p):
             sys.exit(f"Export not found: {p}")
+    return uniq
 
-    recipes, canary, trusted, stats = ingest_recipe_exports(
-        args.export, manifest, args.engine_label)
+
+def cmd_ingest_recipes(args):
+    """Ingest either chunk layout. Which one is not a flag the caller has to
+    remember: the manifest records `mode`, and `build-recipes-multisheet`
+    stamps it, so pointing --chunkdir at a multi-sheet build selects the
+    one-workbook-per-check reader automatically."""
+    manifest = _load_recipe_manifest(args)
+    exports = _resolve_recipe_exports(args)
+    multisheet = manifest.get("mode") == MULTISHEET_MODE
+
+    if multisheet:
+        recipes, canary, trusted, stats = ingest_multisheet_exports(
+            exports, manifest, args.engine_label)
+        recalc_method = RECIPE_MS_RECALC_METHOD
+    else:
+        recipes, canary, trusted, stats = ingest_recipe_exports(
+            exports, manifest, args.engine_label)
+        recalc_method = RECIPE_RECALC_METHOD
+
+    layout = ("one workbook per check (multi-sheet)" if multisheet
+              else "one sheet per check (shared workbook)")
+    print(f"Ingested {len(stats['chunks'])} export(s) [{layout}]: "
+          f"{stats['n_recipes']} recipe(s), {stats['n_checks']} check(s). "
+          f"[serialization={stats['serialization']}]")
+    for inc in stats.get("incomplete") or []:
+        # Not written, and said out loud: a recipe is merged wholesale and its
+        # badge is the AND over its checks, so a partial download must never
+        # become a published verdict.
+        print(f"  INCOMPLETE  {inc['slug']}: {inc['have']} of {inc['want']} "
+              f"workbook(s) ingested, missing {inc['missing']} -- NOT written")
+    for bad in stats.get("setup_failures") or []:
+        print(f"  SETUP ALTERED  {bad['slug']} [{bad['key']}]: {bad['cells']}")
+    if not recipes:
+        sys.exit("Nothing complete to write: every recipe in this ingest was "
+                 "missing at least one of its workbooks. Download the rest and "
+                 "re-run; results/ is unchanged.")
 
     write_recipe_results(args.out, recipes, canary, trusted, args.engine_label,
                          args.allow_label_change,
+                         recalc_method=recalc_method,
                          serialization=stats["serialization"],
                          manifest_note=stats["manifest_note"])
 
     n_ok = sum(1 for r in recipes.values() if r["verified"])
-    print(f"Ingested {len(stats['chunks'])} chunk(s): {stats['n_recipes']} recipe(s), "
-          f"{stats['n_checks']} check(s). [serialization={stats['serialization']}]")
     if stats["manifest_note"]:
         print(f"Manifest note: {stats['manifest_note']}")
     print(f"Deterministic canary OK on all {canary['arithmetic_sheets_checked']} "
@@ -1483,14 +1574,24 @@ def cmd_ingest_recipes(args):
         if not r["main_verified"]:
             print(f"  DIFFERS  {slug} [main] {r['formula']}")
             print(f"           got={r['actual']!r} want={r['expected']!r}")
+            if r.get("notes"):
+                print(f"           {r['notes']}")
         for vi, var in enumerate(r.get("variants") or []):
             for ci, ch in enumerate(var.get("checks") or []):
                 if ch["verified"]:
                     continue
-                print(f"  DIFFERS  {slug} [v{vi}c{ci}] {ch['formula']}")
+                print(f"  DIFFERS  {slug} [{ch.get('key', f'v{vi}c{ci}')}] "
+                      f"{ch['formula']}")
                 print(f"           got={ch['actual']!r} want={ch['expected']!r}")
                 if ch.get("notes"):
                     print(f"           {ch['notes']}")
+        for ch in r.get("extra_checks") or []:
+            if ch["verified"]:
+                continue
+            print(f"  DIFFERS  {slug} [{ch.get('key')}] {ch['formula']}")
+            print(f"           got={ch['actual']!r} want={ch['expected']!r}")
+            if ch.get("notes"):
+                print(f"           {ch['notes']}")
     print(f"Wrote {args.out}")
     return recipes
 
@@ -1640,6 +1741,878 @@ def cmd_selftest_recipes(args):
 
 
 # --------------------------------------------------------------------------
+# build-recipes-multisheet: the six recipes `build-recipes` skips
+# --------------------------------------------------------------------------
+#
+# WHY A SEPARATE COMMAND (AND WHY ONE WORKBOOK PER CHECK)
+# -------------------------------------------------------
+# `build-recipes` puts one worksheet per check into a shared workbook, which
+# is why it cannot carry the six recipes whose checks declare `setup_sheets`:
+# their formulas name the data tabs LITERALLY, so two checks that both want a
+# tab called `Data` -- with different contents -- cannot coexist, and the
+# obvious fix (prefix-rename the tabs, rewrite the references) is exactly what
+# these recipes must not have done to them:
+#
+#   * `=INDIRECT("'"&A1&"'!B2")` resolves the tab name from a CELL VALUE, and
+#     one check deliberately points A1 at a tab that does NOT exist to assert
+#     #REF!. Renaming tabs changes the answer or destroys the assertion.
+#   * `=SUM(Q1:Q3!A1)` is a 3-D reference over a SPAN of consecutive tabs, so
+#     it depends on sheet ORDER, not just names.
+#   * `=$'Q1 Data'.B2`, `=Data.B2` and `=SUM(Q1.A1:Q3.A1)` exist to assert
+#     #NAME? -- a rewriter that "fixed" the separator would delete the test.
+#
+# One workbook per CHECK removes the whole problem instead of solving it: each
+# workbook holds exactly the tabs that one check asks for, named exactly as
+# its formula spells them, in the order the recipe JSON lists them. Nothing is
+# renamed and nothing is rewritten, so what Google Sheets executes is
+# byte-for-byte the formula the recipe teaches. The cost is honest and
+# unavoidable: 34 Drive round-trips instead of one.
+#
+# SHEET ORDER IS LOAD-BEARING
+# ---------------------------
+# `_meta` first, then the formula sheet, then the data tabs in the recipe's
+# own JSON order. The data tabs therefore stay CONSECUTIVE, which is what
+# makes `Q1:Q3!A1` mean Q1+Q2+Q3 and not something else; scripts/verify_
+# recipes.py's LibreOffice reference run has the same property (it appends the
+# extra sheets after the formula sheet, in dict order), so the two engines are
+# handed the same workbook shape.
+#
+# WHERE THE CANARY GOES, AND WHERE IT DELIBERATELY DOES NOT
+# ---------------------------------------------------------
+# `=1111+2222` goes in Z1 of the FORMULA sheet and in `_meta!A2`, not on the
+# data tabs. Several of these checks aggregate WHOLE COLUMNS of a data tab
+# (`=SUM('Q1 Data'!B:B)`, `=COUNT(Data!B:B)`) or reach across a 3-D span;
+# writing extra formulas into those tabs would put harness cells inside the
+# very ranges under test. Z1 is outside every range these recipes touch today,
+# but "the canary must never be able to change the answer" is the stronger
+# rule, and the formula sheet's canary already proves the workbook was
+# recalculated -- it is on the sheet whose result we read.
+#
+# Instead, the data tabs get a check the shared-workbook path cannot do: their
+# setup cells are LITERALS, so ingest reads them back and confirms they still
+# hold what the builder wrote (`setup_intact`). That catches a tab that Drive
+# renamed, dropped or reformatted -- the failure mode that would otherwise
+# turn into a fake "Google Sheets disagrees".
+
+DEFAULT_RECIPE_MS_CHUNK_DIR = os.path.join(
+    REPO_ROOT, "harness", "recipe_chunks_multisheet")
+DEFAULT_RECIPE_MS_EXPORT_DIR = os.path.join(
+    REPO_ROOT, "harness", "recipe_exports_multisheet")
+# Scratch output for `selftest-recipes-multisheet`. Outside results/ for the
+# same reason every other selftest path is: it holds synthesized values.
+RECIPE_MS_SELFTEST_DIR = os.path.join(
+    REPO_ROOT, "harness", "recipe_selftest_multisheet")
+RECIPE_MS_SELFTEST_CHUNK_DIR = os.path.join(RECIPE_MS_SELFTEST_DIR, "chunks")
+RECIPE_MS_SELFTEST_RESULTS_PATH = os.path.join(
+    RECIPE_MS_SELFTEST_DIR, "plumbing-check.json")
+
+MULTISHEET_MODE = "multisheet"
+RECIPE_MS_RECALC_METHOD = (
+    "Drive import + xlsx export readback (how-to recipe corpus, multi-sheet: "
+    "one workbook per check)")
+MS_ID_RE = re.compile(r"(ms-\d+)")
+
+
+def multisheet_workbook_id(n):
+    """Stable id for the nth workbook. Ingest recovers it from the FILENAME,
+    so it has to survive a Drive upload/download round-trip -- `ms-007` does,
+    and it is then re-verified against the workbook's sheet list."""
+    return f"ms-{n:03d}"
+
+
+def multisheet_formula_sheet_name(recipe_index, check_key, slug, data_tabs):
+    """Name for the sheet the formula itself sits on.
+
+    Same `r<index><key>_<slug>` shape `build-recipes` uses, but the `used` set
+    is SEEDED with the data tab names (and `_meta`) so the formula sheet can
+    never collide with -- or be mistaken for -- a tab the formula references.
+    """
+    used = {t.lower() for t in data_tabs}
+    used.add(META_SHEET.lower())
+    name = recipe_sheet_name(recipe_index, check_key, slug, used)
+    if name.lower() in {t.lower() for t in data_tabs}:  # unreachable; guard anyway
+        raise ValueError(f"formula sheet name {name!r} collides with a data tab")
+    return name
+
+
+def collect_multisheet_recipe_checks(only=None, engine=GOOGLE_SHEETS):
+    """Return (multisheet, single_sheet, missing).
+
+    The inverse split of `collect_recipe_checks()`: what that function calls
+    `skipped` is precisely what this command BUILDS, and its `buildable`
+    single-sheet recipes are what this command declines to build (they belong
+    to `build-recipes`). Enumeration, engine scoping and stable keys are
+    unchanged -- it is the same call, read the other way round -- so a check
+    lands under the same key here as it would there.
+    """
+    single_sheet, multisheet, missing = collect_recipe_checks(only, engine=engine)
+    return multisheet, single_sheet, missing
+
+
+def build_multisheet_workbook(rec, chk, plain_names=True):
+    """One workbook for ONE check. Returns (wb, formula_sheet, data_tabs).
+
+    Every tab the check's `setup_sheets` asks for is created with its EXACT
+    name -- no sanitizing, no truncation, no de-duplication -- because the
+    formula spells that name literally. A name that .xlsx or Google Sheets
+    could not carry unchanged is a hard error here rather than a silent
+    rename that would quietly change what the recipe means.
+    """
+    setup_sheets = chk["setup_sheets"] or {}
+    if not setup_sheets:
+        raise ValueError(
+            f"{rec['slug']} {chk['key']}: no setup_sheets -- this is a "
+            f"single-sheet check and belongs in `build-recipes`")
+
+    seen = set()
+    for name in setup_sheets:
+        assert_sheets_safe_name(name)
+        if len(name) > SHEET_NAME_MAX:
+            raise ValueError(
+                f"{rec['slug']} {chk['key']}: data tab {name!r} is longer than "
+                f"{SHEET_NAME_MAX} chars, which .xlsx cannot carry unchanged -- "
+                f"and renaming it would change the formula's meaning")
+        if name.lower() in seen:
+            raise ValueError(f"{rec['slug']} {chk['key']}: duplicate data tab "
+                             f"{name!r}")
+        seen.add(name.lower())
+    data_tabs = list(setup_sheets)
+
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+
+    fs_name = multisheet_formula_sheet_name(
+        rec["index"], chk["key"], rec["slug"], data_tabs)
+    ws = wb.create_sheet(fs_name)
+    for addr, val in (chk["setup_cells"] or {}).items():
+        ws[addr] = val
+    formula = chk["formula"] if plain_names else to_storage_formula_all(chk["formula"])
+    if chk["check_range"]:
+        # Same reasoning as corpus.build_workbook(): a spilling result must be
+        # written as a real array formula over its full range.
+        ws[chk["anchor"]] = ArrayFormula(chk["check_range"], formula)
+    else:
+        ws[chk["anchor"]] = formula
+    ws[CANARY_ANCHOR] = CANARY_ARITH_FORMULA
+
+    # Data tabs AFTER the formula sheet and in the recipe's own order, so a
+    # 3-D span (Q1:Q3) stays contiguous and in the order the JSON declares.
+    for name, cells in setup_sheets.items():
+        tab = wb.create_sheet(title=name)
+        for addr, val in (cells or {}).items():
+            tab[addr] = val
+
+    meta = wb.create_sheet(META_SHEET, 0)
+    meta[META_VOLATILE_CELL] = "=NOW()"
+    meta[META_ARITH_CELL] = CANARY_ARITH_FORMULA
+    assert_sheets_safe_name(META_SHEET)
+    return wb, fs_name, data_tabs
+
+
+def cmd_build_recipes_multisheet(args):
+    plain_names = bool(getattr(args, "plain_names", True))
+    engine = getattr(args, "engine", GOOGLE_SHEETS)
+    multisheet, single_sheet, missing = collect_multisheet_recipe_checks(
+        args.only, engine=engine)
+    if missing:
+        sys.exit(f"No data/recipes/*.json for: {', '.join(missing)}")
+    if not multisheet:
+        sys.exit("No multi-sheet recipes matched. This command builds ONLY the "
+                 "recipes whose checks declare setup_sheets; the single-sheet "
+                 "ones are `build-recipes`' job.")
+
+    outdir = os.path.abspath(args.outdir)
+    os.makedirs(outdir, exist_ok=True)
+    # Stale workbooks from a previous build would still be ingestible against
+    # the new manifest, so clear them first (same rule as build-recipes).
+    for stale in glob.glob(os.path.join(outdir, "ms-*.xlsx")):
+        os.remove(stale)
+
+    manifest_chunks = []
+    recipes_index = {}
+    n = 0
+    for rec in multisheet:
+        recipes_index[rec["slug"]] = {
+            "index": rec["index"],
+            "title": rec["title"],
+            "n_checks": len(rec["checks"]),
+            # Every key this recipe needs before it may be written to the
+            # results file. Ingest refuses to emit a half-covered recipe: a
+            # recipe is merged WHOLESALE and its `verified` flag is the AND
+            # over all its checks, so writing one from a partial download
+            # would publish a verdict nobody executed.
+            "keys": [c["key"] for c in rec["checks"]],
+        }
+        for chk in rec["checks"]:
+            n += 1
+            wb_id = multisheet_workbook_id(n)
+            wb, fs_name, data_tabs = build_multisheet_workbook(
+                rec, chk, plain_names=plain_names)
+            fname = f"{wb_id}-{rec['slug']}-{chk['key']}.xlsx"
+            path = os.path.join(outdir, fname)
+            wb.save(path)
+
+            stored = (chk["formula"] if plain_names
+                      else to_storage_formula_all(chk["formula"]))
+            entry = {
+                "key": chk["key"],
+                "kind": chk["kind"],
+                "variant_index": chk["variant_index"],
+                "check_index": chk["check_index"],
+                "heading": chk["heading"],
+                "label": chk["label"],
+                "sheet": fs_name,
+                "anchor": chk["anchor"],
+                "check_range": chk["check_range"],
+                "formula_display": chk["formula"],
+                "formula_stored_xlsx": stored,
+                "differs_from_lo_serialization":
+                    stored != to_storage_formula_all(chk["formula"]),
+                "serialization": "plain" if plain_names else "xlfn",
+                "expected": chk["expected"],
+                "engines": chk["engines"],
+                # Multi-sheet specifics: the tabs this check needs, in order,
+                # and the literal values ingest re-reads to prove they came
+                # back intact.
+                "data_sheets": data_tabs,
+                "setup_cells": chk["setup_cells"] or {},
+                "setup_sheets": {name: dict(cells or {})
+                                 for name, cells in (chk["setup_sheets"] or {}).items()},
+            }
+            manifest_chunks.append({
+                "chunk": wb_id,
+                "file": fname,
+                "bytes": os.path.getsize(path),
+                "sha256": _sha256(path),
+                "n_recipes": 1,
+                "n_checks": 1,
+                "slugs": [rec["slug"]],
+                # Every sheet the export must still contain, checked by ingest
+                # before a single value is read.
+                "sheets": sorted([fs_name] + data_tabs + [META_SHEET]),
+                "formula_sheet": fs_name,
+                "data_sheets": data_tabs,
+                "recipes": [{
+                    "slug": rec["slug"],
+                    "title": rec["title"],
+                    "index": rec["index"],
+                    "n_checks": 1,
+                    "n_variants": (1 if chk["variant_index"] is not None else 0),
+                    "checks": [entry],
+                }],
+            })
+
+    manifest = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "corpus": "recipes",
+        "mode": MULTISHEET_MODE,
+        "corpus_source": "data/recipes/*.json",
+        "engine_scope": engine,
+        "workbook_layout": (
+            "ONE WORKBOOK PER CHECK. Sheet order is _meta, the formula sheet, "
+            "then the check's data tabs in the recipe's own JSON order -- the "
+            "data tabs stay consecutive so a 3-D reference (Q1:Q3!A1) keeps "
+            "meaning what the recipe says it means. Data tab names are the "
+            "recipe's LITERAL names: nothing is renamed, prefixed or "
+            "truncated, because the formulas spell them out."
+        ),
+        "n_workbooks": len(manifest_chunks),
+        "n_recipes": len(recipes_index),
+        "n_checks": sum(c["n_checks"] for c in manifest_chunks),
+        "subset_only": sorted(set(args.only)) if args.only else None,
+        "plain_names": plain_names,
+        "serialization": "plain" if plain_names else "xlfn",
+        "manifest_note": getattr(args, "manifest_note", None),
+        "recipes_index": recipes_index,
+        "not_built_single_sheet": [
+            {"slug": r["slug"], "n_checks": r["n_checks"]} for r in single_sheet
+        ],
+        "canary": {
+            "arithmetic_formula": CANARY_ARITH_FORMULA,
+            "arithmetic_expected": CANARY_ARITH_EXPECTED,
+            "arithmetic_cell_formula_sheet": CANARY_ANCHOR,
+            "arithmetic_on_data_tabs": False,
+            "arithmetic_on_data_tabs_reason": (
+                "Data tabs carry only the recipe's literal setup values. Adding "
+                "a formula to them would put a harness cell inside ranges these "
+                "checks aggregate whole-column and across 3-D spans. Their "
+                "integrity is proven instead by reading the setup literals back "
+                "(setup_intact)."
+            ),
+            "meta_sheet": META_SHEET,
+            "meta_volatile_cell": META_VOLATILE_CELL,
+            "meta_volatile_formula": "=NOW()",
+            "meta_arithmetic_cell": META_ARITH_CELL,
+        },
+        "chunks": manifest_chunks,
+    }
+    manifest_path = os.path.join(outdir, MANIFEST_NAME)
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2, default=str)
+        f.write("\n")
+
+    mode = ("PLAIN NAMES (formulas exactly as authored)" if plain_names
+            else "xlfn-translated")
+    print(f"Built {manifest['n_workbooks']} workbook(s) -- one per check -- from "
+          f"{manifest['n_recipes']} multi-sheet recipe(s) -> {outdir}  [{mode}]")
+    total = 0
+    print(f"  {'workbook':<58} {'tabs':>4}  {'bytes':>7}")
+    for c in manifest_chunks:
+        total += c["bytes"]
+        flag = "  <-- OVER SIZE BUDGET" if c["bytes"] > SIZE_WARN_BYTES else ""
+        print(f"  {c['file']:<58} {len(c['sheets']):>4}  {c['bytes']:>7,}{flag}")
+    print(f"  {'TOTAL':<58} {'':>4}  {total:>7,} "
+          f"(base64 ~{int(total * 4 / 3):,} bytes)")
+    print(f"\nWrote {manifest_path}")
+    return manifest
+
+
+# --------------------------------------------------------------------------
+# ingest-recipes, multi-sheet path
+# --------------------------------------------------------------------------
+
+def _multisheet_id_from_path(path, manifest):
+    """Which manifest workbook an exported file is, from its FILENAME.
+
+    Same contract as `_chunk_id_from_path`, with `ms-NNN` in place of
+    `chunk-NN`; the id is then re-verified against the workbook's sheet list
+    by the caller, so a file downloaded under the wrong name cannot be
+    ingested against another check's cell map."""
+    base = os.path.basename(path)
+    ids = {c["chunk"] for c in manifest["chunks"]}
+    m = MS_ID_RE.search(base)
+    if m and m.group(1) in ids:
+        return m.group(1)
+    raise SystemExit(
+        f"Cannot tell which workbook {base!r} is. Keep the uploaded name "
+        f"(Drive's .xlsx export already does), or rename it so it contains "
+        f"its manifest id (ms-001 ... {sorted(ids)[-1] if ids else 'ms-001'})."
+    )
+
+
+def _setup_intact_failures(wb, entry):
+    """Every setup literal that did NOT come back the way the builder wrote it.
+
+    Data tabs hold plain values, never formulas, so a Drive round-trip has to
+    return them unchanged. If it does not, the check's inputs were not the
+    ones the recipe describes and its result says nothing about the formula --
+    which is why this is reported rather than absorbed."""
+    bad = []
+    for name, cells in (entry.get("setup_sheets") or {}).items():
+        if name not in wb.sheetnames:
+            bad.append({"sheet": name, "cell": None, "wrote": None,
+                        "read": "SHEET MISSING"})
+            continue
+        tab = wb[name]
+        for addr, wrote in (cells or {}).items():
+            got = norm(tab[addr].value)
+            want = norm(wrote)
+            if got != want and str(got) != str(want):
+                bad.append({"sheet": name, "cell": addr,
+                            "wrote": want, "read": got})
+    return bad
+
+
+def ingest_multisheet_exports(export_paths, manifest, engine_label):
+    """Read one-workbook-per-check exports -> (recipe_results, canary,
+    trusted, stats).
+
+    Per workbook the verification is the shared-workbook path's, plus the
+    multi-sheet extras: every declared tab must still exist, and every setup
+    literal must read back unchanged. Values are then evaluated with exactly
+    `_read_check_value()` / `compare_check()` -- the same functions
+    scripts/verify_recipes.py judges LibreOffice with -- so a difference
+    between the two engines is a difference in the engines.
+
+    COMPLETENESS: a recipe is emitted only when EVERY key the manifest lists
+    for it was ingested in this call. `write_recipe_results()` replaces a
+    recipe wholesale and the site reads `verified` as the AND over its checks,
+    so a recipe assembled from half its workbooks would publish a verdict that
+    was never executed. Incomplete recipes are reported and left alone.
+    """
+    plain_names = bool(manifest.get("plain_names", True))
+    serialization = manifest.get("serialization", "plain" if plain_names else "xlfn")
+    manifest_note = manifest.get("manifest_note")
+    recipes_index = manifest.get("recipes_index") or {}
+
+    chunks_by_id = {c["chunk"]: c for c in manifest["chunks"]}
+    collected = {}           # slug -> {key: (entry, payload)}
+    per_workbook = []
+    sheet_canary_failures = []
+    setup_failures = []
+    n_sheet_canaries = 0
+    volatile_values = {}
+    meta_arith = {}
+    n_checks = 0
+
+    for path in sorted(export_paths):
+        wb_id = _multisheet_id_from_path(path, manifest)
+        chunk = chunks_by_id[wb_id]
+        wb = openpyxl.load_workbook(path, data_only=True)
+
+        missing = set(chunk["sheets"]) - set(wb.sheetnames)
+        if missing:
+            raise SystemExit(
+                f"{os.path.basename(path)} claims to be {wb_id} but is missing "
+                f"{len(missing)} of its sheets ({sorted(missing)}). Wrong file "
+                f"for this workbook, or the manifest is stale -- rebuild.")
+
+        if META_SHEET in wb.sheetnames:
+            meta = wb[META_SHEET]
+            volatile_values[wb_id] = meta[META_VOLATILE_CELL].value
+            meta_arith[wb_id] = meta[META_ARITH_CELL].value
+        else:                                   # cannot happen: checked above
+            volatile_values[wb_id] = None
+            meta_arith[wb_id] = None
+
+        rec = chunk["recipes"][0]
+        entry = rec["checks"][0]
+        ws = wb[entry["sheet"]]
+        n_sheet_canaries += 1
+        n_checks += 1
+
+        canary_val = ws[CANARY_ANCHOR].value
+        canary_ok = canary_val == CANARY_ARITH_EXPECTED
+        if not canary_ok:
+            sheet_canary_failures.append(
+                {"chunk": wb_id, "sheet": entry["sheet"], "slug": rec["slug"],
+                 "key": entry["key"], "value": canary_val})
+
+        bad_setup = _setup_intact_failures(wb, entry)
+        if bad_setup:
+            setup_failures.append({"chunk": wb_id, "slug": rec["slug"],
+                                   "key": entry["key"], "cells": bad_setup[:10]})
+
+        raw = None if entry["check_range"] else ws[entry["anchor"]].value
+        try:
+            actual = _read_check_value(ws, entry)
+            ok = compare_check(entry["expected"], actual)
+        except Exception as e:  # noqa: BLE001 -- report, never abort
+            actual = f"ERR {e}"
+            ok = False
+        ok = bool(ok)
+
+        notes = _readback_artifact_notes(entry["expected"], raw, actual)
+        if not canary_ok:
+            notes.insert(0, "UNTRUSTED_RECALC: per-sheet canary failed on this "
+                            "workbook's formula sheet")
+        if bad_setup:
+            notes.insert(0, f"SETUP_ALTERED: {len(bad_setup)} setup literal(s) did "
+                            f"not survive the round-trip (e.g. {bad_setup[0]}) -- "
+                            f"this check's inputs were not the recipe's, so its "
+                            f"result says nothing about the formula")
+        if entry.get("differs_from_lo_serialization"):
+            notes.append(
+                "NOTE: written with the PLAIN function name; the LibreOffice "
+                "reference run executed the _xlfn. storage form of this formula, "
+                "so the two runs are not byte-identical inputs")
+        if not ok:
+            notes.append(f"MISMATCH vs expected: expected {entry['expected']!r}, "
+                         f"got {actual!r}")
+
+        payload = {
+            "key": entry["key"],
+            "label": entry["label"],
+            "formula": entry["formula_display"],
+            "formula_stored_xlsx": entry["formula_stored_xlsx"],
+            "serialization": entry.get("serialization", serialization),
+            "expected": entry["expected"],
+            "actual": actual,
+            "verified": ok,
+            "sheet": entry["sheet"],
+            "workbook": chunk["file"],
+            "data_sheets": entry.get("data_sheets") or [],
+            "canary_ok_this_sheet": canary_ok,
+            "setup_intact": not bad_setup,
+            "notes": "; ".join(notes) if notes else None,
+        }
+        if entry.get("engines"):
+            payload["engines"] = entry["engines"]
+
+        collected.setdefault(rec["slug"], {})[entry["key"]] = (entry, payload)
+        per_workbook.append({
+            "chunk": wb_id,
+            "export_file": os.path.basename(path),
+            "slug": rec["slug"],
+            "key": entry["key"],
+            "n_recipes": 1,
+            "n_checks": 1,
+        })
+
+    # ---- assemble complete recipes only --------------------------------
+    recipes_out = {}
+    incomplete = []
+    for slug, got in sorted(collected.items()):
+        want = list((recipes_index.get(slug) or {}).get("keys") or sorted(got))
+        missing_keys = [k for k in want if k not in got]
+        if missing_keys:
+            incomplete.append({"slug": slug, "have": len(got), "want": len(want),
+                               "missing": missing_keys})
+            continue
+        main = None
+        variants = {}
+        extra = []
+        recipe_ok = True
+        for key in want:
+            entry, payload = got[key]
+            if not payload["verified"]:
+                recipe_ok = False
+            if entry["kind"] == "main":
+                main = payload
+            elif entry["kind"] == "extra":
+                extra.append(payload)
+            else:
+                variants.setdefault(
+                    entry["variant_index"],
+                    {"heading": entry["heading"], "checks": []},
+                )["checks"].append(payload)
+        if main is None:      # cannot happen for a manifest this tool wrote
+            raise SystemExit(f"{slug}: manifest has no 'main' check")
+        record = {
+            "verified": recipe_ok,
+            "engine": "Google Sheets",
+            "engine_label": engine_label,
+            "serialization": serialization,
+            "multisheet": True,
+            "key": main["key"],
+            "formula": main["formula"],
+            "formula_stored_xlsx": main["formula_stored_xlsx"],
+            "expected": main["expected"],
+            "actual": main["actual"],
+            "main_verified": main["verified"],
+            "sheet": main["sheet"],
+            "workbook": main["workbook"],
+            "data_sheets": main["data_sheets"],
+            "canary_ok_this_sheet": main["canary_ok_this_sheet"],
+            "setup_intact": main["setup_intact"],
+            "notes": main["notes"],
+        }
+        if variants:
+            record["variants"] = [variants[i] for i in sorted(variants)]
+        if extra:
+            record["extra_checks"] = extra
+        recipes_out[slug] = record
+
+    arith_ok = (not sheet_canary_failures
+                and n_sheet_canaries > 0
+                and all(v == CANARY_ARITH_EXPECTED for v in meta_arith.values()))
+
+    canary = {
+        "arithmetic_formula": CANARY_ARITH_FORMULA,
+        "arithmetic_expected": CANARY_ARITH_EXPECTED,
+        "arithmetic_actual": (CANARY_ARITH_EXPECTED if arith_ok
+                              else (sheet_canary_failures[0]["value"]
+                                    if sheet_canary_failures else None)),
+        "arithmetic_ok": arith_ok,
+        "arithmetic_sheets_checked": n_sheet_canaries,
+        "arithmetic_sheet_failures": sheet_canary_failures[:20],
+        "meta_arithmetic_per_chunk": meta_arith,
+        "setup_intact_failures": setup_failures[:20],
+        "volatile_formula": "=NOW()",
+        "volatile_per_chunk": {k: str(v) for k, v in volatile_values.items()},
+        "now_differs_across_runs": None,
+        "method": (
+            "One workbook per check. openpyxl writes formulas with NO cached <v> "
+            "value, so each uploaded workbook contains zero cached results. "
+            "Google Drive's auto-conversion to a Google Sheet recalculates every "
+            "formula with Google's engine; exporting back to .xlsx carries those "
+            f"values out. The deterministic canary =1111+2222 in {CANARY_ANCHOR} "
+            f"of each workbook's FORMULA sheet reading back exactly "
+            f"{CANARY_ARITH_EXPECTED} proves genuine computation -- without "
+            "recalculation the cell would read back blank (None). The canary is "
+            "deliberately NOT written to the data tabs, whose whole columns and "
+            "3-D spans these checks aggregate; those tabs are proven instead by "
+            "reading their setup literals back unchanged (setup_intact). The "
+            "volatile =NOW() canary is recorded per workbook as corroboration, "
+            "but a single Drive import yields one timestamp per workbook, so no "
+            "cross-run volatile comparison is possible: now_differs_across_runs "
+            "is null by design."
+        ),
+        "engine_label": engine_label,
+    }
+
+    stats = {"chunks": per_workbook,
+             "n_recipes": len(recipes_out),
+             "n_checks": n_checks,
+             "incomplete": incomplete,
+             "setup_failures": setup_failures,
+             "serialization": serialization,
+             "manifest_note": manifest_note}
+    return recipes_out, canary, arith_ok, stats
+
+
+# --------------------------------------------------------------------------
+# selftest-recipes-multisheet
+# --------------------------------------------------------------------------
+#
+# WHY THIS ONE DOES NOT DRIVE LIBREOFFICE
+# ---------------------------------------
+# `selftest-recipes` converts its chunks with soffice and then proves the
+# recovered values equal results/recipes-verified.json. That works there
+# because every check in its slice is one LibreOffice ran. It would NOT work
+# here: three of these checks exist to assert LibreOffice-syntax failures
+# (#NAME?) and one asserts a #REF! that LibreOffice's IFERROR did not trap --
+# behaviour that is the ENGINE's, not the harness's, and re-deriving it would
+# prove nothing about the plumbing while making the test depend on which
+# LibreOffice build happens to be installed.
+#
+# So this selftest synthesizes the export instead: it writes each check's
+# expected value into the anchor of the workbook the builder just produced,
+# stamps the canaries, and pushes the result through the REAL ingest path.
+# What that proves is exactly what is in doubt -- that the right formula is on
+# the right sheet at the right anchor with the right tabs beside it, that
+# ingest reads it back into the right recipe/variant/extra slot, that the
+# merge preserves every recipe it did not touch, and that a broken canary is
+# caught rather than shrugged off. It proves nothing about any engine, and
+# claims nothing about one.
+
+def _simulate_multisheet_export(src_path, entry, dest_path, value,
+                                canary_value=CANARY_ARITH_EXPECTED,
+                                meta_arith_value=CANARY_ARITH_EXPECTED):
+    """Write the workbook Drive WOULD hand back if Sheets computed `value`.
+
+    Formulas become their results, the canaries become their computed
+    constants, `_meta!A1` becomes a real timestamp, and the data tabs are left
+    exactly as the builder wrote them (literals survive a round-trip, which is
+    the property `setup_intact` checks). Nothing here touches Drive or
+    LibreOffice."""
+    wb = openpyxl.load_workbook(src_path)
+    ws = wb[entry["sheet"]]
+    if entry["check_range"]:
+        grid = cell_addrs_in_range(entry["check_range"])
+        flat = [addr for row in grid for addr in row]
+        vals = list(value) if isinstance(value, (list, tuple)) else [value]
+        for addr in flat:
+            ws[addr] = None
+        for addr, v in zip(flat, vals):
+            ws[addr] = v
+    else:
+        ws[entry["anchor"]] = value
+    ws[CANARY_ANCHOR] = canary_value
+    meta = wb[META_SHEET]
+    meta[META_VOLATILE_CELL] = datetime.now(timezone.utc).replace(tzinfo=None)
+    meta[META_ARITH_CELL] = meta_arith_value
+    wb.save(dest_path)
+    return dest_path
+
+
+def cmd_selftest_recipes_multisheet(args):
+    """build-recipes-multisheet -> synthesized export -> ingest-recipes,
+    with four assertions that each cover one way this could go wrong.
+
+    Never writes inside results/ and never uploads anything."""
+    failures = []
+
+    def _check(label, cond, detail=""):
+        print(f"  {'PASS' if cond else 'FAIL'}  {label}"
+              + (f"   {detail}" if detail else ""))
+        if not cond:
+            failures.append(f"{label}{(' -- ' + detail) if detail else ''}")
+
+    args.engine = getattr(args, "engine", GOOGLE_SHEETS)
+    print("=== selftest-recipes-multisheet: build ===")
+    manifest = cmd_build_recipes_multisheet(args)
+    chunkdir = os.path.abspath(args.outdir)
+
+    out = os.path.abspath(args.out)
+    if os.path.commonpath([out, os.path.abspath(RESULTS_DIR)]) == \
+            os.path.abspath(RESULTS_DIR):
+        sys.exit(f"selftest-recipes-multisheet refuses to write inside results/ "
+                 f"({out}). These are synthesized values, not engine output.")
+
+    label = args.engine_label
+    with tempfile.TemporaryDirectory() as tmp:
+        export_dir = os.path.join(tmp, "exports")
+        os.makedirs(export_dir)
+
+        # ---- 1. round-trip every workbook through the real ingest path ----
+        print("\n=== selftest-recipes-multisheet: synthesized export ===")
+        exports = []
+        entries = {}
+        for chunk in manifest["chunks"]:
+            entry = chunk["recipes"][0]["checks"][0]
+            entries[chunk["chunk"]] = (chunk, entry)
+            dest = os.path.join(export_dir, f"{chunk['chunk']}-export.xlsx")
+            _simulate_multisheet_export(
+                os.path.join(chunkdir, chunk["file"]), entry, dest,
+                entry["expected"])
+            exports.append(dest)
+        print(f"  synthesized {len(exports)} export workbook(s) "
+              f"(expected values written into each anchor)")
+
+        print("\n=== selftest-recipes-multisheet: ingest ===")
+        recipes, canary, trusted, stats = ingest_multisheet_exports(
+            exports, manifest, label)
+
+        n_expected_recipes = manifest["n_recipes"]
+        n_expected_checks = manifest["n_checks"]
+        _check("every workbook ingested",
+               stats["n_checks"] == n_expected_checks,
+               f"{stats['n_checks']} / {n_expected_checks} check(s)")
+        _check("every multi-sheet recipe assembled",
+               len(recipes) == n_expected_recipes,
+               f"{len(recipes)} / {n_expected_recipes} recipe(s): "
+               f"{sorted(recipes)}")
+        _check("no recipe left incomplete", not stats["incomplete"],
+               str(stats["incomplete"]))
+        _check("every data tab's setup literals survived",
+               not stats["setup_failures"], str(stats["setup_failures"][:2]))
+        _check("deterministic canary OK on every workbook", canary["arithmetic_ok"],
+               f"{canary['arithmetic_sheets_checked']} formula sheet(s) checked")
+        _check("run marked trusted", trusted is True)
+        bad = [(s, k) for s, r in recipes.items()
+               for k, p in result_checks_by_key(r).items() if not p.get("verified")]
+        _check("every check evaluated to its expected value", not bad, str(bad[:5]))
+        # The mapping proof: each stored payload must carry back the formula the
+        # manifest says lives at that key. A transposed anchor or a check written
+        # to the wrong sheet shows up here and nowhere else.
+        wrong = []
+        for chunk, entry in entries.values():
+            slug = chunk["recipes"][0]["slug"]
+            payload = result_checks_by_key(recipes[slug]).get(entry["key"])
+            if payload is None or payload["formula"] != entry["formula_display"]:
+                wrong.append((slug, entry["key"]))
+        _check("every check landed under its own key with its own formula",
+               not wrong, str(wrong[:5]))
+        _check("volatile =NOW() recorded per workbook",
+               len(canary["volatile_per_chunk"]) == n_expected_checks)
+
+        # ---- 2. the merge preserves every recipe it did not touch ----------
+        print("\n=== selftest-recipes-multisheet: merge preservation ===")
+        merge_target = os.path.join(tmp, "merge-into.json")
+        if os.path.exists(DEFAULT_RECIPE_RESULTS_PATH):
+            shutil.copyfile(DEFAULT_RECIPE_RESULTS_PATH, merge_target)
+            with open(merge_target) as f:
+                before = json.load(f)
+            prev_recipes = before.get("recipes") or {}
+            prev_label = before.get("engine_label")
+            prev_json = {k: json.dumps(v, sort_keys=True, default=str)
+                         for k, v in prev_recipes.items()}
+
+            # (a) the engine-date label guard fires without --allow-label-change
+            try:
+                write_recipe_results(
+                    merge_target, recipes, canary, trusted,
+                    "Google Sheets (Drive import, 1999-01-01)",
+                    allow_label_change=False,
+                    engine=RECIPE_SELFTEST_ENGINE_ID,
+                    recalc_method=RECIPE_MS_RECALC_METHOD)
+                guarded = False
+            except SystemExit:
+                guarded = True
+            _check("engine-label change refused without --allow-label-change",
+                   guarded)
+            with open(merge_target) as f:
+                after_guard = json.load(f)
+            _check("refused merge left the target file untouched",
+                   json.dumps(after_guard, sort_keys=True, default=str)
+                   == json.dumps(before, sort_keys=True, default=str))
+
+            # (b) the real merge, under the file's own label
+            write_recipe_results(
+                merge_target, recipes, canary, trusted, prev_label,
+                allow_label_change=False,
+                engine=RECIPE_SELFTEST_ENGINE_ID,
+                recalc_method=RECIPE_MS_RECALC_METHOD,
+                serialization=stats["serialization"],
+                manifest_note=stats["manifest_note"])
+            with open(merge_target) as f:
+                after = json.load(f)
+            after_recipes = after.get("recipes") or {}
+            changed = [k for k, blob in prev_json.items()
+                       if json.dumps(after_recipes.get(k), sort_keys=True,
+                                     default=str) != blob]
+            _check(f"all {len(prev_json)} pre-existing recipe(s) preserved "
+                   f"byte-identical", not changed, str(changed[:5]))
+            _check("merged file holds the old recipes plus the new ones",
+                   len(after_recipes) == len(prev_json) + len(recipes),
+                   f"{len(after_recipes)} = {len(prev_json)} + {len(recipes)}")
+            _check("trust is the AND of both runs",
+                   after["trusted"] == (bool(before.get("trusted", False))
+                                        and trusted))
+        else:
+            _check(f"{DEFAULT_RECIPE_RESULTS_PATH} exists to merge into", False,
+                   "cannot run the merge-preservation assertions")
+
+        # ---- 3. a canary failure is caught --------------------------------
+        print("\n=== selftest-recipes-multisheet: canary failure detection ===")
+        bad_dir = os.path.join(tmp, "bad-exports")
+        os.makedirs(bad_dir)
+        bad_exports = []
+        first_id = manifest["chunks"][0]["chunk"]
+        for chunk in manifest["chunks"]:
+            entry = chunk["recipes"][0]["checks"][0]
+            dest = os.path.join(bad_dir, f"{chunk['chunk']}-export.xlsx")
+            # Exactly what an un-recalculated import looks like: openpyxl never
+            # wrote a cached value, so the canary comes back blank.
+            _simulate_multisheet_export(
+                os.path.join(chunkdir, chunk["file"]), entry, dest,
+                entry["expected"],
+                canary_value=(None if chunk["chunk"] == first_id
+                              else CANARY_ARITH_EXPECTED))
+            bad_exports.append(dest)
+        bad_recipes, bad_canary, bad_trusted, bad_stats = \
+            ingest_multisheet_exports(bad_exports, manifest, label)
+        _check("blank canary marks the run untrusted", bad_trusted is False)
+        _check("the failing workbook is named",
+               len(bad_canary["arithmetic_sheet_failures"]) == 1
+               and bad_canary["arithmetic_sheet_failures"][0]["chunk"] == first_id,
+               str(bad_canary["arithmetic_sheet_failures"][:1]))
+        failed_entry = manifest["chunks"][0]["recipes"][0]["checks"][0]
+        failed_slug = manifest["chunks"][0]["recipes"][0]["slug"]
+        note = (result_checks_by_key(bad_recipes[failed_slug])
+                .get(failed_entry["key"], {}).get("notes") or "")
+        _check("the affected check carries UNTRUSTED_RECALC",
+               "UNTRUSTED_RECALC" in note, note[:90])
+
+        # ---- 4. a half-downloaded recipe is refused, not half-written -----
+        print("\n=== selftest-recipes-multisheet: partial-download guard ===")
+        multi = max(manifest["recipes_index"].items(),
+                    key=lambda kv: kv[1]["n_checks"])
+        multi_slug = multi[0]
+        drop = [c["chunk"] for c in manifest["chunks"]
+                if c["recipes"][0]["slug"] == multi_slug][:1]
+        partial = [p for p in exports
+                   if not any(d in os.path.basename(p) for d in drop)]
+        part_recipes, _pc, _pt, part_stats = ingest_multisheet_exports(
+            partial, manifest, label)
+        _check(f"{multi_slug} (missing 1 of {multi[1]['n_checks']} workbooks) "
+               f"is NOT written", multi_slug not in part_recipes)
+        _check("the incomplete recipe is reported",
+               any(i["slug"] == multi_slug for i in part_stats["incomplete"]),
+               str(part_stats["incomplete"][:1]))
+        _check("the complete recipes still ingest",
+               len(part_recipes) == n_expected_recipes - 1,
+               f"{len(part_recipes)} / {n_expected_recipes - 1}")
+
+        # ---- scratch results file, for a human to read -------------------
+        if os.path.exists(out):
+            os.remove(out)          # scratch: always a fresh write, never a merge
+        write_recipe_results(out, recipes, canary, trusted, args.engine_label,
+                             allow_label_change=True,
+                             engine=RECIPE_SELFTEST_ENGINE_ID,
+                             recalc_method=(
+                                 "selftest plumbing check: expected values "
+                                 "synthesized into the builder's own workbooks "
+                                 "-- NOT Google Sheets, NOT LibreOffice"),
+                             serialization=stats["serialization"],
+                             manifest_note=stats["manifest_note"])
+
+    print(f"\nWorkbooks / checks     : {manifest['n_workbooks']} / {n_expected_checks}")
+    print(f"Recipes assembled      : {len(recipes)} ({', '.join(sorted(recipes))})")
+    print(f"Wrote scratch results -> {out} (synthesized values; plumbing proof only)")
+    if failures:
+        print(f"\nselftest-recipes-multisheet FAILED: {len(failures)} assertion(s)")
+        for f in failures:
+            print(f"  - {f}")
+        sys.exit(1)
+    print("\nselftest-recipes-multisheet PASSED: every check round-tripped to its "
+          "own key, the merge preserved every untouched recipe, the engine-label "
+          "guard held, a broken canary was caught, and a half-downloaded recipe "
+          "was refused.")
+
+
+# --------------------------------------------------------------------------
 
 def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -1757,11 +2730,19 @@ def main():
     ir = sub.add_parser("ingest-recipes",
                         help="read exported recipe .xlsx back into "
                              "results/recipes-verified-sheets.json")
-    ir.add_argument("--export", nargs="+", required=True, metavar="XLSX",
-                    help="exported workbook(s), named <chunk-id>-export.xlsx")
+    ir.add_argument("--export", nargs="+", metavar="XLSX", default=None,
+                    help="exported workbook(s). Shared-workbook builds are named "
+                         "<chunk-id>-export.xlsx; multi-sheet builds keep the "
+                         "uploaded name, which already carries its ms-NNN id")
+    ir.add_argument("--export-dir", nargs="+", metavar="DIR", default=None,
+                    help="directory/-ies of exported .xlsx files to ingest (every "
+                         "*.xlsx in them). This is the usual way to ingest a "
+                         "MULTI-SHEET build, which produces one export per check")
     ir.add_argument("--chunkdir", default=DEFAULT_RECIPE_CHUNK_DIR,
-                    help="directory holding the recipe manifest.json "
-                         "(default %(default)s)")
+                    help="directory holding the recipe manifest.json (default "
+                         "%(default)s; point it at recipe_chunks_multisheet/ to "
+                         "ingest a multi-sheet build -- the manifest's \"mode\" "
+                         "selects the reader, no flag needed)")
     ir.add_argument("--manifest", help="explicit path to manifest.json")
     ir.add_argument("--out", default=DEFAULT_RECIPE_RESULTS_PATH,
                     help="results file (default %(default)s)")
@@ -1772,6 +2753,73 @@ def main():
                     help="permit merging into a file recorded under a different "
                          "engine label (records both in engine_label_history)")
     ir.set_defaults(func=cmd_ingest_recipes)
+
+    bm = sub.add_parser(
+        "build-recipes-multisheet",
+        help="emit ONE workbook per check for the six MULTI-SHEET recipes that "
+             "`build-recipes` skips",
+        description="The six recipes whose checks declare setup_sheets cannot "
+                    "share a workbook: their formulas name the data tabs "
+                    "literally (and one deliberately names a tab that must NOT "
+                    "exist), two tabs called Data with different contents "
+                    "collide, and a 3-D reference depends on tab ORDER. This "
+                    "command gives each CHECK its own workbook holding exactly "
+                    "the tabs it asks for, named and ordered exactly as the "
+                    "recipe declares them -- nothing renamed, nothing rewritten. "
+                    "Cost: one Drive round-trip per check.")
+    bm.add_argument("--only", nargs="+", metavar="SLUG",
+                    help="build only these recipe slugs (default: all six "
+                         "multi-sheet recipes)")
+    bm.add_argument("--outdir", default=DEFAULT_RECIPE_MS_CHUNK_DIR,
+                    help="output directory (default %(default)s)")
+    bm.add_argument("--plain-names", dest="plain_names", action="store_true",
+                    default=True,
+                    help="write every formula EXACTLY as authored, with no "
+                         "_xlfn. storage-form translation. THE DEFAULT, for the "
+                         "same reason as build-recipes: Sheets maps bare modern "
+                         "names on xlsx import, and a recipe is by definition "
+                         "the formula a user types")
+    bm.add_argument("--xlfn-names", dest="plain_names", action="store_false",
+                    help="opt out of --plain-names and write the OOXML storage "
+                         "form instead")
+    bm.add_argument("--manifest-note", default=None, metavar="TEXT",
+                    help="free-text note stored in the manifest and carried into "
+                         "ingest provenance")
+    bm.add_argument("--engine", default=GOOGLE_SHEETS,
+                    choices=[GOOGLE_SHEETS, LIBREOFFICE],
+                    help="engine the workbooks are built FOR; checks carrying an "
+                         "\"engines\" list that excludes it are left out "
+                         "(default %(default)s)")
+    bm.set_defaults(func=cmd_build_recipes_multisheet)
+
+    sm = sub.add_parser(
+        "selftest-recipes-multisheet",
+        help="dry run of the multi-sheet pipeline: build + SYNTHESIZED export + "
+             "ingest, with merge/canary/partial-download assertions",
+        description="Builds the per-check workbooks, writes each check's "
+                    "expected value into the workbook the builder just made "
+                    "(that is the simulated Drive export), and pushes the result "
+                    "through the real ingest path. Proves the cell mapping, the "
+                    "keyed merge (every pre-existing recipe byte-identical), the "
+                    "engine-label guard, canary-failure detection and the "
+                    "partial-download refusal. Executes NO engine: it neither "
+                    "drives LibreOffice nor touches Drive, and claims nothing "
+                    "about either engine's behaviour.")
+    sm.add_argument("--only", nargs="+", metavar="SLUG", default=None)
+    sm.add_argument("--outdir", default=RECIPE_MS_SELFTEST_CHUNK_DIR)
+    sm.add_argument("--out", default=RECIPE_MS_SELFTEST_RESULTS_PATH,
+                    help="scratch results path (never inside results/ -- these "
+                         "are synthesized values, not engine output)")
+    sm.add_argument("--engine-label",
+                    default="SELFTEST (synthesized values via simulated export "
+                            "- NOT Google Sheets)")
+    sm.add_argument("--plain-names", dest="plain_names", action="store_true",
+                    default=True, help=argparse.SUPPRESS)
+    sm.add_argument("--xlfn-names", dest="plain_names", action="store_false",
+                    help="dry-run the --xlfn-names build path instead")
+    sm.add_argument("--manifest-note", default=None, metavar="TEXT",
+                    help=argparse.SUPPRESS)
+    sm.set_defaults(func=cmd_selftest_recipes_multisheet, engine=GOOGLE_SHEETS)
 
     sr = sub.add_parser("selftest-recipes",
                         help="dry run of the recipe pipeline: build + "
