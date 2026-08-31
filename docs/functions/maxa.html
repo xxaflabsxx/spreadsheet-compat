@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MAXA works in Excel &amp; Sheets (docs), LibreOffice (tested)</title>
-<meta name="description" content="All 7 executed test cases for MAXA match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>MAXA gives different results in Google Sheets vs Excel (executed)</title>
+<meta name="description" content="Sheets: direct text argument counts as zero returns #… LibreOffice matches Exce… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/maxa.html">
-<meta property="og:title" content="MAXA works in Excel &amp; Sheets (docs), LibreOffice (tested)">
-<meta property="og:description" content="All 7 executed test cases for MAXA match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="MAXA gives different results in Google Sheets vs Excel (executed)">
+<meta property="og:description" content="Sheets: direct text argument counts as zero returns #… LibreOffice matches Exce… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/maxa.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>MAXA</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
 <p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>MAXA</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>MAXA</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -424,9 +424,66 @@ MAXA&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+<h2 class="section-title">Why isn&rsquo;t MAXA working in Google Sheets?</h2>
+
+<p><code>MAXA</code> runs in Google Sheets, but our executed cases show it does not match
+Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
+formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
+against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=MAXA(&#34;abc&#34;,-5)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        Verbatim from Microsoft&#39;s MAXA page: &#39;Arguments that contain text or FALSE evaluate as 0 (zero)&#39;. Under that rule the literal &#34;abc&#34; becomes 0, which is larger than -5. (MAX&#39;s page carries the opposite rule -- text that cannot be translated into numbers causes an error -- so this case checks that an engine applies the A-variant rule and not MAX&#39;s); MISMATCH vs expected: expected 0, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -436,6 +493,73 @@ MAXA&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=MAXA(A1:A5)</td>
+  <td>Microsoft&#39;s documented example: the largest value in a range where TRUE is counted as 1</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Excel documents MAXA as evaluating a logical TRUE in a range as 1, so the answer is 1 rather than 0.5; MAX over the same range would return 0.5 because MAX ignores logicals in ranges</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MAXA(A1:A3)</td>
+  <td>DIVERGENCE PROBE: all-negative numbers plus a text cell -- Excel counts the text as 0, which becomes the maximum</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft&#39;s MAXA page carries two remarks that contradict each other for this exact input: &#39;Arguments that contain text or FALSE evaluate as 0 (zero)&#39; and, one line later, &#39;Empty cells and text values in the array or reference are ignored&#39;. We assert the text-evaluates-as-0 reading, because AVERAGEA&#39;s page carries the identical contradictory pair and settles it with a worked example (28/5 = 5.6) in which range text counts as 0. Under that reading the answer is 0 (0 &gt; -3); under the &#39;ignored&#39; reading it would be -3. The point of this case is to record which reading each engine actually implements</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MAXA(A1:A3)</td>
+  <td>FALSE in a range is evaluated as 0, so it wins over negative numbers</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Excel documents logical FALSE as 0 for MAXA; 0 &gt; -1 so the maximum is 0</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MAXA(TRUE,0.5)</td>
+  <td>A logical typed directly as an argument is also coerced (TRUE -&gt; 1)</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Excel documents that MAXA evaluates TRUE as 1 whether it comes from a range or is typed as an argument</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MAXA(A1:A4)</td>
+  <td>Truly empty cells are ignored (they are not counted as 0)</td>
+  <td class="result mono">-2</td>
+  <td class="result mono">-2<br><span class="category-tag">Excel documents empty cells in a reference as ignored by MAXA (this remark is not contradicted elsewhere on the page, unlike the text remark), so the maximum is the largest actual number, -2, and NOT 0</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MAXA(&#34;abc&#34;,-5)</td>
+  <td>A non-numeric string typed directly as an argument is documented as evaluating to 0, which then wins</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">0<br><span class="category-tag">Verbatim from Microsoft&#39;s MAXA page: &#39;Arguments that contain text or FALSE evaluate as 0 (zero)&#39;. Under that rule the literal &#34;abc&#34; becomes 0, which is larger than -5. (MAX&#39;s page carries the opposite rule -- text that cannot be translated into numbers causes an error -- so this case checks that an engine applies the A-variant rule and not MAX&#39;s)</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MAXA(NA())</td>
+  <td>An error value passed as an argument propagates instead of being coerced</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Error values are not among the things MAXA coerces; NA() produces #N/A and that error is the result of the whole expression</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

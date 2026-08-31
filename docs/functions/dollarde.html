@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DOLLARDE matches Excel in LibreOffice except error codes (tested)</title>
-<meta name="description" content="4/6 match; zero fraction div0 returns #VALUE!, Excel: #DIV/0! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="4/6 match; zero fraction div0 returns #VALUE!, Excel: #DIV/0! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/dollarde.html">
 <meta property="og:title" content="DOLLARDE matches Excel in LibreOffice except error codes (tested)">
-<meta property="og:description" content="4/6 match; zero fraction div0 returns #VALUE!, Excel: #DIV/0! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="4/6 match; zero fraction div0 returns #VALUE!, Excel: #DIV/0! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/dollarde.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>DOLLARDE</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>DOLLARDE</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -443,6 +443,18 @@ against the failing cases above before assuming your data is wrong.</p>
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -485,6 +497,65 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(DOLLARDE(1.02,16),7)</td>
+  <td>Microsoft&#39;s documented example: 1 and 2/16 expressed in fractional notation converts to 1.125</td>
+  <td class="result mono">1.125</td>
+  <td class="result mono">1.125<br><span class="category-tag">Excel documents this example&#39;s result as 1.125. The fractional part .02 is read as 2 sixteenths: 1 + 2/16 = 1.125</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(DOLLARDE(1.1,32),7)</td>
+  <td>Documented example: 1.1 in thirty-seconds notation is 1 and 10/32</td>
+  <td class="result mono">1.3125</td>
+  <td class="result mono">1.3125<br><span class="category-tag">Excel documents this example&#39;s result as 1.3125. The fractional digits are padded to the width of the fraction denominator: .1 means 10 thirty-seconds, so 1 + 10/32 = 1.3125</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(DOLLARDE(1.02,16.9),7)</td>
+  <td>DIVERGENCE PROBE: a non-integer fraction is documented as truncated to an integer</td>
+  <td class="result mono">1.125</td>
+  <td class="result mono">1.125<br><span class="category-tag">Verbatim from Microsoft: &#39;If fraction is not an integer, it is truncated.&#39; Truncating 16.9 to 16 reproduces the first documented example exactly, 1.125. An engine that rounded 16.9 to 17, or used it as-is, would return a different value</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(DOLLARDE(-1.02,16),7)</td>
+  <td>A negative fractional dollar keeps its sign through the conversion</td>
+  <td class="result mono">-1.125</td>
+  <td class="result mono">-1.125<br><span class="category-tag">The magnitude converts the same way as the documented positive example and the sign is preserved: -(1 + 2/16) = -1.125</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DOLLARDE(1.02,0)</td>
+  <td>A fraction denominator of zero cannot be divided by</td>
+  <td class="result mono">#DIV/0!</td>
+  <td class="result mono">#DIV/0!<br><span class="category-tag">Verbatim from Microsoft: &#39;If fraction is greater than or equal to 0 and less than 1, DOLLARDE returns the #DIV/0! error value.&#39; Note the band is 0 &lt;= fraction &lt; 1, which is worded more widely than DOLLARFR&#39;s page (which names only fraction = 0) even though truncation makes the two equivalent in practice</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DOLLARDE(1.02,-4)</td>
+  <td>A negative fraction denominator is outside the documented domain</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents #NUM! if fraction is less than 0</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

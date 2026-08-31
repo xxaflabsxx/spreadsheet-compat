@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ISPMT matches Excel in LibreOffice except error codes (tested)</title>
-<meta name="description" content="5/6 match; zero nper div0 returns #NUM!, Excel: #DIV/0! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="5/6 match; zero nper div0 returns #NUM!, Excel: #DIV/0! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/ispmt.html">
 <meta property="og:title" content="ISPMT matches Excel in LibreOffice except error codes (tested)">
-<meta property="og:description" content="5/6 match; zero nper div0 returns #NUM!, Excel: #DIV/0! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="5/6 match; zero nper div0 returns #NUM!, Excel: #DIV/0! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/ispmt.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ISPMT</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ISPMT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -443,6 +443,18 @@ against the failing cases above before assuming your data is wrong.</p>
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -477,6 +489,65 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(ISPMT(0.1/12,1,3*12,8000000),4)</td>
+  <td>Microsoft&#39;s documented example: interest paid in the first month of an 8,000,000 loan at 10% over three years</td>
+  <td class="result mono">-64814.8148</td>
+  <td class="result mono">-64814.8148<br><span class="category-tag">Microsoft&#39;s ISPMT page publishes no formula and no text example (its worked example is an image), and it contradicts itself on indexing: the argument table says per &#39;must be between 1 and Nper&#39; while Remarks says &#39;ISPMT counts each period beginning with zero, not with one&#39;. The even-principal formula ISPMT = pv * rate * (per/nper - 1) is confirmed by LibreOffice&#39;s own documented example (see the ISPMT_libreoffice_documented_example case) and reproduces Microsoft&#39;s own published figure of -64,814.8148 here: 8000000 * (0.1/12) * (1/36 - 1) = -64814.81481. Negative because it is cash paid out</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ISPMT(0.1,1,3,8000000),2)</td>
+  <td>Documented example: interest paid in the first year of the same loan on an annual schedule</td>
+  <td class="result mono">-533333.33</td>
+  <td class="result mono">-533333.33<br><span class="category-tag">Same formula on an annual schedule: 8000000 * 0.1 * (1/3 - 1) = -533333.3333, matching the -533,333.33 figure published for this example</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ISPMT(0.1,3,3,8000000),7)</td>
+  <td>DIVERGENCE PROBE: at per = nper the remaining balance is zero, so the interest is exactly zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">The documented formula pv*rate*(per/nper - 1) gives 8000000*0.1*(3/3 - 1) = 0. This is the clearest test of ISPMT&#39;s period indexing: an engine that treats per as 0-based, or that uses (1 - per/nper) with the opposite sign convention, will not return 0 here</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ISPMT(0.1,0,3,8000000),4)</td>
+  <td>At per = 0 the whole principal is still outstanding, so the interest is the full period charge</td>
+  <td class="result mono">-800000</td>
+  <td class="result mono">-800000<br><span class="category-tag">8000000 * 0.1 * (0/3 - 1) = -800000, i.e. one period&#39;s interest on the undiminished balance</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ISPMT(0.01,18,24,120000),7)</td>
+  <td>Cross-vendor check: LibreOffice&#39;s help page publishes a worked example for the same function</td>
+  <td class="result mono">-300</td>
+  <td class="result mono">-300<br><span class="category-tag">LibreOffice&#39;s Calc help documents ISPMT(Rate; Period; TotalPeriods; Invest) with the worked example =ISPMT(1%;18;24;120000) = -300. That is exactly pv * rate * (per/nper - 1) = 120000 * 0.01 * (18/24 - 1) = -300, so both vendors&#39; documentation agrees on the formula and on the sign convention</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISPMT(0.1,1,0,8000000)</td>
+  <td>A zero number of periods divides by zero inside the per/nper term</td>
+  <td class="result mono">#DIV/0!</td>
+  <td class="result mono">#DIV/0!<br><span class="category-tag">DERIVED, not quoted: Microsoft&#39;s ISPMT page documents no error conditions at all. The formula confirmed by both vendors&#39; worked examples divides per by nper, so nper = 0 is a division by zero and #DIV/0! is the consistent result</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
