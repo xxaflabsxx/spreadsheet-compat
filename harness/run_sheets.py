@@ -135,7 +135,11 @@ result is preserved byte-for-byte, generated_at / canary / recalc_method are
 refreshed to describe the most recent execution, and `trusted` becomes the
 AND of the previous file's flag and this run's -- a merge can only ever
 downgrade trust, never launder an untrusted ingest into a trusted file. Each
-merge appends to a top-level "subset_runs" list for auditability. Merging
+merge appends to a top-level "subset_runs" list for auditability. Each
+function block ingested is also stamped with its own "executed_at" UTC date
+(see harness/results_schema.py); functions the merge does not touch keep the
+date of the run that actually produced them, so refreshing the file-level
+generated_at can never re-date the rest of the corpus. Merging
 into a file recorded under a DIFFERENT engine label is refused unless
 --allow-label-change is passed (results executed on two different dates
 against a silently-updated hosted product should not be blended without a
@@ -191,6 +195,7 @@ from recipe_corpus import (  # noqa: E402
     uses_setup_sheets,
 )
 from xlfn_map import to_storage_formula_all  # noqa: E402
+from results_schema import function_cases, stamp_executed_at  # noqa: E402
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DEFAULT_CHUNK_DIR = os.path.join(REPO_ROOT, "harness", "sheets_chunks")
@@ -550,7 +555,7 @@ def ingest_exports(export_paths, manifest, engine_label):
 
     stats = {"chunks": per_chunk,
              "n_functions": len(function_results),
-             "n_cases": sum(len(v) for v in function_results.values()),
+             "n_cases": sum(len(function_cases(v)) for v in function_results.values()),
              "plain_names": plain_names,
              "serialization": serialization,
              "manifest_note": manifest_note}
@@ -564,6 +569,10 @@ def write_results(out_path, function_results, canary, trusted, engine_label,
     """Write (or incrementally merge into) a results file in the same schema
     results/libreoffice-*.json uses. See the module docstring."""
     generated_at = datetime.now(timezone.utc).isoformat()
+    # Per-function execution date: only the functions in THIS ingest get it.
+    # The merge below replaces those blocks wholesale and leaves every other
+    # function's executed_at exactly as the run that produced it recorded it.
+    stamp_executed_at(function_results, generated_at[:10])
     output = {
         "generated_at": generated_at,
         "engine": engine,
@@ -636,7 +645,7 @@ def write_results(out_path, function_results, canary, trusted, engine_label,
 def summarize(function_results):
     n_name_error = n_other_error = n_ok = 0
     for cases in function_results.values():
-        for r in cases.values():
+        for r in function_cases(cases).values():
             if r["error"] == "#NAME?":
                 n_name_error += 1
             elif r["error"]:
@@ -761,7 +770,7 @@ def cmd_selftest(args):
     print("\n=== 3 sample round-tripped values ===")
     shown = 0
     for fn in sorted(function_results):
-        for tid in sorted(function_results[fn]):
+        for tid in sorted(function_cases(function_results[fn])):
             r = function_results[fn][tid]
             print(f"  {tid}: {r['formula_display']}  ->  value={r['value']!r}  "
                   f"expected={r['expected']!r}  matched={r['matched_expected']}")

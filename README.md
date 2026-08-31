@@ -466,6 +466,31 @@ each merge appends to `subset_runs`. An export whose sheet list does not
 match the manifest chunk it claims to be is **rejected**, so an
 out-of-order upload can't be mapped against the wrong cells.
 
+### Per-function execution dates (`executed_at`)
+
+Because a subset run refreshes the file-level `generated_at`, that field
+says when the **file** was last written, not when any given function was
+executed. Every function block therefore carries its own date:
+
+```json
+"function_results": {
+  "ABS":  { "executed_at": "2026-07-29", "ABS_positive_number": { ... } },
+  "MIRR": { "executed_at": "2026-08-31", "MIRR_basic": { ... } }
+}
+```
+
+Merges replace whole function blocks, so a re-executed function brings the
+new date in and every untouched function keeps the date of the run that
+produced it. Anything printing a per-function "last tested" date must read
+`executed_at` and fall back to `generated_at` only for files written before
+this key existed; `scripts/check_honesty.py` fails the build if a function
+page's date does not match its `executed_at`. Consumers iterating a function
+block's test cases must skip the metadata key — `harness/results_schema.py`
+provides `function_cases()` for exactly that. The dates on existing files
+were reconstructed from git history by
+`scripts/backfill_executed_at.py` (one-off; its docstring documents how each
+date was derived and what that derivation cannot know).
+
 Error cells come back from Google's export as cached error strings
 (`#NUM!`, `#N/A`, `#NAME?`, `#REF!`, `#DIV/0!`, `#VALUE!`) and are handled
 exactly as the LO runner handles them, raw string kept verbatim. Sheets

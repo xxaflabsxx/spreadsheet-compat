@@ -46,6 +46,10 @@ from recipe_corpus import (  # noqa: E402
     iter_checks,
     result_checks_by_key,
 )
+# Per-function execution dates live inside each results-file function block.
+# function_cases() is how every case iteration must go: a raw .items() would
+# hand back the executed_at date string as if it were a test case.
+from results_schema import function_cases, function_executed_at  # noqa: E402
 
 # --------------------------------------------------------------------------
 # Config — change branding/deployment details here, nowhere else.
@@ -322,23 +326,40 @@ def classify_verdict(case_results, skip_ids=None):
     return "quirky"
 
 
-def engine_exec_header(engine_key, res_blob):
+def engine_exec_header(engine_key, res_blob, date):
     """Heading for one engine's executed test-case table.
 
     LibreOffice has a real pinnable build number, so it reads "LibreOffice
     Calc 25.8.7.3". Google Sheets is a rolling service with no version to
     pin, so it is identified by the DATE it was executed and by how — never
-    by pretending the label is a version string."""
+    by pretending the label is a version string.
+
+    `date` is THIS function's own execution date (results_schema.executed_at),
+    never the file-level generated_at: a subset run refreshes the file's date
+    without re-executing the rest of the corpus."""
     ver = res_blob.get("engine_version") or ""
-    date = iso_date(res_blob.get("generated_at"))
     if engine_key == "google_sheets":
         return f"Google Sheets (executed {date} via Drive import)"
     return f"{ENGINE_LABELS[engine_key]} {ver} (tested {date})"
 
 
-def engine_tested_cell(engine_key, res_blob):
-    """Support-matrix "Live-tested" cell for one engine."""
-    date = iso_date(res_blob.get("generated_at"))
+def sheets_run_label(entry):
+    """The dated Google Sheets run label for ONE function.
+
+    results/google-sheets.json carries a file-level label ("Google Sheets
+    (Drive import, 2026-08-31)") that names the most recent run. Individual
+    functions were executed by whichever run last covered them, so the
+    published per-function label carries that function's own executed_at --
+    otherwise a 21-function subset run re-labels the whole dataset."""
+    label = entry.get("version") or ""
+    date = entry.get("executed_at")
+    if not entry.get("tested") or not label or not date:
+        return entry.get("version")
+    return re.sub(r"\d{4}-\d{2}-\d{2}", date, label)
+
+
+def engine_tested_cell(engine_key, res_blob, date):
+    """Support-matrix "Live-tested" cell for one engine (this function's date)."""
     if engine_key == "google_sheets":
         return f"Yes (Drive import, {date})"
     return f"Yes ({res_blob.get('engine_version')}, {date})"
@@ -370,7 +391,11 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "tested": False,
                 "verdict": None,
                 "version": None,
+                # file-level provenance (when the results FILE was last written)
                 "generated_at": None,
+                # this function's own execution date -- the only thing any
+                # per-function "last tested" claim may be rendered from
+                "executed_at": None,
                 "cases": [],
                 "inconclusive_count": 0,
                 "exec_header": None,
@@ -378,27 +403,36 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
             }
 
             if fn_results:
+                # Cases only -- executed_at and any future per-function
+                # metadata must never be mistaken for a test case.
+                fn_cases = function_cases(fn_results)
+                # The date this function was executed. Falls back to the
+                # file-level generated_at only for results files written
+                # before per-function dates existed.
+                executed_at = function_executed_at(
+                    fn_results, iso_date(res_blob.get("generated_at"))
+                )
                 # Google Sheets only: mark cases whose result is an artifact of
                 # the Drive-import round trip rather than Sheets behaviour, and
                 # keep them out of the verdict, the quirk counts and the quirks
                 # page. See sheets_case_inconclusive() above.
                 inconclusive_by_id = {}
                 if ek == "google_sheets":
-                    for cid, cres in fn_results.items():
+                    for cid, cres in fn_cases.items():
                         reason = sheets_case_inconclusive(cres, entry["documented"])
                         if reason:
                             inconclusive_by_id[cid] = reason
 
                 merged_cases = []
                 for c in authored_cases or []:
-                    r = fn_results.get(c["id"])
+                    r = fn_cases.get(c["id"])
                     if not r:
                         continue
                     merged_cases.append(
                         {**c, **r, "inconclusive_reason": inconclusive_by_id.get(c["id"])}
                     )
                 verdict = classify_verdict(
-                    [{**v, "id": k} for k, v in fn_results.items()],
+                    [{**v, "id": k} for k, v in fn_cases.items()],
                     skip_ids=set(inconclusive_by_id),
                 )
                 entry.update(
@@ -406,11 +440,12 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     verdict=verdict,
                     version=res_blob.get("engine_version"),
                     generated_at=res_blob.get("generated_at"),
+                    executed_at=executed_at,
                     trusted=res_blob.get("trusted"),
                     cases=merged_cases,
                     inconclusive_count=len(inconclusive_by_id),
-                    exec_header=engine_exec_header(ek, res_blob),
-                    tested_cell=engine_tested_cell(ek, res_blob),
+                    exec_header=engine_exec_header(ek, res_blob, executed_at),
+                    tested_cell=engine_tested_cell(ek, res_blob, executed_at),
                 )
                 for mc in merged_cases:
                     if mc.get("matched_expected") is False and not mc.get("inconclusive_reason"):
@@ -426,7 +461,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                                 # Sheets the version label already names the
                                 # engine, so don't print the name twice.
                                 "engine_ref": (
-                                    f"Google Sheets, executed {iso_date(res_blob.get('generated_at'))} (Drive import)"
+                                    f"Google Sheets, executed {executed_at} (Drive import)"
                                     if ek == "google_sheets"
                                     else f"{ENGINE_LABELS[ek]} {res_blob.get('engine_version')}"
                                 ),
@@ -447,8 +482,13 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     history.append(
                         {
                             "version": vstr,
-                            "verdict": classify_verdict(list(vres.values())),
+                            "verdict": classify_verdict(
+                                list(function_cases(vres).values())
+                            ),
                             "generated_at": blob.get("generated_at"),
+                            "executed_at": function_executed_at(
+                                vres, iso_date(blob.get("generated_at"))
+                            ),
                         }
                     )
                 entry["lo_history"] = history
@@ -504,12 +544,14 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
         else:
             primary_verdict = None
 
+        # "Last tested" is the newest date on which THIS function was
+        # actually executed in any engine -- never the newest date any
+        # results file happens to carry.
         last_tested = None
         for e in engines.values():
-            if e["generated_at"]:
-                d = iso_date(e["generated_at"])
-                if not last_tested or d > last_tested:
-                    last_tested = d
+            d = e["executed_at"]
+            if d and (not last_tested or d > last_tested):
+                last_tested = d
 
         records.append(
             {
@@ -800,7 +842,7 @@ def build_function_title_desc(r):
         if ge["tested"]:
             suffix = (
                 f" Executed: LibreOffice {le['version']} + Google Sheets "
-                f"{iso_date(ge['generated_at'])}; Excel per docs."
+                f"{ge['executed_at']}; Excel per docs."
             )
         else:
             suffix = f" Executed in LibreOffice {le['version']}; Excel/Sheets from official docs."
@@ -1457,7 +1499,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 <tr class="{% if not loop.first and h.verdict != le.lo_history[loop.index0 - 1].verdict %}ver-changed{% endif %}">
   <td>{{ h.version }}</td>
   <td><span class="badge {{ verdict_class[h.verdict] }}">{{ verdict_label[h.verdict] }}</span></td>
-  <td>{{ h.generated_at|dateonly }}</td>
+  <td>{{ h.executed_at }}</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -1479,7 +1521,7 @@ error: see the <a href="{{ rel }}spreadsheet-errors.html">error values guide</a>
 executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
 settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
 available yet{% if le.documented %} despite appearing in some documentation{% endif %}.
-{% if r.engines['excel'].documented %}The same formula is documented for Excel{% if ge.verdict == 'supported' %}, and we executed it successfully in Google Sheets on {{ ge.generated_at|dateonly }}{% elif r.engines['google_sheets'].documented %} and documented for Google Sheets{% endif %}.{% endif %}
+{% if r.engines['excel'].documented %}The same formula is documented for Excel{% if ge.verdict == 'supported' %}, and we executed it successfully in Google Sheets on {{ ge.executed_at }}{% elif r.engines['google_sheets'].documented %} and documented for Google Sheets{% endif %}.{% endif %}
 Watch the <a href="{{ rel }}libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
 we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
 {% elif le.verdict == 'quirky' %}
@@ -1494,7 +1536,7 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Why isn&rsquo;t {{ r.name }} working in Google Sheets?</h2>
 {% if ge.verdict == 'unsupported' %}
 <p>Google Sheets does not implement <code>{{ r.name }}</code>: we imported the formula into
-Sheets on {{ ge.generated_at|dateonly }} and every case came back <code>#NAME?</code>
+Sheets on {{ ge.executed_at }} and every case came back <code>#NAME?</code>
 (unrecognized function). Sheets is a rolling service with no version to pin, so this is a
 statement about the service on that date{% if not ge.documented %}, and Google&rsquo;s own
 function list does not document it either{% endif %}. Rewrite the formula with a documented
@@ -2066,7 +2108,7 @@ db["FILTER"].gv   // "inconclusive"
 
 <h2 class="section-title">License</h2>
 <p>The compatibility dataset is released under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 (CC&nbsp;BY&nbsp;4.0)</a>. Use it freely, including commercially &mdash; just credit <strong>canispreadsheet.com</strong> with a link. If you build something with it, we&rsquo;d love to hear about it.</p>
-<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted, one dated Google Sheets run ({{ sheets_exec_date }}), and Microsoft&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Google Sheets ships changes continuously, so a Sheets verdict is a dated observation rather than a release guarantee. Corrections welcome via the <a href="{{ github_url }}">repository</a>.</p>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted, dated Google Sheets runs (most recently {{ sheets_exec_date }}; each function&rsquo;s own run date is its <code>gver</code>), and Microsoft&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Google Sheets ships changes continuously, so a Sheets verdict is a dated observation rather than a release guarantee. Corrections welcome via the <a href="{{ github_url }}">repository</a>.</p>
 {% endblock %}
 """
 
@@ -2190,7 +2232,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 
 <h2 class="section-title">The execution harness</h2>
 <p>For each function we author test cases: a formula, any setup cells it needs, and the result Excel documents or produces for that input. The harness writes each case into a real <code>.xlsx</code> workbook with openpyxl, then runs <strong>headless LibreOffice Calc</strong> over it (<code>soffice --convert-to xlsx</code>), which forces a full recalculation. We reload the output and compare every result against the expected value.</p>
-<p>The <strong>same workbooks</strong> are run through <strong>Google Sheets</strong>: uploaded to Google Drive with import-conversion on, opened as a Sheet (which recalculates every formula), then exported back to <code>.xlsx</code> and read with the same reader. That run is dated, not versioned &mdash; Sheets is a rolling service with no release to pin &mdash; so every Sheets result on this site is labelled &ldquo;executed {{ sheets_exec_date }} via Drive import&rdquo; rather than given a version number.</p>
+<p>The <strong>same workbooks</strong> are run through <strong>Google Sheets</strong>: uploaded to Google Drive with import-conversion on, opened as a Sheet (which recalculates every formula), then exported back to <code>.xlsx</code> and read with the same reader. That run is dated, not versioned &mdash; Sheets is a rolling service with no release to pin &mdash; so every Sheets result on this site is labelled with the date of the run that actually executed it (&ldquo;executed &lt;date&gt; via Drive import&rdquo;, most recently {{ sheets_exec_date }}) rather than given a version number. A later run that re-executes part of the corpus re-dates only the functions it covered; the rest keep the date they were executed on.</p>
 <p>Two guards make the results trustworthy:</p>
 <ul>
 <li><strong>Recalculation canaries.</strong> Every generated workbook contains sentinel formulas (deterministic arithmetic plus a volatile function) whose values prove the engine really recalculated rather than echoing stored results. A run that fails its canary is discarded, never published.</li>
@@ -2222,7 +2264,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 <h2 class="section-title">Honest limitations</h2>
 <ul>
 <li><strong>Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run Excel (yet); where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
-<li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: the verdicts describe Sheets as it behaved on {{ sheets_exec_date }}. Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
+<li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: each verdict describes Sheets as it behaved on the date that function was executed (the most recent run was {{ sheets_exec_date }}). Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
 <li><strong>Some Sheets results are inconclusive.</strong> See the <a href="#sheets-caveats">Sheets execution caveats</a> above; those cases are excluded from verdicts and quirk counts rather than guessed at.</li>
 <li><strong>Coverage is partial.</strong> {{ n_funcs }} of ~600 catalog functions have executed tests; untested functions say so explicitly rather than borrowing a verdict.</li>
 <li><strong>A passing case is evidence, not proof.</strong> A function can match on our cases and still differ on inputs we haven&rsquo;t authored. When you find such an edge, please report it.</li>
@@ -2467,7 +2509,7 @@ def _stability_stats():
     versions = [v for v, _ in runs]
     volatile = {"RAND", "RANDBETWEEN", "RANDARRAY", "TODAY", "NOW"}
     def vals(d):
-        cs = d.get("cases") or d.get("results") or d
+        cs = d.get("cases") or d.get("results") or function_cases(d)
         items = cs.items() if isinstance(cs, dict) else [(c.get("id"), c) for c in cs]
         return {k: str(v.get("value")) for k, v in items}
     stable, changed, fns = 0, [], set()
@@ -3335,7 +3377,7 @@ def main():
             # the result). gver is a DATE LABEL, never a version — Sheets has no
             # pinnable version.
             "gv": e["google_sheets"]["verdict"],
-            "gver": e["google_sheets"]["version"],
+            "gver": sheets_run_label(e["google_sheets"]),
             "lv": e["libreoffice"]["verdict"],
             "lver": e["libreoffice"]["version"],
             # newly supported: the exact release it started working in (else null)
@@ -3589,7 +3631,7 @@ def main():
             versions=[v for v, _ in lo_versions],
             current_version=lo_versions[-1][0],
             n_funcs=len(fr),
-            n_cases=sum(len(v) for v in fr.values()),
+            n_cases=sum(len(function_cases(v)) for v in fr.values()),
             recipe_total=len(recipes),
             recipe_sheets_count=recipe_sheets_count,
             recipe_sheets_date=recipe_sheets_date,

@@ -9,7 +9,7 @@ Ground truth (see site/build_site.py and results/*.json):
   * Microsoft Excel   -- NOT EXECUTED. Documentation only, and it is the
                          yardstick the two executed engines are measured against.
 
-So this script fails (exit 1) on four kinds of dishonesty:
+So this script fails (exit 1) on five kinds of dishonesty:
 
   1. FALSE EXECUTION CLAIMS -- any page claiming Excel was verified, tested or
      executed, or claiming all three engines were. Truthful claims about
@@ -29,6 +29,15 @@ So this script fails (exit 1) on four kinds of dishonesty:
      data/recipes/*.json), and the whole point of the scoping is that the
      other engine never ran the formula -- so the page must never show a
      number for it under the other engine's heading.
+  5. FILE-LEVEL DATING OF PER-FUNCTION RESULTS -- a function page whose
+     "Last tested" date is not the date that function was actually executed.
+     Each results file records a per-function `executed_at`
+     (harness/results_schema.py); the file-level `generated_at` is refreshed
+     by every subset run, so dating pages from it silently re-dates the whole
+     corpus every time five functions are re-run. Checked three ways per
+     page: the "Last tested" line must equal the newest executed_at across
+     the executed engines, and the support matrix's per-engine "Live-tested"
+     cells must equal that engine's own executed_at for that function.
   4. SELF-CONTRADICTORY RECIPE COPY -- a how-to page that shows an executed
      Google Sheets result AND still carries the LibreOffice-only disclaimer.
      The how-to recipe corpus is executed in Sheets per-recipe (the
@@ -156,8 +165,62 @@ RECIPE_SHEETS_DISCLAIMER = re.compile(
     r"recipe(?:'s|&rsquo;s)? (?:worked example|corpus)[^.]{0,80}?"
     r"(?:LibreOffice only|has not been through Sheets)", re.I)
 
+# (5) Per-function "Last tested" dates must come from that function's own
+# executed_at, not from the results file's generated_at. Cheap to verify: read
+# the results files, recompute what each page's date must be, compare.
+RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results")
+LAST_TESTED = re.compile(r"Last tested (\d{4}-\d{2}-\d{2})")
+# Support-matrix "Live-tested" cells, per engine (site/build_site.py's
+# engine_tested_cell): "Yes (25.8.7.3, 2026-07-29)" / "Yes (Drive import, …)".
+LO_CELL = re.compile(r"Yes \((\d+(?:\.\d+)+), (\d{4}-\d{2}-\d{2})\)")
+GS_CELL = re.compile(r"Yes \(Drive import, (\d{4}-\d{2}-\d{2})\)")
+
+
+def _version_tuple(v):
+    if not re.match(r"^\s*\d+(\.\d+)*\s*$", str(v or "")):
+        return (0,)
+    return tuple(int("".join(c for c in tok if c.isdigit()) or 0)
+                 for tok in str(v).split("."))
+
+
+def expected_dates():
+    """FUNCTION -> {"lo": date|None, "gs": date|None, "page": newest date}.
+
+    Mirrors site/build_site.py: the NEWEST LibreOffice build wins the live
+    verdict, Google Sheets is its own engine, and the page's "Last tested"
+    line is the newest date the function was executed on in either."""
+    import json as _json
+    blobs, newest_lo = [], None
+    for path in sorted(glob.glob(os.path.join(RESULTS_DIR, "*.json"))):
+        try:
+            d = _json.load(open(path, encoding="utf-8"))
+        except Exception:
+            continue
+        engine = str(d.get("engine", "")).lower()
+        if "libreoffice" in engine:
+            if newest_lo is None or _version_tuple(d.get("engine_version")) >= \
+                    _version_tuple(newest_lo.get("engine_version")):
+                newest_lo = d
+        elif "sheet" in engine or "google" in engine:
+            blobs.append(d)
+    if newest_lo is not None:
+        blobs.append(newest_lo)
+    out = {}
+    for d in blobs:
+        slot = "lo" if "libreoffice" in str(d.get("engine", "")).lower() else "gs"
+        fallback = (d.get("generated_at") or "")[:10]
+        for fn, block in (d.get("function_results") or {}).items():
+            date = (block.get("executed_at") if isinstance(block, dict) else None) or fallback
+            e = out.setdefault(fn, {"lo": None, "gs": None, "page": ""})
+            e[slot] = date
+            if date and date > e["page"]:
+                e["page"] = date
+    return out
+
+
 bad = []
 stale = []
+misdated = []
 contradictory = []
 misattributed = []
 files = glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True)
@@ -191,6 +254,32 @@ for f in files:
                 continue
             stale.append((rel, re.sub(r"\s+", " ", ctx)))
 
+# (5) per-function "Last tested" dates
+_expected = expected_dates()
+for fn, want in sorted(_expected.items()):
+    page = os.path.join(ROOT, "functions", fn.lower() + ".html")
+    if not os.path.exists(page):
+        continue
+    rel_page = os.path.relpath(page, ROOT)
+    raw = open(page, encoding="utf-8", errors="replace").read()
+    m = LAST_TESTED.search(raw)
+    if not m:
+        misdated.append((rel_page,
+                         f"executed on {want['page']} but the page shows no "
+                         f"'Last tested' date"))
+    elif m.group(1) != want["page"]:
+        misdated.append((rel_page,
+                         f"page says 'Last tested {m.group(1)}' but {fn} was last "
+                         f"executed {want['page']} (results files' executed_at)"))
+    for label, got, exp in (
+        ("LibreOffice", [d for _v, d in LO_CELL.findall(raw)], want["lo"]),
+        ("Google Sheets", GS_CELL.findall(raw), want["gs"]),
+    ):
+        if exp and got and got[0] != exp:
+            misdated.append((rel_page,
+                             f"{label} live-tested cell says {got[0]} but {fn} was "
+                             f"executed on {exp} in that engine's results file"))
+
 print(f"honesty check: {len(files)} pages")
 print(f"  false execution claims (Excel / all three): {len(bad)}")
 for f, ctx in bad[:40]:
@@ -204,4 +293,8 @@ for f, ctx in misattributed[:40]:
 print(f"  recipe pages both showing and denying a Sheets result: {len(contradictory)}")
 for f, ctx in contradictory[:40]:
     print(f"    {f}: …{ctx}…")
-sys.exit(1 if (bad or stale or contradictory or misattributed) else 0)
+print(f"  function pages dated from the file instead of the function: {len(misdated)}"
+      f"  ({len(_expected)} executed functions checked)")
+for f, ctx in misdated[:40]:
+    print(f"    {f}: {ctx}")
+sys.exit(1 if (bad or stale or contradictory or misattributed or misdated) else 0)

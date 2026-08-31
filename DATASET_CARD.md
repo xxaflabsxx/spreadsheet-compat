@@ -23,7 +23,7 @@ executed engines are measured against. As far as we know this is the only openly
 | `in_google_sheets` | bool | Documented as available in Google Sheets. |
 | `in_libreoffice` | bool | Documented as available in LibreOffice Calc. |
 | `google_sheets_verdict` | string | Result of executing a real test case in Google Sheets: `supported`, `quirky`, `unsupported`, or `inconclusive`; empty if the function is not yet in the executed test set. **`inconclusive` is not a verdict** — see "Google Sheets execution caveats" below. |
-| `google_sheets_executed` | string | Label for the Google Sheets run, e.g. `Google Sheets (Drive import, 2026-08-29)`. This is a **date, not a version**: Sheets is a rolling service with no release to pin, so never parse or compare it as a version string. Empty if not executed. |
+| `google_sheets_executed` | string | Label for the Google Sheets run that executed **this function**, e.g. `Google Sheets (Drive import, 2026-08-29)`. This is a **date, not a version**: Sheets is a rolling service with no release to pin, so never parse or compare it as a version string. Rows can carry different dates — a later run that re-executes part of the corpus re-dates only the functions it covered. Empty if not executed. |
 | `libreoffice_verdict` | string | Result of executing a real test case in LibreOffice (e.g. `supported`, `unsupported`); empty if the function is documented-only and not yet in the executed test set. |
 | `libreoffice_version_tested` | string | LibreOffice version the executed test ran on (e.g. `25.8.7.3`). |
 | `libreoffice_newly_supported_in` | string | LibreOffice version in which the function first started working, when known (from testing across multiple versions); empty otherwise. |

@@ -66,7 +66,12 @@ generated_at / canary / recalc_method are refreshed from this run so the
 canary block always describes the most recent execution against the file.
 `trusted` becomes the AND of the previous file's flag and this run's, so a
 merge can only ever downgrade trust, never launder an untrusted run into a
-trusted file. Each merge appends a record to a top-level "subset_runs" list
+trusted file. Every function block this run executed is stamped with its own
+"executed_at" UTC date (see harness/results_schema.py), so a subset run can
+refresh the file-level generated_at without back-dating -- or forward-dating
+-- the ~300 functions it never touched: their executed_at comes through the
+merge unchanged, and that (not generated_at) is what the site prints as
+"Last tested". Each merge appends a record to a top-level "subset_runs" list
 (timestamp, which functions were re-executed, that run's own trusted flag,
 and the generated_at it superseded) so the provenance of a mixed file is
 auditable. Merging is refused if the installed LibreOffice version does not
@@ -83,6 +88,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from xlfn_map import to_storage_formula_all  # noqa: E402,F401
+from results_schema import function_cases, stamp_executed_at  # noqa: E402
 
 # Everything below is shared verbatim with harness/run_sheets.py -- see
 # harness/corpus.py for why. These are re-exported at module level under
@@ -139,6 +145,43 @@ LO_VERSION = _detect_lo_version()  # e.g. "25.8.7.3"
 LO_VERSION_TAG = (
     ".".join(LO_VERSION.split(".")[:2]) if LO_VERSION != "unknown" else "unknown"
 )  # major.minor for the results filename, e.g. "25.8"
+
+
+
+def merge_subset_run(prev, output, canary, trusted_this_run):
+    """Merge one subset run's `output` into the previously stored results.
+
+    Whole function blocks are replaced (a function is re-executed in full or
+    not at all), so each re-executed function brings this run's `executed_at`
+    with it and every function the run did not touch keeps the block -- and
+    therefore the executed_at -- recorded by the run that produced it. Only
+    the FILE-level provenance (generated_at, canary, recalc_method, engine
+    labels) is refreshed to describe the most recent execution; `trusted` is
+    ANDed so a merge can only ever downgrade trust.
+
+    Pure function of its inputs (no I/O) so the merge contract can be tested
+    without running LibreOffice -- see scripts/test_executed_at_merge.py.
+    """
+    function_results = output["function_results"]
+    merged = dict(prev)
+    merged_fr = dict(prev.get("function_results") or {})
+    for fn, cases in function_results.items():
+        merged_fr[fn] = cases  # whole function re-executed, so replace wholesale
+    merged["function_results"] = merged_fr
+    merged["generated_at"] = output["generated_at"]
+    merged["engine"] = output["engine"]
+    merged["engine_version"] = output["engine_version"]
+    merged["recalc_method"] = output["recalc_method"]
+    merged["canary"] = canary
+    # A merge can only downgrade trust, never upgrade it.
+    merged["trusted"] = bool(prev.get("trusted", False)) and trusted_this_run
+    merged.setdefault("subset_runs", []).append({
+        "generated_at": output["generated_at"],
+        "functions": sorted(function_results.keys()),
+        "trusted_this_run": trusted_this_run,
+        "superseded_generated_at": prev.get("generated_at"),
+    })
+    return merged
 
 
 def run():
@@ -261,8 +304,14 @@ def run():
         }
         function_results.setdefault(c["function"], {})[c["test_id"]] = result
 
+    generated_at = datetime.now(timezone.utc).isoformat()
+    # Per-function execution date: this run executed exactly these functions,
+    # so only these blocks get today's date. A merge below carries it into the
+    # existing file and leaves every other function's own date alone.
+    stamp_executed_at(function_results, generated_at[:10])
+
     output = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": generated_at,
         "engine": "LibreOffice Calc",
         "engine_version": LO_VERSION,
         "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -286,25 +335,8 @@ def run():
                 f"{prev_version!r} but the installed LibreOffice reports "
                 f"{LO_VERSION!r}. Results from different builds must not share a file."
             )
-        merged = dict(prev)
-        merged_fr = dict(prev.get("function_results") or {})
-        for fn, cases in function_results.items():
-            merged_fr[fn] = cases  # whole function re-executed, so replace wholesale
-        merged["function_results"] = merged_fr
-        merged["generated_at"] = output["generated_at"]
-        merged["engine"] = output["engine"]
-        merged["engine_version"] = output["engine_version"]
-        merged["recalc_method"] = output["recalc_method"]
-        merged["canary"] = canary
-        # A merge can only downgrade trust, never upgrade it.
-        merged["trusted"] = bool(prev.get("trusted", False)) and global_trusted
-        merged.setdefault("subset_runs", []).append({
-            "generated_at": output["generated_at"],
-            "functions": sorted(function_results.keys()),
-            "trusted_this_run": global_trusted,
-            "superseded_generated_at": prev.get("generated_at"),
-        })
-        untouched = len(merged_fr) - len(function_results)
+        merged = merge_subset_run(prev, output, canary, global_trusted)
+        untouched = len(merged["function_results"]) - len(function_results)
         print(f"Subset run: merged {len(function_results)} function(s) into "
               f"{os.path.basename(out_json_path)}; {untouched} other function "
               f"result(s) preserved unchanged.")
@@ -322,7 +354,7 @@ def run():
     n_other_error = 0
     n_ok = 0
     for fn, cases in function_results.items():
-        for tid, r in cases.items():
+        for tid, r in function_cases(cases).items():
             if r["error"] == "#NAME?":
                 n_name_error += 1
             elif r["error"]:
