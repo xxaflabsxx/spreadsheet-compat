@@ -148,6 +148,15 @@ USAGE
         --export-dir harness/recipe_exports_multisheet \
         --engine-label "Google Sheets (Drive import, YYYY-MM-DD)"
 
+    # If Drive's importer RENAMES a tab (observed: `Jon's Data` came back as
+    # `Jons Data`, apostrophe stripped, with Sheets rewriting the formula to
+    # match), ingest identifies it by reading its setup literals back, records
+    # BOTH names verbatim in the check's notes under SETUP_ALTERED, and keeps
+    # that check out of the recipe's verdict -- Sheets executed a workbook the
+    # LibreOffice reference run never saw, so the two are not comparable.
+    # Nothing is renamed back. A tab that is genuinely gone, or that no
+    # leftover tab's literals can identify, still refuses the workbook.
+
     # dry run: build + expected values synthesized into the builder's own
     # workbooks + ingest, asserting the mapping, the keyed merge, the
     # engine-label guard, canary detection and the partial-download refusal.
@@ -1542,6 +1551,13 @@ def cmd_ingest_recipes(args):
               f"workbook(s) ingested, missing {inc['missing']} -- NOT written")
     for bad in stats.get("setup_failures") or []:
         print(f"  SETUP ALTERED  {bad['slug']} [{bad['key']}]: {bad['cells']}")
+    for ren in stats.get("importer_renames") or []:
+        # Loud, and never silently corrected: the importer changed a tab name,
+        # so this check ran against a workbook the reference run never saw.
+        pairs = ", ".join(f"{a!r} -> {b!r}" for a, b in ren["renamed"].items())
+        print(f"  TAB RENAMED BY IMPORTER  {ren['slug']} [{ren['key']}] "
+              f"({ren['chunk']}): {pairs} -- recorded, not comparable to the "
+              f"LibreOffice run, excluded from that recipe's verdict")
     if not recipes:
         sys.exit("Nothing complete to write: every recipe in this ingest was "
                  "missing at least one of its workbooks. Download the rest and "
@@ -2090,26 +2106,142 @@ def _multisheet_id_from_path(path, manifest):
     )
 
 
-def _setup_intact_failures(wb, entry):
+def _literals_match(ws, cells):
+    """Does this worksheet hold exactly the setup literals `cells` describes?
+
+    This is the IDENTITY test for a tab whose name did not survive the import.
+    Data tabs contain only literals the builder wrote, so their contents are a
+    fingerprint. An empty `cells` fingerprints nothing and therefore proves
+    nothing -- it returns False rather than matching anything that happens to
+    be lying around."""
+    if not cells:
+        return False
+    for addr, wrote in cells.items():
+        got = norm(ws[addr].value)
+        want = norm(wrote)
+        if got != want and str(got) != str(want):
+            return False
+    return True
+
+
+def _resolve_export_sheets(wb, entry):
+    """Map every sheet the BUILDER wrote to the name it came BACK under.
+
+    Returns (name_map, renames): `name_map[built_name] -> export_name`, and
+    `renames` the subset where those differ.
+
+    WHY THIS EXISTS (observed, not hypothetical)
+    --------------------------------------------
+    Google Drive's .xlsx importer does not always preserve a worksheet name.
+    A tab built as `Jon's Data` came back as `Jons Data` -- the apostrophe
+    stripped -- and Sheets rewrote the formula's reference to match, so the
+    formula computed a real answer against a tab this harness never built.
+    Refusing the whole run for that (which is what a flat "is every sheet
+    name still here?" check does) throws away 33 good workbooks and, worse,
+    hides the finding. Silently accepting it would be the opposite failure:
+    the LibreOffice reference run executed against the ORIGINAL name, so the
+    two engines were no longer handed the same workbook and their values are
+    not comparable.
+
+    So the rule is identity by CONTENTS, never by guesswork. A data tab that
+    is missing by name is matched to a leftover tab only when that tab holds
+    exactly the setup literals the builder wrote into it, and only when that
+    pairing is unambiguous -- one candidate for one expected tab, matching
+    nothing else. Anything less (no candidate, several candidates, or one
+    candidate that fits two expected tabs equally) is a genuinely missing tab
+    and still hard-refuses the workbook, because at that point we cannot say
+    what Sheets executed.
+
+    `_meta` and the formula sheet must come back under their own names: they
+    are plain ASCII by construction, they carry formulas rather than
+    fingerprintable literals, and the anchor we read lives on the formula
+    sheet. Nothing is renamed back -- the export is read exactly as it came.
+    """
+    present = set(wb.sheetnames)
+    name_map = {}
+    problems = []
+
+    for structural in (META_SHEET, entry["sheet"]):
+        if structural in present:
+            name_map[structural] = structural
+        else:
+            problems.append(f"{structural!r} (harness sheet, must come back "
+                            f"under its own name)")
+
+    expected = entry.get("setup_sheets") or {}
+    unmatched = []
+    for name in expected:
+        if name in present:
+            name_map[name] = name
+        else:
+            unmatched.append(name)
+
+    renames = {}
+    if unmatched:
+        claimed = set(name_map.values())
+        spare = [s for s in wb.sheetnames
+                 if s not in claimed and s not in expected]
+        candidates = {name: [s for s in spare
+                             if _literals_match(wb[s], expected[name])]
+                      for name in unmatched}
+        for name in unmatched:
+            cands = candidates[name]
+            if not cands:
+                problems.append(
+                    f"{name!r} (absent, and no leftover tab holds its setup "
+                    f"literals {expected[name]!r}; leftover tabs were {spare!r})")
+                continue
+            if len(cands) > 1:
+                problems.append(f"{name!r} (absent, and {len(cands)} leftover "
+                                f"tabs match its literals: {cands!r} -- "
+                                f"ambiguous, cannot prove which one it is)")
+                continue
+            rival = [o for o in unmatched if o != name and cands[0] in candidates[o]]
+            if rival:
+                problems.append(f"{name!r} (absent; leftover tab {cands[0]!r} "
+                                f"matches it AND {rival!r} equally -- ambiguous)")
+                continue
+            name_map[name] = cands[0]
+            renames[name] = cands[0]
+
+    if problems:
+        raise SystemExit(
+            "Export is missing sheet(s) this workbook was built with:\n  "
+            + "\n  ".join(problems)
+            + "\nA tab renamed by the importer is matched by its setup "
+              "literals and ingested with a SETUP_ALTERED note; these could "
+              "not be identified that way, so what Google executed is "
+              "unknown. Wrong file for this workbook, or a stale manifest -- "
+              "rebuild and re-upload.")
+    return name_map, renames
+
+
+def _setup_intact_failures(wb, entry, name_map):
     """Every setup literal that did NOT come back the way the builder wrote it.
 
     Data tabs hold plain values, never formulas, so a Drive round-trip has to
     return them unchanged. If it does not, the check's inputs were not the
     ones the recipe describes and its result says nothing about the formula --
-    which is why this is reported rather than absorbed."""
+    which is why this is reported rather than absorbed.
+
+    `name_map` is `_resolve_export_sheets()`'s: a tab the importer renamed is
+    read under the name it came back as, and its literals still have to match
+    (they are what identified it). A rename is reported separately, as a
+    rename -- it is not folded in here as if the data had changed."""
     bad = []
     for name, cells in (entry.get("setup_sheets") or {}).items():
-        if name not in wb.sheetnames:
+        export_name = name_map.get(name)
+        if export_name is None or export_name not in wb.sheetnames:
             bad.append({"sheet": name, "cell": None, "wrote": None,
                         "read": "SHEET MISSING"})
             continue
-        tab = wb[name]
+        tab = wb[export_name]
         for addr, wrote in (cells or {}).items():
             got = norm(tab[addr].value)
             want = norm(wrote)
             if got != want and str(got) != str(want):
-                bad.append({"sheet": name, "cell": addr,
-                            "wrote": want, "read": got})
+                bad.append({"sheet": name, "export_sheet": export_name,
+                            "cell": addr, "wrote": want, "read": got})
     return bad
 
 
@@ -2140,6 +2272,7 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
     per_workbook = []
     sheet_canary_failures = []
     setup_failures = []
+    importer_renames = []
     n_sheet_canaries = 0
     volatile_values = {}
     meta_arith = {}
@@ -2150,12 +2283,15 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
         chunk = chunks_by_id[wb_id]
         wb = openpyxl.load_workbook(path, data_only=True)
 
-        missing = set(chunk["sheets"]) - set(wb.sheetnames)
-        if missing:
-            raise SystemExit(
-                f"{os.path.basename(path)} claims to be {wb_id} but is missing "
-                f"{len(missing)} of its sheets ({sorted(missing)}). Wrong file "
-                f"for this workbook, or the manifest is stale -- rebuild.")
+        rec = chunk["recipes"][0]
+        entry = rec["checks"][0]
+        try:
+            name_map, renames = _resolve_export_sheets(wb, entry)
+        except SystemExit as e:
+            raise SystemExit(f"{os.path.basename(path)} (claims to be {wb_id}): {e}")
+        if renames:
+            importer_renames.append({"chunk": wb_id, "slug": rec["slug"],
+                                     "key": entry["key"], "renamed": dict(renames)})
 
         if META_SHEET in wb.sheetnames:
             meta = wb[META_SHEET]
@@ -2165,8 +2301,6 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
             volatile_values[wb_id] = None
             meta_arith[wb_id] = None
 
-        rec = chunk["recipes"][0]
-        entry = rec["checks"][0]
         ws = wb[entry["sheet"]]
         n_sheet_canaries += 1
         n_checks += 1
@@ -2178,7 +2312,7 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
                 {"chunk": wb_id, "sheet": entry["sheet"], "slug": rec["slug"],
                  "key": entry["key"], "value": canary_val})
 
-        bad_setup = _setup_intact_failures(wb, entry)
+        bad_setup = _setup_intact_failures(wb, entry, name_map)
         if bad_setup:
             setup_failures.append({"chunk": wb_id, "slug": rec["slug"],
                                    "key": entry["key"], "cells": bad_setup[:10]})
@@ -2192,23 +2326,49 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
             ok = False
         ok = bool(ok)
 
-        notes = _readback_artifact_notes(entry["expected"], raw, actual)
-        if not canary_ok:
-            notes.insert(0, "UNTRUSTED_RECALC: per-sheet canary failed on this "
-                            "workbook's formula sheet")
+        # A renamed tab means the workbook Google executed is not the workbook
+        # the LibreOffice reference run executed, so the two values are not
+        # comparable -- whatever came back is recorded verbatim, and the check
+        # is excluded from the recipe's verdict rather than counted as a
+        # formula divergence.
+        comparable = not renames
+        not_comparable_reason = None
+        lead = []
+        if renames:
+            not_comparable_reason = "importer_renamed_tab"
+            pairs = "; ".join(f"Google Drive import renamed tab {built!r} -> "
+                              f"{got_name!r}"
+                              for built, got_name in renames.items())
+            lead.append(
+                f"SETUP_ALTERED: {pairs} (identity proven by reading that tab's "
+                f"setup literals back unchanged, not by guessing at the name); "
+                f"formula {entry['formula_display']} result recorded against the "
+                f"renamed reality. NOT comparable to the LibreOffice reference "
+                f"run, which executed against the name as built, and NOT counted "
+                f"toward this recipe's verdict. Nothing was renamed back.")
         if bad_setup:
-            notes.insert(0, f"SETUP_ALTERED: {len(bad_setup)} setup literal(s) did "
-                            f"not survive the round-trip (e.g. {bad_setup[0]}) -- "
-                            f"this check's inputs were not the recipe's, so its "
-                            f"result says nothing about the formula")
+            lead.append(f"SETUP_ALTERED: {len(bad_setup)} setup literal(s) did "
+                        f"not survive the round-trip (e.g. {bad_setup[0]}) -- "
+                        f"this check's inputs were not the recipe's, so its "
+                        f"result says nothing about the formula")
+        if not canary_ok:
+            lead.insert(0, "UNTRUSTED_RECALC: per-sheet canary failed on this "
+                           "workbook's formula sheet")
+        notes = lead + _readback_artifact_notes(entry["expected"], raw, actual)
         if entry.get("differs_from_lo_serialization"):
             notes.append(
                 "NOTE: written with the PLAIN function name; the LibreOffice "
                 "reference run executed the _xlfn. storage form of this formula, "
                 "so the two runs are not byte-identical inputs")
         if not ok:
-            notes.append(f"MISMATCH vs expected: expected {entry['expected']!r}, "
-                         f"got {actual!r}")
+            notes.append(
+                (f"DIFFERS from the LibreOffice-authored expectation: expected "
+                 f"{entry['expected']!r}, got {actual!r} -- but see SETUP_ALTERED "
+                 f"above: this is not a formula divergence, the tabs were not the "
+                 f"ones built")
+                if not comparable else
+                f"MISMATCH vs expected: expected {entry['expected']!r}, "
+                f"got {actual!r}")
 
         payload = {
             "key": entry["key"],
@@ -2223,7 +2383,14 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
             "workbook": chunk["file"],
             "data_sheets": entry.get("data_sheets") or [],
             "canary_ok_this_sheet": canary_ok,
+            # setup_intact: the literals came back unchanged (true even for a
+            # renamed tab -- that is how it was identified). sheet_names_intact:
+            # the tabs also came back under the names the builder wrote.
             "setup_intact": not bad_setup,
+            "sheet_names_intact": not renames,
+            "importer_renamed_tabs": dict(renames),
+            "comparable": comparable,
+            "not_comparable_reason": not_comparable_reason,
             "notes": "; ".join(notes) if notes else None,
         }
         if entry.get("engines"):
@@ -2253,10 +2420,20 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
         variants = {}
         extra = []
         recipe_ok = True
+        not_comparable = []
+        renamed_here = {}
         for key in want:
             entry, payload = got[key]
-            if not payload["verified"]:
-                recipe_ok = False
+            if payload.get("comparable", True):
+                # The verdict is the AND over the checks that ARE comparable.
+                # A check whose tabs the importer renamed executed against a
+                # workbook neither engine agreed on, so counting it either way
+                # would be a claim about a formula nobody tested.
+                if not payload["verified"]:
+                    recipe_ok = False
+            else:
+                not_comparable.append(key)
+                renamed_here.update(payload.get("importer_renamed_tabs") or {})
             if entry["kind"] == "main":
                 main = payload
             elif entry["kind"] == "extra":
@@ -2270,6 +2447,12 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
             raise SystemExit(f"{slug}: manifest has no 'main' check")
         record = {
             "verified": recipe_ok,
+            # Which checks the verdict above is (and is not) an AND over.
+            "verdict_over_comparable_checks_only": bool(not_comparable),
+            "n_checks": len(want),
+            "n_not_comparable": len(not_comparable),
+            "not_comparable_keys": not_comparable,
+            "importer_renamed_tabs": renamed_here,
             "engine": "Google Sheets",
             "engine_label": engine_label,
             "serialization": serialization,
@@ -2285,6 +2468,8 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
             "data_sheets": main["data_sheets"],
             "canary_ok_this_sheet": main["canary_ok_this_sheet"],
             "setup_intact": main["setup_intact"],
+            "sheet_names_intact": main["sheet_names_intact"],
+            "comparable": main["comparable"],
             "notes": main["notes"],
         }
         if variants:
@@ -2308,6 +2493,7 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
         "arithmetic_sheet_failures": sheet_canary_failures[:20],
         "meta_arithmetic_per_chunk": meta_arith,
         "setup_intact_failures": setup_failures[:20],
+        "importer_renamed_tabs": importer_renames[:40],
         "volatile_formula": "=NOW()",
         "volatile_per_chunk": {k: str(v) for k, v in volatile_values.items()},
         "now_differs_across_runs": None,
@@ -2336,6 +2522,7 @@ def ingest_multisheet_exports(export_paths, manifest, engine_label):
              "n_checks": n_checks,
              "incomplete": incomplete,
              "setup_failures": setup_failures,
+             "importer_renames": importer_renames,
              "serialization": serialization,
              "manifest_note": manifest_note}
     return recipes_out, canary, arith_ok, stats
@@ -2585,6 +2772,142 @@ def cmd_selftest_recipes_multisheet(args):
                len(part_recipes) == n_expected_recipes - 1,
                f"{len(part_recipes)} / {n_expected_recipes - 1}")
 
+        # ---- 5. an importer-RENAMED tab is recorded, not refused ----------
+        # Observed for real: Drive's importer stripped the apostrophe from a tab
+        # built as `Jon's Data`. The workbook still computes -- against a tab
+        # this harness never built -- so it must ingest, be flagged, and be kept
+        # out of the recipe's verdict. None of those three is optional.
+        print("\n=== selftest-recipes-multisheet: importer-renamed tab ===")
+
+        def _fixture(chunk, entry, dest, value, rename=None, drop=None,
+                     corrupt=None):
+            """A synthesized export, then mangled the way an importer might."""
+            _simulate_multisheet_export(
+                os.path.join(chunkdir, chunk["file"]), entry, dest, value)
+            fx = openpyxl.load_workbook(dest)
+            if rename:
+                fx[rename[0]].title = rename[1]
+            if drop:
+                fx.remove(fx[drop])
+            if corrupt:
+                fx[corrupt[0]][corrupt[1]] = corrupt[2]
+            fx.save(dest)
+            return dest
+
+        # Prefer the real-world case (a tab name with an apostrophe); fall back
+        # to any single-data-tab check with a fingerprintable literal.
+        def _rename_candidate():
+            single = [(c, c["recipes"][0]["checks"][0]) for c in manifest["chunks"]
+                      if len(c["recipes"][0]["checks"][0].get("setup_sheets") or {}) == 1
+                      and all((cells or {}) for cells in
+                              (c["recipes"][0]["checks"][0]["setup_sheets"] or {}).values())]
+            apos = [t for t in single if "'" in list(t[1]["setup_sheets"])[0]]
+            return (apos or single)[0]
+
+        ren_chunk, ren_entry = _rename_candidate()
+        ren_slug = ren_chunk["recipes"][0]["slug"]
+        ren_key = ren_entry["key"]
+        built_tab = list(ren_entry["setup_sheets"])[0]
+        export_tab = built_tab.replace("'", "") or (built_tab + " 1")
+        if export_tab == built_tab:
+            export_tab = built_tab + " 1"
+        fx_dir = os.path.join(tmp, "fixtures")
+        os.makedirs(fx_dir)
+
+        def _exports_with(replacement_path):
+            return [replacement_path if os.path.basename(p).startswith(ren_chunk["chunk"])
+                    else p for p in exports]
+
+        ren_path = _fixture(
+            ren_chunk, ren_entry,
+            os.path.join(fx_dir, f"{ren_chunk['chunk']}-export.xlsx"),
+            ren_entry["expected"], rename=(built_tab, export_tab))
+        ren_recipes, _rc, _rt, ren_stats = ingest_multisheet_exports(
+            _exports_with(ren_path), manifest, label)
+        _check("a renamed tab does NOT block the run",
+               len(ren_recipes) == n_expected_recipes
+               and ren_stats["n_checks"] == n_expected_checks,
+               f"{len(ren_recipes)} recipe(s), {ren_stats['n_checks']} check(s)")
+        _check("the rename is reported by name",
+               [r["renamed"] for r in ren_stats["importer_renames"]]
+               == [{built_tab: export_tab}],
+               str(ren_stats["importer_renames"]))
+        ren_payload = result_checks_by_key(ren_recipes[ren_slug]).get(ren_key) or {}
+        _check("the affected check is flagged not-comparable",
+               ren_payload.get("comparable") is False
+               and ren_payload.get("not_comparable_reason") == "importer_renamed_tab",
+               f"{ren_slug} [{ren_key}]")
+        ren_note = ren_payload.get("notes") or ""
+        _check("the note records BOTH names verbatim",
+               "SETUP_ALTERED" in ren_note and repr(built_tab) in ren_note
+               and repr(export_tab) in ren_note, ren_note[:140])
+        _check("nothing was renamed back; literals still intact",
+               ren_payload.get("setup_intact") is True
+               and ren_payload.get("sheet_names_intact") is False
+               and ren_payload.get("importer_renamed_tabs") == {built_tab: export_tab})
+        _check("the value it actually returned is recorded as-is",
+               str(ren_payload.get("actual")) == str(ren_entry["expected"]),
+               f"actual={ren_payload.get('actual')!r}")
+        others_comparable = sum(
+            1 for r in ren_recipes.values()
+            for k, pl in result_checks_by_key(r).items()
+            if pl.get("comparable", True))
+        _check("every other check stays comparable",
+               others_comparable == n_expected_checks - 1,
+               f"{others_comparable} / {n_expected_checks - 1}")
+
+        # The load-bearing half: a renamed tab whose formula then FAILED must
+        # not drag the recipe's badge down, because no engine was tested.
+        ren_bad_path = _fixture(
+            ren_chunk, ren_entry,
+            os.path.join(fx_dir, f"{ren_chunk['chunk']}-bad-export.xlsx"),
+            "#REF!", rename=(built_tab, export_tab))
+        os.replace(ren_bad_path,
+                   os.path.join(fx_dir, f"{ren_chunk['chunk']}-export.xlsx"))
+        ren_bad_path = os.path.join(fx_dir, f"{ren_chunk['chunk']}-export.xlsx")
+        bad2_recipes, _bc, _bt, _bs = ingest_multisheet_exports(
+            _exports_with(ren_bad_path), manifest, label)
+        bad2_payload = result_checks_by_key(bad2_recipes[ren_slug]).get(ren_key) or {}
+        _check("a renamed tab's failure is NOT counted as a formula divergence",
+               bad2_recipes[ren_slug]["verified"] is True
+               and bad2_payload.get("verified") is False
+               and bad2_payload.get("comparable") is False,
+               f"recipe verified={bad2_recipes[ren_slug]['verified']}, "
+               f"check verified={bad2_payload.get('verified')}")
+        _check("the recipe records which checks its verdict excluded",
+               bad2_recipes[ren_slug]["n_not_comparable"] == 1
+               and ren_key in bad2_recipes[ren_slug]["not_comparable_keys"]
+               and bad2_recipes[ren_slug]["verdict_over_comparable_checks_only"] is True)
+
+        # ---- 6. a genuinely missing tab still refuses ---------------------
+        print("\n=== selftest-recipes-multisheet: missing-tab refusal ===")
+        gone = _fixture(ren_chunk, ren_entry,
+                        os.path.join(fx_dir, "gone.xlsx"),
+                        ren_entry["expected"], drop=built_tab)
+        try:
+            ingest_multisheet_exports([gone], manifest, label)
+            refused_missing = False
+        except SystemExit:
+            refused_missing = True
+        _check("a data tab that is simply GONE still hard-refuses",
+               refused_missing)
+
+        # Renamed AND altered: the literals no longer fingerprint the tab, so
+        # its identity cannot be proven and the workbook must be refused rather
+        # than matched on a resemblance.
+        addr = list(ren_entry["setup_sheets"][built_tab])[0]
+        unprovable = _fixture(
+            ren_chunk, ren_entry, os.path.join(fx_dir, "unprovable.xlsx"),
+            ren_entry["expected"], rename=(built_tab, export_tab),
+            corrupt=(export_tab, addr, "NOT THE VALUE WE WROTE"))
+        try:
+            ingest_multisheet_exports([unprovable], manifest, label)
+            refused_unprovable = False
+        except SystemExit:
+            refused_unprovable = True
+        _check("a renamed tab whose literals do NOT match is refused",
+               refused_unprovable)
+
         # ---- scratch results file, for a human to read -------------------
         if os.path.exists(out):
             os.remove(out)          # scratch: always a fresh write, never a merge
@@ -2608,8 +2931,10 @@ def cmd_selftest_recipes_multisheet(args):
         sys.exit(1)
     print("\nselftest-recipes-multisheet PASSED: every check round-tripped to its "
           "own key, the merge preserved every untouched recipe, the engine-label "
-          "guard held, a broken canary was caught, and a half-downloaded recipe "
-          "was refused.")
+          "guard held, a broken canary was caught, a half-downloaded recipe was "
+          "refused, an importer-renamed tab was ingested and flagged rather than "
+          "blocking the run or being counted as a formula divergence, and a "
+          "genuinely missing (or unidentifiable) tab still refused.")
 
 
 # --------------------------------------------------------------------------
@@ -2801,8 +3126,11 @@ def main():
                     "(that is the simulated Drive export), and pushes the result "
                     "through the real ingest path. Proves the cell mapping, the "
                     "keyed merge (every pre-existing recipe byte-identical), the "
-                    "engine-label guard, canary-failure detection and the "
-                    "partial-download refusal. Executes NO engine: it neither "
+                    "engine-label guard, canary-failure detection, the "
+                    "partial-download refusal, and the importer-renamed-tab "
+                    "path (ingested and flagged, not blocked and not counted as "
+                    "a divergence) against a still-hard refusal for a tab that "
+                    "is genuinely gone. Executes NO engine: it neither "
                     "drives LibreOffice nor touches Drive, and claims nothing "
                     "about either engine's behaviour.")
     sm.add_argument("--only", nargs="+", metavar="SLUG", default=None)
