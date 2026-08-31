@@ -1,0 +1,33 @@
+{
+  "function": "ACOTH",
+  "cases": [
+    {
+      "id": "ACOTH_documented_six",
+      "formula": "=ROUND(ACOTH(6),3)",
+      "description": "Microsoft's documented worked example: inverse hyperbolic cotangent of 6",
+      "expected": 0.168,
+      "expected_note": "Microsoft's page publishes this example's result as 0.168. Independently verified from the documented identity acoth(x) = 0.5*ln((x+1)/(x-1)) = atanh(1/x): atanh(1/6) = 0.16823611831060645 -> 0.168 at 3 dp"
+    },
+    {
+      "id": "ACOTH_negative_argument",
+      "formula": "=ROUND(ACOTH(-2),9)",
+      "description": "A negative argument whose absolute value exceeds 1, which the documented domain allows",
+      "expected": -0.549306144,
+      "expected_note": "Excel documents \"The absolute value of Number must be greater than 1\", so -2 is in the domain. Independently derived from 0.5*ln((x+1)/(x-1)) with x = -2: 0.5*ln(1/3) = -0.5493061443340548 -> -0.549306144 at 9 dp"
+    },
+    {
+      "id": "ACOTH_inside_unit_num",
+      "formula": "=ACOTH(0.5)",
+      "description": "An argument whose absolute value is below 1 is outside the documented domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Number is less than 1, ACOTH returns the #NUM! error value.\" (The page's next line repeats the rule for the absolute value but misnames the function as ACOT and misnames the error as #VALUE!; the #NUM! statement is the one that names ACOTH, and 0.5 satisfies both stated conditions)"
+    },
+    {
+      "id": "ACOTH_text_argument_value",
+      "formula": "=ACOTH(\"abc\")",
+      "description": "A non-numeric text argument",
+      "expected": "#VALUE!",
+      "expected_note": "#VALUE! is Excel's documented error for an argument of the wrong type; the companion ACOT page states it explicitly for this function family"
+    }
+  ]
+}

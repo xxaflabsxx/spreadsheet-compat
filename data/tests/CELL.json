@@ -1,0 +1,70 @@
+{
+  "function": "CELL",
+  "cases": [
+    {
+      "id": "CELL_row_number",
+      "formula": "=CELL(\"row\",B7)",
+      "description": "The documented \"row\" info_type returns the row number of the referenced cell",
+      "expected": 7,
+      "expected_note": "Excel documents info_type \"row\" as returning the \"Row number of the cell in reference\". B7 is in row 7. This is one of the four info_types this corpus tests, because it depends only on the reference itself -- see the exclusions listed on the \"type\" cases below"
+    },
+    {
+      "id": "CELL_column_number",
+      "formula": "=CELL(\"col\",D2)",
+      "description": "The documented \"col\" info_type returns the column number of the referenced cell",
+      "expected": 4,
+      "expected_note": "Excel documents info_type \"col\" as returning the \"Column number of the cell in reference\". Column D is the 4th column"
+    },
+    {
+      "id": "CELL_column_of_range_uses_first_cell",
+      "formula": "=CELL(\"col\",C3:F9)",
+      "description": "A multi-cell reference, where the documentation says the upper-left cell is used",
+      "expected": 3,
+      "expected_note": "Excel documents that \"address\" returns the \"Reference of the first cell in reference\" and that \"contents\" returns the \"Value of the upper-left cell in reference\", so a range argument resolves to its upper-left cell. C3 is in column C, the 3rd column"
+    },
+    {
+      "id": "CELL_contents_of_number",
+      "formula": "=CELL(\"contents\",A1)",
+      "description": "The documented \"contents\" info_type returns the value of the referenced cell",
+      "setup_cells": {
+        "A1": 42,
+        "A2": "hello"
+      },
+      "expected": 42,
+      "expected_note": "Excel documents info_type \"contents\" as returning the \"Value of the upper-left cell in reference; not a formula\". A1 holds the number 42"
+    },
+    {
+      "id": "CELL_type_value",
+      "formula": "=CELL(\"type\",A1)",
+      "description": "The documented \"type\" info_type returns \"v\" for a cell holding a value",
+      "setup_cells": {
+        "A1": 42,
+        "A2": "hello"
+      },
+      "expected": "v",
+      "expected_note": "Excel documents info_type \"type\" as returning \"'v' for value if the cell contains anything else\" (that is, anything other than blank or a text constant). A1 holds the number 42"
+    },
+    {
+      "id": "CELL_type_label",
+      "formula": "=CELL(\"type\",A2)",
+      "description": "The documented \"type\" info_type returns \"l\" for a cell holding a text constant",
+      "setup_cells": {
+        "A1": 42,
+        "A2": "hello"
+      },
+      "expected": "l",
+      "expected_note": "Excel documents \"type\" as returning \"'l' for label if the cell contains a text constant\". A2 holds the text \"hello\""
+    },
+    {
+      "id": "CELL_type_blank",
+      "formula": "=CELL(\"type\",A3)",
+      "description": "The documented \"type\" info_type returns \"b\" for an empty cell",
+      "setup_cells": {
+        "A1": 42,
+        "A2": "hello"
+      },
+      "expected": "b",
+      "expected_note": "Excel documents \"type\" as returning \"'b' for blank if the cell is empty\". A3 is deliberately left unset. EXCLUSIONS: this corpus tests only the four deterministic info_types \"row\", \"col\", \"contents\" and \"type\". The others are deliberately omitted because their results are not a property of the formula: \"address\" and \"filename\" depend on the workbook's path and quoting (and \"filename\" is documented to return empty text for an unsaved sheet); \"format\", \"color\", \"parentheses\", \"prefix\", \"protect\" and \"width\" depend on cell formatting, column width and sheet protection that survive an .xlsx round-trip inconsistently, and Microsoft documents all six as unsupported in Excel for the web, Excel Mobile and Excel Starter; and the reference-omitted form CELL(info_type) is excluded because Microsoft's own page warns it reports \"your active cell\" at calculation time and \"does not reliably produce information about a specific cell\" -- it is volatile by design and could not be asserted against any fixed value"
+    }
+  ]
+}

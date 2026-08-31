@@ -1,0 +1,71 @@
+{
+  "function": "CHIDIST",
+  "cases": [
+    {
+      "id": "CHIDIST_doc_example",
+      "formula": "=ROUND(CHIDIST(A2,A3),7)",
+      "description": "Microsoft's documented worked example: right-tailed chi-squared probability at x=18.307 with 10 degrees of freedom",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": 0.0500006,
+      "expected_note": "Microsoft's page publishes this example's result as 0.0500006. Independently derived from the documented definition CHIDIST = P(X > x) for a chi-squared random variable: scipy.stats.chi2.sf(18.307, 10) = 0.05000058909139812 -> 0.0500006 at 7 dp"
+    },
+    {
+      "id": "CHIDIST_deg_freedom_truncated",
+      "formula": "=ROUND(CHIDIST(A2,10.9),7)",
+      "description": "A non-integer degrees-of-freedom argument, which the documentation says is truncated",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": 0.0500006,
+      "expected_note": "Excel documents \"If deg_freedom is not an integer, it is truncated\", so 10.9 must behave exactly as 10 and return the documented 0.0500006. Independently checked that this discriminates: a genuine 10.9 degrees of freedom would give chi2.sf(18.307, 10.9) = 0.071937"
+    },
+    {
+      "id": "CHIDIST_one_degree_of_freedom",
+      "formula": "=ROUND(CHIDIST(3,1),7)",
+      "description": "A second point on the distribution, at 1 degree of freedom",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": 0.0832645,
+      "expected_note": "Derived from the same documented right-tail definition: scipy.stats.chi2.sf(3, 1) = 0.08326451666355042 -> 0.0832645 at 7 dp. Equivalently 2*(1 - Phi(sqrt(3))), since a chi-squared variate with 1 degree of freedom is the square of a standard normal"
+    },
+    {
+      "id": "CHIDIST_negative_x_num",
+      "formula": "=CHIDIST(-1,A3)",
+      "description": "A negative x value",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x is negative, CHIDIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHIDIST_zero_deg_freedom_num",
+      "formula": "=CHIDIST(A2,0)",
+      "description": "Zero degrees of freedom",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom < 1 or deg_freedom > 10^10, CHIDIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "CHIDIST_text_argument_value",
+      "formula": "=CHIDIST(\"abc\",A3)",
+      "description": "A non-numeric x argument",
+      "setup_cells": {
+        "A2": 18.307,
+        "A3": 10
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If either argument is nonnumeric, CHIDIST returns the #VALUE! error value.\""
+    }
+  ]
+}

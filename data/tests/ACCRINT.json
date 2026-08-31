@@ -1,0 +1,101 @@
+{
+  "function": "ACCRINT",
+  "cases": [
+    {
+      "id": "ACCRINT_documented_bond",
+      "formula": "=ROUND(ACCRINT(A2,A3,A4,A5,A6,A7,A8),6)",
+      "description": "Microsoft's documented worked example: treasury bond issued 2008-03-01, first interest 2008-08-31, settled 2008-05-01, 10% semiannual coupon on 1000 par, US 30/360 basis",
+      "setup_cells": {
+        "A2": 39508,
+        "A3": 39691,
+        "A4": 39569,
+        "A5": 0.1,
+        "A6": 1000,
+        "A7": 2,
+        "A8": 0
+      },
+      "expected": 16.666667,
+      "expected_note": "Microsoft's page publishes this example's result as 16.666667. Independently derived from the documented ACCRINTM-style day-count: serial 39508 = 2008-03-01 (issue), 39569 = 2008-05-01 (settlement), so on the documented US (NASD) 30/360 basis (basis 0) A = (5-3)*30 + (1-1) = 60 accrued days and D = 360, giving par*rate*A/D = 1000*0.1*60/360 = 16.66666667 -> 16.666667 at 6 dp"
+    },
+    {
+      "id": "ACCRINT_documented_calc_false",
+      "formula": "=ROUND(ACCRINT(DATE(2008,3,5),A3,A4,A5,A6,A7,A8,FALSE),6)",
+      "description": "Same terms but issued 2008-03-05, with calc_method FALSE",
+      "setup_cells": {
+        "A2": 39508,
+        "A3": 39691,
+        "A4": 39569,
+        "A5": 0.1,
+        "A6": 1000,
+        "A7": 2,
+        "A8": 0
+      },
+      "expected": 15.555556,
+      "expected_note": "Microsoft's page publishes this example's result as 15.555556. Re-derived on the same 30/360 basis: 2008-03-05 to 2008-05-01 is (5-3)*30 + (1-5) = 56 days, so 1000*0.1*56/360 = 15.55555556 -> 15.555556 at 6 dp"
+    },
+    {
+      "id": "ACCRINT_documented_calc_true",
+      "formula": "=ROUND(ACCRINT(DATE(2008,4,5),A3,A4,A5,A6,A7,A8,TRUE),7)",
+      "description": "Same terms but issued 2008-04-05, with calc_method TRUE",
+      "setup_cells": {
+        "A2": 39508,
+        "A3": 39691,
+        "A4": 39569,
+        "A5": 0.1,
+        "A6": 1000,
+        "A7": 2,
+        "A8": 0
+      },
+      "expected": 7.2222222,
+      "expected_note": "Microsoft's page publishes this example's result as 7.2222222. Re-derived on the same 30/360 basis: 2008-04-05 to 2008-05-01 is (5-4)*30 + (1-5) = 26 days, so 1000*0.1*26/360 = 7.22222222 -> 7.2222222 at 7 dp"
+    },
+    {
+      "id": "ACCRINT_bad_frequency_num",
+      "formula": "=ACCRINT(A2,A3,A4,A5,A6,3,A8)",
+      "description": "A coupon frequency of 3 is not one of the permitted 1, 2 or 4",
+      "setup_cells": {
+        "A2": 39508,
+        "A3": 39691,
+        "A4": 39569,
+        "A5": 0.1,
+        "A6": 1000,
+        "A7": 2,
+        "A8": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If frequency is any number other than 1, 2, or 4, ACCRINT returns the #NUM! error value.\""
+    },
+    {
+      "id": "ACCRINT_zero_rate_num",
+      "formula": "=ACCRINT(A2,A3,A4,0,A6,A7,A8)",
+      "description": "A coupon rate of zero is outside the documented domain",
+      "setup_cells": {
+        "A2": 39508,
+        "A3": 39691,
+        "A4": 39569,
+        "A5": 0.1,
+        "A6": 1000,
+        "A7": 2,
+        "A8": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If rate <= 0 or if par <= 0, ACCRINT returns the #NUM! error value.\""
+    },
+    {
+      "id": "ACCRINT_issue_after_settlement_num",
+      "formula": "=ACCRINT(A4,A3,A2,A5,A6,A7,A8)",
+      "description": "Issue date later than the settlement date (arguments A2 and A4 swapped)",
+      "setup_cells": {
+        "A2": 39508,
+        "A3": 39691,
+        "A4": 39569,
+        "A5": 0.1,
+        "A6": 1000,
+        "A7": 2,
+        "A8": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If issue >= settlement, ACCRINT returns the #NUM! error value.\" Here issue = serial 39569 (2008-05-01) and settlement = 39508 (2008-03-01)"
+    }
+  ]
+}

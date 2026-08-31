@@ -1,0 +1,33 @@
+{
+  "function": "BESSELK",
+  "cases": [
+    {
+      "id": "BESSELK_documented_1_5_order_1",
+      "formula": "=ROUND(BESSELK(1.5,1),8)",
+      "description": "Microsoft's documented worked example: modified Bessel function K at x=1.5, order 1",
+      "expected": 0.2773878,
+      "expected_note": "Microsoft's page publishes this example's result as 0.277387804. Independently re-derived to 20 significant digits with mpmath: besselk(1, 1.5) = 0.27738780045684381609, so the correct 9-dp value is 0.277387800 and the page's trailing ...804 is off by 3.5e-09. Asserting at 8 dp (0.2773878) is the deepest precision at which the published figure and the true value agree"
+    },
+    {
+      "id": "BESSELK_order_truncated",
+      "formula": "=ROUND(BESSELK(1.5,1.4),8)",
+      "description": "A non-integer order, which the documentation says is truncated toward zero",
+      "expected": 0.2773878,
+      "expected_note": "Excel documents \"If n is not an integer, it is truncated\", so order 1.4 must behave exactly as order 1 and return the documented 0.2773878. Independently verified with mpmath: a genuine fractional-order besselk(1.4, 1.5) would be about 0.35394, so this case separates truncation from fractional-order evaluation"
+    },
+    {
+      "id": "BESSELK_negative_order_num",
+      "formula": "=BESSELK(1.5,-1)",
+      "description": "A negative order",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If n < 0, BESSELK returns the #NUM! error value.\""
+    },
+    {
+      "id": "BESSELK_text_x_value",
+      "formula": "=BESSELK(\"abc\",1)",
+      "description": "A non-numeric x argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, BESSELK returns the #VALUE! error value.\""
+    }
+  ]
+}

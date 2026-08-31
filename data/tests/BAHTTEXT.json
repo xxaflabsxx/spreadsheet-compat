@@ -1,0 +1,32 @@
+{
+  "function": "BAHTTEXT",
+  "cases": [
+    {
+      "id": "BAHTTEXT_documented_1234",
+      "formula": "=BAHTTEXT(A2)",
+      "description": "Microsoft's documented worked example: 1234 rendered as Thai text with a Baht suffix",
+      "setup_cells": {
+        "A2": 1234
+      },
+      "expected": "หนึ่งพันสองร้อยสามสิบสี่บาทถ้วน",
+      "expected_note": "Microsoft's page publishes this example's result as the Thai string for \"one thousand two hundred thirty four Baht\", transcribed here character for character from the page: หนึ่ง (one) พัน (thousand) สอง (two) ร้อย (hundred) สาม (three) สิบ (ten) สี่ (four) บาท (Baht) ถ้วน (exactly). The documented output is a 31-character Thai string"
+    },
+    {
+      "id": "BAHTTEXT_returns_text",
+      "formula": "=ISTEXT(BAHTTEXT(A2))",
+      "description": "The result is a text value, not a number",
+      "setup_cells": {
+        "A2": 1234
+      },
+      "expected": true,
+      "expected_note": "Excel documents BAHTTEXT as converting \"a number to Thai text\", so the result is a text value and ISTEXT is TRUE. This case survives any locale-dependent difference in the Baht wording, unlike the exact-string case above"
+    },
+    {
+      "id": "BAHTTEXT_text_argument_value",
+      "formula": "=BAHTTEXT(\"abc\")",
+      "description": "A non-numeric text argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents the single argument as \"A number you want to convert to text, or a reference to a cell containing a number, or a formula that evaluates to a number\"; non-numeric text is the wrong argument type, which is Excel's documented #VALUE! case"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "function": "BINOMDIST",
+  "cases": [
+    {
+      "id": "BINOMDIST_doc_pmf",
+      "formula": "=ROUND(BINOMDIST(A2,A3,A4,FALSE),7)",
+      "description": "Microsoft's documented worked example for the legacy (pre-2010) name: probability of exactly 6 successes in 10 trials at p=0.5",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": 0.2050781,
+      "expected_note": "Microsoft's page publishes this example's result as 0.2050781, the same figure as the modern BINOM.DIST page. Independently derived from the documented mass function: C(10,6)*0.5^10 = 210/1024 = 0.205078125 exactly -> 0.2050781 at 7 dp"
+    },
+    {
+      "id": "BINOMDIST_cumulative",
+      "formula": "=ROUND(BINOMDIST(A2,A3,A4,TRUE),7)",
+      "description": "The same parameters with cumulative TRUE",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": 0.828125,
+      "expected_note": "Excel documents the cumulative form as \"the probability that there are at most number_s successes\". Independently derived: sum over k = 0..6 of C(10,k)*0.5^10 = 848/1024 = 0.828125 exactly"
+    },
+    {
+      "id": "BINOMDIST_successes_above_trials_num",
+      "formula": "=BINOMDIST(11,A3,A4,FALSE)",
+      "description": "More successes than trials",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If number_s < 0 or number_s > trials, BINOMDIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "BINOMDIST_negative_probability_num",
+      "formula": "=BINOMDIST(A2,A3,-0.1,FALSE)",
+      "description": "A negative success probability",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability_s < 0 or probability_s > 1, BINOMDIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "BINOMDIST_text_argument_value",
+      "formula": "=BINOMDIST(A2,\"abc\",A4,FALSE)",
+      "description": "A non-numeric trials argument",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If number_s, trials, or probability_s is nonnumeric, BINOMDIST returns the #VALUE! error value.\""
+    }
+  ]
+}

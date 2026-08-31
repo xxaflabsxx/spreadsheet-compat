@@ -1,0 +1,33 @@
+{
+  "function": "ACOS",
+  "cases": [
+    {
+      "id": "ACOS_documented_radians",
+      "formula": "=ROUND(ACOS(-0.5),9)",
+      "description": "Microsoft's documented worked example: arccosine of -0.5 in radians (2*pi/3)",
+      "expected": 2.094395102,
+      "expected_note": "Microsoft's page publishes this example's result as 2.094395102. Independently verified in Python: math.acos(-0.5) = 2.0943951023931957, which is exactly 2*pi/3 -> 2.094395102 at 9 dp"
+    },
+    {
+      "id": "ACOS_documented_degrees",
+      "formula": "=ROUND(ACOS(-0.5)*180/PI(),9)",
+      "description": "The same example converted to degrees, as the documented Remark suggests",
+      "expected": 120.0,
+      "expected_note": "Microsoft's page publishes this example's result as 120. Independently verified: 2*pi/3 radians = 120 degrees exactly; the double-precision product is 120.00000000000001, which is 120 at 9 dp"
+    },
+    {
+      "id": "ACOS_out_of_domain_num",
+      "formula": "=ACOS(2)",
+      "description": "An argument above 1 is outside the documented domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents that number \"must be from -1 to 1\"; an argument outside the domain of a real-valued math function is Excel's documented #NUM! case (\"a formula or function contains invalid numeric values\")"
+    },
+    {
+      "id": "ACOS_text_argument_value",
+      "formula": "=ACOS(\"abc\")",
+      "description": "A non-numeric text argument",
+      "expected": "#VALUE!",
+      "expected_note": "The sibling arccosine/arccotangent page for the same function family documents this explicitly (\"If Number is a non-numeric value, ACOT returns the #VALUE! error value\"); #VALUE! is Excel's documented error for an argument of the wrong type"
+    }
+  ]
+}

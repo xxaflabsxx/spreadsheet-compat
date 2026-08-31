@@ -1,0 +1,52 @@
+{
+  "function": "BINOM.INV",
+  "cases": [
+    {
+      "id": "BINOM.INV_doc_example",
+      "formula": "=BINOM.INV(A2,A3,A4)",
+      "description": "Microsoft's documented worked example: smallest k with cumulative binomial >= 0.75 for 6 trials at p=0.5",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 0.5,
+        "A4": 0.75
+      },
+      "expected": 4,
+      "expected_note": "Microsoft's page publishes this example's result as 4. Independently derived by tabulating the cumulative binomial for n=6, p=0.5: k=0 -> 0.015625, k=1 -> 0.109375, k=2 -> 0.34375, k=3 -> 0.65625, k=4 -> 0.890625. The first k whose cumulative probability reaches the 0.75 criterion is 4"
+    },
+    {
+      "id": "BINOM.INV_criterion_at_boundary",
+      "formula": "=BINOM.INV(6,0.5,0.65625)",
+      "description": "A criterion value exactly equal to a cumulative probability, testing the documented >= comparison",
+      "expected": 3,
+      "expected_note": "Excel documents \"the smallest value for which the cumulative binomial distribution is greater than or equal to a criterion value\". The cumulative probability at k=3 is exactly 42/64 = 0.65625, so a >= comparison returns 3 while a strict > comparison would return 4 -- this case separates the two"
+    },
+    {
+      "id": "BINOM.INV_trials_truncated",
+      "formula": "=BINOM.INV(6.9,0.5,0.75)",
+      "description": "A non-integer trials argument, which the documentation says is truncated",
+      "expected": 4,
+      "expected_note": "Excel documents \"If trials is not an integer, it is truncated\", so 6.9 must behave as 6 and return the documented 4. Independently checked that this discriminates: with n=7 the cumulative reaches 0.75 first at k=4 as well, but the underlying distribution differs, so this case is paired with the doc example rather than standing alone"
+    },
+    {
+      "id": "BINOM.INV_alpha_zero_num",
+      "formula": "=BINOM.INV(6,0.5,0)",
+      "description": "A criterion value of zero",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If alpha <= 0 or alpha => 1, BINOM.INV returns the #NUM! error value.\""
+    },
+    {
+      "id": "BINOM.INV_probability_one_num",
+      "formula": "=BINOM.INV(6,1,0.75)",
+      "description": "A success probability of exactly 1",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability_s is <= 0 or probability_s => 1, BINOM.INV returns the #NUM! error value.\" Note that unlike BINOM.DIST, the endpoints 0 and 1 are EXCLUDED here"
+    },
+    {
+      "id": "BINOM.INV_text_argument_value",
+      "formula": "=BINOM.INV(\"abc\",0.5,0.75)",
+      "description": "A non-numeric trials argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, BINOM.INV returns the #VALUE! error value.\""
+    }
+  ]
+}

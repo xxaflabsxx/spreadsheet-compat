@@ -1,0 +1,33 @@
+{
+  "function": "ASIN",
+  "cases": [
+    {
+      "id": "ASIN_documented_radians",
+      "formula": "=ROUND(ASIN(-0.5),9)",
+      "description": "Microsoft's documented worked example: arcsine of -0.5 in radians (-pi/6)",
+      "expected": -0.523598776,
+      "expected_note": "Microsoft's page publishes this example's result as -0.523598776. Independently verified in Python: math.asin(-0.5) = -0.5235987755982989, which is exactly -pi/6 -> -0.523598776 at 9 dp"
+    },
+    {
+      "id": "ASIN_documented_degrees",
+      "formula": "=ROUND(ASIN(-0.5)*180/PI(),9)",
+      "description": "The same example converted to degrees, as the documented Remark suggests",
+      "expected": -30.0,
+      "expected_note": "Microsoft's page publishes this example's result as -30. Independently verified: -pi/6 radians = -30 degrees exactly; the double-precision product is -30.000000000000004, which is -30 at 9 dp"
+    },
+    {
+      "id": "ASIN_out_of_domain_num",
+      "formula": "=ASIN(2)",
+      "description": "An argument above 1 is outside the documented domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents that number \"must be from -1 to 1\"; an argument outside the domain of a real-valued math function is Excel's documented #NUM! case"
+    },
+    {
+      "id": "ASIN_text_argument_value",
+      "formula": "=ASIN(\"abc\")",
+      "description": "A non-numeric text argument",
+      "expected": "#VALUE!",
+      "expected_note": "#VALUE! is Excel's documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-trigonometric family"
+    }
+  ]
+}

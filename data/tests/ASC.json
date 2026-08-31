@@ -1,0 +1,33 @@
+{
+  "function": "ASC",
+  "cases": [
+    {
+      "id": "ASC_halfwidth_unchanged",
+      "formula": "=ASC(\"EXCEL\")",
+      "description": "Microsoft's documented worked example: text with no full-width characters is returned unchanged",
+      "expected": "EXCEL",
+      "expected_note": "Microsoft's page publishes this example verbatim: '=ASC(\"EXCEL\") equals \"EXCEL\"'. The documentation adds \"If text does not contain any full-width letters, text is not changed\""
+    },
+    {
+      "id": "ASC_fullwidth_latin_to_halfwidth",
+      "formula": "=ASC(\"ＥＸＣＥＬ\")",
+      "description": "Full-width (double-byte) Latin letters converted to half-width",
+      "expected": "EXCEL",
+      "expected_note": "The page's second example is the same word in full-width characters, but it is rendered as inline images so the literal argument cannot be copied from the page; this case reconstructs it from the documented rule that the function \"changes full-width (double-byte) characters to half-width (single-byte) characters\". The argument is U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), whose documented half-width forms are the ASCII letters EXCEL"
+    },
+    {
+      "id": "ASC_fullwidth_digits_and_space",
+      "formula": "=ASC(\"Ａ１２３　\")",
+      "description": "Full-width letter, full-width digits and an ideographic space",
+      "expected": "A123 ",
+      "expected_note": "Derived from the same documented full-width-to-half-width rule: U+FF21 -> A, U+FF11/FF12/FF13 -> 1/2/3, and U+3000 IDEOGRAPHIC SPACE -> U+0020 half-width space, giving the five-character string \"A123 \" (trailing half-width space)"
+    },
+    {
+      "id": "ASC_length_preserved",
+      "formula": "=LEN(ASC(\"ＥＸＣＥＬ\"))",
+      "description": "The conversion is character-for-character, so the length is unchanged",
+      "expected": 5,
+      "expected_note": "Excel documents ASC as changing full-width characters to half-width characters, a one-for-one character mapping rather than an encoding change, so a five-character input yields a five-character result. This case separates a genuine width conversion from a byte-level reinterpretation"
+    }
+  ]
+}

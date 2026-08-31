@@ -88,6 +88,28 @@ _XLFN_FUNCTIONS = {
     "DAYS",
     "CEILING.MATH", "FLOOR.MATH",
     "XOR",  # Excel 2013 addition -- yes, even XOR needs the prefix
+    # Excel 2010 statistical renames and Excel 2013 trigonometric additions
+    # needed for the alphabetical corpus batch (ACCRINT..CHIDIST). ACOT/ACOTH
+    # are Excel 2013 additions and are on XlsxWriter's future-function table
+    # even though their legacy neighbours ACOS/ASIN/ATAN are not; the BETA./
+    # BINOM./CHISQ./CONFIDENCE. dotted names are the 2010 renames of BETADIST/
+    # BETAINV/BINOMDIST/CHIDIST/CHIINV/CHITEST/CONFIDENCE, whose UNDOTTED
+    # legacy forms predate 2007 and correctly need no prefix.
+    "ACOT", "ACOTH",
+    "BETA.DIST", "BETA.INV",
+    "BINOM.DIST", "BINOM.DIST.RANGE", "BINOM.INV",
+    "CHISQ.DIST", "CHISQ.DIST.RT", "CHISQ.INV", "CHISQ.INV.RT", "CHISQ.TEST",
+    "CONFIDENCE.NORM", "CONFIDENCE.T",
+    # BAHTTEXT is NOT on XlsxWriter's future-function table and predates 2007,
+    # but it is nevertheless stored prefixed: LibreOffice's own OOXML function
+    # table (sc/source/filter/oox/formulabase.cxx) tags BAHTTEXT
+    # FuncFlags::MACROCALL, i.e. "stored as macro call in Excel (_xlfn.
+    # prefix)". Verified empirically on all four pinned builds (24.2.0.3,
+    # 24.8.7.2, 25.2.0.3, 25.8.7.3): "=_xlfn.BAHTTEXT(1234)" returns the exact
+    # Thai string Microsoft documents, while the unprefixed "=BAHTTEXT(1234)"
+    # returns #NAME? on every one of them. Without this entry the harness would
+    # have recorded BAHTTEXT as unsupported in LibreOffice, which is false.
+    "BAHTTEXT",
 }
 
 

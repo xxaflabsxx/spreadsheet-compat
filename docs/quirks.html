@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>128 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 128 divergences, every one executed — not copied from docs.">
+<title>171 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 171 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="128 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 128 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="171 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 171 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,13 +324,143 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">128 quirks found across 72 functions
-(78 in LibreOffice, 50 in Google Sheets).
+<p class="search-hint">171 quirks found across 93 functions
+(121 in LibreOffice, 50 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <ul class="quirks-list">
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrint.html">ACCRINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACCRINT(A2,A3,A4,A5,A6,3,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If frequency is any number other than 1, 2, or 4, ACCRINT returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrint.html">ACCRINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(ACCRINT(DATE(2008,3,5),A3,A4,A5,A6,A7,A8,FALSE),6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">15.555556</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 15.555556. Re-derived on the same 30/360 basis: 2008-03-05 to 2008-05-01 is (5-3)*30 + (1-5) = 56 days, so 1000*0.1*56/360 = 15.55555556 -&gt; 15.555556 at 6 dp; MISMATCH vs expected: expected 15.555556, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrint.html">ACCRINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(ACCRINT(DATE(2008,4,5),A3,A4,A5,A6,A7,A8,TRUE),7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">7.2222222</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 7.2222222. Re-derived on the same 30/360 basis: 2008-04-05 to 2008-05-01 is (5-4)*30 + (1-5) = 26 days, so 1000*0.1*26/360 = 7.22222222 -&gt; 7.2222222 at 7 dp; MISMATCH vs expected: expected 7.2222222, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrint.html">ACCRINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACCRINT(A4,A3,A2,A5,A6,A7,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If issue &gt;= settlement, ACCRINT returns the #NUM! error value.&#34; Here issue = serial 39569 (2008-05-01) and settlement = 39508 (2008-03-01); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrint.html">ACCRINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACCRINT(A2,A3,A4,0,A6,A7,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If rate &lt;= 0 or if par &lt;= 0, ACCRINT returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrintm.html">ACCRINTM</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACCRINTM(A2,A3,A4,A5,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If basis &lt; 0 or if basis &gt; 4, ACCRINTM returns the #NUM! error value.&#34; The documented basis table stops at 4 (European 30/360); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrintm.html">ACCRINTM</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACCRINTM(A3,A2,A4,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If issue &gt;= settlement, ACCRINTM returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/accrintm.html">ACCRINTM</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACCRINTM(A2,A3,0,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If rate &lt;= 0 or if par &lt;= 0, ACCRINTM returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/acosh.html">ACOSH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACOSH(0.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Excel documents that number must be &#34;any real number equal to or greater than 1&#34;; below that the inverse hyperbolic cosine is not real, which is Excel&#39;s documented #NUM! case; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/acoth.html">ACOTH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ACOTH(0.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Excel documents: &#34;If Number is less than 1, ACOTH returns the #NUM! error value.&#34; (The page&#39;s next line repeats the rule for the absolute value but misnames the function as ACOT and misnames the error as #VALUE!; the #NUM! statement is the one that names ACOTH, and 0.5 satisfies both stated conditions); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/aggregate.html">AGGREGATE</a>
@@ -346,6 +476,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,A6,0.4,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">820</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents the same #NUM! rule for a life &#34;between ... 2 and 3&#34;; here 1/0.4 = 2.5 years; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 820</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,A6,0.22,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">696</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If the life of assets is between 0 (zero) and 1, 1 and 2, 2 and 3, or 4 and 5, the #NUM! error value is returned.&#34; Here 1/0.22 = 4.545 years falls in the excluded 4-to-5 band (the documented coefficient table only covers 3-4, 5-6 and &gt;6); MISMATCH vs expected: expected &#39;#NUM!&#39;, got 696</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/arraytotext.html">ARRAYTOTEXT</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=ARRAYTOTEXT({1,2;3,4})</div>
@@ -447,6 +603,383 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>MISMATCH vs expected: expected &#39;{&#34;a&#34;,&#34;b&#34;}&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/asc.html">ASC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ASC(&#34;Ａ１２３　&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">A123　</dd>
+    <dt>Documented / expected</dt><dd class="mono">A123 </dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Derived from the same documented full-width-to-half-width rule: U+FF21 -&gt; A, U+FF11/FF12/FF13 -&gt; 1/2/3, and U+3000 IDEOGRAPHIC SPACE -&gt; U+0020 half-width space, giving the five-character string &#34;A123 &#34; (trailing half-width space); MISMATCH vs expected: expected &#39;A123 &#39;, got &#39;A123\u3000&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/atan2.html">ATAN2</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ATAN2(0,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Excel documents: &#34;If both x_num and y_num are 0, ATAN2 returns the #DIV/0! error value.&#34; Note this is #DIV/0!, not the #NUM! that most out-of-domain math arguments produce; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/atanh.html">ATANH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ATANH(1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Excel documents &#34;Number must be between -1 and 1 (excluding -1 and 1)&#34;; at 1 the inverse hyperbolic tangent diverges, which is Excel&#39;s documented #NUM! case; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besseli.html">BESSELI</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BESSELI(1.5,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELI returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselj.html">BESSELJ</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BESSELJ(1.9,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELJ returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselk.html">BESSELK</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BESSELK(1.5,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELK returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/bessely.html">BESSELY</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BESSELY(2.5,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELY returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/beta.dist.html">BETA.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETA.DIST(A2,0,A4,TRUE,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or beta &lt;= 0, BETA.DIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/beta.dist.html">BETA.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETA.DIST(4,A3,A4,TRUE,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt; A, x &gt; B, or A = B, BETA.DIST returns the #NUM! error value.&#34; Here x = 4 exceeds B = 3; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/beta.inv.html">BETA.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETA.INV(0.5,8,0,1,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or beta &lt;= 0, BETA.INV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/beta.inv.html">BETA.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETA.INV(1.5,8,10,1,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents the same rule for probability &gt; 1; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/beta.inv.html">BETA.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETA.INV(0,8,10,1,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt;= 0 or probability &gt; 1, BETA.INV returns the #NUM! error value.&#34; Note the asymmetry -- probability = 1 is allowed but probability = 0 is not; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/betadist.html">BETADIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETADIST(A2,A3,0,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or beta &lt;= 0, BETADIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/betadist.html">BETADIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETADIST(A2,A3,A4,2,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents the same rule for the degenerate case A = B, where the rescaling (x-A)/(B-A) would divide by zero -- note the documented error is #NUM!, not #DIV/0!; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/betadist.html">BETADIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETADIST(0,A3,A4,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt; A, x &gt; B, or A = B, BETADIST returns the #NUM! error value.&#34; Here x = 0 is below A = 1; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/betainv.html">BETAINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETAINV(0.5,0,10,1,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or beta &lt;= 0, BETAINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/betainv.html">BETAINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BETAINV(0,8,10,1,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt;= 0 or probability &gt; 1, BETAINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.html">BINOM.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOM.DIST(A2,A3,1.5,FALSE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability_s &lt; 0 or probability_s &gt; 1, BINOM.DIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.html">BINOM.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOM.DIST(11,A3,A4,FALSE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If number_s &lt; 0 or number_s &gt; trials, BINOM.DIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.range.html">BINOM.DIST.RANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(BINOM.DIST.RANGE(60,0.75,45,50),3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.524</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 0.524 (52.4%). Independently derived by summing the binomial mass over k = 45..50 inclusive (the documented equation sums from s to s2): 0.5236297934718872 -&gt; 0.524 at 3 dp. This case also pins the INCLUSIVE upper bound: excluding k=50 would give 0.482911; MISMATCH vs expected: expected 0.524, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.range.html">BINOM.DIST.RANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(BINOM.DIST.RANGE(60,0.75,48),3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.084</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 0.084 (8.4%). Independently derived from the documented summation with s2 omitted (so the sum has the single term k=48): C(60,48)*0.75^48*0.25^12 = 0.0839749674290475 -&gt; 0.084 at 3 dp; MISMATCH vs expected: expected 0.084, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.range.html">BINOM.DIST.RANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOM.DIST.RANGE(60,1.5,48)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents that Probability_s &#34;must be greater than or equal to 0 and less than or equal to 1&#34;, with #NUM! for arguments outside their constraints; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.range.html">BINOM.DIST.RANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(BINOM.DIST.RANGE(60,0.75,48),6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.083975</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft rounds this example to 0.084 on the page. Re-derived exactly from the documented equation: C(60,48)*0.75^48*0.25^12 = 0.0839749674290475 -&gt; 0.083975 at 6 dp. Asserting at 6 dp catches an engine that agrees to the published 3 dp but computes the tail differently; MISMATCH vs expected: expected 0.083975, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.range.html">BINOM.DIST.RANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOM.DIST.RANGE(60,0.75,61)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents that Number_s &#34;must be greater than or equal to 0 and less than or equal to Trials&#34; and that &#34;If any arguments are outside of their constraints, BINOM.DIST.RANGE returns the #NUM! error value&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.dist.range.html">BINOM.DIST.RANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOM.DIST.RANGE(60,0.75,&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If any arguments are non-numeric values, BINOM.DIST.RANGE returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.inv.html">BINOM.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOM.INV(6,0.5,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or alpha =&gt; 1, BINOM.INV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binom.inv.html">BINOM.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOM.INV(6,1,0.75)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">6</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability_s is &lt;= 0 or probability_s =&gt; 1, BINOM.INV returns the #NUM! error value.&#34; Note that unlike BINOM.DIST, the endpoints 0 and 1 are EXCLUDED here; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 6</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binomdist.html">BINOMDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOMDIST(A2,A3,-0.1,FALSE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability_s &lt; 0 or probability_s &gt; 1, BINOMDIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/binomdist.html">BINOMDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=BINOMDIST(11,A3,A4,FALSE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If number_s &lt; 0 or number_s &gt; trials, BINOMDIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -512,6 +1045,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft docs: CHAR takes &#34;A number between 1 and 255 specifying which character you want.&#34; Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;_x0000_&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chidist.html">CHIDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=CHIDIST(-1,A3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is negative, CHIDIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chidist.html">CHIDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=CHIDIST(A2,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If deg_freedom &lt; 1 or deg_freedom &gt; 10^10, CHIDIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">

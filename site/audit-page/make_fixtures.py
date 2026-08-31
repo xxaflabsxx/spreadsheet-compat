@@ -11,7 +11,17 @@ snapshot 2026-08-23):
   SUM, VLOOKUP, IF   x&g&l documented; lv=quirky for SUM/VLOOKUP, supported for IF
   AGGREGATE          Excel-only vs Sheets (g:false); LibreOffice lv=supported
   GROUPBY            Excel-only (g:false); LibreOffice lv=unsupported (executed #NAME?)
-  BAHTTEXT           Excel-only (g:false); LibreOffice documented, lv=null (doc-only)
+  ODDLYIELD          Excel-only (g:false); LibreOffice documented, lv=null (doc-only)
+                     NB: this slot exists purely to exercise the DOCUMENTED-ONLY
+                     verdict basis, so it must name a function the corpus has not
+                     executed yet. It was BAHTTEXT until 2026-08-31, when the
+                     alphabetical corpus push executed BAHTTEXT on all four
+                     LibreOffice builds and lv stopped being null. The corpus
+                     advances alphabetically, so when ODDLYIELD is executed in
+                     turn, pick the next still-unexecuted x&&l&&!g function that
+                     sorts between AGGREGATE and TEXTSPLIT (the at-risk ordering
+                     assertions in test.mjs depend on that), update test.mjs, and
+                     re-run this script.
   TEXTSPLIT          g:false; LibreOffice lv=supported, lnew=25.8.7.3
   FILTER             x&g documented; LibreOffice lv=quirky
   GOOGLEFINANCE      Sheets-only (x:false); l:false, lv=null
@@ -41,7 +51,7 @@ def verdict_mix():
     ws["C4"] = "=GROUPBY(A1:A5,B1:B5,SUM)"
     ws["C5"] = "=FILTER(A1:A5,B1:B5>10)"
     ws["C6"] = '=TEXTSPLIT("a,b",",")'
-    ws["C7"] = "=BAHTTEXT(A1)"
+    ws["C7"] = "=ODDLYIELD(A1,A2,A3,A4,A5,B1,B2)"
 
     ws2 = wb.create_sheet("Mix")
     ws2["A1"] = '=GOOGLEFINANCE("GOOG")'

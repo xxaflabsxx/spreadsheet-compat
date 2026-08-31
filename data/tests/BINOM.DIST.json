@@ -1,0 +1,77 @@
+{
+  "function": "BINOM.DIST",
+  "cases": [
+    {
+      "id": "BINOM.DIST_doc_pmf",
+      "formula": "=ROUND(BINOM.DIST(A2,A3,A4,FALSE),7)",
+      "description": "Microsoft's documented worked example: probability of exactly 6 successes in 10 trials at p=0.5",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": 0.2050781,
+      "expected_note": "Microsoft's page publishes this example's result as 0.2050781. Independently derived from the documented probability mass function COMBIN(n,x)*p^x*(1-p)^(n-x): C(10,6)*0.5^10 = 210/1024 = 0.205078125 exactly -> 0.2050781 at 7 dp"
+    },
+    {
+      "id": "BINOM.DIST_cumulative",
+      "formula": "=ROUND(BINOM.DIST(A2,A3,A4,TRUE),7)",
+      "description": "The same parameters with cumulative TRUE, giving the probability of at most 6 successes",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": 0.828125,
+      "expected_note": "Excel documents that with cumulative TRUE the function returns \"the probability that there are at most number_s successes\", i.e. the sum of the mass function for k = 0..6. Independently derived: (C(10,0)+...+C(10,6))/1024 = (1+10+45+120+210+252+210)/1024 = 848/1024 = 0.828125 exactly"
+    },
+    {
+      "id": "BINOM.DIST_trials_truncated",
+      "formula": "=ROUND(BINOM.DIST(6.9,10.9,A4,FALSE),7)",
+      "description": "Non-integer number_s and trials, which the documentation says are truncated",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": 0.2050781,
+      "expected_note": "Excel documents \"Number_s and trials are truncated to integers\", so 6.9 and 10.9 must behave exactly as 6 and 10 and return the documented 0.205078125. Independently checked that a genuine non-truncating evaluation would differ: with 7 successes in 11 trials the mass is C(11,7)*0.5^11 = 330/2048 = 0.161133"
+    },
+    {
+      "id": "BINOM.DIST_successes_above_trials_num",
+      "formula": "=BINOM.DIST(11,A3,A4,FALSE)",
+      "description": "More successes than trials",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If number_s < 0 or number_s > trials, BINOM.DIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "BINOM.DIST_probability_above_one_num",
+      "formula": "=BINOM.DIST(A2,A3,1.5,FALSE)",
+      "description": "A success probability above 1",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability_s < 0 or probability_s > 1, BINOM.DIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "BINOM.DIST_text_argument_value",
+      "formula": "=BINOM.DIST(\"abc\",A3,A4,FALSE)",
+      "description": "A non-numeric number_s argument",
+      "setup_cells": {
+        "A2": 6,
+        "A3": 10,
+        "A4": 0.5
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If number_s, trials, or probability_s is nonnumeric, BINOM.DIST returns the #VALUE! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "function": "BESSELI",
+  "cases": [
+    {
+      "id": "BESSELI_documented_1_5_order_1",
+      "formula": "=ROUND(BESSELI(1.5,1),8)",
+      "description": "Microsoft's documented worked example: modified Bessel function I at x=1.5, order 1",
+      "expected": 0.98166643,
+      "expected_note": "Microsoft's page publishes this example's result as 0.981666428. Independently re-derived to 20 significant digits with mpmath: besseli(1, 1.5) = 0.98166642857790758565, so the true value rounds to 0.981666429 at 9 dp -- the page's trailing 8 is a TRUNCATION of ...4285 rather than a round. Asserting at 8 dp (0.98166643) is the deepest precision at which the published figure and the true value agree, so a mismatch here is an engine difference and not a documentation artefact"
+    },
+    {
+      "id": "BESSELI_order_truncated",
+      "formula": "=ROUND(BESSELI(1.5,1.9),8)",
+      "description": "A non-integer order, which the documentation says is truncated toward zero",
+      "expected": 0.98166643,
+      "expected_note": "Excel documents \"If n is not an integer, it is truncated\", so order 1.9 must behave exactly as order 1 and return the same 0.98166643 as the documented example above. Independently verified with mpmath: besseli(1, 1.5) = 0.9816664285779076; besseli(1.9, 1.5) would be 0.38286062, so this case distinguishes truncation from a real fractional-order evaluation"
+    },
+    {
+      "id": "BESSELI_negative_order_num",
+      "formula": "=BESSELI(1.5,-1)",
+      "description": "A negative order",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If n < 0, BESSELI returns the #NUM! error value.\""
+    },
+    {
+      "id": "BESSELI_text_x_value",
+      "formula": "=BESSELI(\"abc\",1)",
+      "description": "A non-numeric x argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, BESSELI returns the #VALUE! error value.\""
+    }
+  ]
+}

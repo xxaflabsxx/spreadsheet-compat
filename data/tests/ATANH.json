@@ -1,0 +1,33 @@
+{
+  "function": "ATANH",
+  "cases": [
+    {
+      "id": "ATANH_documented_near_one",
+      "formula": "=ROUND(ATANH(0.76159416),8)",
+      "description": "Microsoft's documented worked example: inverse hyperbolic tangent of 0.76159416",
+      "expected": 1.00000001,
+      "expected_note": "Microsoft's page publishes this example's result as 1.00000001. Independently verified in Python: math.atanh(0.76159416) = 1.0000000096297197 = 0.5*ln(1.76159416/0.23840584) -> 1.00000001 at 8 dp (the argument is tanh(1) rounded to 8 dp, hence the result is 1 plus a small residue rather than exactly 1)"
+    },
+    {
+      "id": "ATANH_documented_negative",
+      "formula": "=ROUND(ATANH(-0.1),9)",
+      "description": "Microsoft's documented worked example: inverse hyperbolic tangent of -0.1",
+      "expected": -0.100335348,
+      "expected_note": "Microsoft's page publishes this example's result as -0.100335348. Independently verified in Python: math.atanh(-0.1) = -0.10033534773107558 -> -0.100335348 at 9 dp"
+    },
+    {
+      "id": "ATANH_at_one_num",
+      "formula": "=ATANH(1)",
+      "description": "An argument of exactly 1 is excluded by the documented open interval",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents \"Number must be between -1 and 1 (excluding -1 and 1)\"; at 1 the inverse hyperbolic tangent diverges, which is Excel's documented #NUM! case"
+    },
+    {
+      "id": "ATANH_text_argument_value",
+      "formula": "=ATANH(\"abc\")",
+      "description": "A non-numeric text argument",
+      "expected": "#VALUE!",
+      "expected_note": "#VALUE! is Excel's documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-hyperbolic family"
+    }
+  ]
+}

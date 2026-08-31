@@ -1,0 +1,69 @@
+{
+  "function": "AMORLINC",
+  "cases": [
+    {
+      "id": "AMORLINC_documented_verbatim",
+      "formula": "=AMORLINC(A2,A3,A4,A5,A6,A7,A7)",
+      "description": "Microsoft's documented worked example, transcribed verbatim including the page's own repeated A7 in the basis position",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": 360,
+      "expected_note": "Microsoft's page publishes this example's result as 360. The published formula passes A7 (0.15) rather than A8 (1) as basis -- an apparent typo on the page -- but a basis of 0.15 truncates to 0 (US 30/360) and the answer is unaffected, because AMORLINC depreciates a full accounting period linearly at cost*rate: 2400*0.15 = 360, with no day-count proration for period 1. Verified in Python; the basis only affects the prorated period 0"
+    },
+    {
+      "id": "AMORLINC_documented_basis_fixed",
+      "formula": "=AMORLINC(A2,A3,A4,A5,A6,A7,A8)",
+      "description": "The same example with the basis argument corrected to A8 (actual basis), as the page's data table intends",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": 360,
+      "expected_note": "Same documented result of 360. A full (non-prorated) accounting period depreciates cost*rate = 2400*0.15 = 360 under the documented linear method regardless of day-count basis, so correcting the page's A7/A8 typo must not change the answer -- this case and the verbatim one above are a paired check of exactly that"
+    },
+    {
+      "id": "AMORLINC_second_full_period",
+      "formula": "=AMORLINC(A2,A3,A4,A5,2,A7,A8)",
+      "description": "The second full accounting period of the same asset",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": 360,
+      "expected_note": "Excel documents AMORLINC as straight-line depreciation with only the first (purchase) period prorated, so every subsequent full period depreciates the same cost*rate = 2400*0.15 = 360. Independently checked that period 2 is not near the end of the asset's life: accumulated depreciation through period 2 is about 131.8 + 360 + 360 = 851.8, well under cost - salvage = 2100, so no salvage clamping applies"
+    },
+    {
+      "id": "AMORLINC_higher_rate_full_period",
+      "formula": "=AMORLINC(A2,A3,A4,A5,1,0.25,A8)",
+      "description": "The same asset at a 25% rate, checking the linear cost*rate relationship directly",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": 600,
+      "expected_note": "Derived from the documented straight-line method: a full period depreciates cost*rate = 2400*0.25 = 600. Accumulated depreciation through period 1 is about 219.7 + 600 = 819.7, under cost - salvage = 2100, so no salvage clamping applies"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "function": "BINOM.DIST.RANGE",
+  "cases": [
+    {
+      "id": "BINOM.DIST.RANGE_doc_single",
+      "formula": "=ROUND(BINOM.DIST.RANGE(60,0.75,48),3)",
+      "description": "Microsoft's documented worked example: probability of exactly 48 successes in 60 trials at p=0.75",
+      "expected": 0.084,
+      "expected_note": "Microsoft's page publishes this example's result as 0.084 (8.4%). Independently derived from the documented summation with s2 omitted (so the sum has the single term k=48): C(60,48)*0.75^48*0.25^12 = 0.0839749674290475 -> 0.084 at 3 dp"
+    },
+    {
+      "id": "BINOM.DIST.RANGE_doc_range",
+      "formula": "=ROUND(BINOM.DIST.RANGE(60,0.75,45,50),3)",
+      "description": "Microsoft's documented worked example: probability of between 45 and 50 successes inclusive",
+      "expected": 0.524,
+      "expected_note": "Microsoft's page publishes this example's result as 0.524 (52.4%). Independently derived by summing the binomial mass over k = 45..50 inclusive (the documented equation sums from s to s2): 0.5236297934718872 -> 0.524 at 3 dp. This case also pins the INCLUSIVE upper bound: excluding k=50 would give 0.482911"
+    },
+    {
+      "id": "BINOM.DIST.RANGE_single_6dp",
+      "formula": "=ROUND(BINOM.DIST.RANGE(60,0.75,48),6)",
+      "description": "The same single-value example asserted at full precision rather than the page's 3 dp",
+      "expected": 0.083975,
+      "expected_note": "Microsoft rounds this example to 0.084 on the page. Re-derived exactly from the documented equation: C(60,48)*0.75^48*0.25^12 = 0.0839749674290475 -> 0.083975 at 6 dp. Asserting at 6 dp catches an engine that agrees to the published 3 dp but computes the tail differently"
+    },
+    {
+      "id": "BINOM.DIST.RANGE_successes_above_trials_num",
+      "formula": "=BINOM.DIST.RANGE(60,0.75,61)",
+      "description": "More successes than trials",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents that Number_s \"must be greater than or equal to 0 and less than or equal to Trials\" and that \"If any arguments are outside of their constraints, BINOM.DIST.RANGE returns the #NUM! error value\""
+    },
+    {
+      "id": "BINOM.DIST.RANGE_probability_above_one_num",
+      "formula": "=BINOM.DIST.RANGE(60,1.5,48)",
+      "description": "A success probability above 1",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents that Probability_s \"must be greater than or equal to 0 and less than or equal to 1\", with #NUM! for arguments outside their constraints"
+    },
+    {
+      "id": "BINOM.DIST.RANGE_text_argument_value",
+      "formula": "=BINOM.DIST.RANGE(60,0.75,\"abc\")",
+      "description": "A non-numeric number_s argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any arguments are non-numeric values, BINOM.DIST.RANGE returns the #VALUE! error value.\""
+    }
+  ]
+}

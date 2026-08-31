@@ -1,0 +1,33 @@
+{
+  "function": "ACOT",
+  "cases": [
+    {
+      "id": "ACOT_documented_two",
+      "formula": "=ROUND(ACOT(2),4)",
+      "description": "Microsoft's documented worked example: arccotangent of 2 in radians",
+      "expected": 0.4636,
+      "expected_note": "Microsoft's page publishes this example's result as 0.4636. Independently verified: acot(2) = atan(1/2) = 0.4636476090008061 -> 0.4636 at 4 dp. (Excel's ACOT returns the principal value in 0..pi, which for a positive argument agrees with atan(1/x))"
+    },
+    {
+      "id": "ACOT_at_zero_half_pi",
+      "formula": "=ROUND(ACOT(0),9)",
+      "description": "The arccotangent of zero, the midpoint of the documented 0..pi output range",
+      "expected": 1.570796327,
+      "expected_note": "Excel documents \"The returned angle is given in radians in the range 0 (zero) to pi\", and cot(pi/2) = 0, so ACOT(0) = pi/2. Independently verified: math.pi/2 = 1.5707963267948966 -> 1.570796327 at 9 dp. This case distinguishes the documented 0..pi principal branch from the atan(1/x) shortcut, which is undefined at 0"
+    },
+    {
+      "id": "ACOT_negative_argument",
+      "formula": "=ROUND(ACOT(-2),9)",
+      "description": "A negative argument, where the documented 0..pi range differs from atan(1/x)",
+      "expected": 2.677945045,
+      "expected_note": "Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -> 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give"
+    },
+    {
+      "id": "ACOT_text_argument_value",
+      "formula": "=ACOT(\"abc\")",
+      "description": "A non-numeric text argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If Number is a non-numeric value, ACOT returns the #VALUE! error value.\""
+    }
+  ]
+}

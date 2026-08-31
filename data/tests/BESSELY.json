@@ -1,0 +1,33 @@
+{
+  "function": "BESSELY",
+  "cases": [
+    {
+      "id": "BESSELY_documented_2_5_order_1",
+      "formula": "=ROUND(BESSELY(2.5,1),9)",
+      "description": "Microsoft's documented worked example: Weber (Neumann) Bessel function Y at x=2.5, order 1",
+      "expected": 0.145918138,
+      "expected_note": "Microsoft's page publishes this example's result as 0.145918138. Independently re-derived to 20 significant digits with mpmath: bessely(1, 2.5) = 0.14591813796678579888 -> 0.145918138 at 9 dp, an exact match (unlike the sibling BESSELI/BESSELJ/BESSELK pages, whose published last digits are truncated or wrong)"
+    },
+    {
+      "id": "BESSELY_order_truncated",
+      "formula": "=ROUND(BESSELY(2.5,1.6),9)",
+      "description": "A non-integer order, which the documentation says is truncated toward zero",
+      "expected": 0.145918138,
+      "expected_note": "Excel documents \"If n is not an integer, it is truncated\", so order 1.6 must behave exactly as order 1. Independently verified with mpmath: a genuine fractional-order bessely(1.6, 2.5) would be about -0.19313, so this case separates truncation from fractional-order evaluation"
+    },
+    {
+      "id": "BESSELY_negative_order_num",
+      "formula": "=BESSELY(2.5,-1)",
+      "description": "A negative order",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If n < 0, BESSELY returns the #NUM! error value.\""
+    },
+    {
+      "id": "BESSELY_text_x_value",
+      "formula": "=BESSELY(\"abc\",1)",
+      "description": "A non-numeric x argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, BESSELY returns the #VALUE! error value.\""
+    }
+  ]
+}

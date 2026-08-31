@@ -1,0 +1,69 @@
+{
+  "function": "AMORDEGRC",
+  "cases": [
+    {
+      "id": "AMORDEGRC_documented_period_1",
+      "formula": "=AMORDEGRC(A2,A3,A4,A5,A6,A7,A8)",
+      "description": "Microsoft's documented worked example: 2400 asset bought 2008-08-19, first period ends 2008-12-31, salvage 300, period 1, 15% rate, actual basis",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": 776,
+      "expected_note": "Microsoft's page publishes this example's result as 776. Independently derived from the documented depreciation-coefficient rule: life = 1/rate = 6.667 years, which is \"More than 6 years\", so the documented coefficient is 2.5 and the effective rate is 0.15*2.5 = 0.375. Serial 39679 = 2008-08-19 and 39813 = 2008-12-31, so on basis 1 (actual) the prorated first period is 134/366 of a year (2008 is a leap year) and period 0 depreciates ROUND(2400*0.375*134/366) = ROUND(329.508) = 330. Period 1 then depreciates ROUND((2400-330)*0.375) = ROUND(776.25) = 776, reproducing the published figure exactly"
+    },
+    {
+      "id": "AMORDEGRC_period_0_prorated",
+      "formula": "=AMORDEGRC(A2,A3,A4,A5,0,A7,A8)",
+      "description": "The prorated period-0 depreciation implied by the documented example's own arithmetic",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": 330,
+      "expected_note": "Not published directly by Microsoft, but forced by the published period-1 figure: 776 = ROUND((2400 - period0)*0.375) has period0 = 330 as its only integer solution consistent with the documented mid-period proration ROUND(cost * rate * coefficient * days/year) = ROUND(2400*0.375*134/366) = ROUND(329.508) = 330. Verified in Python"
+    },
+    {
+      "id": "AMORDEGRC_life_between_4_and_5_num",
+      "formula": "=AMORDEGRC(A2,A3,A4,A5,A6,0.22,A8)",
+      "description": "A 22% rate gives a 4.55-year asset life, which the documentation excludes",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If the life of assets is between 0 (zero) and 1, 1 and 2, 2 and 3, or 4 and 5, the #NUM! error value is returned.\" Here 1/0.22 = 4.545 years falls in the excluded 4-to-5 band (the documented coefficient table only covers 3-4, 5-6 and >6)"
+    },
+    {
+      "id": "AMORDEGRC_life_between_2_and_3_num",
+      "formula": "=AMORDEGRC(A2,A3,A4,A5,A6,0.4,A8)",
+      "description": "A 40% rate gives a 2.5-year asset life, which the documentation excludes",
+      "setup_cells": {
+        "A2": 2400,
+        "A3": 39679,
+        "A4": 39813,
+        "A5": 300,
+        "A6": 1,
+        "A7": 0.15,
+        "A8": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents the same #NUM! rule for a life \"between ... 2 and 3\"; here 1/0.4 = 2.5 years"
+    }
+  ]
+}

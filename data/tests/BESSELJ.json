@@ -1,0 +1,40 @@
+{
+  "function": "BESSELJ",
+  "cases": [
+    {
+      "id": "BESSELJ_documented_1_9_order_2",
+      "formula": "=ROUND(BESSELJ(1.9,2),6)",
+      "description": "Microsoft's documented worked example: Bessel function J at x=1.9, order 2",
+      "expected": 0.329926,
+      "expected_note": "Microsoft's page publishes this example's result as 0.329925829, but that figure is WRONG in the 7th decimal place. Re-derived to 20 significant digits with mpmath: besselj(2, 1.9) = 0.32992572769238721660 (scipy.special.jv agrees to machine precision), which differs from the published 0.329925829 by 1.01e-07 -- far larger than the ~1e-10 rounding residue seen on the sibling BESSELY page. Asserting at 6 dp (0.329926) is the deepest precision at which the published figure and the mathematically correct value still agree, so this case tests the function rather than Microsoft's typo"
+    },
+    {
+      "id": "BESSELJ_order_truncated",
+      "formula": "=ROUND(BESSELJ(1.9,2.7),6)",
+      "description": "A non-integer order, which the documentation says is truncated toward zero",
+      "expected": 0.329926,
+      "expected_note": "Excel documents \"If n is not an integer, it is truncated\", so order 2.7 must behave exactly as order 2. Independently verified with mpmath: besselj(2, 1.9) = 0.3299257276923872, while a genuine fractional-order besselj(2.7, 1.9) would be about 0.16248, so this case separates truncation from fractional-order evaluation"
+    },
+    {
+      "id": "BESSELJ_zero_order_at_zero",
+      "formula": "=ROUND(BESSELJ(0,0),9)",
+      "description": "The order-0 Bessel function at the origin",
+      "expected": 1.0,
+      "expected_note": "Follows from the documented series definition on the page: J_0(0) is the k=0 term (-1)^0/(0! * Gamma(1)) * (0/2)^0 = 1, with every later term carrying a positive power of x/2 and vanishing. Independently verified with mpmath: besselj(0, 0) = 1.0 exactly"
+    },
+    {
+      "id": "BESSELJ_negative_order_num",
+      "formula": "=BESSELJ(1.9,-1)",
+      "description": "A negative order",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If n < 0, BESSELJ returns the #NUM! error value.\""
+    },
+    {
+      "id": "BESSELJ_text_x_value",
+      "formula": "=BESSELJ(\"abc\",2)",
+      "description": "A non-numeric x argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, BESSELJ returns the #VALUE! error value.\""
+    }
+  ]
+}

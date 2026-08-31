@@ -1,0 +1,61 @@
+{
+  "function": "ACCRINTM",
+  "cases": [
+    {
+      "id": "ACCRINTM_documented_actual_365",
+      "formula": "=ROUND(ACCRINTM(A2,A3,A4,A5,A6),8)",
+      "description": "Microsoft's documented worked example: issued 2008-04-01, matures 2008-06-15, 10% coupon on 1000 par, Actual/365 basis",
+      "setup_cells": {
+        "A2": 39539,
+        "A3": 39614,
+        "A4": 0.1,
+        "A5": 1000,
+        "A6": 3
+      },
+      "expected": 20.54794521,
+      "expected_note": "Microsoft's page publishes this example's result as 20.54794521. Independently derived from the documented formula ACCRINTM = par * rate * A/D: serial 39539 = 2008-04-01 and 39614 = 2008-06-15, so on basis 3 (Actual/365) A = 29 + 31 + 15 = 75 actual days and D = 365, giving 1000*0.1*75/365 = 20.547945205 -> 20.54794521 at 8 dp"
+    },
+    {
+      "id": "ACCRINTM_zero_rate_num",
+      "formula": "=ACCRINTM(A2,A3,0,A5,A6)",
+      "description": "A coupon rate of zero is outside the documented domain",
+      "setup_cells": {
+        "A2": 39539,
+        "A3": 39614,
+        "A4": 0.1,
+        "A5": 1000,
+        "A6": 3
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If rate <= 0 or if par <= 0, ACCRINTM returns the #NUM! error value.\""
+    },
+    {
+      "id": "ACCRINTM_basis_out_of_range_num",
+      "formula": "=ACCRINTM(A2,A3,A4,A5,5)",
+      "description": "Basis 5 is above the documented 0-4 range",
+      "setup_cells": {
+        "A2": 39539,
+        "A3": 39614,
+        "A4": 0.1,
+        "A5": 1000,
+        "A6": 3
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If basis < 0 or if basis > 4, ACCRINTM returns the #NUM! error value.\" The documented basis table stops at 4 (European 30/360)"
+    },
+    {
+      "id": "ACCRINTM_issue_after_settlement_num",
+      "formula": "=ACCRINTM(A3,A2,A4,A5,A6)",
+      "description": "Issue date later than the maturity date (arguments swapped)",
+      "setup_cells": {
+        "A2": 39539,
+        "A3": 39614,
+        "A4": 0.1,
+        "A5": 1000,
+        "A6": 3
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If issue >= settlement, ACCRINTM returns the #NUM! error value.\""
+    }
+  ]
+}

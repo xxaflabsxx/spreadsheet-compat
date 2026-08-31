@@ -1,0 +1,40 @@
+{
+  "function": "ATAN2",
+  "cases": [
+    {
+      "id": "ATAN2_documented_first_quadrant",
+      "formula": "=ROUND(ATAN2(1,1),9)",
+      "description": "Microsoft's documented worked example: arctangent of the point (1,1), which is pi/4",
+      "expected": 0.785398163,
+      "expected_note": "Microsoft's page publishes this example's result as 0.785398163. Independently verified in Python: Excel's argument order is ATAN2(x_num, y_num), so this is math.atan2(1, 1) = 0.7853981633974483 = pi/4 -> 0.785398163 at 9 dp"
+    },
+    {
+      "id": "ATAN2_documented_third_quadrant",
+      "formula": "=ROUND(ATAN2(-1,-1),8)",
+      "description": "Microsoft's documented worked example: arctangent of the point (-1,-1), which is -3*pi/4",
+      "expected": -2.35619449,
+      "expected_note": "Microsoft's page publishes this example's result as -2.35619449. Independently verified: math.atan2(-1, -1) = -2.356194490192345 = -3*pi/4 -> -2.35619449 at 8 dp. This case also pins the documented argument ORDER: a function taking (y, x) instead would still return -3*pi/4 here, but the first-quadrant and x=0 cases below separate the two conventions"
+    },
+    {
+      "id": "ATAN2_documented_degrees",
+      "formula": "=ROUND(DEGREES(ATAN2(-1,-1)),9)",
+      "description": "The same example converted to degrees with the DEGREES function, as the page's fourth example does",
+      "expected": -135.0,
+      "expected_note": "Microsoft's page publishes this example's result as -135. Independently verified: -3*pi/4 radians = -135 degrees exactly"
+    },
+    {
+      "id": "ATAN2_zero_x_coordinate",
+      "formula": "=ROUND(ATAN2(0,1),9)",
+      "description": "An x-coordinate of zero, which the documentation explicitly allows",
+      "expected": 1.570796327,
+      "expected_note": "Excel documents \"ATAN2(a,b) equals ATAN(b/a), except that a can equal 0 in ATAN2\". With x_num = 0 and y_num = 1 the point is straight up the y-axis, so the angle from the x-axis is pi/2. Independently verified: math.atan2(1, 0) = 1.5707963267948966 -> 1.570796327 at 9 dp"
+    },
+    {
+      "id": "ATAN2_both_zero_div0",
+      "formula": "=ATAN2(0,0)",
+      "description": "Both coordinates zero, which has no defined angle",
+      "expected": "#DIV/0!",
+      "expected_note": "Excel documents: \"If both x_num and y_num are 0, ATAN2 returns the #DIV/0! error value.\" Note this is #DIV/0!, not the #NUM! that most out-of-domain math arguments produce"
+    }
+  ]
+}
