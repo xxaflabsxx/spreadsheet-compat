@@ -113,6 +113,30 @@ _XLFN_FUNCTIONS = {
     # builds under the plain name, the _xlfn. form AND the COM.MICROSOFT.
     # form, so LO has no such function under any spelling.
     "COPILOT",
+    # Excel 2010 statistical renames and Excel 2013 web functions from the
+    # alphabetical corpus batch DBCS..FISHERINV. All eight dotted names below
+    # are on XlsxWriter's future-function table (they are the 2010 renames of
+    # ERF/ERFC/EXPONDIST/FDIST/FINV/FTEST), and ENCODEURL/FILTERXML are the
+    # Excel 2013 web additions on the same table. Verified empirically on all
+    # four pinned builds: the unprefixed spelling returns #NAME? while the
+    # _xlfn. form evaluates -- e.g. "=_xlfn.F.INV.RT(0.01,6,4)" returns
+    # 15.2068648611575 and "=_xlfn.ENCODEURL(...)" returns a percent-encoded
+    # string, while "=F.INV.RT(...)" and "=ENCODEURL(...)" are #NAME?. Their
+    # UNDOTTED legacy neighbours ERF, ERFC, EXPONDIST, FDIST, FINV (and the
+    # never-renamed FISHER, FISHERINV, DELTA, EUROCONVERT, FINDB and the whole
+    # D-database family) predate 2007 and correctly need no prefix -- all of
+    # them were probed plain and evaluate.
+    "ERF.PRECISE", "ERFC.PRECISE",
+    "EXPON.DIST",
+    "F.DIST", "F.DIST.RT", "F.INV", "F.INV.RT", "F.TEST",
+    "ENCODEURL", "FILTERXML",
+    # DETECTLANGUAGE (Excel for Microsoft 365 / Excel Mobile only) is post-2007
+    # and therefore takes the prefix by the same rule. Recorded here for
+    # storage-form correctness only: the probe run found #NAME? on all four
+    # LibreOffice builds under the plain name, the _xlfn. form AND the
+    # COM.MICROSOFT. add-in form, so LO has no such function under any
+    # spelling. Same treatment as COPILOT above.
+    "DETECTLANGUAGE",
     "BINOM.DIST", "BINOM.DIST.RANGE", "BINOM.INV",
     "CHISQ.DIST", "CHISQ.DIST.RT", "CHISQ.INV", "CHISQ.INV.RT", "CHISQ.TEST",
     "CONFIDENCE.NORM", "CONFIDENCE.T",

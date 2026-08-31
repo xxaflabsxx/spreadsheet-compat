@@ -1,0 +1,33 @@
+{
+  "function": "ERF",
+  "cases": [
+    {
+      "id": "ERF_doc_0745",
+      "formula": "=ROUND(ERF(0.745),8)",
+      "description": "Microsoft's documented worked example: the error function integrated between 0 and 0.745",
+      "expected": 0.70792892,
+      "expected_note": "Microsoft's page publishes '=ERF(0.745)' with the result 0.70792892 and the description \"Error function integrated between 0 and 0.74500\". Re-derived independently with mpmath at 50 decimal digits (not the library that authored the corpus's other values): erf(0.745) = 0.70792892009573768414 and erf(1) = 0.84270079294971486934, which round to the published 0.70792892 and 0.84270079 at 8 dp exactly."
+    },
+    {
+      "id": "ERF_doc_1",
+      "formula": "=ROUND(ERF(1),8)",
+      "description": "Microsoft's documented worked example: the error function integrated between 0 and 1",
+      "expected": 0.84270079,
+      "expected_note": "Microsoft's page publishes '=ERF(1)' with the result 0.84270079. Re-derived independently with mpmath at 50 decimal digits (not the library that authored the corpus's other values): erf(0.745) = 0.70792892009573768414 and erf(1) = 0.84270079294971486934, which round to the published 0.70792892 and 0.84270079 at 8 dp exactly."
+    },
+    {
+      "id": "ERF_two_limits",
+      "formula": "=ROUND(ERF(0.745,1),8)",
+      "description": "The two-argument form, which integrates between the two limits",
+      "expected": 0.13477187,
+      "expected_note": "Not a published example -- the page's two examples both use the one-argument form -- but a direct consequence of the documented syntax ERF(lower_limit,[upper_limit]), \"Returns the error function integrated between lower_limit and upper_limit\", combined with the documented meaning of the one-argument form (\"If omitted, ERF integrates between zero and lower_limit\"). The two-limit integral is therefore erf(1) - erf(0.745) = 0.84270079294971486934 - 0.70792892009573768414 = 0.1347718728539771852 (mpmath, 50 dps), i.e. 0.13477187 at 8 dp. This case exists because the optional second argument is exactly the part of ERF a reimplementation is most likely to drop -- and it is also what distinguishes ERF from ERF.PRECISE, which takes one argument only."
+    },
+    {
+      "id": "ERF_text_argument_value",
+      "formula": "=ERF(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If lower_limit is nonnumeric, ERF returns the #VALUE! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "function": "ERF.PRECISE",
+  "cases": [
+    {
+      "id": "ERF.PRECISE_doc_0745",
+      "formula": "=ROUND(ERF.PRECISE(0.745),8)",
+      "description": "Microsoft's documented worked example",
+      "expected": 0.70792892,
+      "expected_note": "Microsoft's page publishes '=ERF.PRECISE(0.745)' with the result 0.70792892. Re-derived independently with mpmath at 50 decimal digits (not the library that authored the corpus's other values): erf(0.745) = 0.70792892009573768414 and erf(1) = 0.84270079294971486934, which round to the published 0.70792892 and 0.84270079 at 8 dp exactly."
+    },
+    {
+      "id": "ERF.PRECISE_doc_1",
+      "formula": "=ROUND(ERF.PRECISE(1),8)",
+      "description": "Microsoft's documented worked example",
+      "expected": 0.84270079,
+      "expected_note": "Microsoft's page publishes '=ERF.PRECISE(1)' with the result 0.84270079. Re-derived independently with mpmath at 50 decimal digits (not the library that authored the corpus's other values): erf(0.745) = 0.70792892009573768414 and erf(1) = 0.84270079294971486934, which round to the published 0.70792892 and 0.84270079 at 8 dp exactly."
+    },
+    {
+      "id": "ERF.PRECISE_matches_ERF_one_arg",
+      "formula": "=ROUND(ERF.PRECISE(1)-ERF(1),12)",
+      "description": "The two functions agree on the one-argument form",
+      "expected": 0,
+      "expected_note": "Both pages publish 0.84270079 for an argument of 1, and ERF.PRECISE's syntax section documents a single argument x described, word for word, as \"The lower bound for integrating ERF.PRECISE\" -- the same wording ERF uses for its own first argument. The difference of the two is therefore exactly zero, and asserting the DIFFERENCE rather than two separate values catches an engine that implements one of them with a different algorithm at a precision no published 8-decimal figure would reveal."
+    },
+    {
+      "id": "ERF.PRECISE_text_argument_value",
+      "formula": "=ERF.PRECISE(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If lower_limit is nonnumeric, ERF.PRECISE returns the #VALUE! error value.\""
+    }
+  ]
+}

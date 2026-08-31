@@ -1,0 +1,47 @@
+{
+  "function": "DURATION",
+  "cases": [
+    {
+      "id": "DURATION_doc_example",
+      "formula": "=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,1),7)",
+      "description": "Microsoft's documented worked example: a 30-year 8% bond yielding 9%, semiannual, actual/actual basis",
+      "expected": 10.9191453,
+      "expected_note": "Microsoft's page publishes this example's result as 10.9191453. Derived independently from the documented definition, \"the Macauley duration for an assumed par value of $100 ... the weighted average of the present value of cash flows\". Settlement 2018-07-01 falls exactly on a coupon date of the 2048-01-01 maturity at semiannual frequency, so there are 59 remaining coupons at times 0.5, 1.0, ... 29.5 years; discounting each 4.00 coupon (plus 100 redemption at t = 29.5) at 9% nominal semiannual and taking the cash-flow-weighted mean time gives 10.919145281591925, which rounds to the published 10.9191453 at 7 dp. EXECUTED RESULT -- SILENT WRONG VALUE, the most serious class in this batch. All four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 10.9215739665694 where both Microsoft's published figure and the independent derivation give 10.919145281591925: a plausible number, no error, wrong in the third decimal (2.2e-4 relative). The mechanism is pinned down exactly rather than guessed. The discrepancy is 10.9215739665694 - 10.9191452815919 = 0.0024286849775, and YEARFRAC over the same two dates on the same basis 1 returns 29.5024286849775 where the coupon schedule gives 59 coupons / 2 per year = 29.5 exactly -- the excess, 0.0024286849775, matches the error to twelve digits. LibreOffice is therefore taking the cash-flow times from an actual/actual year fraction instead of from the coupon count, which shifts EVERY cash flow later by the same amount and so shifts the weighted average by that amount. The companion case DURATION_basis_30_360 is the control: on basis 0, where YEARFRAC over these dates is exactly 29.5, all four builds return 10.9191452815919 and agree with the documented value."
+    },
+    {
+      "id": "DURATION_basis_30_360",
+      "formula": "=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,0),7)",
+      "description": "The same bond on the US 30/360 basis instead of actual/actual",
+      "expected": 10.9191453,
+      "expected_note": "Derived, not published: this case exists as a controlled comparison against DURATION_doc_example. Because settlement lands exactly on a coupon date, the cash-flow schedule is identical under every basis, so the Macaulay duration is the same 10.919145281591925 whichever basis is chosen -- and the two cases together therefore isolate whether an engine's basis handling leaks into the duration. Note that YEARFRAC over the same two dates is exactly 29.5 on basis 0 but 29.50242868497748 on basis 1, which is the quantity that separates the two cases on an engine that derives the schedule from a year fraction. EXECUTED RESULT: all four LibreOffice builds return 10.9191452815919, matching the derivation exactly -- while the otherwise identical actual/actual case (DURATION_doc_example) does not. The pair isolates the defect to LibreOffice's basis-1 year fraction; see that case's note for the arithmetic."
+    },
+    {
+      "id": "DURATION_frequency_invalid_num",
+      "formula": "=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,3,1)",
+      "description": "A coupon frequency of 3, which is not one of the documented values",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If frequency is any number other than 1, 2, or 4, DURATION returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "DURATION_negative_coupon_num",
+      "formula": "=DURATION(DATE(2018,7,1),DATE(2048,1,1),-0.08,0.09,2,1)",
+      "description": "A negative coupon rate, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If coupon < 0 or if yld < 0, DURATION returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "DURATION_settlement_after_maturity_num",
+      "formula": "=DURATION(DATE(2048,1,1),DATE(2018,7,1),0.08,0.09,2,1)",
+      "description": "Settlement later than maturity, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If settlement >= maturity, DURATION returns the #NUM! error value.\" The example's two dates are simply swapped. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "DURATION_basis_out_of_range_num",
+      "formula": "=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,5)",
+      "description": "A day-count basis above the documented range",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents five bases (0-4) and: \"If basis < 0 or if basis > 4, DURATION returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    }
+  ]
+}

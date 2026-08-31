@@ -1,0 +1,33 @@
+{
+  "function": "F.INV",
+  "cases": [
+    {
+      "id": "F.INV_doc_example",
+      "formula": "=ROUND(F.INV(0.01,6,4),8)",
+      "description": "Microsoft's documented worked example: the 1st percentile of the F distribution with 6 and 4 degrees of freedom",
+      "expected": 0.10930991,
+      "expected_note": "Microsoft's page publishes '=F.INV(A2,A3,A4)' over the data 0.01 / 6 / 4 with the result 0.10930991. Re-derived independently by solving P(F <= x) = 0.01 with mpmath's root finder over the regularized incomplete beta function at 50 digits: x = 0.10930991412457853874, i.e. exactly the published 0.10930991 at 8 dp. Note this is the LEFT-tailed inverse -- the page's own identity is \"If p = F.DIST(x,...), then F.INV(p,...) = x\" -- which is what separates it from F.INV.RT, whose page publishes 15.20686 for the identical arguments."
+    },
+    {
+      "id": "F.INV_probability_above_one_num",
+      "formula": "=F.INV(1.5,6,4)",
+      "description": "A probability outside [0,1]",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability < 0 or probability > 1, F.INV returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.INV_zero_df_num",
+      "formula": "=F.INV(0.01,0,4)",
+      "description": "A numerator degrees of freedom below the documented minimum",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom1 < 1, or deg_freedom2 < 1, F.INV returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.INV_text_argument_value",
+      "formula": "=F.INV(\"abc\",6,4)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, F.INV returns the #VALUE! error value.\""
+    }
+  ]
+}

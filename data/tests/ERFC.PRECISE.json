@@ -1,0 +1,33 @@
+{
+  "function": "ERFC.PRECISE",
+  "cases": [
+    {
+      "id": "ERFC.PRECISE_doc_1",
+      "formula": "=ROUND(ERFC.PRECISE(1),8)",
+      "description": "Microsoft's documented worked example",
+      "expected": 0.15729921,
+      "expected_note": "Microsoft's page publishes '=ERFC.PRECISE(1)' with the result 0.15729921. Re-derived independently with mpmath at 50 decimal digits: erfc(1) = 0.15729920705028513066, which rounds to the published 0.15729921 at 8 dp. It is also exactly 1 - erf(1) = 1 - 0.84270079294971486934, the identity the two pages' own examples encode."
+    },
+    {
+      "id": "ERFC.PRECISE_matches_ERFC",
+      "formula": "=ROUND(ERFC.PRECISE(1)-ERFC(1),12)",
+      "description": "The two functions agree",
+      "expected": 0,
+      "expected_note": "The ERFC and ERFC.PRECISE pages carry identical descriptions (\"Returns the complementary ERF function integrated between x and infinity\"), identical single-argument syntax and the identical published example result 0.15729921, so their difference is exactly zero."
+    },
+    {
+      "id": "ERFC.PRECISE_zero",
+      "formula": "=ERFC.PRECISE(0)",
+      "description": "The complementary error function at zero",
+      "expected": 1,
+      "expected_note": "Derived from the documented definition: integrated from 0 to infinity, the complementary error function is exactly 1."
+    },
+    {
+      "id": "ERFC.PRECISE_text_argument_value",
+      "formula": "=ERFC.PRECISE(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, ERFC.PRECISE returns the #VALUE! error value.\""
+    }
+  ]
+}

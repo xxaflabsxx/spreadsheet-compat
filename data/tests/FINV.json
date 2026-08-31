@@ -1,0 +1,33 @@
+{
+  "function": "FINV",
+  "cases": [
+    {
+      "id": "FINV_doc_example",
+      "formula": "=ROUND(FINV(0.01,6,4),6)",
+      "description": "Microsoft's documented worked example: the upper 1% critical value, legacy spelling",
+      "expected": 15.206865,
+      "expected_note": "Microsoft's page publishes '=FINV(A2,A3,A4)' over the data 0.01 / 6 / 4 with the result 15.206865. Re-derived independently by solving 1 - P(F <= x) = 0.01 with mpmath at 50 digits: x = 15.206864861157530011, i.e. exactly the published 15.206865 at 6 dp. FINV is the pre-2010 spelling of F.INV.RT -- note that despite the name it is the RIGHT-tailed inverse, so it corresponds to F.INV.RT and NOT to the similarly-named modern F.INV, whose page publishes 0.10930991 for the same arguments. Getting that pairing backwards is the classic error with this family, which is why both spellings are asserted in this batch."
+    },
+    {
+      "id": "FINV_probability_above_one_num",
+      "formula": "=FINV(1.5,6,4)",
+      "description": "A probability outside [0,1]",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability < 0 or probability > 1, FINV returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "FINV_df_too_large_num",
+      "formula": "=FINV(0.01,10000000000,4)",
+      "description": "A numerator degrees of freedom at the documented upper limit",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom1 < 1 or deg_freedom1 >= 10^10, FINV returns the #NUM! error value.\" 10^10 is exactly the excluded boundary, and is a constraint the modern F.INV.RT page states only for deg_freedom2. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "FINV_text_argument_value",
+      "formula": "=FINV(\"abc\",6,4)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, FINV returns the #VALUE! error value.\""
+    }
+  ]
+}

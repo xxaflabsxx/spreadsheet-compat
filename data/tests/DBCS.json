@@ -1,0 +1,33 @@
+{
+  "function": "DBCS",
+  "cases": [
+    {
+      "id": "DBCS_halfwidth_latin_to_fullwidth",
+      "formula": "=DBCS(\"EXCEL\")",
+      "description": "Half-width (single-byte) Latin letters converted to full-width",
+      "expected": "ＥＸＣＥＬ",
+      "expected_note": "Microsoft's DBCS page documents the rule as: \"converts half-width (single-byte) letters within a character string to full-width (double-byte) characters\", and adds \"If text does not contain any half-width English letters or katakana, text is not changed\". The page also warns that \"The name of the function (and the characters that it converts) depends upon your language settings\"; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. PUBLISHED EXAMPLE CONTRADICTS THE PUBLISHED RULE: the page's first worked example reads '=DBCS(\"EXCEL\") equals \"EXCEL\"', i.e. it shows the argument coming back unchanged -- which is the documented behaviour of the INVERSE function ASC, whose page carries the identical line, and is impossible under DBCS's own stated rule because \"EXCEL\" is five half-width English letters. The value asserted here is derived from the rule instead: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), exactly the inverse of the mapping batch A's ASC cases assert in the other direction. The page's second example, which does show a conversion, is rendered as inline GIF images (media/fe337.gif ...) so no literal argument can be copied from it. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? -- and a name-form probe confirms this is a genuine gap rather than a storage-prefix artefact: the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form all return #NAME? on every build. LibreOffice nevertheless PERFORMS this conversion under a different name: on all four builds '=JIS(\"EXCEL\")' returns exactly the full-width string asserted here, which independently confirms both the derived expected value and that the gap is a missing alias, not a missing capability."
+    },
+    {
+      "id": "DBCS_fullwidth_unchanged",
+      "formula": "=DBCS(\"ＥＸＣＥＬ\")",
+      "description": "Text that is already full-width is returned unchanged",
+      "expected": "ＥＸＣＥＬ",
+      "expected_note": "Microsoft's DBCS page documents the rule as: \"converts half-width (single-byte) letters within a character string to full-width (double-byte) characters\", and adds \"If text does not contain any half-width English letters or katakana, text is not changed\". The page also warns that \"The name of the function (and the characters that it converts) depends upon your language settings\"; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. This case is unambiguous under either reading of the page: the argument contains no half-width English letters or katakana, so the documented no-change clause applies and the result is the argument itself. EXECUTED RESULT: #NAME? on all four LibreOffice builds; see DBCS_halfwidth_latin_to_fullwidth for the three-spelling probe and for LibreOffice's JIS equivalent."
+    },
+    {
+      "id": "DBCS_roundtrip_through_ASC",
+      "formula": "=ASC(DBCS(\"EXCEL\"))",
+      "description": "Round trip: converting to full-width and back to half-width",
+      "expected": "EXCEL",
+      "expected_note": "Deliberately locale-independent, and the reason this case exists. If DBCS converts (the documented rule), ASC converts back and the result is \"EXCEL\"; if DBCS is a no-op under a non-DBCS default language, ASC leaves the already-half-width text alone and the result is still \"EXCEL\". Both readings of Microsoft's page agree here, so a failure of this case cannot be blamed on the harness locale -- it can only mean the engine lacks one of the two functions or mangles the text. EXECUTED RESULT: #NAME? on all four LibreOffice builds. Because ASC itself is supported there (batch A executed it), the failure is entirely DBCS's, which is what this locale-independent case was built to establish."
+    },
+    {
+      "id": "DBCS_length_preserved",
+      "formula": "=LEN(DBCS(\"EXCEL\"))",
+      "description": "The conversion is character-for-character, so the length is unchanged",
+      "expected": 5,
+      "expected_note": "Microsoft documents DBCS as changing half-width characters to full-width characters -- a one-for-one character mapping, not an encoding change -- so a five-character input yields a five-character result whether or not the mapping fires. This is the mirror of batch A's ASC_length_preserved case and separates a genuine width conversion from a byte-level reinterpretation. EXECUTED RESULT: #NAME? on all four LibreOffice builds -- LEN is supported, so the unrecognized name is DBCS."
+    }
+  ]
+}

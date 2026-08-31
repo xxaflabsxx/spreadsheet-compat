@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FINDB: Excel and Sheets — not in LibreOffice</title>
-<meta name="description" content="FINDB (Text) is documented for Excel and Google Sheets, not for LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>FINDB gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="5/6 match Excel&#39;s docs; dbcs probe returns 5, not 3. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/findb.html">
-<meta property="og:title" content="FINDB: Excel and Sheets — not in LibreOffice">
-<meta property="og:description" content="FINDB (Text) is documented for Excel and Google Sheets, not for LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="FINDB gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="5/6 match Excel&#39;s docs; dbcs probe returns 5, not 3. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/findb.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>FINDB</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Text</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>FINDB</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for FINDB yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,94 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+FINDB&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't FINDB working in LibreOffice?</h2>
+
+<p><code>FINDB</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=FINDB(&#34;b&#34;,A3)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">5</span>, but the documented/expected
+        result is <span class="formula">3</span>.
+        A3 holds the three-character string U+65E5 U+672C followed by an ASCII b. Verbatim from Microsoft&#39;s FIND, FINDB page: &#34;FINDB counts each double-byte character as 2 when you have enabled the editing of a language that supports DBCS and then set it as the default language. Otherwise, FINDB counts each character as 1&#34;, with the DBCS languages listed as Japanese, Chinese (Simplified), Chinese (Traditional) and Korean. This harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, so the documented answer is the one-byte-per-character reading -- the same treatment the corpus&#39;s LENB cases already use, and stated here rather than assumed away. Under that non-DBCS reading the b is the third character and the documented answer is 3; under a DBCS default language the two CJK characters would count 2 bytes each and the answer would be 5. Recording which of the two each engine produces is the whole point of the case -- exactly as for the corpus&#39;s LENB_non_ascii_characters probe. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return 5, i.e. they apply the double-byte count (2 bytes per CJK character) even though the default language is not a DBCS one, where the documentation&#39;s &#34;Otherwise, FINDB counts each character as 1&#34; clause gives 3. No error is raised; a formula that slices text by this position silently cuts in a different place. This is the same shape as the divergence the corpus already records for LENB, and it is the only one of the six FINDB cases that diverges -- every ASCII case matches, so LibreOffice&#39;s FINDB is correct except for exactly this locale rule.; MISMATCH vs expected: expected 3, got 5
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +481,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for FINDB yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=FINDB(&#34;M&#34;,A2)</td>
+  <td>Microsoft&#39;s documented worked example: the position of the first capital M in &#34;Miriam McGovern&#34;</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft&#39;s page publishes &#39;=FIND(&#34;M&#34;,A2)&#39; over the data &#34;Miriam McGovern&#34; with the result 1 and the description &#34;Position of the first &#39;M&#39; in cell A2&#34;, and documents FIND and FINDB as one function pair sharing the example set. Every character here is single-byte, so the byte and character readings coincide and the answer is 1 under either. Verbatim from Microsoft&#39;s FIND, FINDB page: &#34;FINDB counts each double-byte character as 2 when you have enabled the editing of a language that supports DBCS and then set it as the default language. Otherwise, FINDB counts each character as 1&#34;, with the DBCS languages listed as Japanese, Chinese (Simplified), Chinese (Traditional) and Korean. This harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, so the documented answer is the one-byte-per-character reading -- the same treatment the corpus&#39;s LENB cases already use, and stated here rather than assumed away.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FINDB(&#34;m&#34;,A2)</td>
+  <td>Microsoft&#39;s documented worked example: the search is case sensitive</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6<br><span class="category-tag">Microsoft&#39;s page publishes &#39;=FIND(&#34;m&#34;,A2)&#39; with the result 6, and documents &#34;FIND and FINDB are case sensitive and don&#39;t allow wildcard characters&#34;. The lower-case m first occurs at position 6 of &#34;Miriam McGovern&#34;, not at position 1 -- an engine that folds case returns 1 here.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FINDB(&#34;M&#34;,A2,3)</td>
+  <td>Microsoft&#39;s documented worked example: searching from the third character onward</td>
+  <td class="result mono">8</td>
+  <td class="result mono">8<br><span class="category-tag">Microsoft&#39;s page publishes &#39;=FIND(&#34;M&#34;,A2,3)&#39; with the result 8 and the description &#34;Position of the first &#39;M&#39; in cell A2, starting with the third character&#34;. The documentation adds that the result is still measured from the start of within_text: &#34;FIND always returns the number of characters from the start of within_text, counting the characters you skip if start_num is greater than 1.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FINDB(&#34;z&#34;,A2)</td>
+  <td>Text that does not occur in the searched string</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If find_text does not appear in within_text, FIND and FINDB return the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FINDB(&#34;M&#34;,A2,0)</td>
+  <td>A start position of zero, which the documentation excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If start_num is not greater than zero, FIND and FINDB return the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FINDB(&#34;b&#34;,A3)</td>
+  <td>DIVERGENCE PROBE: a search after two CJK characters, where the answer depends on the DBCS language rule</td>
+  <td class="result mono">5</td>
+  <td class="result mono">3<br><span class="category-tag">A3 holds the three-character string U+65E5 U+672C followed by an ASCII b. Verbatim from Microsoft&#39;s FIND, FINDB page: &#34;FINDB counts each double-byte character as 2 when you have enabled the editing of a language that supports DBCS and then set it as the default language. Otherwise, FINDB counts each character as 1&#34;, with the DBCS languages listed as Japanese, Chinese (Simplified), Chinese (Traditional) and Korean. This harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, so the documented answer is the one-byte-per-character reading -- the same treatment the corpus&#39;s LENB cases already use, and stated here rather than assumed away. Under that non-DBCS reading the b is the third character and the documented answer is 3; under a DBCS default language the two CJK characters would count 2 bytes each and the answer would be 5. Recording which of the two each engine produces is the whole point of the case -- exactly as for the corpus&#39;s LENB_non_ascii_characters probe. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return 5, i.e. they apply the double-byte count (2 bytes per CJK character) even though the default language is not a DBCS one, where the documentation&#39;s &#34;Otherwise, FINDB counts each character as 1&#34; clause gives 3. No error is raised; a formula that slices text by this position silently cuts in a different place. This is the same shape as the divergence the corpus already records for LENB, and it is the only one of the six FINDB cases that diverges -- every ASCII case matches, so LibreOffice&#39;s FINDB is correct except for exactly this locale rule.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

@@ -1,0 +1,40 @@
+{
+  "function": "F.INV.RT",
+  "cases": [
+    {
+      "id": "F.INV.RT_doc_example",
+      "formula": "=ROUND(F.INV.RT(0.01,6,4),5)",
+      "description": "Microsoft's documented worked example: the upper 1% critical value of the F distribution with 6 and 4 degrees of freedom",
+      "expected": 15.20686,
+      "expected_note": "Microsoft's page publishes '=F.INV.RT(A2,A3,A4)' over the data 0.01 / 6 / 4 with the result 15.20686. Re-derived independently by solving 1 - P(F <= x) = 0.01 with mpmath at 50 digits: x = 15.206864861157530011, i.e. exactly the published 15.20686 at 5 dp. This is also the x the F.DIST.RT and FDIST pages feed back in as their example argument (15.2068649 and 15.20686486), which is a useful independent confirmation that the three pages describe one consistent distribution."
+    },
+    {
+      "id": "F.INV.RT_roundtrip_with_F.DIST.RT",
+      "formula": "=ROUND(F.DIST.RT(F.INV.RT(0.01,6,4),6,4),8)",
+      "description": "The documented inverse identity, exercised as a round trip",
+      "expected": 0.01,
+      "expected_note": "Microsoft documents the pair with the identity \"If p = F.DIST.RT(x,...), then F.INV.RT(p,...) = x\", and adds that \"precision of F.INV.RT depends on precision of F.DIST.RT\" because \"F.INV.RT uses an iterative search technique\". Feeding the inverse straight back into the forward function must therefore return the probability it started from, 0.01, to within the search tolerance. Asserted at 8 dp, which is far looser than the documented 64-iteration search would need to be to fail."
+    },
+    {
+      "id": "F.INV.RT_probability_below_zero_num",
+      "formula": "=F.INV.RT(-0.5,6,4)",
+      "description": "A probability outside [0,1]",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Probability is < 0 or probability is > 1, F.INV.RT returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.INV.RT_zero_df_num",
+      "formula": "=F.INV.RT(0.01,6,0)",
+      "description": "A denominator degrees of freedom below the documented minimum",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Deg_freedom1 is < 1, or Deg_freedom2 is < 1, F.INV.RT returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.INV.RT_text_argument_value",
+      "formula": "=F.INV.RT(\"abc\",6,4)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is non-numeric, F.INV.RT returns the #VALUE! error value.\""
+    }
+  ]
+}

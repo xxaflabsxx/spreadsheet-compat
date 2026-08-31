@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>251 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 251 divergences, every one executed — not copied from docs.">
+<title>288 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 288 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="251 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 251 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="288 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 288 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">251 quirks found across 116 functions
-(168 in LibreOffice, 83 in Google Sheets).
+<p class="search-hint">288 quirks found across 133 functions
+(205 in LibreOffice, 83 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -2231,6 +2231,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DBCS(&#34;ＥＸＣＥＬ&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">ＥＸＣＥＬ</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. This case is unambiguous under either reading of the page: the argument contains no half-width English letters or katakana, so the documented no-change clause applies and the result is the argument itself. EXECUTED RESULT: #NAME? on all four LibreOffice builds; see DBCS_halfwidth_latin_to_fullwidth for the three-spelling probe and for LibreOffice&#39;s JIS equivalent.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DBCS(&#34;EXCEL&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">ＥＸＣＥＬ</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. PUBLISHED EXAMPLE CONTRADICTS THE PUBLISHED RULE: the page&#39;s first worked example reads &#39;=DBCS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39;, i.e. it shows the argument coming back unchanged -- which is the documented behaviour of the INVERSE function ASC, whose page carries the identical line, and is impossible under DBCS&#39;s own stated rule because &#34;EXCEL&#34; is five half-width English letters. The value asserted here is derived from the rule instead: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), exactly the inverse of the mapping batch A&#39;s ASC cases assert in the other direction. The page&#39;s second example, which does show a conversion, is rendered as inline GIF images (media/fe337.gif ...) so no literal argument can be copied from it. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? -- and a name-form probe confirms this is a genuine gap rather than a storage-prefix artefact: the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form all return #NAME? on every build. LibreOffice nevertheless PERFORMS this conversion under a different name: on all four builds &#39;=JIS(&#34;EXCEL&#34;)&#39; returns exactly the full-width string asserted here, which independently confirms both the derived expected value and that the gap is a missing alias, not a missing capability.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=LEN(DBCS(&#34;EXCEL&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">5</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft documents DBCS as changing half-width characters to full-width characters -- a one-for-one character mapping, not an encoding change -- so a five-character input yields a five-character result whether or not the mapping fires. This is the mirror of batch A&#39;s ASC_length_preserved case and separates a genuine width conversion from a byte-level reinterpretation. EXECUTED RESULT: #NAME? on all four LibreOffice builds -- LEN is supported, so the unrecognized name is DBCS.; MISMATCH vs expected: expected 5, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ASC(DBCS(&#34;EXCEL&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">EXCEL</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Deliberately locale-independent, and the reason this case exists. If DBCS converts (the documented rule), ASC converts back and the result is &#34;EXCEL&#34;; if DBCS is a no-op under a non-DBCS default language, ASC leaves the already-half-width text alone and the result is still &#34;EXCEL&#34;. Both readings of Microsoft&#39;s page agree here, so a failure of this case cannot be blamed on the harness locale -- it can only mean the engine lacks one of the two functions or mangles the text. EXECUTED RESULT: #NAME? on all four LibreOffice builds. Because ASC itself is supported there (batch A executed it), the failure is entirely DBCS&#39;s, which is what this locale-independent case was built to establish.; MISMATCH vs expected: expected &#39;EXCEL&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/dget.html">DGET</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=DGET(A1:B4,&#34;Sales&#34;,D1:D2)</div>
@@ -2241,6 +2293,45 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Database</dd>
   </dl>
   <p>MISMATCH vs expected: expected #NUM!, got #VALUE!</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/disc.html">DISC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DISC(DATE(2018,7,1),DATE(2048,1,1),97.975,100,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents five bases (0-4) and: &#34;If basis &lt; 0 or if basis &gt; 4, DISC returns the #NUM! error value.&#34; 5 is the first excluded value. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/disc.html">DISC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DISC(DATE(2018,7,1),DATE(2048,1,1),0,100,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If pr &lt;= 0 or if redemption &lt;= 0, DISC returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/disc.html">DISC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DISC(DATE(2048,1,1),DATE(2018,7,1),97.975,100,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If settlement &gt;= maturity, DISC returns the #NUM! error value.&#34; The example&#39;s two dates are simply swapped here. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -2309,6 +2400,110 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dstdev.html">DSTDEV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DSTDEV(A6:E12,&#34;Yield&#34;,H3:H4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Database</dd>
+  </dl>
+  <p>Not spelled out on the DSTDEV page, which lists no error conditions at all; derived from the documented definition instead. DSTDEV &#34;estimates the standard deviation of a population based on a sample&#34;, i.e. the n-1 denominator estimator, and the criteria block in H3:H4 selects exactly one record (the cherry), making that denominator zero. Excel&#39;s documented behaviour for the same n-1-denominator situation in its non-database sibling STDEV is #DIV/0!, and that is the value asserted here; an engine returning 0 instead is claiming a sample of one has no spread rather than an undefined one. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return #NUM! rather than the #DIV/0! this estimator&#39;s zero denominator calls for -- an error-CLASS collapse (a division by zero reported as an out-of-range argument), not a computation difference. Both engines agree that the case is an error; they disagree about which one, exactly as batch B recorded for COT(0).; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/duration.html">DURATION</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents five bases (0-4) and: &#34;If basis &lt; 0 or if basis &gt; 4, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/duration.html">DURATION</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,1),7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">10.921574</dd>
+    <dt>Documented / expected</dt><dd class="mono">10.9191453</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 10.9191453. Derived independently from the documented definition, &#34;the Macauley duration for an assumed par value of $100 ... the weighted average of the present value of cash flows&#34;. Settlement 2018-07-01 falls exactly on a coupon date of the 2048-01-01 maturity at semiannual frequency, so there are 59 remaining coupons at times 0.5, 1.0, ... 29.5 years; discounting each 4.00 coupon (plus 100 redemption at t = 29.5) at 9% nominal semiannual and taking the cash-flow-weighted mean time gives 10.919145281591925, which rounds to the published 10.9191453 at 7 dp. EXECUTED RESULT -- SILENT WRONG VALUE, the most serious class in this batch. All four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 10.9215739665694 where both Microsoft&#39;s published figure and the independent derivation give 10.919145281591925: a plausible number, no error, wrong in the third decimal (2.2e-4 relative). The mechanism is pinned down exactly rather than guessed. The discrepancy is 10.9215739665694 - 10.9191452815919 = 0.0024286849775, and YEARFRAC over the same two dates on the same basis 1 returns 29.5024286849775 where the coupon schedule gives 59 coupons / 2 per year = 29.5 exactly -- the excess, 0.0024286849775, matches the error to twelve digits. LibreOffice is therefore taking the cash-flow times from an actual/actual year fraction instead of from the coupon count, which shifts EVERY cash flow later by the same amount and so shifts the weighted average by that amount. The companion case DURATION_basis_30_360 is the control: on basis 0, where YEARFRAC over these dates is exactly 29.5, all four builds return 10.9191452815919 and agree with the documented value.; MISMATCH vs expected: expected 10.9191453, got 10.921574</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/duration.html">DURATION</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,3,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If frequency is any number other than 1, 2, or 4, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/duration.html">DURATION</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DURATION(DATE(2018,7,1),DATE(2048,1,1),-0.08,0.09,2,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If coupon &lt; 0 or if yld &lt; 0, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/duration.html">DURATION</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DURATION(DATE(2048,1,1),DATE(2018,7,1),0.08,0.09,2,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If settlement &gt;= maturity, DURATION returns the #NUM! error value.&#34; The example&#39;s two dates are simply swapped. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dvar.html">DVAR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DVAR(A6:E12,&#34;Yield&#34;,H3:H4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Database</dd>
+  </dl>
+  <p>Not spelled out on the DVAR page, which lists no error conditions; derived from the documented n-1 sample estimator, whose denominator is zero when the criteria select a single record (here the cherry). Excel&#39;s documented behaviour in the same situation for the non-database sibling VAR is #DIV/0!. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return #NUM! rather than #DIV/0!, the same error-class collapse as DSTDEV_single_record_div0 on the same one-record sample.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/encodeurl.html">ENCODEURL</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ENCODEURL(&#34;http://contoso.sharepoint.com/Finance/Profit and Loss Statement.xlsx&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">http%3A%2F%2Fcontoso%2Esharepoint%2Ecom%2FFinance%2FProfit%20and%20Loss%20Statement%2Exlsx</dd>
+    <dt>Documented / expected</dt><dd class="mono">http%3A%2F%2Fcontoso.sharepoint.com%2FFinance%2FProfit%20and%20Loss%20Statement.xlsx</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Web</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example verbatim, argument and result. Re-derived character by character from the documented rule (&#34;returns a URL-encoded string, replacing certain non-alphanumeric characters with the percentage symbol (%) and a hexadecimal number&#34;): the colon becomes %3A, each forward slash %2F and each space %20, while the letters, digits and -- decisively for this case -- the PERIODS are left literal. The published result keeps &#34;contoso.sharepoint.com&#34; and &#34;.xlsx&#34; unencoded, so the period is one of the non-alphanumeric characters Excel deliberately does not escape. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return &#39;http%3A%2F%2Fcontoso%2Esharepoint%2Ecom%2FFinance%2FProfit%20and%20Loss%20Statement%2Exlsx&#39;: identical to the documented result except that every PERIOD has been percent-encoded as %2E, which Microsoft&#39;s published example leaves literal. No error is raised and the string is still a decodable URL, so the difference survives into any downstream comparison, cache key or signature that expects Excel&#39;s output byte for byte. The period is an unreserved character in RFC 3986, so encoding it is legal but not what Excel does.; MISMATCH vs expected: expected &#39;http%3A%2F%2Fcontoso.sharepoint.com%2FFinance%2FProfit%20and%20Loss%20Statement.xlsx&#39;, got &#39;http%3A%2F%2Fcontoso%2Esharepoint%2Ecom%2FFinance%2FProfit%20and%20Loss%20Statement%2Exlsx&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/error.type.html">ERROR.TYPE</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=ERROR.TYPE(A1:A2 C1:C2)</div>
@@ -2374,6 +2569,227 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/expon.dist.html">EXPON.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=EXPON.DIST(0.2,0,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If lambda &lt;= 0, EXPON.DIST returns the #NUM! error value.&#34; Zero is the boundary the rule excludes. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/expon.dist.html">EXPON.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=EXPON.DIST(-1,10,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt; 0, EXPON.DIST returns the #NUM! error value.&#34; EXECUTED RESULT -- SILENT NON-ERROR. All four LibreOffice builds return the number 0 instead of the documented #NUM! for a negative x. 0 is the mathematically natural continuation of the CDF below the support, so nothing looks wrong downstream: a spreadsheet full of negative inputs silently produces zeros where Excel would produce a visible column of errors. This is a missing input guard, not a computation defect.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/expondist.html">EXPONDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=EXPONDIST(0.2,0,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If lambda &lt;= 0, EXPONDIST returns the #NUM! error value.&#34; Zero is the boundary the rule excludes. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/expondist.html">EXPONDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=EXPONDIST(-1,10,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt; 0, EXPONDIST returns the #NUM! error value.&#34; EXECUTED RESULT -- SILENT NON-ERROR: the legacy spelling behaves exactly like the modern one, returning 0 on all four LibreOffice builds where the page documents #NUM!.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.dist.html">F.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.DIST(-1,6,4,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is negative, F.DIST returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.dist.html">F.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.DIST(15.2069,0,4,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If deg_freedom1 &lt; 1, F.DIST returns the #NUM! error value.&#34; Zero is the first excluded value. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.dist.rt.html">F.DIST.RT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.DIST.RT(-1,6,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is negative, F.DIST.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.dist.rt.html">F.DIST.RT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.DIST.RT(15.2068649,6,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If deg_freedom2 &lt; 1 F.DIST.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.inv.html">F.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.INV(1.5,6,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, F.INV returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.inv.html">F.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.INV(0.01,0,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If deg_freedom1 &lt; 1, or deg_freedom2 &lt; 1, F.INV returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.inv.rt.html">F.INV.RT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.INV.RT(-0.5,6,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If Probability is &lt; 0 or probability is &gt; 1, F.INV.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.inv.rt.html">F.INV.RT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.INV.RT(0.01,6,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If Deg_freedom1 is &lt; 1, or Deg_freedom2 is &lt; 1, F.INV.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.test.html">F.TEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.TEST(E2:E3,B2:B6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents the same rule for size as for zero variance: &#34;If the number of data points in array1 or array2 is less than 2 ... F.TEST returns the #DIV/0! error value.&#34; E2:E3 is a two-cell range holding the number 3 and the text &#34;n/a&#34;, and Microsoft documents on the same page that &#34;If an array or reference argument contains text, logical values, or empty cells, those values are ignored&#34; -- so the range contributes exactly ONE data point, one short of the documented minimum. The two conditions the sentence joins are asserted separately (see F.TEST_zero_variance_div0) so a single #DIV/0! cannot stand in for both. EXECUTED RESULT: all four LibreOffice builds return #VALUE! where the page documents #DIV/0!, the same substitution as F.TEST_zero_variance_div0.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/f.test.html">F.TEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=F.TEST(D2:D6,B2:B6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the number of data points in array1 or array2 is less than 2, or if the variance of array1 or array2 is zero, F.TEST returns the #DIV/0! error value.&#34; D2:D6 holds five copies of the value 5, so its variance is exactly zero. EXECUTED RESULT: all four LibreOffice builds return #VALUE! where the page documents #DIV/0! -- the #VALUE!-substitution pattern reaching a documented #DIV/0! rather than the usual #NUM!, the same shape batch B recorded for CHISQ.TEST&#39;s documented #N/A.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/fdist.html">FDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FDIST(15.20686486,10000000000,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents a constraint the modern F.DIST.RT page drops: &#34;If deg_freedom1 &lt; 1 or deg_freedom1 &gt;= 10^10, FDIST returns the #NUM! error value.&#34; 10^10 = 10000000000 is exactly the excluded boundary. This is the one place the legacy and modern spellings are documented to differ, which is why the case is here rather than on F.DIST.RT. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Worth noting separately: LibreOffice does REJECT the 10^10 degrees of freedom the legacy page excludes -- it just reports the rejection with the wrong token.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/fdist.html">FDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FDIST(-1,6,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is negative, FDIST returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/fdist.html">FDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FDIST(15.20686486,6,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If deg_freedom2 &lt; 1 or deg_freedom2 &gt;= 10^10, FDIST returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/filter.html">FILTER</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=FILTER(A1:A3,B1:B3&gt;100)</div>
@@ -2410,6 +2826,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>MISMATCH vs expected: expected &#39;none&#39;, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/findb.html">FINDB</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FINDB(&#34;b&#34;,A3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">5</dd>
+    <dt>Documented / expected</dt><dd class="mono">3</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>A3 holds the three-character string U+65E5 U+672C followed by an ASCII b. Verbatim from Microsoft&#39;s FIND, FINDB page: &#34;FINDB counts each double-byte character as 2 when you have enabled the editing of a language that supports DBCS and then set it as the default language. Otherwise, FINDB counts each character as 1&#34;, with the DBCS languages listed as Japanese, Chinese (Simplified), Chinese (Traditional) and Korean. This harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, so the documented answer is the one-byte-per-character reading -- the same treatment the corpus&#39;s LENB cases already use, and stated here rather than assumed away. Under that non-DBCS reading the b is the third character and the documented answer is 3; under a DBCS default language the two CJK characters would count 2 bytes each and the answer would be 5. Recording which of the two each engine produces is the whole point of the case -- exactly as for the corpus&#39;s LENB_non_ascii_characters probe. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return 5, i.e. they apply the double-byte count (2 bytes per CJK character) even though the default language is not a DBCS one, where the documentation&#39;s &#34;Otherwise, FINDB counts each character as 1&#34; clause gives 3. No error is raised; a formula that slices text by this position silently cuts in a different place. This is the same shape as the divergence the corpus already records for LENB, and it is the only one of the six FINDB cases that diverges -- every ASCII case matches, so LibreOffice&#39;s FINDB is correct except for exactly this locale rule.; MISMATCH vs expected: expected 3, got 5</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/finv.html">FINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FINV(0.01,10000000000,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If deg_freedom1 &lt; 1 or deg_freedom1 &gt;= 10^10, FINV returns the #NUM! error value.&#34; 10^10 is exactly the excluded boundary, and is a constraint the modern F.INV.RT page states only for deg_freedom2. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/finv.html">FINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FINV(1.5,6,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, FINV returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/fisher.html">FISHER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FISHER(-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt;= -1 or if x &gt;= 1, FISHER returns the #NUM! error value.&#34; -1 is the other excluded boundary; both are asserted because an engine can easily guard one side only. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/fisher.html">FISHER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FISHER(1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt;= -1 or if x &gt;= 1, FISHER returns the #NUM! error value.&#34; 1 is exactly the excluded boundary, where the transformation diverges. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">

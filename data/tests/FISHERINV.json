@@ -1,0 +1,40 @@
+{
+  "function": "FISHERINV",
+  "cases": [
+    {
+      "id": "FISHERINV_doc_example",
+      "formula": "=ROUND(FISHERINV(0.972955),2)",
+      "description": "Microsoft's documented worked example, at the depth the page prints",
+      "expected": 0.75,
+      "expected_note": "Microsoft's page publishes '=FISHERINV(0.972955)' with the result 0.75. Re-derived independently with mpmath at 50 decimal digits from the documented inverse transformation, the hyperbolic tangent: tanh(0.972955) = 0.74999996739414839198. That is NOT 0.75 -- the published \"0.75\" is a 2-decimal presentation, because the page's argument 0.972955 is itself a 6-decimal rounding of FISHER(0.75) = 0.97295507452765665255. This case asserts the published figure at the 2 decimals it is actually printed to; the companion case below asserts the true value at full depth."
+    },
+    {
+      "id": "FISHERINV_full_precision",
+      "formula": "=ROUND(FISHERINV(0.972955),8)",
+      "description": "The same example at eight decimals, where the rounded argument shows",
+      "expected": 0.74999997,
+      "expected_note": "tanh(0.972955) = 0.74999996739414839198 (mpmath, 50 dps), i.e. 0.74999997 at 8 dp. Asserted separately from the documented 2-decimal figure so the assertion depth is auditable rather than arbitrary: an engine that returned a literal 0.75 here would be wrong, not precise."
+    },
+    {
+      "id": "FISHERINV_roundtrip",
+      "formula": "=ROUND(FISHERINV(FISHER(0.75)),12)",
+      "description": "The documented inverse identity, exercised without the rounded intermediate",
+      "expected": 0.75,
+      "expected_note": "Microsoft documents the pair as \"If y = FISHER(x), then FISHERINV(y) = x\". Composing them directly avoids the 6-decimal truncation the published example carries, so the identity can be asserted at 12 decimals: tanh(atanh(0.75)) = 0.75. This is the case that actually tests the documented relationship rather than the page's rounding."
+    },
+    {
+      "id": "FISHERINV_zero",
+      "formula": "=FISHERINV(0)",
+      "description": "The inverse transformation at zero",
+      "expected": 0,
+      "expected_note": "Derived from the documented inverse transformation: tanh(0) = 0 exactly. Asserted without a ROUND() wrapper because the value is exact, which catches an engine whose series expansion is not odd-symmetric at the origin."
+    },
+    {
+      "id": "FISHERINV_text_argument_value",
+      "formula": "=FISHERINV(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If y is nonnumeric, FISHERINV returns the #VALUE! error value.\""
+    }
+  ]
+}

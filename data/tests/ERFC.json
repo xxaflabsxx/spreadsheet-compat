@@ -1,0 +1,33 @@
+{
+  "function": "ERFC",
+  "cases": [
+    {
+      "id": "ERFC_doc_1",
+      "formula": "=ROUND(ERFC(1),8)",
+      "description": "Microsoft's documented worked example: the complementary error function of 1",
+      "expected": 0.15729921,
+      "expected_note": "Microsoft's page publishes '=ERFC(1)' with the result 0.15729921. Re-derived independently with mpmath at 50 decimal digits: erfc(1) = 0.15729920705028513066, which rounds to the published 0.15729921 at 8 dp. It is also exactly 1 - erf(1) = 1 - 0.84270079294971486934, the identity the two pages' own examples encode."
+    },
+    {
+      "id": "ERFC_zero",
+      "formula": "=ERFC(0)",
+      "description": "The complementary error function at zero",
+      "expected": 1,
+      "expected_note": "Derived from the documented definition, \"Returns the complementary ERF function integrated between x and infinity\": at x = 0 that is the whole normalized integral, which is exactly 1. Asserted without a ROUND() wrapper because the answer is an exact integer -- an engine that returns 0.9999999999 here has a normalization error the 8-decimal published example would hide."
+    },
+    {
+      "id": "ERFC_complements_ERF",
+      "formula": "=ROUND(ERFC(1)+ERF(1),12)",
+      "description": "ERFC and ERF sum to 1 at the same argument",
+      "expected": 1,
+      "expected_note": "Derived from the two pages read together: ERF(1) is documented as the error function integrated between 0 and 1, ERFC(1) as the complementary function integrated between 1 and infinity, so their sum is the complete integral, 1. Asserting the SUM catches a cancellation or normalization defect that the separately published 0.84270079 and 0.15729921 cannot."
+    },
+    {
+      "id": "ERFC_text_argument_value",
+      "formula": "=ERFC(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, ERFC returns the #VALUE! error value.\""
+    }
+  ]
+}

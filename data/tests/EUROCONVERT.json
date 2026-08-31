@@ -1,0 +1,40 @@
+{
+  "function": "EUROCONVERT",
+  "cases": [
+    {
+      "id": "EUROCONVERT_dem_to_eur",
+      "formula": "=EUROCONVERT(1.2,\"DEM\",\"EUR\")",
+      "description": "Microsoft's documented worked example: 1.20 deutsche marks in euros, with full_precision omitted",
+      "expected": 0.61,
+      "expected_note": "Microsoft publishes '=EUROCONVERT(A2,B2,C2)' over the data 1.20 / DEM / EUR with the result 0.61 and the note \"by using a calculation and display precision of 2 decimal places\". Microsoft's page states the rates its examples assume: \"1 euro = 6.55957 French francs and 1.95583 deutsche marks\" (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1.20 / 1.95583 = 0.6135502574354622, and with full_precision omitted the documented default is FALSE, which applies the currency-specific rounding from the page's own table -- EUR display precision 2 -- giving 0.61."
+    },
+    {
+      "id": "EUROCONVERT_frf_to_eur_full_precision",
+      "formula": "=EUROCONVERT(1,\"FRF\",\"EUR\",TRUE,3)",
+      "description": "Microsoft's documented worked example: 1 franc in euros at triangulation precision 3",
+      "expected": 0.152,
+      "expected_note": "Microsoft publishes '=EUROCONVERT(A3,B3,C3,TRUE,3)' with the result 0.152. Microsoft's page states the rates its examples assume: \"1 euro = 6.55957 French francs and 1.95583 deutsche marks\" (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, and the documented triangulation_precision of 3 rounds the intermediate euro value to 3 significant digits, giving 0.152; full_precision TRUE then displays all significant digits of that value rather than re-rounding to the EUR display precision."
+    },
+    {
+      "id": "EUROCONVERT_frf_to_eur_display_precision",
+      "formula": "=EUROCONVERT(1,\"FRF\",\"EUR\",FALSE,3)",
+      "description": "Microsoft's documented worked example: the same conversion with full_precision FALSE",
+      "expected": 0.15,
+      "expected_note": "Microsoft publishes '=EUROCONVERT(A4,B4,C4,FALSE,3)' with the result 0.15 and the note \"by using a calculation and display precision of 2 decimal places\". Derived: the same 0.152 intermediate as the previous case, then rounded to the EUR display precision of 2 from the page's rounding table, giving 0.15. This case and the previous one differ only in the full_precision flag, which is the whole point -- an engine that ignores that argument returns the same number for both."
+    },
+    {
+      "id": "EUROCONVERT_triangulation_frf_to_dem",
+      "formula": "=EUROCONVERT(1,\"FRF\",\"DEM\",TRUE,3)",
+      "description": "Microsoft's documented worked example: franc to deutsche mark through the euro (triangulation)",
+      "expected": 0.29728616,
+      "expected_note": "Microsoft publishes '=EUROCONVERT(A5,B5,C5,TRUE,3)' with the result 0.29728616 and the note \"by using an intermediate calculation precision of 3 and displaying all significant digits\". Microsoft's page states the rates its examples assume: \"1 euro = 6.55957 French francs and 1.95583 deutsche marks\" (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, rounded to the documented 3 significant digits of triangulation precision = 0.152, then multiplied by the DEM rate 1.95583 = 0.29728616 exactly. This is the case that proves the intermediate rounding really happens: without it the answer would be 0.1524490172374104 * 1.95583 = 0.2981650... , nowhere near the published figure."
+    },
+    {
+      "id": "EUROCONVERT_invalid_currency_value",
+      "formula": "=EUROCONVERT(1,\"XYZ\",\"EUR\")",
+      "description": "A source currency that is not one of the documented ISO codes",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents fourteen accepted ISO codes (BEF, LUF, DEM, ESP, FRF, IEP, ITL, NLG, ATS, PTE, FIM, GRD, SIT, EUR) and the blanket remark \"Invalid parameters return #VALUE.\" XYZ is not among them."
+    }
+  ]
+}

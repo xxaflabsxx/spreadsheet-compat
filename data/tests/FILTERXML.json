@@ -1,0 +1,57 @@
+{
+  "function": "FILTERXML",
+  "cases": [
+    {
+      "id": "FILTERXML_element_by_position",
+      "formula": "=FILTERXML(A1,\"//t[2]\")",
+      "description": "Selecting the second matching element with a standard XPath predicate",
+      "setup_cells": {
+        "A1": "<r><t>alpha</t><t>beta</t></r>",
+        "A2": "<r><rc title=\"Excel\" timestamp=\"2026-01-01\"/></r>",
+        "A3": "<r><t>alpha</t>",
+        "A4": "<r><x:t>alpha</x:t></r>"
+      },
+      "expected": "beta",
+      "expected_note": "Microsoft's page gives no self-contained worked example -- its only example pipes live output of WEBSERVICE into FILTERXML, which no offline harness can reproduce -- so this case supplies literal XML and asserts what the documented contract requires: \"returns specific data from XML content by using the specified xpath\", with xpath documented as \"A string in standard XPath format\". Against <r><t>alpha</t><t>beta</t></r> the standard XPath //t[2] selects the second t element, whose string value is \"beta\"; re-derived with Python's ElementTree, which is an independent XPath implementation from either spreadsheet engine's."
+    },
+    {
+      "id": "FILTERXML_attribute",
+      "formula": "=FILTERXML(A2,\"//rc/@title\")",
+      "description": "Selecting an attribute value, the form Microsoft's own example uses",
+      "setup_cells": {
+        "A1": "<r><t>alpha</t><t>beta</t></r>",
+        "A2": "<r><rc title=\"Excel\" timestamp=\"2026-01-01\"/></r>",
+        "A3": "<r><t>alpha</t>",
+        "A4": "<r><x:t>alpha</x:t></r>"
+      },
+      "expected": "Excel",
+      "expected_note": "Microsoft's page documents its live example as \"Cells B3:B5 contain the formula =FILTERXML(B3,\"//rc/@title\")\", i.e. an attribute selection on rc elements. This case keeps that exact XPath and supplies a literal <rc title=\"Excel\" .../> element in place of the unreachable Wikipedia feed, so the documented attribute form is exercised deterministically. Re-derived with ElementTree."
+    },
+    {
+      "id": "FILTERXML_invalid_xml_value",
+      "formula": "=FILTERXML(A3,\"//t\")",
+      "description": "Malformed XML (an unclosed root element)",
+      "setup_cells": {
+        "A1": "<r><t>alpha</t><t>beta</t></r>",
+        "A2": "<r><rc title=\"Excel\" timestamp=\"2026-01-01\"/></r>",
+        "A3": "<r><t>alpha</t>",
+        "A4": "<r><x:t>alpha</x:t></r>"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If xml is not valid, FILTERXML returns the #VALUE! error value.\" A3 holds <r><t>alpha</t> with no closing </r>, which is not well-formed XML; ElementTree rejects it with a ParseError, confirming the input really is invalid rather than merely unusual."
+    },
+    {
+      "id": "FILTERXML_bad_namespace_prefix_value",
+      "formula": "=FILTERXML(A4,\"//x:t\")",
+      "description": "An element using a namespace prefix that was never declared",
+      "setup_cells": {
+        "A1": "<r><t>alpha</t><t>beta</t></r>",
+        "A2": "<r><rc title=\"Excel\" timestamp=\"2026-01-01\"/></r>",
+        "A3": "<r><t>alpha</t>",
+        "A4": "<r><x:t>alpha</x:t></r>"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents this as a separate failure mode from malformed XML: \"If xml contains a namespace with a prefix that is not valid, FILTERXML returns the #VALUE! error value.\" A4 holds <r><x:t>alpha</x:t></r>, where the prefix x is bound to no namespace; ElementTree rejects it with \"unbound prefix\", confirming the condition the documentation describes."
+    }
+  ]
+}

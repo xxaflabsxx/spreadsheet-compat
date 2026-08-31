@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>F.INV.RT: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="F.INV.RT (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>F.INV.RT matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="3/5 match; probability below zero num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/f.inv.rt.html">
-<meta property="og:title" content="F.INV.RT: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="F.INV.RT (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="F.INV.RT matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="3/5 match; probability below zero num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/f.inv.rt.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>F.INV.RT</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>F.INV.RT</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for F.INV.RT yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060182.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,100 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+F.INV.RT&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't F.INV.RT working in LibreOffice?</h2>
+
+<p><code>F.INV.RT</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=F.INV.RT(-0.5,6,4)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If Probability is &lt; 0 or probability is &gt; 1, F.INV.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=F.INV.RT(0.01,6,0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If Deg_freedom1 is &lt; 1, or Deg_freedom2 is &lt; 1, F.INV.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +487,58 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for F.INV.RT yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(F.INV.RT(0.01,6,4),5)</td>
+  <td>Microsoft&#39;s documented worked example: the upper 1% critical value of the F distribution with 6 and 4 degrees of freedom</td>
+  <td class="result mono">15.20686</td>
+  <td class="result mono">15.20686<br><span class="category-tag">Microsoft&#39;s page publishes &#39;=F.INV.RT(A2,A3,A4)&#39; over the data 0.01 / 6 / 4 with the result 15.20686. Re-derived independently by solving 1 - P(F &lt;= x) = 0.01 with mpmath at 50 digits: x = 15.206864861157530011, i.e. exactly the published 15.20686 at 5 dp. This is also the x the F.DIST.RT and FDIST pages feed back in as their example argument (15.2068649 and 15.20686486), which is a useful independent confirmation that the three pages describe one consistent distribution.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(F.DIST.RT(F.INV.RT(0.01,6,4),6,4),8)</td>
+  <td>The documented inverse identity, exercised as a round trip</td>
+  <td class="result mono">0.01</td>
+  <td class="result mono">0.01<br><span class="category-tag">Microsoft documents the pair with the identity &#34;If p = F.DIST.RT(x,...), then F.INV.RT(p,...) = x&#34;, and adds that &#34;precision of F.INV.RT depends on precision of F.DIST.RT&#34; because &#34;F.INV.RT uses an iterative search technique&#34;. Feeding the inverse straight back into the forward function must therefore return the probability it started from, 0.01, to within the search tolerance. Asserted at 8 dp, which is far looser than the documented 64-iteration search would need to be to fail.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=F.INV.RT(-0.5,6,4)</td>
+  <td>A probability outside [0,1]</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If Probability is &lt; 0 or probability is &gt; 1, F.INV.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=F.INV.RT(0.01,6,0)</td>
+  <td>A denominator degrees of freedom below the documented minimum</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If Deg_freedom1 is &lt; 1, or Deg_freedom2 is &lt; 1, F.INV.RT returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=F.INV.RT(&#34;abc&#34;,6,4)</td>
+  <td>A non-numeric argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If any argument is non-numeric, F.INV.RT returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

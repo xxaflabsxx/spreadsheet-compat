@@ -1,0 +1,40 @@
+{
+  "function": "DELTA",
+  "cases": [
+    {
+      "id": "DELTA_unequal",
+      "formula": "=DELTA(5,4)",
+      "description": "Microsoft's documented worked example: 5 and 4 are not equal",
+      "expected": 0,
+      "expected_note": "Microsoft's page publishes '=DELTA(5, 4)' with the description \"Checks whether 5 equals 4\" and the result 0, which follows from the documented rule \"Returns 1 if number1 = number2; returns 0 otherwise\"."
+    },
+    {
+      "id": "DELTA_equal",
+      "formula": "=DELTA(5,5)",
+      "description": "Microsoft's documented worked example: 5 equals 5",
+      "expected": 1,
+      "expected_note": "Microsoft's page publishes '=DELTA(5, 5)' with the result 1."
+    },
+    {
+      "id": "DELTA_fractional",
+      "formula": "=DELTA(0.5,0)",
+      "description": "Microsoft's documented worked example: 0.5 does not equal 0",
+      "expected": 0,
+      "expected_note": "Microsoft's page publishes '=DELTA(0.5, 0)' with the result 0. The comparison is exact, not rounded -- this case exists to catch an engine that truncates its arguments to integers first, which would return 1."
+    },
+    {
+      "id": "DELTA_second_argument_omitted",
+      "formula": "=DELTA(0)",
+      "description": "The optional second argument omitted, so it defaults to zero",
+      "expected": 1,
+      "expected_note": "Microsoft documents: \"Number2 Optional. The second number. If omitted, number2 is assumed to be zero.\" DELTA(0) is therefore DELTA(0,0), and the Kronecker delta of two equal values is 1."
+    },
+    {
+      "id": "DELTA_text_argument_value",
+      "formula": "=DELTA(\"abc\",1)",
+      "description": "A non-numeric first argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If number1 is nonnumeric, DELTA returns the #VALUE! error value.\""
+    }
+  ]
+}

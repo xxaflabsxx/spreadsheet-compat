@@ -1,0 +1,40 @@
+{
+  "function": "EXPON.DIST",
+  "cases": [
+    {
+      "id": "EXPON.DIST_cumulative",
+      "formula": "=ROUND(EXPON.DIST(0.2,10,TRUE),8)",
+      "description": "Microsoft's documented worked example: the cumulative exponential distribution at x = 0.2 with lambda = 10",
+      "expected": 0.86466472,
+      "expected_note": "Microsoft's page publishes '=EXPON.DIST(A2,A3,TRUE)' over the data 0.2 and 10 with the result 0.86466472. Re-derived independently with mpmath at 50 decimal digits from the equations the page states: the cumulative form is 1 - e^(-lambda*x) = 1 - e^(-2) = 0.86466471676338730811 and the density is lambda*e^(-lambda*x) = 10*e^(-2) = 1.3533528323661269189, which round to the published 0.86466472 and 1.35335283 at 8 dp exactly."
+    },
+    {
+      "id": "EXPON.DIST_density",
+      "formula": "=ROUND(EXPON.DIST(0.2,10,FALSE),8)",
+      "description": "Microsoft's documented worked example: the probability density at the same point",
+      "expected": 1.35335283,
+      "expected_note": "Microsoft's page publishes '=EXPON.DIST(0.2,10,FALSE)' with the result 1.35335283. Re-derived independently with mpmath at 50 decimal digits from the equations the page states: the cumulative form is 1 - e^(-lambda*x) = 1 - e^(-2) = 0.86466471676338730811 and the density is lambda*e^(-lambda*x) = 10*e^(-2) = 1.3533528323661269189, which round to the published 0.86466472 and 1.35335283 at 8 dp exactly. Note the density exceeds 1, which is correct for a continuous distribution and is a useful check that the engine is not clamping a density to a probability."
+    },
+    {
+      "id": "EXPON.DIST_negative_x_num",
+      "formula": "=EXPON.DIST(-1,10,TRUE)",
+      "description": "A negative x, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x < 0, EXPON.DIST returns the #NUM! error value.\" EXECUTED RESULT -- SILENT NON-ERROR. All four LibreOffice builds return the number 0 instead of the documented #NUM! for a negative x. 0 is the mathematically natural continuation of the CDF below the support, so nothing looks wrong downstream: a spreadsheet full of negative inputs silently produces zeros where Excel would produce a visible column of errors. This is a missing input guard, not a computation defect."
+    },
+    {
+      "id": "EXPON.DIST_lambda_zero_num",
+      "formula": "=EXPON.DIST(0.2,0,TRUE)",
+      "description": "A lambda of zero, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If lambda <= 0, EXPON.DIST returns the #NUM! error value.\" Zero is the boundary the rule excludes. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "EXPON.DIST_text_argument_value",
+      "formula": "=EXPON.DIST(\"abc\",10,TRUE)",
+      "description": "A non-numeric x",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x or lambda is nonnumeric, EXPON.DIST returns the #VALUE! error value.\""
+    }
+  ]
+}

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DURATION: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="DURATION (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>DURATION gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="1/6 match Excel&#39;s docs; doc example returns 10.921574, not 10.9191453. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/duration.html">
-<meta property="og:title" content="DURATION: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="DURATION (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="DURATION gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="1/6 match Excel&#39;s docs; doc example returns 10.921574, not 10.9191453. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/duration.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>DURATION</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>DURATION</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for DURATION yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060103.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,126 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+DURATION&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't DURATION working in LibreOffice?</h2>
+
+<p><code>DURATION</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,1),7)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">10.921574</span>, but the documented/expected
+        result is <span class="formula">10.9191453</span>.
+        Microsoft&#39;s page publishes this example&#39;s result as 10.9191453. Derived independently from the documented definition, &#34;the Macauley duration for an assumed par value of $100 ... the weighted average of the present value of cash flows&#34;. Settlement 2018-07-01 falls exactly on a coupon date of the 2048-01-01 maturity at semiannual frequency, so there are 59 remaining coupons at times 0.5, 1.0, ... 29.5 years; discounting each 4.00 coupon (plus 100 redemption at t = 29.5) at 9% nominal semiannual and taking the cash-flow-weighted mean time gives 10.919145281591925, which rounds to the published 10.9191453 at 7 dp. EXECUTED RESULT -- SILENT WRONG VALUE, the most serious class in this batch. All four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 10.9215739665694 where both Microsoft&#39;s published figure and the independent derivation give 10.919145281591925: a plausible number, no error, wrong in the third decimal (2.2e-4 relative). The mechanism is pinned down exactly rather than guessed. The discrepancy is 10.9215739665694 - 10.9191452815919 = 0.0024286849775, and YEARFRAC over the same two dates on the same basis 1 returns 29.5024286849775 where the coupon schedule gives 59 coupons / 2 per year = 29.5 exactly -- the excess, 0.0024286849775, matches the error to twelve digits. LibreOffice is therefore taking the cash-flow times from an actual/actual year fraction instead of from the coupon count, which shifts EVERY cash flow later by the same amount and so shifts the weighted average by that amount. The companion case DURATION_basis_30_360 is the control: on basis 0, where YEARFRAC over these dates is exactly 29.5, all four builds return 10.9191452815919 and agree with the documented value.; MISMATCH vs expected: expected 10.9191453, got 10.921574
+      </li>
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,3,1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If frequency is any number other than 1, 2, or 4, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=DURATION(DATE(2018,7,1),DATE(2048,1,1),-0.08,0.09,2,1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If coupon &lt; 0 or if yld &lt; 0, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=DURATION(DATE(2048,1,1),DATE(2018,7,1),0.08,0.09,2,1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If settlement &gt;= maturity, DURATION returns the #NUM! error value.&#34; The example&#39;s two dates are simply swapped. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,5)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents five bases (0-4) and: &#34;If basis &lt; 0 or if basis &gt; 4, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +513,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for DURATION yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,1),7)</td>
+  <td>Microsoft&#39;s documented worked example: a 30-year 8% bond yielding 9%, semiannual, actual/actual basis</td>
+  <td class="result mono">10.921574</td>
+  <td class="result mono">10.9191453<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 10.9191453. Derived independently from the documented definition, &#34;the Macauley duration for an assumed par value of $100 ... the weighted average of the present value of cash flows&#34;. Settlement 2018-07-01 falls exactly on a coupon date of the 2048-01-01 maturity at semiannual frequency, so there are 59 remaining coupons at times 0.5, 1.0, ... 29.5 years; discounting each 4.00 coupon (plus 100 redemption at t = 29.5) at 9% nominal semiannual and taking the cash-flow-weighted mean time gives 10.919145281591925, which rounds to the published 10.9191453 at 7 dp. EXECUTED RESULT -- SILENT WRONG VALUE, the most serious class in this batch. All four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 10.9215739665694 where both Microsoft&#39;s published figure and the independent derivation give 10.919145281591925: a plausible number, no error, wrong in the third decimal (2.2e-4 relative). The mechanism is pinned down exactly rather than guessed. The discrepancy is 10.9215739665694 - 10.9191452815919 = 0.0024286849775, and YEARFRAC over the same two dates on the same basis 1 returns 29.5024286849775 where the coupon schedule gives 59 coupons / 2 per year = 29.5 exactly -- the excess, 0.0024286849775, matches the error to twelve digits. LibreOffice is therefore taking the cash-flow times from an actual/actual year fraction instead of from the coupon count, which shifts EVERY cash flow later by the same amount and so shifts the weighted average by that amount. The companion case DURATION_basis_30_360 is the control: on basis 0, where YEARFRAC over these dates is exactly 29.5, all four builds return 10.9191452815919 and agree with the documented value.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,0),7)</td>
+  <td>The same bond on the US 30/360 basis instead of actual/actual</td>
+  <td class="result mono">10.9191453</td>
+  <td class="result mono">10.9191453<br><span class="category-tag">Derived, not published: this case exists as a controlled comparison against DURATION_doc_example. Because settlement lands exactly on a coupon date, the cash-flow schedule is identical under every basis, so the Macaulay duration is the same 10.919145281591925 whichever basis is chosen -- and the two cases together therefore isolate whether an engine&#39;s basis handling leaks into the duration. Note that YEARFRAC over the same two dates is exactly 29.5 on basis 0 but 29.50242868497748 on basis 1, which is the quantity that separates the two cases on an engine that derives the schedule from a year fraction. EXECUTED RESULT: all four LibreOffice builds return 10.9191452815919, matching the derivation exactly -- while the otherwise identical actual/actual case (DURATION_doc_example) does not. The pair isolates the defect to LibreOffice&#39;s basis-1 year fraction; see that case&#39;s note for the arithmetic.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,3,1)</td>
+  <td>A coupon frequency of 3, which is not one of the documented values</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If frequency is any number other than 1, 2, or 4, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DURATION(DATE(2018,7,1),DATE(2048,1,1),-0.08,0.09,2,1)</td>
+  <td>A negative coupon rate, which the documentation excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If coupon &lt; 0 or if yld &lt; 0, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DURATION(DATE(2048,1,1),DATE(2018,7,1),0.08,0.09,2,1)</td>
+  <td>Settlement later than maturity, which the documentation excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If settlement &gt;= maturity, DURATION returns the #NUM! error value.&#34; The example&#39;s two dates are simply swapped. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,5)</td>
+  <td>A day-count basis above the documented range</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents five bases (0-4) and: &#34;If basis &lt; 0 or if basis &gt; 4, DURATION returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

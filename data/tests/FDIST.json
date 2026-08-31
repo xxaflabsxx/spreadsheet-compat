@@ -1,0 +1,40 @@
+{
+  "function": "FDIST",
+  "cases": [
+    {
+      "id": "FDIST_doc_example",
+      "formula": "=ROUND(FDIST(15.20686486,6,4),8)",
+      "description": "Microsoft's documented worked example: the right-tailed F distribution, legacy spelling",
+      "expected": 0.01,
+      "expected_note": "Microsoft's page publishes '=FDIST(A2,A3,A4)' over the data 15.20686486 / 6 / 4 with the result 0.01. Re-derived independently with mpmath at 50 decimal digits from the regularized incomplete beta function -- the closed form of the F cumulative distribution, P(F <= x) = I_{d1*x/(d1*x+d2)}(d1/2, d2/2) -- rather than from any statistics library's F routines. The right tail is 0.010000000001416584763, i.e. 0.01 at 8 dp. FDIST is the pre-2010 spelling of F.DIST.RT and carries Microsoft's compatibility banner, but publishes the same worked example with x given to one more decimal."
+    },
+    {
+      "id": "FDIST_negative_x_num",
+      "formula": "=FDIST(-1,6,4)",
+      "description": "A negative x, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x is negative, FDIST returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "FDIST_df_too_large_num",
+      "formula": "=FDIST(15.20686486,10000000000,4)",
+      "description": "A numerator degrees of freedom at the documented upper limit",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents a constraint the modern F.DIST.RT page drops: \"If deg_freedom1 < 1 or deg_freedom1 >= 10^10, FDIST returns the #NUM! error value.\" 10^10 = 10000000000 is exactly the excluded boundary. This is the one place the legacy and modern spellings are documented to differ, which is why the case is here rather than on F.DIST.RT. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Worth noting separately: LibreOffice does REJECT the 10^10 degrees of freedom the legacy page excludes -- it just reports the rejection with the wrong token."
+    },
+    {
+      "id": "FDIST_zero_df_num",
+      "formula": "=FDIST(15.20686486,6,0)",
+      "description": "A denominator degrees of freedom below the documented minimum",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom2 < 1 or deg_freedom2 >= 10^10, FDIST returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "FDIST_text_argument_value",
+      "formula": "=FDIST(\"abc\",6,4)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, FDIST returns the #VALUE! error value.\""
+    }
+  ]
+}

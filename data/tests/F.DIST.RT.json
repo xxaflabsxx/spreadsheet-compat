@@ -1,0 +1,33 @@
+{
+  "function": "F.DIST.RT",
+  "cases": [
+    {
+      "id": "F.DIST.RT_doc_example",
+      "formula": "=ROUND(F.DIST.RT(15.2068649,6,4),8)",
+      "description": "Microsoft's documented worked example: the right-tailed F distribution at 15.2068649 with 6 and 4 degrees of freedom",
+      "expected": 0.01,
+      "expected_note": "Microsoft's page publishes '=F.DIST.RT(A2,A3,A4)' over the data 15.2068649 / 6 / 4 with the result 0.01. Re-derived independently with mpmath at 50 decimal digits from the regularized incomplete beta function -- the closed form of the F cumulative distribution, P(F <= x) = I_{d1*x/(d1*x+d2)}(d1/2, d2/2) -- rather than from any statistics library's F routines. The right tail is 1 - P(F <= x) = 0.009999999952464600992, which rounds to exactly the published 0.01 at 8 dp -- the page's x is quoted to enough digits here that the published figure and the derived one agree well past the printed depth, unlike the F.DIST page's 4-decimal x."
+    },
+    {
+      "id": "F.DIST.RT_negative_x_num",
+      "formula": "=F.DIST.RT(-1,6,4)",
+      "description": "A negative x, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x is negative, F.DIST.RT returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.DIST.RT_zero_df_num",
+      "formula": "=F.DIST.RT(15.2068649,6,0)",
+      "description": "A denominator degrees of freedom below the documented minimum",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom2 < 1 F.DIST.RT returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.DIST.RT_text_argument_value",
+      "formula": "=F.DIST.RT(\"abc\",6,4)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, F.DIST.RT returns the #VALUE! error value.\""
+    }
+  ]
+}

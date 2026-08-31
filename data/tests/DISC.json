@@ -1,0 +1,40 @@
+{
+  "function": "DISC",
+  "cases": [
+    {
+      "id": "DISC_doc_example",
+      "formula": "=ROUND(DISC(DATE(2018,7,1),DATE(2048,1,1),97.975,100,1),12)",
+      "description": "Microsoft's documented worked example: the discount rate of a bond priced at 97.975 per 100 face value, actual/actual basis",
+      "expected": 0.000686384169,
+      "expected_note": "MICROSOFT-PUBLISHED RESULT CORRECTED. The page's example data is settlement 07/01/2018, maturity 01/01/2048, price 97.975, redemption 100, basis 1 (actual/actual), and it publishes the result 0.001038. That figure does not belong to those inputs. Derived independently from the formula the page itself states, DISC = ((redemption - pr)/redemption) * (B/DSM): (100 - 97.975)/100 = 0.02025, DSM = 10776 actual days from 2018-07-01 to 2048-01-01, and B under the documented actual/actual basis is the average length of the calendar years spanned, giving a year fraction of 29.50242868497748 and a discount rate of 0.0006863841691213483. The published 0.001038 is reproducible only by moving the maturity back ten years: with maturity 01/01/2038 the same arithmetic gives 0.0010381908237747707, which rounds to exactly the printed 0.001038. The published number is therefore a stale figure left behind when the example's dates were rolled forward, not a rounding of the correct answer, so the correct value is asserted here and the discrepancy recorded rather than buried. Asserted at 12 decimal places (0.000686384169), which is roughly 9 significant digits of the independently derived value and well inside double precision; the ROUND() wrapper keeps the assertion free of last-bit formatting differences. EXECUTED RESULT: all four LibreOffice builds return 0.000686384169121348, matching the independently derived value to full double precision -- so LibreOffice agrees with the derivation and with the page's stated inputs, and it is Microsoft's printed 0.001038 that stands alone."
+    },
+    {
+      "id": "DISC_price_zero_num",
+      "formula": "=DISC(DATE(2018,7,1),DATE(2048,1,1),0,100,1)",
+      "description": "A price of zero, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If pr <= 0 or if redemption <= 0, DISC returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "DISC_basis_out_of_range_num",
+      "formula": "=DISC(DATE(2018,7,1),DATE(2048,1,1),97.975,100,5)",
+      "description": "A day-count basis above the documented range",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents five bases (0-4) and: \"If basis < 0 or if basis > 4, DISC returns the #NUM! error value.\" 5 is the first excluded value. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "DISC_settlement_after_maturity_num",
+      "formula": "=DISC(DATE(2048,1,1),DATE(2018,7,1),97.975,100,1)",
+      "description": "Settlement later than maturity, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If settlement >= maturity, DISC returns the #NUM! error value.\" The example's two dates are simply swapped here. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "DISC_text_date_value",
+      "formula": "=DISC(\"abc\",DATE(2048,1,1),97.975,100,1)",
+      "description": "A settlement date that is not a valid serial date number",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If settlement or maturity is not a valid serial date number, DISC returns the #VALUE! error value.\""
+    }
+  ]
+}

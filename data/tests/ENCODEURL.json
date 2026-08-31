@@ -1,0 +1,33 @@
+{
+  "function": "ENCODEURL",
+  "cases": [
+    {
+      "id": "ENCODEURL_doc_example",
+      "formula": "=ENCODEURL(\"http://contoso.sharepoint.com/Finance/Profit and Loss Statement.xlsx\")",
+      "description": "Microsoft's documented worked example: a SharePoint URL containing spaces",
+      "expected": "http%3A%2F%2Fcontoso.sharepoint.com%2FFinance%2FProfit%20and%20Loss%20Statement.xlsx",
+      "expected_note": "Microsoft's page publishes this example verbatim, argument and result. Re-derived character by character from the documented rule (\"returns a URL-encoded string, replacing certain non-alphanumeric characters with the percentage symbol (%) and a hexadecimal number\"): the colon becomes %3A, each forward slash %2F and each space %20, while the letters, digits and -- decisively for this case -- the PERIODS are left literal. The published result keeps \"contoso.sharepoint.com\" and \".xlsx\" unencoded, so the period is one of the non-alphanumeric characters Excel deliberately does not escape. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return 'http%3A%2F%2Fcontoso%2Esharepoint%2Ecom%2FFinance%2FProfit%20and%20Loss%20Statement%2Exlsx': identical to the documented result except that every PERIOD has been percent-encoded as %2E, which Microsoft's published example leaves literal. No error is raised and the string is still a decodable URL, so the difference survives into any downstream comparison, cache key or signature that expects Excel's output byte for byte. The period is an unreserved character in RFC 3986, so encoding it is legal but not what Excel does."
+    },
+    {
+      "id": "ENCODEURL_space",
+      "formula": "=ENCODEURL(\"a b\")",
+      "description": "The single documented transformation, isolated",
+      "expected": "a%20b",
+      "expected_note": "Derived from the documented rule and from the published example, in which every space became %20. Isolating one space separates a space-encoding difference from any other character's. EXECUTED RESULT: all four LibreOffice builds return the documented a%20b, so the space handling itself is not the difference seen in ENCODEURL_doc_example."
+    },
+    {
+      "id": "ENCODEURL_alphanumeric_unchanged",
+      "formula": "=ENCODEURL(\"abcXYZ123\")",
+      "description": "Alphanumeric text has nothing to encode",
+      "expected": "abcXYZ123",
+      "expected_note": "Excel documents the function as \"replacing certain non-alphanumeric characters\", so a purely alphanumeric argument must come back unchanged. This case is the control for the others: an engine that fails here is not encoding, it is mangling."
+    },
+    {
+      "id": "ENCODEURL_query_delimiters",
+      "formula": "=ENCODEURL(\"x=1&y=2\")",
+      "description": "The reserved query-string delimiters = and &",
+      "expected": "x%3D1%26y%3D2",
+      "expected_note": "Derived from the documented rule together with the percent-encodings the published example fixes: = is ASCII 0x3D and & is ASCII 0x26, so the encoded form is x%3D1%26y%3D2. These two characters matter because the documented companion use of ENCODEURL is building a WEBSERVICE query string, where an unescaped & would split the parameter. EXECUTED RESULT: all four LibreOffice builds return the derived x%3D1%26y%3D2, so the reserved query delimiters are handled as documented; the divergence recorded for this function is confined to the period."
+    }
+  ]
+}

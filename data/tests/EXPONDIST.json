@@ -1,0 +1,40 @@
+{
+  "function": "EXPONDIST",
+  "cases": [
+    {
+      "id": "EXPONDIST_cumulative",
+      "formula": "=ROUND(EXPONDIST(0.2,10,TRUE),8)",
+      "description": "Microsoft's documented worked example: the cumulative exponential distribution at x = 0.2 with lambda = 10",
+      "expected": 0.86466472,
+      "expected_note": "Microsoft's page publishes '=EXPONDIST(A2,A3,TRUE)' over the data 0.2 and 10 with the result 0.86466472. Re-derived independently with mpmath at 50 decimal digits from the equations the page states: the cumulative form is 1 - e^(-lambda*x) = 1 - e^(-2) = 0.86466471676338730811 and the density is lambda*e^(-lambda*x) = 10*e^(-2) = 1.3533528323661269189, which round to the published 0.86466472 and 1.35335283 at 8 dp exactly. EXPONDIST is the pre-2010 spelling: its page carries Microsoft's compatibility banner (\"This function has been replaced with one or more new functions ... you should consider using the new functions from now on\") and points at EXPON.DIST, but publishes the identical example data and the identical result, so the two are asserted against the same numbers on purpose."
+    },
+    {
+      "id": "EXPONDIST_density",
+      "formula": "=ROUND(EXPONDIST(0.2,10,FALSE),8)",
+      "description": "Microsoft's documented worked example: the probability density at the same point",
+      "expected": 1.35335283,
+      "expected_note": "Microsoft's page publishes '=EXPONDIST(0.2,10,FALSE)' with the result 1.35335283. Re-derived independently with mpmath at 50 decimal digits from the equations the page states: the cumulative form is 1 - e^(-lambda*x) = 1 - e^(-2) = 0.86466471676338730811 and the density is lambda*e^(-lambda*x) = 10*e^(-2) = 1.3533528323661269189, which round to the published 0.86466472 and 1.35335283 at 8 dp exactly. Note the density exceeds 1, which is correct for a continuous distribution and is a useful check that the engine is not clamping a density to a probability."
+    },
+    {
+      "id": "EXPONDIST_negative_x_num",
+      "formula": "=EXPONDIST(-1,10,TRUE)",
+      "description": "A negative x, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x < 0, EXPONDIST returns the #NUM! error value.\" EXECUTED RESULT -- SILENT NON-ERROR: the legacy spelling behaves exactly like the modern one, returning 0 on all four LibreOffice builds where the page documents #NUM!."
+    },
+    {
+      "id": "EXPONDIST_lambda_zero_num",
+      "formula": "=EXPONDIST(0.2,0,TRUE)",
+      "description": "A lambda of zero, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If lambda <= 0, EXPONDIST returns the #NUM! error value.\" Zero is the boundary the rule excludes. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "EXPONDIST_text_argument_value",
+      "formula": "=EXPONDIST(\"abc\",10,TRUE)",
+      "description": "A non-numeric x",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x or lambda is nonnumeric, EXPONDIST returns the #VALUE! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "function": "FINDB",
+  "cases": [
+    {
+      "id": "FINDB_doc_first_match",
+      "formula": "=FINDB(\"M\",A2)",
+      "description": "Microsoft's documented worked example: the position of the first capital M in \"Miriam McGovern\"",
+      "setup_cells": {
+        "A2": "Miriam McGovern",
+        "A3": "日本b"
+      },
+      "expected": 1,
+      "expected_note": "Microsoft's page publishes '=FIND(\"M\",A2)' over the data \"Miriam McGovern\" with the result 1 and the description \"Position of the first 'M' in cell A2\", and documents FIND and FINDB as one function pair sharing the example set. Every character here is single-byte, so the byte and character readings coincide and the answer is 1 under either. Verbatim from Microsoft's FIND, FINDB page: \"FINDB counts each double-byte character as 2 when you have enabled the editing of a language that supports DBCS and then set it as the default language. Otherwise, FINDB counts each character as 1\", with the DBCS languages listed as Japanese, Chinese (Simplified), Chinese (Traditional) and Korean. This harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, so the documented answer is the one-byte-per-character reading -- the same treatment the corpus's LENB cases already use, and stated here rather than assumed away."
+    },
+    {
+      "id": "FINDB_case_sensitive",
+      "formula": "=FINDB(\"m\",A2)",
+      "description": "Microsoft's documented worked example: the search is case sensitive",
+      "setup_cells": {
+        "A2": "Miriam McGovern",
+        "A3": "日本b"
+      },
+      "expected": 6,
+      "expected_note": "Microsoft's page publishes '=FIND(\"m\",A2)' with the result 6, and documents \"FIND and FINDB are case sensitive and don't allow wildcard characters\". The lower-case m first occurs at position 6 of \"Miriam McGovern\", not at position 1 -- an engine that folds case returns 1 here."
+    },
+    {
+      "id": "FINDB_start_num",
+      "formula": "=FINDB(\"M\",A2,3)",
+      "description": "Microsoft's documented worked example: searching from the third character onward",
+      "setup_cells": {
+        "A2": "Miriam McGovern",
+        "A3": "日本b"
+      },
+      "expected": 8,
+      "expected_note": "Microsoft's page publishes '=FIND(\"M\",A2,3)' with the result 8 and the description \"Position of the first 'M' in cell A2, starting with the third character\". The documentation adds that the result is still measured from the start of within_text: \"FIND always returns the number of characters from the start of within_text, counting the characters you skip if start_num is greater than 1.\""
+    },
+    {
+      "id": "FINDB_not_found_value",
+      "formula": "=FINDB(\"z\",A2)",
+      "description": "Text that does not occur in the searched string",
+      "setup_cells": {
+        "A2": "Miriam McGovern",
+        "A3": "日本b"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If find_text does not appear in within_text, FIND and FINDB return the #VALUE! error value.\""
+    },
+    {
+      "id": "FINDB_start_num_zero_value",
+      "formula": "=FINDB(\"M\",A2,0)",
+      "description": "A start position of zero, which the documentation excludes",
+      "setup_cells": {
+        "A2": "Miriam McGovern",
+        "A3": "日本b"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If start_num is not greater than zero, FIND and FINDB return the #VALUE! error value.\""
+    },
+    {
+      "id": "FINDB_dbcs_probe",
+      "formula": "=FINDB(\"b\",A3)",
+      "description": "DIVERGENCE PROBE: a search after two CJK characters, where the answer depends on the DBCS language rule",
+      "setup_cells": {
+        "A2": "Miriam McGovern",
+        "A3": "日本b"
+      },
+      "expected": 3,
+      "expected_note": "A3 holds the three-character string U+65E5 U+672C followed by an ASCII b. Verbatim from Microsoft's FIND, FINDB page: \"FINDB counts each double-byte character as 2 when you have enabled the editing of a language that supports DBCS and then set it as the default language. Otherwise, FINDB counts each character as 1\", with the DBCS languages listed as Japanese, Chinese (Simplified), Chinese (Traditional) and Korean. This harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, so the documented answer is the one-byte-per-character reading -- the same treatment the corpus's LENB cases already use, and stated here rather than assumed away. Under that non-DBCS reading the b is the third character and the documented answer is 3; under a DBCS default language the two CJK characters would count 2 bytes each and the answer would be 5. Recording which of the two each engine produces is the whole point of the case -- exactly as for the corpus's LENB_non_ascii_characters probe. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return 5, i.e. they apply the double-byte count (2 bytes per CJK character) even though the default language is not a DBCS one, where the documentation's \"Otherwise, FINDB counts each character as 1\" clause gives 3. No error is raised; a formula that slices text by this position silently cuts in a different place. This is the same shape as the divergence the corpus already records for LENB, and it is the only one of the six FINDB cases that diverges -- every ASCII case matches, so LibreOffice's FINDB is correct except for exactly this locale rule."
+    }
+  ]
+}

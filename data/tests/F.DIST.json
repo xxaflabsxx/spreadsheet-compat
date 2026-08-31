@@ -1,0 +1,40 @@
+{
+  "function": "F.DIST",
+  "cases": [
+    {
+      "id": "F.DIST_cumulative",
+      "formula": "=ROUND(F.DIST(15.2069,6,4,TRUE),8)",
+      "description": "Microsoft's documented worked example: the cumulative F distribution at 15.2069 with 6 and 4 degrees of freedom",
+      "expected": 0.99000004,
+      "expected_note": "Microsoft's page publishes '=F.DIST(A2,A3,A4,TRUE)' over the data 15.2069 / 6 / 4 with the result 0.99. Re-derived independently with mpmath at 50 decimal digits from the regularized incomplete beta function -- the closed form of the F cumulative distribution, P(F <= x) = I_{d1*x/(d1*x+d2)}(d1/2, d2/2) -- rather than from any statistics library's F routines. The exact value is 0.99000004300276268859, so the page's \"0.99\" is a 2-decimal presentation of a number that is not 0.99: the example's x is itself a 4-decimal rounding of the true 99th percentile 15.206864861157530. Asserting the published 0.99 at 8 dp would therefore be asserting a false value, so this case asserts the derived 0.99000004 at 8 dp -- which does round to the published 0.99 at the 2 decimals the page prints. The companion F.DIST.RT and FDIST cases, whose pages give x to 7 and 8 decimals, land on 0.01 much more cleanly and are the cross-check on this reading."
+    },
+    {
+      "id": "F.DIST_density",
+      "formula": "=ROUND(F.DIST(15.2069,6,4,FALSE),7)",
+      "description": "Microsoft's documented worked example: the F probability density at the same point",
+      "expected": 0.0012238,
+      "expected_note": "Microsoft's page publishes '=F.DIST(A2,A3,A4,FALSE)' with the result 0.0012238. Re-derived independently with mpmath at 50 digits from the F density (d1*x)^(d1/2) * d2^(d2/2) / ((d1*x+d2)^((d1+d2)/2) * x * B(d1/2,d2/2)) = 0.0012237917087831731591, which rounds to exactly the published 0.0012238 at 7 dp. This case also pins down the cumulative flag: an engine that ignores it returns the ~0.99 of the previous case here."
+    },
+    {
+      "id": "F.DIST_negative_x_num",
+      "formula": "=F.DIST(-1,6,4,TRUE)",
+      "description": "A negative x, which the documentation excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x is negative, F.DIST returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.DIST_zero_df_num",
+      "formula": "=F.DIST(15.2069,0,4,TRUE)",
+      "description": "A numerator degrees of freedom below the documented minimum",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If deg_freedom1 < 1, F.DIST returns the #NUM! error value.\" Zero is the first excluded value. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "F.DIST_text_argument_value",
+      "formula": "=F.DIST(\"abc\",6,4,TRUE)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, F.DIST returns the #VALUE! error value.\""
+    }
+  ]
+}

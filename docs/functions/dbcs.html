@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DBCS: Excel only — not in Sheets or LibreOffice</title>
-<meta name="description" content="DBCS (Text) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>DBCS is not supported in LibreOffice Calc (Excel only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for DBCS in all 4 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/dbcs.html">
-<meta property="og:title" content="DBCS: Excel only — not in Sheets or LibreOffice">
-<meta property="og:description" content="DBCS (Text) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="DBCS is not supported in LibreOffice Calc (Excel only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for DBCS in all 4 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/dbcs.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>DBCS</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Text</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>DBCS</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for DBCS yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,117 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+DBCS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't DBCS working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>DBCS</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+The same formula is documented for Excel.
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=DBCS(&#34;EXCEL&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">ＥＸＣＥＬ</span>.
+        Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. PUBLISHED EXAMPLE CONTRADICTS THE PUBLISHED RULE: the page&#39;s first worked example reads &#39;=DBCS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39;, i.e. it shows the argument coming back unchanged -- which is the documented behaviour of the INVERSE function ASC, whose page carries the identical line, and is impossible under DBCS&#39;s own stated rule because &#34;EXCEL&#34; is five half-width English letters. The value asserted here is derived from the rule instead: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), exactly the inverse of the mapping batch A&#39;s ASC cases assert in the other direction. The page&#39;s second example, which does show a conversion, is rendered as inline GIF images (media/fe337.gif ...) so no literal argument can be copied from it. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? -- and a name-form probe confirms this is a genuine gap rather than a storage-prefix artefact: the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form all return #NAME? on every build. LibreOffice nevertheless PERFORMS this conversion under a different name: on all four builds &#39;=JIS(&#34;EXCEL&#34;)&#39; returns exactly the full-width string asserted here, which independently confirms both the derived expected value and that the gap is a missing alias, not a missing capability.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=DBCS(&#34;ＥＸＣＥＬ&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">ＥＸＣＥＬ</span>.
+        Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. This case is unambiguous under either reading of the page: the argument contains no half-width English letters or katakana, so the documented no-change clause applies and the result is the argument itself. EXECUTED RESULT: #NAME? on all four LibreOffice builds; see DBCS_halfwidth_latin_to_fullwidth for the three-spelling probe and for LibreOffice&#39;s JIS equivalent.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ASC(DBCS(&#34;EXCEL&#34;))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">EXCEL</span>.
+        Deliberately locale-independent, and the reason this case exists. If DBCS converts (the documented rule), ASC converts back and the result is &#34;EXCEL&#34;; if DBCS is a no-op under a non-DBCS default language, ASC leaves the already-half-width text alone and the result is still &#34;EXCEL&#34;. Both readings of Microsoft&#39;s page agree here, so a failure of this case cannot be blamed on the harness locale -- it can only mean the engine lacks one of the two functions or mangles the text. EXECUTED RESULT: #NAME? on all four LibreOffice builds. Because ASC itself is supported there (batch A executed it), the failure is entirely DBCS&#39;s, which is what this locale-independent case was built to establish.; MISMATCH vs expected: expected &#39;EXCEL&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=LEN(DBCS(&#34;EXCEL&#34;))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">5</span>.
+        Microsoft documents DBCS as changing half-width characters to full-width characters -- a one-for-one character mapping, not an encoding change -- so a five-character input yields a five-character result whether or not the mapping fires. This is the mirror of batch A&#39;s ASC_length_preserved case and separates a genuine width conversion from a byte-level reinterpretation. EXECUTED RESULT: #NAME? on all four LibreOffice builds -- LEN is supported, so the unrecognized name is DBCS.; MISMATCH vs expected: expected 5, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +504,50 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for DBCS yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DBCS(&#34;EXCEL&#34;)</td>
+  <td>Half-width (single-byte) Latin letters converted to full-width</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">ＥＸＣＥＬ<br><span class="category-tag">Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. PUBLISHED EXAMPLE CONTRADICTS THE PUBLISHED RULE: the page&#39;s first worked example reads &#39;=DBCS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39;, i.e. it shows the argument coming back unchanged -- which is the documented behaviour of the INVERSE function ASC, whose page carries the identical line, and is impossible under DBCS&#39;s own stated rule because &#34;EXCEL&#34; is five half-width English letters. The value asserted here is derived from the rule instead: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), exactly the inverse of the mapping batch A&#39;s ASC cases assert in the other direction. The page&#39;s second example, which does show a conversion, is rendered as inline GIF images (media/fe337.gif ...) so no literal argument can be copied from it. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? -- and a name-form probe confirms this is a genuine gap rather than a storage-prefix artefact: the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form all return #NAME? on every build. LibreOffice nevertheless PERFORMS this conversion under a different name: on all four builds &#39;=JIS(&#34;EXCEL&#34;)&#39; returns exactly the full-width string asserted here, which independently confirms both the derived expected value and that the gap is a missing alias, not a missing capability.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DBCS(&#34;ＥＸＣＥＬ&#34;)</td>
+  <td>Text that is already full-width is returned unchanged</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">ＥＸＣＥＬ<br><span class="category-tag">Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. This case is unambiguous under either reading of the page: the argument contains no half-width English letters or katakana, so the documented no-change clause applies and the result is the argument itself. EXECUTED RESULT: #NAME? on all four LibreOffice builds; see DBCS_halfwidth_latin_to_fullwidth for the three-spelling probe and for LibreOffice&#39;s JIS equivalent.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ASC(DBCS(&#34;EXCEL&#34;))</td>
+  <td>Round trip: converting to full-width and back to half-width</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">EXCEL<br><span class="category-tag">Deliberately locale-independent, and the reason this case exists. If DBCS converts (the documented rule), ASC converts back and the result is &#34;EXCEL&#34;; if DBCS is a no-op under a non-DBCS default language, ASC leaves the already-half-width text alone and the result is still &#34;EXCEL&#34;. Both readings of Microsoft&#39;s page agree here, so a failure of this case cannot be blamed on the harness locale -- it can only mean the engine lacks one of the two functions or mangles the text. EXECUTED RESULT: #NAME? on all four LibreOffice builds. Because ASC itself is supported there (batch A executed it), the failure is entirely DBCS&#39;s, which is what this locale-independent case was built to establish.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(DBCS(&#34;EXCEL&#34;))</td>
+  <td>The conversion is character-for-character, so the length is unchanged</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">5<br><span class="category-tag">Microsoft documents DBCS as changing half-width characters to full-width characters -- a one-for-one character mapping, not an encoding change -- so a five-character input yields a five-character result whether or not the mapping fires. This is the mirror of batch A&#39;s ASC_length_preserved case and separates a genuine width conversion from a byte-level reinterpretation. EXECUTED RESULT: #NAME? on all four LibreOffice builds -- LEN is supported, so the unrecognized name is DBCS.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

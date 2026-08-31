@@ -1,0 +1,33 @@
+{
+  "function": "FISHER",
+  "cases": [
+    {
+      "id": "FISHER_doc_example",
+      "formula": "=ROUND(FISHER(0.75),7)",
+      "description": "Microsoft's documented worked example: the Fisher transformation at 0.75",
+      "expected": 0.9729551,
+      "expected_note": "Microsoft's page publishes '=FISHER(0.75)' with the result 0.9729551. Re-derived independently with mpmath at 50 decimal digits from the documented transformation, which is the inverse hyperbolic tangent 0.5*ln((1+x)/(1-x)): atanh(0.75) = 0.97295507452765665255, i.e. exactly the published 0.9729551 at 7 dp."
+    },
+    {
+      "id": "FISHER_upper_bound_num",
+      "formula": "=FISHER(1)",
+      "description": "An argument at the excluded upper bound",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x <= -1 or if x >= 1, FISHER returns the #NUM! error value.\" 1 is exactly the excluded boundary, where the transformation diverges. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "FISHER_lower_bound_num",
+      "formula": "=FISHER(-1)",
+      "description": "An argument at the excluded lower bound",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x <= -1 or if x >= 1, FISHER returns the #NUM! error value.\" -1 is the other excluded boundary; both are asserted because an engine can easily guard one side only. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "FISHER_text_argument_value",
+      "formula": "=FISHER(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, FISHER returns the #VALUE! error value.\""
+    }
+  ]
+}
