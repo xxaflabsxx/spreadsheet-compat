@@ -1,0 +1,89 @@
+{
+  "function": "PRICEDISC",
+  "cases": [
+    {
+      "id": "PRICEDISC_documented_example_published_precision",
+      "formula": "=ROUND(PRICEDISC(A2,A3,A4,A5,A6),2)",
+      "description": "Microsoft's documented worked example, at the published precision",
+      "setup_cells": {
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 0.0525,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": 99.8,
+      "expected_note": "Microsoft publishes =PRICEDISC(A2,A3,A4,A5,A6) = $99.80 for a discounted security settled 2008-02-16, maturing 2008-03-01, at a 5.25% discount rate, redemption 100, on basis 2 (Actual/360). DERIVATION from the formula Microsoft prints as an image, PRICEDISC = redemption - discount * redemption * DSM/B: on basis 2 the day count is actual and the year is 360, and 2008 is a leap year, so DSM = 14 days (2008-02-16 to 2008-03-01 crosses February 29th) and the price is 100 - 0.0525 * 100 * 14/360 = 23951/240 = 99.79583333... in exact rational arithmetic. THE LEAP DAY MATTERS: in a non-leap year the same dates are 13 days apart and the answer would be 99.8104..., so this case quietly tests the calendar too. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/pricedisc-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "PRICEDISC_documented_example_full_precision",
+      "formula": "=ROUND(PRICEDISC(A2,A3,A4,A5,A6),10)",
+      "description": "The same example carried to ten decimal places",
+      "setup_cells": {
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 0.0525,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": 99.7958333333,
+      "expected_note": "Asserted at ten places from the exact rational 23951/240 = 99.7958333333333... The two published decimals would equally admit a 13-day or 15-day count; ten places do not."
+    },
+    {
+      "id": "PRICEDISC_zero_discount",
+      "formula": "=PRICEDISC(A2,A3,0,A5,A6)",
+      "description": "A discount rate of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 0.0525,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If discount <= 0 or if redemption <= 0, PRICEDISC returns the #NUM! error value.\" A zero discount would price the security at par, but the documented range excludes it -- the boundary is AT zero, not below it."
+    },
+    {
+      "id": "PRICEDISC_basis_out_of_range",
+      "formula": "=PRICEDISC(A2,A3,A4,A5,5)",
+      "description": "A basis of 5, one past the documented range",
+      "setup_cells": {
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 0.0525,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If basis < 0 or if basis > 4, PRICEDISC returns the #NUM! error value.\""
+    },
+    {
+      "id": "PRICEDISC_settlement_not_before_maturity",
+      "formula": "=PRICEDISC(A3,A3,A4,A5,A6)",
+      "description": "Settlement equal to maturity",
+      "setup_cells": {
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 0.0525,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If settlement >= maturity, PRICEDISC returns the #NUM! error value.\""
+    },
+    {
+      "id": "PRICEDISC_invalid_date",
+      "formula": "=PRICEDISC(\"not a date\",A3,A4,A5,A6)",
+      "description": "A settlement date that is not a date",
+      "setup_cells": {
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 0.0525,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If settlement or maturity is not a valid date, PRICEDISC returns the #VALUE! error value.\""
+    }
+  ]
+}

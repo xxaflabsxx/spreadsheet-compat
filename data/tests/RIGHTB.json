@@ -1,0 +1,62 @@
+{
+  "function": "RIGHTB",
+  "cases": [
+    {
+      "id": "RIGHTB_documented_five_characters",
+      "formula": "=RIGHTB(A2,5)",
+      "description": "Microsoft's documented RIGHT example, on ASCII where bytes are characters",
+      "setup_cells": {
+        "A2": "Sale Price"
+      },
+      "expected": "Price",
+      "expected_note": "The RIGHT page publishes =RIGHT(A2,5) = Price for A2 = \"Sale Price\" (\"Last 5 characters of the first string\"). \"Sale Price\" is pure ASCII, so five bytes from the right are five characters from the right and RIGHTB must return the same string. RIGHTB HAS NO PAGE OF ITS OWN: it is documented on the combined RIGHT, RIGHTB page, whose only mention of it is the Important box -- \"The RIGHTB function is deprecated. RIGHT now supports Unicode surrogates via the Compatibility Version, Version 2.\" Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/right-rightb-functions-240267ee-9afa-4639-a02b-f19e1786cf2f (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "RIGHTB_num_bytes_omitted",
+      "formula": "=RIGHTB(A3)",
+      "description": "Microsoft's second documented row: the argument omitted",
+      "setup_cells": {
+        "A3": "Stock Number"
+      },
+      "expected": "r",
+      "expected_note": "The RIGHT page publishes =RIGHT(A3) = r for A3 = \"Stock Number\" (\"Last character of the second string\") and documents the rule: \"If num_chars is omitted, it is assumed to be 1.\" One byte of ASCII is one character, so RIGHTB with no count returns the final \"r\"."
+    },
+    {
+      "id": "RIGHTB_count_exceeds_length",
+      "formula": "=RIGHTB(A3,99)",
+      "description": "A count larger than the text, which the page says returns everything",
+      "setup_cells": {
+        "A3": "Stock Number"
+      },
+      "expected": "Stock Number",
+      "expected_note": "The RIGHT page documents: \"If num_chars is greater than the length of text, RIGHT returns all of text.\" No padding, no error -- \"Stock Number\" is twelve ASCII bytes, so ninety-nine bytes returns the whole string."
+    },
+    {
+      "id": "RIGHTB_zero_count",
+      "formula": "=RIGHTB(A3,0)",
+      "description": "A count of zero, which is inside the documented range",
+      "setup_cells": {
+        "A3": "Stock Number"
+      },
+      "expected": "",
+      "expected_note": "The RIGHT page documents: \"Num_chars must be greater than or equal to zero.\" Zero is inside that range, so it must produce a result rather than an error, and zero bytes of text is the empty string. NOTE ON READ-BACK: a formula returning \"\" round-trips through .xlsx as a cell with no cached value at all, which openpyxl reads back as None; harness/corpus.py treats an expected \"\" as satisfied by a read-back None for exactly this reason, and the raw None is still recorded in the results file."
+    },
+    {
+      "id": "RIGHTB_negative_count",
+      "formula": "=RIGHTB(A3,-1)",
+      "description": "A negative count, which is outside the documented range",
+      "setup_cells": {
+        "A3": "Stock Number"
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The RIGHT page documents: \"Num_chars must be greater than or equal to zero.\" A negative count is outside that range; #VALUE! is Excel's error for an argument of the wrong kind, and the sibling MID/MIDB page states it explicitly for its own negative-count case (\"If num_chars is negative, MID returns the #VALUE! error value\"), so the same code is asserted for the same condition here -- the same reading batch E's LEFTB file used."
+    },
+    {
+      "id": "RIGHTB_double_byte_probe",
+      "formula": "=RIGHTB(\"\uff21\uff22\uff23\",2)",
+      "description": "Full-width (double-byte) characters, where byte and character counting diverge",
+      "expected": null,
+      "expected_note": "DELIBERATELY ASSERTS NOTHING, for the reason given in the LEFTB, MIDB and REPLACEB files: byte counting in the B functions historically applied only when the default language was a DBCS language, this harness runs under en_US.UTF-8, and Microsoft's current page documents nothing about REPLACEB/RIGHTB beyond their deprecation. Two bytes from the right is the last full-width character under DBCS rules and the last two characters otherwise; the case records what each engine returns rather than scoring it."
+    }
+  ]
+}

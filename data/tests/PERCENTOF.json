@@ -1,0 +1,57 @@
+{
+  "function": "PERCENTOF",
+  "cases": [
+    {
+      "id": "PERCENTOF_subset_share_of_total",
+      "formula": "=ROUND(PERCENTOF(A2:A3,A2:A5),12)",
+      "description": "The share the first two values make up of all four",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 4
+      },
+      "expected": 0.3,
+      "expected_note": "Microsoft's page states the definition outright: \"PERCENTOF is logically equivalent to =SUM(data_subset)/SUM(data_all)\" and \"The PERCENTOF function sums the values in the subset and divides it by all the values.\" DERIVATION in exact arithmetic: (1 + 2)/(1 + 2 + 3 + 4) = 3/10 = 0.3 exactly. The data is chosen so the answer is a terminating decimal, so no rounding question arises; the ROUND wrapper only pins the comparison. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentof-function (the /en-us/office/<name>-function-<guid> path was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all FOUR spellings probed before the run -- the plain name PERCENTOF, the storage form _xlfn.PERCENTOF, the add-in form COM.MICROSOFT.PERCENTOF and ORG.OPENOFFICE.PERCENTOF. No LibreOffice release tested here has this function under any name, so the gap is real and not a prefix artefact of the kind that batch E's ISO.CEILING episode was."
+    },
+    {
+      "id": "PERCENTOF_matches_sum_over_sum",
+      "formula": "=ROUND(PERCENTOF(A2:A3,A2:A5)-SUM(A2:A3)/SUM(A2:A5),12)",
+      "description": "The documented equivalence to SUM/SUM, checked inside the engine",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 4
+      },
+      "expected": 0,
+      "expected_note": "Microsoft's own equivalence claim made checkable: the difference between PERCENTOF and the SUM(subset)/SUM(all) it is \"logically equivalent to\" must be exactly zero. This needs no derived constant, and it catches an implementation that, say, averages instead of summing, or that divides by the count."
+    },
+    {
+      "id": "PERCENTOF_whole_set_is_one",
+      "formula": "=ROUND(PERCENTOF(A2:A5,A2:A5),12)",
+      "description": "A subset equal to the whole set",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 4
+      },
+      "expected": 1,
+      "expected_note": "When the subset IS the set, the documented definition gives SUM(x)/SUM(x) = 1 exactly, for any data. Structural rather than derived, and it pins the argument order: an engine that divided all-by-subset would also return 1 here, which is why the 0.3 case above is asserted as well."
+    },
+    {
+      "id": "PERCENTOF_single_cell_subset",
+      "formula": "=ROUND(PERCENTOF(A2,A2:A5),12)",
+      "description": "A single-cell subset",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 4
+      },
+      "expected": 0.1,
+      "expected_note": "1/10 = 0.1 exactly. A single cell is a legitimate data_subset -- Microsoft's argument table asks only for \"The values that in the data subset\" (the page's own wording, printed with that grammatical slip) -- so this case checks that a scalar reference is accepted where a range is expected."
+    }
+  ]
+}

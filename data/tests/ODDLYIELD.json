@@ -1,0 +1,141 @@
+{
+  "function": "ODDLYIELD",
+  "cases": [
+    {
+      "id": "ODDLYIELD_documented_example_published_precision",
+      "formula": "=ROUND(ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,A9),5)",
+      "description": "Microsoft's documented worked example, at the precision Microsoft publishes",
+      "setup_cells": {
+        "A2": 39558,
+        "A3": 39614,
+        "A4": 39440,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": 0.04519,
+      "expected_note": "Microsoft publishes =ODDLYIELD(A2, A3, A4, A5, A6, A7, A8, A9) = 4.52% for a bond settled 2008-04-20, maturing 2008-06-15, last interest 2007-12-24, 3.75% coupon, price 99.875, redemption 100, semiannual, 30/360 basis, and the page's description gives the same figure at five places as \"0.04519\". DERIVATION, clean-room, from the closed form Microsoft prints as an image on the page: yield = ((redemption + (sum DCi/NLi)*100*rate/f) - (pr + (sum Ai/NLi)*100*rate/f)) / (pr + (sum Ai/NLi)*100*rate/f) * f / (sum DSCi/NLi), where Ai is the accrued days in the ith quasi-coupon period counting forward from the last interest date, DCi the days counted in that period, and NLi its normal length. (Two symbols in Microsoft's artwork are never defined in the page's own symbol list: 'par', which the algebra forces to be the pr price argument under a third name, and DSCi, which must be the settlement-to-maturity day counts per quasi-period. Both readings are confirmed by the fact that they reproduce Microsoft's own published figure below.) For this bond the odd last period runs 2007-12-24 to 2008-06-15 and fits inside a single semiannual quasi-period, so on basis 0 the ratios are DC/NL = 171/180, A/NL = 116/180 and DSC/NL = 55/180; with a coupon of 1.875 that gives ((100 + 1.78125) - (99.875 + 1.20833...))/(99.875 + 1.20833...) * 2/(55/180) = 0.045192235629168917... The day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 -- Procedure A for US (NASD) 30/360 with its four order-dependent endpoint adjustments, Procedure B for actual days, Procedure C for European 30/360, and Procedures D/E/F for days-in-year -- written for this batch and used by no engine; the arithmetic is mpmath at 50 digits over exact rational day-count ratios. At five places that is 0.04519 -- the published figure, reproduced from the formula. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddlyield-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "ODDLYIELD_documented_example_full_precision",
+      "formula": "=ROUND(ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,A9),10)",
+      "description": "The same example carried to ten decimal places",
+      "setup_cells": {
+        "A2": 39558,
+        "A3": 39614,
+        "A4": 39440,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": 0.0451922356,
+      "expected_note": "Five published decimals are asserted again at ten: 0.0451922356. Unlike ODDFYIELD, this function has a closed form and no iteration, so there is no convergence tolerance to excuse a difference -- two conforming engines should agree to the last bit."
+    },
+    {
+      "id": "ODDLYIELD_libreoffice_documented_example",
+      "formula": "=ROUND(ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,A9),6)",
+      "description": "LibreOffice's own documented example, which uses a different last-interest date",
+      "setup_cells": {
+        "A2": 36270,
+        "A3": 36326,
+        "A4": 36083,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": 0.044873,
+      "expected_note": "A SECOND VENDOR'S PUBLISHED FIGURE ON A GENUINELY DIFFERENT BOND. LibreOffice's help prints '=ODDLYIELD(\"1999-04-20\";\"1999-06-15\"; \"1998-10-15\"; 0.0375; 99.875; 100;2;0) returns 0.044873 or 4.4873%'. This is NOT Microsoft's example shifted nine years: the last interest date is 1998-10-15, where Microsoft's is 2007-12-24, so the odd last period spans TWO quasi-coupon periods instead of one and the answer is a different number. That makes it a second, independent test vector -- and the more demanding one, because the multi-period sums are exactly where a hand-rolled odd-period implementation goes wrong. The clean-room derivation on these dates gives 0.04487316633024..., which is 0.044873 at six places, matching LibreOffice's published figure exactly."
+    },
+    {
+      "id": "ODDLYIELD_inverts_ODDLPRICE",
+      "formula": "=ROUND(ODDLYIELD(A2,A3,A4,A5,ODDLPRICE(A2,A3,A4,A5,0.0405,A7,A8,A9),A7,A8,A9),10)",
+      "description": "ODDLYIELD fed the price ODDLPRICE computes for a known yield must return that yield",
+      "setup_cells": {
+        "A2": 39485,
+        "A3": 39614,
+        "A4": 39370,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": 0.0405,
+      "expected_note": "The two functions are algebraic inverses of one another -- ODDLPRICE has no published formula precisely because it IS the ODDLYIELD equation solved for price -- so composing them on one bond must return the yield it started from, 0.0405. No derived constant appears in this assertion at all, so it holds for any engine whose two odd-last-period routines agree with each other, whatever day-count reading they share. The bond is ODDLPRICE's documented example."
+    },
+    {
+      "id": "ODDLYIELD_zero_price",
+      "formula": "=ODDLYIELD(A2,A3,A4,A5,0,A7,A8,A9)",
+      "description": "A price of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 39558,
+        "A3": 39614,
+        "A4": 39440,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If rate < 0 or if pr <= 0, ODDLYIELD returns the #NUM! error value.\" Zero is the boundary the <= includes."
+    },
+    {
+      "id": "ODDLYIELD_basis_out_of_range",
+      "formula": "=ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,5)",
+      "description": "A basis of 5, one past the documented range",
+      "setup_cells": {
+        "A2": 39558,
+        "A3": 39614,
+        "A4": 39440,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If basis < 0 or if basis > 4, ODDLYIELD returns the #NUM! error value.\""
+    },
+    {
+      "id": "ODDLYIELD_date_order_violated",
+      "formula": "=ODDLYIELD(A4,A3,A2,A5,A6,A7,A8,A9)",
+      "description": "Settlement and last_interest swapped",
+      "setup_cells": {
+        "A2": 39558,
+        "A3": 39614,
+        "A4": 39440,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"The following date condition must be satisfied; otherwise, ODDLYIELD returns the #NUM! error value: maturity > settlement > last_interest.\""
+    },
+    {
+      "id": "ODDLYIELD_invalid_date",
+      "formula": "=ODDLYIELD(\"not a date\",A3,A4,A5,A6,A7,A8,A9)",
+      "description": "A settlement date that is not a date",
+      "setup_cells": {
+        "A2": 39558,
+        "A3": 39614,
+        "A4": 39440,
+        "A5": 0.0375,
+        "A6": 99.875,
+        "A7": 100,
+        "A8": 2,
+        "A9": 0
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If settlement, maturity, or last_interest is not a valid date, ODDLYIELD returns the #VALUE! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "function": "NORMINV",
+  "cases": [
+    {
+      "id": "NORMINV_documented_example",
+      "formula": "=ROUND(NORMINV(A2,A3,A4),6)",
+      "description": "Microsoft's documented worked example",
+      "setup_cells": {
+        "A2": 0.908789,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": 42.000002,
+      "expected_note": "Microsoft publishes =NORMINV(A2,A3,A4) = 42.000002 for probability 0.908789, mean 40, standard deviation 1.5. DERIVATION BY ROOT-FINDING ON THIS CORPUS'S OWN CDF, never by calling a statistics library's inverse: the documented definition is \"Given a value for probability, NORMINV seeks that value x such that NORMDIST(x, mean, standard_dev, TRUE) = probability\", so the value asserted here is the root of erfc(-z/sqrt(2))/2 = 0.908789 solved with mpmath's findroot at 50 digits, giving z = 1.3333346730441... and x = 40 + 1.5z = 42.00000200956620... At six places that is 42.000002 -- the published figure. The published probability is itself a rounded copy of Phi(4/3), which is why the answer is 42.000002 and not exactly 42. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/norminv-function -- the older /en-us/office/<name>-function-<guid> URL was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and even the working path returns an 87 KB stub for roughly half of all requests, so the page was fetched with retries until the payload exceeded 150 KB."
+    },
+    {
+      "id": "NORMINV_full_precision",
+      "formula": "=ROUND(NORMINV(A2,A3,A4),10)",
+      "description": "The same example carried to ten decimal places",
+      "setup_cells": {
+        "A2": 0.908789,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": 42.0000020096,
+      "expected_note": "Six published decimals leave the iteration's accuracy untested, so the root-found value is asserted at ten places: 42.0000020096. Microsoft documents the iteration explicitly -- \"NORMINV uses an iterative search technique. If the search has not converged after 100 iterations, the function returns the #N/A error value\" -- so this case is where a lazily-converged inverse shows up."
+    },
+    {
+      "id": "NORMINV_round_trips_with_NORMDIST",
+      "formula": "=ROUND(NORMINV(NORMDIST(43,40,1.5,TRUE),40,1.5),6)",
+      "description": "Feeding NORMDIST's own output back into NORMINV must return the input",
+      "expected": 43,
+      "expected_note": "Microsoft documents that NORMINV inverts NORMDIST (\"precision of NORMINV depends on precision of NORMDIST\"), so composing the two on the same parameters must return the starting x. This assertion needs no derived constant at all -- 43 is the input -- which makes it immune to any disagreement about the CDF itself: an engine with an unusual but self-consistent normal implementation still passes, while one whose inverse does not actually invert its own CDF fails."
+    },
+    {
+      "id": "NORMINV_probability_zero",
+      "formula": "=NORMINV(0,A3,A4)",
+      "description": "A probability of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 0.908789,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If probability <= 0 or if probability >= 1, NORMINV returns the #NUM! error value.\" Zero is the boundary the <= includes -- the normal distribution has unbounded support, so there is no finite x with Phi(x) = 0."
+    },
+    {
+      "id": "NORMINV_probability_one",
+      "formula": "=NORMINV(1,A3,A4)",
+      "description": "A probability of one, the other end of the same documented exclusion",
+      "setup_cells": {
+        "A2": 0.908789,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "The upper half of \"If probability <= 0 or if probability >= 1, NORMINV returns the #NUM! error value\", asserted separately because an engine can guard one end and not the other."
+    },
+    {
+      "id": "NORMINV_zero_standard_deviation",
+      "formula": "=NORMINV(A2,A3,0)",
+      "description": "A standard deviation of zero",
+      "setup_cells": {
+        "A2": 0.908789,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If standard_dev <= 0, NORMINV returns the #NUM! error value.\""
+    },
+    {
+      "id": "NORMINV_nonnumeric_argument",
+      "formula": "=NORMINV(\"x\",A3,A4)",
+      "description": "A non-numeric probability",
+      "setup_cells": {
+        "A2": 0.908789,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If any argument is nonnumeric, NORMINV returns the #VALUE! error value.\""
+    }
+  ]
+}

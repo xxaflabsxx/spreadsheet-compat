@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PERCENTOF: Excel only — not in Sheets or LibreOffice</title>
-<meta name="description" content="PERCENTOF (Math and trigonometry) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>PERCENTOF is not supported in LibreOffice Calc (Excel only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for PERCENTOF in all 4 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/percentof.html">
-<meta property="og:title" content="PERCENTOF: Excel only — not in Sheets or LibreOffice">
-<meta property="og:description" content="PERCENTOF (Math and trigonometry) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="PERCENTOF is not supported in LibreOffice Calc (Excel only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for PERCENTOF in all 4 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/percentof.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>PERCENTOF</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>PERCENTOF</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for PERCENTOF yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,117 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+PERCENTOF&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't PERCENTOF working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>PERCENTOF</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+The same formula is documented for Excel.
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(PERCENTOF(A2:A3,A2:A5),12)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.3</span>.
+        Microsoft&#39;s page states the definition outright: &#34;PERCENTOF is logically equivalent to =SUM(data_subset)/SUM(data_all)&#34; and &#34;The PERCENTOF function sums the values in the subset and divides it by all the values.&#34; DERIVATION in exact arithmetic: (1 + 2)/(1 + 2 + 3 + 4) = 3/10 = 0.3 exactly. The data is chosen so the answer is a terminating decimal, so no rounding question arises; the ROUND wrapper only pins the comparison. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentof-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all FOUR spellings probed before the run -- the plain name PERCENTOF, the storage form _xlfn.PERCENTOF, the add-in form COM.MICROSOFT.PERCENTOF and ORG.OPENOFFICE.PERCENTOF. No LibreOffice release tested here has this function under any name, so the gap is real and not a prefix artefact of the kind that batch E&#39;s ISO.CEILING episode was.; MISMATCH vs expected: expected 0.3, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(PERCENTOF(A2:A3,A2:A5)-SUM(A2:A3)/SUM(A2:A5),12)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        Microsoft&#39;s own equivalence claim made checkable: the difference between PERCENTOF and the SUM(subset)/SUM(all) it is &#34;logically equivalent to&#34; must be exactly zero. This needs no derived constant, and it catches an implementation that, say, averages instead of summing, or that divides by the count.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(PERCENTOF(A2:A5,A2:A5),12)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">1</span>.
+        When the subset IS the set, the documented definition gives SUM(x)/SUM(x) = 1 exactly, for any data. Structural rather than derived, and it pins the argument order: an engine that divided all-by-subset would also return 1 here, which is why the 0.3 case above is asserted as well.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(PERCENTOF(A2,A2:A5),12)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.1</span>.
+        1/10 = 0.1 exactly. A single cell is a legitimate data_subset -- Microsoft&#39;s argument table asks only for &#34;The values that in the data subset&#34; (the page&#39;s own wording, printed with that grammatical slip) -- so this case checks that a scalar reference is accepted where a range is expected.; MISMATCH vs expected: expected 0.1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +504,50 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for PERCENTOF yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5),12)</td>
+  <td>The share the first two values make up of all four</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.3<br><span class="category-tag">Microsoft&#39;s page states the definition outright: &#34;PERCENTOF is logically equivalent to =SUM(data_subset)/SUM(data_all)&#34; and &#34;The PERCENTOF function sums the values in the subset and divides it by all the values.&#34; DERIVATION in exact arithmetic: (1 + 2)/(1 + 2 + 3 + 4) = 3/10 = 0.3 exactly. The data is chosen so the answer is a terminating decimal, so no rounding question arises; the ROUND wrapper only pins the comparison. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentof-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all FOUR spellings probed before the run -- the plain name PERCENTOF, the storage form _xlfn.PERCENTOF, the add-in form COM.MICROSOFT.PERCENTOF and ORG.OPENOFFICE.PERCENTOF. No LibreOffice release tested here has this function under any name, so the gap is real and not a prefix artefact of the kind that batch E&#39;s ISO.CEILING episode was.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5)-SUM(A2:A3)/SUM(A2:A5),12)</td>
+  <td>The documented equivalence to SUM/SUM, checked inside the engine</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft&#39;s own equivalence claim made checkable: the difference between PERCENTOF and the SUM(subset)/SUM(all) it is &#34;logically equivalent to&#34; must be exactly zero. This needs no derived constant, and it catches an implementation that, say, averages instead of summing, or that divides by the count.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2:A5,A2:A5),12)</td>
+  <td>A subset equal to the whole set</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">1<br><span class="category-tag">When the subset IS the set, the documented definition gives SUM(x)/SUM(x) = 1 exactly, for any data. Structural rather than derived, and it pins the argument order: an engine that divided all-by-subset would also return 1 here, which is why the 0.3 case above is asserted as well.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2,A2:A5),12)</td>
+  <td>A single-cell subset</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.1<br><span class="category-tag">1/10 = 0.1 exactly. A single cell is a legitimate data_subset -- Microsoft&#39;s argument table asks only for &#34;The values that in the data subset&#34; (the page&#39;s own wording, printed with that grammatical slip) -- so this case checks that a scalar reference is accepted where a range is expected.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

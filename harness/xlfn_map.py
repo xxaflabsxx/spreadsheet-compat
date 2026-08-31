@@ -224,6 +224,39 @@ _XLFN_FUNCTIONS = {
     # returns #NAME? on every one of them. Without this entry the harness would
     # have recorded BAHTTEXT as unsupported in LibreOffice, which is false.
     "BAHTTEXT",
+    # Excel 2010/2013 renames and additions, plus five Excel 365 functions, from
+    # the alphabetical corpus batch F (MUNIT..RIGHTB). Every one of them was
+    # probed empirically on all four pinned builds (24.2.0.3, 24.8.7.2,
+    # 25.2.0.3, 25.8.7.3) in four spellings -- plain, _xlfn., COM.MICROSOFT.
+    # and ORG.OPENOFFICE. -- before being written down here, and the four builds
+    # agreed in every case.
+    #
+    # THE FIVE THAT LIBREOFFICE ANSWERS TO ONLY WHEN PREFIXED. Without an entry
+    # here each of these would have been recorded as unsupported in LibreOffice,
+    # which is false: "=_xlfn.MUNIT(2)" spills the unit matrix while "=MUNIT(2)"
+    # is #NAME?, and likewise _xlfn.NEGBINOM.DIST(10,5,0.25,FALSE) returns
+    # 0.0550486603751779, _xlfn.PHI(0.75) returns 0.301137432154804 and
+    # _xlfn.POISSON.DIST(2,5,TRUE) returns 0.124652019483081, each against
+    # #NAME? for the bare name. Their UNDOTTED compatibility neighbours go the
+    # other way and correctly take no prefix: NEGBINOMDIST, NORMDIST, NORMINV,
+    # NORMSDIST, NORMSINV and POISSON were all probed plain and evaluate.
+    # (PERCENTRANK.EXC, PERCENTRANK.INC and PERMUTATIONA are in this batch too
+    # and behave the same way, but they were already in the set above.)
+    "MUNIT", "NEGBINOM.DIST", "PHI", "POISSON.DIST",
+    # THE FOUR THAT LIBREOFFICE HAS UNDER NO SPELLING AT ALL. PERCENTOF (the
+    # GROUPBY/PIVOTBY aggregation helper) and the REGEXEXTRACT / REGEXREPLACE /
+    # REGEXTEST trio are Excel 365 additions and therefore take the prefix by
+    # the same post-2007 rule; the probe found #NAME? on all four builds under
+    # the plain name, the _xlfn. form, the COM.MICROSOFT. form AND the
+    # ORG.OPENOFFICE. form, so the entry cannot change any verdict -- it is
+    # recorded for storage-form correctness only, exactly as COPILOT and
+    # DETECTLANGUAGE above are. LibreOffice does have regular expressions in a
+    # worksheet function, but under a different name and a different flavour:
+    # its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]])
+    # documents ICU regular expressions, where Microsoft's three pages all say
+    # "All regular expressions for this function ... use the PCRE2 'flavor' of
+    # regex".
+    "PERCENTOF", "REGEXEXTRACT", "REGEXREPLACE", "REGEXTEST",
 }
 
 

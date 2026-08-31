@@ -1,0 +1,54 @@
+{
+  "function": "NORMSINV",
+  "cases": [
+    {
+      "id": "NORMSINV_documented_example",
+      "formula": "=ROUND(NORMSINV(0.9088),4)",
+      "description": "Microsoft's documented worked example",
+      "expected": 1.3334,
+      "expected_note": "Microsoft publishes =NORMSINV(0.9088) = 1.3334, the \"Inverse of the standard normal cumulative distribution, with a probability of 0.9088\". DERIVATION BY ROOT-FINDING on this corpus's own erfc-based CDF, not by calling a statistics library's inverse: the root of erfc(-z/sqrt(2))/2 = 0.9088 at 50 digits is 1.33340174521361..., which is 1.3334 at four places. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/normsinv-function -- the older /en-us/office/<name>-function-<guid> URL was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and even the working path returns an 87 KB stub for roughly half of all requests, so the page was fetched with retries until the payload exceeded 150 KB."
+    },
+    {
+      "id": "NORMSINV_full_precision",
+      "formula": "=ROUND(NORMSINV(0.9088),8)",
+      "description": "The same example carried to eight decimal places",
+      "expected": 1.33340175,
+      "expected_note": "Four published decimals cannot tell a well-converged inverse from a rough one, so the root-found value is asserted at eight places: 1.33340175. Microsoft documents the iteration -- \"NORMSINV uses an iterative search technique. If the search has not converged after 100 iterations, the function returns the #N/A error value\" -- which is exactly the behaviour this precision is aimed at."
+    },
+    {
+      "id": "NORMSINV_median_is_zero",
+      "formula": "=ROUND(NORMSINV(0.5),10)",
+      "expected": 0,
+      "description": "The inverse at probability 0.5",
+      "expected_note": "The standard normal median is exactly zero by symmetry, so no derived constant is involved. An iterative inverse that stops early lands near zero but not on it, and ten decimal places is enough to see that."
+    },
+    {
+      "id": "NORMSINV_round_trips_with_NORMSDIST",
+      "formula": "=ROUND(NORMSINV(NORMSDIST(1.5)),6)",
+      "description": "Composing NORMSDIST and NORMSINV must return the input",
+      "expected": 1.5,
+      "expected_note": "Microsoft documents that \"Given a value for Probability, NORMSINV seeks that value z such that NORMSDIST(z) = probability\", so the composition is the identity on z. Like the NORMINV round trip, this assertion contains no derived constant: an engine with a self-consistent but unusual normal implementation passes, one whose inverse does not invert its own CDF fails."
+    },
+    {
+      "id": "NORMSINV_probability_zero",
+      "formula": "=NORMSINV(0)",
+      "expected": "#NUM!",
+      "description": "A probability of zero, which the page excludes",
+      "expected_note": "Microsoft documents: \"If Probability <= 0 or if Probability >= 1, NORMSINV returns the #NUM! error value.\""
+    },
+    {
+      "id": "NORMSINV_probability_one",
+      "formula": "=NORMSINV(1)",
+      "expected": "#NUM!",
+      "description": "A probability of one, the other end of the same exclusion",
+      "expected_note": "The upper half of the same documented sentence, asserted separately because an engine can guard one end and not the other."
+    },
+    {
+      "id": "NORMSINV_nonnumeric_argument",
+      "formula": "=NORMSINV(\"x\")",
+      "expected": "#VALUE!",
+      "description": "A non-numeric probability",
+      "expected_note": "Microsoft documents: \"If Probability is nonnumeric, NORMSINV returns the #VALUE! error value.\""
+    }
+  ]
+}

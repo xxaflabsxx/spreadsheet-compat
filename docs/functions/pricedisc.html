@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PRICEDISC: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="PRICEDISC (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>PRICEDISC matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="3/6 match; zero discount returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/pricedisc.html">
-<meta property="og:title" content="PRICEDISC: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="PRICEDISC (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="PRICEDISC matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="3/6 match; zero discount returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/pricedisc.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>PRICEDISC</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>PRICEDISC</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for PRICEDISC yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060119.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,110 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+PRICEDISC&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't PRICEDISC working in LibreOffice?</h2>
+
+<p><code>PRICEDISC</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=PRICEDISC(A2,A3,0,A5,A6)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If discount &lt;= 0 or if redemption &lt;= 0, PRICEDISC returns the #NUM! error value.&#34; A zero discount would price the security at par, but the documented range excludes it -- the boundary is AT zero, not below it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=PRICEDISC(A2,A3,A4,A5,5)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, PRICEDISC returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=PRICEDISC(A3,A3,A4,A5,A6)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If settlement &gt;= maturity, PRICEDISC returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +497,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for PRICEDISC yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(PRICEDISC(A2,A3,A4,A5,A6),2)</td>
+  <td>Microsoft&#39;s documented worked example, at the published precision</td>
+  <td class="result mono">99.8</td>
+  <td class="result mono">99.8<br><span class="category-tag">Microsoft publishes =PRICEDISC(A2,A3,A4,A5,A6) = $99.80 for a discounted security settled 2008-02-16, maturing 2008-03-01, at a 5.25% discount rate, redemption 100, on basis 2 (Actual/360). DERIVATION from the formula Microsoft prints as an image, PRICEDISC = redemption - discount * redemption * DSM/B: on basis 2 the day count is actual and the year is 360, and 2008 is a leap year, so DSM = 14 days (2008-02-16 to 2008-03-01 crosses February 29th) and the price is 100 - 0.0525 * 100 * 14/360 = 23951/240 = 99.79583333... in exact rational arithmetic. THE LEAP DAY MATTERS: in a non-leap year the same dates are 13 days apart and the answer would be 99.8104..., so this case quietly tests the calendar too. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/pricedisc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PRICEDISC(A2,A3,A4,A5,A6),10)</td>
+  <td>The same example carried to ten decimal places</td>
+  <td class="result mono">99.7958333333</td>
+  <td class="result mono">99.7958333333<br><span class="category-tag">Asserted at ten places from the exact rational 23951/240 = 99.7958333333333... The two published decimals would equally admit a 13-day or 15-day count; ten places do not.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEDISC(A2,A3,0,A5,A6)</td>
+  <td>A discount rate of zero, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If discount &lt;= 0 or if redemption &lt;= 0, PRICEDISC returns the #NUM! error value.&#34; A zero discount would price the security at par, but the documented range excludes it -- the boundary is AT zero, not below it.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEDISC(A2,A3,A4,A5,5)</td>
+  <td>A basis of 5, one past the documented range</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, PRICEDISC returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEDISC(A3,A3,A4,A5,A6)</td>
+  <td>Settlement equal to maturity</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If settlement &gt;= maturity, PRICEDISC returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEDISC(&#34;not a date&#34;,A3,A4,A5,A6)</td>
+  <td>A settlement date that is not a date</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If settlement or maturity is not a valid date, PRICEDISC returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

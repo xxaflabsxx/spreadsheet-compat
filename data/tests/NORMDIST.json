@@ -1,0 +1,72 @@
+{
+  "function": "NORMDIST",
+  "cases": [
+    {
+      "id": "NORMDIST_documented_cumulative",
+      "formula": "=ROUND(NORMDIST(A2,A3,A4,TRUE),7)",
+      "description": "Microsoft's documented worked example, cumulative form",
+      "setup_cells": {
+        "A2": 42,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": 0.9087888,
+      "expected_note": "Microsoft publishes =NORMDIST(A2,A3,A4,TRUE) = 0.9087888 for x = 42, mean = 40, standard deviation = 1.5. DERIVATION, from the definition rather than from a statistics library: the documented cumulative normal is the integral of the density up to x, which in terms of the complementary error function is Phi(z) = erfc(-z/sqrt(2))/2 with z = (x - mean)/sd. Here z = (42 - 40)/1.5 = 4/3 exactly, and erfc(-(4/3)/sqrt(2))/2 evaluated with mpmath at 50 digits is 0.90878878027413213... No normal-distribution routine was called anywhere: erfc is a different function computed by a different algorithm, which is the point. At seven places that is 0.9087888 -- the published figure, reproduced exactly. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/normdist-function -- the older /en-us/office/<name>-function-<guid> URL was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and even the working path returns an 87 KB stub for roughly half of all requests, so the page was fetched with retries until the payload exceeded 150 KB."
+    },
+    {
+      "id": "NORMDIST_documented_density",
+      "formula": "=ROUND(NORMDIST(A2,A3,A4,FALSE),5)",
+      "description": "The same example in its non-cumulative (density) form",
+      "setup_cells": {
+        "A2": 42,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": 0.10934,
+      "expected_note": "Microsoft publishes =NORMDIST(A2,A3,A4,FALSE) = 0.10934, describing it as the \"Probability mass function for the terms above\" -- Microsoft's own wording, though a normal distribution is continuous and this is a density, not a mass. DERIVATION from the documented density exp(-((x-mean)/sd)^2/2)/(sd*sqrt(2*pi)): exp(-(4/3)^2/2)/(1.5*sqrt(2*pi)) = 0.10934004978399... which is 0.10934 at five places."
+    },
+    {
+      "id": "NORMDIST_cumulative_full_precision",
+      "formula": "=ROUND(NORMDIST(A2,A3,A4,TRUE),12)",
+      "description": "The same cumulative value carried to twelve decimal places",
+      "setup_cells": {
+        "A2": 42,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": 0.908788780274,
+      "expected_note": "Seven published decimals cannot separate a good normal CDF from a mediocre rational approximation to it, so the erfc-derived value is asserted at twelve places: 0.908788780274. This is the assertion that actually constrains the tail algorithm."
+    },
+    {
+      "id": "NORMDIST_standard_normal_equivalence",
+      "formula": "=ROUND(NORMDIST(1.333333,0,1,TRUE)-NORMSDIST(1.333333),12)",
+      "description": "The documented identity between NORMDIST at mean 0, sd 1 and NORMSDIST",
+      "expected": 0,
+      "expected_note": "Microsoft documents: \"If mean = 0, standard_dev = 1, and cumulative = TRUE, NORMDIST returns the standard normal distribution, NORMSDIST.\" This case checks that claim inside the engine instead of against a constant -- the difference of the two calls must be exactly zero -- so an engine whose two code paths disagree fails here even if each separately rounds to a published figure."
+    },
+    {
+      "id": "NORMDIST_zero_standard_deviation",
+      "formula": "=NORMDIST(A2,A3,0,TRUE)",
+      "description": "A standard deviation of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 42,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If standard_dev <= 0, NORMDIST returns the #NUM! error value.\" Zero is the boundary the <= includes. OpenFormula 1.3 section 6.18.52 states the same constraint (\"StandardDeviation > 0\")."
+    },
+    {
+      "id": "NORMDIST_nonnumeric_mean",
+      "formula": "=NORMDIST(A2,\"x\",A4,TRUE)",
+      "description": "A non-numeric mean",
+      "setup_cells": {
+        "A2": 42,
+        "A3": 40,
+        "A4": 1.5
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If mean or standard_dev is nonnumeric, NORMDIST returns the #VALUE! error value.\" The page uses #VALUE! for a wrong-typed argument and #NUM! for an out-of-range one, so the two codes are asserted separately."
+    }
+  ]
+}

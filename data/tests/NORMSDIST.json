@@ -1,0 +1,40 @@
+{
+  "function": "NORMSDIST",
+  "cases": [
+    {
+      "id": "NORMSDIST_documented_example",
+      "formula": "=ROUND(NORMSDIST(1.333333),9)",
+      "description": "Microsoft's documented worked example",
+      "expected": 0.908788726,
+      "expected_note": "Microsoft publishes =NORMSDIST(1.333333) = 0.908788726, the \"Normal cumulative distribution function at 1.333333\". DERIVATION: erfc(-1.333333/sqrt(2))/2 at 50 digits is 0.9087887256040954..., which is 0.908788726 at nine places -- the published figure, reproduced exactly. Note the argument is the DECIMAL 1.333333, not 4/3, so this value is deliberately a hair below NORMDIST's 0.908788780274 for x = 42, mean = 40, sd = 1.5; an engine that silently treated the two as the same number would fail one of the two cases. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/normsdist-function -- the older /en-us/office/<name>-function-<guid> URL was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and even the working path returns an 87 KB stub for roughly half of all requests, so the page was fetched with retries until the payload exceeded 150 KB."
+    },
+    {
+      "id": "NORMSDIST_full_precision",
+      "formula": "=ROUND(NORMSDIST(1.333333),12)",
+      "description": "The same value carried to twelve decimal places",
+      "expected": 0.908788725604,
+      "expected_note": "Nine published decimals are asserted again at twelve: 0.908788725604, from the same erfc derivation. This is the case that would catch a CDF accurate to only about seven digits."
+    },
+    {
+      "id": "NORMSDIST_at_zero_is_one_half",
+      "formula": "=ROUND(NORMSDIST(0),10)",
+      "expected": 0.5,
+      "description": "The standard normal CDF at its mean",
+      "expected_note": "The standard normal distribution is symmetric about zero, so its cumulative value at zero is exactly 1/2 for any conforming implementation. Structural, not derived."
+    },
+    {
+      "id": "NORMSDIST_symmetry",
+      "formula": "=ROUND(NORMSDIST(-1)+NORMSDIST(1),10)",
+      "expected": 1,
+      "description": "Phi(-z) + Phi(z) must equal 1 exactly",
+      "expected_note": "Symmetry of the standard normal density forces Phi(-z) + Phi(z) = 1. Asserting the SUM rather than either tail tests the two tails against each other inside the engine: an implementation that computes the upper tail as 1 - lower with a poor lower tail cancels its error here and is caught, and no derived constant is involved."
+    },
+    {
+      "id": "NORMSDIST_nonnumeric_argument",
+      "formula": "=NORMSDIST(\"x\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If z is nonnumeric, NORMSDIST returns the #VALUE! error value.\" It is the page's only documented error condition -- NORMSDIST has no out-of-range case, since every real number is a valid z."
+    }
+  ]
+}

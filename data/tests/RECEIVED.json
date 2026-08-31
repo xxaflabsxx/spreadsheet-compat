@@ -1,0 +1,103 @@
+{
+  "function": "RECEIVED",
+  "cases": [
+    {
+      "id": "RECEIVED_documented_example_published_precision",
+      "formula": "=ROUND(RECEIVED(A2,A3,A4,A5,A6),2)",
+      "description": "Microsoft's documented worked example, at the published precision",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 0.0575,
+        "A6": 2
+      },
+      "expected": 1014584.65,
+      "expected_note": "Microsoft publishes =RECEIVED(A2,A3,A4,A5,A6) = $1,014,584.65 for a $1,000,000 investment settled 2008-02-15, maturing 2008-05-15, at a 5.75% discount, on basis 2 (Actual/360). DERIVATION from the formula Microsoft prints as an image, RECEIVED = investment / (1 - discount * DIM/B): the actual days from settlement to maturity are 90 (2008 being a leap year makes February 29th one of them), so the value is 1000000/(1 - 0.0575*90/360) = 1000000/0.985625 = 1600000000/1577 in exact rational arithmetic = 1014584.654407102... OpenFormula 1.3 section 6.12.43 gives the same formula written through YEARFRAC. NOTE ON MICROSOFT'S SYMBOLS: this page reuses the name DIM for days from SETTLEMENT to maturity, while the PRICEMAT page uses DIM for days from ISSUE to maturity -- the same three letters for two different quantities on two neighbouring pages. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/received-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "RECEIVED_documented_example_full_precision",
+      "formula": "=ROUND(RECEIVED(A2,A3,A4,A5,A6),6)",
+      "description": "The same example carried to six decimal places",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 0.0575,
+        "A6": 2
+      },
+      "expected": 1014584.654407,
+      "expected_note": "Asserted at six places from the exact rational 1600000000/1577 = 1014584.654407102... On a value above a million, six decimals is already eleven significant figures, close to the limit of what a double carries -- which is why this case stops there rather than at ten."
+    },
+    {
+      "id": "RECEIVED_zero_investment",
+      "formula": "=RECEIVED(A2,A3,0,A5,A6)",
+      "description": "An investment of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 0.0575,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If investment <= 0 or if discount <= 0, RECEIVED returns the #NUM! error value.\""
+    },
+    {
+      "id": "RECEIVED_zero_discount",
+      "formula": "=RECEIVED(A2,A3,A4,0,A6)",
+      "description": "A discount of zero, the other half of the same documented exclusion",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 0.0575,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "The second half of \"If investment <= 0 or if discount <= 0, RECEIVED returns the #NUM! error value\", asserted separately because an engine can guard one argument and not the other. A zero discount is arithmetically harmless -- the formula would simply return the investment -- so an engine that computes it instead of erroring is following the arithmetic rather than the documentation."
+    },
+    {
+      "id": "RECEIVED_basis_out_of_range",
+      "formula": "=RECEIVED(A2,A3,A4,A5,5)",
+      "description": "A basis of 5, one past the documented range",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 0.0575,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If basis < 0 or if basis > 4, RECEIVED returns the #NUM! error value.\""
+    },
+    {
+      "id": "RECEIVED_settlement_not_before_maturity",
+      "formula": "=RECEIVED(A3,A3,A4,A5,A6)",
+      "description": "Settlement equal to maturity",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 0.0575,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If settlement >= maturity, RECEIVED returns the #NUM! error value.\" OpenFormula 1.3 section 6.12.43 requires Settlement < Maturity as well."
+    },
+    {
+      "id": "RECEIVED_invalid_date",
+      "formula": "=RECEIVED(\"not a date\",A3,A4,A5,A6)",
+      "description": "A settlement date that is not a date",
+      "setup_cells": {
+        "A2": 39493,
+        "A3": 39583,
+        "A4": 1000000,
+        "A5": 0.0575,
+        "A6": 2
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If settlement or maturity is not a valid date, RECEIVED returns the #VALUE! error value.\""
+    }
+  ]
+}

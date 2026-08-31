@@ -1,0 +1,82 @@
+{
+  "function": "POISSON",
+  "cases": [
+    {
+      "id": "POISSON_documented_cumulative",
+      "formula": "=ROUND(POISSON(A2,A3,TRUE),6)",
+      "description": "Microsoft's documented worked example, cumulative form",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "expected": 0.124652,
+      "expected_note": "Microsoft publishes =POISSON(A2,A3,TRUE) = 0.124652 for x = 2 events with an expected value of 5. DERIVATION with mpmath at 50 digits, straight from the two documented formulas -- mass e^(-lambda) * lambda^x / x!, cumulative the sum of that over k = 0..x -- and not from any statistics library: e^-5 = 0.006737946999085467..., so the mass at x = 2 is e^-5 * 25/2 = 0.08422433748856832... and the cumulative value is e^-5 * (1 + 5 + 12.5) = e^-5 * 18.5 = 0.12465201948308113... At six places that is 0.124652 -- the published figure. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/poisson-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "POISSON_documented_mass",
+      "formula": "=ROUND(POISSON(A2,A3,FALSE),6)",
+      "description": "The same example in its non-cumulative form",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "expected": 0.084224,
+      "expected_note": "Microsoft publishes =POISSON(A2,A3,FALSE) = 0.084224 on the same data: e^-5 * 5^2/2! = 0.08422433748856832..., which is 0.084224 at six places. The two rows are asserted separately because the cumulative flag is an argument an engine can ignore."
+    },
+    {
+      "id": "POISSON_cumulative_full_precision",
+      "formula": "=ROUND(POISSON(A2,A3,TRUE),12)",
+      "description": "The same cumulative value carried to twelve decimal places",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "expected": 0.124652019483,
+      "expected_note": "Six published decimals are asserted again at twelve: 0.124652019483. An implementation that sums the series in the wrong direction, or that computes e^-5 as 1/e^5 with a poor exponential, diverges here and nowhere in the six-decimal figure."
+    },
+    {
+      "id": "POISSON_x_is_truncated",
+      "formula": "=ROUND(POISSON(2.9,A3,FALSE)-POISSON(2,A3,FALSE),12)",
+      "description": "A fractional x, which the page says is truncated",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "expected": 0,
+      "expected_note": "Microsoft documents: \"If x is not an integer, it is truncated.\" So POISSON(2.9, 5, FALSE) must equal POISSON(2, 5, FALSE) exactly, and their difference must be zero -- an engine that rounded 2.9 to 3 would return the mass at 3 (0.1403738958...) and the difference would be about 0.056. Comparing the two calls against each other rather than against a constant makes the assertion independent of the value of either. OpenFormula 1.3 section 6.18.62 writes the same rule into its formula as the floor function."
+    },
+    {
+      "id": "POISSON_negative_x",
+      "formula": "=POISSON(-1,A3,TRUE)",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "description": "A negative number of events, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If x < 0, POISSON returns the #NUM! error value.\""
+    },
+    {
+      "id": "POISSON_negative_mean",
+      "formula": "=POISSON(A2,-5,TRUE)",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "description": "A negative mean, the other documented exclusion",
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If mean < 0, POISSON returns the #NUM! error value.\" Asserted separately from the negative-x case because the two are separate sentences on the page and an engine can guard one and not the other. Note Microsoft permits mean = 0 while OpenFormula 1.3 section 6.18.62 requires lambda > 0 -- a specification difference this corpus deliberately does not test, since the two sources disagree about what the right answer is."
+    },
+    {
+      "id": "POISSON_nonnumeric_argument",
+      "formula": "=POISSON(\"x\",A3,TRUE)",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "description": "A non-numeric x",
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If x or mean is nonnumeric, POISSON returns the #VALUE! error value.\""
+    }
+  ]
+}

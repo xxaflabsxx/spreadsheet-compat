@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>REGEXREPLACE: Excel and Sheets — not in LibreOffice</title>
-<meta name="description" content="REGEXREPLACE (Text) is documented for Excel and Google Sheets, not for LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>REGEXREPLACE is not supported in LibreOffice (Excel &amp; Sheets only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for REGEXREPLACE in all 5 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/regexreplace.html">
-<meta property="og:title" content="REGEXREPLACE: Excel and Sheets — not in LibreOffice">
-<meta property="og:description" content="REGEXREPLACE (Text) is documented for Excel and Google Sheets, not for LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="REGEXREPLACE is not supported in LibreOffice (Excel &amp; Sheets only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for REGEXREPLACE in all 5 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/regexreplace.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>REGEXREPLACE</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Text</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>REGEXREPLACE</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for REGEXREPLACE yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,127 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+REGEXREPLACE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't REGEXREPLACE working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>REGEXREPLACE</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+The same formula is documented for Excel and documented for Google Sheets.
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=REGEXREPLACE(A2,&#34;[0-9]+-&#34;,&#34;***-&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">(378) ***-4195</span>.
+        Microsoft&#39;s Example 1 uses exactly this pattern -- &#34;Use REGEXREPLACE to anonymize phone numbers by replacing their first 3 digits with ***, using pattern [0-9]+-&#34; -- over a block of names and numbers. DERIVATION on one line of that data: &#34;[0-9]+-&#34; matches a run of digits followed by a hyphen. In &#34;(378) 555-4195&#34; the only such run is &#34;555-&#34; (the &#34;378&#34; is followed by &#34;)&#34;, and &#34;4195&#34; ends the string), so it alone is replaced by &#34;***-&#34;, giving &#34;(378) ***-4195&#34;. REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regexreplace-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.; MISMATCH vs expected: expected &#39;(378) ***-4195&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">a#b#c#</span>.
+        Microsoft documents: &#34;By default, occurrence is 0, which replaces all instances.&#34; All three digits in &#34;a1b2c3&#34; are replaced, giving &#34;a#b#c#&#34; -- an engine that replaced only the first would return &#34;a#b2c3&#34;, which is the single most likely difference between two implementations of this function and is why the default is asserted explicitly.; MISMATCH vs expected: expected &#39;a#b#c#&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;,-1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">a1b2c#</span>.
+        Microsoft documents: &#34;A negative number replaces that instance, searching from the end.&#34; So -1 is the LAST digit, the 3, and only it is replaced: &#34;a1b2c#&#34;. This is an unusual convention -- most regex APIs have no notion of it at all -- which makes it a good probe of whether an engine implemented Excel&#39;s documented argument or borrowed a host language&#39;s replace-all/replace-first semantics.; MISMATCH vs expected: expected &#39;a1b2c#&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXREPLACE(&#34;Apple apple&#34;,&#34;apple&#34;,&#34;X&#34;,0,1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">X X</span>.
+        Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the literal pattern &#34;apple&#34; matches both &#34;Apple&#34; and &#34;apple&#34;, so both are replaced and the answer is &#34;X X&#34;; with the default it would be &#34;Apple X&#34;. Note the fifth argument requires the fourth, so occurrence is passed explicitly as its documented default of 0.; MISMATCH vs expected: expected &#39;X X&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXREPLACE(&#34;abc&#34;,&#34;[0-9]&#34;,&#34;#&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">abc</span>.
+        Nothing matches, so there is nothing to replace and the text comes back unchanged. This is the one place where the REGEX family does NOT return #N/A on a failed match -- REGEXEXTRACT does, because it has nothing to return, while a replacement over zero matches is simply the identity -- and asserting it here pins that difference. LibreOffice&#39;s own REGEX function documents the same behaviour (&#34;if a replacement is given and no match occurs, the original text is returned unchanged&#34;).; MISMATCH vs expected: expected &#39;abc&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +514,58 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for REGEXREPLACE yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(A2,&#34;[0-9]+-&#34;,&#34;***-&#34;)</td>
+  <td>Microsoft&#39;s documented example: masking the middle block of a phone number</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">(378) ***-4195<br><span class="category-tag">Microsoft&#39;s Example 1 uses exactly this pattern -- &#34;Use REGEXREPLACE to anonymize phone numbers by replacing their first 3 digits with ***, using pattern [0-9]+-&#34; -- over a block of names and numbers. DERIVATION on one line of that data: &#34;[0-9]+-&#34; matches a run of digits followed by a hyphen. In &#34;(378) 555-4195&#34; the only such run is &#34;555-&#34; (the &#34;378&#34; is followed by &#34;)&#34;, and &#34;4195&#34; ends the string), so it alone is replaced by &#34;***-&#34;, giving &#34;(378) ***-4195&#34;. REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regexreplace-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;)</td>
+  <td>The documented default occurrence of 0, which replaces all instances</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">a#b#c#<br><span class="category-tag">Microsoft documents: &#34;By default, occurrence is 0, which replaces all instances.&#34; All three digits in &#34;a1b2c3&#34; are replaced, giving &#34;a#b#c#&#34; -- an engine that replaced only the first would return &#34;a#b2c3&#34;, which is the single most likely difference between two implementations of this function and is why the default is asserted explicitly.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;,-1)</td>
+  <td>The documented negative-occurrence rule</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">a1b2c#<br><span class="category-tag">Microsoft documents: &#34;A negative number replaces that instance, searching from the end.&#34; So -1 is the LAST digit, the 3, and only it is replaced: &#34;a1b2c#&#34;. This is an unusual convention -- most regex APIs have no notion of it at all -- which makes it a good probe of whether an engine implemented Excel&#39;s documented argument or borrowed a host language&#39;s replace-all/replace-first semantics.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;Apple apple&#34;,&#34;apple&#34;,&#34;X&#34;,0,1)</td>
+  <td>The documented case_sensitivity argument set to case-insensitive</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">X X<br><span class="category-tag">Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the literal pattern &#34;apple&#34; matches both &#34;Apple&#34; and &#34;apple&#34;, so both are replaced and the answer is &#34;X X&#34;; with the default it would be &#34;Apple X&#34;. Note the fifth argument requires the fourth, so occurrence is passed explicitly as its documented default of 0.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;abc&#34;,&#34;[0-9]&#34;,&#34;#&#34;)</td>
+  <td>A pattern that matches nothing</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">abc<br><span class="category-tag">Nothing matches, so there is nothing to replace and the text comes back unchanged. This is the one place where the REGEX family does NOT return #N/A on a failed match -- REGEXEXTRACT does, because it has nothing to return, while a replacement over zero matches is simply the identity -- and asserting it here pins that difference. LibreOffice&#39;s own REGEX function documents the same behaviour (&#34;if a replacement is given and no match occurs, the original text is returned unchanged&#34;).</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

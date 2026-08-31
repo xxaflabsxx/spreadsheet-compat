@@ -1,0 +1,113 @@
+{
+  "function": "PERCENTRANK.EXC",
+  "cases": [
+    {
+      "id": "PERCENTRANK.EXC_documented_exact_member",
+      "formula": "=PERCENTRANK.EXC(A2:A10,7)",
+      "description": "Microsoft's documented worked example: a value present in the array",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 6,
+        "A6": 6,
+        "A7": 6,
+        "A8": 7,
+        "A9": 8,
+        "A10": 9
+      },
+      "expected": 0.7,
+      "expected_note": "Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the \"exclusive\" in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/<name>-function-<guid> path was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "PERCENTRANK.EXC_documented_interpolated",
+      "formula": "=PERCENTRANK.EXC(A2:A10,5.43)",
+      "description": "Microsoft's documented interpolation case",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 6,
+        "A6": 6,
+        "A7": 6,
+        "A8": 7,
+        "A9": 8,
+        "A10": 9
+      },
+      "expected": 0.381,
+      "expected_note": "Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: \"If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.\" DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid."
+    },
+    {
+      "id": "PERCENTRANK.EXC_documented_significance_one",
+      "formula": "=PERCENTRANK.EXC(A2:A10,5.43,1)",
+      "description": "The same interpolation with the optional significance argument set to 1",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 6,
+        "A6": 6,
+        "A7": 6,
+        "A8": 7,
+        "A9": 8,
+        "A10": 9
+      },
+      "expected": 0.3,
+      "expected_note": "Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, \"displaying only 1 significant digit in the result (the default is 3)\". 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft's published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC's repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine's ranking arithmetic is right and only the significance step differs."
+    },
+    {
+      "id": "PERCENTRANK.EXC_smallest_value_is_not_zero",
+      "formula": "=PERCENTRANK.EXC(A2:A10,1)",
+      "description": "The smallest member of the array, which the exclusive definition keeps above zero",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 6,
+        "A6": 6,
+        "A7": 6,
+        "A8": 7,
+        "A9": 8,
+        "A10": 9
+      },
+      "expected": 0.1,
+      "expected_note": "The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here."
+    },
+    {
+      "id": "PERCENTRANK.EXC_significance_below_one",
+      "formula": "=PERCENTRANK.EXC(A2:A10,7,0)",
+      "description": "A significance of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 6,
+        "A6": 6,
+        "A7": 6,
+        "A8": 7,
+        "A9": 8,
+        "A10": 9
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If significance < 1, PERCENTRANK.EXC returns the #NUM! error value.\" OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (\"INT(Significance) = Significance; Significance >= 1\")."
+    },
+    {
+      "id": "PERCENTRANK.EXC_empty_array",
+      "formula": "=PERCENTRANK.EXC(D20:D25,7)",
+      "description": "An empty array, which the page excludes -- D20:D25 is deliberately left blank",
+      "setup_cells": {
+        "A2": 1,
+        "A3": 2,
+        "A4": 3,
+        "A5": 6,
+        "A6": 6,
+        "A7": 6,
+        "A8": 7,
+        "A9": 8,
+        "A10": 9
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If array is empty, PERCENTRANK.EXC returns the #NUM! error value.\" The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank)."
+    }
+  ]
+}

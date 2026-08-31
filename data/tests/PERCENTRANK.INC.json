@@ -1,0 +1,138 @@
+{
+  "function": "PERCENTRANK.INC",
+  "cases": [
+    {
+      "id": "PERCENTRANK.INC_documented_example",
+      "formula": "=PERCENTRANK.INC(A2:A11,2)",
+      "description": "Microsoft's documented worked example",
+      "setup_cells": {
+        "A2": 13,
+        "A3": 12,
+        "A4": 11,
+        "A5": 8,
+        "A6": 4,
+        "A7": 3,
+        "A8": 2,
+        "A9": 1,
+        "A10": 1,
+        "A11": 1
+      },
+      "expected": 0.333,
+      "expected_note": "Microsoft publishes =PERCENTRANK.INC(A2:A11,2) = 0.333 for the data 13, 12, 11, 8, 4, 3, 2, 1, 1, 1. DERIVATION in exact rational arithmetic: PERCENTRANK.INC gives the r-th smallest of n values the rank r/(n-1) counting r from 0, so the smallest scores 0 and the largest 1 (the \"inclusive\" of the name), with linear interpolation for a value not in the data. Microsoft spells the same arithmetic out on the page for its first row: \"0.333, because 3 values in the set are smaller than 2, and 6 are larger than 2; 3/(3+6)=0.333\". Three of the ten values are below 2, so the rank is 3/9 = 0.3333... and the default three significant digits give 0.333. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-inc-function (the /en-us/office/<name>-function-<guid> path was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "PERCENTRANK.INC_documented_truncates_not_rounds",
+      "formula": "=PERCENTRANK.INC(A2:A11,4)",
+      "description": "The documented row whose exact value is 5/9 -- the case that distinguishes truncation from rounding",
+      "setup_cells": {
+        "A2": 13,
+        "A3": 12,
+        "A4": 11,
+        "A5": 8,
+        "A6": 4,
+        "A7": 3,
+        "A8": 2,
+        "A9": 1,
+        "A10": 1,
+        "A11": 1
+      },
+      "expected": 0.555,
+      "expected_note": "Microsoft publishes =PERCENTRANK.INC(A2:A11,4) = 0.555. THIS IS THE SHARPEST CASE IN THE FILE. Five of the ten values are below 4, so the exact rank is 5/9 = 0.55555... To three significant digits that is 0.555 if the significance argument TRUNCATES and 0.556 if it ROUNDS, and Microsoft publishes 0.555 -- so the documented behaviour is truncation. Microsoft's next row is the same test again in the other direction: =PERCENTRANK.INC(A2:A11,8) = 0.666, where 6/9 = 0.6666... truncates to 0.666 and would round to 0.667. An engine that rounds instead of truncating produces a plausible-looking number that differs from Excel in the third decimal on the most ordinary inputs imaginable, and only a case whose exact value is a repeating decimal can see it. EXECUTED RESULT -- A SILENT WRONG ANSWER, AND THE HEADLINE FINDING OF THIS BATCH: LibreOffice returns 0.556 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents and publishes 0.555. LibreOffice ROUNDS the result to the significance digits; Excel TRUNCATES it. Nothing errors, nothing warns, and the answer is wrong in the third decimal on the most ordinary input imaginable -- a percentile rank of a small integer list. The companion case in this file (rank of 8, exact value 6/9) shows the same split, 0.667 against Microsoft's published 0.666, and PERCENTRANK.EXC's significance-1 row shows it a third time, 0.4 against Microsoft's published 0.3. The corpus's legacy PERCENTRANK file never caught this because every value it asserts is exact at three digits."
+    },
+    {
+      "id": "PERCENTRANK.INC_documented_two_thirds",
+      "formula": "=PERCENTRANK.INC(A2:A11,8)",
+      "description": "The documented row whose exact value is 6/9",
+      "setup_cells": {
+        "A2": 13,
+        "A3": 12,
+        "A4": 11,
+        "A5": 8,
+        "A6": 4,
+        "A7": 3,
+        "A8": 2,
+        "A9": 1,
+        "A10": 1,
+        "A11": 1
+      },
+      "expected": 0.666,
+      "expected_note": "Microsoft publishes =PERCENTRANK.INC(A2:A11,8) = 0.666. Six of the ten values are below 8, so the exact rank is 6/9 = 0.66666..., truncated to three significant digits by the default significance: 0.666, not 0.667. Asserted alongside the 5/9 case because the two together make the truncation reading unambiguous -- a single repeating-decimal row could be dismissed as a typo on Microsoft's page, two cannot. EXECUTED RESULT: LibreOffice returns 0.667 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft's published 0.666. The second of three demonstrations in this batch that LibreOffice rounds where Excel truncates; see the 5/9 case above."
+    },
+    {
+      "id": "PERCENTRANK.INC_documented_interpolated",
+      "formula": "=PERCENTRANK.INC(A2:A11,5)",
+      "description": "Microsoft's documented interpolation case",
+      "setup_cells": {
+        "A2": 13,
+        "A3": 12,
+        "A4": 11,
+        "A5": 8,
+        "A6": 4,
+        "A7": 3,
+        "A8": 2,
+        "A9": 1,
+        "A10": 1,
+        "A11": 1
+      },
+      "expected": 0.583,
+      "expected_note": "Microsoft publishes =PERCENTRANK.INC(A2:A11,5) = 0.583 and explains it as \"one-quarter of the way between the PERCENTRANK.INC of 4 and the PERCENTRANK.INC of 8\". DERIVATION: 5 sits between 4 (rank 5) and 8 (rank 6), a quarter of the way along, so the exact rank is (5 + 1/4)/9 = 21/36 = 0.58333..., truncated to 0.583."
+    },
+    {
+      "id": "PERCENTRANK.INC_largest_value_is_one",
+      "formula": "=PERCENTRANK.INC(A2:A11,13)",
+      "description": "The largest member of the array, which the inclusive definition sends to 1",
+      "setup_cells": {
+        "A2": 13,
+        "A3": 12,
+        "A4": 11,
+        "A5": 8,
+        "A6": 4,
+        "A7": 3,
+        "A8": 2,
+        "A9": 1,
+        "A10": 1,
+        "A11": 1
+      },
+      "expected": 1,
+      "expected_note": "Nine of the ten values are below 13, so the rank is 9/9 = 1 exactly. This is the end of the range where .INC and .EXC part company (.EXC would give 10/11 here), so it pins which of the two definitions the engine implemented."
+    },
+    {
+      "id": "PERCENTRANK.INC_significance_below_one",
+      "formula": "=PERCENTRANK.INC(A2:A11,2,0)",
+      "description": "A significance of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 13,
+        "A3": 12,
+        "A4": 11,
+        "A5": 8,
+        "A6": 4,
+        "A7": 3,
+        "A8": 2,
+        "A9": 1,
+        "A10": 1,
+        "A11": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If significance < 1, PERCENTRANK.INC returns the #NUM! error value.\""
+    },
+    {
+      "id": "PERCENTRANK.INC_empty_array",
+      "formula": "=PERCENTRANK.INC(D20:D25,2)",
+      "description": "An empty array, which the page excludes -- D20:D25 is deliberately left blank",
+      "setup_cells": {
+        "A2": 13,
+        "A3": 12,
+        "A4": 11,
+        "A5": 8,
+        "A6": 4,
+        "A7": 3,
+        "A8": 2,
+        "A9": 1,
+        "A10": 1,
+        "A11": 1
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If array is empty, PERCENTRANK.INC returns the #NUM! error value.\" D20:D25 is deliberately empty; nothing is written into it by design."
+    }
+  ]
+}

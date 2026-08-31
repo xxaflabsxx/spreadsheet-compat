@@ -1,0 +1,113 @@
+{
+  "function": "ODDFYIELD",
+  "cases": [
+    {
+      "id": "ODDFYIELD_documented_example_published_precision",
+      "formula": "=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),4)",
+      "description": "Microsoft's documented worked example, at the precision Microsoft publishes",
+      "setup_cells": {
+        "A2": 39763,
+        "A3": 44256,
+        "A4": 39736,
+        "A5": 39873,
+        "A6": 0.0575,
+        "A7": 84.5,
+        "A8": 100,
+        "A9": 2,
+        "A10": 0
+      },
+      "expected": 0.0772,
+      "expected_note": "Microsoft publishes =ODDFYIELD(A2, A3, A4, A5, A6, A7, A8, A9, A10) = 7.72% for a bond settled 2008-11-11, maturing 2021-03-01, issued 2008-10-15, first coupon 2009-03-01, 5.75% coupon, price 84.50, redemption 100, semiannual, 30/360 basis, and the page's own description spells the same figure as \"(0.0772, or 7.72%)\". DERIVATION: Microsoft publishes no closed form -- \"Excel uses an iterative technique to calculate ODDFYIELD. This function uses the Newton method based on the formula used for the function ODDFPRICE\" -- so the value here is obtained by root-finding on this batch's own clean-room ODDFPRICE implementation (see data/tests/ODDFPRICE.json for its derivation), solving price(yield) = 84.5 with mpmath at 50 digits. The root is 0.07724554159781..., which is 0.0772 at four places -- Microsoft's published figure. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddfyield-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- NOT IMPLEMENTED, AND NOT SIGNALLED AS SUCH: LibreOffice returns #VALUE! on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case -- for this case, for every other case in this file, and for every argument combination probed while preparing the batch (five bases, three frequencies, settlement before and after the first coupon, dates as serials, as DATE() calls and as text, and a bond whose first period is deliberately regular). Not one input produced a number. The name is RECOGNISED -- the plain spelling parses, while _xlfn.ODDFPRICE, COM.MICROSOFT.ODDFPRICE and ORG.OPENOFFICE.ODDFPRICE are all #NAME? -- so this is not a storage-form artefact, and it is not an .xlsx import artefact either: the same #VALUE! comes back when the formula is parsed natively by LibreOffice's own parser rather than read from OOXML, on a run where ODDLPRICE and PRICE in the same file computed correctly. LibreOffice's source says why, in as many words: scaddins/source/analysis/analysishelper.cxx defines GetOddfyield() and GetOddfprice() as bodies that do nothing but `throw uno::RuntimeException()`, and financial.cxx wraps both call sites in SAL_WNOUNREACHABLE_CODE_PUSH under the comment \"Encapsulation violation: We *know* that GetOddfprice() always throws.\" The argument validation in front of them is real (rate < 0, frequency, date ordering are all checked) but every path that survives it ends in the same exception, which is why the error cases in this file also come back #VALUE! instead of the documented #NUM!. So: the function is listed, documented in LibreOffice's own help, and computes nothing. Its ODDL* siblings, by contrast, compute the documented values exactly."
+    },
+    {
+      "id": "ODDFYIELD_documented_example_full_precision",
+      "formula": "=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)",
+      "description": "The same example carried to eight decimal places",
+      "setup_cells": {
+        "A2": 39763,
+        "A3": 44256,
+        "A4": 39736,
+        "A5": 39873,
+        "A6": 0.0575,
+        "A7": 84.5,
+        "A8": 100,
+        "A9": 2,
+        "A10": 0
+      },
+      "expected": 0.07724554,
+      "expected_note": "Four published decimals leave the iteration untested, so the root is asserted at eight places: 0.07724554. Microsoft states the convergence rule loosely -- \"The yield is changed through 100 iterations until the estimated price with the given yield is close to the price\" -- without defining \"close\", so this is exactly the kind of case where two conforming implementations can legitimately differ in the last digit or two; eight places is deliberately short of the fifteen a double carries."
+    },
+    {
+      "id": "ODDFYIELD_inverts_ODDFPRICE",
+      "formula": "=ROUND(ODDFYIELD(A2,A3,A4,A5,0.0785,ODDFPRICE(A2,A3,A4,A5,0.0785,0.0625,100,2,1),100,2,1),8)",
+      "description": "ODDFYIELD fed the price ODDFPRICE computes for a known yield must return that yield",
+      "setup_cells": {
+        "A2": 39763,
+        "A3": 44256,
+        "A4": 39736,
+        "A5": 39873,
+        "A6": 0.0575,
+        "A7": 84.5,
+        "A8": 100,
+        "A9": 2,
+        "A10": 0
+      },
+      "expected": 0.0625,
+      "expected_note": "Microsoft's page says outright that ODDFYIELD inverts ODDFPRICE (\"See ODDFPRICE for the formula that ODDFYIELD uses\"), so composing the two on one bond must return the yield it started from. This assertion contains NO derived constant -- 0.0625 is an input -- which makes it immune to any disagreement about day counts or quasi-coupon schedules: an engine with an unusual but self-consistent odd-period model still passes, and one whose yield solver does not invert its own price function fails. The bond is ODDFPRICE's documented example (7.85% coupon, basis 1), evaluated entirely inside the engine."
+    },
+    {
+      "id": "ODDFYIELD_zero_price",
+      "formula": "=ODDFYIELD(A2,A3,A4,A5,A6,0,A8,A9,A10)",
+      "description": "A price of zero, which the page excludes",
+      "setup_cells": {
+        "A2": 39763,
+        "A3": 44256,
+        "A4": 39736,
+        "A5": 39873,
+        "A6": 0.0575,
+        "A7": 84.5,
+        "A8": 100,
+        "A9": 2,
+        "A10": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If rate < 0 or if pr <= 0, ODDFYIELD returns the #NUM! error value.\" Note the asymmetry with ODDFPRICE, whose corresponding clause reads \"rate < 0 or yld < 0\": the price argument is excluded AT zero, the yield argument only BELOW it. Zero is the boundary the <= includes."
+    },
+    {
+      "id": "ODDFYIELD_basis_out_of_range",
+      "formula": "=ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,5)",
+      "description": "A basis of 5, one past the documented range",
+      "setup_cells": {
+        "A2": 39763,
+        "A3": 44256,
+        "A4": 39736,
+        "A5": 39873,
+        "A6": 0.0575,
+        "A7": 84.5,
+        "A8": 100,
+        "A9": 2,
+        "A10": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If basis < 0 or if basis > 4, ODDFYIELD returns the #NUM! error value.\""
+    },
+    {
+      "id": "ODDFYIELD_date_order_violated",
+      "formula": "=ODDFYIELD(A5,A3,A4,A2,A6,A7,A8,A9,A10)",
+      "description": "Settlement and first_coupon swapped",
+      "setup_cells": {
+        "A2": 39763,
+        "A3": 44256,
+        "A4": 39736,
+        "A5": 39873,
+        "A6": 0.0575,
+        "A7": 84.5,
+        "A8": 100,
+        "A9": 2,
+        "A10": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"The following date condition must be satisfied; otherwise, ODDFYIELD returns the #NUM! error value: maturity > first_coupon > settlement > issue.\""
+    }
+  ]
+}

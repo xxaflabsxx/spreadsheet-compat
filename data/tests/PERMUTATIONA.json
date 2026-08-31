@@ -1,0 +1,47 @@
+{
+  "function": "PERMUTATIONA",
+  "cases": [
+    {
+      "id": "PERMUTATIONA_documented_example",
+      "formula": "=PERMUTATIONA(3,2)",
+      "expected": 9,
+      "description": "Microsoft's documented worked example",
+      "expected_note": "Microsoft publishes =PERMUTATIONA(3,2) = 9 and enumerates all nine arrangements on the page (4,4 / 4,5 / 4,6 / 5,4 / 5,5 / 5,6 / 6,4 / 6,5 / 6,6). DERIVATION from the documented equation, which is n^k with repetition allowed: 3^2 = 9 exactly, in integer arithmetic. The contrast with PERMUT(3,2) = 6 is the whole point of the function -- repetition permitted versus not -- and both are asserted in this batch. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/permutationa-function (the /en-us/office/<name>-function-<guid> path was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "PERMUTATIONA_documented_second_row",
+      "formula": "=PERMUTATIONA(2,2)",
+      "expected": 4,
+      "description": "Microsoft's second documented row",
+      "expected_note": "Microsoft publishes =PERMUTATIONA(2,2) = 4 and again enumerates the arrangements (3,3 / 3,5 / 5,3 / 5,5). 2^2 = 4."
+    },
+    {
+      "id": "PERMUTATIONA_arguments_are_truncated",
+      "formula": "=PERMUTATIONA(3.9,2.9)",
+      "expected": 9,
+      "description": "Fractional arguments, which the page says are truncated",
+      "expected_note": "Microsoft documents: \"Both arguments are truncated to integers.\" 3.9 and 2.9 truncate to 3 and 2, giving 3^2 = 9; an engine that rounded would return 4^3 = 64."
+    },
+    {
+      "id": "PERMUTATIONA_zero_objects_zero_chosen",
+      "formula": "=PERMUTATIONA(0,0)",
+      "expected": 1,
+      "description": "The empty case, which OpenFormula defines as 1",
+      "expected_note": "OpenFormula 1.3 section 6.18.60 is explicit: \"The result is 1 if Total = 0 and Chosen = 0, otherwise the result is Total^Chosen.\" Microsoft's page does not print this row but its error clause is consistent with it -- it names an error only \"when the total number is zero (0) and the chosen number is larger than zero (0)\", which pointedly does not cover chosen = 0. Note this is the exact input on which PERMUT is documented to return #NUM!, so the two sibling functions are specified to disagree here and this corpus asserts both."
+    },
+    {
+      "id": "PERMUTATIONA_zero_objects_one_chosen",
+      "formula": "=PERMUTATIONA(0,1)",
+      "expected": "#NUM!",
+      "description": "The documented invalid case",
+      "expected_note": "Microsoft documents: \"If numeric arguments are values that are not valid, for example, when the total number is zero (0) and the chosen number is larger than zero (0), PERMUTATIONA returns the #NUM! error value.\" This is the page's own worked-out example of an invalid argument, quoted exactly. EXECUTED RESULT -- A SILENT WRONG ANSWER: LibreOffice returns 0 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents #NUM! for exactly this input (Microsoft names it as its own example of an invalid argument). 0^1 = 0 is what the bare formula gives, so LibreOffice has applied the equation without the guard the page describes. Together with PERMUT(0,0) returning 1 above, this shows the same pattern twice in one sibling pair: LibreOffice evaluates the closed form where Excel raises the documented error."
+    },
+    {
+      "id": "PERMUTATIONA_nonnumeric_argument",
+      "formula": "=PERMUTATIONA(\"x\",2)",
+      "expected": "#VALUE!",
+      "description": "A non-numeric argument",
+      "expected_note": "Microsoft documents: \"If numeric arguments use data types that are nonnumeric, PERMUTATIONA returns the #VALUE! error value.\""
+    }
+  ]
+}

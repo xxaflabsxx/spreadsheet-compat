@@ -1,0 +1,47 @@
+{
+  "function": "PHI",
+  "cases": [
+    {
+      "id": "PHI_documented_example",
+      "formula": "=ROUND(PHI(0.75),9)",
+      "expected": 0.301137432,
+      "description": "Microsoft's documented worked example",
+      "expected_note": "Microsoft publishes =PHI(0.75) = 0.301137432, \"The value of the density function for a standard normal distribution\". DERIVATION from the density itself, with mpmath at 50 digits and no statistics library: exp(-0.75^2/2)/sqrt(2*pi) = exp(-0.28125)/2.5066282746310002... = 0.30113743215480421..., which is 0.301137432 at nine places -- the published figure, reproduced exactly. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/phi-function (the /en-us/office/<name>-function-<guid> path was serving Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "PHI_full_precision",
+      "formula": "=ROUND(PHI(0.75),12)",
+      "expected": 0.301137432155,
+      "description": "The same value carried to twelve decimal places",
+      "expected_note": "Nine published decimals are asserted again at twelve: 0.301137432155, from the same exp/sqrt derivation."
+    },
+    {
+      "id": "PHI_at_zero_is_the_peak",
+      "formula": "=ROUND(PHI(0),12)",
+      "expected": 0.398942280402,
+      "description": "The density at its mode",
+      "expected_note": "At x = 0 the exponential is 1 and the density is exactly 1/sqrt(2*pi) = 0.3989422804014327..., a constant that depends on nothing but pi. Asserted at twelve places: 0.398942280402. This is the case that catches a normalising constant computed as 1/2.5066 or similar."
+    },
+    {
+      "id": "PHI_matches_NORM.S.DIST_density",
+      "formula": "=ROUND(PHI(0.75)-NORM.S.DIST(0.75,FALSE),12)",
+      "description": "The documented equivalence to NORM.S.DIST with cumulative FALSE",
+      "expected": 0,
+      "expected_note": "OpenFormula 1.3 section 6.18.61 defines PHI outright as a synonym: \"PHI(N) is a synonym for NORMDIST(N,0,1,FALSE()).\" This case checks that identity inside the engine -- the difference of the two calls must be exactly zero -- rather than against a constant, so an engine whose two density paths disagree is caught even if each rounds to a published figure on its own. NORM.S.DIST was executed by an earlier batch of this corpus and is supported on all four LibreOffice builds, so a failure here is PHI's."
+    },
+    {
+      "id": "PHI_symmetry",
+      "formula": "=ROUND(PHI(1.25)-PHI(-1.25),12)",
+      "expected": 0,
+      "description": "The standard normal density is even",
+      "expected_note": "The density depends on x only through x^2, so PHI(x) = PHI(-x) exactly, for every x. No derived constant is involved, and an engine that accidentally implemented the CUMULATIVE distribution instead of the density fails immediately (the CDF is not even)."
+    },
+    {
+      "id": "PHI_nonnumeric_argument",
+      "formula": "=PHI(\"x\")",
+      "expected": "#VALUE!",
+      "description": "A non-numeric argument",
+      "expected_note": "Microsoft documents: \"If x is using a data type that is not valid, such as a nonnumeric value, PHI returns the #VALUE! error value\", separately from \"If x is a numeric value that is not valid, PHI returns the #NUM! error value\"."
+    }
+  ]
+}

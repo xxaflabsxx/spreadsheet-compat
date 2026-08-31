@@ -1,0 +1,107 @@
+{
+  "function": "PROB",
+  "cases": [
+    {
+      "id": "PROB_documented_single_limit",
+      "formula": "=ROUND(PROB(A3:A6,B3:B6,2),12)",
+      "description": "Microsoft's documented example with only a lower limit",
+      "setup_cells": {
+        "A3": 0,
+        "A4": 1,
+        "A5": 2,
+        "A6": 3,
+        "B3": 0.2,
+        "B4": 0.3,
+        "B5": 0.1,
+        "B6": 0.4
+      },
+      "expected": 0.1,
+      "expected_note": "Microsoft publishes =PROB(A3:A6,B3:B6,2) = 0.1 for the values 0, 1, 2, 3 with probabilities 0.2, 0.3, 0.1, 0.4, and documents the rule it exercises: \"If upper_limit is omitted, PROB returns the probability of being equal to lower_limit.\" DERIVATION: with no upper limit the answer is simply the probability attached to the value 2, which is 0.1 -- a lookup, not a calculation. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/prob-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "PROB_documented_range",
+      "formula": "=ROUND(PROB(A3:A6,B3:B6,1,3),12)",
+      "description": "Microsoft's documented example with both limits",
+      "setup_cells": {
+        "A3": 0,
+        "A4": 1,
+        "A5": 2,
+        "A6": 3,
+        "B3": 0.2,
+        "B4": 0.3,
+        "B5": 0.1,
+        "B6": 0.4
+      },
+      "expected": 0.8,
+      "expected_note": "Microsoft publishes =PROB(A3:A6,B3:B6,1,3) = 0.8. DERIVATION: the values 1, 2 and 3 all lie in the closed interval [1,3], so the answer is 0.3 + 0.1 + 0.4 = 0.8 exactly. Note that both endpoints are INCLUDED -- OpenFormula 1.3 section 6.18.63 writes the same rule as an indicator over Start <= d_i <= End -- so an engine using a half-open interval would return 0.4 here."
+    },
+    {
+      "id": "PROB_whole_range_is_one",
+      "formula": "=ROUND(PROB(A3:A6,B3:B6,0,3),12)",
+      "description": "Limits spanning the whole sample",
+      "setup_cells": {
+        "A3": 0,
+        "A4": 1,
+        "A5": 2,
+        "A6": 3,
+        "B3": 0.2,
+        "B4": 0.3,
+        "B5": 0.1,
+        "B6": 0.4
+      },
+      "expected": 1,
+      "expected_note": "Every value lies in [0,3], so the answer is the sum of all four probabilities, which the page requires to be 1. Structural: it pins both endpoints at once and needs no derived constant."
+    },
+    {
+      "id": "PROB_probabilities_do_not_sum_to_one",
+      "formula": "=PROB(A3:A6,C3:C6,2)",
+      "description": "A probability column that sums to 0.9, which the page excludes",
+      "setup_cells": {
+        "A3": 0,
+        "A4": 1,
+        "A5": 2,
+        "A6": 3,
+        "C3": 0.2,
+        "C4": 0.3,
+        "C5": 0.1,
+        "C6": 0.3
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If the sum of the values in prob_range is not equal to 1, PROB returns the #NUM! error value.\" The C column sums to 0.9. OpenFormula 1.3 section 6.18.63 states the same constraint."
+    },
+    {
+      "id": "PROB_probability_above_one",
+      "formula": "=PROB(A3:A6,D3:D6,2)",
+      "description": "A probability greater than 1 among otherwise valid entries",
+      "setup_cells": {
+        "A3": 0,
+        "A4": 1,
+        "A5": 2,
+        "A6": 3,
+        "D3": 1.5,
+        "D4": 0.3,
+        "D5": 0.1,
+        "D6": -0.9
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If any value in prob_range <= 0 or if any value in prob_range > 1, PROB returns the #NUM! error value.\" The D column is deliberately built to sum to exactly 1 (1.5 + 0.3 + 0.1 - 0.9 = 1.0) so that the OTHER documented constraint is satisfied and only the per-value range rule can fire -- otherwise a passing result would not say which rule the engine enforced."
+    },
+    {
+      "id": "PROB_mismatched_range_lengths",
+      "formula": "=PROB(A3:A6,B3:B5,2)",
+      "description": "x_range and prob_range of different lengths",
+      "setup_cells": {
+        "A3": 0,
+        "A4": 1,
+        "A5": 2,
+        "A6": 3,
+        "B3": 0.2,
+        "B4": 0.3,
+        "B5": 0.1,
+        "B6": 0.4
+      },
+      "expected": "#N/A",
+      "expected_note": "Microsoft documents: \"If x_range and prob_range contain a different number of data points, PROB returns the #N/A error value.\" Note the code: #N/A for a shape mismatch, #NUM! for a bad probability -- two different errors on the same page, so they are asserted separately."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "function": "REGEXEXTRACT",
+  "cases": [
+    {
+      "id": "REGEXEXTRACT_documented_first_match",
+      "formula": "=REGEXEXTRACT(A2,\"[A-Z][a-z]+\")",
+      "description": "Microsoft's documented example: the first match of a capitalised-word pattern",
+      "setup_cells": {
+        "A2": "DylanWilliams"
+      },
+      "expected": "Dylan",
+      "expected_note": "Microsoft's Example 1 is exactly this: the data \"DylanWilliams\" with the pattern \"[A-Z][a-z]+\", described as \"Extract names based on capital letters\". DERIVATION: the pattern matches one upper-case letter followed by one or more lower-case letters; scanning from the left, the first such run in \"DylanWilliams\" is \"Dylan\" (it stops at the W, which is not in [a-z]). With return_mode omitted the documented behaviour is \"0: Return the first string that matches the pattern\", so the answer is the single string \"Dylan\". REGEX FLAVOUR, AS DOCUMENTED: \"All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 'flavor' of regex\" -- Microsoft's own sentence, printed on all three REGEX pages. This corpus's patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice's own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regexextract-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft's pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten."
+    },
+    {
+      "id": "REGEXEXTRACT_documented_all_matches_count",
+      "formula": "=COUNTA(REGEXEXTRACT(A2,\"[A-Z][a-z]+\",1))",
+      "description": "The same pattern with return_mode 1, counted rather than indexed",
+      "setup_cells": {
+        "A2": "DylanWilliams"
+      },
+      "expected": 2,
+      "expected_note": "Microsoft's Example 1 runs the same data a second time with return_mode 1, documented as \"1: Return all strings that match the pattern as an array\". \"DylanWilliams\" contains exactly two capitalised words, so the array has two elements. The result is wrapped in COUNTA DELIBERATELY: Microsoft's page shows the array only as a screenshot and never states whether it spills down a column or across a row, so asserting INDEX(...,2) would be asserting an orientation this corpus cannot source. COUNTA is orientation-blind and still distinguishes return_mode 1 from return_mode 0, which returns a single string and would count 1. EXECUTED RESULT -- READ THIS ONE CAREFULLY: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, not #NAME?. That is NOT a partially-working REGEXEXTRACT. COUNTA counts non-empty cells, and an error value is not empty, so COUNTA(#NAME?) is 1: the wrapper this case uses to avoid asserting an array orientation also swallows the #NAME? underneath it. The other four cases in this file show the raw #NAME?, and the function is absent under all four spellings probed. The count of 1 here is an artefact of the wrapper, not evidence of anything the engine computed."
+    },
+    {
+      "id": "REGEXEXTRACT_documented_capture_group",
+      "formula": "=REGEXEXTRACT(\"2024-08-31\",\"-([0-9]{2})-\",2)",
+      "description": "return_mode 2, which returns the capturing groups of the first match",
+      "expected": "08",
+      "expected_note": "Microsoft documents return_mode \"2: Return capturing groups from the first match as an array\" and explains: \"Capturing groups are parts of a regex pattern surrounded by parentheses '(...)'. They allow you to return separate parts of a single match individually.\" The pattern here has exactly ONE group, so the returned array has one element and coerces to the scalar string \"08\" -- chosen that way so the case tests the group extraction without depending on how a multi-element array is laid out. The match itself is \"-08-\" and the group inside it is \"08\". Note the documented remark that \"REGEXEXTRACT always return text values\" (Microsoft's own grammar): the expected value is the two-character STRING \"08\", not the number 8."
+    },
+    {
+      "id": "REGEXEXTRACT_case_insensitive",
+      "formula": "=REGEXEXTRACT(\"abcDEF\",\"[A-Z]+\",0,1)",
+      "description": "The documented case_sensitivity argument set to case-insensitive",
+      "expected": "abc",
+      "expected_note": "Microsoft documents case_sensitivity as \"0: Case sensitive\" (the default) and \"1: Case insensitive\". With matching made case-insensitive, [A-Z]+ also matches lower-case letters, so the FIRST match in \"abcDEF\" is the leading run \"abc\" -- not \"DEF\", which is what the same call returns with the default sensitivity. The two readings give different answers on the same string, which is what makes this a real test of the argument rather than a decoration."
+    },
+    {
+      "id": "REGEXEXTRACT_no_match",
+      "formula": "=REGEXEXTRACT(\"abc\",\"[0-9]+\")",
+      "description": "A pattern that matches nothing",
+      "expected": "#N/A",
+      "expected_note": "There is no digit in \"abc\", so nothing matches. #N/A -- \"not available\" -- is Excel's error for a lookup that found nothing, and it is what this function family returns on no match; the value is asserted here so that an engine returning an empty string, a zero or #VALUE! instead is recorded as different."
+    }
+  ]
+}

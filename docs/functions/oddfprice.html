@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ODDFPRICE: Excel and LibreOffice — not in Sheets</title>
-<meta name="description" content="ODDFPRICE (Financial) is documented for Excel and LibreOffice, not for Google Sheets. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>ODDFPRICE gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="1/7 match Excel&#39;s docs; documented example published precision returns #VALUE!, not… Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/oddfprice.html">
-<meta property="og:title" content="ODDFPRICE: Excel and LibreOffice — not in Sheets">
-<meta property="og:description" content="ODDFPRICE (Financial) is documented for Excel and LibreOffice, not for Google Sheets. Not yet live-tested by any engine.">
+<meta property="og:title" content="ODDFPRICE gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="1/7 match Excel&#39;s docs; documented example published precision returns #VALUE!, not… Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/oddfprice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>ODDFPRICE</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>ODDFPRICE</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for ODDFPRICE yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,136 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+ODDFPRICE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't ODDFPRICE working in LibreOffice?</h2>
+
+<p><code>ODDFPRICE</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),2)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">113.6</span>.
+        Microsoft publishes =ODDFPRICE(A2, A3, A4, A5, A6, A7, A8, A9, A10) = $ 113.60 for a bond settled 2008-11-11, maturing 2021-03-01, issued 2008-10-15, first coupon 2009-03-01, 7.85% coupon, 6.25% yield, redemption 100, semiannual, actual/actual basis. DERIVATION, clean-room, from the odd-short-first-coupon formula Microsoft prints as an image on the page: price = redemption/(1+yld/f)^(N-1+DSC/E) + 100*(rate/f)*(DFC/E)/(1+yld/f)^(DSC/E) + sum over k = 2..N of 100*(rate/f)/(1+yld/f)^(k-1+DSC/E) - 100*(rate/f)*(A/E), with A = days from the start of the coupon period to settlement, DSC = days from settlement to the next coupon, DFC = days from the start of the odd first coupon to the first coupon date, E = days in the coupon period, and N = coupons payable between settlement and redemption. The quasi-coupon period is generated by walking BACK from first_coupon on the frequency grid, which puts the period at 2008-09-01 to 2009-03-01. On basis 1 (actual/actual) that is E = 181 actual days, with A = 27 (2008-10-15 to 2008-11-11), DSC = 110 (2008-11-11 to 2009-03-01), DFC = 137 (2008-10-15 to 2009-03-01) and N = 25 semiannual coupons from 2009-03-01 through 2021-03-01. The odd first period is SHORT -- 137 days against a 181-day quasi-period -- which is what selects this branch of the formula over the odd-long-first-coupon branch. The day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 -- Procedure A for US (NASD) 30/360 with its four order-dependent endpoint adjustments, Procedure B for actual days, Procedure C for European 30/360, and Procedures D/E/F for days-in-year -- written for this batch and used by no engine; the arithmetic is mpmath at 50 digits over exact rational day-count ratios. The independent computation gives 113.5977174740789..., which is 113.60 at the two decimals Microsoft prints -- the published figure, reproduced from the formula rather than copied. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddfprice-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- NOT IMPLEMENTED, AND NOT SIGNALLED AS SUCH: LibreOffice returns #VALUE! on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case -- for this case, for every other case in this file, and for every argument combination probed while preparing the batch (five bases, three frequencies, settlement before and after the first coupon, dates as serials, as DATE() calls and as text, and a bond whose first period is deliberately regular). Not one input produced a number. The name is RECOGNISED -- the plain spelling parses, while _xlfn.ODDFPRICE, COM.MICROSOFT.ODDFPRICE and ORG.OPENOFFICE.ODDFPRICE are all #NAME? -- so this is not a storage-form artefact, and it is not an .xlsx import artefact either: the same #VALUE! comes back when the formula is parsed natively by LibreOffice&#39;s own parser rather than read from OOXML, on a run where ODDLPRICE and PRICE in the same file computed correctly. LibreOffice&#39;s source says why, in as many words: scaddins/source/analysis/analysishelper.cxx defines GetOddfprice() and GetOddfyield() as bodies that do nothing but `throw uno::RuntimeException()`, and financial.cxx wraps both call sites in SAL_WNOUNREACHABLE_CODE_PUSH under the comment &#34;Encapsulation violation: We *know* that GetOddfprice() always throws.&#34; The argument validation in front of them is real (rate &lt; 0, frequency, date ordering are all checked) but every path that survives it ends in the same exception, which is why the error cases in this file also come back #VALUE! instead of the documented #NUM!. So: the function is listed, documented in LibreOffice&#39;s own help, and computes nothing. Its ODDL* siblings, by contrast, compute the documented values exactly.; MISMATCH vs expected: expected 113.6, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">113.59771747</span>.
+        Two published decimals cannot distinguish a correct odd-period price from one whose quasi-coupon schedule is off by a day, so the derived value is asserted at eight places: 113.59771747. This is the assertion that actually constrains the day counts.; MISMATCH vs expected: expected 113.59771747, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,0),8)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">113.59920583</span>.
+        The same bond on basis 0, where every day count is taken under Procedure A instead of actual days: E = 180, A = 26, DSC = 106, DFC = 136. The derived price is 113.5992058282384..., asserted at eight places. The two bases MUST differ here -- unlike the MDURATION case in batch E, settlement does not fall on a coupon date, so the ratios genuinely change -- and the pair of cases pins which basis the engine applied. A basis argument that is silently ignored produces the basis-0 number for the basis-1 case, and this file catches that.; MISMATCH vs expected: expected 113.59920583, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ODDFPRICE(A2,A3,A4,A5,-0.0785,A7,A8,A9,A10)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, ODDFPRICE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,5)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDFPRICE returns the #NUM! error value.&#34; The basis table stops at 4 (European 30/360).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ODDFPRICE(A5,A3,A4,A2,A6,A7,A8,A9,A10)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDFPRICE returns the #NUM! error value: maturity &gt; first_coupon &gt; settlement &gt; issue.&#34; Swapping the settlement and first-coupon arguments puts settlement (2009-03-01) after first_coupon (2008-11-11) and also before issue, breaking the chain in two places at once.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +523,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for ODDFPRICE yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),2)</td>
+  <td>Microsoft&#39;s documented worked example, at the two decimals Microsoft publishes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">113.6<br><span class="category-tag">Microsoft publishes =ODDFPRICE(A2, A3, A4, A5, A6, A7, A8, A9, A10) = $ 113.60 for a bond settled 2008-11-11, maturing 2021-03-01, issued 2008-10-15, first coupon 2009-03-01, 7.85% coupon, 6.25% yield, redemption 100, semiannual, actual/actual basis. DERIVATION, clean-room, from the odd-short-first-coupon formula Microsoft prints as an image on the page: price = redemption/(1+yld/f)^(N-1+DSC/E) + 100*(rate/f)*(DFC/E)/(1+yld/f)^(DSC/E) + sum over k = 2..N of 100*(rate/f)/(1+yld/f)^(k-1+DSC/E) - 100*(rate/f)*(A/E), with A = days from the start of the coupon period to settlement, DSC = days from settlement to the next coupon, DFC = days from the start of the odd first coupon to the first coupon date, E = days in the coupon period, and N = coupons payable between settlement and redemption. The quasi-coupon period is generated by walking BACK from first_coupon on the frequency grid, which puts the period at 2008-09-01 to 2009-03-01. On basis 1 (actual/actual) that is E = 181 actual days, with A = 27 (2008-10-15 to 2008-11-11), DSC = 110 (2008-11-11 to 2009-03-01), DFC = 137 (2008-10-15 to 2009-03-01) and N = 25 semiannual coupons from 2009-03-01 through 2021-03-01. The odd first period is SHORT -- 137 days against a 181-day quasi-period -- which is what selects this branch of the formula over the odd-long-first-coupon branch. The day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 -- Procedure A for US (NASD) 30/360 with its four order-dependent endpoint adjustments, Procedure B for actual days, Procedure C for European 30/360, and Procedures D/E/F for days-in-year -- written for this batch and used by no engine; the arithmetic is mpmath at 50 digits over exact rational day-count ratios. The independent computation gives 113.5977174740789..., which is 113.60 at the two decimals Microsoft prints -- the published figure, reproduced from the formula rather than copied. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddfprice-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- NOT IMPLEMENTED, AND NOT SIGNALLED AS SUCH: LibreOffice returns #VALUE! on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case -- for this case, for every other case in this file, and for every argument combination probed while preparing the batch (five bases, three frequencies, settlement before and after the first coupon, dates as serials, as DATE() calls and as text, and a bond whose first period is deliberately regular). Not one input produced a number. The name is RECOGNISED -- the plain spelling parses, while _xlfn.ODDFPRICE, COM.MICROSOFT.ODDFPRICE and ORG.OPENOFFICE.ODDFPRICE are all #NAME? -- so this is not a storage-form artefact, and it is not an .xlsx import artefact either: the same #VALUE! comes back when the formula is parsed natively by LibreOffice&#39;s own parser rather than read from OOXML, on a run where ODDLPRICE and PRICE in the same file computed correctly. LibreOffice&#39;s source says why, in as many words: scaddins/source/analysis/analysishelper.cxx defines GetOddfprice() and GetOddfyield() as bodies that do nothing but `throw uno::RuntimeException()`, and financial.cxx wraps both call sites in SAL_WNOUNREACHABLE_CODE_PUSH under the comment &#34;Encapsulation violation: We *know* that GetOddfprice() always throws.&#34; The argument validation in front of them is real (rate &lt; 0, frequency, date ordering are all checked) but every path that survives it ends in the same exception, which is why the error cases in this file also come back #VALUE! instead of the documented #NUM!. So: the function is listed, documented in LibreOffice&#39;s own help, and computes nothing. Its ODDL* siblings, by contrast, compute the documented values exactly.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</td>
+  <td>The same example carried to eight decimal places</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">113.59771747<br><span class="category-tag">Two published decimals cannot distinguish a correct odd-period price from one whose quasi-coupon schedule is off by a day, so the derived value is asserted at eight places: 113.59771747. This is the assertion that actually constrains the day counts.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,0),8)</td>
+  <td>The identical bond priced on basis 0 (US 30/360) instead of actual/actual</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">113.59920583<br><span class="category-tag">The same bond on basis 0, where every day count is taken under Procedure A instead of actual days: E = 180, A = 26, DSC = 106, DFC = 136. The derived price is 113.5992058282384..., asserted at eight places. The two bases MUST differ here -- unlike the MDURATION case in batch E, settlement does not fall on a coupon date, so the ratios genuinely change -- and the pair of cases pins which basis the engine applied. A basis argument that is silently ignored produces the basis-0 number for the basis-1 case, and this file catches that.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDFPRICE(A2,A3,A4,A5,-0.0785,A7,A8,A9,A10)</td>
+  <td>A negative coupon rate, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, ODDFPRICE returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,5)</td>
+  <td>A basis of 5, one past the documented range</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDFPRICE returns the #NUM! error value.&#34; The basis table stops at 4 (European 30/360).</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDFPRICE(A5,A3,A4,A2,A6,A7,A8,A9,A10)</td>
+  <td>Settlement and first_coupon swapped, breaking the documented date ordering</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDFPRICE returns the #NUM! error value: maturity &gt; first_coupon &gt; settlement &gt; issue.&#34; Swapping the settlement and first-coupon arguments puts settlement (2009-03-01) after first_coupon (2008-11-11) and also before issue, breaking the chain in two places at once.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDFPRICE(&#34;not a date&#34;,A3,A4,A5,A6,A7,A8,A9,A10)</td>
+  <td>A settlement date that is not a date</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If settlement, maturity, issue, or first_coupon is not a valid date, ODDFPRICE returns the #VALUE! error value.&#34; The page uses #VALUE! for a malformed date and #NUM! for every out-of-range or mis-ordered argument, so the two codes are asserted separately.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

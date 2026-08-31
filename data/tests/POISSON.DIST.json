@@ -1,0 +1,78 @@
+{
+  "function": "POISSON.DIST",
+  "cases": [
+    {
+      "id": "POISSON.DIST_documented_cumulative",
+      "formula": "=ROUND(POISSON.DIST(A2,A3,TRUE),6)",
+      "description": "Microsoft's documented worked example, cumulative form",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "expected": 0.124652,
+      "expected_note": "Microsoft publishes =POISSON.DIST(A2,A3,TRUE) = 0.124652 -- the same example, the same data and the same figure as the compatibility function POISSON, whose page prints the identical table and shares the identical formula images. DERIVATION with mpmath at 50 digits, straight from the two documented formulas -- mass e^(-lambda) * lambda^x / x!, cumulative the sum of that over k = 0..x -- and not from any statistics library: e^-5 = 0.006737946999085467..., so the mass at x = 2 is e^-5 * 25/2 = 0.08422433748856832... and the cumulative value is e^-5 * (1 + 5 + 12.5) = e^-5 * 18.5 = 0.12465201948308113... Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/poisson-dist-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "POISSON.DIST_documented_mass",
+      "formula": "=ROUND(POISSON.DIST(A2,A3,FALSE),6)",
+      "description": "The same example in its non-cumulative form",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "expected": 0.084224,
+      "expected_note": "Microsoft publishes =POISSON.DIST(A2,A3,FALSE) = 0.084224. e^-5 * 25/2 = 0.08422433748856832..."
+    },
+    {
+      "id": "POISSON.DIST_mass_full_precision",
+      "formula": "=ROUND(POISSON.DIST(A2,A3,FALSE),12)",
+      "description": "The mass value carried to twelve decimal places",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "expected": 0.084224337489,
+      "expected_note": "Asserted at twelve places from the same derivation: 0.084224337489."
+    },
+    {
+      "id": "POISSON.DIST_agrees_with_the_old_name",
+      "formula": "=ROUND(POISSON.DIST(2,5,TRUE)-POISSON(2,5,TRUE),12)",
+      "description": "The modern and compatibility spellings must agree exactly",
+      "expected": 0,
+      "expected_note": "POISSON's page carries Microsoft's standard compatibility notice pointing at POISSON.DIST as its replacement, and both pages publish the same two figures from the same two formula images. This case checks the two names against each other inside the engine: the difference must be exactly zero. It is the cheapest possible test of the claim that the rename changed nothing but the name."
+    },
+    {
+      "id": "POISSON.DIST_negative_x",
+      "formula": "=POISSON.DIST(-1,A3,TRUE)",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "description": "A negative number of events, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If x < 0, POISSON.DIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "POISSON.DIST_negative_mean",
+      "formula": "=POISSON.DIST(A2,-5,TRUE)",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "description": "A negative mean",
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If mean < 0, POISSON.DIST returns the #NUM! error value.\""
+    },
+    {
+      "id": "POISSON.DIST_nonnumeric_argument",
+      "formula": "=POISSON.DIST(\"x\",A3,TRUE)",
+      "setup_cells": {
+        "A2": 2,
+        "A3": 5
+      },
+      "description": "A non-numeric x",
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If x or mean is nonnumeric, POISSON.DIST returns the #VALUE! error value.\""
+    }
+  ]
+}

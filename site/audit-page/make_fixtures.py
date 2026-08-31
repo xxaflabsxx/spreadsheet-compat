@@ -11,17 +11,27 @@ snapshot 2026-08-23):
   SUM, VLOOKUP, IF   x&g&l documented; lv=quirky for SUM/VLOOKUP, supported for IF
   AGGREGATE          Excel-only vs Sheets (g:false); LibreOffice lv=supported
   GROUPBY            Excel-only (g:false); LibreOffice lv=unsupported (executed #NAME?)
-  ODDLYIELD          Excel-only (g:false); LibreOffice documented, lv=null (doc-only)
+  WEBSERVICE         Excel-only (g:false); LibreOffice documented, lv=null (doc-only)
                      NB: this slot exists purely to exercise the DOCUMENTED-ONLY
                      verdict basis, so it must name a function the corpus has not
-                     executed yet. It was BAHTTEXT until 2026-08-31, when the
-                     alphabetical corpus push executed BAHTTEXT on all four
-                     LibreOffice builds and lv stopped being null. The corpus
-                     advances alphabetically, so when ODDLYIELD is executed in
-                     turn, pick the next still-unexecuted x&&l&&!g function that
-                     sorts between AGGREGATE and TEXTSPLIT (the at-risk ordering
-                     assertions in test.mjs depend on that), update test.mjs, and
-                     re-run this script.
+                     executed yet. It was BAHTTEXT until 2026-08-31 (executed by
+                     the alphabetical corpus push, batch A), then ODDLYIELD until
+                     later the same day, when batch F executed the whole ODD*
+                     family and its lv stopped being null.
+                     WEBSERVICE IS THE LAST CANDIDATE IN THE DATASET. Of the
+                     ~480 functions, exactly five were ever both x && l && !g and
+                     un-executed -- ODDFPRICE, ODDFYIELD, ODDLPRICE, ODDLYIELD
+                     and WEBSERVICE -- and batch F executed the first four. When
+                     the alphabetical push reaches W and executes WEBSERVICE too
+                     (or deliberately skips it, as it skips CALL and REGISTER.ID,
+                     in which case lv stays null and this slot keeps working),
+                     there will be no real function left to point at: the doc-only
+                     verdict basis will then have to be exercised with a SYNTHETIC
+                     dataset entry in test.mjs rather than a fixture formula.
+                     Note WEBSERVICE sorts AFTER TEXTSPLIT, where the previous two
+                     occupants sorted before it, so the at-risk ordering and
+                     free-tier assertions in test.mjs name it last; that is the
+                     one thing to re-check when this slot moves again.
   TEXTSPLIT          g:false; LibreOffice lv=supported, lnew=25.8.7.3
   FILTER             x&g documented; LibreOffice lv=quirky
   GOOGLEFINANCE      Sheets-only (x:false); l:false, lv=null
@@ -51,7 +61,7 @@ def verdict_mix():
     ws["C4"] = "=GROUPBY(A1:A5,B1:B5,SUM)"
     ws["C5"] = "=FILTER(A1:A5,B1:B5>10)"
     ws["C6"] = '=TEXTSPLIT("a,b",",")'
-    ws["C7"] = "=ODDLYIELD(A1,A2,A3,A4,A5,B1,B2)"
+    ws["C7"] = '=WEBSERVICE("https://example.com/rates.xml")' 
 
     ws2 = wb.create_sheet("Mix")
     ws2["A1"] = '=GOOGLEFINANCE("GOOG")'

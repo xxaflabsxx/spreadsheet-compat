@@ -1,0 +1,60 @@
+{
+  "function": "NEGBINOMDIST",
+  "cases": [
+    {
+      "id": "NEGBINOMDIST_documented_example",
+      "formula": "=ROUND(NEGBINOMDIST(A2,A3,A4),8)",
+      "description": "Microsoft's documented worked example for the compatibility function",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": 0.05504866,
+      "expected_note": "Microsoft publishes =NEGBINOMDIST(A2,A3,A4) = 0.05504866 for 10 failures, a threshold of 5 successes and a success probability of 0.25 -- the same data as NEGBINOM.DIST's page, printed to eight places instead of seven. DERIVATION, in exact rational arithmetic with no statistics library: the documented mass function is P(X = x) = C(x + r - 1, r - 1) * p^r * (1 - p)^x with x = number_f, r = number_s and p = probability_s, which for x = 10, r = 5, p = 1/4 is C(14,4) * (1/4)^5 * (3/4)^10 = 1001 * 59049 / 1073741824 = 59108049/1073741824 exactly, = 0.05504866037517786... The cumulative value is the exact sum of that expression over x = 0..10, which is 336633157/1073741824 = 0.3135140584781766... Both are terminating binary fractions -- the denominators are powers of two -- so an engine using IEEE doubles can represent them exactly and there is no rounding anywhere in the derivation. Rounded to eight places, 0.05504866037517786 is 0.05504866. NEGBINOMDIST takes no `cumulative` argument at all: it is the mass function only, which is why its published figure matches NEGBINOM.DIST's FALSE row and not its TRUE row. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/negbinomdist-function -- note the path: the older /en-us/office/<name>-function-<guid> URLs were returning Microsoft's 'Sorry, the page you're looking for can't be found' body all through this batch (confirmed with curl, with the r.jina.ai reader and with a real headless Firefox), while the /en-us/excel/functions/<name>-function path serves the same article intermittently -- roughly one request in two returns an 87 KB stub, so every page cited in this batch was fetched with retries until the payload exceeded 150 KB."
+    },
+    {
+      "id": "NEGBINOMDIST_agrees_with_the_new_name",
+      "formula": "=ROUND(NEGBINOMDIST(10,5,0.25)-NEGBINOM.DIST(10,5,0.25,FALSE),12)",
+      "description": "The old and new spellings must agree exactly on the same inputs",
+      "expected": 0,
+      "expected_note": "Microsoft's compatibility notice says NEGBINOMDIST \"has been replaced with one or more new functions that may provide improved accuracy\" and points at NEGBINOM.DIST. This case checks the two against each other inside the engine rather than against a constant: the difference of the two calls must be exactly zero, so an engine whose legacy path and modern path disagree fails here even if each of them individually rounds to a published figure. Both names are computed on identical arguments in one formula, so no intermediate rounding is involved."
+    },
+    {
+      "id": "NEGBINOMDIST_probability_above_one",
+      "formula": "=NEGBINOMDIST(A2,A3,1.5)",
+      "description": "A success probability above 1, which the page excludes",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If probability_s < 0 or if probability > 1, NEGBINOMDIST returns the #NUM! error value.\" (Quoted as printed, including the dropped _s.)"
+    },
+    {
+      "id": "NEGBINOMDIST_negative_failures",
+      "formula": "=NEGBINOMDIST(-1,A3,A4)",
+      "description": "A negative number of failures, which the page excludes",
+      "expected": "#NUM!",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected_note": "Microsoft documents: \"If number_f < 0 or number_s < 1, NEGBINOMDIST returns the #NUM! error value.\" EXECUTED RESULT -- A SILENT WRONG ANSWER: LibreOffice returns 0.0009765625 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents #NUM!. That number is (1/4)^5, the mass at ZERO failures: the engine has taken a documented-invalid -1 and evaluated the distribution as though 0 had been passed. A user who lands a negative value in this argument gets a plausible probability back instead of an error. NEGBINOM.DIST, the modern spelling of the same function, rejects the same input on the same builds (with #VALUE! rather than the documented #NUM!), so the two spellings do not even agree with each other about whether the input is legal."
+    },
+    {
+      "id": "NEGBINOMDIST_nonnumeric_argument",
+      "formula": "=NEGBINOMDIST(\"x\",A3,A4)",
+      "description": "A non-numeric first argument",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If any argument is nonnumeric, NEGBINOMDIST returns the #VALUE! error value.\""
+    }
+  ]
+}

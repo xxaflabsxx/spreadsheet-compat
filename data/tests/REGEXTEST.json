@@ -1,0 +1,72 @@
+{
+  "function": "REGEXTEST",
+  "cases": [
+    {
+      "id": "REGEXTEST_documented_contains_letter",
+      "formula": "=REGEXTEST(A2,\"a\")",
+      "description": "Microsoft's documented example: does 'alfalfa' contain the letter a?",
+      "setup_cells": {
+        "A2": "alfalfa"
+      },
+      "expected": true,
+      "expected_note": "Microsoft's Example 1 checks \"various aspects of the string 'alfalfa'\", and its first row is =REGEXTEST(A2,\"a\") with the question \"Does it contain the letter 'a'?\". The documented return is \"TRUE if there is a match and FALSE if there is not\", and \"alfalfa\" plainly contains an 'a', so the answer is TRUE. (The page shows the result column only as a screenshot, so the TRUE/FALSE values in this file are read off the questions Microsoft prints in text, each of which has one and only one correct answer for the string 'alfalfa'.) REGEX FLAVOUR, AS DOCUMENTED: \"All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 'flavor' of regex\" -- Microsoft's own sentence, printed on all three REGEX pages. This corpus's patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice's own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regextest-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft's pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten."
+    },
+    {
+      "id": "REGEXTEST_documented_lower_case_class",
+      "formula": "=REGEXTEST(A2,\"[a-z]\")",
+      "description": "Microsoft's row: does it contain any lower case letters?",
+      "setup_cells": {
+        "A2": "alfalfa"
+      },
+      "expected": true,
+      "expected_note": "Microsoft's second documented row, question \"Does it contain any lower case letters?\". Every character of \"alfalfa\" is lower case, so TRUE."
+    },
+    {
+      "id": "REGEXTEST_documented_upper_case_class",
+      "formula": "=REGEXTEST(A2,\"[A-Z]\")",
+      "description": "Microsoft's row: does it contain any upper case letters?",
+      "setup_cells": {
+        "A2": "alfalfa"
+      },
+      "expected": false,
+      "expected_note": "Microsoft's third documented row, question \"Does it contain any upper case letters?\". It does not, so FALSE -- and this is the row that proves matching is case-SENSITIVE by default, since a case-insensitive engine would answer TRUE here and every subsequent case-sensitivity assertion in this batch would be meaningless."
+    },
+    {
+      "id": "REGEXTEST_documented_digit_class",
+      "formula": "=REGEXTEST(A2,\"[0-9]\")",
+      "description": "Microsoft's row: does it contain any number digits?",
+      "setup_cells": {
+        "A2": "alfalfa"
+      },
+      "expected": false,
+      "expected_note": "Microsoft's fifth documented row, question \"Does it contain any number digits?\". No digits, so FALSE. Asserted alongside the TRUE rows so that an engine that always returns TRUE (or that returns a truthy string) is caught."
+    },
+    {
+      "id": "REGEXTEST_documented_phone_pattern_matches",
+      "formula": "=REGEXTEST(A2,\"^\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}$\")",
+      "description": "Microsoft's Example 2 pattern against a number in the required format",
+      "setup_cells": {
+        "A2": "(378) 555-4195"
+      },
+      "expected": true,
+      "expected_note": "Microsoft's Example 2 checks \"whether phone numbers have the specific format '(###) ###-####'\" using the pattern ^\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}$, and notes: \"Backslash '\\' is used to 'escape' parentheses '()' and some other characters. In this pattern, '\\(' is interpreted as '(' and '\\)' is interpreted as ')'.\" The string \"(378) 555-4195\" is Microsoft's own first data row and matches the pattern end to end -- three digits in literal parentheses, a space, three digits, a hyphen, four digits -- so TRUE. This case also exercises the anchors and the escaping, which are the parts of a pattern most likely to be mangled on the way into a stored .xlsx."
+    },
+    {
+      "id": "REGEXTEST_documented_phone_pattern_rejects",
+      "formula": "=REGEXTEST(A2,\"^\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}$\")",
+      "description": "The same pattern against Microsoft's second data row, which has a country code",
+      "setup_cells": {
+        "A2": "+1(878) 555-8622"
+      },
+      "expected": false,
+      "expected_note": "Microsoft's second data row for the same example is \"+1(878) 555-8622\". The pattern is anchored at both ends with ^ and $, so the leading \"+1\" makes the whole string fail to match: FALSE. The pair of phone cases is the sharpest test in this file -- an engine that ignored the anchors would return TRUE for both."
+    },
+    {
+      "id": "REGEXTEST_case_insensitive",
+      "formula": "=REGEXTEST(\"ALFALFA\",\"alfalfa\",1)",
+      "description": "The documented case_sensitivity argument set to case-insensitive",
+      "expected": true,
+      "expected_note": "Microsoft documents case_sensitivity as \"0: Case sensitive\" (default) and \"1: Case insensitive\". With 1, the lower-case literal pattern matches the upper-case string, so TRUE; with the default it would be FALSE."
+    }
+  ]
+}

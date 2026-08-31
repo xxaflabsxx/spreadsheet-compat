@@ -1,0 +1,39 @@
+{
+  "function": "PHONETIC",
+  "cases": [
+    {
+      "id": "PHONETIC_nonadjacent_range",
+      "formula": "=PHONETIC((A2,C2))",
+      "description": "A reference to nonadjacent cells, which the page documents as an error",
+      "setup_cells": {
+        "A2": "Tokyo",
+        "C2": "Osaka"
+      },
+      "expected": "#N/A",
+      "expected_note": "Microsoft documents: \"If the reference is a range of nonadjacent cells, the #N/A error value is returned.\" This is the ONLY behaviour of PHONETIC this corpus can assert a value for, and that is why it is the only asserted case in this file. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/phonetic-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). LibreOffice has no PHONETIC function at all, so the two probe cases in this file return #NAME? as well -- which is the only reading of them the corpus offers: they assert nothing about a value, and here they record an absence rather than a difference."
+    },
+    {
+      "id": "PHONETIC_latin_text_probe",
+      "formula": "=PHONETIC(A2)",
+      "description": "Plain Latin text with no furigana attached -- recorded, not asserted",
+      "setup_cells": {
+        "A2": "Tokyo"
+      },
+      "expected": null,
+      "expected_note": "DELIBERATELY ASSERTS NOTHING ABOUT THE VALUE. PHONETIC \"extracts the phonetic (furigana) characters from a text string\" -- it reads phonetic metadata that Excel stores alongside a cell when text is typed with a Japanese IME, and Microsoft's worked example is a pair of cells containing Japanese place names whose furigana it returns. That metadata cannot be created by a formula, by openpyxl, or by any file this harness can write, and Microsoft's page does not document what the function returns for a string that carries none. So this case is a PROBE: it asserts only that the engine HAS the function and does not fail on it, and the value each engine returns is recorded in the results file for the reader to see rather than being scored against a number this corpus cannot source."
+    },
+    {
+      "id": "PHONETIC_range_upper_left_probe",
+      "formula": "=PHONETIC(A2:B3)",
+      "description": "A rectangular range, where the documented rule is that the upper-left cell wins",
+      "setup_cells": {
+        "A2": "Tokyo",
+        "B2": "Kyoto",
+        "A3": "Osaka",
+        "B3": "Nara"
+      },
+      "expected": null,
+      "expected_note": "Microsoft documents: \"If reference is a range of cells, the furigana text string in the upper-left corner cell of the range is returned.\" The rule is about WHICH cell is read, not about what the phonetic content of that cell is, and without furigana metadata (see the previous case) there is no value to assert -- so this too is a probe that records the engine's answer without scoring it."
+    }
+  ]
+}

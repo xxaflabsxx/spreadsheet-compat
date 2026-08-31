@@ -47,6 +47,20 @@ results/<engine>-<ver>.json Output of each engine runner: real, executed
                             values per test id, plus a canary block proving
                             recalculation actually happened.
 
+scripts/check_test_setup_refs.py
+                            Pre-execution audit: every cell a test formula
+                            reads must exist in that case's setup_cells,
+                            unless the case's own words say it is testing a
+                            blank, or the reference is consumed as a
+                            REFERENCE rather than a value (ROW, COLUMNS,
+                            CELL, OFFSET...). A formula pointing at a cell
+                            nobody populated does not fail -- the engine
+                            reads a blank and returns a plausible wrong
+                            number, which is then published as a
+                            "divergence" that is really our own typo. Batch
+                            E authored five such cases; run this (exit 1 on
+                            violation) before any engine run.
+
 scripts/gen_test_cases.py   Generator that produced the current
                             data/tests/*.json files (kept for reference /
                             as a pattern to follow when adding more
@@ -120,7 +134,7 @@ engine runners (what actually happens) → results (raw truth) → site
   anti-bot wall and is recorded honestly as `fetched: false` — LibreOffice
   coverage instead comes from `help.libreoffice.org`'s category pages (18
   pages fetched), which gave full, real coverage anyway.
-- `data/tests/`: 451 functions, 1668 hand-authored test cases. Phase 1
+- `data/tests/`: 481 functions, 1854 hand-authored test cases. Phase 1
   covered 31 functions (125 cases); the Phase-2 batch added 117 more
   workhorse/compat-interesting functions (479 cases) spanning math
   (CEILING/FLOOR + .MATH variants, MROUND, INT-vs-TRUNC...), statistics

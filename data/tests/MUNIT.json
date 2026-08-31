@@ -1,0 +1,70 @@
+{
+  "function": "MUNIT",
+  "cases": [
+    {
+      "id": "MUNIT_documented_3x3_unit_matrix",
+      "formula": "=MUNIT(3)",
+      "description": "The documented 3x3 unit matrix, entered as a legacy array formula",
+      "check_range": "H30:J32",
+      "expected": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected_note": "Microsoft documents MUNIT as returning \"the unit matrix for the specified dimension\" and illustrates exactly this case: \"The following example shows the results of the MUNIT function in a 3X3 matrix below, in cells A1:C3.\" DERIVATION: the unit (identity) matrix is fixed by its definition, not by any implementation -- entry (i,j) is 1 when i = j and 0 otherwise -- so the whole 3x3 answer is forced and no arithmetic is involved. ENTERED AS AN ARRAY FORMULA, because the page is explicit that outside dynamic-array Excel \"the formula must be entered as a legacy array formula by first selecting the output range (A1:C3 in this case), entering the formula in the top-left-cell of the output range, and then pressing CTRL+SHIFT+ENTER\"; the harness therefore writes it as a CSE array formula over the full 3x3 check range, exactly as it does for MMULT and MINVERSE. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/munit-function -- note the path: the older /en-us/office/<name>-function-<guid> URLs were returning Microsoft's 'Sorry, the page you're looking for can't be found' body all through this batch (confirmed with curl, with the r.jina.ai reader and with a real headless Firefox), while the /en-us/excel/functions/<name>-function path serves the same article intermittently -- roughly one request in two returns an 87 KB stub, so every page cited in this batch was fetched with retries until the payload exceeded 150 KB."
+    },
+    {
+      "id": "MUNIT_diagonal_entry_is_one",
+      "formula": "=INDEX(MUNIT(4),3,3)",
+      "description": "A diagonal entry of a 4x4 unit matrix, read out with INDEX so the result is scalar",
+      "expected": 1,
+      "expected_note": "Reading one cell out of the array with INDEX turns a spill result into a scalar, which removes the array-entry question from this assertion entirely: whatever the engine does about spilling, entry (3,3) of a unit matrix is 1 by definition. The dimension is deliberately 4 rather than the documented 3, so this case fails if an engine ignores its argument and always returns a 3x3 matrix."
+    },
+    {
+      "id": "MUNIT_off_diagonal_entry_is_zero",
+      "formula": "=INDEX(MUNIT(4),3,2)",
+      "description": "An off-diagonal entry of the same 4x4 unit matrix",
+      "expected": 0,
+      "expected_note": "The other half of the definition: entry (3,2) is off the diagonal and is 0. Asserted separately from the diagonal case because an engine that returned a matrix of all ones would satisfy the diagonal assertion on its own."
+    },
+    {
+      "id": "MUNIT_is_the_multiplicative_identity",
+      "formula": "=INDEX(MMULT(A2:B3,MUNIT(2)),2,1)",
+      "description": "Multiplying a matrix by MUNIT(2) must return the operand unchanged",
+      "setup_cells": {
+        "A2": 1,
+        "B2": 3,
+        "A3": 7,
+        "B3": 2
+      },
+      "expected": 7,
+      "expected_note": "Microsoft's own closing remark is that \"MUNIT can be used in line with other matrix functions, such as MMULT\", and this is that claim made checkable. The unit matrix is the multiplicative identity of matrix multiplication, so {1,3; 7,2} x MUNIT(2) = {1,3; 7,2} and the entry at row 2 column 1 is 7 -- exactly and structurally, with no derived constant anywhere. An engine whose MUNIT is transposed, mis-sized or filled with the wrong constant cannot return 7 here by accident. MMULT itself was executed by batch E of this corpus and is supported on all four LibreOffice builds, so a failure here is MUNIT's."
+    },
+    {
+      "id": "MUNIT_zero_dimension",
+      "formula": "=MUNIT(0)",
+      "description": "A dimension of zero, which the page excludes",
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If dimension is a value that's equal to or smaller than zero (0), MUNIT returns the #VALUE! error value\", and separately \"The dimension has to be greater than zero.\" OpenFormula 1.3 section 6.5.5 states the same constraint (\"The dimension has to be greater than zero\"). Zero is the boundary the words \"equal to\" include. Note this family uses #VALUE! rather than the #NUM! that most out-of-range numeric arguments produce elsewhere in Excel, which is exactly why it is worth asserting."
+    },
+    {
+      "id": "MUNIT_negative_dimension",
+      "formula": "=MUNIT(-1)",
+      "description": "A negative dimension, the other half of the same documented exclusion",
+      "expected": "#VALUE!",
+      "expected_note": "The same documented clause -- \"equal to or smaller than zero (0)\" -- exercised below the boundary rather than on it. Asserted separately because an engine can guard the equality and not the inequality."
+    }
+  ]
+}

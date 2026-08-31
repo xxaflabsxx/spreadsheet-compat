@@ -1,0 +1,43 @@
+{
+  "function": "REGEXREPLACE",
+  "cases": [
+    {
+      "id": "REGEXREPLACE_documented_phone_digits",
+      "formula": "=REGEXREPLACE(A2,\"[0-9]+-\",\"***-\")",
+      "description": "Microsoft's documented example: masking the middle block of a phone number",
+      "setup_cells": {
+        "A2": "(378) 555-4195"
+      },
+      "expected": "(378) ***-4195",
+      "expected_note": "Microsoft's Example 1 uses exactly this pattern -- \"Use REGEXREPLACE to anonymize phone numbers by replacing their first 3 digits with ***, using pattern [0-9]+-\" -- over a block of names and numbers. DERIVATION on one line of that data: \"[0-9]+-\" matches a run of digits followed by a hyphen. In \"(378) 555-4195\" the only such run is \"555-\" (the \"378\" is followed by \")\", and \"4195\" ends the string), so it alone is replaced by \"***-\", giving \"(378) ***-4195\". REGEX FLAVOUR, AS DOCUMENTED: \"All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 'flavor' of regex\" -- Microsoft's own sentence, printed on all three REGEX pages. This corpus's patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice's own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regexreplace-function (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft's pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten."
+    },
+    {
+      "id": "REGEXREPLACE_default_replaces_every_occurrence",
+      "formula": "=REGEXREPLACE(\"a1b2c3\",\"[0-9]\",\"#\")",
+      "description": "The documented default occurrence of 0, which replaces all instances",
+      "expected": "a#b#c#",
+      "expected_note": "Microsoft documents: \"By default, occurrence is 0, which replaces all instances.\" All three digits in \"a1b2c3\" are replaced, giving \"a#b#c#\" -- an engine that replaced only the first would return \"a#b2c3\", which is the single most likely difference between two implementations of this function and is why the default is asserted explicitly."
+    },
+    {
+      "id": "REGEXREPLACE_negative_occurrence_counts_from_the_end",
+      "formula": "=REGEXREPLACE(\"a1b2c3\",\"[0-9]\",\"#\",-1)",
+      "description": "The documented negative-occurrence rule",
+      "expected": "a1b2c#",
+      "expected_note": "Microsoft documents: \"A negative number replaces that instance, searching from the end.\" So -1 is the LAST digit, the 3, and only it is replaced: \"a1b2c#\". This is an unusual convention -- most regex APIs have no notion of it at all -- which makes it a good probe of whether an engine implemented Excel's documented argument or borrowed a host language's replace-all/replace-first semantics."
+    },
+    {
+      "id": "REGEXREPLACE_case_insensitive",
+      "formula": "=REGEXREPLACE(\"Apple apple\",\"apple\",\"X\",0,1)",
+      "description": "The documented case_sensitivity argument set to case-insensitive",
+      "expected": "X X",
+      "expected_note": "Microsoft documents case_sensitivity as \"0: Case sensitive\" (default) and \"1: Case insensitive\". With 1, the literal pattern \"apple\" matches both \"Apple\" and \"apple\", so both are replaced and the answer is \"X X\"; with the default it would be \"Apple X\". Note the fifth argument requires the fourth, so occurrence is passed explicitly as its documented default of 0."
+    },
+    {
+      "id": "REGEXREPLACE_no_match_returns_the_original",
+      "formula": "=REGEXREPLACE(\"abc\",\"[0-9]\",\"#\")",
+      "description": "A pattern that matches nothing",
+      "expected": "abc",
+      "expected_note": "Nothing matches, so there is nothing to replace and the text comes back unchanged. This is the one place where the REGEX family does NOT return #N/A on a failed match -- REGEXEXTRACT does, because it has nothing to return, while a replacement over zero matches is simply the identity -- and asserting it here pins that difference. LibreOffice's own REGEX function documents the same behaviour (\"if a replacement is given and no match occurs, the original text is returned unchanged\")."
+    }
+  ]
+}

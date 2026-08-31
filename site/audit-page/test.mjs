@@ -65,9 +65,9 @@ console.log('guard: audit.js matches the E1 prototype byte-for-byte');
 // regenerate verdict-mix.xlsx.
 console.log('guard: doc-only fixture function');
 {
-  const e = DB.ODDLYIELD;
+  const e = DB.WEBSERVICE;
   ok(e && e.x === true && e.g === false && e.l === true && e.lv === null,
-    'ODDLYIELD is still Excel+LibreOffice documented and never executed ' +
+    'WEBSERVICE is still Excel+LibreOffice documented and never executed ' +
     '(if this fails, re-point the doc-only fixture slot -- see make_fixtures.py)');
 }
 
@@ -180,10 +180,10 @@ console.log('unit: classifyFunction on real compat.json entries');
   eq(c('SUM', DB.SUM, 'g', 'x').verdict, 'ok', 'SUM ok in Sheets');
   eq(c('SUM', DB.SUM, 'g', 'x').basis, 'executed', 'SUM Sheets verdict is execution-based');
   eq(c('GOOGLEFINANCE', DB.GOOGLEFINANCE, 'x', 'g').verdict, 'missing', 'GOOGLEFINANCE missing in Excel');
-  eq(c('ODDLYIELD', DB.ODDLYIELD, 'l', 'x'), {
+  eq(c('WEBSERVICE', DB.WEBSERVICE, 'l', 'x'), {
     verdict: 'ok', basis: 'documented',
-    note: c('ODDLYIELD', DB.ODDLYIELD, 'l', 'x').note
-  }, 'ODDLYIELD LO doc-only -> ok/documented');
+    note: c('WEBSERVICE', DB.WEBSERVICE, 'l', 'x').note
+  }, 'WEBSERVICE LO doc-only -> ok/documented');
   eq(c('NOTAREALFUNCTION', DB.NOTAREALFUNCTION, 'g', 'x').verdict, 'unknown', 'absent fn unknown');
 }
 
@@ -269,7 +269,7 @@ const audit = await X.auditXlsx(buf.buffer.slice(buf.byteOffset, buf.byteOffset 
   // note: bare SUM as GROUPBY's aggregation argument (no parenthesis) is
   // correctly NOT tokenized as a call — SUM counts only C1 and Mix!A4.
   for (const [fn, n] of [['SUM', 2], ['VLOOKUP', 1], ['AGGREGATE', 1], ['GROUPBY', 2],
-    ['FILTER', 1], ['TEXTSPLIT', 1], ['ODDLYIELD', 1], ['GOOGLEFINANCE', 1],
+    ['FILTER', 1], ['TEXTSPLIT', 1], ['WEBSERVICE', 1], ['GOOGLEFINANCE', 1],
     ['ARRAYFORMULA', 1], ['NOTAREALFUNCTION', 1], ['IF', 1]]) {
     eq(audit.functionCounts[fn], n, 'functionCounts.' + fn);
   }
@@ -292,13 +292,13 @@ console.log('e2e: Excel -> Google Sheets (default direction)');
     'summary tiles');
   eq(fnVerdicts(rep), {
     SUM: 'ok', VLOOKUP: 'ok', AGGREGATE: 'missing', GROUPBY: 'missing', FILTER: 'quirk',
-    TEXTSPLIT: 'missing', ODDLYIELD: 'missing', GOOGLEFINANCE: 'ok', ARRAYFORMULA: 'ok',
+    TEXTSPLIT: 'missing', WEBSERVICE: 'missing', GOOGLEFINANCE: 'ok', ARRAYFORMULA: 'ok',
     NOTAREALFUNCTION: 'unknown', IF: 'ok'
   }, 'per-function verdicts');
-  eq(rep.atRiskFunctions.map(r => r.fn), ['GROUPBY', 'AGGREGATE', 'ODDLYIELD', 'TEXTSPLIT', 'FILTER'],
+  eq(rep.atRiskFunctions.map(r => r.fn), ['GROUPBY', 'AGGREGATE', 'TEXTSPLIT', 'WEBSERVICE', 'FILTER'],
     'at-risk order: count desc then name asc');
   eq(rep.atRiskFunctions.map(r => r.fn).slice(0, V.FREE_DETAIL_LIMIT),
-    ['GROUPBY', 'AGGREGATE', 'ODDLYIELD'], 'free tier details these 3; TEXTSPLIT stays locked');
+    ['GROUPBY', 'AGGREGATE', 'TEXTSPLIT'], 'free tier details these 3; WEBSERVICE stays locked');
   eq(rep.unknownFunctions.map(r => r.fn), ['NOTAREALFUNCTION'], 'unknown list');
   // formula-level: worst function wins
   eq(formulaVerdict(rep, 'Mix', 'A4'), 'missing', 'IF+SUM+GROUPBY formula -> missing');
@@ -319,7 +319,7 @@ console.log('e2e: Excel -> LibreOffice');
     'summary tiles');
   eq(fnVerdicts(rep), {
     SUM: 'quirk', VLOOKUP: 'quirk', AGGREGATE: 'ok', GROUPBY: 'missing', FILTER: 'quirk',
-    TEXTSPLIT: 'ok', ODDLYIELD: 'ok', GOOGLEFINANCE: 'missing', ARRAYFORMULA: 'missing',
+    TEXTSPLIT: 'ok', WEBSERVICE: 'ok', GOOGLEFINANCE: 'missing', ARRAYFORMULA: 'missing',
     NOTAREALFUNCTION: 'unknown', IF: 'ok'
   }, 'per-function verdicts (executed lv wins over docs)');
   eq(rep.atRiskFunctions.map(r => r.fn),
@@ -328,7 +328,7 @@ console.log('e2e: Excel -> LibreOffice');
   const basis = {};
   rep.functionRows.forEach(r => { basis[r.fn] = r.basis; });
   eq(basis.AGGREGATE, 'executed', 'AGGREGATE ok is execution-verified');
-  eq(basis.ODDLYIELD, 'documented', 'ODDLYIELD ok is only documentation-based');
+  eq(basis.WEBSERVICE, 'documented', 'WEBSERVICE ok is only documentation-based');
   eq(basis.GROUPBY, 'executed', 'GROUPBY missing is execution-verified');
   eq(basis.GOOGLEFINANCE, 'documented', 'GOOGLEFINANCE missing is documentation-based');
   eq(formulaVerdict(rep, 'Calc', 'C1'), 'quirk', 'SUM formula flagged quirk for LO target');
@@ -450,8 +450,8 @@ console.log('unit: classifyFunction per target LibreOffice version');
     'lnew-null note never claims execution in a build we cannot cite');
 
   // Documentation-only rows do not pretend to vary by release.
-  const bt = c('ODDLYIELD', DB.ODDLYIELD, 'l', 'x', '24.2');
-  eq(bt.basis, 'documented', 'ODDLYIELD stays documentation-based at an older target');
+  const bt = c('WEBSERVICE', DB.WEBSERVICE, 'l', 'x', '24.2');
+  eq(bt.basis, 'documented', 'WEBSERVICE stays documentation-based at an older target');
   ok(/no executed per-release data/.test(bt.note), 'documented row admits it has no per-release data');
 
   // Excel / Sheets targets ignore the LibreOffice version entirely.

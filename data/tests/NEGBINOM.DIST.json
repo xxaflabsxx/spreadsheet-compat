@@ -1,0 +1,84 @@
+{
+  "function": "NEGBINOM.DIST",
+  "cases": [
+    {
+      "id": "NEGBINOM.DIST_documented_cumulative",
+      "formula": "=ROUND(NEGBINOM.DIST(A2,A3,A4,TRUE),7)",
+      "description": "Microsoft's documented worked example, cumulative form",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": 0.3135141,
+      "expected_note": "Microsoft publishes =NEGBINOM.DIST(A2,A3,A4,TRUE) = 0.3135141 for 10 failures, a threshold of 5 successes and a success probability of 0.25. DERIVATION, in exact rational arithmetic with no statistics library: the documented mass function is P(X = x) = C(x + r - 1, r - 1) * p^r * (1 - p)^x with x = number_f, r = number_s and p = probability_s, which for x = 10, r = 5, p = 1/4 is C(14,4) * (1/4)^5 * (3/4)^10 = 1001 * 59049 / 1073741824 = 59108049/1073741824 exactly, = 0.05504866037517786... The cumulative value is the exact sum of that expression over x = 0..10, which is 336633157/1073741824 = 0.3135140584781766... Both are terminating binary fractions -- the denominators are powers of two -- so an engine using IEEE doubles can represent them exactly and there is no rounding anywhere in the derivation. Rounded to seven places, 0.3135140584781766 is 0.3135141 -- Microsoft's published figure, reproduced exactly. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/negbinom-dist-function -- note the path: the older /en-us/office/<name>-function-<guid> URLs were returning Microsoft's 'Sorry, the page you're looking for can't be found' body all through this batch (confirmed with curl, with the r.jina.ai reader and with a real headless Firefox), while the /en-us/excel/functions/<name>-function path serves the same article intermittently -- roughly one request in two returns an 87 KB stub, so every page cited in this batch was fetched with retries until the payload exceeded 150 KB."
+    },
+    {
+      "id": "NEGBINOM.DIST_documented_probability_mass",
+      "formula": "=ROUND(NEGBINOM.DIST(A2,A3,A4,FALSE),7)",
+      "description": "The same example in its non-cumulative form",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": 0.0550487,
+      "expected_note": "Microsoft publishes =NEGBINOM.DIST(A2,A3,A4,FALSE) = 0.0550487 on the same data. 59108049/1073741824 = 0.05504866037517786..., which is 0.0550487 at seven places. The cumulative and non-cumulative rows are asserted separately because the `cumulative` flag is a documented argument an engine can ignore -- one that summed when it should not would still pass a single-row test."
+    },
+    {
+      "id": "NEGBINOM.DIST_mass_full_precision",
+      "formula": "=ROUND(NEGBINOM.DIST(A2,A3,A4,FALSE),12)",
+      "description": "The same mass value carried to twelve decimal places",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": 0.055048660375,
+      "expected_note": "Seven published decimals cannot distinguish a correct binomial coefficient from an off-by-one one, so the exact rational 59108049/1073741824 is asserted at twelve places: 0.055048660375. This is the assertion that actually constrains C(x + r - 1, r - 1) -- using C(x + r, r) or C(x + r - 1, x) with the wrong index moves the answer in the fourth significant figure."
+    },
+    {
+      "id": "NEGBINOM.DIST_zero_failures_is_p_to_the_r",
+      "formula": "=ROUND(NEGBINOM.DIST(0,5,0.25,FALSE),10)",
+      "description": "Zero failures, where the distribution collapses to p^r",
+      "expected": 0.0009765625,
+      "expected_note": "With x = 0 the binomial coefficient C(r - 1, r - 1) is 1 and the (1 - p)^x factor is 1, so the mass is exactly p^r = (1/4)^5 = 1/1024 = 0.0009765625 -- an exactly representable binary fraction that every conforming engine must return bit for bit. Structural rather than derived: it pins the p^r factor on its own, with the combinatorial factor removed."
+    },
+    {
+      "id": "NEGBINOM.DIST_probability_above_one",
+      "formula": "=NEGBINOM.DIST(A2,A3,1.5,TRUE)",
+      "description": "A success probability above 1, which the page excludes",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If probability_s < 0 or if probability > 1, NEGBINOM.DIST returns the #NUM! error value.\" (The sentence is quoted as printed: Microsoft's own text drops the _s in its second clause.) OpenFormula 1.3 section 6.18.51 imposes the same constraint on its NEGBINOMDIST."
+    },
+    {
+      "id": "NEGBINOM.DIST_threshold_below_one",
+      "formula": "=NEGBINOM.DIST(A2,0,A4,TRUE)",
+      "description": "A threshold of zero successes, which the page excludes",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": "#NUM!",
+      "expected_note": "Microsoft documents: \"If number_f < 0 or number_s < 1, NEGBINOM.DIST returns the #NUM! error value.\" Zero successes is below the documented floor of one. Asserted separately from the probability case because the sentence names two different arguments and an engine can guard one and not the other."
+    },
+    {
+      "id": "NEGBINOM.DIST_nonnumeric_argument",
+      "formula": "=NEGBINOM.DIST(\"x\",A3,A4,TRUE)",
+      "description": "A non-numeric first argument",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 5,
+        "A4": 0.25
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Microsoft documents: \"If any argument is nonnumeric, NEGBINOM.DIST returns the #VALUE! error value.\" Note the page uses #VALUE! for a wrong-typed argument and #NUM! for every out-of-range one, so the two codes are asserted separately."
+    }
+  ]
+}

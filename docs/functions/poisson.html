@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POISSON: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="POISSON (Compatibility) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>POISSON matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="5/7 match; negative x returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/poisson.html">
-<meta property="og:title" content="POISSON: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="POISSON (Compatibility) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="POISSON matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="5/7 match; negative x returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/poisson.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>POISSON</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Compatibility</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>POISSON</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for POISSON yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060184.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,104 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+POISSON&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't POISSON working in LibreOffice?</h2>
+
+<p><code>POISSON</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=POISSON(-1,A3,TRUE)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If x &lt; 0, POISSON returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=POISSON(A2,-5,TRUE)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If mean &lt; 0, POISSON returns the #NUM! error value.&#34; Asserted separately from the negative-x case because the two are separate sentences on the page and an engine can guard one and not the other. Note Microsoft permits mean = 0 while OpenFormula 1.3 section 6.18.62 requires lambda &gt; 0 -- a specification difference this corpus deliberately does not test, since the two sources disagree about what the right answer is.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +491,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for POISSON yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(POISSON(A2,A3,TRUE),6)</td>
+  <td>Microsoft&#39;s documented worked example, cumulative form</td>
+  <td class="result mono">0.124652</td>
+  <td class="result mono">0.124652<br><span class="category-tag">Microsoft publishes =POISSON(A2,A3,TRUE) = 0.124652 for x = 2 events with an expected value of 5. DERIVATION with mpmath at 50 digits, straight from the two documented formulas -- mass e^(-lambda) * lambda^x / x!, cumulative the sum of that over k = 0..x -- and not from any statistics library: e^-5 = 0.006737946999085467..., so the mass at x = 2 is e^-5 * 25/2 = 0.08422433748856832... and the cumulative value is e^-5 * (1 + 5 + 12.5) = e^-5 * 18.5 = 0.12465201948308113... At six places that is 0.124652 -- the published figure. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/poisson-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(POISSON(A2,A3,FALSE),6)</td>
+  <td>The same example in its non-cumulative form</td>
+  <td class="result mono">0.084224</td>
+  <td class="result mono">0.084224<br><span class="category-tag">Microsoft publishes =POISSON(A2,A3,FALSE) = 0.084224 on the same data: e^-5 * 5^2/2! = 0.08422433748856832..., which is 0.084224 at six places. The two rows are asserted separately because the cumulative flag is an argument an engine can ignore.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(POISSON(A2,A3,TRUE),12)</td>
+  <td>The same cumulative value carried to twelve decimal places</td>
+  <td class="result mono">0.124652019483</td>
+  <td class="result mono">0.124652019483<br><span class="category-tag">Six published decimals are asserted again at twelve: 0.124652019483. An implementation that sums the series in the wrong direction, or that computes e^-5 as 1/e^5 with a poor exponential, diverges here and nowhere in the six-decimal figure.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(POISSON(2.9,A3,FALSE)-POISSON(2,A3,FALSE),12)</td>
+  <td>A fractional x, which the page says is truncated</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft documents: &#34;If x is not an integer, it is truncated.&#34; So POISSON(2.9, 5, FALSE) must equal POISSON(2, 5, FALSE) exactly, and their difference must be zero -- an engine that rounded 2.9 to 3 would return the mass at 3 (0.1403738958...) and the difference would be about 0.056. Comparing the two calls against each other rather than against a constant makes the assertion independent of the value of either. OpenFormula 1.3 section 6.18.62 writes the same rule into its formula as the floor function.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=POISSON(-1,A3,TRUE)</td>
+  <td>A negative number of events, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If x &lt; 0, POISSON returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=POISSON(A2,-5,TRUE)</td>
+  <td>A negative mean, the other documented exclusion</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If mean &lt; 0, POISSON returns the #NUM! error value.&#34; Asserted separately from the negative-x case because the two are separate sentences on the page and an engine can guard one and not the other. Note Microsoft permits mean = 0 while OpenFormula 1.3 section 6.18.62 requires lambda &gt; 0 -- a specification difference this corpus deliberately does not test, since the two sources disagree about what the right answer is.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=POISSON(&#34;x&#34;,A3,TRUE)</td>
+  <td>A non-numeric x</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If x or mean is nonnumeric, POISSON returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

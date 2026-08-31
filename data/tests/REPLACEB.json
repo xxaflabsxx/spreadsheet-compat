@@ -1,0 +1,49 @@
+{
+  "function": "REPLACEB",
+  "cases": [
+    {
+      "id": "REPLACEB_documented_five_characters",
+      "formula": "=REPLACEB(A2,6,5,\"*\")",
+      "description": "Microsoft's documented REPLACE example, on pure ASCII where bytes are characters",
+      "setup_cells": {
+        "A2": "abcdefghijk"
+      },
+      "expected": "abcde*k",
+      "expected_note": "The REPLACE page publishes =REPLACE(A2,6,5,\"*\") = abcde*k for A2 = \"abcdefghijk\": \"Replaces five characters in abcdefghijk with a single * character, starting with the sixth character (f).\" \"abcdefghijk\" is pure ASCII, so its bytes and its characters are the same things and REPLACEB must return the same string. REPLACEB HAS NO PAGE OF ITS OWN: Microsoft documents it on the combined REPLACE, REPLACEB page, which now carries only an Important box about it -- \"The REPLACEB function is deprecated. In workbooks set to Compatibility Version 2, REPLACE has improved behavior with Surrogate Pairs, counting them as one character instead of two. Variation Selectors (commonly used with emojis) will still be counted as separate characters.\" Every worked example on that page is written with REPLACE, which is why the ASCII cases here are the honest way to test REPLACEB against documented behaviour. Microsoft's page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/replace-replaceb-functions-8d799074-2425-4a8a-84bc-82472868878a (the /en-us/office/<name>-function-<guid> path was returning Microsoft's 'Sorry, the page you're looking for can't be found' body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB)."
+    },
+    {
+      "id": "REPLACEB_documented_two_digits",
+      "formula": "=REPLACEB(A3,3,2,\"10\")",
+      "description": "Microsoft's second documented row: replacing the last two digits of a year",
+      "setup_cells": {
+        "A3": 2009
+      },
+      "expected": "2010",
+      "expected_note": "The REPLACE page publishes =REPLACE(A3,3,2,\"10\") = 2010 for A3 = 2009: \"Replaces the last two digits (09) of 2009 with 10.\" Note the source cell holds the NUMBER 2009, not the text \"2009\" -- Microsoft's example data is a number -- so this case also exercises the implicit number-to-text conversion. The result is the four-character string \"2010\", not the number 2010."
+    },
+    {
+      "id": "REPLACEB_documented_first_three",
+      "formula": "=REPLACEB(A4,1,3,\"@\")",
+      "description": "Microsoft's third documented row",
+      "setup_cells": {
+        "A4": 123456
+      },
+      "expected": "@456",
+      "expected_note": "The REPLACE page publishes =REPLACE(A4,1,3,\"@\") = @456 for A4 = 123456: \"Replaces the first three characters of 123456 with a single @ character.\" Start position 1 is the first byte, which is the boundary case for a one-based index."
+    },
+    {
+      "id": "REPLACEB_zero_length_insertion",
+      "formula": "=REPLACEB(\"abcdef\",3,0,\"XY\")",
+      "description": "A replacement of zero bytes, which inserts rather than replaces",
+      "expected": "abXYcdef",
+      "expected_note": "Replacing zero bytes at position 3 removes nothing and inserts \"XY\" before the third byte, giving \"abXYcdef\". The behaviour follows directly from the documented meaning of the arguments -- start_num is where to begin and num_chars/num_bytes is how many to take out -- and it is worth asserting because an off-by-one in the insertion point is invisible in every case where something is actually replaced."
+    },
+    {
+      "id": "REPLACEB_double_byte_probe",
+      "formula": "=REPLACEB(\"\uff21\uff22\uff23\",1,2,\"x\")",
+      "description": "Full-width (double-byte) characters, where byte and character counting diverge",
+      "expected": null,
+      "expected_note": "DELIBERATELY ASSERTS NOTHING. This is the one thing REPLACEB does that REPLACE does not, and it is also the one thing Microsoft no longer documents: the combined page's only mention of REPLACEB is that it is deprecated. Historically the B functions counted BYTES only when the default language was a DBCS language (Japanese, Chinese, Korean) and behaved exactly like their non-B siblings otherwise -- so under this harness's en_US.UTF-8 environment the two readings give different answers (two bytes is the first full-width character under DBCS rules, the first TWO characters otherwise) and neither can be called wrong without knowing which rule the engine applied. The case therefore records what each engine returns instead of scoring it, exactly as the LEFTB and MIDB files from batch E do."
+    }
+  ]
+}

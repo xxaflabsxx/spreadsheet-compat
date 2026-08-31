@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PRICEMAT: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="PRICEMAT (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>PRICEMAT matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="4/7 match; negative rate returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/pricemat.html">
-<meta property="og:title" content="PRICEMAT: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="PRICEMAT (Financial) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="PRICEMAT matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="4/7 match; negative rate returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/pricemat.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>PRICEMAT</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>PRICEMAT</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for PRICEMAT yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060119.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,112 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+PRICEMAT&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't PRICEMAT working in LibreOffice?</h2>
+
+<p><code>PRICEMAT</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=PRICEMAT(A2,A3,A4,-0.061,A6,A7)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, PRICEMAT returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=PRICEMAT(A2,A3,A4,A5,A6,5)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, PRICEMAT returns the #NUM! error value.&#34; (This page prints its basis table with the row label &#34;0 (zero) or omitted&#34; where its sibling pages print &#34;0 or omitted&#34; -- a wording difference across Microsoft&#39;s own financial pages, not a behavioural one.); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=PRICEMAT(A3,A3,A4,A5,A6,A7)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If settlement &gt;= maturity, PRICEMAT returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.12.40 states the same constraint as &#34;Settlement &lt; Maturity&#34;.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +499,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for PRICEMAT yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(PRICEMAT(A2,A3,A4,A5,A6,A7),2)</td>
+  <td>Microsoft&#39;s documented worked example, at the published precision</td>
+  <td class="result mono">99.98</td>
+  <td class="result mono">99.98<br><span class="category-tag">Microsoft publishes =PRICEMAT(A2,A3,A4,A5,A6,A7) = $99.98 for a security settled 2008-02-15, maturing 2008-04-13, issued 2007-11-11, 6.1% coupon, 6.1% yield, 30/360 basis. DERIVATION from the formula Microsoft prints as an image: PRICEMAT = (100 + (DIM/B * rate * 100)) / (1 + (DSM/B * yld)) - (A/B * rate * 100), where DIM is days from issue to maturity, DSM days from settlement to maturity and A days from issue to settlement. Under Procedure A (US 30/360) those are DIM = 152, DSM = 58 and A = 94 -- and note they satisfy DIM = A + DSM exactly, which is a useful internal check on the day counts. In exact rational arithmetic the price is 99.98449887555695..., which is $99.98 as published. Day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 (Procedure A for US 30/360, Procedure B for actual days, Procedure C for European 30/360, D/E/F for days-in-year) written for this batch and used by no engine. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/pricemat-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PRICEMAT(A2,A3,A4,A5,A6,A7),10)</td>
+  <td>The same example carried to ten decimal places</td>
+  <td class="result mono">99.9844988756</td>
+  <td class="result mono">99.9844988756<br><span class="category-tag">Asserted at ten places: 99.9844988756. The two published decimals hide any day-count slip of a day or two in DIM, DSM or A; ten places do not.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PRICEMAT(A2,A3,A4,0,0,A7),10)</td>
+  <td>Both rate and yield zero, which OpenFormula defines as exactly 100</td>
+  <td class="result mono">100</td>
+  <td class="result mono">100<br><span class="category-tag">OpenFormula 1.3 section 6.12.40 adds a rule Microsoft&#39;s page does not print: &#34;If both, Rate and AnnualYield, are 0, the return value is 100.&#34; The documented Microsoft formula gives the same answer without needing a special case -- with rate = 0 the numerator is 100 and the accrued term vanishes, and with yld = 0 the denominator is 1 -- so this is a case where the two specifications agree by different routes, and where an engine that special-cases one but not the other still lands on 100.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEMAT(A2,A3,A4,-0.061,A6,A7)</td>
+  <td>A negative coupon rate, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, PRICEMAT returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEMAT(A2,A3,A4,A5,A6,5)</td>
+  <td>A basis of 5, one past the documented range</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, PRICEMAT returns the #NUM! error value.&#34; (This page prints its basis table with the row label &#34;0 (zero) or omitted&#34; where its sibling pages print &#34;0 or omitted&#34; -- a wording difference across Microsoft&#39;s own financial pages, not a behavioural one.)</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEMAT(A3,A3,A4,A5,A6,A7)</td>
+  <td>Settlement equal to maturity</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If settlement &gt;= maturity, PRICEMAT returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.12.40 states the same constraint as &#34;Settlement &lt; Maturity&#34;.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PRICEMAT(A2,A3,&#34;not a date&#34;,A5,A6,A7)</td>
+  <td>An issue date that is not a date</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If settlement, maturity, or issue is not a valid date, PRICEMAT returns the #VALUE! error value.&#34; The issue argument is the one this function has that PRICE does not, so it is the one asserted here.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

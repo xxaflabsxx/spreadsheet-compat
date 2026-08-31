@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>REGEXTEST: Excel only — not in Sheets or LibreOffice</title>
-<meta name="description" content="REGEXTEST (Text) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>REGEXTEST is not supported in LibreOffice Calc (Excel only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for REGEXTEST in all 7 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/regextest.html">
-<meta property="og:title" content="REGEXTEST: Excel only — not in Sheets or LibreOffice">
-<meta property="og:description" content="REGEXTEST (Text) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="REGEXTEST is not supported in LibreOffice Calc (Excel only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for REGEXTEST in all 7 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/regextest.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>REGEXTEST</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Text</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>REGEXTEST</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for REGEXTEST yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,147 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+REGEXTEST&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't REGEXTEST working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>REGEXTEST</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+The same formula is documented for Excel.
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=REGEXTEST(A2,&#34;a&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        Microsoft&#39;s Example 1 checks &#34;various aspects of the string &#39;alfalfa&#39;&#34;, and its first row is =REGEXTEST(A2,&#34;a&#34;) with the question &#34;Does it contain the letter &#39;a&#39;?&#34;. The documented return is &#34;TRUE if there is a match and FALSE if there is not&#34;, and &#34;alfalfa&#34; plainly contains an &#39;a&#39;, so the answer is TRUE. (The page shows the result column only as a screenshot, so the TRUE/FALSE values in this file are read off the questions Microsoft prints in text, each of which has one and only one correct answer for the string &#39;alfalfa&#39;.) REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regextest-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXTEST(A2,&#34;[a-z]&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        Microsoft&#39;s second documented row, question &#34;Does it contain any lower case letters?&#34;. Every character of &#34;alfalfa&#34; is lower case, so TRUE.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXTEST(A2,&#34;[A-Z]&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">False</span>.
+        Microsoft&#39;s third documented row, question &#34;Does it contain any upper case letters?&#34;. It does not, so FALSE -- and this is the row that proves matching is case-SENSITIVE by default, since a case-insensitive engine would answer TRUE here and every subsequent case-sensitivity assertion in this batch would be meaningless.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXTEST(A2,&#34;[0-9]&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">False</span>.
+        Microsoft&#39;s fifth documented row, question &#34;Does it contain any number digits?&#34;. No digits, so FALSE. Asserted alongside the TRUE rows so that an engine that always returns TRUE (or that returns a truthy string) is caught.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        Microsoft&#39;s Example 2 checks &#34;whether phone numbers have the specific format &#39;(###) ###-####&#39;&#34; using the pattern ^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$, and notes: &#34;Backslash &#39;\&#39; is used to &#39;escape&#39; parentheses &#39;()&#39; and some other characters. In this pattern, &#39;\(&#39; is interpreted as &#39;(&#39; and &#39;\)&#39; is interpreted as &#39;)&#39;.&#34; The string &#34;(378) 555-4195&#34; is Microsoft&#39;s own first data row and matches the pattern end to end -- three digits in literal parentheses, a space, three digits, a hyphen, four digits -- so TRUE. This case also exercises the anchors and the escaping, which are the parts of a pattern most likely to be mangled on the way into a stored .xlsx.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">False</span>.
+        Microsoft&#39;s second data row for the same example is &#34;+1(878) 555-8622&#34;. The pattern is anchored at both ends with ^ and $, so the leading &#34;+1&#34; makes the whole string fail to match: FALSE. The pair of phone cases is the sharpest test in this file -- an engine that ignored the anchors would return TRUE for both.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=REGEXTEST(&#34;ALFALFA&#34;,&#34;alfalfa&#34;,1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the lower-case literal pattern matches the upper-case string, so TRUE; with the default it would be FALSE.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +534,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for REGEXTEST yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;a&#34;)</td>
+  <td>Microsoft&#39;s documented example: does &#39;alfalfa&#39; contain the letter a?</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft&#39;s Example 1 checks &#34;various aspects of the string &#39;alfalfa&#39;&#34;, and its first row is =REGEXTEST(A2,&#34;a&#34;) with the question &#34;Does it contain the letter &#39;a&#39;?&#34;. The documented return is &#34;TRUE if there is a match and FALSE if there is not&#34;, and &#34;alfalfa&#34; plainly contains an &#39;a&#39;, so the answer is TRUE. (The page shows the result column only as a screenshot, so the TRUE/FALSE values in this file are read off the questions Microsoft prints in text, each of which has one and only one correct answer for the string &#39;alfalfa&#39;.) REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regextest-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;[a-z]&#34;)</td>
+  <td>Microsoft&#39;s row: does it contain any lower case letters?</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft&#39;s second documented row, question &#34;Does it contain any lower case letters?&#34;. Every character of &#34;alfalfa&#34; is lower case, so TRUE.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;[A-Z]&#34;)</td>
+  <td>Microsoft&#39;s row: does it contain any upper case letters?</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">False<br><span class="category-tag">Microsoft&#39;s third documented row, question &#34;Does it contain any upper case letters?&#34;. It does not, so FALSE -- and this is the row that proves matching is case-SENSITIVE by default, since a case-insensitive engine would answer TRUE here and every subsequent case-sensitivity assertion in this batch would be meaningless.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;[0-9]&#34;)</td>
+  <td>Microsoft&#39;s row: does it contain any number digits?</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">False<br><span class="category-tag">Microsoft&#39;s fifth documented row, question &#34;Does it contain any number digits?&#34;. No digits, so FALSE. Asserted alongside the TRUE rows so that an engine that always returns TRUE (or that returns a truthy string) is caught.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</td>
+  <td>Microsoft&#39;s Example 2 pattern against a number in the required format</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft&#39;s Example 2 checks &#34;whether phone numbers have the specific format &#39;(###) ###-####&#39;&#34; using the pattern ^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$, and notes: &#34;Backslash &#39;\&#39; is used to &#39;escape&#39; parentheses &#39;()&#39; and some other characters. In this pattern, &#39;\(&#39; is interpreted as &#39;(&#39; and &#39;\)&#39; is interpreted as &#39;)&#39;.&#34; The string &#34;(378) 555-4195&#34; is Microsoft&#39;s own first data row and matches the pattern end to end -- three digits in literal parentheses, a space, three digits, a hyphen, four digits -- so TRUE. This case also exercises the anchors and the escaping, which are the parts of a pattern most likely to be mangled on the way into a stored .xlsx.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</td>
+  <td>The same pattern against Microsoft&#39;s second data row, which has a country code</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">False<br><span class="category-tag">Microsoft&#39;s second data row for the same example is &#34;+1(878) 555-8622&#34;. The pattern is anchored at both ends with ^ and $, so the leading &#34;+1&#34; makes the whole string fail to match: FALSE. The pair of phone cases is the sharpest test in this file -- an engine that ignored the anchors would return TRUE for both.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(&#34;ALFALFA&#34;,&#34;alfalfa&#34;,1)</td>
+  <td>The documented case_sensitivity argument set to case-insensitive</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the lower-case literal pattern matches the upper-case string, so TRUE; with the default it would be FALSE.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>
