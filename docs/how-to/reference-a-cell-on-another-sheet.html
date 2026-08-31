@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How to reference a cell on another sheet</title>
-<meta name="description" content="Pull a value from another tab into a formula. Recipe executed in LibreOffice Calc; Excel per docs (reference cell another sheet excel).">
+<meta name="description" content="Pull a value from another tab into a formula. Recipe executed in LibreOffice Calc and Google Sheets; Excel per docs (reference cell another sheet excel).">
 
 <link rel="canonical" href="https://canispreadsheet.com/how-to/reference-a-cell-on-another-sheet.html">
 <meta property="og:title" content="How to reference a cell on another sheet">
-<meta property="og:description" content="Pull a value from another tab into a formula. Recipe executed in LibreOffice Calc; Excel per docs (reference cell another sheet excel).">
+<meta property="og:description" content="Pull a value from another tab into a formula. Recipe executed in LibreOffice Calc and Google Sheets; Excel per docs (reference cell another sheet excel).">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/how-to/reference-a-cell-on-another-sheet.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,7 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>How to reference a cell on another sheet</h1>
   <span class="badge badge-good">&#10003; Verified in LibreOffice 25.8.7.3</span>
+  <span class="badge badge-good">&#10003; Verified in Google Sheets (2026-08-30) &mdash; 28/29 checks</span>
 </div>
+<p style="color:var(--text-muted);font-size:0.9rem;margin:0.35rem 0 0">Google Sheets: verified over 28 of 29 checks &mdash; 1 excluded as not comparable.</p>
+<ul style="color:var(--text-muted);font-size:0.9rem;margin-top:0.25rem">
+<li><code>=&#39;Jon&#39;&#39;s Data&#39;!A1</code>: the Drive importer renamed its data tab (“Jon&#39;s Data” → “Jons Data”), so the Sheets run isn’t comparable to the LibreOffice reference run.</li>
+</ul>
+
 <p class="lede">Pull a value from another tab into a formula.</p>
 
 <h2 class="section-title">The formula</h2>
@@ -351,20 +357,24 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=&#39;Q1 Data&#39;!B2</code></td><td>Quoted name, exclamation mark outside the quotes</td>
+<td><strong>120</strong></td>
 <td><strong>120</strong></td></tr>
 
 <tr><td><code>=SUM(&#39;Q1 Data&#39;!B2:B4)</code></td><td>A range from the same quoted tab — quotes still wrap the name only</td>
+<td><strong>300</strong></td>
 <td><strong>300</strong></td></tr>
 
 <tr><td><code>=&#39;Jon&#39;&#39;s Data&#39;!A1</code></td><td>An apostrophe inside the name is doubled (tab: Jon&#39;s Data)</td>
-<td><strong>7</strong></td></tr>
+<td><strong>7</strong></td>
+<td><strong>7</strong> <span class="badge badge-quirk">not comparable</span><div style="color:var(--text-muted);font-size:0.85rem;margin-top:0.35rem">SETUP_ALTERED: Google Drive import renamed tab &#34;Jon&#39;s Data&#34; -&gt; &#39;Jons Data&#39; (identity proven by reading that tab&#39;s setup literals back unchanged, not by guessing at the name); formula =&#39;Jon&#39;&#39;s Data&#39;!A1 result recorded against the renamed reality. NOT comparable to the LibreOffice reference run, which executed against the name as built, and NOT counted toward this recipe&#39;s verdict. Nothing was renamed back.</div></td></tr>
 
 <tr><td><code>=$&#39;Q1 Data&#39;.B2</code></td><td>LibreOffice&#39;s own quoted form, run in a workbook that arrived as .xlsx</td>
-<td><strong>#NAME?</strong></td></tr>
+<td><strong>#NAME?</strong></td>
+<td><strong>#ERROR!</strong> <span class="badge badge-quirk">differs from LibreOffice</span><div style="color:var(--text-muted);font-size:0.85rem;margin-top:0.35rem">NOTE: #ERROR! is Google Sheets&#39; parse-failure error (no Excel equivalent); it means Sheets could not parse the formula, which is not the same as #NAME?</div></td></tr>
 
 </tbody>
 </table>
@@ -379,28 +389,35 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=SUM(Data!B2:B6)</code></td><td>A range on another tab, summed</td>
+<td><strong>150</strong></td>
 <td><strong>150</strong></td></tr>
 
 <tr><td><code>=SUMPRODUCT(Data!B2:B6,Data!C2:C6)</code></td><td>Two ranges from that tab — each one carries its own prefix</td>
+<td><strong>395</strong></td>
 <td><strong>395</strong></td></tr>
 
 <tr><td><code>=SUM(Data!B2:B6,C2:C6)</code></td><td>The prefix left off the second range: it silently means THIS sheet, which is empty</td>
+<td><strong>150</strong></td>
 <td><strong>150</strong></td></tr>
 
 <tr><td><code>=SUM(Data!B2:B6,Data!C2:C6)</code></td><td>The same formula with both prefixes — the answer the previous row should have given</td>
+<td><strong>161</strong></td>
 <td><strong>161</strong></td></tr>
 
 <tr><td><code>=AVERAGE(&#39;Q1 Data&#39;!B:B)</code></td><td>Whole column across tabs — the Amount header is text, so it is ignored</td>
+<td><strong>100</strong></td>
 <td><strong>100</strong></td></tr>
 
 <tr><td><code>=SUM(&#39;Q1 Data&#39;!B:B)</code></td><td>Whole column, summed</td>
+<td><strong>300</strong></td>
 <td><strong>300</strong></td></tr>
 
 <tr><td><code>=COUNT(Data!B:B)</code></td><td>Whole column, counted — five numbers, header not counted</td>
+<td><strong>5</strong></td>
 <td><strong>5</strong></td></tr>
 
 </tbody>
@@ -428,25 +445,31 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=INDIRECT(&#34;&#39;&#34;&amp;A1&amp;&#34;&#39;!B2&#34;)</code></td><td>The tab named in A1, cell B2 — quotes built into the string</td>
+<td><strong>120</strong></td>
 <td><strong>120</strong></td></tr>
 
 <tr><td><code>=SUM(INDIRECT(&#34;&#39;&#34;&amp;A1&amp;&#34;&#39;!B2:B4&#34;))</code></td><td>A range works the same way</td>
+<td><strong>300</strong></td>
 <td><strong>300</strong></td></tr>
 
 <tr><td><code>=INDIRECT(A1&amp;&#34;!B2&#34;)</code></td><td>Quotes omitted while the tab name contains a space</td>
-<td><strong>#REF!</strong></td></tr>
+<td><strong>#REF!</strong></td>
+<td><strong>120</strong> <span class="badge badge-quirk">differs from LibreOffice</span></td></tr>
 
 <tr><td><code>=INDIRECT(&#34;&#39;&#34;&amp;A1&amp;&#34;&#39;!B2&#34;)</code></td><td>A1 names a tab that does not exist</td>
+<td><strong>#REF!</strong></td>
 <td><strong>#REF!</strong></td></tr>
 
 <tr><td><code>=IFERROR(INDIRECT(&#34;&#39;&#34;&amp;A1&amp;&#34;&#39;!B2&#34;),&#34;No such tab&#34;)</code></td><td>IFERROR did NOT catch that #REF! in our run</td>
-<td><strong>#REF!</strong></td></tr>
+<td><strong>#REF!</strong></td>
+<td><strong>No such tab</strong> <span class="badge badge-quirk">differs from LibreOffice</span></td></tr>
 
 <tr><td><code>=IF(ISREF(INDIRECT(&#34;&#39;&#34;&amp;A1&amp;&#34;&#39;!B2&#34;)),INDIRECT(&#34;&#39;&#34;&amp;A1&amp;&#34;&#39;!B2&#34;),&#34;No such tab&#34;)</code></td><td>Testing with ISREF first does work</td>
+<td><strong>No such tab</strong></td>
 <td><strong>No such tab</strong></td></tr>
 
 </tbody>
@@ -462,20 +485,24 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=SUM(Q1:Q3!A1)</code></td><td>A1 added across the Q1-to-Q3 span</td>
-<td><strong>600</strong></td></tr>
+<td><strong>600</strong></td>
+<td><strong>#VALUE!</strong> <span class="badge badge-quirk">differs from LibreOffice</span></td></tr>
 
 <tr><td><code>=AVERAGE(Q1:Q3!A1)</code></td><td>Any aggregate works over the span</td>
-<td><strong>200</strong></td></tr>
+<td><strong>200</strong></td>
+<td><strong>#VALUE!</strong> <span class="badge badge-quirk">differs from LibreOffice</span></td></tr>
 
 <tr><td><code>=VLOOKUP(&#34;x&#34;,Q1:Q3!A1:B2,2,FALSE)</code></td><td>A lookup cannot take a 3-D range as its table</td>
+<td><strong>#VALUE!</strong></td>
 <td><strong>#VALUE!</strong></td></tr>
 
 <tr><td><code>=SUM(Q1.A1:Q3.A1)</code></td><td>LibreOffice&#39;s native 3-D spelling, in a workbook that arrived as .xlsx</td>
-<td><strong>#NAME?</strong></td></tr>
+<td><strong>#NAME?</strong></td>
+<td><strong>#REF!</strong> <span class="badge badge-quirk">differs from LibreOffice</span></td></tr>
 
 </tbody>
 </table>
@@ -502,20 +529,24 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=XLOOKUP(A2,Data!A:A,Data!C:C)</code></td><td>XLOOKUP — lookup column and return column each carry the prefix</td>
-<td><strong>3</strong></td></tr>
+<td><strong>3</strong></td>
+<td><strong>3</strong><div style="color:var(--text-muted);font-size:0.85rem;margin-top:0.35rem">NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs</div></td></tr>
 
 <tr><td><code>=VLOOKUP(A2,Data!A:C,3,FALSE)</code></td><td>VLOOKUP — one prefixed block, column counted from ITS first column</td>
+<td><strong>3</strong></td>
 <td><strong>3</strong></td></tr>
 
 <tr><td><code>=XLOOKUP(A2,Data!A:A,Data!C:C,&#34;Not found&#34;)</code></td><td>XLOOKUP&#39;s built-in not-found result, with A2 holding zzz</td>
-<td><strong>Not found</strong></td></tr>
+<td><strong>Not found</strong></td>
+<td><strong>Not found</strong><div style="color:var(--text-muted);font-size:0.85rem;margin-top:0.35rem">NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs</div></td></tr>
 
 <tr><td><code>=XLOOKUP(A2,&#39;Q1 Data&#39;!A:A,&#39;Q1 Data&#39;!B:B,&#34;Not found&#34;)</code></td><td>A quoted tab name works here too, with A2 holding Feb</td>
-<td><strong>80</strong></td></tr>
+<td><strong>80</strong></td>
+<td><strong>80</strong><div style="color:var(--text-muted);font-size:0.85rem;margin-top:0.35rem">NOTE: written with the PLAIN function name; the LibreOffice reference run executed the _xlfn. storage form of this formula, so the two runs are not byte-identical inputs</div></td></tr>
 
 </tbody>
 </table>
@@ -530,16 +561,19 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <div class="table-scroll">
 <table class="matrix">
-<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th></tr></thead>
+<thead><tr><th>Formula</th><th>What it does</th><th>Returned by LibreOffice 25.8.7.3</th><th>Returned by Google Sheets (executed 2026-08-30)</th></tr></thead>
 <tbody>
 
 <tr><td><code>=Data!B2</code></td><td>Exclamation mark — Excel and Google Sheets syntax, and what .xlsx stores</td>
+<td><strong>10</strong></td>
 <td><strong>10</strong></td></tr>
 
 <tr><td><code>=Data.B2</code></td><td>Dot — LibreOffice&#39;s native syntax, in that Excel-syntax document</td>
+<td><strong>#NAME?</strong></td>
 <td><strong>#NAME?</strong></td></tr>
 
 <tr><td><code>=SUM(Data.B2:B6)</code></td><td>Same for a range</td>
+<td><strong>#NAME?</strong></td>
 <td><strong>#NAME?</strong></td></tr>
 
 </tbody>
@@ -549,7 +583,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p>Same-workbook references: Excel and Google Sheets document Sheet!A1 and nothing else; LibreOffice Calc documents Sheet.A1 as its own A1 syntax and offers Excel A1 and Excel R1C1 as alternatives, set per document, which is why the dot form returned #NAME? in the .xlsx-derived file above while the exclamation mark returned 10 from the same tab. Round-tripping handles the swap for you: save from LibreOffice to .xlsx and dots become exclamation marks, open an .xlsx in LibreOffice and it keeps working. Quoting rules for awkward names are the same in all three. 3-D references exist in Excel and LibreOffice and are documented as absent in Google Sheets. Cross-FILE references are where the three really part company, and none of these were executed here — they are the documented forms only. Excel documents =&#39;[Budget.xlsx]Q1 Data&#39;!A1 for an open workbook and a full path in single quotes for a closed one, refreshed through Data &gt; Edit Links. LibreOffice Calc documents =&#39;file:///home/you/Budget.xlsx&#39;#$&#39;Q1 Data&#39;.A1, and its DDE and WEBSERVICE functions for live external data. Google Sheets has no file-path references at all: reaching another spreadsheet is IMPORTRANGE(&#34;url-or-key&#34;,&#34;&#39;Q1 Data&#39;!A1&#34;), which needs a one-time access grant on the source file and has no Excel or LibreOffice equivalent — so a Sheets model built on IMPORTRANGE does not survive an export to .xlsx. Everything shown with a returned value on this page was executed in LibreOffice Calc 25.8.7.3 by our harness; the Excel and Google Sheets behaviour described here comes from each vendor&#39;s own documentation, because these recipe formulas were not run in those apps. (Our function-level Google Sheets verdicts elsewhere on the site ARE executed — see the methodology page; the recipe corpus is LibreOffice-only.)</p>
 
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=Summary!B2*Data!C5</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>60</code> &mdash; exactly the expected result. The 28 further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result. The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.</p>
+<p>We ran <code>=Summary!B2*Data!C5</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>60</code> &mdash; exactly the expected result. The 28 further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. It returned <code>60</code> for the worked example, the same value LibreOffice produced. The 28 further formulas above were run through Sheets the same way and have their own column; 6 of them came back with a value different from LibreOffice&rsquo;s, flagged in that column. 1 of the checks on this page is left out of the Google Sheets verdict entirely, because Google executed it against a workbook the LibreOffice run never saw &mdash; the value is still shown as it came back, marked not comparable, with the reason under the title. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
 
 
 <h2 class="section-title">Functions used</h2>

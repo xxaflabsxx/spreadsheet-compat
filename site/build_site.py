@@ -1713,7 +1713,7 @@ RECIPE_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet how-to recipes</h1>
 <p class="lede">{{ recipes|length }} common spreadsheet tasks with copy-paste formulas for Microsoft Excel, Google Sheets, and LibreOffice Calc &mdash; each recipe formula <strong>executed and verified in LibreOffice Calc</strong>.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of them have also been <strong>executed in Google Sheets</strong> ({{ recipe_sheets_date }}), and those pages show what each engine actually returned side by side; the rest are LibreOffice-executed only.{% else %} Function-level verdicts come from our executed Google Sheets and LibreOffice runs; the recipe formulas themselves have only been executed in LibreOffice so far,{% endif %} {% if recipe_sheets_count %}Excel is documentation only.{% else %}and Excel is documentation only.{% endif %}</p>
-{% if recipe_sheets_count %}<p>What the two engines did with the same {{ recipe_total }} recipes: {{ recipe_sheets_count }} had their worked example &mdash; and every extra formula on the page &mdash; executed in Google Sheets ({{ recipe_sheets_date }}, Drive import) as well as LibreOffice. {{ recipe_sheets_same_count }} came back with exactly the values LibreOffice produced. {{ recipe_sheets_diff_count }} disagreed on at least one formula, and those are the interesting ones: a function Google Sheets lacks, an argument that means something else there, or an array expression it declines to expand inside a scalar function. Each of those pages prints both engines&rsquo; values side by side and flags the disagreement rather than picking a winner. The remaining {{ recipe_total - recipe_sheets_count }} recipes stay LibreOffice-executed{% if recipe_multisheet_count %}: their worked examples need extra worksheets, and the Sheets runner packs many recipes into one shared workbook, so there is no rewrite that would still be testing the same thing{% endif %}.</p>
+{% if recipe_sheets_count %}<p>What the two engines did with the same {{ recipe_total }} recipes: {{ recipe_sheets_count }} had their worked example &mdash; and every extra formula on the page &mdash; executed in Google Sheets ({{ recipe_sheets_date }}, Drive import) as well as LibreOffice. {{ recipe_sheets_same_count }} came back with exactly the values LibreOffice produced. {{ recipe_sheets_diff_count }} disagreed on at least one formula, and those are the interesting ones: a function Google Sheets lacks, an argument that means something else there, or an array expression it declines to expand inside a scalar function. Each of those pages prints both engines&rsquo; values side by side and flags the disagreement rather than picking a winner. {% if recipe_total - recipe_sheets_count %}The remaining {{ recipe_total - recipe_sheets_count }} recipes stay LibreOffice-executed{% if recipe_multisheet_count %}: their worked examples need extra worksheets, and the Sheets runner packs many recipes into one shared workbook, so there is no rewrite that would still be testing the same thing{% endif %}.{% else %}Every recipe in the corpus has now been executed in both engines, including the ones whose worked examples need extra worksheets &mdash; those are built one workbook per check, so their tab names and tab order survive the Drive round-trip without anything being renamed or rewritten.{% endif %}</p>
 {% endif %}<p>
 {% for cat, items in grouped %}<a href="#{{ cat|lower|replace(' ','-')|replace('&','and') }}">{{ cat }}</a> ({{ items|length }}){% if not loop.last %} &middot; {% endif %}{% endfor %}
 </p>
@@ -1863,7 +1863,7 @@ RECIPE_TMPL = """{% extends "base.html" %}
 {% for ch in rows %}
 <tr><td><code>{{ ch.formula }}</code></td><td>{{ ch.label }}</td>
 <td>{% if not ch.lo_scoped %}<span style="color:var(--text-muted)">n/a (Sheets-only formula)</span>{% elif ch.verified %}<strong>{{ ch.actual }}</strong>{% else %}&mdash;{% endif %}</td>{% if r.sheets_has %}
-<td>{% if ch.sheets_has %}<strong>{{ ch.sheets_actual }}</strong>{% if ch.sheets_only %} <span class="badge badge-good">Google Sheets alternative (executed {{ r.sheets_date }})</span>{% elif ch.sheets_differs %} <span class="badge badge-quirk">differs from LibreOffice</span>{% endif %}{% else %}<span style="color:var(--text-muted)">not run in Sheets</span>{% endif %}</td>{% endif %}</tr>
+<td>{% if ch.sheets_has %}<strong>{{ ch.sheets_actual }}</strong>{% if ch.sheets_only %} <span class="badge badge-good">Google Sheets alternative (executed {{ r.sheets_date }})</span>{% elif not ch.sheets_comparable %} <span class="badge badge-quirk">not comparable</span>{% elif ch.sheets_differs %} <span class="badge badge-quirk">differs from LibreOffice</span>{% endif %}{% if ch.sheets_notes %}<div style="color:var(--text-muted);font-size:0.85rem;margin-top:0.35rem">{{ ch.sheets_notes }}</div>{% endif %}{% else %}<span style="color:var(--text-muted)">not run in Sheets</span>{% endif %}</td>{% endif %}</tr>
 {% endfor %}
 </tbody>
 </table>
@@ -1873,9 +1873,19 @@ RECIPE_TMPL = """{% extends "base.html" %}
 <div class="func-header">
   <h1>{{ r.title }}</h1>
   {% if r.verified %}<span class="badge badge-good">&#10003; Verified in LibreOffice {{ r.engine_version }}</span>{% endif %}{% if r.sheets_has and r.sheets_verified %}
-  <span class="badge badge-good">&#10003; Verified in Google Sheets ({{ r.sheets_date }})</span>{% elif r.sheets_has %}
-  <span class="badge badge-quirk">Google Sheets returned something else ({{ r.sheets_date }})</span>{% endif %}
+  <span class="badge badge-good">&#10003; Verified in Google Sheets ({{ r.sheets_date }}){% if r.sheets_not_comparable %} &mdash; {{ r.sheets_comparable_checks }}/{{ r.sheets_total_checks }} checks{% endif %}</span>{% elif r.sheets_has %}
+  <span class="badge badge-quirk">Google Sheets returned something else ({{ r.sheets_date }}){% if r.sheets_not_comparable %} &mdash; {{ r.sheets_comparable_checks }}/{{ r.sheets_total_checks }} checks{% endif %}</span>{% endif %}
 </div>
+{#- Coverage the Sheets badge does NOT claim. A check Google executed against a
+    workbook the LibreOffice run never saw is a real value but not a
+    comparison, so the badge carries the count and the exclusion is named here
+    rather than being left for a reader to infer from a table row. -#}
+{% if r.sheets_has and r.sheets_not_comparable %}
+<p style="color:var(--text-muted);font-size:0.9rem;margin:0.35rem 0 0">Google Sheets: verified over {{ r.sheets_comparable_checks }} of {{ r.sheets_total_checks }} checks &mdash; {{ r.sheets_not_comparable }} excluded as not comparable.</p>
+<ul style="color:var(--text-muted);font-size:0.9rem;margin-top:0.25rem">
+{% for e in r.sheets_excluded %}<li><code>{{ e.formula }}</code>: {{ e.why }}</li>
+{% endfor %}</ul>
+{% endif %}
 <p class="lede">{{ r.task }}</p>
 
 <h2 class="section-title">The formula</h2>
@@ -1923,7 +1933,7 @@ RECIPE_TMPL = """{% extends "base.html" %}
 
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %}{% if r.sheets_has %} We then ran the same formulas in <strong>Google Sheets</strong>, executed {{ r.sheets_date }}: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed.{% if r.sheets_differs %} For the worked example Google Sheets returned <code>{{ r.sheets_actual }}</code>, which is <strong>not</strong> what LibreOffice returned (<code>{{ r.example_actual }}</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding.{% else %} It returned <code>{{ r.sheets_actual }}</code> for the worked example, the same value LibreOffice produced.{% endif %}{% if r.sheets_check_count %} The {{ r.sheets_check_count }} further formulas above were run through Sheets the same way and have their own column;{% if r.sheets_diff_count %} {{ r.sheets_diff_count }} of them came back with a value different from LibreOffice&rsquo;s, flagged in that column.{% else %} every one of them matched LibreOffice.{% endif %}{% endif %}{% if r.sheets_alt_count %} A further {{ r.sheets_alt_count }} {% if r.sheets_alt_count == 1 %}row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only{% else %}rows are Google Sheets alternatives: Sheets-specific syntax, executed in Google Sheets only{% endif %}, so the LibreOffice column reads n/a for {% if r.sheets_alt_count == 1 %}it{% else %}them{% endif %}.{% endif %} Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.{% else %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.{% endif %}</p>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %}{% if r.sheets_has %} We then ran the same formulas in <strong>Google Sheets</strong>, executed {{ r.sheets_date }}: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed.{% if r.sheets_differs %} For the worked example Google Sheets returned <code>{{ r.sheets_actual }}</code>, which is <strong>not</strong> what LibreOffice returned (<code>{{ r.example_actual }}</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding.{% else %} It returned <code>{{ r.sheets_actual }}</code> for the worked example, the same value LibreOffice produced.{% endif %}{% if r.sheets_check_count %} The {{ r.sheets_check_count }} further formulas above were run through Sheets the same way and have their own column;{% if r.sheets_diff_count %} {{ r.sheets_diff_count }} of them came back with a value different from LibreOffice&rsquo;s, flagged in that column.{% else %} every one of them matched LibreOffice.{% endif %}{% endif %}{% if r.sheets_not_comparable %} {{ r.sheets_not_comparable }} of the checks on this page {% if r.sheets_not_comparable == 1 %}is{% else %}are{% endif %} left out of the Google Sheets verdict entirely, because Google executed {% if r.sheets_not_comparable == 1 %}it{% else %}them{% endif %} against a workbook the LibreOffice run never saw &mdash; the value is still shown as it came back, marked not comparable, with the reason under the title.{% endif %}{% if r.sheets_alt_count %} A further {{ r.sheets_alt_count }} {% if r.sheets_alt_count == 1 %}row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only{% else %}rows are Google Sheets alternatives: Sheets-specific syntax, executed in Google Sheets only{% endif %}, so the LibreOffice column reads n/a for {% if r.sheets_alt_count == 1 %}it{% else %}them{% endif %}.{% endif %} Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.{% else %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.{% endif %}</p>
 {% endif %}
 {% if functions_used %}
 <h2 class="section-title">Functions used</h2>
@@ -2259,7 +2269,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 </ul>
 
 <h2 class="section-title">How-to recipes are verified too</h2>
-<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of the {{ recipe_total }} recipes have additionally been executed in <strong>Google Sheets</strong> ({{ recipe_sheets_date }}) by the same Drive-import round-trip used for the function corpus &mdash; those pages carry a second column showing what Google actually returned, including where it disagrees with LibreOffice &mdash; {{ recipe_sheets_same_count }} of them returned exactly the LibreOffice values and {{ recipe_sheets_diff_count }} returned something different on at least one formula. The other {{ recipe_total - recipe_sheets_count }} are executed in <strong>LibreOffice only</strong>{% if recipe_multisheet_count %}, among them the {{ recipe_multisheet_count }} whose worked examples need extra worksheets to exist: those formulas resolve tab names out of cell values, span a run of consecutive tabs, or exist precisely to produce an error for a wrong-syntax reference, so there is no rewrite into one shared workbook that would still be testing the same thing{% endif %}. Their pages say so.{% else %} To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.{% endif %}</p>
+<p>Every formula on a <a href="{{ rel }}how-to/">how-to recipe page</a> runs through the same pipeline before publishing: the exact formula shown is executed in LibreOffice {{ current_version }} with the sample data shown, and the page displays the value it actually returned.{% if recipe_sheets_count %} {{ recipe_sheets_count }} of the {{ recipe_total }} recipes have additionally been executed in <strong>Google Sheets</strong> ({{ recipe_sheets_date }}) by the same Drive-import round-trip used for the function corpus &mdash; those pages carry a second column showing what Google actually returned, including where it disagrees with LibreOffice &mdash; {{ recipe_sheets_same_count }} of them returned exactly the LibreOffice values and {{ recipe_sheets_diff_count }} returned something different on at least one formula. {% if recipe_total - recipe_sheets_count %}The other {{ recipe_total - recipe_sheets_count }} are executed in <strong>LibreOffice only</strong>{% if recipe_multisheet_count %}, among them the {{ recipe_multisheet_count }} whose worked examples need extra worksheets to exist: those formulas resolve tab names out of cell values, span a run of consecutive tabs, or exist precisely to produce an error for a wrong-syntax reference, so there is no rewrite into one shared workbook that would still be testing the same thing{% endif %}. Their pages say so.{% else %}That now covers the whole recipe corpus. The recipes whose worked examples need extra worksheets &mdash; formulas that resolve a tab name out of a cell value, span a run of consecutive tabs, or exist precisely to produce an error for a wrong-syntax reference &mdash; are built one workbook per check rather than packed into a shared one, so their tab names and tab order reach Google unchanged and nothing has to be renamed or rewritten to make them fit. Where Google&rsquo;s importer altered a workbook anyway, the affected check is excluded from that recipe&rsquo;s Sheets verdict and the page says which check and why.{% endif %}{% else %} To be precise: the recipe formulas have been executed in <strong>LibreOffice only</strong>. The Google Sheets run covers the <em>function</em> corpus, not the recipe corpus, so a recipe page&rsquo;s per-function verdicts are Sheets-executed while its worked example is not.{% endif %}</p>
 
 <h2 class="section-title">Honest limitations</h2>
 <ul>
@@ -2653,6 +2663,49 @@ def _fmt_actual(v):
     return v
 
 
+# Harness bookkeeping appended to a check's `notes` by
+# harness/run_sheets.py: it restates the expected-vs-actual comparison, which
+# the page already shows as two side-by-side columns with a "differs" badge.
+# Repeating it in prose would read as if the page had an opinion about which
+# engine is right, and "expected" there means "what the LibreOffice reference
+# run returned", which is not what a reader would take it to mean. The
+# EXPLANATORY notes (NOTE:, SETUP_ALTERED:, UNTRUSTED_RECALC:) are the ones
+# worth showing, and they are kept verbatim. Both bookkeeping forms are always
+# appended last, so cutting from the marker to the end is exact.
+_NOTE_BOOKKEEPING = re.compile(
+    r"(?:^|; )(?:MISMATCH vs expected|DIFFERS from the LibreOffice-authored "
+    r"expectation): .*$", re.S)
+
+
+def _display_notes(raw):
+    """The part of a stored check note that belongs on the page, or ""."""
+    if not raw:
+        return ""
+    return _NOTE_BOOKKEEPING.sub("", str(raw)).strip().strip(";").strip()
+
+
+def _not_comparable_reason(payload):
+    """One plain-language sentence for why a Sheets check is not comparable.
+
+    Names come VERBATIM out of the results file (`importer_renamed_tabs`) --
+    never hardcoded here -- so this sentence cannot drift from what the
+    harness actually recorded, and a different tab or a second rename in some
+    later run reads correctly with no code change."""
+    reason = payload.get("not_comparable_reason")
+    renamed = payload.get("importer_renamed_tabs") or {}
+    if reason == "importer_renamed_tab" and renamed:
+        pairs = ", ".join(f"\u201c{built}\u201d \u2192 \u201c{got}\u201d"
+                          for built, got in renamed.items())
+        tab_word = "data tab" if len(renamed) == 1 else "data tabs"
+        return (f"the Drive importer renamed its {tab_word} ({pairs}), so the "
+                f"Sheets run isn\u2019t comparable to the LibreOffice reference "
+                f"run.")
+    # Unknown/new reason: say so plainly rather than inventing an explanation.
+    return ("the Sheets run for this check was not executed against the same "
+            "workbook as the LibreOffice reference run, so the two are not "
+            "comparable.")
+
+
 def _recipe_needs_extra_sheets(d):
     """True if any of this recipe's checks needs extra worksheets to exist
     (`setup_sheets`). Those are the recipes harness/run_sheets.py's
@@ -2723,6 +2776,26 @@ def load_recipes():
         d["sheets_actual"] = _fmt_actual(sv.get("actual", "")) if d["sheets_has"] else ""
         d["sheets_verified"] = bool(sv.get("main_verified", sv.get("verified")))
         d["needs_extra_sheets"] = _recipe_needs_extra_sheets(d)
+        # ---- checks the Sheets verdict does NOT cover ---------------------
+        # The harness records these on the recipe record (n_checks,
+        # n_not_comparable, not_comparable_keys); the page reads them rather
+        # than recounting, so the badge can never claim coverage the run did
+        # not have. Absent on a single-sheet record, which means zero.
+        d["sheets_total_checks"] = int(sv.get("n_checks") or 0)
+        d["sheets_not_comparable"] = int(sv.get("n_not_comparable") or 0)
+        d["sheets_comparable_checks"] = (
+            d["sheets_total_checks"] - d["sheets_not_comparable"])
+        d["sheets_excluded"] = []
+        if d["sheets_has"] and d["sheets_not_comparable"]:
+            _by_key = result_checks_by_key(sv)
+            for _k in (sv.get("not_comparable_keys") or []):
+                _pl = _by_key.get(_k) or {}
+                d["sheets_excluded"].append({
+                    "key": _k,
+                    "formula": _pl.get("formula", ""),
+                    "label": _pl.get("label", ""),
+                    "why": _not_comparable_reason(_pl),
+                })
         # Did Sheets return something OTHER than what LibreOffice returned?
         # That is the interesting content, not an error to be hidden.
         d["sheets_differs"] = bool(
@@ -2776,6 +2849,16 @@ def load_recipes():
                 # A Sheets-only alternative has no LibreOffice value to
                 # disagree with, so it can never be a "differs" row.
                 "sheets_differs": bool(s_has and lo_scoped and str(s_a) != str(a)),
+                # Sheets executed this one against a workbook the LibreOffice
+                # run never saw (see harness/run_sheets.py: a tab the Drive
+                # importer renamed). The value is real and is shown as it came
+                # back, but it is NOT a comparison, so the row must not read as
+                # agreement just because the two numbers happen to match.
+                "sheets_comparable": bool(sg.get("comparable", True)) if s_has else True,
+                "sheets_not_comparable_why": (
+                    _not_comparable_reason(sg)
+                    if s_has and not sg.get("comparable", True) else ""),
+                "sheets_notes": _display_notes(sg.get("notes")) if s_has else "",
             }
 
         # Optional "variants": extra worked sections, each with its own sample grid

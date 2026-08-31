@@ -2706,14 +2706,28 @@ def cmd_selftest_recipes_multisheet(args):
             with open(merge_target) as f:
                 after = json.load(f)
             after_recipes = after.get("recipes") or {}
-            changed = [k for k, blob in prev_json.items()
+            # The invariant is about the recipes this ingest did NOT touch.
+            # Once a real Sheets run has landed, the target file already
+            # contains these six, so "prev + new" is the wrong arithmetic and
+            # "every prior entry unchanged" is the wrong claim -- a re-ingest
+            # is SUPPOSED to replace them. What must never move is everything
+            # else, which is what the merge exists to protect.
+            untouched = {k: blob for k, blob in prev_json.items()
+                         if k not in recipes}
+            changed = [k for k, blob in untouched.items()
                        if json.dumps(after_recipes.get(k), sort_keys=True,
                                      default=str) != blob]
-            _check(f"all {len(prev_json)} pre-existing recipe(s) preserved "
+            _check(f"all {len(untouched)} untouched recipe(s) preserved "
                    f"byte-identical", not changed, str(changed[:5]))
-            _check("merged file holds the old recipes plus the new ones",
-                   len(after_recipes) == len(prev_json) + len(recipes),
-                   f"{len(after_recipes)} = {len(prev_json)} + {len(recipes)}")
+            _check("merged file holds every prior recipe plus the ingested ones",
+                   set(after_recipes) == set(prev_json) | set(recipes)
+                   and len(after_recipes) == len(set(prev_json) | set(recipes)),
+                   f"{len(after_recipes)} vs "
+                   f"{len(set(prev_json) | set(recipes))}")
+            _check("re-ingested recipes were actually replaced",
+                   all(json.dumps(after_recipes[k], sort_keys=True, default=str)
+                       == json.dumps(recipes[k], sort_keys=True, default=str)
+                       for k in recipes))
             _check("trust is the AND of both runs",
                    after["trusted"] == (bool(before.get("trusted", False))
                                         and trusted))

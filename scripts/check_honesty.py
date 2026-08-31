@@ -44,6 +44,15 @@ So this script fails (exit 1) on five kinds of dishonesty:
      multi-sheet recipes are skipped and stay LibreOffice-only), so the two
      wordings coexist ACROSS the site by design -- but never on one page.
 
+  6. UNDECLARED EXCLUSIONS FROM A SHEETS VERDICT -- a recipe whose stored
+     Google Sheets result carries `n_not_comparable > 0` has checks its
+     Sheets badge does NOT cover: Google executed them against a workbook the
+     LibreOffice reference run never saw (observed: the Drive importer
+     renamed a data tab). The value is real and is still shown, so the page
+     must SAY which checks the verdict leaves out and why. A page that
+     silently drops them reads as full coverage, which is the quiet kind of
+     dishonesty this file exists to catch.
+
 Usage: python3 scripts/check_honesty.py [docs_dir]
 """
 import re, sys, glob, os, html
@@ -218,6 +227,35 @@ def expected_dates():
     return out
 
 
+# (6) Recipes whose Sheets verdict excludes checks must declare it on the page.
+def recipes_with_exclusions():
+    """{slug: (n_comparable, n_total, n_excluded)} from the Sheets recipe run.
+
+    Read from the RESULTS file, not from the page, so the guard cannot be
+    satisfied by copy that merely looks right: the numbers it demands are the
+    ones the harness actually recorded."""
+    import json as _json
+    path = os.path.join(RESULTS_DIR, "recipes-verified-sheets.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        d = _json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return {}
+    if not d.get("trusted"):
+        return {}          # an untrusted run is not published; nothing to declare
+    out = {}
+    for slug, rec in (d.get("recipes") or {}).items():
+        n_excl = int(rec.get("n_not_comparable") or 0)
+        n_total = int(rec.get("n_checks") or 0)
+        if n_excl and n_total:
+            out[slug] = (n_total - n_excl, n_total, n_excl)
+    return out
+
+
+RECIPE_EXCLUSIONS = recipes_with_exclusions()
+undeclared = []
+
 bad = []
 stale = []
 misdated = []
@@ -227,6 +265,17 @@ files = glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True)
 for f in files:
     text = strip_tags(open(f, encoding="utf-8", errors="replace").read())
     rel = os.path.relpath(f, ROOT)
+    slug = os.path.basename(f)[:-5]
+    if rel.replace(os.sep, "/").startswith("how-to/") and slug in RECIPE_EXCLUSIONS:
+        n_ok, n_all, n_excl = RECIPE_EXCLUSIONS[slug]
+        want = (f"verified over {n_ok} of {n_all} checks \u2014 {n_excl} excluded "
+                f"as not comparable")
+        norm = re.sub(r"\s+", " ", text)
+        if want.lower() not in norm.lower():
+            undeclared.append(
+                (rel, f"stored Sheets result excludes {n_excl} of {n_all} check(s) "
+                      f"as not comparable, but the page does not say so "
+                      f"(expected the line: {want!r})"))
     n_alt = len(SHEETS_ALT_LABEL.findall(text))
     n_na = len(SHEETS_ONLY_NA.findall(text))
     if n_alt != n_na:
@@ -293,8 +342,12 @@ for f, ctx in misattributed[:40]:
 print(f"  recipe pages both showing and denying a Sheets result: {len(contradictory)}")
 for f, ctx in contradictory[:40]:
     print(f"    {f}: …{ctx}…")
+print(f"  recipe pages hiding checks their Sheets verdict excludes: {len(undeclared)}")
+for f, ctx in undeclared[:10]:
+    print(f"    {f}: {ctx}")
 print(f"  function pages dated from the file instead of the function: {len(misdated)}"
       f"  ({len(_expected)} executed functions checked)")
 for f, ctx in misdated[:40]:
     print(f"    {f}: {ctx}")
-sys.exit(1 if (bad or stale or contradictory or misattributed or misdated) else 0)
+sys.exit(1 if (bad or stale or contradictory or misattributed or misdated
+               or undeclared) else 0)
