@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BAHTTEXT works in Excel and LibreOffice (LibreOffice-tested)</title>
-<meta name="description" content="All 3 executed test cases pass in LibreOffice; documented in Excel only. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="All 3 executed test cases pass in LibreOffice; documented in Excel only. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/bahttext.html">
 <meta property="og:title" content="BAHTTEXT works in Excel and LibreOffice (LibreOffice-tested)">
-<meta property="og:description" content="All 3 executed test cases pass in LibreOffice; documented in Excel only. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="All 3 executed test cases pass in LibreOffice; documented in Excel only. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/bahttext.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>BAHTTEXT</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>BAHTTEXT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -436,6 +436,41 @@ BAHTTEXT&rsquo;s support changed &mdash; not documentation claims, real results.
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=BAHTTEXT(A2)</td>
+  <td>Microsoft&#39;s documented worked example: 1234 rendered as Thai text with a Baht suffix</td>
+  <td class="result mono">หนึ่งพันสองร้อยสามสิบสี่บาทถ้วน</td>
+  <td class="result mono">หนึ่งพันสองร้อยสามสิบสี่บาทถ้วน<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as the Thai string for &#34;one thousand two hundred thirty four Baht&#34;, transcribed here character for character from the page: หนึ่ง (one) พัน (thousand) สอง (two) ร้อย (hundred) สาม (three) สิบ (ten) สี่ (four) บาท (Baht) ถ้วน (exactly). The documented output is a 31-character Thai string</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISTEXT(BAHTTEXT(A2))</td>
+  <td>The result is a text value, not a number</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Excel documents BAHTTEXT as converting &#34;a number to Thai text&#34;, so the result is a text value and ISTEXT is TRUE. This case survives any locale-dependent difference in the Baht wording, unlike the exact-string case above</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=BAHTTEXT(&#34;abc&#34;)</td>
+  <td>A non-numeric text argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents the single argument as &#34;A number you want to convert to text, or a reference to a cell containing a number, or a formula that evaluates to a number&#34;; non-numeric text is the wrong argument type, which is Excel&#39;s documented #VALUE! case</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

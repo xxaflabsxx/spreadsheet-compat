@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>171 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 171 divergences, every one executed — not copied from docs.">
+<title>197 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 197 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="171 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 171 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="197 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 197 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">171 quirks found across 93 functions
-(121 in LibreOffice, 50 in Google Sheets).
+<p class="search-hint">197 quirks found across 95 functions
+(121 in LibreOffice, 76 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -450,6 +450,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/acot.html">ACOT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(ACOT(-2),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">-0.463647609</dd>
+    <dt>Documented / expected</dt><dd class="mono">2.677945045</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give; MISMATCH vs expected: expected 2.677945045, got -0.463647609</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/acoth.html">ACOTH</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ACOTH(0.5)</div>
@@ -477,6 +490,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,A6,A7,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">776</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 776. Independently derived from the documented depreciation-coefficient rule: life = 1/rate = 6.667 years, which is &#34;More than 6 years&#34;, so the documented coefficient is 2.5 and the effective rate is 0.15*2.5 = 0.375. Serial 39679 = 2008-08-19 and 39813 = 2008-12-31, so on basis 1 (actual) the prorated first period is 134/366 of a year (2008 is a leap year) and period 0 depreciates ROUND(2400*0.375*134/366) = ROUND(329.508) = 330. Period 1 then depreciates ROUND((2400-330)*0.375) = ROUND(776.25) = 776, reproducing the published figure exactly; MISMATCH vs expected: expected 776, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,A6,0.4,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents the same #NUM! rule for a life &#34;between ... 2 and 3&#34;; here 1/0.4 = 2.5 years; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,A6,0.4,A8)</div>
   <dl class="quirk-grid">
@@ -490,6 +529,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,A6,0.22,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents: &#34;If the life of assets is between 0 (zero) and 1, 1 and 2, 2 and 3, or 4 and 5, the #NUM! error value is returned.&#34; Here 1/0.22 = 4.545 years falls in the excluded 4-to-5 band (the documented coefficient table only covers 3-4, 5-6 and &gt;6); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,A6,0.22,A8)</div>
   <dl class="quirk-grid">
@@ -499,6 +551,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Excel documents: &#34;If the life of assets is between 0 (zero) and 1, 1 and 2, 2 and 3, or 4 and 5, the #NUM! error value is returned.&#34; Here 1/0.22 = 4.545 years falls in the excluded 4-to-5 band (the documented coefficient table only covers 3-4, 5-6 and &gt;6); MISMATCH vs expected: expected &#39;#NUM!&#39;, got 696</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/amordegrc.html">AMORDEGRC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AMORDEGRC(A2,A3,A4,A5,0,A7,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">330</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Not published directly by Microsoft, but forced by the published period-1 figure: 776 = ROUND((2400 - period0)*0.375) has period0 = 330 as its only integer solution consistent with the documented mid-period proration ROUND(cost * rate * coefficient * days/year) = ROUND(2400*0.375*134/366) = ROUND(329.508) = 330. Verified in Python; MISMATCH vs expected: expected 330, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/areas.html">AREAS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AREAS(B2:D4 B2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#ERROR!</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 1. The space operator intersects B2:D4 with B2, and the single-cell result is one contiguous area; MISMATCH vs expected: expected 1, got &#39;#ERROR!&#39;; NOTE: #ERROR! is Google Sheets&#39; parse-failure error (no Excel equivalent); it means Sheets could not parse the formula, which is not the same as #NAME?</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/areas.html">AREAS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AREAS(B2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>Follows directly from the documented definition that &#34;an area is a range of contiguous cells or a single cell&#34;, so a lone cell reference is exactly one area; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/areas.html">AREAS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AREAS(B2:D4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 1. Follows directly from the documented definition: &#34;An area is a range of contiguous cells or a single cell&#34;; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/areas.html">AREAS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AREAS((B2:D4,E5,F6:I9))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#ERROR!</dd>
+    <dt>Documented / expected</dt><dd class="mono">3</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 3. The documentation specifies the extra set of parentheses so Excel does not read the commas as argument separators; the union then contains three areas (a 3x3 range, a single cell, and a 4x4 range); MISMATCH vs expected: expected 3, got &#39;#ERROR!&#39;; NOTE: #ERROR! is Google Sheets&#39; parse-failure error (no Excel equivalent); it means Sheets could not parse the formula, which is not the same as #NAME?</p>
 </li>
 
 <li class="quirk-entry">
@@ -646,6 +763,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/besseli.html">BESSELI</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELI(1.5,1),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.98166643</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 0.981666428. Independently re-derived to 20 significant digits with mpmath: besseli(1, 1.5) = 0.98166642857790758565, so the true value rounds to 0.981666429 at 9 dp -- the page&#39;s trailing 8 is a TRUNCATION of ...4285 rather than a round. Asserting at 8 dp (0.98166643) is the deepest precision at which the published figure and the true value agree, so a mismatch here is an engine difference and not a documentation artefact; MISMATCH vs expected: expected 0.98166643, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besseli.html">BESSELI</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELI(1.5,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELI returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besseli.html">BESSELI</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=BESSELI(1.5,-1)</div>
   <dl class="quirk-grid">
@@ -655,6 +798,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Engineering</dd>
   </dl>
   <p>Excel documents: &#34;If n &lt; 0, BESSELI returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besseli.html">BESSELI</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELI(1.5,1.9),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.98166643</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents &#34;If n is not an integer, it is truncated&#34;, so order 1.9 must behave exactly as order 1 and return the same 0.98166643 as the documented example above. Independently verified with mpmath: besseli(1, 1.5) = 0.9816664285779076; besseli(1.9, 1.5) would be 0.38286062, so this case distinguishes truncation from a real fractional-order evaluation; MISMATCH vs expected: expected 0.98166643, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besseli.html">BESSELI</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELI(&#34;abc&#34;,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is nonnumeric, BESSELI returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselj.html">BESSELJ</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELJ(1.9,2),6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.329926</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 0.329925829, but that figure is WRONG in the 7th decimal place. Re-derived to 20 significant digits with mpmath: besselj(2, 1.9) = 0.32992572769238721660 (scipy.special.jv agrees to machine precision), which differs from the published 0.329925829 by 1.01e-07 -- far larger than the ~1e-10 rounding residue seen on the sibling BESSELY page. Asserting at 6 dp (0.329926) is the deepest precision at which the published figure and the mathematically correct value still agree, so this case tests the function rather than Microsoft&#39;s typo; MISMATCH vs expected: expected 0.329926, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselj.html">BESSELJ</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELJ(1.9,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELJ returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -671,6 +866,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselj.html">BESSELJ</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELJ(1.9,2.7),6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.329926</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents &#34;If n is not an integer, it is truncated&#34;, so order 2.7 must behave exactly as order 2. Independently verified with mpmath: besselj(2, 1.9) = 0.3299257276923872, while a genuine fractional-order besselj(2.7, 1.9) would be about 0.16248, so this case separates truncation from fractional-order evaluation; MISMATCH vs expected: expected 0.329926, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselj.html">BESSELJ</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELJ(&#34;abc&#34;,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is nonnumeric, BESSELJ returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselj.html">BESSELJ</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELJ(0,0),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1.0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Follows from the documented series definition on the page: J_0(0) is the k=0 term (-1)^0/(0! * Gamma(1)) * (0/2)^0 = 1, with every later term carrying a positive power of x/2 and vanishing. Independently verified with mpmath: besselj(0, 0) = 1.0 exactly; MISMATCH vs expected: expected 1.0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselk.html">BESSELK</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELK(1.5,1),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.2773878</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 0.277387804. Independently re-derived to 20 significant digits with mpmath: besselk(1, 1.5) = 0.27738780045684381609, so the correct 9-dp value is 0.277387800 and the page&#39;s trailing ...804 is off by 3.5e-09. Asserting at 8 dp (0.2773878) is the deepest precision at which the published figure and the true value agree; MISMATCH vs expected: expected 0.2773878, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselk.html">BESSELK</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELK(1.5,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELK returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/besselk.html">BESSELK</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=BESSELK(1.5,-1)</div>
@@ -684,6 +944,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselk.html">BESSELK</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELK(1.5,1.4),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.2773878</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents &#34;If n is not an integer, it is truncated&#34;, so order 1.4 must behave exactly as order 1 and return the documented 0.2773878. Independently verified with mpmath: a genuine fractional-order besselk(1.4, 1.5) would be about 0.35394, so this case separates truncation from fractional-order evaluation; MISMATCH vs expected: expected 0.2773878, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/besselk.html">BESSELK</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELK(&#34;abc&#34;,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is nonnumeric, BESSELK returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/bessely.html">BESSELY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELY(2.5,1),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.145918138</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 0.145918138. Independently re-derived to 20 significant digits with mpmath: bessely(1, 2.5) = 0.14591813796678579888 -&gt; 0.145918138 at 9 dp, an exact match (unlike the sibling BESSELI/BESSELJ/BESSELK pages, whose published last digits are truncated or wrong); MISMATCH vs expected: expected 0.145918138, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/bessely.html">BESSELY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELY(2.5,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If n &lt; 0, BESSELY returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/bessely.html">BESSELY</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=BESSELY(2.5,-1)</div>
@@ -694,6 +1006,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Engineering</dd>
   </dl>
   <p>Excel documents: &#34;If n &lt; 0, BESSELY returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/bessely.html">BESSELY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(BESSELY(2.5,1.6),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.145918138</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents &#34;If n is not an integer, it is truncated&#34;, so order 1.6 must behave exactly as order 1. Independently verified with mpmath: a genuine fractional-order bessely(1.6, 2.5) would be about -0.19313, so this case separates truncation from fractional-order evaluation; MISMATCH vs expected: expected 0.145918138, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/bessely.html">BESSELY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=BESSELY(&#34;abc&#34;,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If x is nonnumeric, BESSELY returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
