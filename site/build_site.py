@@ -1473,7 +1473,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 <tr>
   <td>{{ e.label }}</td>
   <td>{% if e.doc_url %}<a href="{{ e.doc_url }}">Yes</a>{% elif e.documented %}Yes{% else %}No{% endif %}</td>
-  <td>{% if e.tested %}{{ e.tested_cell }}{% else %}Not yet{% endif %}</td>
+  <td>{% if e.tested %}{{ e.tested_cell }}{% elif ek == 'excel' %}No — documented only{% else %}Not yet{% endif %}</td>
   <td>
     {% if e.verdict %}
       <span class="badge {{ verdict_class[e.verdict] }}">{{ verdict_label[e.verdict] }}</span>

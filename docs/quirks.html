@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>244 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 244 divergences, every one executed — not copied from docs.">
+<title>251 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 251 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="244 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 244 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="251 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 251 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">244 quirks found across 116 functions
-(168 in LibreOffice, 76 in Google Sheets).
+<p class="search-hint">251 quirks found across 116 functions
+(168 in LibreOffice, 83 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -1543,6 +1543,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/chisq.test.html">CHISQ.TEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=CHISQ.TEST(A2,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.06031830659</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;r = c= 1 is not allowed and #N/A is returned.&#34; With one row and one column there are no degrees of freedom left after conditioning on the margins, so CHISQ.TEST has no distribution to evaluate; MISMATCH vs expected: expected &#39;#N/A&#39;, got 0.06031830659</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisq.test.html">CHISQ.TEST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=CHISQ.TEST(A2,A6)</div>
   <dl class="quirk-grid">
@@ -1565,6 +1578,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Compatibility</dd>
   </dl>
   <p>Excel documents: &#34;If actual_range and expected_range have a different number of data points, CHITEST returns the #N/A error value.&#34; Here the actual range holds 6 values and the expected range 4; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chitest.html">CHITEST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=CHITEST(A2,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.06031830659</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;r = c= 1 is not allowed and #N/A is returned.&#34; With one row and one column there are no degrees of freedom left after conditioning on the margins, so CHITEST has no distribution to evaluate; MISMATCH vs expected: expected &#39;#N/A&#39;, got 0.06031830659</p>
 </li>
 
 <li class="quirk-entry">
@@ -1647,6 +1673,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/confidence.html">CONFIDENCE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CONFIDENCE(A2,A3,A4),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.692951913</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.692951912</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes this example&#39;s result as 0.692951912. Independently derived from the documented normal-distribution confidence half-width z_(1-alpha/2) * standard_dev / sqrt(size): scipy.stats.norm.isf(0.05/2) = 1.9599639845400545 (the +/-1.96 the page names in prose), so 1.9599639845400545 * 2.5 / sqrt(50) = 0.6929519121748391 -&gt; 0.692951912 at 9 dp; MISMATCH vs expected: expected 0.692951912, got 0.692951913</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/confidence.html">CONFIDENCE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=CONFIDENCE(A2,A3,0)</div>
   <dl class="quirk-grid">
@@ -1656,6 +1695,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Compatibility</dd>
   </dl>
   <p>Excel documents: &#34;If Size &lt; 1, CONFIDENCE returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/confidence.html">CONFIDENCE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CONFIDENCE(A2,A3,50.9),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.692951913</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.692951912</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents &#34;If Size is not an integer, it is truncated&#34;, so 50.9 must behave exactly as 50 and return the documented 0.692951912. Independently checked that this discriminates: a genuine size of 50.9 would give 1.9599639845400545 * 2.5 / sqrt(50.9) = 0.686798; MISMATCH vs expected: expected 0.692951912, got 0.692951913</p>
 </li>
 
 <li class="quirk-entry">
@@ -1686,6 +1738,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/confidence.norm.html">CONFIDENCE.NORM</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CONFIDENCE.NORM(A2,A3,A4),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.692951913</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.692951912</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft&#39;s CONFIDENCE.NORM page publishes this example&#39;s result rounded to 0.692952; its CONFIDENCE page publishes the identical calculation to more digits as 0.692951912, and the two agree. Independently derived from the documented normal-distribution half-width z_(1-alpha/2) * standard_dev / sqrt(size): scipy.stats.norm.isf(0.05/2) = 1.9599639845400545, so 1.9599639845400545 * 2.5 / sqrt(50) = 0.6929519121748391 -&gt; 0.692951912 at 9 dp. Asserted at 9 dp rather than the page&#39;s 6 because the deeper figure is derived, not merely copied; MISMATCH vs expected: expected 0.692951912, got 0.692951913</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/confidence.norm.html">CONFIDENCE.NORM</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=CONFIDENCE.NORM(A2,-1,A4)</div>
   <dl class="quirk-grid">
@@ -1711,6 +1776,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/confidence.norm.html">CONFIDENCE.NORM</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CONFIDENCE.NORM(A2,A3,50.9),9)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.692951913</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.692951912</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents &#34;If size is not an integer, it is truncated&#34;, so 50.9 must behave exactly as 50. Independently checked that this discriminates: a genuine size of 50.9 would give 1.9599639845400545 * 2.5 / sqrt(50.9) = 0.686798; MISMATCH vs expected: expected 0.692951912, got 0.692951913</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/confidence.t.html">CONFIDENCE.T</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=CONFIDENCE.T(0,1,50)</div>
@@ -1721,6 +1799,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;If alpha &lt;= 0 or alpha &gt;= 1, CONFIDENCE.T returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/confidence.t.html">CONFIDENCE.T</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=CONFIDENCE.T(0.05,1,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If size equals 1, CONFIDENCE.T returns #DIV/0! error value.&#34; This is the one place the .T variant&#39;s error contract differs from CONFIDENCE.NORM&#39;s, which returns #NUM! only below size 1 and computes normally at size 1: with size 1 there are zero degrees of freedom for the t distribution; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
