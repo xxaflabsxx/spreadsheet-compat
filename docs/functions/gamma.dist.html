@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GAMMA.DIST matches Excel in LibreOffice except error codes (tested)</title>
-<meta name="description" content="5/8 match; negative x num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="5/8 match; negative x num returns #VALUE!, Excel: #NUM! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/gamma.dist.html">
 <meta property="og:title" content="GAMMA.DIST matches Excel in LibreOffice except error codes (tested)">
-<meta property="og:description" content="5/8 match; negative x num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="5/8 match; negative x num returns #VALUE!, Excel: #NUM! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/gamma.dist.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>GAMMA.DIST</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>GAMMA.DIST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -443,6 +443,22 @@ against the failing cases above before assuming your data is wrong.</p>
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -497,6 +513,81 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMA.DIST(A2,A3,A4,FALSE),12)</td>
+  <td>Microsoft&#39;s documented worked example: the probability DENSITY at x = 10.00001131 with alpha = 9, beta = 2</td>
+  <td class="result mono">0.03263913042</td>
+  <td class="result mono">0.032639130418<br><span class="category-tag">Microsoft publishes &#39;=GAMMA.DIST(A2,A3,A4,FALSE)&#39; with the result 0.032639. Derived independently with mpmath at 50 digits straight from the density the page states in prose -- x^(alpha-1) * e^(-x/beta) / (beta^alpha * Gamma(alpha)) -- rather than from any statistics library&#39;s gamma routine: with x = 10.00001131, alpha = 9, beta = 2 the value is 0.032639130418294001533, which rounds to exactly the published 0.032639. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMA.DIST(A2,A3,A4,TRUE),12)</td>
+  <td>Microsoft&#39;s documented worked example: the CUMULATIVE distribution at the same point</td>
+  <td class="result mono">0.06809400387</td>
+  <td class="result mono">0.06809400387<br><span class="category-tag">Microsoft publishes &#39;=GAMMA.DIST(A2,A3,A4,TRUE)&#39; with the result 0.068094. Derived independently as the REGULARIZED LOWER INCOMPLETE GAMMA function P(alpha, x/beta) = P(9, 5.000005655) = 0.068094003869787331102 at 50 digits, which rounds to exactly the published 0.068094. Asserted at 12 dp: the 11th and 12th decimals (…3870) are carried because they are inside double precision and pin the implementation&#39;s incomplete-gamma routine, not just its leading digits. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMA.DIST(2,1,3,TRUE)-(1-EXP(-2/3)),12)</td>
+  <td>The page&#39;s own identity: at alpha = 1 the gamma distribution IS the exponential distribution</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft&#39;s GAMMA.DIST page states &#34;When alpha = 1, GAMMA.DIST returns the exponential distribution with:&#34; followed by an equation rendered as an image. The identity behind it is standard and independently checkable: the gamma CDF with alpha = 1 and scale beta is 1 - e^(-x/beta). At x = 2, beta = 3 that is 1 - e^(-2/3) = 0.48658288096740797313 (mpmath, 50 digits), and the regularized incomplete gamma P(1, 2/3) gives the identical value. Asserted as a difference of zero against the engine&#39;s OWN EXP, so it tests the distribution rather than a printed constant, and so it holds even if the engine&#39;s exp differs in the last bit. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMA.DIST(3,2,2,TRUE)-(1-CHISQ.DIST.RT(3,4)),12)</td>
+  <td>The page&#39;s other stated identity, relating the gamma and chi-squared distributions</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft&#39;s GAMMA.DIST page states: &#34;For a positive integer n, when alpha = n/2, beta = 2, and cumulative = TRUE, GAMMA.DIST returns (1 - CHISQ.DIST.RT(x)) with n degrees of freedom.&#34; Instantiated here at n = 4, so alpha = 2 and beta = 2. Derived independently: P(2, 1.5) = 0.44217459962892543 at 50 digits, and the chi-squared survival function at x = 3 with 4 degrees of freedom is 0.55782540037107457, whose complement is the same number. Written as a difference of exactly zero so it tests the two functions against each other inside the engine under test rather than against a figure from outside it. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA.DIST(-1,9,2,TRUE)</td>
+  <td>A negative x, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If x &lt; 0, GAMMA.DIST returns the #NUM! error value.&#34; The gamma distribution has no support below zero. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. WORTH READING NEXT TO ITS LEGACY TWIN: on the identical input, LibreOffice&#39;s GAMMADIST(-1,9,2,TRUE) returns the NUMBER 0 rather than any error at all (see data/tests/GAMMADIST.json). The two names are documented as the same function with the same exclusions, but LibreOffice guards the modern spelling and not the legacy one, so which spelling a workbook happens to use decides whether an out-of-domain x is visible.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA.DIST(1,0,2,TRUE)</td>
+  <td>An alpha of zero, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMA.DIST returns the #NUM! error value.&#34; Zero is the boundary of the exclusion. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA.DIST(1,9,0,TRUE)</td>
+  <td>A beta of zero, the other half of the same exclusion</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMA.DIST returns the #NUM! error value.&#34; Asserted separately from the alpha case because an engine can guard one parameter and not the other; beta also appears in a division (x/beta), so a missing guard here surfaces as #DIV/0! rather than a wrong number. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA.DIST(&#34;abc&#34;,9,2,TRUE)</td>
+  <td>A non-numeric x</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If x, alpha, or beta is nonnumeric, GAMMA.DIST returns the #VALUE! error value.&#34; Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

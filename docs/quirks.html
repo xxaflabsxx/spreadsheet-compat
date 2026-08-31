@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>355 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 355 divergences, every one executed — not copied from docs.">
+<title>387 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 387 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="355 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 355 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="387 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 387 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">355 quirks found across 154 functions
-(255 in LibreOffice, 100 in Google Sheets).
+<p class="search-hint">387 quirks found across 154 functions
+(255 in LibreOffice, 132 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -3129,6 +3129,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,1.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;For numbers outside of the range (0,1), FORECAST.ETS.CONFINT will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,1.5)</div>
   <dl class="quirk-grid">
@@ -3138,6 +3151,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;For numbers outside of the range (0,1), FORECAST.ETS.CONFINT will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents confidence_level as &#34;A numerical value between 0 and 1 (exclusive) ... For numbers outside of the range (0,1), FORECAST.ETS.CONFINT will return the #NUM! error.&#34; The interval is open, so 0 is outside it. Asserted separately from the 1.5 case because a boundary and a far-out-of-range value exercise different guards. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, and a SILENT WRONG ANSWER rather than a different error code: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return the number 0 for a confidence level of 0, where the page&#39;s &#34;For numbers outside of the range (0,1) ... #NUM!&#34; clause calls for an error. 0 is a superficially reasonable answer -- a zero-confidence interval arguably has zero width -- which is exactly what makes it dangerous: an out-of-range argument produces a clean-looking number instead of a visible error. Its sibling case one line down, a confidence level of 1.5, DOES error (with #VALUE! rather than #NUM!), so the range is guarded on the upper side only.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3155,6 +3181,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,E1:E20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.CONFINT will return the #VALUE! error.&#34; E1:E20 is the 1..20 timeline with its first two entries both 1. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build returns a confidence radius of roughly 3.8 to 4.1 -- and, because this is CONFINT, a DIFFERENT one on each build and on each run (24.2.0.3 3.98634886618424, 24.8.7.2 3.77969371470417, 25.2.0.3 4.11592383024156, 25.8.7.3 3.99931306698463 on the run recorded here). This is one of only two cases in the whole batch that differ across the four builds, and both are FORECAST.ETS.CONFINT. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,E1:E20)</div>
   <dl class="quirk-grid">
@@ -3164,6 +3203,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.CONFINT will return the #VALUE! error.&#34; E1:E20 is the 1..20 timeline with its first two entries both 1. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build returns a confidence radius of roughly 3.8 to 4.1 -- and, because this is CONFINT, a DIFFERENT one on each build and on each run (24.2.0.3 3.98634886618424, 24.8.7.2 3.77969371470417, 25.2.0.3 4.11592383024156, 25.8.7.3 3.99931306698463 on the run recorded here). This is one of only two cases in the whole batch that differ across the four builds, and both are FORECAST.ETS.CONFINT. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got 3.66439998164772</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,0.99)&gt;=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,0.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The one property of the interval that is fixed by the documentation rather than by the implementation. Microsoft defines confidence_level as &#34;a numerical value between 0 and 1 (exclusive), indicating a confidence level for the calculated confidence interval ... (90% of future points are to fall within this radius from prediction)&#34;. A radius that captures 99% of future points cannot be smaller than one that captures 50% of them, whatever the fitted parameters are. 0.99 against 0.50 is used rather than 0.99 against 0.90 on purpose: LibreOffice&#39;s CONFINT is non-deterministic (see the value probe on this function), so a narrow comparison could flip on noise alone, while the 99-vs-50 gap on this data is an order of magnitude larger than the observed jitter. Confirmed stable: true on twelve identical cells x two runs x all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) (96/96). HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,0.95,-3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents seasonality as: &#34;The default value of 1 means Excel detects seasonality automatically ... 0 indicates no seasonality ... Positive whole numbers will indicate to the algorithm to use patterns of this length as the seasonality. For any other value, FORECAST.ETS.CONFINT will return the #NUM! error.&#34; -3 is neither 0, 1, nor a positive whole number. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,H1:H20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If a constant step can&#39;t be identified in the provided timeline, FORECAST.ETS.CONFINT will return the #NUM! error.&#34; H1:H20 is 1, 2, 4, 8, 16, 32, 33, 34, ... -- doubling, then stepping by 1, so no single step fits. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20)&gt;=0</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Asserted structurally rather than numerically. Microsoft defines the return value as a radius -- &#34;95% of future points are expected to fall within this radius from the result FORECAST.ETS forecasted&#34; -- and a radius is by definition non-negative. This holds for every implementation of the algorithm regardless of how it fits its parameters, so it is assertable where the value itself is not. Confirmed stable: true on twelve identical cells x two runs x all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) (96/96). HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,0.95,9000)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;Maximum supported seasonality is 8,760 (number of hours in a year). Any seasonality above that number will result in the #NUM! error.&#34; 9000 exceeds it. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3181,6 +3285,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.CONFINT will return the #N/A error.&#34; 20 values against a 10-row timeline. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A10)</div>
   <dl class="quirk-grid">
@@ -3190,6 +3307,45 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.CONFINT will return the #N/A error.&#34; 20 values against a 10-row timeline. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(5,C1:C20,A1:A20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the target date is chronologically before the end of the historical timeline, FORECAST.ETS.CONFINT returns the #NUM! error.&#34; The timeline here ends at 20, so a target of 5 is squarely inside it. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(B1:B20,A1:A20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes no worked example (only a &#34;Download a sample workbook&#34; link), so this is asserted from the documented DEFINITION on a series constructed so that the definition has only one possible answer: &#34;Returns the length of the repetitive pattern Excel detects for the specified time series.&#34; B1:B20 is 10, 20, 30, 20 repeated five times over a constant-step timeline -- a pattern of length 4 repeated exactly five times, with no other repetitive structure and no noise for a detector to trip over. Any implementation that detects a repetitive pattern at all must report 4 here; 2 does not fit (10, 20 then 30, 20 differ), and 20 is the whole series. This is the one FORECAST.ETS.* quantity in this batch that the algorithm&#39;s implementation freedom does not reach, which is exactly why it is the one asserted. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected 4, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,E1:E20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.SEASONALITY will return the #VALUE! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build reports a seasonality of 4 -- the same answer it gives for the well-formed timeline, so the duplicate is simply absorbed. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3207,6 +3363,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,H1:H20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If a constant step can&#39;t be identified in the provided timeline, FORECAST.ETS.SEASONALITY will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,H1:H20)</div>
   <dl class="quirk-grid">
@@ -3220,6 +3389,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,A1:A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.SEASONALITY will return the #N/A error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,A1:A10)</div>
   <dl class="quirk-grid">
@@ -3229,6 +3411,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.SEASONALITY will return the #N/A error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(B1:B20,D1:D20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Seasonality is documented as &#34;the length of the repetitive pattern&#34; -- a count of data points, not a distance along the timeline. Rescaling the timeline from 1, 2, 3 ... to 2, 4, 6 ... leaves the pattern four points long, so the answer must still be 4. This separates an implementation that counts points from one that has confused the period with the timeline step. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected 4, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,A1:A20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The companion to the clean case, and the reason both exist: a detector could pass the clean series by exact-matching repeated blocks. C1:C20 is the same 10, 20, 30, 20 pattern with the fixed residual sequence 0, 1, -1, 2, 0, -2, 1, 0, ... added, so no two cycles are identical yet the period is still unambiguously 4 (the residuals are small relative to the 20-unit swing of the pattern). HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected 4, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=AND(FORECAST.ETS.STAT(C1:C20,A1:A20,1)&gt;=0,FORECAST.ETS.STAT(C1:C20,A1:A20,1)&lt;=1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>What CAN be asserted about alpha. A smoothing parameter in exponential smoothing is a weight on the most recent observation, and the documentation describes it in exactly those terms (&#34;a higher value gives more weight to recent data points&#34;); a weight outside [0,1] is not a weight. This bounds the optimizer&#39;s output without pretending to know which value inside the interval it will pick. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,E1:E20,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.STAT will return the #VALUE! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build reports a detected step size of 1 -- a confident, specific answer about a timeline that has no well-defined step at all, since two of its entries are the same instant. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3246,6 +3480,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,6)&lt;=FORECAST.ETS.STAT(C1:C20,A1:A20,7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The strongest thing assertable about the two error metrics without knowing the fitted model. Statistic types 6 and 7 are documented as the MAE and RMSE of the SAME set of residuals, and the mean of |e| never exceeds the root mean of e^2 -- that is Jensen&#39;s inequality applied to the convex square, an identity that holds for any residual vector whatsoever. So this passes for every conforming implementation and fails only if the two statistics are not computed from one set of residuals. NOTE ON THE PAGE: Microsoft&#39;s own text for type 6 is copy-pasted from type 5 -- it reads &#34;MAE metric: Returns the symmetric mean absolute percentage error metric, an accuracy measure based on percentage errors&#34;, which is the definition of SMAPE, not of MAE. The label (MAE), not the pasted sentence, is what is relied on here. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,H1:H20,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If a constant step can&#39;t be identified in the provided timeline, FORECAST.ETS.STAT will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,H1:H20,8)</div>
   <dl class="quirk-grid">
@@ -3259,6 +3519,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,7)&gt;=0</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Documented as &#34;RMSE metric -- Returns the root mean squared error metric, a measure of the differences between predicted and observed values&#34;. A root of a mean of squares is non-negative by construction, for every implementation. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A10,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.STAT will return the #N/A error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A10,8)</div>
   <dl class="quirk-grid">
@@ -3268,6 +3554,45 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.STAT will return the #N/A error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,5)&gt;=0</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Documented as &#34;SMAPE metric -- Returns the symmetric mean absolute percentage error metric, an accuracy measure based on percentage errors&#34;. A mean of absolute percentage errors is non-negative by construction. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(B1:B20,A1:A20,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Statistic type 8 is documented as &#34;Step size detected -- Returns the step size detected in the historical timeline&#34;, and it is the ONE of the eight statistics that is a property of the INPUT rather than of the fitted model: it owes nothing to the AAA algorithm&#39;s smoothing parameters, its optimizer or its error metrics. A1:A20 is 1, 2, 3 ... 20, so the detected step is 1 and any other answer is wrong regardless of implementation. Microsoft&#39;s page publishes no worked example, so this is asserted from the definition, not from a figure. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(B1:B20,D1:D20,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The companion to the step-1 case: D1:D20 is 2, 4, 6 ... 40. Asserting only the step-1 case would be passed by an implementation that returns a hard-coded 1, so both are asserted. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3307,6 +3632,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Verbatim from Microsoft: &#39;any other value produces the #VALUE! error value for FVSCHEDULE&#39;. Note this is the opposite of most statistical functions, which ignore stray text in a reference, and it differs from an empty cell, which the same sentence documents as a zero rate; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got 1.09</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.html">GAMMA</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(GAMMA(-3.75),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.267866128861</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=GAMMA(-3.75)&#39; with the result 0.268. Derived independently with mpmath at 50 digits: Gamma(-3.75) = 0.26786612886141660256, which rounds to the published 0.268. This case matters because the gamma function is only defined for negative arguments by analytic continuation -- an implementation that simply integrates the defining integral cannot reach it -- and because the sign is a real test: Gamma is positive on (-4,-3), and an engine using the reflection formula with a sign slip lands on -0.268.; MISMATCH vs expected: expected 0.267866128861, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3610,6 +3948,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/hypgeomdist.html">HYPGEOMDIST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(HYPGEOMDIST(1.9,4.9,8.9,20.9),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.2724458204</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.363261093911</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents, as the first remark on the page: &#34;All arguments are truncated to integers.&#34; Truncation (toward zero), not rounding: 1.9, 4.9, 8.9, 20.9 must become 1, 4, 8, 20 and reproduce the documented example&#39;s answer exactly. Chosen with fractional parts of .9 precisely so that an engine which ROUNDS instead of truncating gets 2, 5, 9, 21 and a visibly different number (0.4067...), rather than accidentally passing. Set up from Microsoft&#39;s own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected 0.363261093911, got 0.2724458204</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/hypgeomdist.html">HYPGEOMDIST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=HYPGEOMDIST(1,0,8,20)</div>
   <dl class="quirk-grid">
@@ -3649,6 +4000,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/imcos.html">IMCOS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMCOS(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents, on this page specifically: &#34;If inumber is a logical value, IMCOS returns the #VALUE! error value.&#34; This is a deliberate refusal to coerce, and it is the sort of guard an engine drops: TRUE coerces to 1 in almost every other numeric context, so an implementation that simply converts its argument to a number computes cos(1) = 0.54030230586814 and returns a plausible answer where Excel raises an error. EXECUTED RESULT, and a SILENT WRONG ANSWER: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return the string &#34;0.54030230586814&#34; -- that is cos(1), i.e. TRUE was coerced to 1 and fed to the function -- where the page documents #VALUE!. The same coercion happens on this batch&#39;s IMCOSH, IMCOT, IMCSC and IMCSCH when they are called under their unprefixed names (returning cosh(1), cot(1), csc(1) and csch(1) respectively), so it is one behaviour across the complex family rather than a slip in one function.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcos.html">IMCOS</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IMCOS(TRUE)</div>
   <dl class="quirk-grid">
@@ -3671,6 +4035,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Engineering</dd>
   </dl>
   <p>Microsoft publishes &#39;=IMCOSH(&#34;4+3i&#34;)&#39; with the result -27.0349456030742+3.85115333481178i. Derived independently with mpmath at 40 digits from cosh(x+yi) = cosh(x)cos(y) + i*sinh(x)sin(y): cosh(4)cos(3) = -27.034945603074224648 and sinh(4)sin(3) = 3.8511533348117775366, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOSH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOSH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOSH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOSH, COM.MICROSOFT.IMCOSH, ORG.OPENOFFICE.IMCOSH and _xlfn.ORG.OPENOFFICE.IMCOSH are all #NAME? on every build, while the UNPREFIXED IMCOSH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOSH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOSH token Excel writes -- meaning a workbook saved by Excel that uses IMCOSH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;-27.0349456030742+3.85115333481178i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcosh.html">IMCOSH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMCOSH(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCOSH returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOSH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOSH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOSH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOSH, COM.MICROSOFT.IMCOSH, ORG.OPENOFFICE.IMCOSH and _xlfn.ORG.OPENOFFICE.IMCOSH are all #NAME? on every build, while the UNPREFIXED IMCOSH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOSH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOSH token Excel writes -- meaning a workbook saved by Excel that uses IMCOSH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3714,6 +4091,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/imcot.html">IMCOT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMCOT(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCOT returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOT is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOT, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOT here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOT, COM.MICROSOFT.IMCOT, ORG.OPENOFFICE.IMCOT and _xlfn.ORG.OPENOFFICE.IMCOT are all #NAME? on every build, while the UNPREFIXED IMCOT(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOT correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOT token Excel writes -- meaning a workbook saved by Excel that uses IMCOT arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcot.html">IMCOT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IMCOT(TRUE)</div>
   <dl class="quirk-grid">
@@ -3753,6 +4143,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/imcsc.html">IMCSC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMCSC(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCSC returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsc.html">IMCSC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IMCSC(TRUE)</div>
   <dl class="quirk-grid">
@@ -3788,6 +4191,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Engineering</dd>
   </dl>
   <p>Microsoft publishes &#39;=IMCSCH(&#34;4+3i&#34;)&#39; with the result -0.036275889628626-0.0051744731840194i. Derived independently with mpmath at 40 digits from csch(z) = 1/sinh(z): -0.036275889628626011594 - 0.0051744731840193976541i, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;-0.036275889628626-0.0051744731840194i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsch.html">IMCSCH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMCSCH(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCSCH returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
