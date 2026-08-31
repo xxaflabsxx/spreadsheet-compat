@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Z.TEST matches Excel in LibreOffice except error codes (tested)</title>
-<meta name="description" content="6/7 match; empty array returns #DIV/0!, Excel: #N/A (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="6/7 match; empty array returns #DIV/0!, Excel: #N/A (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/z.test.html">
 <meta property="og:title" content="Z.TEST matches Excel in LibreOffice except error codes (tested)">
-<meta property="og:description" content="6/7 match; empty array returns #DIV/0!, Excel: #N/A (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="6/7 match; empty array returns #DIV/0!, Excel: #N/A (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/z.test.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>Z.TEST</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>Z.TEST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -443,6 +443,20 @@ against the failing cases above before assuming your data is wrong.</p>
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -479,6 +493,73 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(Z.TEST(A2:A11,4),6)</td>
+  <td>Microsoft&#39;s first documented row: the one-tailed p-value at a hypothesized mean of 4</td>
+  <td class="result mono">0.090574</td>
+  <td class="result mono">0.090574<br><span class="category-tag">Microsoft publishes =Z.TEST(A2:A11,4) = 0.090574 (&#34;One-tailed probability-value of a z-test for the data set above, at the hypothesized population mean of 4&#34;). DERIVATION from the identity the page publishes AS TEXT (this page carries no equation images at all): &#34;Z.TEST(array,x) = 1-Norm.S.Dist((Average(array)- x) / (STDEV(array)/sqrt(n)),TRUE)&#34; when sigma is omitted. With n = 10, AVERAGE = 51/10 = 5.1 and the SAMPLE standard deviation (n-1 divisor), the standard normal CDF was evaluated as erfc(-z/sqrt(2))/2 at 50 digits -- not from a statistics library&#39;s norm.cdf. The result is 0.09057419685136376034696, i.e. 0.090574 at the published precision. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/z-test-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(Z.TEST(A2:A11,6),6)</td>
+  <td>Microsoft&#39;s third documented row: the same data at a hypothesized mean of 6</td>
+  <td class="result mono">0.863043</td>
+  <td class="result mono">0.863043<br><span class="category-tag">Microsoft publishes =Z.TEST(A2:A11,6) = 0.863043. Derived the same way: 0.8630433891295298922184. The pair of rows is worth having because the sample mean 5.1 lies BETWEEN the two hypothesized means, so one p-value is below 0.5 and the other above -- which exercises the page&#39;s own remark that &#34;if AVERAGE(array) &lt; x, Z.TEST will return a value greater than 0.5&#34;.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(2*MIN(Z.TEST(A2:A11,4),1-Z.TEST(A2:A11,4)),6)</td>
+  <td>Microsoft&#39;s second documented row: the two-tailed form it publishes as a composed formula</td>
+  <td class="result mono">0.181148</td>
+  <td class="result mono">0.181148<br><span class="category-tag">Microsoft publishes =2 * MIN(Z.TEST(A2:A11,4), 1 - Z.TEST(A2:A11,4)) = 0.181148 and documents that composition as the way to get a two-tailed value. Derived as twice the one-tailed figure (which is below 0.5, so MIN picks it): 0.181148393702727521. The case also exercises MIN over two function calls, so a failure should be read against the one-tailed case above before blaming Z.TEST.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(2*MIN(Z.TEST(A2:A11,6),1-Z.TEST(A2:A11,6)),6)</td>
+  <td>Microsoft&#39;s fourth documented row, where MIN must pick the OTHER branch</td>
+  <td class="result mono">0.273913</td>
+  <td class="result mono">0.273913<br><span class="category-tag">Microsoft publishes 0.273913 here. This is the row that makes the MIN meaningful: Z.TEST(A2:A11,6) = 0.863043 is ABOVE 0.5, so the two-tailed value is 2*(1 - 0.863043) = 0.273913221740940216, not twice the p-value itself. An engine that hard-coded doubling would return 1.726087 and fail only on this row.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(Z.TEST(A2:A11,4),12)</td>
+  <td>The headline example carried to twelve decimals</td>
+  <td class="result mono">0.09057419685</td>
+  <td class="result mono">0.090574196851<br><span class="category-tag">Asserted at twelve places from the derivation: 0.090574196851. Six published decimals cannot separate the documented SAMPLE standard deviation (n-1) from a population one (n): with the n divisor (population sigma 2.46779253585 rather than the sample 2.60128173535) the answer would be 0.0793345963, which differs in the second significant digit and WOULD be caught here, but a subtler slip in the standard normal tail would not be.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(Z.TEST(A2:A11,4,2.5),12)</td>
+  <td>The optional sigma argument supplied, which the page documents as replacing STDEV</td>
+  <td class="result mono">0.08205175341</td>
+  <td class="result mono">0.082051753413<br><span class="category-tag">MICROSOFT PUBLISHES NO FIGURE WITH sigma SUPPLIED -- both example rows omit it -- so this value is ours, derived from the page&#39;s own three-argument identity &#34;Z.TEST(array,x,sigma) = 1-Norm.S.Dist((Average(array)- x) / (sigma/sqrt(n)),TRUE)&#34;. With sigma = 2.5, z = (5.1-4)/(2.5/sqrt(10)) = 1.391326... and the result is 0.08205175341289340444 at 50 digits, i.e. 0.082051753413 at twelve places. The case exists because the optional argument is the only part of the signature no published example touches, and an engine that ignored sigma would return the 0.090574 above.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=Z.TEST(A20:A21,4)</td>
+  <td>An empty array, which the page assigns an error code -- the referenced cells are DELIBERATELY left unset</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">The Remarks publish: &#34;If array is empty, Z.TEST returns the #N/A error value.&#34; A2:A11 holds the data; A20:A21 IS DELIBERATELY BLANK AND UNPOPULATED, which is the entire content of this case -- see scripts/check_test_setup_refs.py, which accepts a reference to an unset cell only when the case says in its own words that emptiness is the point.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

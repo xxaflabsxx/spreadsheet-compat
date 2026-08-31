@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SERIESSUM works in Excel &amp; Sheets (docs), LibreOffice (tested)</title>
-<meta name="description" content="All 5 executed test cases for SERIESSUM match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>SERIESSUM works in Excel (docs), Sheets &amp; LibreOffice (executed)</title>
+<meta name="description" content="All 5 LibreOffice and 5 Google Sheets executed cases for SERIESSUM match Excel&#39;… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/seriessum.html">
-<meta property="og:title" content="SERIESSUM works in Excel &amp; Sheets (docs), LibreOffice (tested)">
-<meta property="og:description" content="All 5 executed test cases for SERIESSUM match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="SERIESSUM works in Excel (docs), Sheets &amp; LibreOffice (executed)">
+<meta property="og:description" content="All 5 LibreOffice and 5 Google Sheets executed cases for SERIESSUM match Excel&#39;… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/seriessum.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>SERIESSUM</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>SERIESSUM</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -436,6 +436,57 @@ SERIESSUM&rsquo;s support changed &mdash; not documentation claims, real results
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(SERIESSUM(A3,0,2,A4:A7),6)</td>
+  <td>Microsoft&#39;s documented worked example: a four-term Taylor approximation to cos(pi/4)</td>
+  <td class="result mono">0.707103</td>
+  <td class="result mono">0.707103<br><span class="category-tag">Microsoft publishes =SERIESSUM(A3,0,2,A4:A7) = 0.707103 (&#34;Approximation to the cosine of Pi/4 radians, or 45 degrees&#34;). DERIVATION: the documented series is sum over i of coefficient_i * x^(n + (i-1)*m), here x = 0.785398163, n = 0, m = 2 and four coefficients, i.e. 1 - x^2/2 + x^4/24 - x^6/720. Evaluated at 50 digits on the ROUNDED LITERALS THE PAGE ACTUALLY PUTS IN THE CELLS -- 0.785398163, 1, -0.5, 0.041666667, -0.001388889, not PI()/4 and not -1/FACT(2) -- that is 0.7071032152046538649644, which is 0.707103 at the published precision. USING THE EXACT VALUES WOULD HAVE BEEN WRONG BY MORE THAN THE LAST PUBLISHED DIGIT: the page prints the same coefficients a second time as formulae (=PI()/4, =-1/FACT(2), =1/FACT(4), =-1/FACT(6)) in column B, and the true cos(0.785398163) is 0.7071067814675859, which differs from the series value in the SIXTH decimal (0.707107 vs 0.707103). The case therefore cites column A, the column the published formula reads. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/seriessum-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SERIESSUM(A3,0,2,A4:A7),10)</td>
+  <td>The same example carried to ten decimals</td>
+  <td class="result mono">0.7071032152</td>
+  <td class="result mono">0.7071032152<br><span class="category-tag">Asserted at ten places from the derivation: 0.7071032152. This is the case that separates SERIESSUM from COS: at six published decimals the truncated series and the true cosine differ by 4e-6, which is visible but small; at ten places they differ in the sixth digit and cannot be confused.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SERIESSUM(2,0,1,{1;1;1;1})</td>
+  <td>A structural case with no derived constant: powers of two, one per coefficient</td>
+  <td class="result mono">15</td>
+  <td class="result mono">15<br><span class="category-tag">With x = 2, n = 0, m = 1 and four unit coefficients the documented sum is 2^0 + 2^1 + 2^2 + 2^3 = 15 exactly. A structural assertion that pins down all three of the exponent arguments at once: an engine that started the power at n = 1, or stepped by m = 2, or reversed the coefficient order would return 30, 85 or 15 respectively -- the last is why the coefficients are all 1 here and NOT all 1 in the next case.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SERIESSUM(10,0,1,{1;2;3})</td>
+  <td>Distinct coefficients, which pin down the order in which they are applied</td>
+  <td class="result mono">321</td>
+  <td class="result mono">321<br><span class="category-tag">With x = 10, n = 0, m = 1 and coefficients 1, 2, 3 the documented sum is 1*10^0 + 2*10^1 + 3*10^2 = 1 + 20 + 300 = 321 exactly. Base ten makes the coefficient order readable straight off the answer: an engine applying them in reverse would return 123. No derived constant.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SERIESSUM(&#34;abc&#34;,0,2,{1;1})</td>
+  <td>A non-numeric argument, which the page&#39;s single Remark assigns an error code</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The page&#39;s only Remark publishes: &#34;If any argument is nonnumeric, SERIESSUM returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SQRTPI matches Excel in LibreOffice except error codes (tested)</title>
-<meta name="description" content="5/6 match; negative argument returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta name="description" content="5/6 match; negative argument returns #VALUE!, Excel: #NUM! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/sqrtpi.html">
 <meta property="og:title" content="SQRTPI matches Excel in LibreOffice except error codes (tested)">
-<meta property="og:description" content="5/6 match; negative argument returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:description" content="5/6 match; negative argument returns #VALUE!, Excel: #NUM! (code only). Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/sqrtpi.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>SQRTPI</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>SQRTPI</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -443,6 +443,18 @@ against the failing cases above before assuming your data is wrong.</p>
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -477,6 +489,65 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(SQRTPI(1),6)</td>
+  <td>Microsoft&#39;s first documented example, at the six decimals it publishes</td>
+  <td class="result mono">1.772454</td>
+  <td class="result mono">1.772454<br><span class="category-tag">Microsoft publishes =SQRTPI(1) = 1.772454 (&#34;Square root of pi&#34;). DERIVATION: sqrt(1*pi) = 1.772453850905516027298 at 50 digits, which is 1.772454 at the published precision. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sqrtpi-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SQRTPI(2),6)</td>
+  <td>Microsoft&#39;s second documented example</td>
+  <td class="result mono">2.506628</td>
+  <td class="result mono">2.506628<br><span class="category-tag">Microsoft publishes =SQRTPI(2) = 2.506628 (&#34;Square root of 2 * pi&#34;). Derived independently as sqrt(2*pi) = 2.506628274631000502416, i.e. 2.506628 at the published precision. This is also the normal distribution&#39;s normalising constant, so the digits are checkable against any statistics reference.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SQRTPI(2),10)</td>
+  <td>The same example carried to ten decimals</td>
+  <td class="result mono">2.506628275</td>
+  <td class="result mono">2.5066282746<br><span class="category-tag">Asserted at ten places from the derivation: 2.5066282746. Six published decimals cannot see an engine that multiplies before or after taking the root in a way that loses a bit.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SQRTPI(0)</td>
+  <td>Zero, which is inside the documented range</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">The only Remark on the page is &#34;If number &lt; 0, SQRTPI returns the #NUM! error value&#34;, so zero is inside the documented range and sqrt(0*pi) = 0 exactly.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SQRTPI(3)^2/PI(),12)</td>
+  <td>A structural round trip: squaring the result and dividing by pi must give back the argument</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3<br><span class="category-tag">SQRTPI(n)^2 / PI() = n exactly in real arithmetic, for any n. A structural assertion with no derived constant, and it is sharp about the ARGUMENT handling: an engine that computed sqrt(pi)*n, or sqrt(n)+pi, or sqrt(n/pi) would pass none of it.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SQRTPI(-1)</td>
+  <td>A negative argument, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The page&#39;s single Remark publishes: &#34;If number &lt; 0, SQRTPI returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

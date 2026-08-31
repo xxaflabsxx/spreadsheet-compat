@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>STOCKHISTORY is not supported in LibreOffice Calc (Excel only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for STOCKHISTORY in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>STOCKHISTORY is not supported in Google Sheets or (executed)</title>
+<meta name="description" content="#NAME? in both: 1 executed Sheets case and 1 in LibreOffice. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/stockhistory.html">
-<meta property="og:title" content="STOCKHISTORY is not supported in LibreOffice Calc (Excel only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for STOCKHISTORY in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="STOCKHISTORY is not supported in Google Sheets or (executed)">
+<meta property="og:description" content="#NAME? in both: 1 executed Sheets case and 1 in LibreOffice. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/stockhistory.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Information &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>STOCKHISTORY</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>STOCKHISTORY</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -435,6 +435,17 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+<h2 class="section-title">Why isn&rsquo;t STOCKHISTORY working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>STOCKHISTORY</code>: we imported the formula into
+Sheets on 2026-08-31 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
+
+
 
 
 
@@ -447,6 +458,25 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=STOCKHISTORY(&#34;MSFT&#34;,DATE(2020,1,1))</td>
+  <td>Existence probe only: STOCKHISTORY returns historical market data from a Microsoft-selected provider, so its output is neither offline-reproducible nor stable over time</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">NOT DETERMINISTICALLY ASSERTABLE, and deliberately recorded as a probe rather than a support claim. THE PAGE HAS NO EXAMPLE SECTION, NO EXAMPLE TABLE AND NO REMARKS AT ALL -- its only sections are Technical details, Notes and Tips, and a search of the whole article for every Excel error token (#VALUE!, #NUM!, #N/A, #NAME?, #BUSY!, #CONNECT!, #BLOCKED!, #FIELD!, #REF!, #DIV/0!) returns zero hits, so Microsoft publishes neither a value nor an error code that any engine could be held to. What it does publish is why: &#34;The STOCKHISTORY function requires a Microsoft 365 Personal, Microsoft 365 Family, Microsoft 365 Business Standard, or Microsoft 365 Business Premium subscription&#34;; &#34;This will pull data from the default exchange for the instrument&#34;; &#34;while some financial instruments may be available as Stocks data types, the historical information will not be available&#34;; &#34;STOCKHISTORY... generally only updates after a trading day completes... you cannot use STOCKHISTORY to get data for today&#39;s trading details until after the market has closed&#34;; and &#34;Date returned may be earlier than the date provided.&#34; A function whose answer depends on a paid subscription, an exchange&#39;s choice of default, and what time of day the sheet is recalculated has no value a compatibility corpus can assert. What the run does establish is recorded separately: probing all four pinned LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) with the plain name, the _xlfn. storage form, the COM.MICROSOFT. add-in form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form returned #NAME? for ALL FIVE spellings on every build, which is the signature of a name the engine does not implement at all. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/stockhistory-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SEARCHB works in Excel &amp; Sheets (docs), LibreOffice (tested)</title>
-<meta name="description" content="All 8 executed test cases for SEARCHB match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>SEARCHB works in Excel (docs), Sheets &amp; LibreOffice (executed)</title>
+<meta name="description" content="All 8 LibreOffice and 8 Google Sheets executed cases for SEARCHB match Excel&#39;s… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/searchb.html">
-<meta property="og:title" content="SEARCHB works in Excel &amp; Sheets (docs), LibreOffice (tested)">
-<meta property="og:description" content="All 8 executed test cases for SEARCHB match Excel&#39;s documented results. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="SEARCHB works in Excel (docs), Sheets &amp; LibreOffice (executed)">
+<meta property="og:description" content="All 8 LibreOffice and 8 Google Sheets executed cases for SEARCHB match Excel&#39;s… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/searchb.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>SEARCHB</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>SEARCHB</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -436,6 +436,81 @@ SEARCHB&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SEARCHB(&#34;e&#34;,A2,6)</td>
+  <td>Microsoft&#39;s documented SEARCH example with a start position, on ASCII where bytes are characters</td>
+  <td class="result mono">7</td>
+  <td class="result mono">7<br><span class="category-tag">The SEARCH page publishes =SEARCH(&#34;e&#34;,A2,6) = 7 for A2 = &#34;Statements&#34; (&#34;Position of the first &#39;e&#39; in the string, starting the search at the sixth character&#34;). &#34;Statements&#34; is pure ASCII, so a search over BYTES from byte six lands on the same position a search over characters does. SEARCHB HAS NO PAGE OF ITS OWN, AND THE PAGE THAT USED TO DOCUMENT IT NO LONGER DOES -- see SEARCHB_documentation_has_been_withdrawn for the full finding. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/search-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCHB(A4,A3)</td>
+  <td>Microsoft&#39;s second documented row: the search string taken from a cell, case-insensitively</td>
+  <td class="result mono">8</td>
+  <td class="result mono">8<br><span class="category-tag">The SEARCH page publishes =SEARCH(A4,A3) = 8 for A4 = &#34;margin&#34; and A3 = &#34;Profit Margin&#34;. The match is case-insensitive -- the page&#39;s Remarks say &#34;SEARCH... do not distinguish between uppercase and lowercase letters&#34; -- so lowercase &#34;margin&#34; finds &#34;Margin&#34; at position 8. Pure ASCII again, so bytes and characters coincide.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCHB(&#34;e&#34;,A2)</td>
+  <td>The start argument omitted, which the page says defaults to 1</td>
+  <td class="result mono">5</td>
+  <td class="result mono">5<br><span class="category-tag">The Remarks publish: &#34;If start_num is omitted, it is assumed to be 1.&#34; &#34;Statements&#34; has its first &#34;e&#34; at position 5, which is why the documented row above passes 6 to skip it and find the second one at 7. The pair together prove the start argument is honoured rather than ignored.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCHB(&#34;zzz&#34;,A2)</td>
+  <td>A string that does not occur, which the page assigns an error code</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The Remarks publish: &#34;If find_text is not found, the #VALUE! error value is returned.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCHB(&#34;e&#34;,A2,99)</td>
+  <td>A start position past the end of the text, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The Remarks publish: &#34;If start_num is not greater than 0 or is greater than the length of within_text, the #VALUE! error value is returned.&#34; &#34;Statements&#34; is ten characters, so 99 is outside the documented range.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCHB(&#34;?argin&#34;,A3)</td>
+  <td>The single-character wildcard the page documents</td>
+  <td class="result mono">8</td>
+  <td class="result mono">8<br><span class="category-tag">The Remarks publish that SEARCH supports wildcards: &#34;You can use the wildcard characters -- the question mark (?) and asterisk (*) -- in find_text. A question mark matches any single character; an asterisk matches any sequence of characters.&#34; &#34;?argin&#34; therefore matches &#34;Margin&#34; in &#34;Profit Margin&#34; at position 8, the same position the literal search finds. This case is what distinguishes SEARCHB from FINDB, whose page documents no wildcards at all.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCHB(&#34;Ｂ&#34;,&#34;ＡＢＣ&#34;)</td>
+  <td>Full-width (double-byte) characters, where byte and character counting diverge</td>
+  <td class="result mono">3</td>
+  <td class="result mono"><br><span class="category-tag">DELIBERATELY ASSERTS NOTHING, for the reason the LEFTB, MIDB, REPLACEB and RIGHTB files give: byte counting in the B functions historically applied only when the default language was a DBCS language, this harness runs under en_US.UTF-8, and there is now NO Microsoft documentation of SEARCHB&#39;s byte behaviour at all to hold an engine to. Under DBCS rules the second full-width character starts at BYTE 3; under character rules it is at position 2. The case records what each engine returns rather than scoring it.</span></td>
+  <td><span class="verdict-ok">Ran OK</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SEARCHB(&#34;a&#34;,&#34;a&#34;)</td>
+  <td>A trivially true search, carrying this batch&#39;s finding that SEARCHB&#39;s documentation has been withdrawn</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">THE ASSERTION IS TRIVIAL AND THE NOTE IS THE POINT. Searching for &#34;a&#34; in &#34;a&#34; is position 1 under byte counting and character counting alike, so the value cannot be controversial; the case exists to carry a documentation finding made on 2026-08-31. SEARCHB HAS NO PAGE OF ITS OWN: /en-us/excel/functions/searchb-function, search-searchb-functions, search-searchb-function, searchb-functions and search-and-searchb-functions were each requested six times and returned HTTP 404 every time, and the function index&#39;s left-hand navigation has no SEARCHB entry. It used to be documented on the combined &#34;SEARCH, SEARCHB functions&#34; page, and that page still ANSWERS to SEARCHB -- the context-sensitive help IDs SEARCHB and XLWAEnduser_SEARCHB resolve to it, and its own HTML head meta description still publishes &#34;Syntax: SEARCH(find_text,within_text,[start_num]) SEARCHB(find_text,within_text,[start_num])&#34; -- but THE LIVE ARTICLE BODY HAS BEEN REWRITTEN TO SEARCH ONLY. There is no SEARCHB syntax line, no SEARCHB argument list, and the double-byte remarks are gone: the strings &#34;double-byte&#34; and &#34;DBCS&#34; appear zero times in the article. What survives is an Important box reading &#34;The SEARCHB function is deprecated.&#34; Every SEARCHB case in this file therefore cites the SEARCH page and asserts only what holds for pure ASCII, where the two functions must agree; nothing here is asserted about byte semantics, because Microsoft no longer publishes any.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

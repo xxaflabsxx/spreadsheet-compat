@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>658 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 658 divergences, every one executed — not copied from docs.">
+<title>671 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 671 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="658 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 658 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="671 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 671 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,9 +324,9 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">658 quirks found across 224 functions
-(439 in LibreOffice, 219 in Google Sheets).
-A further 8 Google Sheets cases
+<p class="search-hint">671 quirks found across 224 functions
+(439 in LibreOffice, 232 in Google Sheets).
+A further 9 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
 
@@ -8329,6 +8329,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=COUNT(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>COUNT tallies numeric cells, so it reports 4 whether or not the blanks were trimmed -- but paired with the ROWS case below it pins the shape down. The data block B3:C4 holds exactly four numbers.; MISMATCH vs expected: expected 4, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=COUNT(TRIMRANGE(A1:E10))</div>
   <dl class="quirk-grid">
@@ -8338,6 +8351,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>COUNT tallies numeric cells, so it reports 4 whether or not the blanks were trimmed -- but paired with the ROWS case below it pins the shape down. The data block B3:C4 holds exactly four numbers.; MISMATCH vs expected: expected 4, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=SUM(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">10</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>THE PAGE PUBLISHES NO EXAMPLE TABLE AND NO ERROR REMARKS AT ALL -- every value in this file is derived from the prose, and that is said out loud rather than dressed up as a citation. What the page does document: &#34;=TRIMRANGE(range,[trim_rows],[trim_cols])&#34;, with trim_rows and trim_cols each taking 0 = None, 1 = leading, 2 = trailing, 3 = both, and 3 as the default for each. A1:E10 IS DELIBERATELY MOSTLY BLANK: only B3:C4 holds data (1, 2, 3, 4), so trimming both leading and trailing blank rows and columns must reduce A1:E10 to exactly B3:C4, whose sum is 10. SUM is wrapped around the call because TRIMRANGE returns a RANGE rather than a scalar, and a sum is the cheapest assertion that depends on the whole trimmed shape. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/trimrange-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.; MISMATCH vs expected: expected 10, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -8355,6 +8381,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROWS(TRIMRANGE(A1:E10,1,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">8</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>With trim_rows = 1 (&#34;1 - Trims leading blank rows&#34;) the two blank rows before the data are removed and THE SIX BLANK ROWS AFTER IT ARE DELIBERATELY LEFT, so A1:E10 becomes A3:E10 -- eight rows. Derived from the prose; the page publishes no worked example of any trim code. This case and the trailing one below are what separate the three non-zero codes from each other, which the default case cannot do.; MISMATCH vs expected: expected 8, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROWS(TRIMRANGE(A1:E10,1,1))</div>
   <dl class="quirk-grid">
@@ -8364,6 +8403,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>With trim_rows = 1 (&#34;1 - Trims leading blank rows&#34;) the two blank rows before the data are removed and THE SIX BLANK ROWS AFTER IT ARE DELIBERATELY LEFT, so A1:E10 becomes A3:E10 -- eight rows. Derived from the prose; the page publishes no worked example of any trim code. This case and the trailing one below are what separate the three non-zero codes from each other, which the default case cannot do.; MISMATCH vs expected: expected 8, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=SUM(TRIMRANGE(A1:E10,0,0))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">10</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>With trim_rows = 0 and trim_cols = 0 -- both documented as &#34;0 - None&#34; -- nothing is trimmed and the range stays A1:E10, WHICH IS DELIBERATELY FULL OF BLANK CELLS. The sum is still 10 because blanks contribute nothing to SUM, so this case does NOT prove the range was left untrimmed; it proves only that the 0 codes are accepted and do not error. The shape difference between this and the case above is invisible to SUM, which is stated here rather than glossed: a sharper test would need a function sensitive to the range&#39;s dimensions, and ROWS/COLUMNS of a trimmed reference is exactly the sort of thing an engine without TRIMRANGE cannot be asked.; MISMATCH vs expected: expected 10, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -8381,6 +8433,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROWS(TRIMRANGE(A1:E10,2,2))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>With trim_rows = 2 (&#34;2 - Trims trailing blank rows&#34;) the six blank rows after the data are removed and THE TWO BLANK ROWS BEFORE IT ARE DELIBERATELY LEFT, so A1:E10 becomes A1:E4 -- four rows. The page documents the equivalent Trim Refs operator spellings for these codes in a table that is worth recording as published, typo and all: &#34;Trim All (.:.) | A1.:.E10 | TRIMRANGE(A1:E10,3,3)&#34;, &#34;Trim Trailing (:.) | A1:.E10 | TRIMRANGE(A1:E10,2,2)&#34;, &#34;Trim Leading (.:) | A1.:Z10 | TRIMRANGE(A1:E10,1,1)&#34; -- note the third row&#39;s example says Z10 where its equivalent says E10, which is a slip in Microsoft&#39;s own table.; MISMATCH vs expected: expected 4, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROWS(TRIMRANGE(A1:E10,2,2))</div>
   <dl class="quirk-grid">
@@ -8394,6 +8459,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=COLUMNS(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>The column half of the same assertion: five columns A through E trim to the two, B and C, that hold data. Derived from the documented default trim_cols = 3.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=COLUMNS(TRIMRANGE(A1:E10))</div>
   <dl class="quirk-grid">
@@ -8403,6 +8481,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>The column half of the same assertion: five columns A through E trim to the two, B and C, that hold data. Derived from the documented default trim_cols = 3.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROWS(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>THIS IS THE CASE THAT MAKES THE FILE MEAN SOMETHING. A1:E10 IS TEN ROWS OF MOSTLY BLANK CELLS; trimmed to its data block B3:C4 it is two. ROWS() reads the reference&#39;s shape rather than its values, so an engine that accepted TRIMRANGE but ignored it would return 10 here and pass every other case in this file. Derived from the documented default trim_rows = 3 (&#34;Trims both leading and trailing blank rows&#34;), not from any published example -- there is none.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -8498,6 +8589,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A2,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">TRUE</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A2, 0) = TRUE for A2 = TRUE. Format 0 is documented as &#34;Concise format that is easy to read. The text returned will be the same as the text rendered in a cell that has general formatting applied.&#34; Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/valuetotext-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.; MISMATCH vs expected: expected &#39;TRUE&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=VALUETOTEXT(A2,0)</div>
   <dl class="quirk-grid">
@@ -8507,6 +8611,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft publishes =VALUETOTEXT(A2, 0) = TRUE for A2 = TRUE. Format 0 is documented as &#34;Concise format that is easy to read. The text returned will be the same as the text rendered in a cell that has general formatting applied.&#34; Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/valuetotext-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.; MISMATCH vs expected: expected &#39;TRUE&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A3,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1234.01234</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A3, 0) = 1234.01234. The published Strict row for the same cell is ALSO 1234.01234, because the page documents strict format as encapsulating &#34;returned strings in quotes except for Booleans, Numbers and Errors&#34; -- numbers are one of the three exceptions.; MISMATCH vs expected: expected &#39;1234.01234&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -8524,6 +8641,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A4,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">Hello</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A4, 0) = Hello, with no quotation marks. This is the concise half of the pair that defines the format argument.; MISMATCH vs expected: expected &#39;Hello&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=VALUETOTEXT(A4,0)</div>
   <dl class="quirk-grid">
@@ -8533,6 +8663,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft publishes =VALUETOTEXT(A4, 0) = Hello, with no quotation marks. This is the concise half of the pair that defines the format argument.; MISMATCH vs expected: expected &#39;Hello&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A4,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If format is anything other than 0 or 1, VALUETOTEXT returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -8550,6 +8693,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A6,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">&#34;Seattle&#34;</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A6, 1) = &#34;Seattle&#34;. Asserted alongside the Hello pair so the quoting behaviour rests on two independent strings rather than one.; MISMATCH vs expected: expected &#39;&#34;Seattle&#34;&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=VALUETOTEXT(A6,1)</div>
   <dl class="quirk-grid">
@@ -8559,6 +8715,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft publishes =VALUETOTEXT(A6, 1) = &#34;Seattle&#34;. Asserted alongside the Hello pair so the quoting behaviour rests on two independent strings rather than one.; MISMATCH vs expected: expected &#39;&#34;Seattle&#34;&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A4,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">&#34;Hello&#34;</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A4, 1) = &#34;Hello&#34; WITH the quotation marks, against the unquoted Hello from format 0 on the identical cell. THIS PAIR IS THE ONLY THING IN THE PUBLISHED TABLE THAT DISTINGUISHES THE TWO FORMATS: rows A2, A3, A5 and A7 (a Boolean, two numbers and an error) print identically under both formats, so an engine that ignored the format argument entirely would pass four of the six documented rows. The expected value here contains literal double-quote characters as part of the string.; MISMATCH vs expected: expected &#39;&#34;Hello&#34;&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
