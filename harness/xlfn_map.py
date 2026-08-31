@@ -137,6 +137,38 @@ _XLFN_FUNCTIONS = {
     # COM.MICROSOFT. add-in form, so LO has no such function under any
     # spelling. Same treatment as COPILOT above.
     "DETECTLANGUAGE",
+    # Excel 2010 statistical renames, Excel 2013 additions and one Excel 365
+    # addition from the alphabetical corpus batch D (FLOOR.PRECISE..IMLN). All
+    # eleven names below are on the MS XLSX-extensions future-function list
+    # (mirrored by XlsxWriter): _xlfn.GAMMA, _xlfn.GAMMA.DIST, _xlfn.GAMMA.INV,
+    # _xlfn.GAMMALN.PRECISE, _xlfn.GAUSS, _xlfn.HYPGEOM.DIST, _xlfn.IMAGE,
+    # _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH. Verified empirically
+    # on all four pinned builds: "=_xlfn.GAMMA(2.5)" returns 1.32934038817914
+    # and "=_xlfn.HYPGEOM.DIST(1,4,8,20,TRUE)" returns 0.465428276573787 while
+    # the unprefixed spellings are #NAME?, so seven of these would have been
+    # recorded as unsupported without an entry here.
+    #
+    # THE FOUR IM* ENTRIES GO THE OTHER WAY, and are deliberately kept anyway.
+    # For IMCOSH, IMCOT, IMCSC and IMCSCH the PLAIN name evaluates in
+    # LibreOffice and the _xlfn. form -- the one real Excel actually writes into
+    # a .xlsx -- returns #NAME? on every build, as do COM.MICROSOFT.IMCOT,
+    # ORG.OPENOFFICE.IMCOT and _xlfn.ORG.OPENOFFICE.IMCOT (five spellings
+    # probed, four dead). That is the exact mirror image of the COT/COTH/CSC/
+    # CSCH case above. This module's contract is "the storage-form token a
+    # function must use inside a raw .xlsx", i.e. what Excel writes -- not
+    # "whichever spelling makes a given engine answer" -- so the spec-faithful
+    # token is what is recorded, and the consequence (an Excel-authored
+    # workbook using IMCOT opens in LibreOffice as #NAME?, even though
+    # LibreOffice can compute IMCOT under the bare name) is a real interop gap
+    # this corpus should report rather than paper over. It is documented case
+    # by case in data/tests/IMCOSH.json, IMCOT.json, IMCSC.json and IMCSCH.json.
+    # Their pre-2007 Analysis-ToolPak neighbours IMABS, IMAGINARY, IMARGUMENT,
+    # IMCONJUGATE, IMCOS, IMDIV, IMEXP and IMLN are absent from the MS list and
+    # were probed plain and evaluate, so they correctly take no prefix -- as do
+    # FTEST, GAMMADIST, GAMMAINV, GAMMALN, GESTEP, GETPIVOTDATA and HYPGEOMDIST.
+    "GAMMA", "GAMMA.DIST", "GAMMA.INV", "GAMMALN.PRECISE", "GAUSS",
+    "HYPGEOM.DIST",
+    "IMAGE", "IMCOSH", "IMCOT", "IMCSC", "IMCSCH",
     "BINOM.DIST", "BINOM.DIST.RANGE", "BINOM.INV",
     "CHISQ.DIST", "CHISQ.DIST.RT", "CHISQ.INV", "CHISQ.INV.RT", "CHISQ.TEST",
     "CONFIDENCE.NORM", "CONFIDENCE.T",

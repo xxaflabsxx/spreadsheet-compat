@@ -1,0 +1,33 @@
+{
+  "function": "IMAGINARY",
+  "cases": [
+    {
+      "id": "IMAGINARY_doc_example",
+      "formula": "=IMAGINARY(\"3+4i\")",
+      "description": "Microsoft's first worked example: the imaginary coefficient of 3+4i",
+      "expected": 4,
+      "expected_note": "Microsoft publishes '=IMAGINARY(\"3+4i\")' with the result 4. Read directly off the documented x + yi form, where y is the imaginary coefficient."
+    },
+    {
+      "id": "IMAGINARY_doc_example_negative_j",
+      "formula": "=IMAGINARY(\"0-j\")",
+      "description": "Microsoft's second worked example: a j suffix, no explicit coefficient, negative sign",
+      "expected": -1,
+      "expected_note": "Microsoft publishes '=IMAGINARY(\"0-j\")' with the result -1. Three separate parsing rules have to hold at once for this: the j suffix is accepted (Microsoft documents every IM* function as accepting \"a complex number in x + yi or x + yj text format\", so the j suffix is not an alternative spelling this corpus invented -- it is half of the documented input grammar, and an engine that parses only the i form is incompatible on documented input.), an absent coefficient means 1, and the sign attaches to that implied 1. This is the richest single parsing case Microsoft publishes anywhere in the IM* family."
+    },
+    {
+      "id": "IMAGINARY_doc_example_real_number",
+      "formula": "=IMAGINARY(4)",
+      "description": "Microsoft's third worked example: a plain real number has imaginary coefficient 0",
+      "expected": 0,
+      "expected_note": "Microsoft publishes '=IMAGINARY(4)' with the result 0 -- and it is the line that establishes, for the whole family, that a bare number is a legal complex argument."
+    },
+    {
+      "id": "IMAGINARY_unit_imaginary",
+      "formula": "=IMAGINARY(\"i\")",
+      "description": "The bare imaginary unit with no sign and no real part",
+      "expected": 1,
+      "expected_note": "The positive counterpart of Microsoft's published \"0-j\" example: an absent coefficient means 1, so IMAGINARY(\"i\") is +1. Asserted because \"i\" is the form Excel prints for the unit imaginary, so an engine that cannot read it cannot consume its own output."
+    }
+  ]
+}

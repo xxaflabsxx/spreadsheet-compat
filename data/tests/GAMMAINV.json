@@ -1,0 +1,103 @@
+{
+  "function": "GAMMAINV",
+  "cases": [
+    {
+      "id": "GAMMAINV_doc_example",
+      "formula": "=ROUND(GAMMAINV(A2,A3,A4),7)",
+      "description": "Microsoft's documented worked example: the inverse of the gamma cumulative distribution",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 0.068094,
+        "A3": 9,
+        "A4": 2
+      },
+      "expected": 10.0000112,
+      "expected_note": "Microsoft publishes '=GAMMAINV(A2,A3,A4)' with the result 10.0000112. Derived independently, and deliberately NOT by calling an inverse-gamma routine: the regularized lower incomplete gamma P(9, x/2) was built at 50 digits with mpmath and the equation P(9, x/2) = 0.068094 solved for x by mpmath's own root finder, giving x = 10.000011191437178309. That rounds to exactly the published 10.0000112 at 7 dp, which is the precision the page prints, so 7 is the precision asserted. Note this is NOT the 10.00001131 that appears as the input on the GAMMADIST page: the two pages form a round trip, but Microsoft rounded the probability to six decimals (0.068094) before feeding it back, and inverting a rounded probability necessarily lands slightly off the original x. The corpus asserts the value that the published INPUT actually produces, and tests the exact round trip separately below. Set up from Microsoft's own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GAMMAINV_round_trips_with_GAMMADIST",
+      "formula": "=ROUND(GAMMAINV(GAMMADIST(10.00001131,9,2,TRUE),9,2),6)",
+      "description": "The documented inverse relationship, without a rounded probability in the middle",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 0.068094,
+        "A3": 9,
+        "A4": 2
+      },
+      "expected": 10.000011,
+      "expected_note": "Excel documents the pair as exact inverses: \"If p = GAMMADIST(x,...), then GAMMAINV(p,...) = x.\" Feeding the FULL-PRECISION cumulative probability back in (rather than Microsoft's 6-decimal 0.068094) must therefore return the original 10.00001131. Derived independently with mpmath: solving P(9, x/2) = 0.068094003869787331102 gives x = 10.00001131 to twenty digits. Asserted at 6 dp because Microsoft's own page warns the inverse is iterative -- \"precision of GAMMAINV depends on precision of GAMMADIST\" and \"GAMMAINV uses an iterative search technique\" -- so the last couple of digits are an implementation's convergence tolerance, not a fact about the function. This case is the one that actually tests the inverse property; the doc-example case above tests the published figure. Set up from Microsoft's own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GAMMAINV_probability_zero",
+      "formula": "=GAMMAINV(0,9,2)",
+      "description": "A probability of exactly 0, the lower end of the permitted range",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 0.068094,
+        "A3": 9,
+        "A4": 2
+      },
+      "expected": 0,
+      "expected_note": "Excel excludes only probability < 0 and probability > 1 (\"If probability < 0 or probability > 1, GAMMAINV returns the #NUM! error value\"), so 0 is IN range. The gamma distribution's support starts at 0 and its CDF is 0 there, so the inverse at probability 0 is 0. Included because a naive iterative solver can fail to converge at the boundary and return the #N/A the page describes for non-convergence. Set up from Microsoft's own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GAMMAINV_probability_negative_num",
+      "formula": "=GAMMAINV(-0.1,9,2)",
+      "description": "A probability below 0",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 0.068094,
+        "A3": 9,
+        "A4": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability < 0 or probability > 1, GAMMAINV returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft's own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GAMMAINV_probability_above_one_num",
+      "formula": "=GAMMAINV(2,9,2)",
+      "description": "A probability above 1",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 0.068094,
+        "A3": 9,
+        "A4": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If probability < 0 or probability > 1, GAMMAINV returns the #NUM! error value.\" Asserted separately from the negative case because they are guards on opposite ends of the same range. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft's own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GAMMAINV_alpha_zero_num",
+      "formula": "=GAMMAINV(0.5,0,2)",
+      "description": "An alpha of zero",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 0.068094,
+        "A3": 9,
+        "A4": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If alpha <= 0 or if beta <= 0, GAMMAINV returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft's own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GAMMAINV_text_value",
+      "formula": "=GAMMAINV(\"abc\",9,2)",
+      "description": "A non-numeric probability",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 0.068094,
+        "A3": 9,
+        "A4": 2
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is text, GAMMAINV returns the #VALUE! error value.\" Set up from Microsoft's own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    }
+  ]
+}

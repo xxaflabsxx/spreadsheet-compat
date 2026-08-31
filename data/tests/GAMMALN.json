@@ -1,0 +1,47 @@
+{
+  "function": "GAMMALN",
+  "cases": [
+    {
+      "id": "GAMMALN_doc_example",
+      "formula": "=ROUND(GAMMALN(4),12)",
+      "description": "Microsoft's documented worked example: the natural logarithm of the gamma function at 4",
+      "expected": 1.791759469228,
+      "expected_note": "Microsoft publishes '=GAMMALN(4)' with the result 1.7917595. Derived independently two ways that agree to every digit mpmath prints at 50 places: mpmath's loggamma(4) = 1.7917594692280550008, and -- using the page's own stated identity that \"The number e raised to the GAMMALN(i) power, where i is an integer, returns the same result as (i - 1)!\" -- ln(3!) = ln(6) = 1.7917594692280550008. Rounds to exactly the published 1.7917595 at the 7 dp the page prints; asserted at 12 dp because that is still comfortably inside double precision."
+    },
+    {
+      "id": "GAMMALN_exp_is_factorial",
+      "formula": "=ROUND(EXP(GAMMALN(6)),9)",
+      "description": "The page's own identity: e raised to GAMMALN(i) is (i-1)!",
+      "expected": 120,
+      "expected_note": "Microsoft states: \"The number e raised to the GAMMALN(i) power, where i is an integer, returns the same result as (i - 1)!\". At i = 6 that is 5! = 120, an exact integer. Asserted as EXP(...) inside the engine so it exercises the log-gamma implementation against a value that is known exactly, rather than comparing two printed decimals. ROUND at 9 dp absorbs the round-trip through the exponential, which cannot be exact in binary floating point; 120 is recovered to far more than 9 decimals in the reference computation (mpmath: 119.99999999999999999997)."
+    },
+    {
+      "id": "GAMMALN_half_equals_log_sqrt_pi",
+      "formula": "=ROUND(GAMMALN(0.5)-LN(SQRT(PI())),12)",
+      "description": "The classical value ln(Gamma(1/2)) = ln(sqrt(pi)), asserted as a difference of zero",
+      "expected": 0,
+      "expected_note": "Not a published example; the standard closed form, checked against the engine's own LN, SQRT and PI so that it tests the log-gamma implementation rather than a printed constant. mpmath at 50 digits: loggamma(0.5) = 0.57236494292470008707, and ln(sqrt(pi)) = 0.57236494292470008707."
+    },
+    {
+      "id": "GAMMALN_zero_num",
+      "formula": "=GAMMALN(0)",
+      "description": "Zero, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x <= 0, GAMMALN returns the #NUM! error value.\" Gamma has a pole at 0, so its logarithm diverges. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "GAMMALN_negative_num",
+      "formula": "=GAMMALN(-1)",
+      "description": "A negative argument, also excluded",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If x <= 0, GAMMALN returns the #NUM! error value.\" Note this is a STRICTER domain than GAMMA's: GAMMA(-3.75) is a documented finite value, but GAMMALN(-3.75) is excluded outright, because the gamma function alternates sign on the negative axis and its real logarithm would be undefined half the time. Asserted separately from the zero case for that reason. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "GAMMALN_text_value",
+      "formula": "=GAMMALN(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If x is nonnumeric, GAMMALN returns the #VALUE! error value.\""
+    }
+  ]
+}

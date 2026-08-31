@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GAMMALN: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="GAMMALN (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>GAMMALN matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="4/6 match; zero num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/gammaln.html">
-<meta property="og:title" content="GAMMALN: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="GAMMALN (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="GAMMALN matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="4/6 match; zero num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/gammaln.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>GAMMALN</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>GAMMALN</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for GAMMALN yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060182.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,102 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+GAMMALN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't GAMMALN working in LibreOffice?</h2>
+
+<p><code>GAMMALN</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=GAMMALN(0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If x &lt;= 0, GAMMALN returns the #NUM! error value.&#34; Gamma has a pole at 0, so its logarithm diverges. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=GAMMALN(-1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If x &lt;= 0, GAMMALN returns the #NUM! error value.&#34; Note this is a STRICTER domain than GAMMA&#39;s: GAMMA(-3.75) is a documented finite value, but GAMMALN(-3.75) is excluded outright, because the gamma function alternates sign on the negative axis and its real logarithm would be undefined half the time. Asserted separately from the zero case for that reason. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +489,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for GAMMALN yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMALN(4),12)</td>
+  <td>Microsoft&#39;s documented worked example: the natural logarithm of the gamma function at 4</td>
+  <td class="result mono">1.791759469228</td>
+  <td class="result mono">1.791759469228<br><span class="category-tag">Microsoft publishes &#39;=GAMMALN(4)&#39; with the result 1.7917595. Derived independently two ways that agree to every digit mpmath prints at 50 places: mpmath&#39;s loggamma(4) = 1.7917594692280550008, and -- using the page&#39;s own stated identity that &#34;The number e raised to the GAMMALN(i) power, where i is an integer, returns the same result as (i - 1)!&#34; -- ln(3!) = ln(6) = 1.7917594692280550008. Rounds to exactly the published 1.7917595 at the 7 dp the page prints; asserted at 12 dp because that is still comfortably inside double precision.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(EXP(GAMMALN(6)),9)</td>
+  <td>The page&#39;s own identity: e raised to GAMMALN(i) is (i-1)!</td>
+  <td class="result mono">120</td>
+  <td class="result mono">120<br><span class="category-tag">Microsoft states: &#34;The number e raised to the GAMMALN(i) power, where i is an integer, returns the same result as (i - 1)!&#34;. At i = 6 that is 5! = 120, an exact integer. Asserted as EXP(...) inside the engine so it exercises the log-gamma implementation against a value that is known exactly, rather than comparing two printed decimals. ROUND at 9 dp absorbs the round-trip through the exponential, which cannot be exact in binary floating point; 120 is recovered to far more than 9 decimals in the reference computation (mpmath: 119.99999999999999999997).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMALN(0.5)-LN(SQRT(PI())),12)</td>
+  <td>The classical value ln(Gamma(1/2)) = ln(sqrt(pi)), asserted as a difference of zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Not a published example; the standard closed form, checked against the engine&#39;s own LN, SQRT and PI so that it tests the log-gamma implementation rather than a printed constant. mpmath at 50 digits: loggamma(0.5) = 0.57236494292470008707, and ln(sqrt(pi)) = 0.57236494292470008707.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMALN(0)</td>
+  <td>Zero, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If x &lt;= 0, GAMMALN returns the #NUM! error value.&#34; Gamma has a pole at 0, so its logarithm diverges. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMALN(-1)</td>
+  <td>A negative argument, also excluded</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If x &lt;= 0, GAMMALN returns the #NUM! error value.&#34; Note this is a STRICTER domain than GAMMA&#39;s: GAMMA(-3.75) is a documented finite value, but GAMMALN(-3.75) is excluded outright, because the gamma function alternates sign on the negative axis and its real logarithm would be undefined half the time. Asserted separately from the zero case for that reason. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMALN(&#34;abc&#34;)</td>
+  <td>A non-numeric argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If x is nonnumeric, GAMMALN returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

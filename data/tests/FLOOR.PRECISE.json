@@ -1,0 +1,54 @@
+{
+  "function": "FLOOR.PRECISE",
+  "cases": [
+    {
+      "id": "FLOOR.PRECISE_neg_number_neg_significance",
+      "formula": "=FLOOR.PRECISE(-3.2,-1)",
+      "description": "Microsoft's first worked example: a negative number with a negative significance",
+      "expected": -4,
+      "expected_note": "Microsoft publishes '=FLOOR.PRECISE(-3.2,-1)' with the result -4, and states the rule that produces it: \"The absolute value of the multiple is used, so that the FLOOR.PRECISE function returns the mathematical floor irrespective of the signs of number and significance.\" Derived independently: |significance| = 1, and the mathematical floor of -3.2 to a multiple of 1 is -4 (not -3), because \"Regardless of the sign of the number, the number is rounded down\". This is the case that separates FLOOR.PRECISE from the legacy FLOOR, which errors on mismatched signs, and from FLOOR.MATH's mode argument."
+    },
+    {
+      "id": "FLOOR.PRECISE_pos_number_pos_significance",
+      "formula": "=FLOOR.PRECISE(3.2,1)",
+      "description": "Microsoft's second worked example: rounds 3.2 down to the nearest multiple of 1",
+      "expected": 3,
+      "expected_note": "Published result 3. Derived independently: floor(3.2/1)*1 = 3."
+    },
+    {
+      "id": "FLOOR.PRECISE_neg_number_pos_significance",
+      "formula": "=FLOOR.PRECISE(-3.2,1)",
+      "description": "Microsoft's third worked example: rounds -3.2 down to the nearest multiple of 1",
+      "expected": -4,
+      "expected_note": "Published result -4. Derived independently: the mathematical floor of -3.2 is -4. Asserted alongside FLOOR.PRECISE(3.2,-1) because the two together prove the sign of the RESULT is driven by the number and never by the significance."
+    },
+    {
+      "id": "FLOOR.PRECISE_pos_number_neg_significance",
+      "formula": "=FLOOR.PRECISE(3.2,-1)",
+      "description": "Microsoft's fourth worked example: a positive number with a negative significance",
+      "expected": 3,
+      "expected_note": "Published result 3. Derived independently from the documented absolute-value rule: |-1| = 1 and floor(3.2) = 3. The legacy FLOOR function returns #NUM! for this same argument pair, which is the whole reason FLOOR.PRECISE exists."
+    },
+    {
+      "id": "FLOOR.PRECISE_significance_omitted",
+      "formula": "=FLOOR.PRECISE(3.2)",
+      "description": "Microsoft's fifth worked example: significance omitted, so it defaults to 1",
+      "expected": 3,
+      "expected_note": "Published result 3. The page states \"If significance is omitted, its default value is 1\", so this must equal FLOOR.PRECISE(3.2,1) -- both are asserted here so that an engine cannot pass by ignoring the default."
+    },
+    {
+      "id": "FLOOR.PRECISE_zero_significance",
+      "formula": "=FLOOR.PRECISE(3.2,0)",
+      "description": "Significance of zero, which the page's own description singles out",
+      "expected": 0,
+      "expected_note": "Not in the worked-example table; taken from the page's opening sentence, which ends \"However, if the number or the significance is zero, zero is returned.\" A division by the significance would be #DIV/0!, so this is a real guard rather than arithmetic, and it is asserted because it is the one documented special case the example table omits."
+    },
+    {
+      "id": "FLOOR.PRECISE_zero_number",
+      "formula": "=FLOOR.PRECISE(0,5)",
+      "description": "Number of zero, the other half of the same documented sentence",
+      "expected": 0,
+      "expected_note": "From the same sentence: \"if the number or the significance is zero, zero is returned\". Both halves are asserted separately because an engine can easily guard one and not the other."
+    }
+  ]
+}

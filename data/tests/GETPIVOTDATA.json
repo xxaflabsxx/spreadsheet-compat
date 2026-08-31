@@ -1,0 +1,56 @@
+{
+  "function": "GETPIVOTDATA",
+  "cases": [
+    {
+      "id": "GETPIVOTDATA_not_a_pivot_table_ref",
+      "formula": "=GETPIVOTDATA(\"Sales\",A1)",
+      "description": "The pivot_table argument points at an ordinary range, not a PivotTable",
+      "setup_cells": {
+        "A1": "Region",
+        "B1": "Sales",
+        "A2": "North",
+        "B2": 100,
+        "A3": "South",
+        "B3": 200,
+        "A4": "East",
+        "B4": 300
+      },
+      "expected": "#REF!",
+      "expected_note": "Excel documents: \"If the pivot_table argument is not a range in which a PivotTable is found, GETPIVOTDATA returns #REF!.\" A1 is the top-left of a plain data range that happens to have a \"Sales\" header -- a deliberately tempting target, because an engine that treats GETPIVOTDATA as a glorified lookup would find the column and return 100 or 600 instead of erroring. HARNESS LIMITATION, stated rather than worked around: Microsoft's GETPIVOTDATA examples all read from a PivotTable, and a PivotTable is a workbook feature that openpyxl cannot author -- it can neither build a pivot cache nor lay out a pivot range -- so none of the page's four value-returning examples ($5,534 / $5,534 / $2,876 / $309) can be reproduced by this harness at all. What CAN be executed faithfully is the branch the page documents for exactly this situation, and it is the one that matters for a compatibility corpus: what an engine does when GETPIVOTDATA is pointed somewhere that is not a PivotTable. A3:B4 here holds a plain two-column range of ordinary values -- headers Region / Sales and three data rows -- which is emphatically NOT a PivotTable. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GETPIVOTDATA_blank_cell_ref",
+      "formula": "=GETPIVOTDATA(\"Sales\",J20)",
+      "description": "The pivot_table argument points at an empty cell",
+      "setup_cells": {
+        "A1": "Region",
+        "B1": "Sales",
+        "A2": "North",
+        "B2": 100,
+        "A3": "South",
+        "B3": 200,
+        "A4": "East",
+        "B4": 300
+      },
+      "expected": "#REF!",
+      "expected_note": "The same documented clause -- \"If the pivot_table argument is not a range in which a PivotTable is found, GETPIVOTDATA returns #REF!\" -- exercised against a blank cell rather than against populated data. Asserted separately because an engine can special-case emptiness (returning 0, or #N/A, or a blank) on the way to deciding there is no PivotTable. HARNESS LIMITATION, stated rather than worked around: Microsoft's GETPIVOTDATA examples all read from a PivotTable, and a PivotTable is a workbook feature that openpyxl cannot author -- it can neither build a pivot cache nor lay out a pivot range -- so none of the page's four value-returning examples ($5,534 / $5,534 / $2,876 / $309) can be reproduced by this harness at all. What CAN be executed faithfully is the branch the page documents for exactly this situation, and it is the one that matters for a compatibility corpus: what an engine does when GETPIVOTDATA is pointed somewhere that is not a PivotTable. A3:B4 here holds a plain two-column range of ordinary values -- headers Region / Sales and three data rows -- which is emphatically NOT a PivotTable. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "GETPIVOTDATA_field_item_pair_not_a_pivot_ref",
+      "formula": "=GETPIVOTDATA(\"Sales\",A1,\"Region\",\"North\")",
+      "description": "The full field/item form, still pointed at an ordinary range",
+      "setup_cells": {
+        "A1": "Region",
+        "B1": "Sales",
+        "A2": "North",
+        "B2": 100,
+        "A3": "South",
+        "B3": 200,
+        "A4": "East",
+        "B4": 300
+      },
+      "expected": "#REF!",
+      "expected_note": "The same documented clause, exercised through the optional field1/item1 arguments that the page describes as \"1 to 126 pairs of field names and item names\". This is the shape closest to a lookup -- \"give me Sales where Region is North\", which the plain range below can answer, and the answer would be 100 -- so it is the strongest test that an engine really requires a PivotTable rather than merely preferring one. HARNESS LIMITATION, stated rather than worked around: Microsoft's GETPIVOTDATA examples all read from a PivotTable, and a PivotTable is a workbook feature that openpyxl cannot author -- it can neither build a pivot cache nor lay out a pivot range -- so none of the page's four value-returning examples ($5,534 / $5,534 / $2,876 / $309) can be reproduced by this harness at all. What CAN be executed faithfully is the branch the page documents for exactly this situation, and it is the one that matters for a compatibility corpus: what an engine does when GETPIVOTDATA is pointed somewhere that is not a PivotTable. A3:B4 here holds a plain two-column range of ordinary values -- headers Region / Sales and three data rows -- which is emphatically NOT a PivotTable. Column F is untouched because this harness writes the formula under test into cell F1."
+    }
+  ]
+}

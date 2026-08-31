@@ -1,0 +1,19 @@
+{
+  "function": "IMAGE",
+  "cases": [
+    {
+      "id": "IMAGE_existence_probe",
+      "formula": "=IMAGE(\"https://example.com/example.png\")",
+      "description": "Existence probe only: the documented single-argument form, recorded without an asserted expected value",
+      "expected": null,
+      "expected_note": "NOT REPRODUCIBLE OFFLINE, and recorded as a probe rather than as a support claim -- the same treatment batch B gave COPILOT and the CUBE* family and batch C gave DETECTLANGUAGE. Microsoft's IMAGE page documents the function as inserting an image \"from a source location\" given \"The URL path, using an 'https' protocol, of the image file\", and its own error vocabulary is made of network and policy outcomes rather than computed values: #CONNECT! \"If there are issues with your internet connection or the server providing the source\", and #BLOCKED! \"If your security settings block access to the image file\". The successful return value is not a value at all in the spreadsheet sense -- it is an image rendered in the cell -- so there is nothing a .xlsx round trip could read back and compare, and no offline engine could produce it. EXECUTED RESULT: probing all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) with the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form returned #NAME? for all three spellings on every build, which is the signature of a name the engine does not implement at all."
+    },
+    {
+      "id": "IMAGE_invalid_sizing_probe",
+      "formula": "=IMAGE(\"https://example.com/example.png\",\"alt text\",5)",
+      "description": "The documented #VALUE! branch for an out-of-range sizing argument, recorded as a probe",
+      "expected": null,
+      "expected_note": "Excel documents \"Excel returns a #VALUE! error under the following circumstances: ... If sizing is not between 0 and 3\", and 5 is outside the documented 0-3 range, so in Excel this is a deterministic, network-independent #VALUE!. It is nevertheless recorded WITHOUT an asserted expected value, because an engine that does not implement IMAGE at all cannot meaningfully be said to pass or fail an argument-validation branch of it, and a #NAME? here would otherwise be scored as a wrong answer to a question the engine was never asked. NOT REPRODUCIBLE OFFLINE, and recorded as a probe rather than as a support claim -- the same treatment batch B gave COPILOT and the CUBE* family and batch C gave DETECTLANGUAGE. Microsoft's IMAGE page documents the function as inserting an image \"from a source location\" given \"The URL path, using an 'https' protocol, of the image file\", and its own error vocabulary is made of network and policy outcomes rather than computed values: #CONNECT! \"If there are issues with your internet connection or the server providing the source\", and #BLOCKED! \"If your security settings block access to the image file\". The successful return value is not a value at all in the spreadsheet sense -- it is an image rendered in the cell -- so there is nothing a .xlsx round trip could read back and compare, and no offline engine could produce it. EXECUTED RESULT: probing all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) with the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form returned #NAME? for all three spellings on every build, which is the signature of a name the engine does not implement at all."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "function": "IMEXP",
+  "cases": [
+    {
+      "id": "IMEXP_doc_example",
+      "formula": "=IMEXP(\"1+i\")",
+      "description": "Microsoft's documented worked example: the exponential of 1+i",
+      "expected": "1.46869393991589+2.28735528717884i",
+      "expected_note": "Microsoft publishes '=IMEXP(\"1+i\")' with the result 1.46869393991589+2.28735528717884i. Derived independently with mpmath at 40 digits from Euler's formula, which is what the page's image renders: e^(x+yi) = e^x(cos y + i sin y), so the real part is e*cos(1) = 1.4686939399158851571 and the imaginary part is e*sin(1) = 2.2873552871788423912. Rendered through this corpus's independent implementation of Excel's complex-string format, byte-identical to Microsoft's published string. EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    },
+    {
+      "id": "IMEXP_zero_is_one",
+      "formula": "=IMEXP(\"0\")",
+      "description": "e^0 = 1, printed as a bare real number",
+      "expected": "1",
+      "expected_note": "Exact by definition, and a formatting case as much as a value case: the imaginary part is zero, so the documented format yields \"1\" rather than \"1+0i\". EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    }
+  ]
+}

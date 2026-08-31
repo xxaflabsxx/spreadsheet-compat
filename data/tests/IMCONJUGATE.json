@@ -1,0 +1,26 @@
+{
+  "function": "IMCONJUGATE",
+  "cases": [
+    {
+      "id": "IMCONJUGATE_doc_example",
+      "formula": "=IMCONJUGATE(\"3+4i\")",
+      "description": "Microsoft's documented worked example: the complex conjugate of 3+4i",
+      "expected": "3-4i",
+      "expected_note": "Microsoft publishes '=IMCONJUGATE(\"3+4i\")' with the result 3-4i, a string. Derived from the definition: the conjugate negates the imaginary part and leaves the real part alone. EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    },
+    {
+      "id": "IMCONJUGATE_j_suffix_preserved",
+      "formula": "=IMCONJUGATE(\"3-4j\")",
+      "description": "A j-suffixed input, whose suffix must survive into the result",
+      "expected": "3+4j",
+      "expected_note": "Microsoft documents every IM* function as accepting \"a complex number in x + yi or x + yj text format\", so the j suffix is not an alternative spelling this corpus invented -- it is half of the documented input grammar, and an engine that parses only the i form is incompatible on documented input. The suffix is a property of the value's notation, not of the function, so an engine that accepts j on input but emits i on output has silently rewritten the user's notation -- which is why this is asserted as a string rather than checked numerically. The conjugate of 3-4j is 3+4j. EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    },
+    {
+      "id": "IMCONJUGATE_real_number_unchanged",
+      "formula": "=IMCONJUGATE(\"5\")",
+      "description": "A real number is its own conjugate, and must come back with no imaginary part at all",
+      "expected": "5",
+      "expected_note": "Derived from the definition (negating a zero imaginary part changes nothing) plus the documented output format. The interesting half is the FORMATTING: the result must be the bare \"5\", not \"5+0i\" or \"5-0i\". EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    }
+  ]
+}

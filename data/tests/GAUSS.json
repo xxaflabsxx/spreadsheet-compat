@@ -1,0 +1,40 @@
+{
+  "function": "GAUSS",
+  "cases": [
+    {
+      "id": "GAUSS_doc_example",
+      "formula": "=ROUND(GAUSS(2),12)",
+      "description": "Microsoft's documented worked example: the probability of falling between the mean and 2 standard deviations",
+      "expected": 0.477249868052,
+      "expected_note": "PUBLISHED EXAMPLE TABLE IS BROKEN, so the figure is taken from the page's prose and then derived. The GAUSS page's example table has a Formula column reading '=GAUSS(2) (with a leading apostrophe, i.e. the formula as literal text) and a Result column whose cell contains the string '=GAUSS(2)' rather than any number -- the table's own result cell was never evaluated. The only figure Microsoft actually publishes for this example is inside the Description column: \"Probability that a member of a standard normal population will fall between the mean and 2 standard deviations from the mean (result is 0.47725)\". Derived independently with mpmath at 50 digits from the definition the page gives -- GAUSS(z) = NORM.S.DIST(z,TRUE) - 0.5 = erf(z/sqrt(2))/2 -- giving 0.4772498680518207928, which rounds to exactly the published 0.47725."
+    },
+    {
+      "id": "GAUSS_zero_is_zero",
+      "formula": "=GAUSS(0)",
+      "description": "At z = 0 the probability of falling between the mean and the mean is zero",
+      "expected": 0,
+      "expected_note": "Derived from the identity the page itself states: \"Because NORM.S.DIST(0,True) always returns 0.5, GAUSS(z) will always be 0.5 less than NORM.S.DIST(z,True).\" At z = 0 that is 0.5 - 0.5 = 0 exactly. An exact value, so asserted with no ROUND wrapper."
+    },
+    {
+      "id": "GAUSS_matches_norm_s_dist_identity",
+      "formula": "=ROUND(NORM.S.DIST(2,TRUE)-GAUSS(2),12)",
+      "description": "The page's stated relationship to NORM.S.DIST, asserted as an exact difference",
+      "expected": 0.5,
+      "expected_note": "Microsoft states: \"Because NORM.S.DIST(0,True) always returns 0.5, GAUSS (z) will always be 0.5 less than NORM.S.DIST(z,True).\" Written as a difference computed inside the engine under test, so it holds an engine to its OWN normal distribution rather than to a figure from outside -- an engine whose erf is slightly off passes only if both functions are off together, which is what the identity actually claims."
+    },
+    {
+      "id": "GAUSS_is_odd",
+      "formula": "=ROUND(GAUSS(-2)+GAUSS(2),12)",
+      "description": "GAUSS is an odd function, so GAUSS(-z) = -GAUSS(z)",
+      "expected": 0,
+      "expected_note": "Not published; derived from the definition. The standard normal density is symmetric about 0, so the signed area from the mean out to -z is the negative of the area out to +z. mpmath at 50 digits: GAUSS(-2) = -0.4772498680518207928 exactly negates GAUSS(2). This is worth asserting because an implementation built on a one-sided series or table can easily return the ABSOLUTE probability 0.47725 for a negative z."
+    },
+    {
+      "id": "GAUSS_text_value",
+      "formula": "=GAUSS(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If z is not a valid data type, GAUSS returns the #VALUE! error value.\" (The page's companion clause, \"If z is not a valid number, GAUSS returns the #NUM! error value\", is not asserted anywhere in this corpus because the page never says which numbers are not valid ones -- the whole real line has a finite answer -- and this corpus does not invent an input to fit an undocumented guard.)"
+    }
+  ]
+}

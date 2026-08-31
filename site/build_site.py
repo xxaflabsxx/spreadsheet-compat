@@ -75,6 +75,28 @@ ENGINE_LABELS = {
     "libreoffice": "LibreOffice Calc",
 }
 
+# Functions whose LibreOffice #NAME? is a STORAGE-FORM gap, not a missing
+# implementation: LibreOffice computes them under their bare name, but its
+# .xlsx importer has no mapping for the "_xlfn."-prefixed token that Excel
+# writes into the file for them (see harness/xlfn_map.py and the per-case
+# expected_note in data/tests/<NAME>.json). Without this, the generated
+# "Why isn't X working" prose would tell readers the function "simply isn't
+# available yet", which our own executed evidence contradicts. Keyed by
+# function name; the value is the clause that replaces that sentence. It is
+# a build-time constant written here, never user or engine input, so the
+# template renders it with |safe to keep the inline markup.
+LO_STORAGE_FORM_GAP = {
+    name: (
+        "LibreOffice does implement this function &mdash; typed on its own, "
+        "<code>=" + name + "(&hellip;)</code> evaluates correctly on every release we "
+        "tested &mdash; but its .xlsx importer does not recognise the "
+        "<code>_xlfn." + name + "</code> token that Excel writes into the file "
+        "for it, so an Excel-authored workbook opens here with <code>#NAME?</code>. "
+        "The gap is in the file-format mapping, not in the function."
+    )
+    for name in ("IMCOSH", "IMCOT", "IMCSC", "IMCSCH")
+}
+
 VERDICT_LABELS = {
     "supported": "Supported, behaves as documented",
     "quirky": "Quirk found",
@@ -492,6 +514,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                         }
                     )
                 entry["lo_history"] = history
+                entry["storage_form_gap"] = LO_STORAGE_FORM_GAP.get(name)
                 change = None
                 if len(history) >= 2 and history[0]["verdict"] != history[-1]["verdict"]:
                     # Precise "supported since" = the FIRST tested release whose
@@ -1517,10 +1540,12 @@ what our executed tests show: <code>#NAME?</code> in {{ le.lo_change.from_versio
 {{ since }} or newer; no setting or extension enables it in older releases. (Other causes of this
 error: see the <a href="{{ rel }}spreadsheet-errors.html">error values guide</a>.)</p>
 {% elif le.verdict == 'unsupported' %}
-<p>LibreOffice Calc does not implement <code>{{ r.name }}</code> as of {{ le.version }} &mdash; in our
+<p>{% if le.storage_form_gap %}<code>{{ r.name }}</code> comes back as a <code>#NAME?</code>
+(unrecognized function) error in LibreOffice Calc {{ le.version }} in our executed tests &mdash; but not
+because the function is missing. This is not a typo or a settings problem. {{ le.storage_form_gap|safe }}{% else %}LibreOffice Calc does not implement <code>{{ r.name }}</code> as of {{ le.version }} &mdash; in our
 executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
 settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
-available yet{% if le.documented %} despite appearing in some documentation{% endif %}.
+available yet{% if le.documented %} despite appearing in some documentation{% endif %}.{% endif %}
 {% if r.engines['excel'].documented %}The same formula is documented for Excel{% if ge.verdict == 'supported' %}, and we executed it successfully in Google Sheets on {{ ge.executed_at }}{% elif r.engines['google_sheets'].documented %} and documented for Google Sheets{% endif %}.{% endif %}
 Watch the <a href="{{ rel }}libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
 we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>

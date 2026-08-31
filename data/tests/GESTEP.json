@@ -1,0 +1,47 @@
+{
+  "function": "GESTEP",
+  "cases": [
+    {
+      "id": "GESTEP_above_step",
+      "formula": "=GESTEP(5,4)",
+      "description": "Microsoft's first worked example: 5 is greater than or equal to the step 4",
+      "expected": 1,
+      "expected_note": "Microsoft publishes '=GESTEP(5, 4)' with the result 1. Derived from the documented rule: \"Returns 1 if number >= step; returns 0 (zero) otherwise.\" 5 >= 4."
+    },
+    {
+      "id": "GESTEP_equal_to_step",
+      "formula": "=GESTEP(5,5)",
+      "description": "Microsoft's second worked example: the boundary, where number equals step",
+      "expected": 1,
+      "expected_note": "Microsoft publishes '=GESTEP(5, 5)' with the result 1. This is the case that makes the comparison >= rather than >, and it is the one an implementation is most likely to get wrong; the page's own description of this example says \"Checks whether 5 is greater than or equal to the step value, 5.\""
+    },
+    {
+      "id": "GESTEP_negative_above_negative_step",
+      "formula": "=GESTEP(-4,-5)",
+      "description": "Microsoft's third worked example: both arguments negative",
+      "expected": 1,
+      "expected_note": "Microsoft publishes '=GESTEP(-4, -5)' with the result 1. -4 >= -5, so the answer is 1 -- a case an engine comparing magnitudes rather than signed values would get wrong, since |-4| < |-5|."
+    },
+    {
+      "id": "GESTEP_step_omitted",
+      "formula": "=GESTEP(-1)",
+      "description": "Microsoft's fourth worked example: step omitted, so it defaults to zero",
+      "expected": 0,
+      "expected_note": "Microsoft publishes '=GESTEP(-1)' with the result 0, and documents \"Step Optional. The threshold value. If you omit a value for step, GESTEP uses zero.\" -1 >= 0 is false. (The page's description of this example reads \"Checks whether -1 is greater than the default step value, 0\", dropping the \"or equal to\"; the syntax section's \"Returns 1 if number >= step\" is the rule relied on here, and both readings agree on this input.)"
+    },
+    {
+      "id": "GESTEP_default_step_boundary",
+      "formula": "=GESTEP(0)",
+      "description": "Zero against the default step of zero, where the >= boundary and the default meet",
+      "expected": 1,
+      "expected_note": "Not published; derived from the two documented clauses together -- \"Returns 1 if number >= step\" and \"If you omit a value for step, GESTEP uses zero\" -- which give 0 >= 0, hence 1. Included because it is the single input that fails if EITHER the default is wrong OR the comparison is strict, and the published examples exercise those two rules only separately."
+    },
+    {
+      "id": "GESTEP_text_value",
+      "formula": "=GESTEP(\"x\",4)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, GESTEP returns the #VALUE! error value.\""
+    }
+  ]
+}

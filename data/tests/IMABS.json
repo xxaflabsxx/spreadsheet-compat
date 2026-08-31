@@ -1,0 +1,47 @@
+{
+  "function": "IMABS",
+  "cases": [
+    {
+      "id": "IMABS_doc_example",
+      "formula": "=IMABS(\"5+12i\")",
+      "description": "Microsoft's documented worked example: the modulus of 5+12i",
+      "expected": 13,
+      "expected_note": "Microsoft publishes '=IMABS(\"5+12i\")' with the result 13. Derived independently from the definition the page states, |z| = sqrt(x^2 + y^2): sqrt(25 + 144) = sqrt(169) = 13 exactly. A Pythagorean triple was chosen by Microsoft precisely so the answer is an exact integer, so this is asserted with no ROUND wrapper -- any floating-point drift shows up immediately."
+    },
+    {
+      "id": "IMABS_second_triple",
+      "formula": "=IMABS(\"3+4i\")",
+      "description": "A second exact-integer modulus, from the 3-4-5 triple",
+      "expected": 5,
+      "expected_note": "Not published on the IMABS page, but 3+4i is the complex number Microsoft's own IMAGINARY, IMARGUMENT, IMCONJUGATE and IMLN pages all use, so this ties the whole family to one number. sqrt(9 + 16) = sqrt(25) = 5 exactly."
+    },
+    {
+      "id": "IMABS_negative_components",
+      "formula": "=IMABS(\"-3-4i\")",
+      "description": "Both components negative: a modulus is always non-negative",
+      "expected": 5,
+      "expected_note": "Derived from |z| = sqrt(x^2 + y^2), which squares away both signs: sqrt(9 + 16) = 5. Included because an implementation that parses the string by splitting on the sign characters, rather than by reading a signed real and a signed imaginary part, mis-handles a leading minus."
+    },
+    {
+      "id": "IMABS_j_suffix",
+      "formula": "=IMABS(\"5+12j\")",
+      "description": "The same number written with the documented j suffix instead of i",
+      "expected": 13,
+      "expected_note": "Microsoft documents every IM* function as accepting \"a complex number in x + yi or x + yj text format\", so the j suffix is not an alternative spelling this corpus invented -- it is half of the documented input grammar, and an engine that parses only the i form is incompatible on documented input. Same derivation as the doc example: sqrt(25 + 144) = 13."
+    },
+    {
+      "id": "IMABS_unit_imaginary",
+      "formula": "=IMABS(\"i\")",
+      "description": "The bare imaginary unit, written with no coefficient and no real part",
+      "expected": 1,
+      "expected_note": "|i| = 1. This is the parsing edge case of the whole family: \"i\" carries neither a real part nor an explicit coefficient, and it is exactly the form Excel itself PRINTS for a result whose real part is 0 and whose imaginary coefficient is 1, so an engine that cannot read it back cannot round-trip its own output."
+    },
+    {
+      "id": "IMABS_plain_number",
+      "formula": "=IMABS(4)",
+      "description": "A plain real number, which is a complex number with zero imaginary part",
+      "expected": 4,
+      "expected_note": "Microsoft's IMAGINARY page establishes that a bare number is a valid inumber by publishing '=IMAGINARY(4)' with the result 0. A real 4 therefore has modulus sqrt(16 + 0) = 4."
+    }
+  ]
+}

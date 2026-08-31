@@ -1,0 +1,95 @@
+{
+  "function": "HYPGEOMDIST",
+  "cases": [
+    {
+      "id": "HYPGEOMDIST_doc_example",
+      "formula": "=ROUND(HYPGEOMDIST(A2,A3,A4,A5),12)",
+      "description": "Microsoft's documented worked example: the hypergeometric probability",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 1,
+        "A3": 4,
+        "A4": 8,
+        "A5": 20
+      },
+      "expected": 0.363261093911,
+      "expected_note": "Microsoft publishes '=HYPGEOMDIST(A2,A3,A4,A5)' with the result 0.3633. Derived independently from the equation the page states -- P(X = x) = C(M,x)*C(N-M,n-x)/C(N,n) with x = sample_s, n = number_sample, M = population_s, N = number_pop -- evaluated in exact rational arithmetic from binomial coefficients rather than from any statistics library's hypergeometric routine: C(8,1)*C(12,3)/C(20,4) = 8*220/4845 = 1760/4845 = 0.36326109391124871001, and C(8,0)*C(12,4)/C(20,4) = 495/4845 = 0.10216718266253869969. The mass at x = 1 is 1760/4845 = 0.36326109391124871001, which rounds to exactly the published 0.3633. The legacy function has no cumulative argument, so this single mass is its whole contract; it must agree with HYPGEOM.DIST(...,FALSE) on the same data, which the corpus asserts on that function's page. Set up from Microsoft's own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "HYPGEOMDIST_arguments_truncated_to_integers",
+      "formula": "=ROUND(HYPGEOMDIST(1.9,4.9,8.9,20.9),12)",
+      "description": "All four arguments given fractionally, to test the documented truncation",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 1,
+        "A3": 4,
+        "A4": 8,
+        "A5": 20
+      },
+      "expected": 0.363261093911,
+      "expected_note": "Excel documents, as the first remark on the page: \"All arguments are truncated to integers.\" Truncation (toward zero), not rounding: 1.9, 4.9, 8.9, 20.9 must become 1, 4, 8, 20 and reproduce the documented example's answer exactly. Chosen with fractional parts of .9 precisely so that an engine which ROUNDS instead of truncating gets 2, 5, 9, 21 and a visibly different number (0.4067...), rather than accidentally passing. Set up from Microsoft's own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "HYPGEOMDIST_zero_successes",
+      "formula": "=ROUND(HYPGEOMDIST(0,4,8,20),12)",
+      "description": "The probability of drawing no successes at all",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 1,
+        "A3": 4,
+        "A4": 8,
+        "A5": 20
+      },
+      "expected": 0.102167182663,
+      "expected_note": "Not published; derived in exact rational arithmetic from the same documented equation: C(8,0)*C(12,4)/C(20,4) = 1*495/4845 = 0.10216718266253869969. Included because 0 is a legal sample_s (the page excludes only sample_s < 0) that sits exactly on the boundary of the exclusion, and because C(M,0) = 1 is where a binomial-coefficient routine written as a product loop is most likely to slip. Set up from Microsoft's own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "HYPGEOMDIST_sample_successes_too_large_num",
+      "formula": "=HYPGEOMDIST(5,4,8,20)",
+      "description": "sample_s larger than the sample size",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 1,
+        "A3": 4,
+        "A4": 8,
+        "A5": 20
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If sample_s < 0 or sample_s is greater than the lesser of number_sample or population_s, HYPGEOMDIST returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft's own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "HYPGEOMDIST_sample_size_zero_num",
+      "formula": "=HYPGEOMDIST(1,0,8,20)",
+      "description": "A sample size of zero",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 1,
+        "A3": 4,
+        "A4": 8,
+        "A5": 20
+      },
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If number_sample <= 0 or number_sample > number_population, HYPGEOMDIST returns the #NUM! error value.\" EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft's own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    },
+    {
+      "id": "HYPGEOMDIST_text_value",
+      "formula": "=HYPGEOMDIST(\"a\",4,8,20)",
+      "description": "A non-numeric argument",
+      "setup_cells": {
+        "A1": "Data",
+        "B1": "Description",
+        "A2": 1,
+        "A3": 4,
+        "A4": 8,
+        "A5": 20
+      },
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If any argument is nonnumeric, HYPGEOMDIST returns the #VALUE! error value.\" Set up from Microsoft's own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1."
+    }
+  ]
+}

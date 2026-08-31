@@ -1,0 +1,26 @@
+{
+  "function": "IMLN",
+  "cases": [
+    {
+      "id": "IMLN_doc_example",
+      "formula": "=IMLN(\"3+4i\")",
+      "description": "Microsoft's documented worked example: the natural logarithm of 3+4i",
+      "expected": "1.6094379124341+0.927295218001612i",
+      "expected_note": "Microsoft publishes '=IMLN(\"3+4i\")' with the result 1.6094379124341+0.927295218001612i. Derived independently with mpmath at 40 digits from ln(z) = ln|z| + i*arg(z), the identity the page renders as an image: |3+4i| = 5, so the real part is ln(5) = 1.6094379124341003746, and the imaginary part is atan2(4,3) = 0.92729521800161223243. Note the real part prints as 1.6094379124341 -- fourteen significant digits, not fifteen -- because the fifteenth digit is a zero that Excel's format strips; reproducing that trailing-zero rule is precisely what this corpus's formatter had to get right, and it is confirmed by Microsoft's own published string. Cross-check: the imaginary part is the same constant Microsoft's IMARGUMENT page publishes for the identical number. EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    },
+    {
+      "id": "IMLN_of_one_is_zero",
+      "formula": "=IMLN(\"1\")",
+      "description": "ln(1) = 0, printed as a bare zero",
+      "expected": "0",
+      "expected_note": "Exact: |1| = 1 so ln|1| = 0, and arg(1) = 0. Both parts vanish, and the documented format collapses the result to \"0\" rather than \"0+0i\". EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    },
+    {
+      "id": "IMLN_negative_real_is_pure_imaginary",
+      "formula": "=IMLN(\"-1\")",
+      "description": "ln(-1) = pi*i, a result with no real part at all",
+      "expected": "3.14159265358979i",
+      "expected_note": "Derived from the same documented identity: |-1| = 1 so ln|-1| = 0, and arg(-1) = pi, giving 0 + pi*i. The real part is exactly zero, so Excel's format omits it entirely and prints only the imaginary term -- the complement of the IMEXP(\"0\") and IMLN(\"1\") cases, which drop the imaginary term instead. pi to 15 significant digits is 3.14159265358979, which is the coefficient asserted. This value is also why IMLN is worth testing on the negative real axis at all: it exists only by analytic continuation, and the real-valued LN(-1) is an error in every engine. EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    }
+  ]
+}

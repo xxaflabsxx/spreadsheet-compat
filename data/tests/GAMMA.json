@@ -1,0 +1,54 @@
+{
+  "function": "GAMMA",
+  "cases": [
+    {
+      "id": "GAMMA_doc_example_2_5",
+      "formula": "=ROUND(GAMMA(2.5),12)",
+      "description": "Microsoft's first worked example",
+      "expected": 1.329340388179,
+      "expected_note": "Microsoft publishes '=GAMMA(2.5)' with the result 1.329 (\"Returns the gamma function value of 2.5 (1.329)\"). Derived independently with mpmath at 50 decimal digits: Gamma(2.5) = 1.3293403881791370205, which rounds to the published 1.329 at the three decimals the page prints. Asserted at 12 dp rather than 3 because the page's precision is a display choice, not a limit on the answer, and 12 dp is well inside the ~15 significant digits an IEEE double carries. Cross-checked against the closed form the page itself supplies, Gamma(N+1) = N*Gamma(N): Gamma(2.5) = 1.5*Gamma(1.5) = 1.5*0.5*Gamma(0.5) = 0.75*sqrt(pi) = 1.32934038817913702, identical to 17 digits."
+    },
+    {
+      "id": "GAMMA_doc_example_negative",
+      "formula": "=ROUND(GAMMA(-3.75),12)",
+      "description": "Microsoft's second worked example: a negative non-integer argument",
+      "expected": 0.267866128861,
+      "expected_note": "Microsoft publishes '=GAMMA(-3.75)' with the result 0.268. Derived independently with mpmath at 50 digits: Gamma(-3.75) = 0.26786612886141660256, which rounds to the published 0.268. This case matters because the gamma function is only defined for negative arguments by analytic continuation -- an implementation that simply integrates the defining integral cannot reach it -- and because the sign is a real test: Gamma is positive on (-4,-3), and an engine using the reflection formula with a sign slip lands on -0.268."
+    },
+    {
+      "id": "GAMMA_integer_is_factorial",
+      "formula": "=GAMMA(5)",
+      "description": "At a positive integer n, GAMMA(n) is (n-1)!",
+      "expected": 24,
+      "expected_note": "Derived from the recurrence the page states, Gamma(N+1) = N*Gamma(N), together with Gamma(1) = 1: Gamma(5) = 4*3*2*1 = 24 = 4!. An exact integer, so this case is asserted with no ROUND wrapper at all and catches any accumulation of floating-point error in a series or Lanczos approximation."
+    },
+    {
+      "id": "GAMMA_half_equals_sqrt_pi",
+      "formula": "=ROUND(GAMMA(0.5)-SQRT(PI()),12)",
+      "description": "The classical value Gamma(1/2) = sqrt(pi), asserted as a difference of zero",
+      "expected": 0,
+      "expected_note": "Not a published example; the standard closed-form value, and the reason it is asserted as a DIFFERENCE against the engine's own SQRT(PI()) is that it then tests the gamma implementation rather than the printing of a constant. mpmath at 50 digits: Gamma(0.5) = 1.7724538509055160273, sqrt(pi) = 1.7724538509055160273 -- equal to every digit mpmath will print."
+    },
+    {
+      "id": "GAMMA_zero_num",
+      "formula": "=GAMMA(0)",
+      "description": "Zero, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Number is a negative integer or 0, GAMMA returns the #NUM! error value\", and the page's own example table lists '=GAMMA(0)' with the result #NUM!. The gamma function has a pole at 0. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "GAMMA_negative_integer_num",
+      "formula": "=GAMMA(-2)",
+      "description": "A negative integer, the other excluded case",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents: \"If Number is a negative integer or 0, GAMMA returns the #NUM! error value\", and publishes '=GAMMA(-2)' with the result #NUM!. Gamma has poles at every non-positive integer. Asserted alongside GAMMA(-3.75), which is NOT an integer and must return a finite value -- together they check that an engine rejects the poles without rejecting the whole negative axis. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one."
+    },
+    {
+      "id": "GAMMA_text_value",
+      "formula": "=GAMMA(\"abc\")",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents: \"If Number contains characters that are not valid, GAMMA returns the #VALUE! error value.\""
+    }
+  ]
+}

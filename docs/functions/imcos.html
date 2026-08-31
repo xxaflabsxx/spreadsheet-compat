@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IMCOS: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="IMCOS (Engineering) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>IMCOS gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="2/3 match Excel&#39;s docs; logical value returns 0.54030230586814, not #VALUE!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/imcos.html">
-<meta property="og:title" content="IMCOS: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="IMCOS (Engineering) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="IMCOS gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="2/3 match Excel&#39;s docs; logical value returns 0.54030230586814, not #VALUE!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/imcos.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>IMCOS</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Engineering</p>
+<p class="category-tag">Category: Engineering &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>IMCOS</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for IMCOS yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,88 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+IMCOS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't IMCOS working in LibreOffice?</h2>
+
+<p><code>IMCOS</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=IMCOS(TRUE)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">0.54030230586814</span>, but the documented/expected
+        result is <span class="formula">#VALUE!</span>.
+        Excel documents, on this page specifically: &#34;If inumber is a logical value, IMCOS returns the #VALUE! error value.&#34; This is a deliberate refusal to coerce, and it is the sort of guard an engine drops: TRUE coerces to 1 in almost every other numeric context, so an implementation that simply converts its argument to a number computes cos(1) = 0.54030230586814 and returns a plausible answer where Excel raises an error. EXECUTED RESULT, and a SILENT WRONG ANSWER: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return the string &#34;0.54030230586814&#34; -- that is cos(1), i.e. TRUE was coerced to 1 and fed to the function -- where the page documents #VALUE!. The same coercion happens on this batch&#39;s IMCOSH, IMCOT, IMCSC and IMCSCH when they are called under their unprefixed names (returning cosh(1), cot(1), csc(1) and csch(1) respectively), so it is one behaviour across the complex family rather than a slip in one function.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;0.54030230586814&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +475,42 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for IMCOS yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMCOS(&#34;1+i&#34;)</td>
+  <td>Microsoft&#39;s documented worked example: the cosine of 1+i</td>
+  <td class="result mono">0.833730025131149-0.988897705762865i</td>
+  <td class="result mono">0.833730025131149-0.988897705762865i<br><span class="category-tag">Microsoft publishes &#39;=IMCOS(&#34;1+i&#34;)&#39; with the result 0.833730025131149-0.988897705762865i. Derived independently with mpmath at 40 digits from cos(x+yi) = cos(x)cosh(y) - i*sin(x)sinh(y), the identity the page renders as an image: the real part is cos(1)cosh(1) = 0.83373002513114904888 and the imaginary part is -sin(1)sinh(1) = -0.98889770576286509638. Rendered through this corpus&#39;s independent implementation of Excel&#39;s complex-string format, that is byte-identical to Microsoft&#39;s published string. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMCOS(&#34;0&#34;)</td>
+  <td>The cosine of 0 is 1, and must print as a bare real number</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">cos(0) = 1 with a zero imaginary part. Asserted as the string &#34;1&#34; because that is what Excel&#39;s documented output format produces for a result whose imaginary part vanishes -- not &#34;1+0i&#34;. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMCOS(TRUE)</td>
+  <td>A logical argument, which the page rejects outright</td>
+  <td class="result mono">0.54030230586814</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents, on this page specifically: &#34;If inumber is a logical value, IMCOS returns the #VALUE! error value.&#34; This is a deliberate refusal to coerce, and it is the sort of guard an engine drops: TRUE coerces to 1 in almost every other numeric context, so an implementation that simply converts its argument to a number computes cos(1) = 0.54030230586814 and returns a plausible answer where Excel raises an error. EXECUTED RESULT, and a SILENT WRONG ANSWER: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return the string &#34;0.54030230586814&#34; -- that is cos(1), i.e. TRUE was coerced to 1 and fed to the function -- where the page documents #VALUE!. The same coercion happens on this batch&#39;s IMCOSH, IMCOT, IMCSC and IMCSCH when they are called under their unprefixed names (returning cosh(1), cot(1), csc(1) and csch(1) respectively), so it is one behaviour across the complex family rather than a slip in one function.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

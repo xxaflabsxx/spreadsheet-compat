@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>305 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 305 divergences, every one executed — not copied from docs.">
+<title>355 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 355 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="305 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 305 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="355 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 355 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">305 quirks found across 136 functions
-(205 in LibreOffice, 100 in Google Sheets).
+<p class="search-hint">355 quirks found across 154 functions
+(255 in LibreOffice, 100 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -3128,6 +3128,175 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,1.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;For numbers outside of the range (0,1), FORECAST.ETS.CONFINT will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents confidence_level as &#34;A numerical value between 0 and 1 (exclusive) ... For numbers outside of the range (0,1), FORECAST.ETS.CONFINT will return the #NUM! error.&#34; The interval is open, so 0 is outside it. Asserted separately from the 1.5 case because a boundary and a far-out-of-range value exercise different guards. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, and a SILENT WRONG ANSWER rather than a different error code: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return the number 0 for a confidence level of 0, where the page&#39;s &#34;For numbers outside of the range (0,1) ... #NUM!&#34; clause calls for an error. 0 is a superficially reasonable answer -- a zero-confidence interval arguably has zero width -- which is exactly what makes it dangerous: an out-of-range argument produces a clean-looking number instead of a visible error. Its sibling case one line down, a confidence level of 1.5, DOES error (with #VALUE! rather than #NUM!), so the range is guarded on the upper side only.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,E1:E20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">3.66439998164772</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.CONFINT will return the #VALUE! error.&#34; E1:E20 is the 1..20 timeline with its first two entries both 1. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build returns a confidence radius of roughly 3.8 to 4.1 -- and, because this is CONFINT, a DIFFERENT one on each build and on each run (24.2.0.3 3.98634886618424, 24.8.7.2 3.77969371470417, 25.2.0.3 4.11592383024156, 25.8.7.3 3.99931306698463 on the run recorded here). This is one of only two cases in the whole batch that differ across the four builds, and both are FORECAST.ETS.CONFINT. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got 3.66439998164772</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A20,0.95,9000)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;Maximum supported seasonality is 8,760 (number of hours in a year). Any seasonality above that number will result in the #NUM! error.&#34; 9000 exceeds it. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.confint.html">FORECAST.ETS.CONFINT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.CONFINT(21,C1:C20,A1:A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.CONFINT will return the #N/A error.&#34; 20 values against a 10-row timeline. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,E1:E20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">4</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.SEASONALITY will return the #VALUE! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build reports a seasonality of 4 -- the same answer it gives for the well-formed timeline, so the duplicate is simply absorbed. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got 4</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,H1:H20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If a constant step can&#39;t be identified in the provided timeline, FORECAST.ETS.SEASONALITY will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.seasonality.html">FORECAST.ETS.SEASONALITY</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.SEASONALITY(C1:C20,A1:A10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.SEASONALITY will return the #N/A error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,E1:E20,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.STAT will return the #VALUE! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build reports a detected step size of 1 -- a confident, specific answer about a timeline that has no well-defined step at all, since two of its entries are the same instant. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got 1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,H1:H20,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If a constant step can&#39;t be identified in the provided timeline, FORECAST.ETS.STAT will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/forecast.ets.stat.html">FORECAST.ETS.STAT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A10,8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.STAT will return the #N/A error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/ftest.html">FTEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FTEST(D2:D2,E2:E2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If the number of data points in array1 or array2 is less than 2 ... FTEST returns the #DIV/0! error value.&#34; A one-point sample has no n-1 estimator. Asserted separately from the zero-variance case because they are different guards on the same documented error. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #DIV/0!, the same substitution batch C recorded for this function&#39;s modern replacement F.TEST on the identical inputs. Set up from Microsoft&#39;s own worked-example table for FTEST: the header row Data1 / Data2 in row 1 and the two five-value samples 6, 7, 9, 15, 21 and 20, 28, 31, 38, 40 in A2:A6 and B2:B6, exactly as the page pastes them at A1. Two extra columns this corpus adds for the documented error branches: C2:C6 is five copies of 7 (a sample whose variance is zero) and D2 / E2 are single-cell samples. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/ftest.html">FTEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FTEST(C2:C6,B2:B6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If the number of data points in array1 or array2 is less than 2, or if the variance of array1 or array2 is zero, FTEST returns the #DIV/0! error value.&#34; C2:C6 is five copies of 7, so its variance is exactly zero and the F ratio&#39;s denominator vanishes. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #DIV/0!, the same substitution batch C recorded for this function&#39;s modern replacement F.TEST on the identical inputs. Set up from Microsoft&#39;s own worked-example table for FTEST: the header row Data1 / Data2 in row 1 and the two five-value samples 6, 7, 9, 15, 21 and 20, 28, 31, 38, 40 in A2:A6 and B2:B6, exactly as the page pastes them at A1. Two extra columns this corpus adds for the documented error branches: C2:C6 is five copies of 7 (a sample whose variance is zero) and D2 / E2 are single-cell samples. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/fvschedule.html">FVSCHEDULE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=FVSCHEDULE(1,A1:A2)</div>
@@ -3138,6 +3307,240 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Verbatim from Microsoft: &#39;any other value produces the #VALUE! error value for FVSCHEDULE&#39;. Note this is the opposite of most statistical functions, which ignore stray text in a reference, and it differs from an empty cell, which the same sentence documents as a zero rate; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got 1.09</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.html">GAMMA</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA(-2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If Number is a negative integer or 0, GAMMA returns the #NUM! error value&#34;, and publishes &#39;=GAMMA(-2)&#39; with the result #NUM!. Gamma has poles at every non-positive integer. Asserted alongside GAMMA(-3.75), which is NOT an integer and must return a finite value -- together they check that an engine rejects the poles without rejecting the whole negative axis. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.html">GAMMA</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If Number is a negative integer or 0, GAMMA returns the #NUM! error value&#34;, and the page&#39;s own example table lists &#39;=GAMMA(0)&#39; with the result #NUM!. The gamma function has a pole at 0. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.dist.html">GAMMA.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA.DIST(1,0,2,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMA.DIST returns the #NUM! error value.&#34; Zero is the boundary of the exclusion. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.dist.html">GAMMA.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA.DIST(1,9,0,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMA.DIST returns the #NUM! error value.&#34; Asserted separately from the alpha case because an engine can guard one parameter and not the other; beta also appears in a division (x/beta), so a missing guard here surfaces as #DIV/0! rather than a wrong number. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.dist.html">GAMMA.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA.DIST(-1,9,2,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt; 0, GAMMA.DIST returns the #NUM! error value.&#34; The gamma distribution has no support below zero. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. WORTH READING NEXT TO ITS LEGACY TWIN: on the identical input, LibreOffice&#39;s GAMMADIST(-1,9,2,TRUE) returns the NUMBER 0 rather than any error at all (see data/tests/GAMMADIST.json). The two names are documented as the same function with the same exclusions, but LibreOffice guards the modern spelling and not the legacy one, so which spelling a workbook happens to use decides whether an out-of-domain x is visible.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.inv.html">GAMMA.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA.INV(0.5,0,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMA.INV returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.inv.html">GAMMA.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA.INV(2,9,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, GAMMA.INV returns the #NUM! error value.&#34; Asserted separately from the negative case because they are guards on opposite ends of the same range. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gamma.inv.html">GAMMA.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMA.INV(-0.1,9,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, GAMMA.INV returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammadist.html">GAMMADIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMADIST(1,0,2,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMADIST returns the #NUM! error value.&#34; Zero is the boundary of the exclusion. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammadist.html">GAMMADIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMADIST(1,9,0,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMADIST returns the #NUM! error value.&#34; Asserted separately from the alpha case because an engine can guard one parameter and not the other; beta also appears in a division (x/beta), so a missing guard here surfaces as #DIV/0! rather than a wrong number. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammadist.html">GAMMADIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMADIST(-1,9,2,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt; 0, GAMMADIST returns the #NUM! error value.&#34; The gamma distribution has no support below zero. Set up from Microsoft&#39;s own worked-example table: A2 = 10.00001131 (the value at which the distribution is evaluated), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 exactly as the page describes. Column F is untouched because this harness writes the formula under test into cell F1. EXECUTED RESULT, and a SILENT WRONG ANSWER -- the serious class: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return the NUMBER 0 for a negative x, where the page documents #NUM!. No error is raised, so a column of negative inputs yields a column of zeros that looks like a legitimately tiny probability rather than a visible column of errors. This is the same shape of missing input guard batch C recorded for EXPON.DIST/EXPONDIST at negative x. The finding is sharpened by the modern spelling on the same engine: GAMMA.DIST(-1,9,2,TRUE) returns #VALUE! on all four builds (see data/tests/GAMMA.DIST.json), so LibreOffice has the guard -- it is just missing from the legacy alias, and the two names disagree about the same documented exclusion.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammainv.html">GAMMAINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMAINV(0.5,0,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If alpha &lt;= 0 or if beta &lt;= 0, GAMMAINV returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammainv.html">GAMMAINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMAINV(2,9,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, GAMMAINV returns the #NUM! error value.&#34; Asserted separately from the negative case because they are guards on opposite ends of the same range. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammainv.html">GAMMAINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMAINV(-0.1,9,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If probability &lt; 0 or probability &gt; 1, GAMMAINV returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 0.068094 (the probability), A3 = 9 (alpha) and A4 = 2 (beta), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammaln.html">GAMMALN</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMALN(-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt;= 0, GAMMALN returns the #NUM! error value.&#34; Note this is a STRICTER domain than GAMMA&#39;s: GAMMA(-3.75) is a documented finite value, but GAMMALN(-3.75) is excluded outright, because the gamma function alternates sign on the negative axis and its real logarithm would be undefined half the time. Asserted separately from the zero case for that reason. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammaln.html">GAMMALN</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMALN(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt;= 0, GAMMALN returns the #NUM! error value.&#34; Gamma has a pole at 0, so its logarithm diverges. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammaln.precise.html">GAMMALN.PRECISE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMALN.PRECISE(-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt;= 0, GAMMALN.PRECISE returns the #NUM! error value.&#34; Note this is a STRICTER domain than GAMMA&#39;s: GAMMA(-3.75) is a documented finite value, but GAMMALN.PRECISE(-3.75) is excluded outright, because the gamma function alternates sign on the negative axis and its real logarithm would be undefined half the time. Asserted separately from the zero case for that reason. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/gammaln.precise.html">GAMMALN.PRECISE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=GAMMALN.PRECISE(0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If x &lt;= 0, GAMMALN.PRECISE returns the #NUM! error value.&#34; Gamma has a pole at 0, so its logarithm diverges. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -3154,6 +3557,84 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/hypgeom.dist.html">HYPGEOM.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=HYPGEOM.DIST(1,4,25,20,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If population_s &lt;= 0 or population_s &gt; number_population, HYPGEOM.DIST returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/hypgeom.dist.html">HYPGEOM.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=HYPGEOM.DIST(1,4,8,0,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If number_pop &lt;= 0, HYPGEOM.DIST returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/hypgeom.dist.html">HYPGEOM.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=HYPGEOM.DIST(1,25,8,20,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If number_sample &lt;= 0 or number_sample &gt; number_population, HYPGEOM.DIST returns the #NUM! error value.&#34; Sampling 25 items without replacement from a population of 20 is impossible. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/hypgeom.dist.html">HYPGEOM.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=HYPGEOM.DIST(5,4,8,20,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents: &#34;If sample_s &lt; 0 or sample_s is greater than the lesser of number_sample or population_s, HYPGEOM.DIST returns the #NUM! error value.&#34; 5 successes cannot occur in a sample of 4. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/hypgeomdist.html">HYPGEOMDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=HYPGEOMDIST(1,0,8,20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If number_sample &lt;= 0 or number_sample &gt; number_population, HYPGEOMDIST returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/hypgeomdist.html">HYPGEOMDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=HYPGEOMDIST(5,4,8,20)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents: &#34;If sample_s &lt; 0 or sample_s is greater than the lesser of number_sample or population_s, HYPGEOMDIST returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one. Set up from Microsoft&#39;s own worked-example table: A2 = 1 (number of successes in the sample), A3 = 4 (sample size), A4 = 8 (number of successes in the population) and A5 = 20 (population size), pasted at A1 as the page describes. Column F is untouched because this harness writes the formula under test into cell F1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/iferror.html">IFERROR</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IFERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;),&#34;missing&#34;)</div>
@@ -3164,6 +3645,175 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Logical</dd>
   </dl>
   <p>Microsoft documents IFERROR as returning value_if_error for any of #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? and #NULL! -- #REF! is explicitly in that list, so the source of the #REF! (a missing sheet name inside INDIRECT) should not matter. Excel function reference: https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188; MISMATCH vs expected: expected &#39;missing&#39;, got &#39;#REF!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcos.html">IMCOS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCOS(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0.54030230586814</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents, on this page specifically: &#34;If inumber is a logical value, IMCOS returns the #VALUE! error value.&#34; This is a deliberate refusal to coerce, and it is the sort of guard an engine drops: TRUE coerces to 1 in almost every other numeric context, so an implementation that simply converts its argument to a number computes cos(1) = 0.54030230586814 and returns a plausible answer where Excel raises an error. EXECUTED RESULT, and a SILENT WRONG ANSWER: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return the string &#34;0.54030230586814&#34; -- that is cos(1), i.e. TRUE was coerced to 1 and fed to the function -- where the page documents #VALUE!. The same coercion happens on this batch&#39;s IMCOSH, IMCOT, IMCSC and IMCSCH when they are called under their unprefixed names (returning cosh(1), cot(1), csc(1) and csch(1) respectively), so it is one behaviour across the complex family rather than a slip in one function.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;0.54030230586814&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcosh.html">IMCOSH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCOSH(&#34;4+3i&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">-27.0349456030742+3.85115333481178i</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=IMCOSH(&#34;4+3i&#34;)&#39; with the result -27.0349456030742+3.85115333481178i. Derived independently with mpmath at 40 digits from cosh(x+yi) = cosh(x)cos(y) + i*sinh(x)sin(y): cosh(4)cos(3) = -27.034945603074224648 and sinh(4)sin(3) = 3.8511533348117775366, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOSH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOSH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOSH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOSH, COM.MICROSOFT.IMCOSH, ORG.OPENOFFICE.IMCOSH and _xlfn.ORG.OPENOFFICE.IMCOSH are all #NAME? on every build, while the UNPREFIXED IMCOSH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOSH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOSH token Excel writes -- meaning a workbook saved by Excel that uses IMCOSH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;-27.0349456030742+3.85115333481178i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcosh.html">IMCOSH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCOSH(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCOSH returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOSH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOSH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOSH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOSH, COM.MICROSOFT.IMCOSH, ORG.OPENOFFICE.IMCOSH and _xlfn.ORG.OPENOFFICE.IMCOSH are all #NAME? on every build, while the UNPREFIXED IMCOSH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOSH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOSH token Excel writes -- meaning a workbook saved by Excel that uses IMCOSH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcosh.html">IMCOSH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCOSH(&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a value that is not in the x+yi or x+yj text format, IMCOSH returns the #NUM! error value.&#34; Note this is #NUM!, not the #VALUE! that the logical-value clause on the same page specifies -- the two malformed-input branches are documented as returning DIFFERENT errors, which is why both are asserted. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOSH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOSH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOSH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOSH, COM.MICROSOFT.IMCOSH, ORG.OPENOFFICE.IMCOSH and _xlfn.ORG.OPENOFFICE.IMCOSH are all #NAME? on every build, while the UNPREFIXED IMCOSH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOSH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOSH token Excel writes -- meaning a workbook saved by Excel that uses IMCOSH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcot.html">IMCOT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCOT(&#34;4+3i&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.00490118239430447-0.999266927805902i</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=IMCOT(&#34;4+3i&#34;)&#39; with the result 0.00490118239430447-0.999266927805902i. Derived independently with mpmath at 40 digits from cot(z) = cos(z)/sin(z) evaluated on the complex plane: 0.0049011823943044733598 - 0.99926692780590154452i, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOT is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOT, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOT here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOT, COM.MICROSOFT.IMCOT, ORG.OPENOFFICE.IMCOT and _xlfn.ORG.OPENOFFICE.IMCOT are all #NAME? on every build, while the UNPREFIXED IMCOT(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOT correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOT token Excel writes -- meaning a workbook saved by Excel that uses IMCOT arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;0.00490118239430447-0.999266927805902i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcot.html">IMCOT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCOT(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCOT returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOT is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOT, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOT here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOT, COM.MICROSOFT.IMCOT, ORG.OPENOFFICE.IMCOT and _xlfn.ORG.OPENOFFICE.IMCOT are all #NAME? on every build, while the UNPREFIXED IMCOT(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOT correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOT token Excel writes -- meaning a workbook saved by Excel that uses IMCOT arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcot.html">IMCOT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCOT(&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a value that is not in the x+yi or x+yj text format, IMCOT returns the #NUM! error value.&#34; Note this is #NUM!, not the #VALUE! that the logical-value clause on the same page specifies -- the two malformed-input branches are documented as returning DIFFERENT errors, which is why both are asserted. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCOT is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCOT, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCOT here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCOT, COM.MICROSOFT.IMCOT, ORG.OPENOFFICE.IMCOT and _xlfn.ORG.OPENOFFICE.IMCOT are all #NAME? on every build, while the UNPREFIXED IMCOT(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCOT correctly, and its OOXML import simply has no mapping for the _xlfn.IMCOT token Excel writes -- meaning a workbook saved by Excel that uses IMCOT arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsc.html">IMCSC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCSC(&#34;4+3i&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">-0.0754898329158637+0.0648774713706355i</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=IMCSC(&#34;4+3i&#34;)&#39; with the result -0.0754898329158637+0.0648774713706355i. Derived independently with mpmath at 40 digits from csc(z) = 1/sin(z): -0.075489832915863699572 + 0.064877471370635490483i, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;-0.0754898329158637+0.0648774713706355i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsc.html">IMCSC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCSC(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCSC returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsc.html">IMCSC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCSC(&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a value that is not in the x+yi or x+yj text format, IMCSC returns the #NUM! error value.&#34; Note this is #NUM!, not the #VALUE! that the logical-value clause on the same page specifies -- the two malformed-input branches are documented as returning DIFFERENT errors, which is why both are asserted. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsch.html">IMCSCH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCSCH(&#34;4+3i&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">-0.036275889628626-0.0051744731840194i</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=IMCSCH(&#34;4+3i&#34;)&#39; with the result -0.036275889628626-0.0051744731840194i. Derived independently with mpmath at 40 digits from csch(z) = 1/sinh(z): -0.036275889628626011594 - 0.0051744731840193976541i, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;-0.036275889628626-0.0051744731840194i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsch.html">IMCSCH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCSCH(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMCSCH returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imcsch.html">IMCSCH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=IMCSCH(&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a value that is not in the x+yi or x+yj text format, IMCSCH returns the #NUM! error value.&#34; Note this is #NUM!, not the #VALUE! that the logical-value clause on the same page specifies -- the two malformed-input branches are documented as returning DIFFERENT errors, which is why both are asserted. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">

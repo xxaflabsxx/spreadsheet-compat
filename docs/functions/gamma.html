@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GAMMA: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="GAMMA (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>GAMMA matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="5/7 match; zero num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/gamma.html">
-<meta property="og:title" content="GAMMA: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="GAMMA (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="GAMMA matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="5/7 match; zero num returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/gamma.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>GAMMA</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>GAMMA</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for GAMMA yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060182.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,104 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+GAMMA&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't GAMMA working in LibreOffice?</h2>
+
+<p><code>GAMMA</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=GAMMA(0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If Number is a negative integer or 0, GAMMA returns the #NUM! error value&#34;, and the page&#39;s own example table lists &#39;=GAMMA(0)&#39; with the result #NUM!. The gamma function has a pole at 0. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=GAMMA(-2)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If Number is a negative integer or 0, GAMMA returns the #NUM! error value&#34;, and publishes &#39;=GAMMA(-2)&#39; with the result #NUM!. Gamma has poles at every non-positive integer. Asserted alongside GAMMA(-3.75), which is NOT an integer and must return a finite value -- together they check that an engine rejects the poles without rejecting the whole negative axis. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +491,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for GAMMA yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMA(2.5),12)</td>
+  <td>Microsoft&#39;s first worked example</td>
+  <td class="result mono">1.329340388179</td>
+  <td class="result mono">1.329340388179<br><span class="category-tag">Microsoft publishes &#39;=GAMMA(2.5)&#39; with the result 1.329 (&#34;Returns the gamma function value of 2.5 (1.329)&#34;). Derived independently with mpmath at 50 decimal digits: Gamma(2.5) = 1.3293403881791370205, which rounds to the published 1.329 at the three decimals the page prints. Asserted at 12 dp rather than 3 because the page&#39;s precision is a display choice, not a limit on the answer, and 12 dp is well inside the ~15 significant digits an IEEE double carries. Cross-checked against the closed form the page itself supplies, Gamma(N+1) = N*Gamma(N): Gamma(2.5) = 1.5*Gamma(1.5) = 1.5*0.5*Gamma(0.5) = 0.75*sqrt(pi) = 1.32934038817913702, identical to 17 digits.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMA(-3.75),12)</td>
+  <td>Microsoft&#39;s second worked example: a negative non-integer argument</td>
+  <td class="result mono">0.267866128861</td>
+  <td class="result mono">0.267866128861<br><span class="category-tag">Microsoft publishes &#39;=GAMMA(-3.75)&#39; with the result 0.268. Derived independently with mpmath at 50 digits: Gamma(-3.75) = 0.26786612886141660256, which rounds to the published 0.268. This case matters because the gamma function is only defined for negative arguments by analytic continuation -- an implementation that simply integrates the defining integral cannot reach it -- and because the sign is a real test: Gamma is positive on (-4,-3), and an engine using the reflection formula with a sign slip lands on -0.268.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA(5)</td>
+  <td>At a positive integer n, GAMMA(n) is (n-1)!</td>
+  <td class="result mono">24</td>
+  <td class="result mono">24<br><span class="category-tag">Derived from the recurrence the page states, Gamma(N+1) = N*Gamma(N), together with Gamma(1) = 1: Gamma(5) = 4*3*2*1 = 24 = 4!. An exact integer, so this case is asserted with no ROUND wrapper at all and catches any accumulation of floating-point error in a series or Lanczos approximation.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(GAMMA(0.5)-SQRT(PI()),12)</td>
+  <td>The classical value Gamma(1/2) = sqrt(pi), asserted as a difference of zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Not a published example; the standard closed-form value, and the reason it is asserted as a DIFFERENCE against the engine&#39;s own SQRT(PI()) is that it then tests the gamma implementation rather than the printing of a constant. mpmath at 50 digits: Gamma(0.5) = 1.7724538509055160273, sqrt(pi) = 1.7724538509055160273 -- equal to every digit mpmath will print.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA(0)</td>
+  <td>Zero, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If Number is a negative integer or 0, GAMMA returns the #NUM! error value&#34;, and the page&#39;s own example table lists &#39;=GAMMA(0)&#39; with the result #NUM!. The gamma function has a pole at 0. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA(-2)</td>
+  <td>A negative integer, the other excluded case</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If Number is a negative integer or 0, GAMMA returns the #NUM! error value&#34;, and publishes &#39;=GAMMA(-2)&#39; with the result #NUM!. Gamma has poles at every non-positive integer. Asserted alongside GAMMA(-3.75), which is NOT an integer and must return a finite value -- together they check that an engine rejects the poles without rejecting the whole negative axis. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GAMMA(&#34;abc&#34;)</td>
+  <td>A non-numeric argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If Number contains characters that are not valid, GAMMA returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

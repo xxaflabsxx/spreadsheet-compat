@@ -1,0 +1,26 @@
+{
+  "function": "IMDIV",
+  "cases": [
+    {
+      "id": "IMDIV_doc_example",
+      "formula": "=IMDIV(\"-238+240i\",\"10+24i\")",
+      "description": "Microsoft's documented worked example: the quotient of two complex numbers",
+      "expected": "5+12i",
+      "expected_note": "Microsoft publishes '=IMDIV(\"-238+240i\",\"10+24i\")' with the result 5+12i. Derived independently from the documented quotient formula, which multiplies numerator and denominator by the conjugate of the denominator: (-238+240i)(10-24i)/(10^2+24^2) = (-2380 + 5712i + 2400i + 5760)/676 = (3380 + 8112i)/676 = 5 + 12i, an exact result in integers. Microsoft chose the operands so the answer is exact, which makes this a strong test: any rounding at all in the division shows up as a long decimal string instead of \"5+12i\". EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    },
+    {
+      "id": "IMDIV_yields_unit_imaginary",
+      "formula": "=IMDIV(\"1+i\",\"1-i\")",
+      "description": "A quotient that is exactly the imaginary unit, which must print as bare \"i\"",
+      "expected": "i",
+      "expected_note": "Derived exactly: (1+i)/(1-i) = (1+i)^2/((1-i)(1+i)) = 2i/2 = i. The point of the case is the FORMATTING of a result whose real part is zero and whose imaginary coefficient is exactly 1: Excel's format prints \"i\", not \"0+1i\", \"1i\" or \"0+i\". This is the single most formatting-sensitive value in the whole complex family -- an adjacent function, IMSQRT, is where all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) actually split in this batch, printing IMSQRT(\"-1\") as \"1i\" on 24.2.0.3 and 24.8.7.2 but as \"i\" on 25.2.0.3 and 25.8.7.3. EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    },
+    {
+      "id": "IMDIV_real_operands",
+      "formula": "=IMDIV(\"6\",\"3\")",
+      "description": "Two real operands, whose quotient must come back as a bare real number",
+      "expected": "2",
+      "expected_note": "6/3 = 2 with a zero imaginary part, so the documented format prints \"2\" rather than \"2+0i\". Included because it is the degenerate case an implementation is most likely to route through the general conjugate formula and emit with a spurious imaginary term. EXCEL'S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as \"i\" / \"-i\" with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, \"1i\" for \"i\", a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value."
+    }
+  ]
+}

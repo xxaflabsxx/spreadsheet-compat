@@ -1,0 +1,26 @@
+{
+  "function": "IMARGUMENT",
+  "cases": [
+    {
+      "id": "IMARGUMENT_doc_example",
+      "formula": "=ROUND(IMARGUMENT(\"3+4i\"),12)",
+      "description": "Microsoft's documented worked example: the argument (theta) of 3+4i in radians",
+      "expected": 0.927295218002,
+      "expected_note": "Microsoft publishes '=IMARGUMENT(\"3+4i\")' with the result 0.92729522. Derived independently with mpmath at 50 digits as atan2(4, 3) = 0.92729521800161223243, which rounds to exactly the published 0.92729522 at the 8 dp the page prints; asserted at 12 dp. Cross-check from a completely different direction: this same number is the imaginary part of Microsoft's own published IMLN(\"3+4i\") result, 1.6094379124341+0.927295218001612i, since ln(z) = ln|z| + i*arg(z) -- two Microsoft pages independently agreeing on the same constant."
+    },
+    {
+      "id": "IMARGUMENT_eighth_turn",
+      "formula": "=ROUND(IMARGUMENT(\"1+i\"),12)",
+      "description": "The argument of 1+i is pi/4",
+      "expected": 0.785398163397,
+      "expected_note": "Not published; derived from atan2(1, 1) = pi/4 = 0.78539816339744830962 (mpmath, 50 digits). Chosen because the answer is a recognizable closed form, so a wrong value is obviously wrong rather than merely different."
+    },
+    {
+      "id": "IMARGUMENT_negative_real_axis",
+      "formula": "=ROUND(IMARGUMENT(\"-1\"),12)",
+      "description": "The argument of -1 is pi, which is where a two-argument arctangent is required",
+      "expected": 3.14159265359,
+      "expected_note": "Derived from atan2(0, -1) = pi = 3.1415926535897932385. This is the case that distinguishes a correct implementation from one built on the single-argument arctangent of y/x: that shortcut computes atan(0/-1) = atan(0) = 0 and loses the quadrant entirely, returning 0 instead of pi. Microsoft's page states the relationship as tan(theta) = y/x, which is exactly the ambiguous form, so the quadrant convention has to be inferred from the published example (3+4i, first quadrant) plus the standard principal-value range -- and this case is what makes that inference testable."
+    }
+  ]
+}

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IMCSC: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="IMCSC (Engineering) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>IMCSC is not supported in LibreOffice Calc (Excel &amp; Sheets only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for IMCSC in all 3 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/imcsc.html">
-<meta property="og:title" content="IMCSC: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="IMCSC (Engineering) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="IMCSC is not supported in LibreOffice Calc (Excel &amp; Sheets only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for IMCSC in all 3 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/imcsc.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>IMCSC</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Engineering</p>
+<p class="category-tag">Category: Engineering &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>IMCSC</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for IMCSC yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,106 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+IMCSC&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't IMCSC working in LibreOffice?</h2>
+
+<p><code>IMCSC</code> comes back as a <code>#NAME?</code>
+(unrecognized function) error in LibreOffice Calc 25.8.7.3 in our executed tests &mdash; but not
+because the function is missing. This is not a typo or a settings problem. LibreOffice does implement this function &mdash; typed on its own, <code>=IMCSC(&hellip;)</code> evaluates correctly on every release we tested &mdash; but its .xlsx importer does not recognise the <code>_xlfn.IMCSC</code> token that Excel writes into the file for it, so an Excel-authored workbook opens here with <code>#NAME?</code>. The gap is in the file-format mapping, not in the function.
+The same formula is documented for Excel and documented for Google Sheets.
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=IMCSC(&#34;4+3i&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">-0.0754898329158637+0.0648774713706355i</span>.
+        Microsoft publishes &#39;=IMCSC(&#34;4+3i&#34;)&#39; with the result -0.0754898329158637+0.0648774713706355i. Derived independently with mpmath at 40 digits from csc(z) = 1/sin(z): -0.075489832915863699572 + 0.064877471370635490483i, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;-0.0754898329158637+0.0648774713706355i&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=IMCSC(TRUE)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">#VALUE!</span>.
+        Excel documents: &#34;If inumber is a logical value, IMCSC returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=IMCSC(&#34;abc&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Excel documents: &#34;If inumber is a value that is not in the x+yi or x+yj text format, IMCSC returns the #NUM! error value.&#34; Note this is #NUM!, not the #VALUE! that the logical-value clause on the same page specifies -- the two malformed-input branches are documented as returning DIFFERENT errors, which is why both are asserted. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +493,42 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for IMCSC yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMCSC(&#34;4+3i&#34;)</td>
+  <td>Microsoft&#39;s documented worked example: the cosecant of 4+3i</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">-0.0754898329158637+0.0648774713706355i<br><span class="category-tag">Microsoft publishes &#39;=IMCSC(&#34;4+3i&#34;)&#39; with the result -0.0754898329158637+0.0648774713706355i. Derived independently with mpmath at 40 digits from csc(z) = 1/sin(z): -0.075489832915863699572 + 0.064877471370635490483i, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMCSC(TRUE)</td>
+  <td>A logical argument, which the page rejects outright</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If inumber is a logical value, IMCSC returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMCSC(&#34;abc&#34;)</td>
+  <td>A string that is not in the documented complex-number format</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If inumber is a value that is not in the x+yi or x+yj text format, IMCSC returns the #NUM! error value.&#34; Note this is #NUM!, not the #VALUE! that the logical-value clause on the same page specifies -- the two malformed-input branches are documented as returning DIFFERENT errors, which is why both are asserted. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSC, COM.MICROSOFT.IMCSC, ORG.OPENOFFICE.IMCSC and _xlfn.ORG.OPENOFFICE.IMCSC are all #NAME? on every build, while the UNPREFIXED IMCSC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSC correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSC token Excel writes -- meaning a workbook saved by Excel that uses IMCSC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>
