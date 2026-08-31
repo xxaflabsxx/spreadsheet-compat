@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ISOMITTED is not supported in LibreOffice Calc (Excel only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for ISOMITTED in all 3 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>ISOMITTED is not supported in Google Sheets or LibreOffice (executed)</title>
+<meta name="description" content="#NAME? in both: 3 executed Sheets cases and 3 in LibreOffice. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/isomitted.html">
-<meta property="og:title" content="ISOMITTED is not supported in LibreOffice Calc (Excel only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for ISOMITTED in all 3 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="ISOMITTED is not supported in Google Sheets or LibreOffice (executed)">
+<meta property="og:description" content="#NAME? in both: 3 executed Sheets cases and 3 in LibreOffice. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/isomitted.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Information &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ISOMITTED</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ISOMITTED</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -435,6 +435,17 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+<h2 class="section-title">Why isn&rsquo;t ISOMITTED working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>ISOMITTED</code>: we imported the formula into
+Sheets on 2026-08-31 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
+
+
 
 
 
@@ -445,6 +456,28 @@ we re-run every test on each new release, so it will flip to Supported here as s
   
     
   
+    
+      
+      <li>
+        <span class="formula">=LAMBDA(x,y,IF(ISOMITTED(y),&#34;Missing second argument&#34;,x+y))(1,)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">Missing second argument</span>.
+        Microsoft&#39;s page publishes exactly this formula -- &#34;Example 1: Check for a missing parameter and return a friendly string ... =LAMBDA(x,y, IF(ISOMITTED(y),\&#34;Missing second argument\&#34;,x+y))(1,)&#34; -- and the trailing comma with nothing after it is the point: y is supplied as omitted. ISOMITTED(y) is therefore TRUE and the IF returns the friendly string. The result string is fixed by the formula itself, so nothing here is derived or guessed. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.; MISMATCH vs expected: expected &#39;Missing second argument&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=LAMBDA(x,y,IF(ISOMITTED(y),&#34;Missing second argument&#34;,x+y))(1,2)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">3</span>.
+        The control for Microsoft&#39;s own example: with y = 2 present, ISOMITTED(y) must be FALSE and the IF must fall through to x+y = 1+2 = 3. Without this case a function that returned TRUE unconditionally would pass the documented example. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.; MISMATCH vs expected: expected 3, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
     
   
     
@@ -482,6 +515,41 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=LAMBDA(x,y,IF(ISOMITTED(y),&#34;Missing second argument&#34;,x+y))(1,)</td>
+  <td>Microsoft&#39;s documented Example 1, called with the second argument omitted</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">Missing second argument<br><span class="category-tag">Microsoft&#39;s page publishes exactly this formula -- &#34;Example 1: Check for a missing parameter and return a friendly string ... =LAMBDA(x,y, IF(ISOMITTED(y),\&#34;Missing second argument\&#34;,x+y))(1,)&#34; -- and the trailing comma with nothing after it is the point: y is supplied as omitted. ISOMITTED(y) is therefore TRUE and the IF returns the friendly string. The result string is fixed by the formula itself, so nothing here is derived or guessed. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LAMBDA(x,y,IF(ISOMITTED(y),&#34;Missing second argument&#34;,x+y))(1,2)</td>
+  <td>The same documented LAMBDA with the second argument actually supplied</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">3<br><span class="category-tag">The control for Microsoft&#39;s own example: with y = 2 present, ISOMITTED(y) must be FALSE and the IF must fall through to x+y = 1+2 = 3. Without this case a function that returned TRUE unconditionally would pass the documented example. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISOMITTED(A2)</td>
+  <td>PROBE: ISOMITTED called on its own, the only way to ask an engine about this function rather than about LAMBDA</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">Microsoft documents ISOMITTED only as a LAMBDA helper -- &#34;Checks whether the value in a LAMBDA is missing&#34; -- and publishes no behaviour for a call outside one, so no expected value is derived and none is invented. The case exists because it is the ONLY way to put the question to an engine directly: the two documented cases in this file are LAMBDA calls, and an engine without LAMBDA fails on the LAMBDA before ISOMITTED is ever looked up, so their results say nothing about ISOMITTED itself. FOR THE RECORD, all four LibreOffice builds return #NAME? here -- under the plain name, the _xlfn. storage form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike -- which is what establishes that ISOMITTED is genuinely absent from LibreOffice rather than merely unreachable there. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

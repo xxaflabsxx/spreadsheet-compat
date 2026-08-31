@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JIS works in Excel and LibreOffice (LibreOffice-tested)</title>
-<meta name="description" content="All 5 executed test cases pass in LibreOffice; documented in Excel only. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<title>JIS is not supported in Google Sheets (#NAME?, executed)</title>
+<meta name="description" content="#NAME? in Google Sheets for all 5 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/jis.html">
-<meta property="og:title" content="JIS works in Excel and LibreOffice (LibreOffice-tested)">
-<meta property="og:description" content="All 5 executed test cases pass in LibreOffice; documented in Excel only. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+<meta property="og:title" content="JIS is not supported in Google Sheets (#NAME?, executed)">
+<meta property="og:description" content="#NAME? in Google Sheets for all 5 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-31; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/jis.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>JIS</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
 
 
-<p class="lede">Real compatibility results for the <strong>JIS</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>JIS</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -424,9 +424,93 @@ JIS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+<h2 class="section-title">Why isn&rsquo;t JIS working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>JIS</code>: we imported the formula into
+Sheets on 2026-08-31 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
 
 
 
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=JIS(&#34;EXCEL&#34;)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">ＥＸＣＥＬ</span>.
+        Derived from the documented rule rather than from the broken example: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E, X, C, E, L). That is exactly the mapping batch A&#39;s ASC cases assert in the opposite direction, and exactly the value batch C asserted for DBCS(&#34;EXCEL&#34;) on the other Windows-named half of this pair. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=JIS(&#34;ＥＸＣＥＬ&#34;)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">ＥＸＣＥＬ</span>.
+        The Text argument description ends: &#34;If text does not contain any half-width English letters or katakana, text is not changed.&#34; Full-width input contains no half-width letters, so the documented answer is the argument itself -- which also makes JIS idempotent, since this string is the output of the previous case. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=JIS(&#34;ｶﾅ&#34;)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">カナ</span>.
+        The page names two classes of convertible characters: &#34;half-width (single-byte) English letters or katakana&#34;. This case covers the second. U+FF76 HALFWIDTH KATAKANA LETTER KA and U+FF85 HALFWIDTH KATAKANA LETTER NA map to U+30AB KATAKANA LETTER KA and U+30CA KATAKANA LETTER NA. Latin-only tests would never exercise this branch, and it is the branch the function is actually named after. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;カナ&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=LEN(JIS(&#34;EXCEL&#34;))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">5</span>.
+        &#34;Half-width&#34; and &#34;full-width&#34; describe how many BYTES a character occupied in a legacy double-byte encoding, not how many characters there are: the conversion replaces each character with one other character. So LEN is invariant under JIS even though LENB is not -- on all four builds LENB of the full-width result is 10 against LENB 5 for the argument. Asserting LEN here separates &#34;converted the characters&#34; from &#34;inserted padding&#34;. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected 5, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ASC(JIS(&#34;EXCEL&#34;))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">EXCEL</span>.
+        ASC is documented as the inverse operation (&#34;changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters&#34;), and batch A already executed ASC&#39;s own cases. Composing the two must return the original string. This is the strongest single check in the file: it depends on nothing but the two documented rules being inverses, and it would fail if JIS converted the wrong character class, converted only some characters, or changed the length. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;EXCEL&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -436,6 +520,57 @@ JIS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=JIS(&#34;EXCEL&#34;)</td>
+  <td>The page&#39;s own example argument: five half-width English letters converted to full-width</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">ＥＸＣＥＬ<br><span class="category-tag">Derived from the documented rule rather than from the broken example: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E, X, C, E, L). That is exactly the mapping batch A&#39;s ASC cases assert in the opposite direction, and exactly the value batch C asserted for DBCS(&#34;EXCEL&#34;) on the other Windows-named half of this pair. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=JIS(&#34;ＥＸＣＥＬ&#34;)</td>
+  <td>Text that is already full-width, which the page says is left alone</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">ＥＸＣＥＬ<br><span class="category-tag">The Text argument description ends: &#34;If text does not contain any half-width English letters or katakana, text is not changed.&#34; Full-width input contains no half-width letters, so the documented answer is the argument itself -- which also makes JIS idempotent, since this string is the output of the previous case. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=JIS(&#34;ｶﾅ&#34;)</td>
+  <td>Half-width katakana, the other character class the page names explicitly</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">カナ<br><span class="category-tag">The page names two classes of convertible characters: &#34;half-width (single-byte) English letters or katakana&#34;. This case covers the second. U+FF76 HALFWIDTH KATAKANA LETTER KA and U+FF85 HALFWIDTH KATAKANA LETTER NA map to U+30AB KATAKANA LETTER KA and U+30CA KATAKANA LETTER NA. Latin-only tests would never exercise this branch, and it is the branch the function is actually named after. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(JIS(&#34;EXCEL&#34;))</td>
+  <td>The conversion is character-for-character, so the character count is unchanged</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">5<br><span class="category-tag">&#34;Half-width&#34; and &#34;full-width&#34; describe how many BYTES a character occupied in a legacy double-byte encoding, not how many characters there are: the conversion replaces each character with one other character. So LEN is invariant under JIS even though LENB is not -- on all four builds LENB of the full-width result is 10 against LENB 5 for the argument. Asserting LEN here separates &#34;converted the characters&#34; from &#34;inserted padding&#34;. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ASC(JIS(&#34;EXCEL&#34;))</td>
+  <td>Round trip: full-width conversion followed by the documented inverse</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">EXCEL<br><span class="category-tag">ASC is documented as the inverse operation (&#34;changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters&#34;), and batch A already executed ASC&#39;s own cases. Composing the two must return the original string. This is the strongest single check in the file: it depends on nothing but the two documented rules being inverses, and it would fail if JIS converted the wrong character class, converted only some characters, or changed the length. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

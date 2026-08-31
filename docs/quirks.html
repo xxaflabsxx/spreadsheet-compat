@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>428 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 428 divergences, every one executed — not copied from docs.">
+<title>456 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 456 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="428 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 428 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="456 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 456 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">428 quirks found across 167 functions
-(296 in LibreOffice, 132 in Google Sheets).
+<p class="search-hint">456 quirks found across 170 functions
+(296 in LibreOffice, 160 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -4234,6 +4234,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/imsec.html">IMSEC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMSEC(&#34;4+3i&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">-0.065294027857947-0.0752249603027732i</dd>
+    <dt>Documented / expected</dt><dd class="mono">-0.0652940278579471-0.0752249603027732i</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Microsoft publishes &#39;=IMSEC(&#34;4+3i&#34;)&#39; with the result -0.0652940278579471-0.0752249603027732i. Derived independently with mpmath at 40 digits: sec(z) = 1/cos(z), with cos(x+yi) = cos(x)cosh(y) - i*sin(x)sinh(y). At 40 digits 1/cos(4+3i) = -0.06529402785794704644515821 - 0.07522496030277322686557715i. Cross-check on the modulus: |cos(4+3i)|^2 = 100.785068044323640479, and 1/|cos| = 0.09961..., consistent with |sec| = sqrt(0.0652940278579470^2 + 0.0752249603027732^2) = 0.0996136.... EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMSEC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMSEC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMSEC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMSEC, COM.MICROSOFT.IMSEC, ORG.OPENOFFICE.IMSEC and _xlfn.ORG.OPENOFFICE.IMSEC are all #NAME? on every build, while the UNPREFIXED IMSEC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMSEC, and its OOXML import simply has no mapping for the _xlfn.IMSEC token Excel writes -- meaning a workbook saved by Excel that uses IMSEC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is the same class batch D recorded for IMCOSH, IMCOT, IMCSC and IMCSCH. It is recorded as its own divergence class rather than as an ordinary unsupported-function result. CROSS-VERSION DRIFT FOUND HERE, in the last digit. Under the unprefixed name the four builds do NOT agree: 24.2.0.3 and 24.8.7.2 return -0.0652940278579471-0.0752249603027732i, which is Microsoft&#39;s published string byte for byte, while 25.2.0.3 and 25.8.7.3 return -0.065294027857947-0.0752249603027732i -- one significant digit shorter. Neither is a wrong value: the exact real part is -0.06529402785794704644515821, the correctly-rounded double is -0.065294027857947051 (whose 15-digit rendering ends ...471, matching Excel and the older builds) and the newer builds hold the adjacent double -0.065294027857947037 (whose 15-digit rendering ends ...47). The two doubles differ by one unit in the last place, about 1.4e-17, and straddle a 15-digit rounding boundary, which is the only reason the STRINGS differ at all. Recorded as a precision/formatting difference, not as a value error -- but it is a real regression in byte-for-byte agreement with Excel, and because IM* results are strings, an exact-match comparison in a spreadsheet would flag it.; MISMATCH vs expected: expected &#39;-0.0652940278579471-0.0752249603027732i&#39;, got &#39;-0.065294027857947-0.0752249603027732i&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imsec.html">IMSEC</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IMSEC(&#34;4+3i&#34;)</div>
   <dl class="quirk-grid">
@@ -4243,6 +4256,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Engineering</dd>
   </dl>
   <p>Microsoft publishes &#39;=IMSEC(&#34;4+3i&#34;)&#39; with the result -0.0652940278579471-0.0752249603027732i. Derived independently with mpmath at 40 digits: sec(z) = 1/cos(z), with cos(x+yi) = cos(x)cosh(y) - i*sin(x)sinh(y). At 40 digits 1/cos(4+3i) = -0.06529402785794704644515821 - 0.07522496030277322686557715i. Cross-check on the modulus: |cos(4+3i)|^2 = 100.785068044323640479, and 1/|cos| = 0.09961..., consistent with |sec| = sqrt(0.0652940278579470^2 + 0.0752249603027732^2) = 0.0996136.... EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMSEC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMSEC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMSEC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMSEC, COM.MICROSOFT.IMSEC, ORG.OPENOFFICE.IMSEC and _xlfn.ORG.OPENOFFICE.IMSEC are all #NAME? on every build, while the UNPREFIXED IMSEC(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMSEC, and its OOXML import simply has no mapping for the _xlfn.IMSEC token Excel writes -- meaning a workbook saved by Excel that uses IMSEC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is the same class batch D recorded for IMCOSH, IMCOT, IMCSC and IMCSCH. It is recorded as its own divergence class rather than as an ordinary unsupported-function result. CROSS-VERSION DRIFT FOUND HERE, in the last digit. Under the unprefixed name the four builds do NOT agree: 24.2.0.3 and 24.8.7.2 return -0.0652940278579471-0.0752249603027732i, which is Microsoft&#39;s published string byte for byte, while 25.2.0.3 and 25.8.7.3 return -0.065294027857947-0.0752249603027732i -- one significant digit shorter. Neither is a wrong value: the exact real part is -0.06529402785794704644515821, the correctly-rounded double is -0.065294027857947051 (whose 15-digit rendering ends ...471, matching Excel and the older builds) and the newer builds hold the adjacent double -0.065294027857947037 (whose 15-digit rendering ends ...47). The two doubles differ by one unit in the last place, about 1.4e-17, and straddle a 15-digit rounding boundary, which is the only reason the STRINGS differ at all. Recorded as a precision/formatting difference, not as a value error -- but it is a real regression in byte-for-byte agreement with Excel, and because IM* results are strings, an exact-match comparison in a spreadsheet would flag it.; MISMATCH vs expected: expected &#39;-0.0652940278579471-0.0752249603027732i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imsec.html">IMSEC</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMSEC(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMSEC returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMSEC is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMSEC, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMSEC here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMSEC, COM.MICROSOFT.IMSEC, ORG.OPENOFFICE.IMSEC and _xlfn.ORG.OPENOFFICE.IMSEC are all #NAME? on every build, while the UNPREFIXED IMSEC(...) evaluates on every build. So LibreOffice implements IMSEC, and its OOXML import simply has no mapping for the _xlfn.IMSEC token Excel writes -- meaning a workbook saved by Excel that uses IMSEC arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is the same class batch D recorded for IMCOSH, IMCOT, IMCSC and IMCSCH. It is recorded as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -4286,6 +4312,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/imsech.html">IMSECH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMSECH(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMSECH returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMSECH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMSECH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMSECH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMSECH, COM.MICROSOFT.IMSECH, ORG.OPENOFFICE.IMSECH and _xlfn.ORG.OPENOFFICE.IMSECH are all #NAME? on every build, while the UNPREFIXED IMSECH(...) evaluates on every build. So LibreOffice implements IMSECH, and its OOXML import simply has no mapping for the _xlfn.IMSECH token Excel writes -- meaning a workbook saved by Excel that uses IMSECH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is the same class batch D recorded for IMCOSH, IMCOT, IMCSC and IMCSCH. It is recorded as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imsech.html">IMSECH</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IMSECH(TRUE)</div>
   <dl class="quirk-grid">
@@ -4325,6 +4364,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/imsinh.html">IMSINH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMSINH(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMSINH returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMSINH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMSINH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMSINH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMSINH, COM.MICROSOFT.IMSINH, ORG.OPENOFFICE.IMSINH and _xlfn.ORG.OPENOFFICE.IMSINH are all #NAME? on every build, while the UNPREFIXED IMSINH(...) evaluates on every build. So LibreOffice implements IMSINH, and its OOXML import simply has no mapping for the _xlfn.IMSINH token Excel writes -- meaning a workbook saved by Excel that uses IMSINH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is the same class batch D recorded for IMCOSH, IMCOT, IMCSC and IMCSCH. It is recorded as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imsinh.html">IMSINH</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IMSINH(TRUE)</div>
   <dl class="quirk-grid">
@@ -4350,6 +4402,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imsqrt.html">IMSQRT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMSQRT(&#34;-4&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1.22464679914735E-16+2i</dd>
+    <dt>Documented / expected</dt><dd class="mono">2i</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Exact: r = 4, theta = pi, so the answer is 2(cos(pi/2) + i*sin(pi/2)) = 0 + 2i. The real part is exactly zero and is dropped, but the coefficient is 2, so it IS printed. This case is the control for the IMSQRT(&#34;-1&#34;) case above: it exercises the same &#34;omit the zero real part&#34; rule on the same axis, and all four LibreOffice builds agree on it -- which is what isolates the 24.8-to-25.2 change to the coefficient-of-one rule specifically, rather than to the handling of negative reals in general. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.; MISMATCH vs expected: expected &#39;2i&#39;, got &#39;1.22464679914735E-16+2i&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imsqrt.html">IMSQRT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMSQRT(&#34;-1&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">6.12323399573677E-17+i</dd>
+    <dt>Documented / expected</dt><dd class="mono">i</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Exact and definitional: the principal square root of -1 is i. In the documented polar form r = 1 and theta = pi, so the answer is cos(pi/2) + i*sin(pi/2) = 0 + 1i, with a real part of exactly zero and an imaginary coefficient of exactly 1. Excel&#39;s format therefore drops the real term entirely AND drops the digit 1, printing &#34;i&#34;. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. CROSS-VERSION DRIFT: THIS IS THE CASE THAT MOVES. The four pinned builds do not agree on this formula. 24.2.0.3 and 24.8.7.2 return &#34;1i&#34;; 25.2.0.3 and 25.8.7.3 return &#34;i&#34;. Excel&#39;s documented format prints a coefficient of exactly 1 as &#34;i&#34; with no digit -- the rule this corpus validated against twenty published Microsoft strings, among them IMSUB(&#34;13+4i&#34;,&#34;5+3i&#34;) = &#34;8+i&#34; on Microsoft&#39;s own IMSUB page, where the imaginary coefficient is likewise exactly 1 and is likewise printed with no digit. So the newer builds are right and the older ones are wrong, and the change landed somewhere between 24.8.7.2 and 25.2.0.3. The NUMBER is identical on all four builds; only its rendering changed, so this is recorded as a formatting-only difference and not as a value error. It matters anyway: IM* functions return TEXT, so =IMSQRT(&#34;-1&#34;)=&#34;i&#34; is FALSE on 24.2/24.8 and TRUE on 25.2/25.8, and any formula that compares, matches or joins these strings changes its answer when the workbook moves between releases.; MISMATCH vs expected: expected &#39;i&#39;, got &#39;6.12323399573677E-17+i&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/imtan.html">IMTAN</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=IMTAN(&#34;4+3i&#34;)</div>
@@ -4360,6 +4438,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Engineering</dd>
   </dl>
   <p>Microsoft publishes &#39;=IMTAN(&#34;4+3i&#34;)&#39; with the result 0.00490825806749606+1.00070953606723i. Derived independently with mpmath at 40 digits: tan(z) = sin(z)/cos(z). At 40 digits tan(4+3i) = 0.004908258067496060259082 + 1.000709536067232939326i. Cross-check against the sibling published example: batch D asserts Microsoft&#39;s IMCOT(&#34;4+3i&#34;) = 0.00490118239430447-0.999266927805902i, and the product of that cotangent with the tangent asserted here is 1 to 15 digits, since cot = 1/tan.. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMTAN is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMTAN, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMTAN here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMTAN, COM.MICROSOFT.IMTAN, ORG.OPENOFFICE.IMTAN and _xlfn.ORG.OPENOFFICE.IMTAN are all #NAME? on every build, while the UNPREFIXED IMTAN(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMTAN, and its OOXML import simply has no mapping for the _xlfn.IMTAN token Excel writes -- meaning a workbook saved by Excel that uses IMTAN arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is the same class batch D recorded for IMCOSH, IMCOT, IMCSC and IMCSCH. It is recorded as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;0.00490825806749606+1.00070953606723i&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/imtan.html">IMTAN</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=IMTAN(TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Engineering</dd>
+  </dl>
+  <p>Excel documents: &#34;If inumber is a logical value, IMTAN returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMTAN is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMTAN, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMTAN here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMTAN, COM.MICROSOFT.IMTAN, ORG.OPENOFFICE.IMTAN and _xlfn.ORG.OPENOFFICE.IMTAN are all #NAME? on every build, while the UNPREFIXED IMTAN(...) evaluates on every build. So LibreOffice implements IMTAN, and its OOXML import simply has no mapping for the _xlfn.IMTAN token Excel writes -- meaning a workbook saved by Excel that uses IMTAN arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is the same class batch D recorded for IMCOSH, IMCOT, IMCSC and IMCSCH. It is recorded as its own divergence class rather than as an ordinary unsupported-function result.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -4403,6 +4494,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISTEXT(INFO(&#34;directory&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Excel&#39;s type_text table documents &#34;directory&#34; as &#34;Path of the current directory or folder specified in the Excel option, At startup, open all files in&#34;. A path is text, so ISTEXT is the documented promise. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures. EXECUTED RESULT: FALSE on all four LibreOffice builds -- INFO(&#34;directory&#34;) returns #N/A there, and because the IS functions inspect rather than propagate, ISTEXT reports a clean FALSE instead of surfacing the error. So a workbook asking LibreOffice where it is gets no answer and no complaint.; MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ISTEXT(INFO(&#34;directory&#34;))</div>
   <dl class="quirk-grid">
@@ -4416,6 +4520,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=INFO(&#34;memavail&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Excel documents, in an Important box: &#34;In previous versions of Microsoft Excel, the \&#34;memavail\&#34;, \&#34;memused\&#34;, and \&#34;totmem\&#34; type_text values, returned memory information. These type_text values are no longer supported and now return a #N/A error value.&#34; That makes #N/A the documented CORRECT answer here, not a failure -- one of the few places in this corpus where an error value is the specification. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=INFO(&#34;memused&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Same documented Important box as INFO(&#34;memavail&#34;): &#34;memavail&#34;, &#34;memused&#34; and &#34;totmem&#34; &#34;are no longer supported and now return a #N/A error value&#34;. All three are asserted separately because the documentation names all three separately, and an engine could easily retire one spelling and not the others. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISNUMBER(INFO(&#34;numfile&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Excel&#39;s type_text table documents &#34;numfile&#34; as &#34;Number of worksheets in the open workbooks&#34;, and the page&#39;s Result column for =INFO(&#34;numfile&#34;) reads &#39;a number indicating how many sheets are in the currently open workbooks&#39; -- Microsoft publishes that sentence INSTEAD of a figure, because the figure depends on what is open. So the documented promise is &#34;a number&#34;, and ISNUMBER is the exact assertion of it. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=LEFT(INFO(&#34;origin&#34;),3)=&#34;$A:&#34;</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Excel&#39;s type_text table documents &#34;origin&#34; as returning &#34;the absolute cell reference of the top and leftmost cell visible in the window ... as text prepended with \&#34;$A:\&#34;&#34;, and gives worked forms for both reference styles (&#34;$A:$D$9&#34; in A1 style, &#34;$A:R9C4&#34; in R1C1 style). The scroll position is not fixed, but the &#34;$A:&#34; prefix is documented for BOTH styles, so the prefix is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures. EXECUTED RESULT: #N/A on all four LibreOffice builds, propagated from INFO(&#34;origin&#34;) itself. &#34;directory&#34; and &#34;origin&#34; are the two documented type_text codes LibreOffice does not implement; every other code in this file it answers.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=LEFT(INFO(&#34;origin&#34;),3)=&#34;$A:&#34;</div>
   <dl class="quirk-grid">
@@ -4425,6 +4581,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Information</dd>
   </dl>
   <p>Excel&#39;s type_text table documents &#34;origin&#34; as returning &#34;the absolute cell reference of the top and leftmost cell visible in the window ... as text prepended with \&#34;$A:\&#34;&#34;, and gives worked forms for both reference styles (&#34;$A:$D$9&#34; in A1 style, &#34;$A:R9C4&#34; in R1C1 style). The scroll position is not fixed, but the &#34;$A:&#34; prefix is documented for BOTH styles, so the prefix is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected True, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISTEXT(INFO(&#34;osversion&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Excel&#39;s type_text table documents &#34;osversion&#34; as &#34;Current operating system version, as text&#34;. The words &#34;as text&#34; are the documented guarantee, and ISTEXT asserts precisely that. The string itself is machine-specific (all four builds here return &#34;Linux 7.0&#34;). WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=OR(INFO(&#34;recalc&#34;)=&#34;Automatic&#34;,INFO(&#34;recalc&#34;)=&#34;Manual&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Excel&#39;s type_text table documents &#34;recalc&#34; as &#34;Current recalculation mode; returns \&#34;Automatic\&#34; or \&#34;Manual\&#34;&#34;, and the page&#39;s own Result column for =INFO(&#34;recalc&#34;) reads &#39;\&#34;Automatic\&#34; or \&#34;Manual\&#34; depending on the current state of your calculation options&#39;. The documentation therefore fixes a two-value enumeration, not a value, so the enumeration is what is asserted. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISTEXT(INFO(&#34;release&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Excel&#39;s type_text table documents &#34;release&#34; as &#34;Version of Microsoft Excel, as text&#34;. Again &#34;as text&#34; is the documented guarantee. The string is emphatically build-specific and is NOT assertable: the four pinned LibreOffice builds return four different strings here, and three of them are not version numbers at all but 40-character git commit hashes (24.2.0.3 -&gt; da48488a73ddd66ea24cf16bbc4f7b9c08e9bea1, 24.8.7.2 -&gt; e07d0a63a46349d29051da79b1fde8160bab2a89, 25.2.0.3 -&gt; e1cf4a87eb02d755bce1a01209907ea5ddc8f069), while 25.8.7.3 returns &#34;580(Build:3)&#34;. A workbook that parses INFO(&#34;release&#34;) to branch on version -- the obvious reason to call it -- gets nothing parseable from three of these four releases. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/info.html">INFO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=INFO(&#34;totmem&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Same documented Important box: &#34;totmem&#34; is one of the three type_text values that &#34;are no longer supported and now return a #N/A error value&#34;. WHY THIS FUNCTION IS ASSERTED STRUCTURALLY. INFO returns facts about the machine the workbook is open on, so no fixed value can be asserted for most type_text codes without pinning the assertion to this VM instead of to the function. What the documentation DOES fix is the TYPE and the ENUMERATION of each answer, and that is what is asserted here: a wrapper such as ISTEXT() or OR() turns the documented promise into something a run can check on any machine. Codes whose documented answer this environment cannot produce at all are carried as probes with expected: null rather than as invented figures.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -4507,6 +4715,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/isomitted.html">ISOMITTED</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=LAMBDA(x,y,IF(ISOMITTED(y),&#34;Missing second argument&#34;,x+y))(1,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">3</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>The control for Microsoft&#39;s own example: with y = 2 present, ISOMITTED(y) must be FALSE and the IF must fall through to x+y = 1+2 = 3. Without this case a function that returned TRUE unconditionally would pass the documented example. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.; MISMATCH vs expected: expected 3, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/isomitted.html">ISOMITTED</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=LAMBDA(x,y,IF(ISOMITTED(y),&#34;Missing second argument&#34;,x+y))(1,2)</div>
   <dl class="quirk-grid">
@@ -4516,6 +4737,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Information</dd>
   </dl>
   <p>The control for Microsoft&#39;s own example: with y = 2 present, ISOMITTED(y) must be FALSE and the IF must fall through to x+y = 1+2 = 3. Without this case a function that returned TRUE unconditionally would pass the documented example. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.; MISMATCH vs expected: expected 3, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/isomitted.html">ISOMITTED</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=LAMBDA(x,y,IF(ISOMITTED(y),&#34;Missing second argument&#34;,x+y))(1,)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">Missing second argument</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Information</dd>
+  </dl>
+  <p>Microsoft&#39;s page publishes exactly this formula -- &#34;Example 1: Check for a missing parameter and return a friendly string ... =LAMBDA(x,y, IF(ISOMITTED(y),\&#34;Missing second argument\&#34;,x+y))(1,)&#34; -- and the trailing comma with nothing after it is the point: y is supplied as omitted. ISOMITTED(y) is therefore TRUE and the IF returns the friendly string. The result string is fixed by the formula itself, so nothing here is derived or guessed. ISOMITTED EXISTS ONLY INSIDE A LAMBDA. Its whole documented purpose is &#34;Checks whether the value in a LAMBDA is missing and returns TRUE or FALSE&#34;, and its argument is documented as &#34;The value you want to test, such as a LAMBDA parameter&#34;. So it cannot be exercised on its own: both asserted cases here are the LAMBDA call Microsoft itself publishes. It is an Excel for Microsoft 365 / Excel 2024 function only -- the page&#39;s Applies To line lists no perpetual release before 2024 -- and it is stored as _xlfn.ISOMITTED, which [MS-XLSX] section 2.2.3 lists prefixed. EXECUTED RESULT: LibreOffice has no LAMBDA at all, so these formulas cannot work there and do not: a five-spelling probe on all four builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) returns #NAME? for =ISOMITTED(A1) under the plain name, the _xlfn. form, the COM.MICROSOFT. form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form alike, and =LAMBDA(x,x+1)(2) is itself an error on every build. This is a genuine missing function, not the storage-form gap this batch records for IMSEC/IMSECH/IMSINH/IMTAN -- there is no spelling under which LibreOffice computes it.; MISMATCH vs expected: expected &#39;Missing second argument&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -4542,6 +4776,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>DERIVED, not quoted: Microsoft&#39;s ISPMT page documents no error conditions at all. The formula confirmed by both vendors&#39; worked examples divides per by nper, so nper = 0 is a division by zero and #DIV/0! is the consistent result; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#NUM!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/jis.html">JIS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=JIS(&#34;ＥＸＣＥＬ&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">ＥＸＣＥＬ</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>The Text argument description ends: &#34;If text does not contain any half-width English letters or katakana, text is not changed.&#34; Full-width input contains no half-width letters, so the documented answer is the argument itself -- which also makes JIS idempotent, since this string is the output of the previous case. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/jis.html">JIS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=JIS(&#34;ｶﾅ&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">カナ</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>The page names two classes of convertible characters: &#34;half-width (single-byte) English letters or katakana&#34;. This case covers the second. U+FF76 HALFWIDTH KATAKANA LETTER KA and U+FF85 HALFWIDTH KATAKANA LETTER NA map to U+30AB KATAKANA LETTER KA and U+30CA KATAKANA LETTER NA. Latin-only tests would never exercise this branch, and it is the branch the function is actually named after. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;カナ&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/jis.html">JIS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=JIS(&#34;EXCEL&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">ＥＸＣＥＬ</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Derived from the documented rule rather than from the broken example: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E, X, C, E, L). That is exactly the mapping batch A&#39;s ASC cases assert in the opposite direction, and exactly the value batch C asserted for DBCS(&#34;EXCEL&#34;) on the other Windows-named half of this pair. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/jis.html">JIS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=LEN(JIS(&#34;EXCEL&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">5</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>&#34;Half-width&#34; and &#34;full-width&#34; describe how many BYTES a character occupied in a legacy double-byte encoding, not how many characters there are: the conversion replaces each character with one other character. So LEN is invariant under JIS even though LENB is not -- on all four builds LENB of the full-width result is 10 against LENB 5 for the argument. Asserting LEN here separates &#34;converted the characters&#34; from &#34;inserted padding&#34;. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected 5, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/jis.html">JIS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ASC(JIS(&#34;EXCEL&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">EXCEL</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>ASC is documented as the inverse operation (&#34;changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters&#34;), and batch A already executed ASC&#39;s own cases. Composing the two must return the original string. This is the strongest single check in the file: it depends on nothing but the two documented rules being inverses, and it would fail if JIS converted the wrong character class, converted only some characters, or changed the length. Microsoft&#39;s JIS page states the rule twice: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and &#34;For Japanese, this function changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters&#34;. It also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. THE PAGE&#39;S PUBLISHED EXAMPLES ARE UNUSABLE AS WRITTEN, so no figure is copied from them. The first reads, in the raw page source, &#39;=JIS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39; -- both sides identical ASCII, i.e. the argument coming back unchanged, which directly contradicts the page&#39;s own rule since &#34;EXCEL&#34; is five half-width English letters. (The full-width result appears to have been flattened to ASCII somewhere in publishing; the identical defect sits on the DBCS page, which batch C recorded, and the ASC page carries the same line as its CORRECT behaviour.) The second example is rendered entirely as inline GIF images (media/fe337.gif and siblings), so no literal argument or result can be read out of it at all. Every value in this file is therefore derived from the stated rule and from the Unicode halfwidth/fullwidth block, not copied from the page.; MISMATCH vs expected: expected &#39;EXCEL&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -4741,6 +5040,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/loginv.html">LOGINV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(LOGINV(A2,A3,A4),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">4.00002521</dd>
+    <dt>Documented / expected</dt><dd class="mono">4.0000252187</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.; MISMATCH vs expected: expected 4.0000252187, got 4.00002521</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/loginv.html">LOGINV</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=LOGINV(1,A3,A4)</div>
   <dl class="quirk-grid">
@@ -4763,6 +5075,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Compatibility</dd>
   </dl>
   <p>Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/loginv.html">LOGINV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(LOGINV(LOGNORMDIST(4,3.5,1.2),3.5,1.2),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">3.999999991</dd>
+    <dt>Documented / expected</dt><dd class="mono">4.0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.; MISMATCH vs expected: expected 4.0, got 3.999999991</p>
 </li>
 
 <li class="quirk-entry">
@@ -4819,6 +5144,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 
 <li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/lognorm.inv.html">LOGNORM.INV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(LOGNORM.INV(A2,A3,A4),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">4.00002521</dd>
+    <dt>Documented / expected</dt><dd class="mono">4.0000252187</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>4.0000252186806350759 at ten places, from the root-finding derivation described on the previous case. Microsoft&#39;s seven-place figure cannot distinguish an accurate inverse from a crude one; this can.; MISMATCH vs expected: expected 4.0000252187, got 4.00002521</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/lognorm.inv.html">LOGNORM.INV</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=LOGNORM.INV(1,A3,A4)</div>
   <dl class="quirk-grid">
@@ -4841,6 +5179,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGNORM.INV returns the #NUM! error value.&#34; The interval is open at both ends, which matters: the lognormal has no finite quantile at 0 or 1.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/lognorm.inv.html">LOGNORM.INV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(LOGNORM.INV(LOGNORM.DIST(4,3.5,1.2,TRUE),3.5,1.2),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">3.999999991</dd>
+    <dt>Documented / expected</dt><dd class="mono">4.0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The page&#39;s Description states &#34;If p = LOGNORM.DIST(x,...) then LOGNORM.INV(p,...) = x&#34;. Feeding the CDF&#39;s own FULL-PRECISION output straight back in -- rather than the six-place 0.039084 the example table uses -- must therefore return 4 exactly, to ten places. This is the strongest assertion in the file because it depends on no derived constant at all: any inaccuracy in either direction shows up as a departure from 4.; MISMATCH vs expected: expected 4.0, got 3.999999991</p>
 </li>
 
 <li class="quirk-entry">
@@ -5023,6 +5374,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Financial</dd>
   </dl>
   <p>Excel documents: &#34;If settlement &gt;= maturity, MDURATION returns the #NUM! error value.&#34; Equality is the boundary the &gt;= sign includes.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/midb.html">MIDB</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=MIDB(A2,0,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-08-31 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>The MID page documents: &#34;If start_num is less than 1, MID returns the #VALUE! error value.&#34; Positions are 1-based -- &#34;The first character in text has start_num 1&#34; -- so 0 is outside the range rather than a synonym for the beginning. MIDB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft&#39;s MID page -- the page that historically documented MID and MIDB together -- now carries only an Important box reading &#34;The MIDB function is deprecated&#34;, and every worked example and argument rule on it is written for MID. MIDB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with MID: for text in which every character occupies one byte, a byte count and a character count are the same number, so MIDB must return what MID returns. Those are the cases asserted here, each traced to a specific sentence on the MID page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
