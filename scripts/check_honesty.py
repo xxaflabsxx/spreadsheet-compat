@@ -9,12 +9,26 @@ Ground truth (see site/build_site.py and results/*.json):
   * Microsoft Excel   -- NOT EXECUTED. Documentation only, and it is the
                          yardstick the two executed engines are measured against.
 
-So this script fails (exit 1) on five kinds of dishonesty:
+So this script fails (exit 1) on six kinds of dishonesty:
 
   1. FALSE EXECUTION CLAIMS -- any page claiming Excel was verified, tested or
      executed, or claiming all three engines were. Truthful claims about
      executing Google Sheets and/or LibreOffice are allowed, because they are
      true. Negations ("we do not run Excel") are allowed.
+
+     1b. FABRICATED LIBREOFFICE / SHEETS EXECUTION -- the same lie about an
+     engine we DO execute, on a function that engine never ran. Excel is
+     always-false and so can be matched on wording alone; LibreOffice and
+     Sheets are usually-true, so this half is derived FROM THE RESULTS FILES
+     the way rule 5 is: a function page whose results carry no LibreOffice
+     entry must not contain LibreOffice execution copy (a "Yes (<version>,
+     <date>)" live-tested cell, or prose like "pass in LibreOffice"), and
+     symmetrically for Google Sheets. Until batch G every executed function
+     had run in BOTH engines, so nothing exercised the single-engine paths in
+     build_site.py -- and one of them fabricated "All 0 executed test cases
+     pass in LibreOffice" for a Sheets-only function, with the version
+     rendered as None. Rule 1's wording-only patterns could never catch that,
+     because the sentence is true for 519 other functions.
   2. STALE "NOT YET EXECUTED" COPY -- any page still telling readers Google
      Sheets has not been executed. That was true until 2026-08-29 and is now a
      lie in the other direction. (Saying a specific CASE is "Not executed",
@@ -227,6 +241,70 @@ def expected_dates():
     return out
 
 
+# (1b) Execution claims about an engine that did not run THIS function.
+# High-signal patterns only: each must name the engine AND assert execution.
+LO_EXEC_PROSE = re.compile(
+    r"\b(?:executed|execution|ran|run|tested)\b[^.]{0,60}?\bin libreoffice\b"
+    r"|\bpass(?:es|ed)?\b[^.]{0,40}?\bin libreoffice\b"
+    r"|\blibreoffice\b[^.]{0,60}?\bexecuted (?:test )?cases?\b",
+    re.I,
+)
+GS_EXEC_PROSE = re.compile(
+    r"\b(?:executed|execution|ran|run|tested)\b[^.]{0,60}?\bin (?:google )?sheets\b"
+    r"|\bpass(?:es|ed)?\b[^.]{0,40}?\bin (?:google )?sheets\b"
+    r"|\b(?:google )?sheets\b[^.]{0,60}?\bexecuted (?:test )?cases?\b",
+    re.I,
+)
+
+
+# The regions of a function page that make claims about THAT function: the
+# title, the meta description, the lede and the support matrix -- i.e. exactly
+# what build_site.py renders from the function's own record. Deliberately NOT
+# the whole page: the "Where <NAME> behaves differently" section and the
+# related-recipe cards quote executed results for OTHER functions, and those
+# citations are true. (Observed: functions/sortn.html legitimately quotes
+# SORT's executed Sheets-vs-LibreOffice values, which a whole-page scan flags.)
+OWN_CLAIM_REGIONS = [
+    re.compile(r"<title>(.*?)</title>", re.S | re.I),
+    re.compile(r'<meta name="description" content="(.*?)"', re.S | re.I),
+    re.compile(r'<p class="lede">(.*?)</p>', re.S | re.I),
+    re.compile(r'<table class="matrix">(.*?)</table>', re.S | re.I),
+]
+
+
+def own_claims(raw):
+    """Raw HTML -> plain text of just this function's own claim regions."""
+    return "\n".join(
+        strip_tags(m.group(1))
+        for rx in OWN_CLAIM_REGIONS for m in [rx.search(raw)] if m
+    )
+
+
+def executed_engines():
+    """FUNCTION -> set of engine slots ("lo" / "gs") that actually ran it.
+
+    Read from results/*.json, never from the page, so the guard cannot be
+    satisfied by copy that merely looks right -- the same discipline rule 5
+    and rule 6 use."""
+    import json as _json
+    out = {}
+    for path in sorted(glob.glob(os.path.join(RESULTS_DIR, "*.json"))):
+        try:
+            d = _json.load(open(path, encoding="utf-8"))
+        except Exception:
+            continue
+        engine = str(d.get("engine", "")).lower()
+        if "libreoffice" in engine:
+            slot = "lo"
+        elif "sheet" in engine or "google" in engine:
+            slot = "gs"
+        else:
+            continue
+        for fn in (d.get("function_results") or {}):
+            out.setdefault(fn, set()).add(slot)
+    return out
+
+
 # (6) Recipes whose Sheets verdict excludes checks must declare it on the page.
 def recipes_with_exclusions():
     """{slug: (n_comparable, n_total, n_excluded)} from the Sheets recipe run.
@@ -257,6 +335,7 @@ RECIPE_EXCLUSIONS = recipes_with_exclusions()
 undeclared = []
 
 bad = []
+fabricated = []
 stale = []
 misdated = []
 contradictory = []
@@ -304,7 +383,34 @@ for f in files:
             stale.append((rel, re.sub(r"\s+", " ", ctx)))
 
 # (5) per-function "Last tested" dates
+# (1b) fabricated LibreOffice / Sheets execution claims -- same loop, but over
+# EVERY function page, including the ones no engine has executed (which is
+# exactly where a fabricated claim would be invisible to rule 5).
 _expected = expected_dates()
+_ran = executed_engines()
+for _page in sorted(glob.glob(os.path.join(ROOT, "functions", "*.html"))):
+    _fn_slug = os.path.basename(_page)[:-5]
+    _rel = os.path.relpath(_page, ROOT)
+    _raw = open(_page, encoding="utf-8", errors="replace").read()
+    _txt = own_claims(_raw)
+    _slots = next((v for k, v in _ran.items() if k.lower() == _fn_slug), set())
+    for _slot, _label, _cell_rx, _prose_rx in (
+        ("lo", "LibreOffice", LO_CELL, LO_EXEC_PROSE),
+        ("gs", "Google Sheets", GS_CELL, GS_EXEC_PROSE),
+    ):
+        if _slot in _slots:
+            continue                      # that engine really did run it
+        if _cell_rx.search(_txt):
+            fabricated.append(
+                (_rel, f"support matrix shows a {_label} live-tested cell, but no "
+                       f"{_label} results file has an entry for this function"))
+        m = _prose_rx.search(_txt)
+        if m:
+            fabricated.append(
+                (_rel, f"claims {_label} execution but no {_label} results file has "
+                       f"an entry for this function: "
+                       f"…{re.sub(chr(92) + 's+', ' ', _txt[max(0, m.start() - 50):m.end() + 40])}…"))
+
 for fn, want in sorted(_expected.items()):
     page = os.path.join(ROOT, "functions", fn.lower() + ".html")
     if not os.path.exists(page):
@@ -333,6 +439,9 @@ print(f"honesty check: {len(files)} pages")
 print(f"  false execution claims (Excel / all three): {len(bad)}")
 for f, ctx in bad[:40]:
     print(f"    {f}: …{ctx}…")
+print(f"  fabricated LibreOffice/Sheets execution claims: {len(fabricated)}")
+for f, ctx in fabricated[:40]:
+    print(f"    {f}: {ctx}")
 print(f"  stale 'Google Sheets not yet executed' copy: {len(stale)}")
 for f, ctx in stale[:40]:
     print(f"    {f}: …{ctx}…")
@@ -349,5 +458,5 @@ print(f"  function pages dated from the file instead of the function: {len(misda
       f"  ({len(_expected)} executed functions checked)")
 for f, ctx in misdated[:40]:
     print(f"    {f}: {ctx}")
-sys.exit(1 if (bad or stale or contradictory or misattributed or misdated
-               or undeclared) else 0)
+sys.exit(1 if (bad or fabricated or stale or contradictory or misattributed
+               or misdated or undeclared) else 0)

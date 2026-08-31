@@ -708,7 +708,25 @@ def build_function_title_desc(r):
     sheets_cases = [c for c in ge["cases"] if not c.get("inconclusive_reason")]
     sheets_mismatches = [c for c in sheets_cases if c.get("matched_expected") is False]
 
-    if r["any_tested"]:
+    # THE VENDOR WHOSE DOCUMENTATION THE EXECUTED VALUES ARE MEASURED AGAINST.
+    # Excel wherever Excel documents the function -- which is every function
+    # this corpus had executed up to batch G, hence the hard-coded "Excel" this
+    # replaces. For a function Excel does NOT document (x == false: the 78
+    # Sheets-only and LibreOffice-only names still to be run) no copy on the
+    # page may say "Excel" at all, so the yardstick falls back to whichever
+    # vendor actually publishes documentation for it.
+    doc_ref = (
+        "excel" if excel_doc
+        else "google_sheets" if sheets_doc
+        else "libreoffice" if le["documented"]
+        else None
+    )
+    ref_poss = {
+        "excel": "Excel's", "google_sheets": "Google's", "libreoffice": "LibreOffice's",
+    }.get(doc_ref, "the")
+    ref_short = ENGINE_SHORT.get(doc_ref, "docs")
+
+    if r["any_tested"] and le["tested"]:
         verdict = le["verdict"]
         total = len(le["cases"])
         mismatches = [c for c in le["cases"] if c.get("matched_expected") is False]
@@ -738,16 +756,16 @@ def build_function_title_desc(r):
                 )
         elif sheets_verdict == "quirky" and verdict == "quirky":
             first_s = sheets_mismatches[0] if sheets_mismatches else None
-            title = f"{name} differs from Excel in both Sheets and LibreOffice (executed)"
+            title = f"{name} differs from {ref_short} in both Sheets and LibreOffice (executed)"
             if first_s:
                 phrase = _case_mismatch_phrase(first_s, name, max_len=46)
                 punct = "" if phrase.endswith("\u2026") else "."
                 desc = f"Sheets: {phrase}{punct} LibreOffice differs too (executed)."
             else:
-                desc = "Executed results differ from Excel's documented behaviour in both Google Sheets and LibreOffice."
+                desc = f"Executed results differ from {ref_poss} documented behaviour in both Google Sheets and LibreOffice."
         elif sheets_verdict == "quirky" and verdict == "supported":
             first_s = sheets_mismatches[0] if sheets_mismatches else None
-            title = f"{name} gives different results in Google Sheets vs Excel (executed)"
+            title = f"{name} gives different results in Google Sheets vs {ref_short} (executed)"
             if first_s:
                 phrase = _case_mismatch_phrase(first_s, name, max_len=46)
                 punct = "" if phrase.endswith("\u2026") else "."
@@ -757,7 +775,7 @@ def build_function_title_desc(r):
                 )
             else:
                 desc = (
-                    f"Sheets diverges from Excel's documented behavior; LibreOffice "
+                    f"Sheets diverges from {ref_poss} documented behavior; LibreOffice "
                     f"matches on all {total} executed case{'s' if total != 1 else ''}."
                 )
         elif verdict == "unsupported":
@@ -789,12 +807,12 @@ def build_function_title_desc(r):
                 for c in mismatches
             )
             if error_only:
-                title = f"{name} matches Excel in LibreOffice except error codes (tested)"
+                title = f"{name} matches {ref_short} in LibreOffice except error codes (tested)"
                 label = _case_label(first_mismatch, name)
                 label_prefix = f"{label} " if label else ""
                 desc = (
                     f"{passed}/{total} match; {label_prefix}returns "
-                    f"{first_mismatch['value']}, Excel: {first_mismatch['expected']} "
+                    f"{first_mismatch['value']}, {ref_short}: {first_mismatch['expected']} "
                     f"(code only)."
                 )
             else:
@@ -807,9 +825,9 @@ def build_function_title_desc(r):
                 if first_mismatch:
                     mismatch_phrase = _case_mismatch_phrase(first_mismatch, name, max_len=60)
                     punct = "" if mismatch_phrase.endswith("…") else "."
-                    desc = f"{passed}/{total} match Excel's docs; {mismatch_phrase}{punct}"
+                    desc = f"{passed}/{total} match {ref_poss} docs; {mismatch_phrase}{punct}"
                 else:
-                    desc = f"{passed}/{total} executed cases match Excel's documented behavior."
+                    desc = f"{passed}/{total} executed cases match {ref_poss} documented behavior."
         else:  # supported
             lo_change = le.get("lo_change")
             since = (
@@ -863,18 +881,65 @@ def build_function_title_desc(r):
                     f"{pass_verb} in LibreOffice; documented in "
                     f"{_join_and(present_full[:-1]) or 'LibreOffice'} only."
                 )
-        if ge["tested"]:
-            suffix = (
-                f" Executed: LibreOffice {le['version']} + Google Sheets "
-                f"{ge['executed_at']}; Excel per docs."
+    elif r["any_tested"]:
+        # ENGINE-SCOPED BRANCH: this function WAS executed, but not in
+        # LibreOffice. Every string in the branch above reads verdict/total off
+        # the LibreOffice entry without checking which engine ran, so with no
+        # LibreOffice run le["verdict"] is None, le["cases"] is empty, and the
+        # "supported" fall-through emitted "All 0 executed test cases pass in
+        # LibreOffice" with the version rendered as None -- a fabricated
+        # execution claim for an engine that never touched the function. No
+        # string below may name an engine that did not run.
+        run_key = next(ek for ek in ENGINE_ORDER if engines[ek]["tested"])
+        ran_entry = engines[run_key]
+        run_full = ENGINE_FULL[run_key]
+        verdict = ran_entry["verdict"]
+        cases = [c for c in ran_entry["cases"] if not c.get("inconclusive_reason")]
+        total = len(cases)
+        mismatches = [c for c in cases if c.get("matched_expected") is False]
+        passed = total - len(mismatches)
+        case_word = "case" if total == 1 else "cases"
+        against = f", matching {ref_poss} documented behavior" if doc_ref else ""
+        if verdict == "unsupported":
+            title = f"{name} is not supported in {run_full} (#NAME?, executed)"
+            desc = (
+                f"{run_full} returns #NAME? (unrecognized) for {name} in all "
+                f"{total} executed test {case_word}."
+            )
+        elif verdict == "quirky":
+            first = mismatches[0] if mismatches else None
+            title = (
+                f"{name} gives different results in {run_full} vs {ref_short} (tested)"
+                if doc_ref and doc_ref != run_key
+                else f"{name} behaves differently in {run_full} than documented (tested)"
+            )
+            if first:
+                phrase = _case_mismatch_phrase(first, name, max_len=60)
+                punct = "" if phrase.endswith("…") else "."
+                desc = f"{passed}/{total} match {ref_poss} docs; {phrase}{punct}"
+            else:
+                desc = (
+                    f"{passed}/{total} executed {case_word} match {ref_poss} "
+                    f"documented behavior."
+                )
+        elif verdict == "inconclusive":
+            title = f"{name}: {run_full} result inconclusive (executed)"
+            desc = (
+                f"All {total} executed {run_full} {case_word} for {name} were "
+                f"inconclusive (import serialization), so no verdict is published."
+            )
+        elif verdict == "supported":
+            title = f"{name} works in {run_full} (executed)"
+            desc = (
+                f"All {total} executed test {case_word} for {name} pass in "
+                f"{run_full}{against}."
             )
         else:
-            suffix = f" Executed in LibreOffice {le['version']}; Excel/Sheets from official docs."
-        budget = 155 - len(suffix)
-        lead = desc.rstrip()
-        if len(lead) > budget:
-            lead = lead[: max(10, budget - 1)].rstrip() + "…"
-        desc = lead + suffix
+            title = f"{name}: executed in {run_full}, no verdict published"
+            desc = (
+                f"{name} was executed in {run_full} ({total} {case_word}) but the "
+                f"run produced no publishable verdict."
+            )
     else:
         documented = [ek for ek in ENGINE_ORDER if engines[ek]["documented"]]
         missing = [ek for ek in ENGINE_ORDER if not engines[ek]["documented"]]
@@ -896,6 +961,33 @@ def build_function_title_desc(r):
                 f"{name} ({r['category']}) is documented in Excel, Google Sheets & "
                 f"LibreOffice — not yet live-tested by a real engine."
             )
+    if r["any_tested"]:
+        # ENGINE-SCOPED PROVENANCE. Name only the engines that actually ran
+        # this function and only the vendors that actually document it. The
+        # forms this replaces hard-coded "Excel per docs" / "Excel/Sheets from
+        # official docs", which is a claim about Excel that is simply false for
+        # a function Excel does not document.
+        ran = []
+        if le["tested"]:
+            ran.append(f"LibreOffice {le['version']}")
+        if ge["tested"]:
+            ran.append(f"Google Sheets {ge['executed_at']}")
+        doc_only = [
+            ENGINE_SHORT[ek] for ek in ENGINE_ORDER
+            if engines[ek]["documented"] and not engines[ek]["tested"]
+        ]
+        suffix = " Executed: " + " + ".join(ran) if len(ran) > 1 else f" Executed in {ran[0]}"
+        if doc_only == ["Excel"] and len(ran) > 1:
+            suffix += "; Excel per docs."
+        elif doc_only:
+            suffix += f"; {'/'.join(doc_only)} from official docs."
+        else:
+            suffix += "."
+        budget = 155 - len(suffix)
+        lead = desc.rstrip()
+        if len(lead) > budget:
+            lead = lead[: max(10, budget - 1)].rstrip() + "…"
+        desc = lead + suffix
     if len(desc) > 155:
         desc = desc[:154].rstrip() + "…"
     if len(title) > 70:
@@ -920,6 +1012,67 @@ def build_function_title_desc(r):
             head = (cut if len(cut) >= 20 else head[: limit - 1]).rstrip(" -—,;:")
         title = head + tag
     return title, desc
+
+
+def build_function_lede(r):
+    """The one-sentence lede under a function page's heading, ENGINE-SCOPED.
+
+    It names the engines that ACTUALLY executed this function and the vendor
+    whose documentation those results were measured against. It replaces a
+    template conditional that assumed LibreOffice always ran -- "executed in
+    {Google Sheets and LibreOffice Calc | LibreOffice Calc}, with Excel
+    behavior from Microsoft's official documentation" -- which is wrong twice
+    over for the functions still to be run: it credits LibreOffice with a
+    Sheets-only execution, and it invokes Excel's documentation for the 78
+    functions Excel does not document at all.
+
+    Returns None when nothing has been executed (the page shows the
+    "Not yet live-tested" box instead).
+    """
+    engines = r["engines"]
+    tested = [ek for ek in ENGINE_ORDER if engines[ek]["tested"]]
+    if not tested:
+        return None
+    name = r["name"]
+
+    # A single-engine run carries its own date inline; with two engines the
+    # dates differ per engine and belong in the provenance line, not here.
+    labels = []
+    for ek in tested:
+        label = ENGINE_LABELS[ek]
+        if len(tested) == 1 and engines[ek]["executed_at"]:
+            label += f" ({engines[ek]['executed_at']})"
+        labels.append(label)
+    ran = _join_and(labels)
+
+    if engines["excel"]["documented"]:
+        authority = (
+            "with Excel behavior from Microsoft&rsquo;s official documentation "
+            "(we do not run Excel)"
+        )
+    else:
+        vendor = {
+            "excel": "Microsoft&rsquo;s",
+            "google_sheets": "Google&rsquo;s",
+            "libreoffice": "LibreOffice&rsquo;s",
+        }
+        documented = [ek for ek in ENGINE_ORDER if engines[ek]["documented"]]
+        authority = (
+            "measured against " + _join_and([vendor[ek] for ek in documented])
+            + " published documentation"
+            if documented else "with no vendor documentation to measure against"
+        )
+        # Said outright rather than left to inference: this page's silence
+        # about Excel is a fact about the function, not an omission.
+        authority += (
+            f". Excel does not document {name}, so this page makes no claim "
+            f"about Excel"
+        )
+    return (
+        f"Real compatibility results for the <strong>{name}</strong> function: "
+        f"executed in {ran}, {authority}. Syntax and links to that "
+        f"documentation are below."
+    )
 
 
 # --------------------------------------------------------------------------
@@ -1460,8 +1613,8 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 </div>
 <p class="category-tag">Category: {{ r.category }}{% if r.last_tested %} &middot; Last tested {{ r.last_tested }}{% endif %}</p>
 
-{% if r.any_tested %}
-<p class="lede">Real compatibility results for the <strong>{{ r.name }}</strong> function: executed in {% if r.engines['google_sheets'].tested %}Google Sheets and LibreOffice Calc{% else %}LibreOffice Calc{% endif %}, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+{% if function_lede %}
+<p class="lede">{{ function_lede|safe }}</p>
 {% endif %}
 
 {% set le = r.engines['libreoffice'] %}
@@ -1496,8 +1649,15 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 {% set e = r.engines[ek] %}
 <tr>
   <td>{{ e.label }}</td>
-  <td>{% if e.doc_url %}<a href="{{ e.doc_url }}">Yes</a>{% elif e.documented %}Yes{% else %}No{% endif %}</td>
-  <td>{% if e.tested %}{{ e.tested_cell }}{% elif ek == 'excel' %}No — documented only{% else %}Not yet{% endif %}</td>
+  <td>{% if e.doc_url %}<a href="{{ e.doc_url }}">Yes</a>{% elif e.documented %}Yes{% else %}No{% endif %}</td>{# Excel is never executed, so its Live-tested cell can never say
+     "Not yet": that would promise a run this project will never make. "No —
+     documented only" is the honest form WHEN EXCEL DOCUMENTS THE FUNCTION.
+     For a function Excel does not document at all it was not honest -- the row
+     read "Documented: No" beside "Live-tested: No — documented only", claiming
+     a documentation basis that does not exist. Sheets and LibreOffice keep
+     "Not yet" because both ARE executed engines and those functions are queued
+     (see sheets-lo-only-plan.md). #}
+  <td>{% if e.tested %}{{ e.tested_cell }}{% elif ek == 'excel' %}{% if e.documented %}No — documented only{% else %}n/a (not an Excel function){% endif %}{% else %}Not yet{% endif %}</td>
   <td>
     {% if e.verdict %}
       <span class="badge {{ verdict_class[e.verdict] }}">{{ verdict_label[e.verdict] }}</span>
@@ -3211,6 +3371,7 @@ def main():
         ctx.update(
             page_title=title,
             meta_description=desc,
+            function_lede=build_function_lede(r),
             canonical=BASE_URL + f"functions/{r['name_lower']}.html",
             r=r,
             related_recipes=func_recipes.get(r["name"], []),
