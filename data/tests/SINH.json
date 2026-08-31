@@ -1,0 +1,40 @@
+{
+  "function": "SINH",
+  "cases": [
+    {
+      "id": "SINH_documented_example",
+      "formula": "=ROUND(2.868*SINH(0.0342*1.03),7)",
+      "description": "Microsoft's only documented example, at the seven decimals it publishes",
+      "expected": 0.1010491,
+      "expected_note": "Microsoft publishes =2.868*SINH(0.0342*1.03) = 0.1010491 (\"Probability of obtaining a result of less than 1.03 seconds\"). DERIVATION: 2.868 * sinh(0.0342 * 1.03) = 2.868 * sinh(0.035226) evaluated at 50 digits (mpmath) is 0.1010490631182873426942, which is 0.1010491 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sinh-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SINH_full_precision",
+      "formula": "=ROUND(2.868*SINH(0.0342*1.03),10)",
+      "description": "The same example carried to ten decimals",
+      "expected": 0.1010490631,
+      "expected_note": "Seven published decimals cannot separate sinh from its small-argument approximation x + x^3/6, which agrees with sinh to eleven places at this argument. Asserted at ten places from the derivation: 0.1010490631."
+    },
+    {
+      "id": "SINH_zero_is_exactly_zero",
+      "formula": "=SINH(0)",
+      "description": "A structural identity: sinh(0) = 0 exactly",
+      "expected": 0,
+      "expected_note": "sinh(0) = (e^0 - e^-0)/2 = 0 exactly. No derived constant."
+    },
+    {
+      "id": "SINH_is_odd",
+      "formula": "=ROUND(SINH(2)+SINH(-2),15)",
+      "description": "sinh is an odd function, so the two signs must cancel exactly",
+      "expected": 0,
+      "expected_note": "sinh is odd, so sinh(2) + sinh(-2) = 0 exactly. A structural assertion with no derived constant."
+    },
+    {
+      "id": "SINH_identity_against_exponentials",
+      "formula": "=ROUND(SINH(1)-(EXP(1)-EXP(-1))/2,15)",
+      "description": "sinh checked against its own defining exponential form, computed by the engine",
+      "expected": 0,
+      "expected_note": "sinh(x) = (e^x - e^-x)/2 is the definition the page states (its Remarks bullet is an image of that formula). Asserting the difference is zero makes the engine check its own SINH against its own EXP, which is sharper than any single published digit string: it fails if SINH is implemented from a truncated series or from a different convention, and it needs no constant from us at all. The SINH page publishes no error-condition remarks, so no error case is asserted."
+    }
+  ]
+}

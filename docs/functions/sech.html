@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SECH: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="SECH (Math and trigonometry) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>SECH gives different results in LibreOffice vs Excel (tested)</title>
+<meta name="description" content="5/6 match Excel&#39;s docs; argument outside documented range returns 0, not #NUM!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/sech.html">
-<meta property="og:title" content="SECH: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="SECH (Math and trigonometry) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="SECH gives different results in LibreOffice vs Excel (tested)">
+<meta property="og:description" content="5/6 match Excel&#39;s docs; argument outside documented range returns 0, not #NUM!. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/sech.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>SECH</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>SECH</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for SECH yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,94 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+SECH&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't SECH working in LibreOffice?</h2>
+
+<p><code>SECH</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=SECH(200000000)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">0</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The Remarks publish the same constraint SEC carries: &#34;The absolute value of number must be less than 2^27&#34; (= 134217728) and &#34;If number is outside its constraints, SECH returns the #NUM! error value.&#34; LIBREOFFICE DOES NOT ENFORCE THE LIMIT: all four builds returned 0 rather than #NUM!. That is a silent wrong answer rather than a harmless permissiveness, and the limit exists precisely because of it -- at 2e8 radians the argument reduction consumes every bit of a double&#39;s precision, so the hyperbolic secant simply underflows to zero. Excel documents the guard; LibreOffice computes through it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +481,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for SECH yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(SECH(45),25)</td>
+  <td>Microsoft&#39;s first documented example, which the page prints in scientific notation</td>
+  <td class="result mono">5.72504e-20</td>
+  <td class="result mono">5.72504e-20<br><span class="category-tag">Microsoft publishes =SECH(45) = 5.73E-20. DERIVATION: 1/cosh(45 rad) = 5.72503716109878728894e-20 at 50 digits (mpmath), which is 5.73E-20 at the three significant figures the page prints. Asserted here at 25 decimal places -- ROUND(x,25) lands on 5.72504e-20 -- so the assertion carries THREE more significant digits than the page&#39;s 5.73E-20 while claiming nothing the derivation does not have. Same description/unit error as SEC: the page calls it &#34;the hyperbolic secant of a 45 degree angle&#34; while its own Remarks say to convert degrees with PI()/180, and 45 radians is what reproduces the published figure. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sech-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SECH(30),20)</td>
+  <td>Microsoft&#39;s second documented example</td>
+  <td class="result mono">1.8715246e-13</td>
+  <td class="result mono">1.8715246e-13<br><span class="category-tag">Microsoft publishes =SECH(30) = 1.87E-13. Derived independently as 1/cosh(30 rad) = 1.871524593768034920983e-13, i.e. 1.87E-13 at the published three significant figures. Rounded here to 20 decimals, which lands on 1.8715246e-13 -- five more significant digits than the page prints -- for the same reason as the 45 case.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SECH(0)</td>
+  <td>A structural identity with no derived constant: sech(0) = 1 exactly</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">cosh(0) = 1 exactly, so sech(0) = 1 exactly. No rounding, no published figure, nothing to get wrong except the function itself -- a sharp check that the engine computes a hyperbolic secant rather than a circular one (cos(0) is also 1, so this case does NOT distinguish them; the 45 and 30 cases, whose circular and hyperbolic values differ by nineteen orders of magnitude, do).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SECH(2)-SECH(-2),15)</td>
+  <td>sech is an even function, so a sign flip must change nothing</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">cosh is even, so sech is even and sech(2) - sech(-2) = 0 exactly. A structural assertion with no derived constant. NOTE ON READ-BACK: a formula returning 0 round-trips through .xlsx normally here (it is a genuine numeric zero, not a blank), unlike the empty-string case documented in RIGHTB.json.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SECH(&#34;abc&#34;)</td>
+  <td>A non-numeric argument, which the page assigns an error code</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The Remarks publish: &#34;If number is a nonnumeric value, SECH returns the #VALUE! error values.&#34; (Microsoft&#39;s plural, as published).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SECH(200000000)</td>
+  <td>An argument beyond the documented magnitude limit</td>
+  <td class="result mono">0</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish the same constraint SEC carries: &#34;The absolute value of number must be less than 2^27&#34; (= 134217728) and &#34;If number is outside its constraints, SECH returns the #NUM! error value.&#34; LIBREOFFICE DOES NOT ENFORCE THE LIMIT: all four builds returned 0 rather than #NUM!. That is a silent wrong answer rather than a harmless permissiveness, and the limit exists precisely because of it -- at 2e8 radians the argument reduction consumes every bit of a double&#39;s precision, so the hyperbolic secant simply underflows to zero. Excel documents the guard; LibreOffice computes through it.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

@@ -1,0 +1,97 @@
+{
+  "function": "SEARCHB",
+  "cases": [
+    {
+      "id": "SEARCHB_documented_start_num",
+      "formula": "=SEARCHB(\"e\",A2,6)",
+      "description": "Microsoft's documented SEARCH example with a start position, on ASCII where bytes are characters",
+      "setup_cells": {
+        "A2": "Statements",
+        "A3": "Profit Margin",
+        "A4": "margin",
+        "A5": "The \"boss\" is here."
+      },
+      "expected": 7,
+      "expected_note": "The SEARCH page publishes =SEARCH(\"e\",A2,6) = 7 for A2 = \"Statements\" (\"Position of the first 'e' in the string, starting the search at the sixth character\"). \"Statements\" is pure ASCII, so a search over BYTES from byte six lands on the same position a search over characters does. SEARCHB HAS NO PAGE OF ITS OWN, AND THE PAGE THAT USED TO DOCUMENT IT NO LONGER DOES -- see SEARCHB_documentation_has_been_withdrawn for the full finding. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/search-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SEARCHB_documented_cell_as_find_text",
+      "formula": "=SEARCHB(A4,A3)",
+      "description": "Microsoft's second documented row: the search string taken from a cell, case-insensitively",
+      "setup_cells": {
+        "A2": "Statements",
+        "A3": "Profit Margin",
+        "A4": "margin",
+        "A5": "The \"boss\" is here."
+      },
+      "expected": 8,
+      "expected_note": "The SEARCH page publishes =SEARCH(A4,A3) = 8 for A4 = \"margin\" and A3 = \"Profit Margin\". The match is case-insensitive -- the page's Remarks say \"SEARCH... do not distinguish between uppercase and lowercase letters\" -- so lowercase \"margin\" finds \"Margin\" at position 8. Pure ASCII again, so bytes and characters coincide."
+    },
+    {
+      "id": "SEARCHB_start_num_omitted",
+      "formula": "=SEARCHB(\"e\",A2)",
+      "description": "The start argument omitted, which the page says defaults to 1",
+      "setup_cells": {
+        "A2": "Statements",
+        "A3": "Profit Margin",
+        "A4": "margin",
+        "A5": "The \"boss\" is here."
+      },
+      "expected": 5,
+      "expected_note": "The Remarks publish: \"If start_num is omitted, it is assumed to be 1.\" \"Statements\" has its first \"e\" at position 5, which is why the documented row above passes 6 to skip it and find the second one at 7. The pair together prove the start argument is honoured rather than ignored."
+    },
+    {
+      "id": "SEARCHB_text_not_found",
+      "formula": "=SEARCHB(\"zzz\",A2)",
+      "description": "A string that does not occur, which the page assigns an error code",
+      "expected": "#VALUE!",
+      "setup_cells": {
+        "A2": "Statements",
+        "A3": "Profit Margin",
+        "A4": "margin",
+        "A5": "The \"boss\" is here."
+      },
+      "expected_note": "The Remarks publish: \"If find_text is not found, the #VALUE! error value is returned.\""
+    },
+    {
+      "id": "SEARCHB_start_num_beyond_length",
+      "formula": "=SEARCHB(\"e\",A2,99)",
+      "description": "A start position past the end of the text, which the page excludes",
+      "setup_cells": {
+        "A2": "Statements",
+        "A3": "Profit Margin",
+        "A4": "margin",
+        "A5": "The \"boss\" is here."
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If start_num is not greater than 0 or is greater than the length of within_text, the #VALUE! error value is returned.\" \"Statements\" is ten characters, so 99 is outside the documented range."
+    },
+    {
+      "id": "SEARCHB_wildcard_question_mark",
+      "formula": "=SEARCHB(\"?argin\",A3)",
+      "description": "The single-character wildcard the page documents",
+      "setup_cells": {
+        "A2": "Statements",
+        "A3": "Profit Margin",
+        "A4": "margin",
+        "A5": "The \"boss\" is here."
+      },
+      "expected": 8,
+      "expected_note": "The Remarks publish that SEARCH supports wildcards: \"You can use the wildcard characters -- the question mark (?) and asterisk (*) -- in find_text. A question mark matches any single character; an asterisk matches any sequence of characters.\" \"?argin\" therefore matches \"Margin\" in \"Profit Margin\" at position 8, the same position the literal search finds. This case is what distinguishes SEARCHB from FINDB, whose page documents no wildcards at all."
+    },
+    {
+      "id": "SEARCHB_double_byte_probe",
+      "formula": "=SEARCHB(\"Ｂ\",\"ＡＢＣ\")",
+      "description": "Full-width (double-byte) characters, where byte and character counting diverge",
+      "expected": null,
+      "expected_note": "DELIBERATELY ASSERTS NOTHING, for the reason the LEFTB, MIDB, REPLACEB and RIGHTB files give: byte counting in the B functions historically applied only when the default language was a DBCS language, this harness runs under en_US.UTF-8, and there is now NO Microsoft documentation of SEARCHB's byte behaviour at all to hold an engine to. Under DBCS rules the second full-width character starts at BYTE 3; under character rules it is at position 2. The case records what each engine returns rather than scoring it."
+    },
+    {
+      "id": "SEARCHB_documentation_has_been_withdrawn",
+      "formula": "=SEARCHB(\"a\",\"a\")",
+      "description": "A trivially true search, carrying this batch's finding that SEARCHB's documentation has been withdrawn",
+      "expected": 1,
+      "expected_note": "THE ASSERTION IS TRIVIAL AND THE NOTE IS THE POINT. Searching for \"a\" in \"a\" is position 1 under byte counting and character counting alike, so the value cannot be controversial; the case exists to carry a documentation finding made on 2026-08-31. SEARCHB HAS NO PAGE OF ITS OWN: /en-us/excel/functions/searchb-function, search-searchb-functions, search-searchb-function, searchb-functions and search-and-searchb-functions were each requested six times and returned HTTP 404 every time, and the function index's left-hand navigation has no SEARCHB entry. It used to be documented on the combined \"SEARCH, SEARCHB functions\" page, and that page still ANSWERS to SEARCHB -- the context-sensitive help IDs SEARCHB and XLWAEnduser_SEARCHB resolve to it, and its own HTML head meta description still publishes \"Syntax: SEARCH(find_text,within_text,[start_num]) SEARCHB(find_text,within_text,[start_num])\" -- but THE LIVE ARTICLE BODY HAS BEEN REWRITTEN TO SEARCH ONLY. There is no SEARCHB syntax line, no SEARCHB argument list, and the double-byte remarks are gone: the strings \"double-byte\" and \"DBCS\" appear zero times in the article. What survives is an Important box reading \"The SEARCHB function is deprecated.\" Every SEARCHB case in this file therefore cites the SEARCH page and asserts only what holds for pure ASCII, where the two functions must agree; nothing here is asserted about byte semantics, because Microsoft no longer publishes any."
+    }
+  ]
+}

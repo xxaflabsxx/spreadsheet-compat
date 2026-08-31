@@ -1,0 +1,40 @@
+{
+  "function": "TAN",
+  "cases": [
+    {
+      "id": "TAN_documented_radians",
+      "formula": "=ROUND(TAN(0.785),5)",
+      "description": "Microsoft's first documented example, at the five decimals it publishes",
+      "expected": 0.9992,
+      "expected_note": "Microsoft publishes =TAN(0.785) = 0.99920 (\"Tangent of 0.785 radians\"). DERIVATION: tan(0.785) = 0.9992039901050426572858 at 50 digits, which is 0.99920 at the published precision -- 0.9992 as a number, the trailing zero being the page's formatting. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/tan-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "TAN_documented_forty_five_degrees",
+      "formula": "=ROUND(TAN(45*PI()/180),10)",
+      "description": "Microsoft's second documented row: 45 degrees converted by hand",
+      "expected": 1,
+      "expected_note": "Microsoft publishes =TAN(45*PI()/180) = 1. tan(pi/4) = 1 exactly in real arithmetic; the ROUND(...,10) wrapper absorbs the double-precision residue from PI()/180 the same way the SIN(PI()) case does."
+    },
+    {
+      "id": "TAN_documented_radians_function",
+      "formula": "=ROUND(TAN(RADIANS(45)),10)",
+      "description": "Microsoft's third documented row: the same angle via RADIANS()",
+      "expected": 1,
+      "expected_note": "Microsoft publishes =TAN(RADIANS(45)) = 1, matching the hand-converted row. Kept separate because it asserts RADIANS() and *PI()/180 agree, which is a different claim from TAN being right."
+    },
+    {
+      "id": "TAN_full_precision",
+      "formula": "=ROUND(TAN(0.785),10)",
+      "description": "The first example carried to ten decimals",
+      "expected": 0.9992039901,
+      "expected_note": "Asserted at ten places from the derivation: 0.9992039901. Five published decimals cannot separate tan(0.785) from the nearby exact 1 at tan(pi/4), and pi/4 = 0.7853981634 is only 0.0004 away."
+    },
+    {
+      "id": "TAN_quotient_identity",
+      "formula": "=ROUND(TAN(1)-SIN(1)/COS(1),15)",
+      "description": "tan checked against sin/cos as the engine itself computes them",
+      "expected": 0,
+      "expected_note": "tan(x) = sin(x)/cos(x) by definition. Asserting the difference is zero makes the engine check TAN against its own SIN and COS, with no constant from us. The TAN page publishes no error-condition remarks at all -- only the degrees-to-radians note -- so no error case is asserted for this function."
+    }
+  ]
+}

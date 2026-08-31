@@ -1,0 +1,55 @@
+{
+  "function": "T.DIST.2T",
+  "cases": [
+    {
+      "id": "T.DIST.2T_documented_example",
+      "formula": "=ROUND(T.DIST.2T(A2,A3),6)",
+      "description": "Microsoft's documented worked example, at the six decimals its description publishes",
+      "setup_cells": {
+        "A2": 1.959999998,
+        "A3": 60
+      },
+      "expected": 0.054645,
+      "expected_note": "Microsoft publishes =T.DIST.2T(A2,A3) for A2 = 1.959999998 and A3 = 60 with the description \"Two-tailed distribution (0.054645, or 5.46 percent)\". NOTE ON THE RESULT COLUMN: the page's Result cell reads \"5.46%\", which is cell FORMATTING of the same number -- the assertable figure is 0.054645, and this corpus asserts the number rather than the percent string. DERIVATION -- and this batch derived the whole t family TWICE, along two paths that share no code: (1) the Student t CDF as the regularized incomplete beta 1 - I_{v/(v+x^2)}(v/2, 1/2)/2, and (2) NUMERICAL QUADRATURE of the t density gamma((v+1)/2)/(sqrt(v*pi)*gamma(v/2)) * (1+x^2/v)^(-(v+1)/2), integrated as a TAIL from x to infinity so the heavy tail carries the error rather than the answer. The two agree to 25 significant digits on every point asserted in this batch, and scipy.stats.t reproduces each of them to double precision as a third check. Inverses are ROOT-FOUND on that cross-checked CDF, never taken from a statistics library's own inverse. Two-tailed is 2*(1 - F(x)) = 0.05464492997592087239699 at 50 digits, i.e. 0.054645 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-dist-2t-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "T.DIST.2T_full_precision",
+      "formula": "=ROUND(T.DIST.2T(A2,A3),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A2": 1.959999998,
+        "A3": 60
+      },
+      "expected": 0.05464493,
+      "expected_note": "Asserted at ten places from the derivation: 0.05464493. The argument 1.959999998 is deliberately just short of the familiar 1.96, and at ten places the difference from T.DIST.2T(1.96,60) = 0.0546449297 is visible -- which is the point of carrying the extra digits."
+    },
+    {
+      "id": "T.DIST.2T_is_twice_T.DIST.RT",
+      "formula": "=ROUND(T.DIST.2T(1.5,20)-2*T.DIST.RT(1.5,20),15)",
+      "description": "The documented relationship between the two-tailed and right-tailed functions",
+      "expected": 0,
+      "expected_note": "The two-tailed probability P(|X| > x) is exactly twice the right-tailed P(X > x) for a symmetric distribution, and the TDIST page states the pair explicitly (\"If Tails = 1, TDIST is calculated as TDIST = P( X>x )... If Tails = 2, TDIST is calculated as TDIST = P(|X| > x) = P(X > x or X < -x)\"). A structural assertion with no derived constant, checking the engine's two functions against each other."
+    },
+    {
+      "id": "T.DIST.2T_negative_x",
+      "formula": "=T.DIST.2T(-1,10)",
+      "description": "A negative x, which this page excludes even though the two-tailed value would be well defined",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If x < 0, then T.DIST.2T returns the #NUM! error value.\" Worth noting that P(|X| > x) is perfectly well defined for negative x (it is 1), so this is a documented RESTRICTION rather than a mathematical necessity -- and its right-tailed sibling T.DIST.RT publishes no such rule, which is why the two files assert different things about negative arguments."
+    },
+    {
+      "id": "T.DIST.2T_deg_freedom_below_one",
+      "formula": "=T.DIST.2T(1,0)",
+      "description": "Zero degrees of freedom, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If deg_freedom < 1, T.DIST.2T returns the #NUM! error value.\" Unlike the T.DIST page, this one names the code."
+    },
+    {
+      "id": "T.DIST.2T_nonnumeric_argument",
+      "formula": "=T.DIST.2T(\"abc\",60)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If any argument is nonnumeric, T.DIST.2T returns the #VALUE! error value.\""
+    }
+  ]
+}

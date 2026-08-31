@@ -1,0 +1,145 @@
+{
+  "function": "Z.TEST",
+  "cases": [
+    {
+      "id": "Z.TEST_documented_mean_four",
+      "formula": "=ROUND(Z.TEST(A2:A11,4),6)",
+      "description": "Microsoft's first documented row: the one-tailed p-value at a hypothesized mean of 4",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 3,
+        "A3": 6,
+        "A4": 7,
+        "A5": 8,
+        "A6": 6,
+        "A7": 5,
+        "A8": 4,
+        "A9": 2,
+        "A10": 1,
+        "A11": 9
+      },
+      "expected": 0.090574,
+      "expected_note": "Microsoft publishes =Z.TEST(A2:A11,4) = 0.090574 (\"One-tailed probability-value of a z-test for the data set above, at the hypothesized population mean of 4\"). DERIVATION from the identity the page publishes AS TEXT (this page carries no equation images at all): \"Z.TEST(array,x) = 1-Norm.S.Dist((Average(array)- x) / (STDEV(array)/sqrt(n)),TRUE)\" when sigma is omitted. With n = 10, AVERAGE = 51/10 = 5.1 and the SAMPLE standard deviation (n-1 divisor), the standard normal CDF was evaluated as erfc(-z/sqrt(2))/2 at 50 digits -- not from a statistics library's norm.cdf. The result is 0.09057419685136376034696, i.e. 0.090574 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/z-test-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "Z.TEST_documented_mean_six",
+      "formula": "=ROUND(Z.TEST(A2:A11,6),6)",
+      "description": "Microsoft's third documented row: the same data at a hypothesized mean of 6",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 3,
+        "A3": 6,
+        "A4": 7,
+        "A5": 8,
+        "A6": 6,
+        "A7": 5,
+        "A8": 4,
+        "A9": 2,
+        "A10": 1,
+        "A11": 9
+      },
+      "expected": 0.863043,
+      "expected_note": "Microsoft publishes =Z.TEST(A2:A11,6) = 0.863043. Derived the same way: 0.8630433891295298922184. The pair of rows is worth having because the sample mean 5.1 lies BETWEEN the two hypothesized means, so one p-value is below 0.5 and the other above -- which exercises the page's own remark that \"if AVERAGE(array) < x, Z.TEST will return a value greater than 0.5\"."
+    },
+    {
+      "id": "Z.TEST_documented_two_tailed_at_four",
+      "formula": "=ROUND(2*MIN(Z.TEST(A2:A11,4),1-Z.TEST(A2:A11,4)),6)",
+      "description": "Microsoft's second documented row: the two-tailed form it publishes as a composed formula",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 3,
+        "A3": 6,
+        "A4": 7,
+        "A5": 8,
+        "A6": 6,
+        "A7": 5,
+        "A8": 4,
+        "A9": 2,
+        "A10": 1,
+        "A11": 9
+      },
+      "expected": 0.181148,
+      "expected_note": "Microsoft publishes =2 * MIN(Z.TEST(A2:A11,4), 1 - Z.TEST(A2:A11,4)) = 0.181148 and documents that composition as the way to get a two-tailed value. Derived as twice the one-tailed figure (which is below 0.5, so MIN picks it): 0.181148393702727521. The case also exercises MIN over two function calls, so a failure should be read against the one-tailed case above before blaming Z.TEST."
+    },
+    {
+      "id": "Z.TEST_documented_two_tailed_at_six",
+      "formula": "=ROUND(2*MIN(Z.TEST(A2:A11,6),1-Z.TEST(A2:A11,6)),6)",
+      "description": "Microsoft's fourth documented row, where MIN must pick the OTHER branch",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 3,
+        "A3": 6,
+        "A4": 7,
+        "A5": 8,
+        "A6": 6,
+        "A7": 5,
+        "A8": 4,
+        "A9": 2,
+        "A10": 1,
+        "A11": 9
+      },
+      "expected": 0.273913,
+      "expected_note": "Microsoft publishes 0.273913 here. This is the row that makes the MIN meaningful: Z.TEST(A2:A11,6) = 0.863043 is ABOVE 0.5, so the two-tailed value is 2*(1 - 0.863043) = 0.273913221740940216, not twice the p-value itself. An engine that hard-coded doubling would return 1.726087 and fail only on this row."
+    },
+    {
+      "id": "Z.TEST_full_precision",
+      "formula": "=ROUND(Z.TEST(A2:A11,4),12)",
+      "description": "The headline example carried to twelve decimals",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 3,
+        "A3": 6,
+        "A4": 7,
+        "A5": 8,
+        "A6": 6,
+        "A7": 5,
+        "A8": 4,
+        "A9": 2,
+        "A10": 1,
+        "A11": 9
+      },
+      "expected": 0.090574196851,
+      "expected_note": "Asserted at twelve places from the derivation: 0.090574196851. Six published decimals cannot separate the documented SAMPLE standard deviation (n-1) from a population one (n): with the n divisor (population sigma 2.46779253585 rather than the sample 2.60128173535) the answer would be 0.0793345963, which differs in the second significant digit and WOULD be caught here, but a subtler slip in the standard normal tail would not be."
+    },
+    {
+      "id": "Z.TEST_with_explicit_sigma",
+      "formula": "=ROUND(Z.TEST(A2:A11,4,2.5),12)",
+      "description": "The optional sigma argument supplied, which the page documents as replacing STDEV",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 3,
+        "A3": 6,
+        "A4": 7,
+        "A5": 8,
+        "A6": 6,
+        "A7": 5,
+        "A8": 4,
+        "A9": 2,
+        "A10": 1,
+        "A11": 9
+      },
+      "expected": 0.082051753413,
+      "expected_note": "MICROSOFT PUBLISHES NO FIGURE WITH sigma SUPPLIED -- both example rows omit it -- so this value is ours, derived from the page's own three-argument identity \"Z.TEST(array,x,sigma) = 1-Norm.S.Dist((Average(array)- x) / (sigma/sqrt(n)),TRUE)\". With sigma = 2.5, z = (5.1-4)/(2.5/sqrt(10)) = 1.391326... and the result is 0.08205175341289340444 at 50 digits, i.e. 0.082051753413 at twelve places. The case exists because the optional argument is the only part of the signature no published example touches, and an engine that ignored sigma would return the 0.090574 above."
+    },
+    {
+      "id": "Z.TEST_empty_array",
+      "formula": "=Z.TEST(A20:A21,4)",
+      "description": "An empty array, which the page assigns an error code -- the referenced cells are DELIBERATELY left unset",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 3,
+        "A3": 6,
+        "A4": 7,
+        "A5": 8,
+        "A6": 6,
+        "A7": 5,
+        "A8": 4,
+        "A9": 2,
+        "A10": 1,
+        "A11": 9
+      },
+      "expected": "#N/A",
+      "expected_note": "The Remarks publish: \"If array is empty, Z.TEST returns the #N/A error value.\" A2:A11 holds the data; A20:A21 IS DELIBERATELY BLANK AND UNPOPULATED, which is the entire content of this case -- see scripts/check_test_setup_refs.py, which accepts a reference to an unset cell only when the case says in its own words that emptiness is the point."
+    }
+  ]
+}

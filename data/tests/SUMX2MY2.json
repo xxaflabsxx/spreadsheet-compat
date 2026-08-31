@@ -1,0 +1,76 @@
+{
+  "function": "SUMX2MY2",
+  "cases": [
+    {
+      "id": "SUMX2MY2_documented_array_constants",
+      "formula": "=SUMX2MY2({2,3,9,1,8,7,5},{6,5,11,7,5,4,4})",
+      "description": "Microsoft's second documented row, which passes the data as array constants",
+      "expected": -55,
+      "expected_note": "Microsoft publishes =SUMX2MY2({2, 3, 9, 1, 8, 7, 5}, {6, 5, 11, 7, 5, 4, 4}) = -55. DERIVATION in exact integer arithmetic: sum of x^2 = 4+9+81+1+64+49+25 = 233; sum of y^2 = 36+25+121+49+25+16+16 = 288; 233 - 288 = -55. THIS ROW, NOT THE RANGE ROW ABOVE IT, IS THE ONE THAT REPRODUCES THE PUBLISHED ANSWER -- see SUMX2MY2_published_range_is_off_by_one_row. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sumx2my2-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SUMX2MY2_documented_range_corrected",
+      "formula": "=SUMX2MY2(A3:A9,B3:B9)",
+      "description": "Microsoft's first documented row over the range where its own data actually sits",
+      "setup_cells": {
+        "A2": "First array",
+        "B2": "Second array",
+        "A3": 2,
+        "B3": 6,
+        "A4": 3,
+        "B4": 5,
+        "A5": 9,
+        "B5": 11,
+        "A6": 1,
+        "B6": 7,
+        "A7": 8,
+        "B7": 5,
+        "A8": 7,
+        "B8": 4,
+        "A9": 5,
+        "B9": 4
+      },
+      "expected": -55,
+      "expected_note": "Microsoft's first example row publishes =SUMX2MY2(A2:A8,B2:B8) = -55, but its data table puts the seven pairs in ROWS 3 THROUGH 9 (row 1 is the word \"Data\", row 2 is the column headers \"First array\" and \"Second array\"). The corrected range A3:A9/B3:B9 -- which is exactly the range the SUMX2PY2 and SUMXMY2 pages publish over an IDENTICAL data table -- gives the published -55. Asserted here in the corrected form so that a failure means the engine is wrong rather than the citation."
+    },
+    {
+      "id": "SUMX2MY2_published_range_is_off_by_one_row",
+      "formula": "=SUMX2MY2(A2:A8,B2:B8)",
+      "description": "Microsoft's published range verbatim, which does NOT produce Microsoft's published result",
+      "setup_cells": {
+        "A2": "First array",
+        "B2": "Second array",
+        "A3": 2,
+        "B3": 6,
+        "A4": 3,
+        "B4": 5,
+        "A5": 9,
+        "B5": 11,
+        "A6": 1,
+        "B6": 7,
+        "A7": 8,
+        "B7": 5,
+        "A8": 7,
+        "B8": 4,
+        "A9": 5,
+        "B9": 4
+      },
+      "expected": -64,
+      "expected_note": "A WRONG PUBLISHED FIGURE, RECORDED RATHER THAN QUIETLY CORRECTED. Microsoft publishes =SUMX2MY2(A2:A8,B2:B8) = -55 on a data table whose numbers start in row 3, so the published range takes in the text header row and only the FIRST SIX numeric pairs. Text is ignored per the page's own Remarks (\"If an array or reference argument contains text, logical values, or empty cells, those values are ignored\"), leaving x = 2,3,9,1,8,7 and y = 6,5,11,7,5,4: sum x^2 = 4+9+81+1+64+49 = 208, sum y^2 = 36+25+121+49+25+16 = 272, difference -64. So the page's own formula returns -64, not the -55 it prints beside it. The error is a one-row citation slip and nothing more -- its two sibling pages, SUMX2PY2 and SUMXMY2, publish A3:A9/B3:B9 over a byte-identical data table, and the array-constant row on this same page returns the correct -55. This case asserts what the published formula actually computes, and would catch an engine that silently included the header text as a zero (which would give 208+0 vs 272+0, the same -64 here, so the case is a citation record rather than a discriminator)."
+    },
+    {
+      "id": "SUMX2MY2_mismatched_lengths",
+      "formula": "=SUMX2MY2({1,2,3},{1,2})",
+      "description": "Arrays of different lengths, which the page assigns an error code",
+      "expected": "#N/A",
+      "expected_note": "The Remarks publish: \"If array_x and array_y have a different number of values, the SUMX2MY2 function returns the #N/A error value.\""
+    },
+    {
+      "id": "SUMX2MY2_identity_against_sumsq",
+      "formula": "=SUMX2MY2({2,3,9},{6,5,11})-(SUMSQ(2,3,9)-SUMSQ(6,5,11))",
+      "description": "The definition checked against the engine's own SUMSQ, with no constant from us",
+      "expected": 0,
+      "expected_note": "SUMX2MY2(x,y) = SUMSQ(x) - SUMSQ(y) by definition. Asserting the difference is zero makes the engine check the function against its own sum-of-squares, which is sharper than the published integer: it fails for an engine that squared the difference instead of differencing the squares (that is SUMXMY2, and would give 16+4+4 = 24 here, not -88)."
+    }
+  ]
+}

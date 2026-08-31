@@ -1,0 +1,62 @@
+{
+  "function": "T.INV.2T",
+  "cases": [
+    {
+      "id": "T.INV.2T_documented_example",
+      "formula": "=ROUND(T.INV.2T(A2,A3),6)",
+      "description": "Microsoft's documented worked example, at the six decimals its Result column publishes",
+      "setup_cells": {
+        "A2": 0.546449,
+        "A3": 60
+      },
+      "expected": 0.606533,
+      "expected_note": "Microsoft publishes =T.INV.2T(A2,A3) with Result 0.606533 for A2 = 0.546449 and A3 = 60, and its Description column gives the same value to nine places as 0.606533076. DERIVATION: the two-tailed inverse solves 2*(1 - F(t)) = p, root-found on the incomplete-beta CDF and independently on a numerically integrated t density, giving 0.6065330758257550412791 at 50 digits -- 0.606533 at six places and 0.606533076 at nine, matching both of Microsoft's printings. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-inv-2t-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "T.INV.2T_full_precision",
+      "formula": "=ROUND(T.INV.2T(A2,A3),12)",
+      "description": "The same example carried to twelve decimals",
+      "setup_cells": {
+        "A2": 0.546449,
+        "A3": 60
+      },
+      "expected": 0.606533075826,
+      "expected_note": "Asserted at twelve places from the derivation: 0.606533075826."
+    },
+    {
+      "id": "T.INV.2T_documented_remark_figure_is_wrong",
+      "formula": "=ROUND(T.INV.2T(0.05,10),9)",
+      "description": "The figure Microsoft's Remarks publish for a probability of 0.05 at 10 degrees of freedom, which is a typo",
+      "expected": 2.228138852,
+      "expected_note": "BOTH FIGURES IN MICROSOFT'S REMARK ARE WRONG, AND THE SECOND ONE WAS CAUGHT BY THE ENGINE RATHER THAN BY THE DERIVATION. The paragraph -- identical on the T.INV.2T page and the TINV page -- publishes: \"For a probability of 0.05 and degrees of freedom of 10, the two-tailed value is calculated with TINV(0.05,10), which returns 2.28139. The one-tailed value ... TINV(2*0.05,10), which returns 1.812462.\" FIGURE ONE, 2.28139, IS A TRANSPOSITION: the true value is 2.228138851986274748395, i.e. 2.228139 -- the digits are right and their order is not. FIGURE TWO, 1.812462, IS A LAST-DIGIT ROUNDING ERROR: the true value is 1.812461122811676413626, which correctly rounded to six places is 1.812461, not 1.812462. This corpus originally asserted Microsoft's 1.812462 -- the derivation had been done but the six-place rounding was copied from the page instead of taken from the derived digits -- and ALL FOUR LibreOffice builds returned 1.812461. The engine was right and the citation was wrong; the case now asserts the derived value and this note records why it changed. Every figure here was checked three independent ways: a root find on the regularized-incomplete-beta t CDF, a root find on a NUMERICALLY INTEGRATED t density sharing no code with the first, and scipy.stats.t.ppf -- all agreeing to double precision. The sanity check settles figure one from the other direction too: T.DIST.2T(2.28139, 10) is 0.045678, not 0.05, while T.DIST.2T(2.228139, 10) is 0.0500000 to six places. This case asserts the DERIVED 2.228138852 at nine places, not the published 2.28139. Had the published figure been copied, every engine on earth would have been recorded as diverging from Excel here, and the divergence would have been ours."
+    },
+    {
+      "id": "T.INV.2T_documented_remark_second_figure_is_also_wrong",
+      "formula": "=ROUND(T.INV.2T(2*0.05,10),6)",
+      "description": "The second figure in the same Remark, which is also wrong -- by a last-digit rounding error rather than a transposition",
+      "expected": 1.812461,
+      "expected_note": "BOTH FIGURES IN MICROSOFT'S REMARK ARE WRONG, AND THE SECOND ONE WAS CAUGHT BY THE ENGINE RATHER THAN BY THE DERIVATION. The paragraph -- identical on the T.INV.2T page and the TINV page -- publishes: \"For a probability of 0.05 and degrees of freedom of 10, the two-tailed value is calculated with TINV(0.05,10), which returns 2.28139. The one-tailed value ... TINV(2*0.05,10), which returns 1.812462.\" FIGURE ONE, 2.28139, IS A TRANSPOSITION: the true value is 2.228138851986274748395, i.e. 2.228139 -- the digits are right and their order is not. FIGURE TWO, 1.812462, IS A LAST-DIGIT ROUNDING ERROR: the true value is 1.812461122811676413626, which correctly rounded to six places is 1.812461, not 1.812462. This corpus originally asserted Microsoft's 1.812462 -- the derivation had been done but the six-place rounding was copied from the page instead of taken from the derived digits -- and ALL FOUR LibreOffice builds returned 1.812461. The engine was right and the citation was wrong; the case now asserts the derived value and this note records why it changed. Every figure here was checked three independent ways: a root find on the regularized-incomplete-beta t CDF, a root find on a NUMERICALLY INTEGRATED t density sharing no code with the first, and scipy.stats.t.ppf -- all agreeing to double precision. The sanity check settles figure one from the other direction too: T.DIST.2T(2.28139, 10) is 0.045678, not 0.05, while T.DIST.2T(2.228139, 10) is 0.0500000 to six places. This case asserts the DERIVED 1.812461 at six places. It is the pair with the 2.228139 case above that shows the paragraph to be unreliable as a whole rather than carrying one isolated typo."
+    },
+    {
+      "id": "T.INV.2T_round_trips_through_T.DIST.2T",
+      "formula": "=ROUND(T.DIST.2T(T.INV.2T(0.2,15),15),12)",
+      "description": "The two-tailed inverse fed back through the two-tailed distribution",
+      "expected": 0.2,
+      "expected_note": "T.DIST.2T(T.INV.2T(p, v), v) = p by definition. A structural round trip with no derived constant, checking the engine's own pair against each other. NOTE ON MICROSOFT'S OWN WORDING: the T.INV.2T page states this relationship as \"T.DIST.2T(x, deg_freedom, 2) = probability\" -- a THREE-argument call, when the T.DIST.2T page's syntax line publishes exactly two arguments, T.DIST.2T(x,deg_freedom). The stray third argument is left over from the legacy TDIST(x,deg_freedom,tails) form. Recorded as published; the formula under test uses the two-argument syntax the T.DIST.2T page actually documents."
+    },
+    {
+      "id": "T.INV.2T_probability_out_of_range",
+      "formula": "=T.INV.2T(0,60)",
+      "description": "A probability of zero, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If probability <= 0 or if probability > 1, T.INV.2T returns the #NUM! error value.\""
+    },
+    {
+      "id": "T.INV.2T_deg_freedom_below_one",
+      "formula": "=T.INV.2T(0.5,0)",
+      "description": "Zero degrees of freedom, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If deg_freedom < 1, T.INV.2T returns the #NUM! error value.\""
+    }
+  ]
+}

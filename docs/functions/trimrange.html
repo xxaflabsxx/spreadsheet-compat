@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TRIMRANGE: Excel only — not in Sheets or LibreOffice</title>
-<meta name="description" content="TRIMRANGE (Lookup and reference) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>TRIMRANGE is not supported in LibreOffice Calc (Excel only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for TRIMRANGE in all 7 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/trimrange.html">
-<meta property="og:title" content="TRIMRANGE: Excel only — not in Sheets or LibreOffice">
-<meta property="og:description" content="TRIMRANGE (Lookup and reference) is documented for Excel, not for Google Sheets or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="TRIMRANGE is not supported in LibreOffice Calc (Excel only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for TRIMRANGE in all 7 executed test cases. Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/trimrange.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>TRIMRANGE</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Lookup and reference</p>
+<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>TRIMRANGE</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for TRIMRANGE yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,147 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+TRIMRANGE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't TRIMRANGE working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>TRIMRANGE</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+The same formula is documented for Excel.
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=SUM(TRIMRANGE(A1:E10))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">10</span>.
+        THE PAGE PUBLISHES NO EXAMPLE TABLE AND NO ERROR REMARKS AT ALL -- every value in this file is derived from the prose, and that is said out loud rather than dressed up as a citation. What the page does document: &#34;=TRIMRANGE(range,[trim_rows],[trim_cols])&#34;, with trim_rows and trim_cols each taking 0 = None, 1 = leading, 2 = trailing, 3 = both, and 3 as the default for each. A1:E10 IS DELIBERATELY MOSTLY BLANK: only B3:C4 holds data (1, 2, 3, 4), so trimming both leading and trailing blank rows and columns must reduce A1:E10 to exactly B3:C4, whose sum is 10. SUM is wrapped around the call because TRIMRANGE returns a RANGE rather than a scalar, and a sum is the cheapest assertion that depends on the whole trimmed shape. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/trimrange-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.; MISMATCH vs expected: expected 10, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SUM(TRIMRANGE(A1:E10,0,0))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">10</span>.
+        With trim_rows = 0 and trim_cols = 0 -- both documented as &#34;0 - None&#34; -- nothing is trimmed and the range stays A1:E10, WHICH IS DELIBERATELY FULL OF BLANK CELLS. The sum is still 10 because blanks contribute nothing to SUM, so this case does NOT prove the range was left untrimmed; it proves only that the 0 codes are accepted and do not error. The shape difference between this and the case above is invisible to SUM, which is stated here rather than glossed: a sharper test would need a function sensitive to the range&#39;s dimensions, and ROWS/COLUMNS of a trimmed reference is exactly the sort of thing an engine without TRIMRANGE cannot be asked.; MISMATCH vs expected: expected 10, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=COUNT(TRIMRANGE(A1:E10))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">0</span>, but the documented/expected
+        result is <span class="formula">4</span>.
+        COUNT tallies numeric cells, so it reports 4 whether or not the blanks were trimmed -- but paired with the ROWS case below it pins the shape down. The data block B3:C4 holds exactly four numbers.; MISMATCH vs expected: expected 4, got 0
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROWS(TRIMRANGE(A1:E10))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">2</span>.
+        THIS IS THE CASE THAT MAKES THE FILE MEAN SOMETHING. A1:E10 IS TEN ROWS OF MOSTLY BLANK CELLS; trimmed to its data block B3:C4 it is two. ROWS() reads the reference&#39;s shape rather than its values, so an engine that accepted TRIMRANGE but ignored it would return 10 here and pass every other case in this file. Derived from the documented default trim_rows = 3 (&#34;Trims both leading and trailing blank rows&#34;), not from any published example -- there is none.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=COLUMNS(TRIMRANGE(A1:E10))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">2</span>.
+        The column half of the same assertion: five columns A through E trim to the two, B and C, that hold data. Derived from the documented default trim_cols = 3.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROWS(TRIMRANGE(A1:E10,1,1))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">8</span>.
+        With trim_rows = 1 (&#34;1 - Trims leading blank rows&#34;) the two blank rows before the data are removed and THE SIX BLANK ROWS AFTER IT ARE DELIBERATELY LEFT, so A1:E10 becomes A3:E10 -- eight rows. Derived from the prose; the page publishes no worked example of any trim code. This case and the trailing one below are what separate the three non-zero codes from each other, which the default case cannot do.; MISMATCH vs expected: expected 8, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROWS(TRIMRANGE(A1:E10,2,2))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">4</span>.
+        With trim_rows = 2 (&#34;2 - Trims trailing blank rows&#34;) the six blank rows after the data are removed and THE TWO BLANK ROWS BEFORE IT ARE DELIBERATELY LEFT, so A1:E10 becomes A1:E4 -- four rows. The page documents the equivalent Trim Refs operator spellings for these codes in a table that is worth recording as published, typo and all: &#34;Trim All (.:.) | A1.:.E10 | TRIMRANGE(A1:E10,3,3)&#34;, &#34;Trim Trailing (:.) | A1:.E10 | TRIMRANGE(A1:E10,2,2)&#34;, &#34;Trim Leading (.:) | A1.:Z10 | TRIMRANGE(A1:E10,1,1)&#34; -- note the third row&#39;s example says Z10 where its equivalent says E10, which is a slip in Microsoft&#39;s own table.; MISMATCH vs expected: expected 4, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +534,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for TRIMRANGE yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SUM(TRIMRANGE(A1:E10))</td>
+  <td>The documented default, trimming both leading and trailing blank rows and columns from a mostly-blank range</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">10<br><span class="category-tag">THE PAGE PUBLISHES NO EXAMPLE TABLE AND NO ERROR REMARKS AT ALL -- every value in this file is derived from the prose, and that is said out loud rather than dressed up as a citation. What the page does document: &#34;=TRIMRANGE(range,[trim_rows],[trim_cols])&#34;, with trim_rows and trim_cols each taking 0 = None, 1 = leading, 2 = trailing, 3 = both, and 3 as the default for each. A1:E10 IS DELIBERATELY MOSTLY BLANK: only B3:C4 holds data (1, 2, 3, 4), so trimming both leading and trailing blank rows and columns must reduce A1:E10 to exactly B3:C4, whose sum is 10. SUM is wrapped around the call because TRIMRANGE returns a RANGE rather than a scalar, and a sum is the cheapest assertion that depends on the whole trimmed shape. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/trimrange-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUM(TRIMRANGE(A1:E10,0,0))</td>
+  <td>Trim codes of 0, documented as None, which must leave the blank cells in place</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">10<br><span class="category-tag">With trim_rows = 0 and trim_cols = 0 -- both documented as &#34;0 - None&#34; -- nothing is trimmed and the range stays A1:E10, WHICH IS DELIBERATELY FULL OF BLANK CELLS. The sum is still 10 because blanks contribute nothing to SUM, so this case does NOT prove the range was left untrimmed; it proves only that the 0 codes are accepted and do not error. The shape difference between this and the case above is invisible to SUM, which is stated here rather than glossed: a sharper test would need a function sensitive to the range&#39;s dimensions, and ROWS/COLUMNS of a trimmed reference is exactly the sort of thing an engine without TRIMRANGE cannot be asked.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=COUNT(TRIMRANGE(A1:E10))</td>
+  <td>COUNT over the default-trimmed range, which IS sensitive to the trimmed shape</td>
+  <td class="result mono">0</td>
+  <td class="result mono">4<br><span class="category-tag">COUNT tallies numeric cells, so it reports 4 whether or not the blanks were trimmed -- but paired with the ROWS case below it pins the shape down. The data block B3:C4 holds exactly four numbers.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROWS(TRIMRANGE(A1:E10))</td>
+  <td>The trimmed range&#39;s row count, which is the assertion that actually distinguishes trimming from not trimming</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">2<br><span class="category-tag">THIS IS THE CASE THAT MAKES THE FILE MEAN SOMETHING. A1:E10 IS TEN ROWS OF MOSTLY BLANK CELLS; trimmed to its data block B3:C4 it is two. ROWS() reads the reference&#39;s shape rather than its values, so an engine that accepted TRIMRANGE but ignored it would return 10 here and pass every other case in this file. Derived from the documented default trim_rows = 3 (&#34;Trims both leading and trailing blank rows&#34;), not from any published example -- there is none.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=COLUMNS(TRIMRANGE(A1:E10))</td>
+  <td>The trimmed range&#39;s column count</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">2<br><span class="category-tag">The column half of the same assertion: five columns A through E trim to the two, B and C, that hold data. Derived from the documented default trim_cols = 3.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROWS(TRIMRANGE(A1:E10,1,1))</td>
+  <td>Trim code 1, documented as leading only, which must leave the TRAILING blank rows in place</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">8<br><span class="category-tag">With trim_rows = 1 (&#34;1 - Trims leading blank rows&#34;) the two blank rows before the data are removed and THE SIX BLANK ROWS AFTER IT ARE DELIBERATELY LEFT, so A1:E10 becomes A3:E10 -- eight rows. Derived from the prose; the page publishes no worked example of any trim code. This case and the trailing one below are what separate the three non-zero codes from each other, which the default case cannot do.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROWS(TRIMRANGE(A1:E10,2,2))</td>
+  <td>Trim code 2, documented as trailing only, which must leave the LEADING blank rows in place</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">4<br><span class="category-tag">With trim_rows = 2 (&#34;2 - Trims trailing blank rows&#34;) the six blank rows after the data are removed and THE TWO BLANK ROWS BEFORE IT ARE DELIBERATELY LEFT, so A1:E10 becomes A1:E4 -- four rows. The page documents the equivalent Trim Refs operator spellings for these codes in a table that is worth recording as published, typo and all: &#34;Trim All (.:.) | A1.:.E10 | TRIMRANGE(A1:E10,3,3)&#34;, &#34;Trim Trailing (:.) | A1:.E10 | TRIMRANGE(A1:E10,2,2)&#34;, &#34;Trim Leading (.:) | A1.:Z10 | TRIMRANGE(A1:E10,1,1)&#34; -- note the third row&#39;s example says Z10 where its equivalent says E10, which is a slip in Microsoft&#39;s own table.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

@@ -21,13 +21,24 @@ snapshot 2026-08-23):
                      WEBSERVICE IS THE LAST CANDIDATE IN THE DATASET. Of the
                      ~480 functions, exactly five were ever both x && l && !g and
                      un-executed -- ODDFPRICE, ODDFYIELD, ODDLPRICE, ODDLYIELD
-                     and WEBSERVICE -- and batch F executed the first four. When
-                     the alphabetical push reaches W and executes WEBSERVICE too
-                     (or deliberately skips it, as it skips CALL and REGISTER.ID,
-                     in which case lv stays null and this slot keeps working),
-                     there will be no real function left to point at: the doc-only
-                     verdict basis will then have to be exercised with a SYNTHETIC
-                     dataset entry in test.mjs rather than a fixture formula.
+                     and WEBSERVICE -- and batch F executed the first four.
+                     THE PUSH HAS NOW REACHED W AND THIS SLOT IS SETTLED: batch G
+                     (RTD..ZTEST) closed the Excel-documented set and DELIBERATELY
+                     DID NOT EXECUTE WEBSERVICE, for the same class of reason it
+                     skips CALL and REGISTER.ID -- WEBSERVICE's documented
+                     behaviour IS a network fetch, so any value this harness sees
+                     describes the sandbox rather than the engine. (Concretely:
+                     _xlfn.WEBSERVICE parses and evaluates in all four pinned
+                     LibreOffice builds and returns #N/A for an unreachable host,
+                     which classify_verdict() would publish as "quirky" -- a
+                     LibreOffice defect that does not exist.) So lv stays null,
+                     WEBSERVICE stays doc-only, and this slot keeps working
+                     indefinitely.
+                     IF THAT EVER CHANGES -- if a later batch decides to execute
+                     WEBSERVICE after all -- there is no real function left to
+                     point at, and the doc-only verdict basis must then be
+                     exercised with a SYNTHETIC dataset entry in test.mjs rather
+                     than with a fixture formula over a real name.
                      Note WEBSERVICE sorts AFTER TEXTSPLIT, where the previous two
                      occupants sorted before it, so the at-risk ordering and
                      free-tier assertions in test.mjs name it last; that is the

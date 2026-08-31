@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TINV: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="TINV (Compatibility) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>TINV matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="6/8 match; probability out of range returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/tinv.html">
-<meta property="og:title" content="TINV: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="TINV (Compatibility) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="TINV matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="6/8 match; probability out of range returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/tinv.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>TINV</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Compatibility</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>TINV</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for TINV yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,106 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+TINV&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't TINV working in LibreOffice?</h2>
+
+<p><code>TINV</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=TINV(1.5,60)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, TINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=TINV(0.05,0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The Remarks publish: &#34;If deg_freedom &lt; 1, TINV returns the #NUM! error value.&#34; A separate documented failure mode is NOT asserted anywhere in this file: &#34;If the search has not converged after 100 iterations, the function returns the #N/A error value&#34; is a property of Microsoft&#39;s particular iterative implementation, not of the function, and no input is known that reliably triggers it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +493,82 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for TINV yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(TINV(A2,A3),2)</td>
+  <td>Microsoft&#39;s documented worked example, at the two decimals it publishes</td>
+  <td class="result mono">1.96</td>
+  <td class="result mono">1.96<br><span class="category-tag">Microsoft publishes =TINV(A2,A3) = 1.96 for A2 = 0.05464 and A3 = 60. TINV IS TWO-TAILED -- the page&#39;s own description is &#34;Returns the two-tailed inverse of the Student&#39;s t-distribution&#34; and its Important box points at &#34;T.INV.2T function or T.INV function&#34;, of which only T.INV.2T shares the convention. DERIVATION: solving 2*(1 - F(t)) = 0.05464 at 60 degrees of freedom by root find on the doubly-cross-checked CDF gives 1.960041187127245765323, which is 1.96 at the published precision. Note the probability in the cell is 0.05464, a five-decimal truncation of the 0.05464493 the T.DIST.2T family publishes for t = 1.959999998, so the inverse comes back at 1.96004 rather than at 1.96 exactly -- the two published examples are consistent, just rounded at different points. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/tinv-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TINV(A2,A3),10)</td>
+  <td>The same example carried to ten decimals</td>
+  <td class="result mono">1.9600411871</td>
+  <td class="result mono">1.9600411871<br><span class="category-tag">Asserted at ten places from the derivation: 1.9600411871. Two published decimals are the loosest assertion anywhere in this batch and could not distinguish TINV from almost anything; this case is what makes the file&#39;s headline example meaningful.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TINV(0.05,10),9)</td>
+  <td>The figure Microsoft&#39;s Remarks publish for a probability of 0.05 at 10 degrees of freedom, which is a typo</td>
+  <td class="result mono">2.228138852</td>
+  <td class="result mono">2.228138852<br><span class="category-tag">BOTH FIGURES IN MICROSOFT&#39;S REMARK ARE WRONG, AND THE SECOND ONE WAS CAUGHT BY THE ENGINE RATHER THAN BY THE DERIVATION. The paragraph -- identical on the T.INV.2T page and the TINV page -- publishes: &#34;For a probability of 0.05 and degrees of freedom of 10, the two-tailed value is calculated with TINV(0.05,10), which returns 2.28139. The one-tailed value ... TINV(2*0.05,10), which returns 1.812462.&#34; FIGURE ONE, 2.28139, IS A TRANSPOSITION: the true value is 2.228138851986274748395, i.e. 2.228139 -- the digits are right and their order is not. FIGURE TWO, 1.812462, IS A LAST-DIGIT ROUNDING ERROR: the true value is 1.812461122811676413626, which correctly rounded to six places is 1.812461, not 1.812462. This corpus originally asserted Microsoft&#39;s 1.812462 -- the derivation had been done but the six-place rounding was copied from the page instead of taken from the derived digits -- and ALL FOUR LibreOffice builds returned 1.812461. The engine was right and the citation was wrong; the case now asserts the derived value and this note records why it changed. Every figure here was checked three independent ways: a root find on the regularized-incomplete-beta t CDF, a root find on a NUMERICALLY INTEGRATED t density sharing no code with the first, and scipy.stats.t.ppf -- all agreeing to double precision. The sanity check settles figure one from the other direction too: T.DIST.2T(2.28139, 10) is 0.045678, not 0.05, while T.DIST.2T(2.228139, 10) is 0.0500000 to six places. This case asserts the DERIVED 2.228138852 at nine places, not the published 2.28139. Had the published figure been copied, every engine on earth would have been recorded as diverging from Excel here, and the divergence would have been ours.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TINV(2*0.05,10),6)</td>
+  <td>The second figure in the same Remark, which is also wrong -- by a last-digit rounding error rather than a transposition</td>
+  <td class="result mono">1.812461</td>
+  <td class="result mono">1.812461<br><span class="category-tag">BOTH FIGURES IN MICROSOFT&#39;S REMARK ARE WRONG, AND THE SECOND ONE WAS CAUGHT BY THE ENGINE RATHER THAN BY THE DERIVATION. The paragraph -- identical on the T.INV.2T page and the TINV page -- publishes: &#34;For a probability of 0.05 and degrees of freedom of 10, the two-tailed value is calculated with TINV(0.05,10), which returns 2.28139. The one-tailed value ... TINV(2*0.05,10), which returns 1.812462.&#34; FIGURE ONE, 2.28139, IS A TRANSPOSITION: the true value is 2.228138851986274748395, i.e. 2.228139 -- the digits are right and their order is not. FIGURE TWO, 1.812462, IS A LAST-DIGIT ROUNDING ERROR: the true value is 1.812461122811676413626, which correctly rounded to six places is 1.812461, not 1.812462. This corpus originally asserted Microsoft&#39;s 1.812462 -- the derivation had been done but the six-place rounding was copied from the page instead of taken from the derived digits -- and ALL FOUR LibreOffice builds returned 1.812461. The engine was right and the citation was wrong; the case now asserts the derived value and this note records why it changed. Every figure here was checked three independent ways: a root find on the regularized-incomplete-beta t CDF, a root find on a NUMERICALLY INTEGRATED t density sharing no code with the first, and scipy.stats.t.ppf -- all agreeing to double precision. The sanity check settles figure one from the other direction too: T.DIST.2T(2.28139, 10) is 0.045678, not 0.05, while T.DIST.2T(2.228139, 10) is 0.0500000 to six places. This case asserts the DERIVED 1.812461 at six places. It is the pair with the 2.228139 case above that shows the paragraph to be unreliable as a whole rather than carrying one isolated typo.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TINV(0.2,15)-T.INV.2T(0.2,15),15)</td>
+  <td>The legacy inverse against its modern two-tailed replacement</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">TINV and T.INV.2T are documented as the same two-tailed inverse. A structural assertion with no derived constant, checking the engine&#39;s legacy and modern spellings against each other -- and specifically NOT against T.INV, which is left-tailed and would differ.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TDIST(TINV(0.1,20),20,2),12)</td>
+  <td>The documented relationship between the two legacy functions</td>
+  <td class="result mono">0.1</td>
+  <td class="result mono">0.1<br><span class="category-tag">The page publishes the relationship in words: &#34;TINV seeks that value x such that TDIST(x, deg_freedom, 2) = probability. Thus, precision of TINV depends on precision of TDIST.&#34; This case asserts exactly that sentence as a round trip, with no derived constant.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TINV(1.5,60)</td>
+  <td>A probability above one, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, TINV returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TINV(0.05,0)</td>
+  <td>Zero degrees of freedom, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If deg_freedom &lt; 1, TINV returns the #NUM! error value.&#34; A separate documented failure mode is NOT asserted anywhere in this file: &#34;If the search has not converged after 100 iterations, the function returns the #N/A error value&#34; is a property of Microsoft&#39;s particular iterative implementation, not of the function, and no input is known that reliably triggers it.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

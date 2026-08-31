@@ -1,0 +1,58 @@
+{
+  "function": "SUMXMY2",
+  "cases": [
+    {
+      "id": "SUMXMY2_documented_range",
+      "formula": "=SUMXMY2(A3:A9,B3:B9)",
+      "description": "Microsoft's first documented row",
+      "setup_cells": {
+        "A2": "First array",
+        "B2": "Second array",
+        "A3": 2,
+        "B3": 6,
+        "A4": 3,
+        "B4": 5,
+        "A5": 9,
+        "B5": 11,
+        "A6": 1,
+        "B6": 7,
+        "A7": 8,
+        "B7": 5,
+        "A8": 7,
+        "B8": 4,
+        "A9": 5,
+        "B9": 4
+      },
+      "expected": 79,
+      "expected_note": "Microsoft publishes =SUMXMY2(A3:A9,B3:B9) = 79. DERIVATION in exact integer arithmetic: the pairwise differences are -4,-2,-2,-6,3,3,1 and their squares are 16,4,4,36,9,9,1, summing to 79. Like SUMX2PY2 and unlike SUMX2MY2, this page's range citation matches its own data rows. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sumxmy2-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SUMXMY2_documented_array_constants",
+      "formula": "=SUMXMY2({2,3,9,1,8,7,5},{6,5,11,7,5,4,4})",
+      "description": "Microsoft's second documented row, as array constants",
+      "expected": 79,
+      "expected_note": "Microsoft publishes =SUMXMY2({2, 3, 9, 1, 8, 7, 5}, {6, 5, 11, 7, 5, 4, 4}) = 79, matching the range row."
+    },
+    {
+      "id": "SUMXMY2_mismatched_lengths",
+      "formula": "=SUMXMY2({1,2,3},{1,2})",
+      "description": "Arrays of different lengths, which the page assigns an error code",
+      "expected": "#N/A",
+      "expected_note": "The Remarks publish: \"If array_x and array_y do not have the same number of values, SUMXMY2 returns the #N/A error value.\""
+    },
+    {
+      "id": "SUMXMY2_is_symmetric",
+      "formula": "=SUMXMY2({2,3,9},{6,5,11})-SUMXMY2({6,5,11},{2,3,9})",
+      "description": "Squaring the difference makes the function symmetric in its two arguments",
+      "expected": 0,
+      "expected_note": "(x-y)^2 = (y-x)^2, so SUMXMY2 must be symmetric while SUMX2MY2 must ANTI-symmetric. A structural assertion with no derived constant, and the one that most sharply separates the two names: the same swap applied to SUMX2MY2 would give -88 - 88 = -176, not 0."
+    },
+    {
+      "id": "SUMXMY2_identity_against_sumproduct",
+      "formula": "=SUMXMY2({2,3,9},{6,5,11})-SUMPRODUCT(({2,3,9}-{6,5,11})^2)",
+      "description": "The definition checked against the engine's own SUMPRODUCT over an array expression",
+      "expected": 0,
+      "expected_note": "SUMXMY2(x,y) = SUMPRODUCT((x-y)^2) by definition. No constant from us. This case also exercises array arithmetic inside SUMPRODUCT, so a #VALUE! here would point at the array handling rather than at SUMXMY2 -- worth reading alongside the two simpler cases above before concluding anything about SUMXMY2 itself."
+    }
+  ]
+}

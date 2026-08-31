@@ -1,0 +1,55 @@
+{
+  "function": "T.DIST.RT",
+  "cases": [
+    {
+      "id": "T.DIST.RT_documented_example",
+      "formula": "=ROUND(T.DIST.RT(A2,A3),6)",
+      "description": "Microsoft's documented worked example, at the six decimals it publishes",
+      "setup_cells": {
+        "A2": 1.959999998,
+        "A3": 60
+      },
+      "expected": 0.027322,
+      "expected_note": "Microsoft publishes =T.DIST.RT(A2,A3) = 0.027322 for A2 = 1.959999998 and A3 = 60. Unlike the T.DIST.2T page, this one prints the unformatted number rather than a percentage. DERIVATION -- and this batch derived the whole t family TWICE, along two paths that share no code: (1) the Student t CDF as the regularized incomplete beta 1 - I_{v/(v+x^2)}(v/2, 1/2)/2, and (2) NUMERICAL QUADRATURE of the t density gamma((v+1)/2)/(sqrt(v*pi)*gamma(v/2)) * (1+x^2/v)^(-(v+1)/2), integrated as a TAIL from x to infinity so the heavy tail carries the error rather than the answer. The two agree to 25 significant digits on every point asserted in this batch, and scipy.stats.t reproduces each of them to double precision as a third check. Inverses are ROOT-FOUND on that cross-checked CDF, never taken from a statistics library's own inverse. Right-tailed is 1 - F(x) = 0.02732246498796043619849 at 50 digits, i.e. 0.027322 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-dist-rt-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "T.DIST.RT_full_precision",
+      "formula": "=ROUND(T.DIST.RT(A2,A3),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A2": 1.959999998,
+        "A3": 60
+      },
+      "expected": 0.027322465,
+      "expected_note": "Asserted at ten places from the derivation: 0.027322465."
+    },
+    {
+      "id": "T.DIST.RT_complements_T.DIST",
+      "formula": "=ROUND(T.DIST.RT(1.3,12)+T.DIST(1.3,12,TRUE),12)",
+      "description": "Right tail plus left tail is exactly one",
+      "expected": 1,
+      "expected_note": "P(X > x) + P(X <= x) = 1 by definition. A structural assertion with no derived constant that checks T.DIST.RT against the engine's own T.DIST -- the two are separate implementations in most engines, and this is what catches one of them being off."
+    },
+    {
+      "id": "T.DIST.RT_negative_x_is_allowed",
+      "formula": "=ROUND(T.DIST.RT(-1,10),12)",
+      "description": "A negative x, which this page does NOT exclude although its two-tailed sibling does",
+      "expected": 0.829553433849,
+      "expected_note": "THE ASYMMETRY BETWEEN THE TWO PAGES IS THE POINT. T.DIST.2T's Remarks publish \"If x < 0, then T.DIST.2T returns the #NUM! error value\"; the T.DIST.RT page publishes NO such rule -- its only Remarks are the nonnumeric #VALUE! and the deg_freedom #NUM!. So a negative x is inside T.DIST.RT's documented range, and the right-tail probability there is 1 - F(-1) = 0.829553433849 at twelve places (0.82955343384897006366 at 20), derived on the same cross-checked CDF. MICROSOFT PUBLISHES NO FIGURE FOR THIS INPUT: the value is entirely ours, and the case is what makes the difference between the two pages testable rather than merely noted."
+    },
+    {
+      "id": "T.DIST.RT_deg_freedom_below_one",
+      "formula": "=T.DIST.RT(1,0)",
+      "description": "Zero degrees of freedom, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If deg_freedom < 1, T.DIST.RT returns the #NUM! error value.\""
+    },
+    {
+      "id": "T.DIST.RT_nonnumeric_argument",
+      "formula": "=T.DIST.RT(\"abc\",60)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If any argument is nonnumeric, T.DIST.RT returns the #VALUE! error value.\""
+    }
+  ]
+}

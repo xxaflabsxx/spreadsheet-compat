@@ -1,0 +1,47 @@
+{
+  "function": "TANH",
+  "cases": [
+    {
+      "id": "TANH_documented_negative_two",
+      "formula": "=ROUND(TANH(-2),6)",
+      "description": "Microsoft's first documented example, at the six decimals the Result column publishes",
+      "expected": -0.964028,
+      "expected_note": "Microsoft publishes =TANH(-2) with Result -0.964028 (its Description column rounds the same value differently, to -0.96403 -- both are the same figure at different precisions, recorded as published). DERIVATION: tanh(-2) = -0.9640275800758168839464 at 50 digits, which is -0.964028 at six places and -0.96403 at five. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/tanh-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "TANH_documented_zero",
+      "formula": "=TANH(0)",
+      "description": "Microsoft's second documented row: an exact zero",
+      "expected": 0,
+      "expected_note": "Microsoft publishes =TANH(0) = 0. tanh(0) = 0 exactly -- unlike SIN(PI()), there is no argument rounding here, so the bare value is asserted with no ROUND wrapper."
+    },
+    {
+      "id": "TANH_documented_half",
+      "formula": "=ROUND(TANH(0.5),6)",
+      "description": "Microsoft's third documented row",
+      "expected": 0.462117,
+      "expected_note": "Microsoft publishes =TANH(0.5) = 0.462117. Derived independently as 0.4621171572600097585023, i.e. 0.462117 at the published precision."
+    },
+    {
+      "id": "TANH_full_precision_half",
+      "formula": "=ROUND(TANH(0.5),10)",
+      "description": "The same example carried to ten decimals",
+      "expected": 0.4621171573,
+      "expected_note": "Asserted at ten places from the derivation: 0.4621171573. Six published decimals cannot separate tanh from its small-argument approximation x - x^3/3, which agrees to only three places here but would still round to a plausible-looking figure at six."
+    },
+    {
+      "id": "TANH_quotient_identity",
+      "formula": "=ROUND(TANH(1)-SINH(1)/COSH(1),15)",
+      "description": "tanh checked against sinh/cosh as the engine itself computes them",
+      "expected": 0,
+      "expected_note": "tanh(x) = sinh(x)/cosh(x) by definition -- the relation the page's own equation image states. Asserting the difference is zero makes the engine check TANH against its own SINH and COSH with no constant from us. The TANH page publishes no error-condition remarks, so no error case is asserted."
+    },
+    {
+      "id": "TANH_is_odd",
+      "formula": "=ROUND(TANH(2)+TANH(-2),15)",
+      "description": "tanh is an odd function, so the two signs must cancel exactly",
+      "expected": 0,
+      "expected_note": "tanh is odd, so tanh(2) + tanh(-2) = 0 exactly. A structural assertion with no derived constant."
+    }
+  ]
+}

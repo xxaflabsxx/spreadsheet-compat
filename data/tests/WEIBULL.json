@@ -1,0 +1,79 @@
+{
+  "function": "WEIBULL",
+  "cases": [
+    {
+      "id": "WEIBULL_documented_cumulative",
+      "formula": "=ROUND(WEIBULL(A2,A3,A4,TRUE),6)",
+      "description": "Microsoft's first documented row: the cumulative distribution function",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 105,
+        "A3": 20,
+        "A4": 100
+      },
+      "expected": 0.929581,
+      "expected_note": "Microsoft publishes =WEIBULL(A2,A3,A4,TRUE) = 0.929581 (\"Weibull cumulative distribution function for the terms above\"). DERIVATION from the two closed forms (the page prints them only as images, so they were taken from the standard Weibull definition and checked against the published figures): the cumulative form is 1 - e^(-(x/beta)^alpha) and the density is (alpha/beta^alpha) * x^(alpha-1) * e^(-(x/beta)^alpha). With x = 105, alpha = 20, beta = 100 the driving quantity is (1.05)^20 = 2.653297705144420133945... and everything follows from it, evaluated at 50 digits with mpmath; scipy.stats.weibull_min reproduces the cumulative value to double precision as a second check. The cumulative value is 0.9295813900692767751575, i.e. 0.929581 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/weibull-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "WEIBULL_documented_density",
+      "formula": "=ROUND(WEIBULL(A2,A3,A4,FALSE),6)",
+      "description": "Microsoft's second documented row: the probability density function",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 105,
+        "A3": 20,
+        "A4": 100
+      },
+      "expected": 0.035589,
+      "expected_note": "Microsoft publishes =WEIBULL(A2,A3,A4,FALSE) = 0.035589. Derived as 0.03558886402450438219872. The cumulative flag is what this case pins down: the two published values differ by a factor of 26, so an engine ignoring FALSE cannot slip through."
+    },
+    {
+      "id": "WEIBULL_full_precision_cumulative",
+      "formula": "=ROUND(WEIBULL(A2,A3,A4,TRUE),12)",
+      "description": "The cumulative example carried to twelve decimals",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 105,
+        "A3": 20,
+        "A4": 100
+      },
+      "expected": 0.929581390069,
+      "expected_note": "Asserted at twelve places from the derivation: 0.929581390069."
+    },
+    {
+      "id": "WEIBULL_matches_WEIBULL.DIST",
+      "formula": "=ROUND(WEIBULL(105,20,100,TRUE)-WEIBULL.DIST(105,20,100,TRUE),15)",
+      "description": "The legacy spelling against its modern replacement on identical arguments",
+      "expected": 0,
+      "expected_note": "The WEIBULL page's Important box publishes that it \"has been replaced with one or more new functions... this function may not be available in future versions of Excel\" and names WEIBULL.DIST. The two pages publish identical example values (0.929581 and 0.035589) on identical data, so the two spellings must agree exactly. A structural assertion with no derived constant."
+    },
+    {
+      "id": "WEIBULL_alpha_one_is_exponential",
+      "formula": "=ROUND(WEIBULL(2,1,2,TRUE)-(1-EXP(-1)),15)",
+      "description": "At alpha = 1 the Weibull is exactly an exponential distribution",
+      "expected": 0,
+      "expected_note": "With alpha = 1 the cumulative form collapses to 1 - e^(-x/beta), and at x = beta = 2 that is exactly 1 - e^-1. A structural assertion with no derived constant, checked against the engine's own EXP -- it fails for an engine that swapped alpha and beta, since 1 - e^(-(2/1)^2) = 1 - e^-4 is a different number."
+    },
+    {
+      "id": "WEIBULL_x_negative",
+      "formula": "=WEIBULL(-1,20,100,TRUE)",
+      "description": "A negative x, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If x < 0, WEIBULL returns the #NUM! error value.\""
+    },
+    {
+      "id": "WEIBULL_alpha_zero",
+      "formula": "=WEIBULL(105,0,100,TRUE)",
+      "description": "An alpha of zero, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If alpha <= 0 or if beta <= 0, WEIBULL returns the #NUM! error value.\""
+    },
+    {
+      "id": "WEIBULL_nonnumeric_argument",
+      "formula": "=WEIBULL(\"abc\",20,100,TRUE)",
+      "description": "A non-numeric argument",
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If x, alpha, or beta is nonnumeric, WEIBULL returns the #VALUE! error value.\""
+    }
+  ]
+}

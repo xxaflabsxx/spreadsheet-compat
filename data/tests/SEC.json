@@ -1,0 +1,47 @@
+{
+  "function": "SEC",
+  "cases": [
+    {
+      "id": "SEC_documented_45",
+      "formula": "=ROUND(SEC(45),5)",
+      "description": "Microsoft's first documented example, at the five decimals it publishes",
+      "expected": 1.90359,
+      "expected_note": "Microsoft publishes =SEC(45) = 1.90359. DERIVATION: SEC is 1/COS, and the argument is in RADIANS, so this is 1/cos(45 rad) = 1.9035944074044247389 at 50 digits (mpmath), which is 1.90359 at the published precision. THE PAGE'S OWN DESCRIPTION IS WRONG ABOUT THE UNIT: it reads \"Returns the secant of a 45 degree angle\", but 45 DEGREES would give 1/cos(pi/4) = 1.4142135624, not the 1.90359 the same row publishes. The page's Remarks bullet contradicts its own description and is the correct half -- \"If you want to supply the angle in degrees, multiply the angle by PI()/180 or use the RADIANS function\" -- so the published RESULT is right and the word \"degree\" in the description is the error. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sec-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SEC_documented_30",
+      "formula": "=ROUND(SEC(30),5)",
+      "description": "Microsoft's second documented example",
+      "expected": 6.48292,
+      "expected_note": "Microsoft publishes =SEC(30) = 6.48292. Derived independently as 1/cos(30 rad) = 6.482921234962677788 at 50 digits, i.e. 6.48292 at the published precision. Same description/unit error as the 45 row: 30 DEGREES would give 1/cos(pi/6) = 1.1547005384."
+    },
+    {
+      "id": "SEC_full_precision_45",
+      "formula": "=ROUND(SEC(45),10)",
+      "description": "The same example carried to ten decimals, where a unit or reciprocal error cannot hide",
+      "expected": 1.9035944074,
+      "expected_note": "Five published decimals cannot separate an engine that computes 1/COS from one that computes COS of a reciprocal, or one that silently converts units. Asserted at ten places from the independent derivation: 1.9035944074."
+    },
+    {
+      "id": "SEC_degrees_conversion_identity",
+      "formula": "=ROUND(SEC(45*PI()/180),10)",
+      "description": "The page's own documented degrees-to-radians conversion, which must give the secant of a true 45 degrees",
+      "expected": 1.4142135624,
+      "expected_note": "The Remarks bullet says to convert degrees with PI()/180. A true 45-degree secant is 1/cos(pi/4) = sqrt(2) = 1.41421356237309504880, i.e. 1.4142135624 at ten places -- a structural assertion with no derived constant, since sec(45 deg) is exactly sqrt(2). It is also the value the page's own \"45 degree angle\" description would require, which is how the description was shown to be wrong."
+    },
+    {
+      "id": "SEC_nonnumeric_argument",
+      "formula": "=SEC(\"abc\")",
+      "description": "A non-numeric argument, which the page assigns an error code",
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If number is a nonnumeric value, SEC returns the #VALUE! error values.\" (the trailing plural is Microsoft's, recorded as published)."
+    },
+    {
+      "id": "SEC_argument_outside_documented_range",
+      "formula": "=SEC(200000000)",
+      "description": "An argument beyond the documented magnitude limit",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"The absolute value of number must be less than 2^27\" and \"If number is outside its constraints, SEC returns the #NUM! error value.\" 2^27 = 134217728, so 200000000 is outside the documented range. LIBREOFFICE DOES NOT ENFORCE THE LIMIT: all four builds returned -1.35887556717362 rather than #NUM!. That is a silent wrong answer rather than a harmless permissiveness, and the limit exists precisely because of it -- at 2e8 radians the argument reduction consumes every bit of a double's precision, so the secant returned is numerically meaningless. Excel documents the guard; LibreOffice computes through it."
+    }
+  ]
+}

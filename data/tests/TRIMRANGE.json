@@ -1,0 +1,96 @@
+{
+  "function": "TRIMRANGE",
+  "cases": [
+    {
+      "id": "TRIMRANGE_default_trims_leading_and_trailing_blanks",
+      "formula": "=SUM(TRIMRANGE(A1:E10))",
+      "description": "The documented default, trimming both leading and trailing blank rows and columns from a mostly-blank range",
+      "setup_cells": {
+        "B3": 1,
+        "C3": 2,
+        "B4": 3,
+        "C4": 4
+      },
+      "expected": 10,
+      "expected_note": "THE PAGE PUBLISHES NO EXAMPLE TABLE AND NO ERROR REMARKS AT ALL -- every value in this file is derived from the prose, and that is said out loud rather than dressed up as a citation. What the page does document: \"=TRIMRANGE(range,[trim_rows],[trim_cols])\", with trim_rows and trim_cols each taking 0 = None, 1 = leading, 2 = trailing, 3 = both, and 3 as the default for each. A1:E10 IS DELIBERATELY MOSTLY BLANK: only B3:C4 holds data (1, 2, 3, 4), so trimming both leading and trailing blank rows and columns must reduce A1:E10 to exactly B3:C4, whose sum is 10. SUM is wrapped around the call because TRIMRANGE returns a RANGE rather than a scalar, and a sum is the cheapest assertion that depends on the whole trimmed shape. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/trimrange-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "TRIMRANGE_trim_none_keeps_the_blank_range",
+      "formula": "=SUM(TRIMRANGE(A1:E10,0,0))",
+      "description": "Trim codes of 0, documented as None, which must leave the blank cells in place",
+      "setup_cells": {
+        "B3": 1,
+        "C3": 2,
+        "B4": 3,
+        "C4": 4
+      },
+      "expected": 10,
+      "expected_note": "With trim_rows = 0 and trim_cols = 0 -- both documented as \"0 - None\" -- nothing is trimmed and the range stays A1:E10, WHICH IS DELIBERATELY FULL OF BLANK CELLS. The sum is still 10 because blanks contribute nothing to SUM, so this case does NOT prove the range was left untrimmed; it proves only that the 0 codes are accepted and do not error. The shape difference between this and the case above is invisible to SUM, which is stated here rather than glossed: a sharper test would need a function sensitive to the range's dimensions, and ROWS/COLUMNS of a trimmed reference is exactly the sort of thing an engine without TRIMRANGE cannot be asked."
+    },
+    {
+      "id": "TRIMRANGE_counts_only_the_trimmed_cells",
+      "formula": "=COUNT(TRIMRANGE(A1:E10))",
+      "description": "COUNT over the default-trimmed range, which IS sensitive to the trimmed shape",
+      "setup_cells": {
+        "B3": 1,
+        "C3": 2,
+        "B4": 3,
+        "C4": 4
+      },
+      "expected": 4,
+      "expected_note": "COUNT tallies numeric cells, so it reports 4 whether or not the blanks were trimmed -- but paired with the ROWS case below it pins the shape down. The data block B3:C4 holds exactly four numbers."
+    },
+    {
+      "id": "TRIMRANGE_trimmed_range_has_two_rows",
+      "formula": "=ROWS(TRIMRANGE(A1:E10))",
+      "description": "The trimmed range's row count, which is the assertion that actually distinguishes trimming from not trimming",
+      "setup_cells": {
+        "B3": 1,
+        "C3": 2,
+        "B4": 3,
+        "C4": 4
+      },
+      "expected": 2,
+      "expected_note": "THIS IS THE CASE THAT MAKES THE FILE MEAN SOMETHING. A1:E10 IS TEN ROWS OF MOSTLY BLANK CELLS; trimmed to its data block B3:C4 it is two. ROWS() reads the reference's shape rather than its values, so an engine that accepted TRIMRANGE but ignored it would return 10 here and pass every other case in this file. Derived from the documented default trim_rows = 3 (\"Trims both leading and trailing blank rows\"), not from any published example -- there is none."
+    },
+    {
+      "id": "TRIMRANGE_trimmed_range_has_two_columns",
+      "formula": "=COLUMNS(TRIMRANGE(A1:E10))",
+      "description": "The trimmed range's column count",
+      "setup_cells": {
+        "B3": 1,
+        "C3": 2,
+        "B4": 3,
+        "C4": 4
+      },
+      "expected": 2,
+      "expected_note": "The column half of the same assertion: five columns A through E trim to the two, B and C, that hold data. Derived from the documented default trim_cols = 3."
+    },
+    {
+      "id": "TRIMRANGE_trim_leading_only_keeps_trailing_blanks",
+      "formula": "=ROWS(TRIMRANGE(A1:E10,1,1))",
+      "description": "Trim code 1, documented as leading only, which must leave the TRAILING blank rows in place",
+      "setup_cells": {
+        "B3": 1,
+        "C3": 2,
+        "B4": 3,
+        "C4": 4
+      },
+      "expected": 8,
+      "expected_note": "With trim_rows = 1 (\"1 - Trims leading blank rows\") the two blank rows before the data are removed and THE SIX BLANK ROWS AFTER IT ARE DELIBERATELY LEFT, so A1:E10 becomes A3:E10 -- eight rows. Derived from the prose; the page publishes no worked example of any trim code. This case and the trailing one below are what separate the three non-zero codes from each other, which the default case cannot do."
+    },
+    {
+      "id": "TRIMRANGE_trim_trailing_only_keeps_leading_blanks",
+      "formula": "=ROWS(TRIMRANGE(A1:E10,2,2))",
+      "description": "Trim code 2, documented as trailing only, which must leave the LEADING blank rows in place",
+      "setup_cells": {
+        "B3": 1,
+        "C3": 2,
+        "B4": 3,
+        "C4": 4
+      },
+      "expected": 4,
+      "expected_note": "With trim_rows = 2 (\"2 - Trims trailing blank rows\") the six blank rows after the data are removed and THE TWO BLANK ROWS BEFORE IT ARE DELIBERATELY LEFT, so A1:E10 becomes A1:E4 -- four rows. The page documents the equivalent Trim Refs operator spellings for these codes in a table that is worth recording as published, typo and all: \"Trim All (.:.) | A1.:.E10 | TRIMRANGE(A1:E10,3,3)\", \"Trim Trailing (:.) | A1:.E10 | TRIMRANGE(A1:E10,2,2)\", \"Trim Leading (.:) | A1.:Z10 | TRIMRANGE(A1:E10,1,1)\" -- note the third row's example says Z10 where its equivalent says E10, which is a slip in Microsoft's own table."
+    }
+  ]
+}

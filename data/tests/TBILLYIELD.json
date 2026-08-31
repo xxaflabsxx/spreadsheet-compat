@@ -1,0 +1,83 @@
+{
+  "function": "TBILLYIELD",
+  "cases": [
+    {
+      "id": "TBILLYIELD_documented_example",
+      "formula": "=ROUND(TBILLYIELD(A2,A3,A4),4)",
+      "description": "Microsoft's documented worked example, at the four decimals its description publishes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 98.45
+      },
+      "expected": 0.0914,
+      "expected_note": "Microsoft publishes =TBILLYIELD(A2,A3,A4) with the description \"The yield for the Treasury bill using the terms in A2, A3, and A4 (0.0914, or 9.14%)\" and a Result cell formatted as \"9.14%\". Settlement 2008-03-31, maturity 2008-06-01, price $98.45 per $100 face value. DERIVATION (the page's formula is an image, awftbyd.gif, with the same DSM legend): (100 - pr)/pr * (360/DSM) with the ACTUAL day count 62 gives 0.09141696292534281361097, i.e. 0.0914 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/tbillyield-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "TBILLYIELD_full_precision",
+      "formula": "=ROUND(TBILLYIELD(A2,A3,A4),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 98.45
+      },
+      "expected": 0.0914169629,
+      "expected_note": "Asserted at ten places from the derivation: 0.0914169629. Four published decimals cannot separate the actual day count from the 30/360 one here either (61 days would give 0.0929), though in this case the difference is larger than it is for TBILLEQ."
+    },
+    {
+      "id": "TBILLYIELD_price_zero",
+      "formula": "=TBILLYIELD(A2,A3,0)",
+      "description": "A price of zero, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 98.45
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If pr <= 0, TBILLYIELD returns the #NUM! error value.\" The formula divides by pr, so zero would be a division by zero as well as a documented exclusion."
+    },
+    {
+      "id": "TBILLYIELD_settlement_equals_maturity",
+      "formula": "=TBILLYIELD(A2,A2,A4)",
+      "description": "Settlement equal to maturity, which THIS page excludes with >= where its two siblings use >",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 98.45
+      },
+      "expected": "#NUM!",
+      "expected_note": "A DELIBERATE DIFFERENCE BETWEEN THE THREE TBILL PAGES, recorded because it is testable. TBILLYIELD's Remark publishes \"If settlement >= maturity, or if maturity is more than one year after settlement, TBILLYIELD returns the #NUM! error value\" -- with a GREATER-THAN-OR-EQUAL -- while TBILLEQ and TBILLPRICE both publish \"If settlement > maturity\". Equal dates are therefore documented as an error here and not documented as one on the other two pages; the arithmetic agrees, since DSM = 0 would divide by zero. Only TBILLYIELD's file asserts this case, because only TBILLYIELD's page states it."
+    },
+    {
+      "id": "TBILLYIELD_maturity_more_than_one_year_out",
+      "formula": "=TBILLYIELD(A2,A2+400,A4)",
+      "description": "A maturity more than a year after settlement, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 98.45
+      },
+      "expected": "#NUM!",
+      "expected_note": "The second half of the same Remark."
+    },
+    {
+      "id": "TBILLYIELD_invalid_date",
+      "formula": "=TBILLYIELD(\"not a date\",A3,A4)",
+      "description": "A non-date settlement argument",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 98.45
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If settlement or maturity is not a valid date, TBILLYIELD returns the #VALUE! error value.\""
+    }
+  ]
+}

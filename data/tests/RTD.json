@@ -1,0 +1,12 @@
+{
+  "function": "RTD",
+  "cases": [
+    {
+      "id": "RTD_no_realtime_server_probe",
+      "formula": "=RTD(\"NoSuchProgID\",\"\",\"topic\")",
+      "description": "Existence probe only: RTD requires a running real-time data COM server, which no flat workbook can supply, so this records what the engine returns rather than asserting a documented value",
+      "expected": null,
+      "expected_note": "NOT EXECUTABLE AS DOCUMENTED, and deliberately recorded as a probe rather than a support claim -- the same treatment batch B gave the CUBE* family and COPILOT, and batch D gave DETECTLANGUAGE. Microsoft documents RTD as retrieving real-time data \"from a program that supports COM automation\": the first argument is the ProgID of a registered real-time data SERVER, which must be installed on the machine, registered with the operating system, and running. A .xlsx carries no such server, and neither LibreOffice Calc nor Google Sheets can supply one, so the documented behaviour cannot be reproduced by this harness in any engine -- and an engine that DID return a number here would not thereby be compatible, because there would be no server behind the number. THE SAME AMBIGUITY THE CUBEVALUE FILE RECORDS APPLIES: a #NAME? from an unregistered ProgID and a #NAME? from an unimplemented function name are the same token, so this case is recorded with no asserted expected value and can never be scored as documented behaviour. What the run does establish is recorded separately: probing all four pinned LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) with the plain name, the _xlfn. storage form, the COM.MICROSOFT. add-in form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form returned #NAME? for ALL FIVE spellings on every build, which is the signature of a name the engine does not implement at all. RTD IS THE THIRD NAME THIS PUSH HAS DECLINED TO ASSERT ON FOR ITS OWN NATURE rather than for a documentation gap, after CALL and REGISTER.ID -- both of which invoke or register external code and return an opaque handle, and neither of which has a test file at all. RTD gets a probe file where they do not, because RTD's argument list is ordinary data (three strings) and can be safely evaluated, whereas CALL and REGISTER.ID name a DLL to load."
+    }
+  ]
+}

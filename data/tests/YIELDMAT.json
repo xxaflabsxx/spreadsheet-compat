@@ -1,0 +1,117 @@
+{
+  "function": "YIELDMAT",
+  "cases": [
+    {
+      "id": "YIELDMAT_documented_example",
+      "formula": "=ROUND(YIELDMAT(A2,A3,A4,A5,A6,A7),6)",
+      "description": "Microsoft's documented worked example, at the six decimals its description publishes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39522,
+        "A3": 39755,
+        "A4": 39394,
+        "A5": 0.0625,
+        "A6": 100.0123,
+        "A7": 0
+      },
+      "expected": 0.060954,
+      "expected_note": "Microsoft publishes =YIELDMAT(A2,A3,A4,A5,A6,A7) with the description \"The yield, for the bond with the terms above (0.060954 or 6.10%)\" and a Result cell formatted as \"6.10%\". Settlement 2008-03-15 (serial 39522), maturity 2008-11-03 (serial 39755), issue 2007-11-08 (serial 39394), 6.25% semiannual coupon, price 100.0123, 30/360 basis. DERIVATION -- THE PAGE PRINTS NO FORMULA (every image in the article body was enumerated and there are none): the closed form for a security paying interest at maturity is ((1 + DIM/B*rate) - (pr/100 + DIS/B*rate)) / (pr/100 + DIS/B*rate) * B/DSM, where DIM is issue-to-maturity, DIS is issue-to-settlement and DSM is settlement-to-maturity, all on the given basis. On basis 0 those are DIM = 355, DIS = 127 and DSM = 228 days with B = 360, giving 0.06095433369153852071011, i.e. 0.060954 at the published precision. Day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 (Procedure A for US 30/360, Procedure B for actual days, Procedure C for European 30/360, D/E/F for days-in-year) written for this batch and used by no engine; the bond arithmetic is evaluated over exact rational day-count ratios at 50 digits with mpmath. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/yieldmat-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "YIELDMAT_full_precision",
+      "formula": "=ROUND(YIELDMAT(A2,A3,A4,A5,A6,A7),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39522,
+        "A3": 39755,
+        "A4": 39394,
+        "A5": 0.0625,
+        "A6": 100.0123,
+        "A7": 0
+      },
+      "expected": 0.0609543337,
+      "expected_note": "Asserted at ten places from the derivation: 0.0609543337. Six published decimals cannot separate the three separate day counts this function needs -- DIM, DIS and DSM are 355, 127 and 228 here, and getting any one of them wrong by a day or two still lands near 0.0610."
+    },
+    {
+      "id": "YIELDMAT_settlement_after_maturity",
+      "formula": "=YIELDMAT(A3,A2,A4,A5,A6,A7)",
+      "description": "The dates reversed, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39522,
+        "A3": 39755,
+        "A4": 39394,
+        "A5": 0.0625,
+        "A6": 100.0123,
+        "A7": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If settlement >= maturity, YIELDMAT returns the #NUM! error value.\""
+    },
+    {
+      "id": "YIELDMAT_negative_rate",
+      "formula": "=YIELDMAT(A2,A3,A4,-0.01,A6,A7)",
+      "description": "A negative coupon rate, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39522,
+        "A3": 39755,
+        "A4": 39394,
+        "A5": 0.0625,
+        "A6": 100.0123,
+        "A7": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If rate < 0 or if pr <= 0, YIELDMAT returns the #NUM! error value.\""
+    },
+    {
+      "id": "YIELDMAT_price_zero",
+      "formula": "=YIELDMAT(A2,A3,A4,A5,0,A7)",
+      "description": "A price of zero, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39522,
+        "A3": 39755,
+        "A4": 39394,
+        "A5": 0.0625,
+        "A6": 100.0123,
+        "A7": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "The second half of the same Remark: pr <= 0 is a #NUM!."
+    },
+    {
+      "id": "YIELDMAT_invalid_basis",
+      "formula": "=YIELDMAT(A2,A3,A4,A5,A6,5)",
+      "description": "A basis of 5, which is outside the documented table",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39522,
+        "A3": 39755,
+        "A4": 39394,
+        "A5": 0.0625,
+        "A6": 100.0123,
+        "A7": 0
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If basis < 0 or if basis > 4, YIELDMAT returns the #NUM! error value.\""
+    },
+    {
+      "id": "YIELDMAT_invalid_issue_date",
+      "formula": "=YIELDMAT(A2,A3,\"not a date\",A5,A6,A7)",
+      "description": "A non-date issue argument",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39522,
+        "A3": 39755,
+        "A4": 39394,
+        "A5": 0.0625,
+        "A6": 100.0123,
+        "A7": 0
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If settlement, maturity, or issue is not a valid date, YIELDMAT returns the #VALUE! error value.\" The issue date is asserted rather than the settlement date because issue is the argument this function has and its YIELD/YIELDDISC siblings do not."
+    }
+  ]
+}

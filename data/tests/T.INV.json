@@ -1,0 +1,54 @@
+{
+  "function": "T.INV",
+  "cases": [
+    {
+      "id": "T.INV_documented_example",
+      "formula": "=ROUND(T.INV(0.75,2),7)",
+      "description": "Microsoft's only documented example, at the seven decimals it publishes",
+      "expected": 0.8164966,
+      "expected_note": "Microsoft publishes =T.INV(0.75,2) = 0.8164966 (\"The left-tailed inverse of the Student's t-distribution with a probability of 75% and 2 degrees of freedom\"). DERIVATION, AND THIS ONE IS EXACT: at two degrees of freedom the t CDF has the elementary closed form F(t) = 1/2 + t/(2*sqrt(2+t^2)), so F(t) = 3/4 solves to t/(2*sqrt(2+t^2)) = 1/4, i.e. 4t^2 = 2 + t^2 and t = sqrt(2/3) = 0.8164965809277260327324 -- an exact surd, no iteration and no library. The general root find on the cross-checked CDF used by the rest of this family lands on the same digits, and so does scipy.stats.t.ppf(0.75, 2). Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-inv-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "T.INV_full_precision",
+      "formula": "=ROUND(T.INV(0.75,2),12)",
+      "description": "The same example carried to twelve decimals",
+      "expected": 0.816496580928,
+      "expected_note": "Asserted at twelve places from the exact surd sqrt(2/3): 0.816496580928. Seven published decimals cannot see an iterative inverse that stops one iteration early."
+    },
+    {
+      "id": "T.INV_median_is_zero",
+      "formula": "=ROUND(T.INV(0.5,7),12)",
+      "description": "The median of a symmetric distribution is exactly zero",
+      "expected": 0,
+      "expected_note": "The t distribution is symmetric about zero, so its 50th percentile is exactly 0 for every degrees of freedom. A structural assertion with no derived constant, and the sharpest single test of an inverse's centring: an engine whose root finder is biased returns a small non-zero number here."
+    },
+    {
+      "id": "T.INV_round_trips_through_T.DIST",
+      "formula": "=ROUND(T.DIST(T.INV(0.3,9),9,TRUE),12)",
+      "description": "The inverse fed back through the distribution must return the probability it started from",
+      "expected": 0.3,
+      "expected_note": "T.DIST(T.INV(p, v), v, TRUE) = p by definition of an inverse. A structural round trip with no derived constant, run at a probability below one half so it exercises the negative-x branch of both functions. It is the strongest available check that the two are inverses OF EACH OTHER in the same engine, which no single published value can establish."
+    },
+    {
+      "id": "T.INV_is_left_tailed_not_two_tailed",
+      "formula": "=ROUND(T.INV(0.95,10),9)",
+      "description": "A probability where the left-tailed and two-tailed conventions give visibly different answers",
+      "expected": 1.812461123,
+      "expected_note": "T.INV IS LEFT-TAILED AND T.INV.2T IS TWO-TAILED, and this case makes the difference impossible to pass by accident. The left-tailed 95th percentile at 10 degrees of freedom is 1.812461122811676413626, derived by root find on the cross-checked CDF; the two-tailed T.INV.2T(0.95,10) is 0.0642981 and T.INV.2T(0.05,10) is 2.2281389. Microsoft publishes no figure for T.INV(0.95,10) -- the value is ours -- but it is the same number the T.INV.2T and TINV pages MEANT to publish for TINV(2*0.05,10), which is exactly the documented relationship between the two conventions and is why this probability was chosen. Those pages print 1.812462; the correctly rounded value is 1.812461, and the error is recorded in T.INV.2T.json and TINV.json."
+    },
+    {
+      "id": "T.INV_probability_out_of_range",
+      "formula": "=T.INV(0,2)",
+      "description": "A probability of zero, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If probability <= 0 or if probability > 1, T.INV returns the #NUM! error value.\" Note the asymmetry, which is Microsoft's: zero is excluded and ONE IS NOT, so probability = 1 is not listed as an error even though the left-tailed inverse there is unbounded."
+    },
+    {
+      "id": "T.INV_deg_freedom_below_one",
+      "formula": "=T.INV(0.75,0)",
+      "description": "Zero degrees of freedom, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If deg_freedom < 1, T.INV returns the #NUM! error value.\""
+    }
+  ]
+}

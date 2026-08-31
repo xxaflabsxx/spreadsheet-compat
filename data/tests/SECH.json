@@ -1,0 +1,47 @@
+{
+  "function": "SECH",
+  "cases": [
+    {
+      "id": "SECH_documented_45",
+      "formula": "=ROUND(SECH(45),25)",
+      "description": "Microsoft's first documented example, which the page prints in scientific notation",
+      "expected": 5.72504e-20,
+      "expected_note": "Microsoft publishes =SECH(45) = 5.73E-20. DERIVATION: 1/cosh(45 rad) = 5.72503716109878728894e-20 at 50 digits (mpmath), which is 5.73E-20 at the three significant figures the page prints. Asserted here at 25 decimal places -- ROUND(x,25) lands on 5.72504e-20 -- so the assertion carries THREE more significant digits than the page's 5.73E-20 while claiming nothing the derivation does not have. Same description/unit error as SEC: the page calls it \"the hyperbolic secant of a 45 degree angle\" while its own Remarks say to convert degrees with PI()/180, and 45 radians is what reproduces the published figure. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sech-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SECH_documented_30",
+      "formula": "=ROUND(SECH(30),20)",
+      "description": "Microsoft's second documented example",
+      "expected": 1.8715246e-13,
+      "expected_note": "Microsoft publishes =SECH(30) = 1.87E-13. Derived independently as 1/cosh(30 rad) = 1.871524593768034920983e-13, i.e. 1.87E-13 at the published three significant figures. Rounded here to 20 decimals, which lands on 1.8715246e-13 -- five more significant digits than the page prints -- for the same reason as the 45 case."
+    },
+    {
+      "id": "SECH_zero_is_exactly_one",
+      "formula": "=SECH(0)",
+      "description": "A structural identity with no derived constant: sech(0) = 1 exactly",
+      "expected": 1,
+      "expected_note": "cosh(0) = 1 exactly, so sech(0) = 1 exactly. No rounding, no published figure, nothing to get wrong except the function itself -- a sharp check that the engine computes a hyperbolic secant rather than a circular one (cos(0) is also 1, so this case does NOT distinguish them; the 45 and 30 cases, whose circular and hyperbolic values differ by nineteen orders of magnitude, do)."
+    },
+    {
+      "id": "SECH_is_even",
+      "formula": "=ROUND(SECH(2)-SECH(-2),15)",
+      "description": "sech is an even function, so a sign flip must change nothing",
+      "expected": 0,
+      "expected_note": "cosh is even, so sech is even and sech(2) - sech(-2) = 0 exactly. A structural assertion with no derived constant. NOTE ON READ-BACK: a formula returning 0 round-trips through .xlsx normally here (it is a genuine numeric zero, not a blank), unlike the empty-string case documented in RIGHTB.json."
+    },
+    {
+      "id": "SECH_nonnumeric_argument",
+      "formula": "=SECH(\"abc\")",
+      "description": "A non-numeric argument, which the page assigns an error code",
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If number is a nonnumeric value, SECH returns the #VALUE! error values.\" (Microsoft's plural, as published)."
+    },
+    {
+      "id": "SECH_argument_outside_documented_range",
+      "formula": "=SECH(200000000)",
+      "description": "An argument beyond the documented magnitude limit",
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish the same constraint SEC carries: \"The absolute value of number must be less than 2^27\" (= 134217728) and \"If number is outside its constraints, SECH returns the #NUM! error value.\" LIBREOFFICE DOES NOT ENFORCE THE LIMIT: all four builds returned 0 rather than #NUM!. That is a silent wrong answer rather than a harmless permissiveness, and the limit exists precisely because of it -- at 2e8 radians the argument reduction consumes every bit of a double's precision, so the hyperbolic secant simply underflows to zero. Excel documents the guard; LibreOffice computes through it."
+    }
+  ]
+}

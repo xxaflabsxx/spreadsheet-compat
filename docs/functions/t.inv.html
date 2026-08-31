@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>T.INV: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="T.INV (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>T.INV matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="5/7 match; probability out of range returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/t.inv.html">
-<meta property="og:title" content="T.INV: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="T.INV (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="T.INV matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="5/7 match; probability out of range returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/t.inv.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>T.INV</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>T.INV</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for T.INV yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,104 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+T.INV&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't T.INV working in LibreOffice?</h2>
+
+<p><code>T.INV</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=T.INV(0,2)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, T.INV returns the #NUM! error value.&#34; Note the asymmetry, which is Microsoft&#39;s: zero is excluded and ONE IS NOT, so probability = 1 is not listed as an error even though the left-tailed inverse there is unbounded.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=T.INV(0.75,0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The Remarks publish: &#34;If deg_freedom &lt; 1, T.INV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +491,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for T.INV yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV(0.75,2),7)</td>
+  <td>Microsoft&#39;s only documented example, at the seven decimals it publishes</td>
+  <td class="result mono">0.8164966</td>
+  <td class="result mono">0.8164966<br><span class="category-tag">Microsoft publishes =T.INV(0.75,2) = 0.8164966 (&#34;The left-tailed inverse of the Student&#39;s t-distribution with a probability of 75% and 2 degrees of freedom&#34;). DERIVATION, AND THIS ONE IS EXACT: at two degrees of freedom the t CDF has the elementary closed form F(t) = 1/2 + t/(2*sqrt(2+t^2)), so F(t) = 3/4 solves to t/(2*sqrt(2+t^2)) = 1/4, i.e. 4t^2 = 2 + t^2 and t = sqrt(2/3) = 0.8164965809277260327324 -- an exact surd, no iteration and no library. The general root find on the cross-checked CDF used by the rest of this family lands on the same digits, and so does scipy.stats.t.ppf(0.75, 2). Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-inv-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV(0.75,2),12)</td>
+  <td>The same example carried to twelve decimals</td>
+  <td class="result mono">0.816496580928</td>
+  <td class="result mono">0.816496580928<br><span class="category-tag">Asserted at twelve places from the exact surd sqrt(2/3): 0.816496580928. Seven published decimals cannot see an iterative inverse that stops one iteration early.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV(0.5,7),12)</td>
+  <td>The median of a symmetric distribution is exactly zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">The t distribution is symmetric about zero, so its 50th percentile is exactly 0 for every degrees of freedom. A structural assertion with no derived constant, and the sharpest single test of an inverse&#39;s centring: an engine whose root finder is biased returns a small non-zero number here.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.DIST(T.INV(0.3,9),9,TRUE),12)</td>
+  <td>The inverse fed back through the distribution must return the probability it started from</td>
+  <td class="result mono">0.3</td>
+  <td class="result mono">0.3<br><span class="category-tag">T.DIST(T.INV(p, v), v, TRUE) = p by definition of an inverse. A structural round trip with no derived constant, run at a probability below one half so it exercises the negative-x branch of both functions. It is the strongest available check that the two are inverses OF EACH OTHER in the same engine, which no single published value can establish.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV(0.95,10),9)</td>
+  <td>A probability where the left-tailed and two-tailed conventions give visibly different answers</td>
+  <td class="result mono">1.812461123</td>
+  <td class="result mono">1.812461123<br><span class="category-tag">T.INV IS LEFT-TAILED AND T.INV.2T IS TWO-TAILED, and this case makes the difference impossible to pass by accident. The left-tailed 95th percentile at 10 degrees of freedom is 1.812461122811676413626, derived by root find on the cross-checked CDF; the two-tailed T.INV.2T(0.95,10) is 0.0642981 and T.INV.2T(0.05,10) is 2.2281389. Microsoft publishes no figure for T.INV(0.95,10) -- the value is ours -- but it is the same number the T.INV.2T and TINV pages MEANT to publish for TINV(2*0.05,10), which is exactly the documented relationship between the two conventions and is why this probability was chosen. Those pages print 1.812462; the correctly rounded value is 1.812461, and the error is recorded in T.INV.2T.json and TINV.json.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=T.INV(0,2)</td>
+  <td>A probability of zero, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, T.INV returns the #NUM! error value.&#34; Note the asymmetry, which is Microsoft&#39;s: zero is excluded and ONE IS NOT, so probability = 1 is not listed as an error even though the left-tailed inverse there is unbounded.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=T.INV(0.75,0)</td>
+  <td>Zero degrees of freedom, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If deg_freedom &lt; 1, T.INV returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

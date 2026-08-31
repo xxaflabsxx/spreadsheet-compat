@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WEIBULL.DIST: documented in Excel, Sheets &amp; LibreOffice</title>
-<meta name="description" content="WEIBULL.DIST (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
-<meta name="robots" content="noindex,follow">
+<title>WEIBULL.DIST matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="5/7 match; x negative returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/weibull.dist.html">
-<meta property="og:title" content="WEIBULL.DIST: documented in Excel, Sheets &amp; LibreOffice">
-<meta property="og:description" content="WEIBULL.DIST (Statistical) is documented in Excel, Google Sheets &amp; LibreOffice — not yet live-tested by a real engine.">
+<meta property="og:title" content="WEIBULL.DIST matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="5/7 match; x negative returns #VALUE!, Excel: #NUM! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/weibull.dist.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>WEIBULL.DIST</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>WEIBULL.DIST</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for WEIBULL.DIST yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,104 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+WEIBULL.DIST&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't WEIBULL.DIST working in LibreOffice?</h2>
+
+<p><code>WEIBULL.DIST</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=WEIBULL.DIST(-1,20,100,TRUE)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The Remarks publish: &#34;If x &lt; 0, WEIBULL.DIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=WEIBULL.DIST(105,0,100,TRUE)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        The Remarks publish: &#34;If alpha &lt;= 0 or if beta &lt;= 0, WEIBULL.DIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +491,74 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for WEIBULL.DIST yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(WEIBULL.DIST(A2,A3,A4,TRUE),6)</td>
+  <td>Microsoft&#39;s first documented row: the cumulative distribution function</td>
+  <td class="result mono">0.929581</td>
+  <td class="result mono">0.929581<br><span class="category-tag">Microsoft publishes =WEIBULL.DIST(A2,A3,A4,TRUE) = 0.929581 (&#34;Weibull cumulative distribution function for the terms above&#34;). DERIVATION from the two closed forms (the page prints them only as images, so they were taken from the standard Weibull definition and checked against the published figures): the cumulative form is 1 - e^(-(x/beta)^alpha) and the density is (alpha/beta^alpha) * x^(alpha-1) * e^(-(x/beta)^alpha). With x = 105, alpha = 20, beta = 100 the driving quantity is (1.05)^20 = 2.653297705144420133945... and everything follows from it, evaluated at 50 digits with mpmath; scipy.stats.weibull_min reproduces the cumulative value to double precision as a second check. The cumulative value is 0.9295813900692767751575, i.e. 0.929581 at the published precision. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/weibull-dist-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(WEIBULL.DIST(A2,A3,A4,FALSE),6)</td>
+  <td>Microsoft&#39;s second documented row: the probability density function</td>
+  <td class="result mono">0.035589</td>
+  <td class="result mono">0.035589<br><span class="category-tag">Microsoft publishes =WEIBULL.DIST(A2,A3,A4,FALSE) = 0.035589. Derived as 0.03558886402450438219872. The cumulative flag is what this case pins down: the two published values differ by a factor of 26, so an engine ignoring FALSE cannot slip through.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(WEIBULL.DIST(A2,A3,A4,TRUE),12)</td>
+  <td>The cumulative example carried to twelve decimals</td>
+  <td class="result mono">0.929581390069</td>
+  <td class="result mono">0.929581390069<br><span class="category-tag">Asserted at twelve places from the derivation: 0.929581390069.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(WEIBULL.DIST(2,1,2,TRUE)-(1-EXP(-1)),15)</td>
+  <td>At alpha = 1 the Weibull is exactly an exponential distribution</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">With alpha = 1 the cumulative form collapses to 1 - e^(-x/beta), and at x = beta = 2 that is exactly 1 - e^-1. A structural assertion with no derived constant, checked against the engine&#39;s own EXP -- it fails for an engine that swapped alpha and beta, since 1 - e^(-(2/1)^2) = 1 - e^-4 is a different number.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEIBULL.DIST(-1,20,100,TRUE)</td>
+  <td>A negative x, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If x &lt; 0, WEIBULL.DIST returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEIBULL.DIST(105,0,100,TRUE)</td>
+  <td>An alpha of zero, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If alpha &lt;= 0 or if beta &lt;= 0, WEIBULL.DIST returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEIBULL.DIST(&#34;abc&#34;,20,100,TRUE)</td>
+  <td>A non-numeric argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The Remarks publish: &#34;If x, alpha, or beta is nonnumeric, WEIBULL.DIST returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

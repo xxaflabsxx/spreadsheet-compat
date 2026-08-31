@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SKEW.P: Excel and Sheets — not in LibreOffice</title>
-<meta name="description" content="SKEW.P (Statistical) is documented for Excel and Google Sheets, not for LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>SKEW.P matches Excel in LibreOffice except error codes (tested)</title>
+<meta name="description" content="5/6 match; zero variance is div zero returns #VALUE!, Excel: #DIV/0! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/skew.p.html">
-<meta property="og:title" content="SKEW.P: Excel and Sheets — not in LibreOffice">
-<meta property="og:description" content="SKEW.P (Statistical) is documented for Excel and Google Sheets, not for LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="SKEW.P matches Excel in LibreOffice except error codes (tested)">
+<meta property="og:description" content="5/6 match; zero variance is div zero returns #VALUE!, Excel: #DIV/0! (code only). Executed in LibreOffice 25.8.7.3; Excel/Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/skew.p.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>SKEW.P</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+
+
+<p class="lede">Real compatibility results for the <strong>SKEW.P</strong> function: executed in LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for SKEW.P yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-quirk">Quirk found</span>
     
   </td>
 </tr>
@@ -390,6 +384,94 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+SKEW.P&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-quirk">Quirk found</span></td>
+  <td>2026-08-31</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't SKEW.P working in LibreOffice?</h2>
+
+<p><code>SKEW.P</code> exists in LibreOffice 25.8.7.3, but it is not a drop-in match for
+Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
+page). If a formula that works in Excel or Google Sheets misbehaves in LibreOffice, compare your usage
+against the failing cases above before assuming your data is wrong.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=SKEW.P(5,5,5,5)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">#DIV/0!</span>.
+        The second half of the same Remark: a standard deviation of zero is a #DIV/0!. Four identical values give a population standard deviation of exactly 0, so the divisor in ((x-mu)/sigma)^3 vanishes.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +481,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for SKEW.P yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(SKEW.P(A2:A11),6)</td>
+  <td>Microsoft&#39;s documented worked example, at the six decimals it publishes</td>
+  <td class="result mono">0.303193</td>
+  <td class="result mono">0.303193<br><span class="category-tag">Microsoft publishes =SKEW.P(A2:A11) = 0.303193 (&#34;Skewness of a distribution based on the population of the data set in A2:A11&#34;). DERIVATION: the population skewness is (1/n) * sum ((x - mu)/sigma_p)^3 where sigma_p is the POPULATION standard deviation (divisor n), which is what the page&#39;s own Remark insists on -- &#34;SKEW.P uses the standard deviation of an entire population, not a sample.&#34; With n = 10, mu = 43/10 = 4.3 and sum (x-mu)^2 = 20.1 (so sigma_p = sqrt(2.01)), evaluated at 50 digits that is 0.3031933393541437334559, i.e. 0.303193 at the published precision. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/skew-p-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SKEW.P(A2:A11),10)</td>
+  <td>The same example carried to ten decimals</td>
+  <td class="result mono">0.3031933394</td>
+  <td class="result mono">0.3031933394<br><span class="category-tag">Asserted at ten places from the derivation: 0.3031933394.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SKEW(A2:A11),6)</td>
+  <td>The sample-skewness sibling on the same data, which must NOT give the same number</td>
+  <td class="result mono">0.359543</td>
+  <td class="result mono">0.359543<br><span class="category-tag">SKEW (sample) and SKEW.P (population) are different estimators, and this case pins the difference down on Microsoft&#39;s own SKEW.P data so that an engine cannot pass by implementing one and aliasing the other. Derived independently: the sample form n/((n-1)(n-2)) * sum ((x-xbar)/s)^3 with the SAMPLE standard deviation s (divisor n-1) gives 0.359543071406797143, i.e. 0.359543 -- larger than the population figure by a factor of 1.1859. The formula under test here is SKEW rather than SKEW.P on purpose: the file&#39;s subject is SKEW.P, and this case is the control that proves the corpus is not reading a SKEW alias.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SKEW.P({1,2,3,4,5}),12)</td>
+  <td>Perfectly symmetric data, whose skewness is exactly zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">A symmetric distribution has zero third central moment, so SKEW.P of 1,2,3,4,5 is exactly 0. A structural assertion with no derived constant, and a sharp one: it fails for an engine using a sample divisor in the wrong place only if that error is asymmetric, but it catches sign errors and any spurious offset immediately.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SKEW.P(1,2)</td>
+  <td>Fewer than three data points, which the page assigns an error code</td>
+  <td class="result mono">#DIV/0!</td>
+  <td class="result mono">#DIV/0!<br><span class="category-tag">The Remarks publish: &#34;If there are fewer than three data points, or the sample standard deviation is zero, SKEW.P returns the #DIV/0! Error value.&#34; (the capitalised &#34;Error&#34; is Microsoft&#39;s, recorded as published).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SKEW.P(5,5,5,5)</td>
+  <td>Constant data, where the documented standard-deviation divisor is zero</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#DIV/0!<br><span class="category-tag">The second half of the same Remark: a standard deviation of zero is a #DIV/0!. Four identical values give a population standard deviation of exactly 0, so the divisor in ((x-mu)/sigma)^3 vanishes.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

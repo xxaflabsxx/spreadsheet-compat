@@ -1,0 +1,58 @@
+{
+  "function": "SUMX2PY2",
+  "cases": [
+    {
+      "id": "SUMX2PY2_documented_range",
+      "formula": "=SUMX2PY2(A3:A9,B3:B9)",
+      "description": "Microsoft's first documented row",
+      "setup_cells": {
+        "A2": "First array",
+        "B2": "Second array",
+        "A3": 2,
+        "B3": 6,
+        "A4": 3,
+        "B4": 5,
+        "A5": 9,
+        "B5": 11,
+        "A6": 1,
+        "B6": 7,
+        "A7": 8,
+        "B7": 5,
+        "A8": 7,
+        "B8": 4,
+        "A9": 5,
+        "B9": 4
+      },
+      "expected": 521,
+      "expected_note": "Microsoft publishes =SUMX2PY2(A3:A9,B3:B9) = 521. DERIVATION in exact integer arithmetic: sum of x^2 = 4+9+81+1+64+49+25 = 233; sum of y^2 = 36+25+121+49+25+16+16 = 288; 233 + 288 = 521. This page's range citation is correct -- its data sits in rows 3-9 and it says A3:A9 -- which is what showed the SUMX2MY2 page's A2:A8 to be a slip over the identical table. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sumx2py2-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SUMX2PY2_documented_array_constants",
+      "formula": "=SUMX2PY2({2,3,9,1,8,7,5},{6,5,11,7,5,4,4})",
+      "description": "Microsoft's second documented row, as array constants",
+      "expected": 521,
+      "expected_note": "Microsoft publishes =SUMX2PY2({2,3,9,1,8,7,5}, {6,5,11,7,5,4,4}) = 521, the same value as the range row -- which is the cross-check that the range row cites the right rows."
+    },
+    {
+      "id": "SUMX2PY2_mismatched_lengths",
+      "formula": "=SUMX2PY2({1,2,3},{1,2})",
+      "description": "Arrays of different lengths, which the page assigns an error code",
+      "expected": "#N/A",
+      "expected_note": "The Remarks publish: \"If array_x and array_y have a different number of values, SUMX2PY2 returns the #N/A error value.\""
+    },
+    {
+      "id": "SUMX2PY2_identity_against_sumsq",
+      "formula": "=SUMX2PY2({2,3,9},{6,5,11})-(SUMSQ(2,3,9)+SUMSQ(6,5,11))",
+      "description": "The definition checked against the engine's own SUMSQ",
+      "expected": 0,
+      "expected_note": "SUMX2PY2(x,y) = SUMSQ(x) + SUMSQ(y) by definition. No constant from us; fails for any engine that differences rather than sums."
+    },
+    {
+      "id": "SUMX2PY2_pythagorean_structural",
+      "formula": "=SUMX2PY2({3},{4})",
+      "description": "A single 3-4-5 pair, where the answer is the square of the hypotenuse",
+      "expected": 25,
+      "expected_note": "3^2 + 4^2 = 25 exactly. A structural assertion with no derived constant, chosen because the answer is recognisable on sight and an off-by-one in the array pairing cannot produce it."
+    }
+  ]
+}

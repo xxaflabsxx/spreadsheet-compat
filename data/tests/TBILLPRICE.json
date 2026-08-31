@@ -1,0 +1,83 @@
+{
+  "function": "TBILLPRICE",
+  "cases": [
+    {
+      "id": "TBILLPRICE_documented_example",
+      "formula": "=ROUND(TBILLPRICE(A2,A3,A4),2)",
+      "description": "Microsoft's documented worked example, at the two decimals it publishes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.09
+      },
+      "expected": 98.45,
+      "expected_note": "Microsoft publishes =TBILLPRICE(A2,A3,A4) = \"$ 98.45\" (the dollar sign and the space are the page's formatting; the assertable figure is 98.45). Settlement 2008-03-31, maturity 2008-06-01, discount 9.0%. DERIVATION: the page prints its formula only as an image (awftbpr.gif) with the textual legend \"DSM = number of days from settlement to maturity\", so the standard discount-bill form was used and checked against the published figure: 100 * (1 - discount*DSM/360) with the ACTUAL day count DSM = 62 gives exactly 98.45 -- 100*(1 - 0.09*62/360) = 100*(1 - 0.0155). The 30/360 count of 61 would give 98.475, so this function independently confirms the day-count finding recorded on TBILLEQ. The answer here is EXACT in decimal, with no rounding at all. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/tbillprice-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "TBILLPRICE_full_precision",
+      "formula": "=ROUND(TBILLPRICE(A2,A3,A4),10)",
+      "description": "The same example at ten decimals, where it is still exact",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.09
+      },
+      "expected": 98.45,
+      "expected_note": "0.09*62/360 = 0.0155 exactly in decimal, so the price is 98.45 with no residue -- and 98.45 is not exactly representable in binary, which is precisely why the ROUND(...,10) wrapper is kept rather than asserting a bare equality."
+    },
+    {
+      "id": "TBILLPRICE_inverts_TBILLYIELD",
+      "formula": "=ROUND(TBILLYIELD(A2,A3,TBILLPRICE(A2,A3,0.09)),10)",
+      "description": "Price fed into yield: a structural round trip across the two functions",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.09
+      },
+      "expected": 0.0914169629,
+      "expected_note": "TBILLPRICE at a 9% discount gives 98.45, and TBILLYIELD of 98.45 over the same dates is the documented 0.0914169629 -- which is Microsoft's OWN TBILLYIELD example, whose data table uses exactly the $98.45 this composition produces. The two published examples are therefore two halves of one round trip, and this case asserts them as such. Derived: (100-98.45)/98.45 * (360/62) = 0.09141696292534281361097."
+    },
+    {
+      "id": "TBILLPRICE_discount_zero",
+      "formula": "=TBILLPRICE(A2,A3,0)",
+      "description": "A discount rate of zero, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.09
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If discount <= 0, TBILLPRICE returns the #NUM! error value.\" Note that the arithmetic would be perfectly well defined at zero (the price would be par, 100), so this is a documented restriction rather than a mathematical one."
+    },
+    {
+      "id": "TBILLPRICE_maturity_more_than_one_year_out",
+      "formula": "=TBILLPRICE(A2,A2+400,A4)",
+      "description": "A maturity more than a year after settlement, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.09
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If settlement > maturity, or if maturity is more than one year after settlement, TBILLPRICE returns the #NUM! error value.\" LIBREOFFICE DOES NOT ENFORCE THIS RULE AT ALL IN TBILLPRICE, AND ITS TWO SIBLINGS DO. Probed on LibreOffice 25.8.7.3 with the same settlement date and maturities 365, 366, 370, 400, 500 and 730 days out, TBILLPRICE returned a price for EVERY one of them (90.975, 90.95, 90.85, 90.1, 87.65 and 81.975) -- a two-year bill priced without complaint -- while TBILLEQ and TBILLYIELD rejected all six. The rejection is itself off-spec: the siblings return #VALUE! where Microsoft documents #NUM!, the corpus-wide pattern already recorded in 160-odd cases. AND TBILLPRICE'S PERMISSIVENESS IS NOT EVEN MONOTONIC: at 364 days it returns #VALUE!, at 365 days and beyond it returns a price, so the one input near the documented boundary that it does reject is the one INSIDE the documented range. The returned price does not follow the documented formula on the actual day count either: 90.1 at a 400-day maturity implies DSM = 396 in 100*(1 - discount*DSM/360), which is neither the actual count (400) nor the US 30/360 count (395). The case asserts the documented #NUM! and records the divergence rather than accommodating it."
+    },
+    {
+      "id": "TBILLPRICE_invalid_date",
+      "formula": "=TBILLPRICE(\"not a date\",A3,A4)",
+      "description": "A non-date settlement argument",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.09
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If settlement or maturity is not a valid date, TBILLPRICE returns the #VALUE! error value.\""
+    }
+  ]
+}

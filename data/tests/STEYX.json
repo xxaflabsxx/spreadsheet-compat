@@ -1,0 +1,94 @@
+{
+  "function": "STEYX",
+  "cases": [
+    {
+      "id": "STEYX_documented_example",
+      "formula": "=ROUND(STEYX(A3:A9,B3:B9),6)",
+      "description": "Microsoft's documented worked example, at the six decimals it publishes",
+      "setup_cells": {
+        "A2": "Known y",
+        "B2": "Known x",
+        "A3": 2,
+        "B3": 6,
+        "A4": 3,
+        "B4": 5,
+        "A5": 9,
+        "B5": 11,
+        "A6": 1,
+        "B6": 7,
+        "A7": 8,
+        "B7": 5,
+        "A8": 7,
+        "B8": 4,
+        "A9": 5,
+        "B9": 4
+      },
+      "expected": 3.305719,
+      "expected_note": "Microsoft publishes =STEYX(A3:A9,B3:B9) = 3.305719 (\"Standard error of the predicted y-value for each x in the regression\"). DERIVATION from the definition the page states in words (its equation is an image): with n = 7, xbar = 42/7 = 6 and ybar = 35/7 = 5, Sxx = sum (x-xbar)^2 = 36, Syy = sum (y-ybar)^2 = 58 and Sxy = sum (x-xbar)(y-ybar) = 11; the standard error of the estimate is sqrt((Syy - Sxy^2/Sxx)/(n-2)) = sqrt((58 - 121/36)/5) = 3.305718950210041340286 at 50 digits, which is 3.305719 at the published precision. Computed from the raw sums of products, NOT by calling a regression routine. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/steyx-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "STEYX_full_precision",
+      "formula": "=ROUND(STEYX(A3:A9,B3:B9),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A2": "Known y",
+        "B2": "Known x",
+        "A3": 2,
+        "B3": 6,
+        "A4": 3,
+        "B4": 5,
+        "A5": 9,
+        "B5": 11,
+        "A6": 1,
+        "B6": 7,
+        "A7": 8,
+        "B7": 5,
+        "A8": 7,
+        "B8": 4,
+        "A9": 5,
+        "B9": 4
+      },
+      "expected": 3.3057189502,
+      "expected_note": "Asserted at ten places from the derivation: 3.3057189502. Six published decimals cannot see an engine that divides by n-1 or n instead of the documented n-2 -- those give 3.0177 and 2.7938 respectively, which differ from the published figure only in the second decimal and would still read as a plausible standard error."
+    },
+    {
+      "id": "STEYX_argument_order_is_y_then_x",
+      "formula": "=ROUND(STEYX(B3:B9,A3:A9),10)",
+      "description": "The arguments swapped, which is a different regression and must give a different number",
+      "setup_cells": {
+        "A2": "Known y",
+        "B2": "Known x",
+        "A3": 2,
+        "B3": 6,
+        "A4": 3,
+        "B4": 5,
+        "A5": 9,
+        "B5": 11,
+        "A6": 1,
+        "B6": 7,
+        "A7": 8,
+        "B7": 5,
+        "A8": 7,
+        "B8": 4,
+        "A9": 5,
+        "B9": 4
+      },
+      "expected": 2.6043729803,
+      "expected_note": "STEYX(known_y's, known_x's) is NOT symmetric: regressing x on y is a different fit from regressing y on x. Swapping gives sqrt((Sxx - Sxy^2/Syy)/(n-2)) = sqrt((36 - 121/58)/5) = 2.604372980333203958 at 50 digits, i.e. 2.6043729803 at ten places, derived the same way as the headline figure. The case exists because an engine that took its arguments in the other order would still return a plausible standard error on the documented example, and only a second, deliberately asymmetric point catches it. MICROSOFT PUBLISHES NO FIGURE FOR THE SWAPPED ORDER -- this value is entirely ours, derived from the definition its page states in words."
+    },
+    {
+      "id": "STEYX_mismatched_lengths",
+      "formula": "=STEYX({1,2,3},{1,2})",
+      "description": "Different numbers of data points, which the page assigns an error code",
+      "expected": "#N/A",
+      "expected_note": "The Remarks publish: \"If known_y's and known_x's have a different number of data points, STEYX returns the #N/A error value.\""
+    },
+    {
+      "id": "STEYX_two_points_is_div_zero",
+      "formula": "=STEYX({1,2},{3,4})",
+      "description": "Fewer than three points, where the documented n-2 denominator vanishes",
+      "expected": "#DIV/0!",
+      "expected_note": "The Remarks publish: \"If known_y's and known_x's are empty or have less than three data points, STEYX returns the #DIV/0! error value.\" With n = 2 the documented denominator n-2 is zero, so the error code and the formula agree."
+    }
+  ]
+}

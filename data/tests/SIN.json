@@ -1,0 +1,40 @@
+{
+  "function": "SIN",
+  "cases": [
+    {
+      "id": "SIN_documented_pi_is_only_approximately_zero",
+      "formula": "=ROUND(SIN(PI()),10)",
+      "description": "Microsoft's first documented row, which publishes 0 but says 'approximately'",
+      "expected": 0,
+      "expected_note": "Microsoft publishes =SIN(PI()) = 0.0 with the description \"Sine of pi radians (0, approximately)\". THE WORD 'approximately' IS LOAD-BEARING AND THE CASE IS WRITTEN AROUND IT: sin(pi) is zero only for the exact pi, and PI() is a binary double, so a correct engine returns sin of a number that is not quite pi -- in IEEE-754 double precision that is 1.2246467991473532e-16, not 0. Asserting a bare = 0 would therefore fail on every conforming engine and would have been published as a divergence that is ours. The formula is ROUND(...,10)-wrapped like the rest of this corpus, which is exactly enough to absorb the 1.2e-16 residue and still fail on anything genuinely wrong. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sin-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SIN_documented_pi_over_two",
+      "formula": "=ROUND(SIN(PI()/2),10)",
+      "description": "Microsoft's second documented row",
+      "expected": 1,
+      "expected_note": "Microsoft publishes =SIN(PI()/2) = 1.0. sin(pi/2) = 1 exactly in real arithmetic, and unlike sin(pi) the value is at a smooth maximum where a small argument error costs only O(eps^2), so a double-precision engine returns exactly 1.0."
+    },
+    {
+      "id": "SIN_documented_thirty_degrees",
+      "formula": "=ROUND(SIN(30*PI()/180),10)",
+      "description": "Microsoft's third documented row: degrees converted by hand",
+      "expected": 0.5,
+      "expected_note": "Microsoft publishes =SIN(30*PI()/180) = 0.5. sin(pi/6) = 1/2 exactly -- a structural assertion with no derived constant."
+    },
+    {
+      "id": "SIN_documented_radians_function",
+      "formula": "=ROUND(SIN(RADIANS(30)),10)",
+      "description": "Microsoft's fourth documented row: the same angle via RADIANS()",
+      "expected": 0.5,
+      "expected_note": "Microsoft publishes =SIN(RADIANS(30)) = 0.5, the same value as the hand-converted row. Kept as a separate case because it asserts that RADIANS() and *PI()/180 agree bit for bit in the engine, which is a different claim from SIN itself being right."
+    },
+    {
+      "id": "SIN_is_odd",
+      "formula": "=ROUND(SIN(1)+SIN(-1),15)",
+      "description": "sine is an odd function, so the two signs must cancel exactly",
+      "expected": 0,
+      "expected_note": "sin is odd, so sin(1) + sin(-1) = 0 exactly. A structural assertion with no derived constant and no published figure behind it. The SIN page publishes no error-condition remarks at all -- only the degrees-to-radians note -- so no error case is asserted for this function."
+    }
+  ]
+}

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>595 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 595 divergences, every one executed — not copied from docs.">
+<title>658 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 658 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="595 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 595 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="658 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 658 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-31) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">595 quirks found across 196 functions
-(376 in LibreOffice, 219 in Google Sheets).
+<p class="search-hint">658 quirks found across 224 functions
+(439 in LibreOffice, 219 in Google Sheets).
 A further 8 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -7600,6 +7600,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/sec.html">SEC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SEC(200000000)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">-1.35887556717362</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>The Remarks publish: &#34;The absolute value of number must be less than 2^27&#34; and &#34;If number is outside its constraints, SEC returns the #NUM! error value.&#34; 2^27 = 134217728, so 200000000 is outside the documented range. LIBREOFFICE DOES NOT ENFORCE THE LIMIT: all four builds returned -1.35887556717362 rather than #NUM!. That is a silent wrong answer rather than a harmless permissiveness, and the limit exists precisely because of it -- at 2e8 radians the argument reduction consumes every bit of a double&#39;s precision, so the secant returned is numerically meaningless. Excel documents the guard; LibreOffice computes through it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got -1.35887556717362</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/sech.html">SECH</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SECH(200000000)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>The Remarks publish the same constraint SEC carries: &#34;The absolute value of number must be less than 2^27&#34; (= 134217728) and &#34;If number is outside its constraints, SECH returns the #NUM! error value.&#34; LIBREOFFICE DOES NOT ENFORCE THE LIMIT: all four builds returned 0 rather than #NUM!. That is a silent wrong answer rather than a harmless permissiveness, and the limit exists precisely because of it -- at 2e8 radians the argument reduction consumes every bit of a double&#39;s precision, so the hyperbolic secant simply underflows to zero. Excel documents the guard; LibreOffice computes through it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/skew.html">SKEW</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=SKEW(A1:A4)</div>
@@ -7610,6 +7636,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents #DIV/0! if the sample standard deviation is zero, since the formula standardizes each deviation by s; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/skew.p.html">SKEW.P</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SKEW.P(5,5,5,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The second half of the same Remark: a standard deviation of zero is a #DIV/0!. Four identical values give a population standard deviation of exactly 0, so the divisor in ((x-mu)/sigma)^3 vanishes.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -7678,6 +7717,45 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/sqrtpi.html">SQRTPI</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SQRTPI(-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>The page&#39;s single Remark publishes: &#34;If number &lt; 0, SQRTPI returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/steyx.html">STEYX</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=STEYX({1,2,3},{1,2})</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If known_y&#39;s and known_x&#39;s have a different number of data points, STEYX returns the #N/A error value.&#34;; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/steyx.html">STEYX</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=STEYX({1,2},{3,4})</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If known_y&#39;s and known_x&#39;s are empty or have less than three data points, STEYX returns the #DIV/0! error value.&#34; With n = 2 the documented denominator n-2 is zero, so the error code and the formula agree.; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/sum.html">SUM</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=SUM(1,&#34;2&#34;,3)</div>
@@ -7691,6 +7769,162 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/sumx2my2.html">SUMX2MY2</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SUMX2MY2({1,2,3},{1,2})</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If array_x and array_y have a different number of values, the SUMX2MY2 function returns the #N/A error value.&#34;; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/sumx2py2.html">SUMX2PY2</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SUMX2PY2({1,2,3},{1,2})</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If array_x and array_y have a different number of values, SUMX2PY2 returns the #N/A error value.&#34;; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/sumxmy2.html">SUMXMY2</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SUMXMY2({1,2,3},{1,2})</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Math and trigonometry</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If array_x and array_y do not have the same number of values, SUMXMY2 returns the #N/A error value.&#34;; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.dist.2t.html">T.DIST.2T</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.DIST.2T(1,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If deg_freedom &lt; 1, T.DIST.2T returns the #NUM! error value.&#34; Unlike the T.DIST page, this one names the code.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.dist.2t.html">T.DIST.2T</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.DIST.2T(-1,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If x &lt; 0, then T.DIST.2T returns the #NUM! error value.&#34; Worth noting that P(|X| &gt; x) is perfectly well defined for negative x (it is 1), so this is a documented RESTRICTION rather than a mathematical necessity -- and its right-tailed sibling T.DIST.RT publishes no such rule, which is why the two files assert different things about negative arguments.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.dist.rt.html">T.DIST.RT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.DIST.RT(1,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If deg_freedom &lt; 1, T.DIST.RT returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.inv.html">T.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.INV(0.75,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If deg_freedom &lt; 1, T.INV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.inv.html">T.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.INV(0,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, T.INV returns the #NUM! error value.&#34; Note the asymmetry, which is Microsoft&#39;s: zero is excluded and ONE IS NOT, so probability = 1 is not listed as an error even though the left-tailed inverse there is unbounded.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.inv.2t.html">T.INV.2T</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.INV.2T(0.5,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If deg_freedom &lt; 1, T.INV.2T returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.inv.2t.html">T.INV.2T</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.INV.2T(0,60)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, T.INV.2T returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.test.html">T.TEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.TEST({1,2,3},{4,5,6},3,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If tails is any value other than 1 or 2, T.TEST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/t.test.html">T.TEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=T.TEST({1,2,3},{1,2},2,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If array1 and array2 have a different number of data points, and type = 1 (paired), T.TEST returns the #N/A error value.&#34; The restriction is specific to the paired type -- types 2 and 3 accept unequal sample sizes -- which is why this case names type 1.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/take.html">TAKE</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=TAKE(A1:C3,2,2)</div>
@@ -7701,6 +7935,149 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>MISMATCH vs expected: value mismatch: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbilleq.html">TBILLEQ</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLEQ(A2,A3,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If discount &lt;= 0, TBILLEQ returns the #NUM! error value.&#34; Zero is inside the excluded range because the rule uses &lt;=.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbilleq.html">TBILLEQ</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLEQ(A3,A2,A4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If settlement &gt; maturity, or if maturity is more than one year after settlement, TBILLEQ returns the #NUM! error value.&#34; Passing A3 as settlement and A2 as maturity reverses them.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbilleq.html">TBILLEQ</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLEQ(A2,A2+400,A4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The second half of the same Remark. 400 days is unambiguously more than one year, chosen well clear of the 365/366 boundary so the case does not turn on how an engine reads &#34;one year&#34;.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbillprice.html">TBILLPRICE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLPRICE(A2,A3,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If discount &lt;= 0, TBILLPRICE returns the #NUM! error value.&#34; Note that the arithmetic would be perfectly well defined at zero (the price would be par, 100), so this is a documented restriction rather than a mathematical one.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbillprice.html">TBILLPRICE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLPRICE(A2,A2+400,A4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">90.1</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If settlement &gt; maturity, or if maturity is more than one year after settlement, TBILLPRICE returns the #NUM! error value.&#34; LIBREOFFICE DOES NOT ENFORCE THIS RULE AT ALL IN TBILLPRICE, AND ITS TWO SIBLINGS DO. Probed on LibreOffice 25.8.7.3 with the same settlement date and maturities 365, 366, 370, 400, 500 and 730 days out, TBILLPRICE returned a price for EVERY one of them (90.975, 90.95, 90.85, 90.1, 87.65 and 81.975) -- a two-year bill priced without complaint -- while TBILLEQ and TBILLYIELD rejected all six. The rejection is itself off-spec: the siblings return #VALUE! where Microsoft documents #NUM!, the corpus-wide pattern already recorded in 160-odd cases. AND TBILLPRICE&#39;S PERMISSIVENESS IS NOT EVEN MONOTONIC: at 364 days it returns #VALUE!, at 365 days and beyond it returns a price, so the one input near the documented boundary that it does reject is the one INSIDE the documented range. The returned price does not follow the documented formula on the actual day count either: 90.1 at a 400-day maturity implies DSM = 396 in 100*(1 - discount*DSM/360), which is neither the actual count (400) nor the US 30/360 count (395). The case asserts the documented #NUM! and records the divergence rather than accommodating it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 90.1</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbillyield.html">TBILLYIELD</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLYIELD(A2,A2+400,A4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The second half of the same Remark.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbillyield.html">TBILLYIELD</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLYIELD(A2,A3,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If pr &lt;= 0, TBILLYIELD returns the #NUM! error value.&#34; The formula divides by pr, so zero would be a division by zero as well as a documented exclusion.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tbillyield.html">TBILLYIELD</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TBILLYIELD(A2,A2,A4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>A DELIBERATE DIFFERENCE BETWEEN THE THREE TBILL PAGES, recorded because it is testable. TBILLYIELD&#39;s Remark publishes &#34;If settlement &gt;= maturity, or if maturity is more than one year after settlement, TBILLYIELD returns the #NUM! error value&#34; -- with a GREATER-THAN-OR-EQUAL -- while TBILLEQ and TBILLPRICE both publish &#34;If settlement &gt; maturity&#34;. Equal dates are therefore documented as an error here and not documented as one on the other two pages; the arithmetic agrees, since DSM = 0 would divide by zero. Only TBILLYIELD&#39;s file asserts this case, because only TBILLYIELD&#39;s page states it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tdist.html">TDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TDIST(1.96,0,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If deg_freedom &lt; 1, TDIST returns the #NUM! error value.&#34; Note this legacy page NAMES the code where its modern sibling T.DIST does not.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tdist.html">TDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TDIST(1.96,60,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If tails is any value other than 1 or 2, TDIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tdist.html">TDIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TDIST(-1,60,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If x &lt; 0, then TDIST returns the #NUM! error value.&#34; The same page ALSO publishes, two bullets later, the identities &#34;TDIST(-x,df,1) = 1 - TDIST(x,df,1) = P(X &gt; -x)&#34; and &#34;TDIST(-x,df,2) = TDIST(x,df,2) = P(|X| &gt; x)&#34; -- i.e. it defines the function at negative arguments in the same breath as forbidding them. Recorded as published; the #NUM! rule is the one asserted, because it is the one stated as a return value.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -7899,6 +8276,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tinv.html">TINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TINV(0.05,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If deg_freedom &lt; 1, TINV returns the #NUM! error value.&#34; A separate documented failure mode is NOT asserted anywhere in this file: &#34;If the search has not converged after 100 iterations, the function returns the #N/A error value&#34; is a property of Microsoft&#39;s particular iterative implementation, not of the function, and no input is known that reliably triggers it.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/tinv.html">TINV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TINV(1.5,60)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, TINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/trim.html">TRIM</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=TRIM(CHAR(160)&amp;&#34;Hello&#34;&amp;CHAR(160))</div>
@@ -7922,6 +8325,123 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft docs: &#34;the TRIM function was designed to trim the 7-bit ASCII space character (value 32) from text&#34; -- it does not generalize to other whitespace. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9; MISMATCH vs expected: expected &#39;\tHello&#39;, got &#39;Hello&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=COUNT(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">0</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>COUNT tallies numeric cells, so it reports 4 whether or not the blanks were trimmed -- but paired with the ROWS case below it pins the shape down. The data block B3:C4 holds exactly four numbers.; MISMATCH vs expected: expected 4, got 0</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SUM(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">10</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>THE PAGE PUBLISHES NO EXAMPLE TABLE AND NO ERROR REMARKS AT ALL -- every value in this file is derived from the prose, and that is said out loud rather than dressed up as a citation. What the page does document: &#34;=TRIMRANGE(range,[trim_rows],[trim_cols])&#34;, with trim_rows and trim_cols each taking 0 = None, 1 = leading, 2 = trailing, 3 = both, and 3 as the default for each. A1:E10 IS DELIBERATELY MOSTLY BLANK: only B3:C4 holds data (1, 2, 3, 4), so trimming both leading and trailing blank rows and columns must reduce A1:E10 to exactly B3:C4, whose sum is 10. SUM is wrapped around the call because TRIMRANGE returns a RANGE rather than a scalar, and a sum is the cheapest assertion that depends on the whole trimmed shape. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/trimrange-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.; MISMATCH vs expected: expected 10, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROWS(TRIMRANGE(A1:E10,1,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">8</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>With trim_rows = 1 (&#34;1 - Trims leading blank rows&#34;) the two blank rows before the data are removed and THE SIX BLANK ROWS AFTER IT ARE DELIBERATELY LEFT, so A1:E10 becomes A3:E10 -- eight rows. Derived from the prose; the page publishes no worked example of any trim code. This case and the trailing one below are what separate the three non-zero codes from each other, which the default case cannot do.; MISMATCH vs expected: expected 8, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SUM(TRIMRANGE(A1:E10,0,0))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">10</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>With trim_rows = 0 and trim_cols = 0 -- both documented as &#34;0 - None&#34; -- nothing is trimmed and the range stays A1:E10, WHICH IS DELIBERATELY FULL OF BLANK CELLS. The sum is still 10 because blanks contribute nothing to SUM, so this case does NOT prove the range was left untrimmed; it proves only that the 0 codes are accepted and do not error. The shape difference between this and the case above is invisible to SUM, which is stated here rather than glossed: a sharper test would need a function sensitive to the range&#39;s dimensions, and ROWS/COLUMNS of a trimmed reference is exactly the sort of thing an engine without TRIMRANGE cannot be asked.; MISMATCH vs expected: expected 10, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROWS(TRIMRANGE(A1:E10,2,2))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>With trim_rows = 2 (&#34;2 - Trims trailing blank rows&#34;) the six blank rows after the data are removed and THE TWO BLANK ROWS BEFORE IT ARE DELIBERATELY LEFT, so A1:E10 becomes A1:E4 -- four rows. The page documents the equivalent Trim Refs operator spellings for these codes in a table that is worth recording as published, typo and all: &#34;Trim All (.:.) | A1.:.E10 | TRIMRANGE(A1:E10,3,3)&#34;, &#34;Trim Trailing (:.) | A1:.E10 | TRIMRANGE(A1:E10,2,2)&#34;, &#34;Trim Leading (.:) | A1.:Z10 | TRIMRANGE(A1:E10,1,1)&#34; -- note the third row&#39;s example says Z10 where its equivalent says E10, which is a slip in Microsoft&#39;s own table.; MISMATCH vs expected: expected 4, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=COLUMNS(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>The column half of the same assertion: five columns A through E trim to the two, B and C, that hold data. Derived from the documented default trim_cols = 3.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/trimrange.html">TRIMRANGE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROWS(TRIMRANGE(A1:E10))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Lookup and reference</dd>
+  </dl>
+  <p>THIS IS THE CASE THAT MAKES THE FILE MEAN SOMETHING. A1:E10 IS TEN ROWS OF MOSTLY BLANK CELLS; trimmed to its data block B3:C4 it is two. ROWS() reads the reference&#39;s shape rather than its values, so an engine that accepted TRIMRANGE but ignored it would return 10 here and pass every other case in this file. Derived from the documented default trim_rows = 3 (&#34;Trims both leading and trailing blank rows&#34;), not from any published example -- there is none.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/ttest.html">TTEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TTEST({1,2,3},{4,5,6},3,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If tails is any value other than 1 or 2, TTEST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/ttest.html">TTEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TTEST({1,2,3},{1,2},2,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The TTEST Remarks publish the same rule as T.TEST: &#34;If array1 and array2 have a different number of data points, and type = 1 (paired), TTEST returns the #N/A error value.&#34;; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -7977,6 +8497,84 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A2,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">TRUE</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A2, 0) = TRUE for A2 = TRUE. Format 0 is documented as &#34;Concise format that is easy to read. The text returned will be the same as the text rendered in a cell that has general formatting applied.&#34; Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/valuetotext-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.; MISMATCH vs expected: expected &#39;TRUE&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A3,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1234.01234</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A3, 0) = 1234.01234. The published Strict row for the same cell is ALSO 1234.01234, because the page documents strict format as encapsulating &#34;returned strings in quotes except for Booleans, Numbers and Errors&#34; -- numbers are one of the three exceptions.; MISMATCH vs expected: expected &#39;1234.01234&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A4,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">Hello</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A4, 0) = Hello, with no quotation marks. This is the concise half of the pair that defines the format argument.; MISMATCH vs expected: expected &#39;Hello&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A4,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If format is anything other than 0 or 1, VALUETOTEXT returns the #VALUE! error value.&#34;; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A6,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">&#34;Seattle&#34;</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A6, 1) = &#34;Seattle&#34;. Asserted alongside the Hello pair so the quoting behaviour rests on two independent strings rather than one.; MISMATCH vs expected: expected &#39;&#34;Seattle&#34;&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/valuetotext.html">VALUETOTEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=VALUETOTEXT(A4,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">&#34;Hello&#34;</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Microsoft publishes =VALUETOTEXT(A4, 1) = &#34;Hello&#34; WITH the quotation marks, against the unquoted Hello from format 0 on the identical cell. THIS PAIR IS THE ONLY THING IN THE PUBLISHED TABLE THAT DISTINGUISHES THE TWO FORMATS: rows A2, A3, A5 and A7 (a Boolean, two numbers and an error) print identically under both formats, so an engine that ignored the format argument entirely would pass four of the six documented rows. The expected value here contains literal double-quote characters as part of the string.; MISMATCH vs expected: expected &#39;&#34;Hello&#34;&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/var.p.html">VAR.P</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ROUND(VAR.P(A1:A3),4)</div>
@@ -8029,6 +8627,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weibull.html">WEIBULL</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=WEIBULL(105,0,100,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If alpha &lt;= 0 or if beta &lt;= 0, WEIBULL returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weibull.html">WEIBULL</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=WEIBULL(-1,20,100,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If x &lt; 0, WEIBULL returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weibull.dist.html">WEIBULL.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=WEIBULL.DIST(105,0,100,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If alpha &lt;= 0 or if beta &lt;= 0, WEIBULL.DIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weibull.dist.html">WEIBULL.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=WEIBULL.DIST(-1,20,100,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If x &lt; 0, WEIBULL.DIST returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/year.html">YEAR</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=YEAR(1)</div>
@@ -8065,6 +8715,175 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Date and time</dd>
   </dl>
   <p>Microsoft docs: &#39;invalid basis values (&lt; 0 or &gt; 4) return a #NUM! error.&#39;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yield.html">YIELD</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELD(A2,A3,A4,A5,A6,A7,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If basis &lt; 0 or if basis &gt; 4, YIELD returns the #NUM! error value.&#34; The basis table runs 0 = US (NASD) 30/360, 1 = Actual/actual, 2 = Actual/360, 3 = Actual/365, 4 = European 30/360.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yield.html">YIELD</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELD(A2,A3,A4,A5,A6,3,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If frequency is any number other than 1, 2, or 4, YIELD returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yield.html">YIELD</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELD(A2,A3,A4,0,A6,A7,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If pr &lt;= 0 or if redemption &lt;= 0, YIELD returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yield.html">YIELD</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELD(A3,A2,A4,A5,A6,A7,A8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If settlement &gt;= maturity, YIELD returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yielddisc.html">YIELDDISC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELDDISC(A2,A3,A4,A5,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If basis &lt; 0 or if basis &gt; 4, YIELDDISC returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yielddisc.html">YIELDDISC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELDDISC(A2,A3,0,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If pr &lt;= 0 or if redemption &lt;= 0, YIELDDISC returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yielddisc.html">YIELDDISC</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELDDISC(A3,A2,A4,A5,A6)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If settlement &gt;= maturity, YIELDDISC returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yieldmat.html">YIELDMAT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELDMAT(A2,A3,A4,A5,A6,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If basis &lt; 0 or if basis &gt; 4, YIELDMAT returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yieldmat.html">YIELDMAT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELDMAT(A2,A3,A4,-0.01,A6,A7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If rate &lt; 0 or if pr &lt;= 0, YIELDMAT returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yieldmat.html">YIELDMAT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELDMAT(A2,A3,A4,A5,0,A7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The second half of the same Remark: pr &lt;= 0 is a #NUM!.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/yieldmat.html">YIELDMAT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=YIELDMAT(A3,A2,A4,A5,A6,A7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If settlement &gt;= maturity, YIELDMAT returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/z.test.html">Z.TEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=Z.TEST(A20:A21,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If array is empty, Z.TEST returns the #N/A error value.&#34; A2:A11 holds the data; A20:A21 IS DELIBERATELY BLANK AND UNPOPULATED, which is the entire content of this case -- see scripts/check_test_setup_refs.py, which accepts a reference to an unset cell only when the case says in its own words that emptiness is the point.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#DIV/0!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/ztest.html">ZTEST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ZTEST(A20:A21,4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#N/A</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>The Remarks publish: &#34;If array is empty, ZTEST returns the #N/A error value.&#34; A20:A21 IS DELIBERATELY BLANK AND UNPOPULATED; emptiness is the whole content of the case.; MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#DIV/0!&#39;</p>
 </li>
 
 </ul>

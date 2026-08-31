@@ -1,0 +1,47 @@
+{
+  "function": "T.DIST",
+  "cases": [
+    {
+      "id": "T.DIST_documented_cumulative",
+      "formula": "=ROUND(T.DIST(60,1,TRUE),8)",
+      "description": "Microsoft's first documented example: the cumulative distribution at 60 with one degree of freedom",
+      "expected": 0.99469533,
+      "expected_note": "Microsoft publishes =T.DIST(60,1,TRUE) = 0.99469533 (\"Student's left-tailed t-distribution for 60, returned as the cumulative distribution function, using 1 degree of freedom\"). DERIVATION -- and this batch derived the whole t family TWICE, along two paths that share no code: (1) the Student t CDF as the regularized incomplete beta 1 - I_{v/(v+x^2)}(v/2, 1/2)/2, and (2) NUMERICAL QUADRATURE of the t density gamma((v+1)/2)/(sqrt(v*pi)*gamma(v/2)) * (1+x^2/v)^(-(v+1)/2), integrated as a TAIL from x to infinity so the heavy tail carries the error rather than the answer. The two agree to 25 significant digits on every point asserted in this batch, and scipy.stats.t reproduces each of them to double precision as a third check. Inverses are ROOT-FOUND on that cross-checked CDF, never taken from a statistics library's own inverse. The value is 0.9946953263673767294563 at 50 digits, i.e. 0.99469533 at the published precision. With v = 1 the t distribution is Cauchy and the CDF has the closed form 1/2 + arctan(x)/pi, which gives the same digits -- a fourth, exact check available only at this one degree of freedom. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-dist-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "T.DIST_documented_density",
+      "formula": "=ROUND(T.DIST(8,3,FALSE),8)",
+      "description": "Microsoft's second documented example: the probability density at 8 with three degrees of freedom",
+      "expected": 0.00073691,
+      "expected_note": "Microsoft publishes =T.DIST(8,3,FALSE) = 0.00073691 (\"...returned as the probability density function, using 3 degrees of freedom\"). Derived from the density formula above at 50 digits: 0.0007369065209469263303782, i.e. 0.00073691 at the published precision. This is the case that pins the cumulative flag down: an engine ignoring FALSE and returning the CDF would give 0.99796, three orders of magnitude away."
+    },
+    {
+      "id": "T.DIST_full_precision_cumulative",
+      "formula": "=ROUND(T.DIST(60,1,TRUE),12)",
+      "description": "The cumulative example carried to twelve decimals",
+      "expected": 0.994695326367,
+      "expected_note": "Asserted at twelve places from the derivation: 0.994695326367. Eight published decimals are not enough to separate a correct heavy-tail integration from an approximation that is good to 1e-9."
+    },
+    {
+      "id": "T.DIST_symmetry_identity",
+      "formula": "=ROUND(T.DIST(1.5,7,TRUE)+T.DIST(-1.5,7,TRUE),12)",
+      "description": "The t distribution is symmetric, so the two tails must sum to exactly one",
+      "expected": 1,
+      "expected_note": "F(x) + F(-x) = 1 for any symmetric distribution. A structural assertion with no derived constant, and a sharp one for the CDF: it fails for an engine whose incomplete-beta branch is wrong on one side of zero, which is exactly the failure mode a single positive-x example cannot see."
+    },
+    {
+      "id": "T.DIST_density_is_even",
+      "formula": "=ROUND(T.DIST(2.5,9,FALSE)-T.DIST(-2.5,9,FALSE),15)",
+      "description": "The density is an even function, so a sign flip must change nothing",
+      "expected": 0,
+      "expected_note": "The t density depends on x only through x^2, so it is exactly even. A structural assertion with no derived constant."
+    },
+    {
+      "id": "T.DIST_deg_freedom_below_one",
+      "formula": "=T.DIST(1,0,TRUE)",
+      "description": "Zero degrees of freedom, which the page excludes but does NOT assign a code to",
+      "expected": null,
+      "expected_note": "DELIBERATELY ASSERTS NOTHING, AND THE REASON IS A GAP IN THE PAGE. The T.DIST Remarks publish \"If deg_freedom < 1, T.DIST returns an error value. Deg_freedom needs to be at least 1\" -- an ERROR VALUE, unnamed. Every sibling page in this family (T.DIST.2T, T.DIST.RT, T.INV, T.INV.2T) names #NUM! for the same condition, so #NUM! is the obvious guess, but it IS a guess and this corpus does not assert guesses about which of Excel's eight error codes appears. The case records what each engine returns without scoring it."
+    }
+  ]
+}

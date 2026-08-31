@@ -1,0 +1,83 @@
+{
+  "function": "TBILLEQ",
+  "cases": [
+    {
+      "id": "TBILLEQ_documented_example",
+      "formula": "=ROUND(TBILLEQ(A2,A3,A4),5)",
+      "description": "Microsoft's documented worked example, at the five decimals its description publishes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.0914
+      },
+      "expected": 0.09415,
+      "expected_note": "Microsoft publishes =TBILLEQ(A2,A3,A4) with the description \"The bond equivalent yield, for the Treasury bill using the terms in A2, A3, and A4 (0.09415, or 9.42%)\" and a Result cell formatted as \"9.42%\"; the assertable figure is 0.09415. Settlement 2008-03-31 (serial 39538), maturity 2008-06-01 (serial 39600), discount 9.14%. A CONTRADICTION IN THE PAGE, SETTLED BY ARITHMETIC. The TBILLEQ page publishes its formula as TEXT -- \"TBILLEQ is calculated as TBILLEQ = (365 x rate)/(360-(rate x DSM)), where DSM is the number of days between settlement and maturity computed according to the 360 days per year basis\" -- but a 360-days-per-year (30/360) count from 2008-03-31 to 2008-06-01 is 61 DAYS, and 61 does not reproduce Microsoft's own published answer. Worked both ways at 50 digits: with the ACTUAL day count of 62, 365*0.0914/(360 - 0.0914*62) = 0.09415149356594301634733, which is the published 0.09415; with the 30/360 count of 61 it is 0.09412721351734614, which would print as 0.09413. The published FIGURE is therefore right and the phrase \"computed according to the 360 days per year basis\" describes the DENOMINATOR (365/360 scaling), not the day count. All three TBILL* functions in this batch were derived on actual days for the same reason, and each reproduces its published figure exactly. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/tbilleq-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "TBILLEQ_full_precision",
+      "formula": "=ROUND(TBILLEQ(A2,A3,A4),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.0914
+      },
+      "expected": 0.0941514936,
+      "expected_note": "Asserted at ten places from the derivation: 0.0941514936. This is the case that decides the day-count question empirically -- the 30/360 reading would give 0.0941272135, which differs in the FIFTH decimal and is invisible at the precision Microsoft prints."
+    },
+    {
+      "id": "TBILLEQ_discount_zero",
+      "formula": "=TBILLEQ(A2,A3,0)",
+      "description": "A discount rate of zero, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.0914
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If discount <= 0, TBILLEQ returns the #NUM! error value.\" Zero is inside the excluded range because the rule uses <=."
+    },
+    {
+      "id": "TBILLEQ_maturity_before_settlement",
+      "formula": "=TBILLEQ(A3,A2,A4)",
+      "description": "The dates reversed, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.0914
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If settlement > maturity, or if maturity is more than one year after settlement, TBILLEQ returns the #NUM! error value.\" Passing A3 as settlement and A2 as maturity reverses them."
+    },
+    {
+      "id": "TBILLEQ_maturity_more_than_one_year_out",
+      "formula": "=TBILLEQ(A2,A2+400,A4)",
+      "description": "A maturity more than a year after settlement, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.0914
+      },
+      "expected": "#NUM!",
+      "expected_note": "The second half of the same Remark. 400 days is unambiguously more than one year, chosen well clear of the 365/366 boundary so the case does not turn on how an engine reads \"one year\"."
+    },
+    {
+      "id": "TBILLEQ_invalid_date",
+      "formula": "=TBILLEQ(\"not a date\",A3,A4)",
+      "description": "A non-date settlement argument",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39538,
+        "A3": 39600,
+        "A4": 0.0914
+      },
+      "expected": "#VALUE!",
+      "expected_note": "The Remarks publish: \"If settlement or maturity is not a valid date, TBILLEQ returns the #VALUE! error value.\""
+    }
+  ]
+}

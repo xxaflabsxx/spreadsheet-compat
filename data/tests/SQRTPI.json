@@ -1,0 +1,47 @@
+{
+  "function": "SQRTPI",
+  "cases": [
+    {
+      "id": "SQRTPI_documented_one",
+      "formula": "=ROUND(SQRTPI(1),6)",
+      "description": "Microsoft's first documented example, at the six decimals it publishes",
+      "expected": 1.772454,
+      "expected_note": "Microsoft publishes =SQRTPI(1) = 1.772454 (\"Square root of pi\"). DERIVATION: sqrt(1*pi) = 1.772453850905516027298 at 50 digits, which is 1.772454 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sqrtpi-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SQRTPI_documented_two",
+      "formula": "=ROUND(SQRTPI(2),6)",
+      "description": "Microsoft's second documented example",
+      "expected": 2.506628,
+      "expected_note": "Microsoft publishes =SQRTPI(2) = 2.506628 (\"Square root of 2 * pi\"). Derived independently as sqrt(2*pi) = 2.506628274631000502416, i.e. 2.506628 at the published precision. This is also the normal distribution's normalising constant, so the digits are checkable against any statistics reference."
+    },
+    {
+      "id": "SQRTPI_full_precision_two",
+      "formula": "=ROUND(SQRTPI(2),10)",
+      "description": "The same example carried to ten decimals",
+      "expected": 2.5066282746,
+      "expected_note": "Asserted at ten places from the derivation: 2.5066282746. Six published decimals cannot see an engine that multiplies before or after taking the root in a way that loses a bit."
+    },
+    {
+      "id": "SQRTPI_zero",
+      "formula": "=SQRTPI(0)",
+      "description": "Zero, which is inside the documented range",
+      "expected": 0,
+      "expected_note": "The only Remark on the page is \"If number < 0, SQRTPI returns the #NUM! error value\", so zero is inside the documented range and sqrt(0*pi) = 0 exactly."
+    },
+    {
+      "id": "SQRTPI_squares_back_to_pi",
+      "formula": "=ROUND(SQRTPI(3)^2/PI(),12)",
+      "description": "A structural round trip: squaring the result and dividing by pi must give back the argument",
+      "expected": 3,
+      "expected_note": "SQRTPI(n)^2 / PI() = n exactly in real arithmetic, for any n. A structural assertion with no derived constant, and it is sharp about the ARGUMENT handling: an engine that computed sqrt(pi)*n, or sqrt(n)+pi, or sqrt(n/pi) would pass none of it."
+    },
+    {
+      "id": "SQRTPI_negative_argument",
+      "formula": "=SQRTPI(-1)",
+      "description": "A negative argument, which the page excludes",
+      "expected": "#NUM!",
+      "expected_note": "The page's single Remark publishes: \"If number < 0, SQRTPI returns the #NUM! error value.\""
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "function": "YIELDDISC",
+  "cases": [
+    {
+      "id": "YIELDDISC_documented_example",
+      "formula": "=ROUND(YIELDDISC(A2,A3,A4,A5,A6),6)",
+      "description": "Microsoft's documented worked example, at the six decimals it publishes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 99.795,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": 0.052823,
+      "expected_note": "Microsoft publishes =YIELDDISC(A2,A3,A4,A5,A6) = 0.052823 (\"The yield, for the bond with the terms above (0.052823 or 5.28%)\"). Settlement 2008-02-16 (serial 39494), maturity 2008-03-01 (serial 39508), price 99.795, redemption 100, basis 2 (Actual/360). DERIVATION -- AND THE PAGE PRINTS NO FORMULA AT ALL: every image in the YIELDDISC article body was enumerated and there are none, so the closed form was taken from the definition of a discounted security's yield, (redemption - pr)/pr * B/DSM, and checked against the published figure. With basis 2 the days-in-year B is 360 and the actual day count from 2008-02-16 to 2008-03-01 is 14, giving 0.205/99.795 * 360/14 = 0.052822571986858774774, i.e. 0.052823 at the published precision. Day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 (Procedure A for US 30/360, Procedure B for actual days, Procedure C for European 30/360, D/E/F for days-in-year) written for this batch and used by no engine; the bond arithmetic is evaluated over exact rational day-count ratios at 50 digits with mpmath. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/yielddisc-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "YIELDDISC_full_precision",
+      "formula": "=ROUND(YIELDDISC(A2,A3,A4,A5,A6),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 99.795,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": 0.052822572,
+      "expected_note": "Asserted at ten places from the derivation: 0.052822572. Six published decimals cannot see a basis mix-up: basis 3 (Actual/365) would give 0.053556, which IS visible, but basis 0 (30/360) counts 15 days rather than 14 and gives 0.049301, which is also visible -- so this case is really about the arithmetic rather than the day count, and it is the ten-place assertion that makes it sharp."
+    },
+    {
+      "id": "YIELDDISC_par_redemption_structural",
+      "formula": "=ROUND(YIELDDISC(A2,A3,50,100,2),10)",
+      "description": "A price of exactly half redemption, where the yield has a closed form with no derived constant",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 99.795,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": 25.7142857143,
+      "expected_note": "At pr = 50 and redemption = 100 the ratio (redemption-pr)/pr is exactly 1, so the yield is exactly B/DSM = 360/14 = 180/7 = 25.714285714285714..., i.e. 25.7142857143 at ten places. A STRUCTURAL ASSERTION WITH NO DERIVED CONSTANT that isolates the day-count factor completely: it reads the engine's B/DSM off directly, and any basis or day-count error changes it visibly (basis 3 would give 365/14 = 26.0714, basis 0 would give 360/15 = 24)."
+    },
+    {
+      "id": "YIELDDISC_settlement_after_maturity",
+      "formula": "=YIELDDISC(A3,A2,A4,A5,A6)",
+      "description": "The dates reversed, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 99.795,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If settlement >= maturity, YIELDDISC returns the #NUM! error value.\""
+    },
+    {
+      "id": "YIELDDISC_price_zero",
+      "formula": "=YIELDDISC(A2,A3,0,A5,A6)",
+      "description": "A price of zero, which the page excludes",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 99.795,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If pr <= 0 or if redemption <= 0, YIELDDISC returns the #NUM! error value.\""
+    },
+    {
+      "id": "YIELDDISC_invalid_basis",
+      "formula": "=YIELDDISC(A2,A3,A4,A5,5)",
+      "description": "A basis of 5, which is outside the documented table",
+      "setup_cells": {
+        "A1": "Data",
+        "A2": 39494,
+        "A3": 39508,
+        "A4": 99.795,
+        "A5": 100,
+        "A6": 2
+      },
+      "expected": "#NUM!",
+      "expected_note": "The Remarks publish: \"If basis < 0 or if basis > 4, YIELDDISC returns the #NUM! error value.\""
+    }
+  ]
+}

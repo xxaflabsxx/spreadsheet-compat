@@ -1,0 +1,86 @@
+{
+  "function": "SKEW.P",
+  "cases": [
+    {
+      "id": "SKEW.P_documented_example",
+      "formula": "=ROUND(SKEW.P(A2:A11),6)",
+      "description": "Microsoft's documented worked example, at the six decimals it publishes",
+      "setup_cells": {
+        "A2": 3,
+        "A3": 4,
+        "A4": 5,
+        "A5": 2,
+        "A6": 3,
+        "A7": 4,
+        "A8": 5,
+        "A9": 6,
+        "A10": 4,
+        "A11": 7,
+        "A1": "Population Data Set"
+      },
+      "expected": 0.303193,
+      "expected_note": "Microsoft publishes =SKEW.P(A2:A11) = 0.303193 (\"Skewness of a distribution based on the population of the data set in A2:A11\"). DERIVATION: the population skewness is (1/n) * sum ((x - mu)/sigma_p)^3 where sigma_p is the POPULATION standard deviation (divisor n), which is what the page's own Remark insists on -- \"SKEW.P uses the standard deviation of an entire population, not a sample.\" With n = 10, mu = 43/10 = 4.3 and sum (x-mu)^2 = 20.1 (so sigma_p = sqrt(2.01)), evaluated at 50 digits that is 0.3031933393541437334559, i.e. 0.303193 at the published precision. Microsoft's page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/skew-p-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/<name>-function-<guid> URL returning Microsoft's 'Sorry, the page you're looking for can't be found' body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/<slug>-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror."
+    },
+    {
+      "id": "SKEW.P_full_precision",
+      "formula": "=ROUND(SKEW.P(A2:A11),10)",
+      "description": "The same example carried to ten decimals",
+      "setup_cells": {
+        "A2": 3,
+        "A3": 4,
+        "A4": 5,
+        "A5": 2,
+        "A6": 3,
+        "A7": 4,
+        "A8": 5,
+        "A9": 6,
+        "A10": 4,
+        "A11": 7,
+        "A1": "Population Data Set"
+      },
+      "expected": 0.3031933394,
+      "expected_note": "Asserted at ten places from the derivation: 0.3031933394."
+    },
+    {
+      "id": "SKEW.P_differs_from_sample_SKEW",
+      "formula": "=ROUND(SKEW(A2:A11),6)",
+      "description": "The sample-skewness sibling on the same data, which must NOT give the same number",
+      "setup_cells": {
+        "A2": 3,
+        "A3": 4,
+        "A4": 5,
+        "A5": 2,
+        "A6": 3,
+        "A7": 4,
+        "A8": 5,
+        "A9": 6,
+        "A10": 4,
+        "A11": 7,
+        "A1": "Population Data Set"
+      },
+      "expected": 0.359543,
+      "expected_note": "SKEW (sample) and SKEW.P (population) are different estimators, and this case pins the difference down on Microsoft's own SKEW.P data so that an engine cannot pass by implementing one and aliasing the other. Derived independently: the sample form n/((n-1)(n-2)) * sum ((x-xbar)/s)^3 with the SAMPLE standard deviation s (divisor n-1) gives 0.359543071406797143, i.e. 0.359543 -- larger than the population figure by a factor of 1.1859. The formula under test here is SKEW rather than SKEW.P on purpose: the file's subject is SKEW.P, and this case is the control that proves the corpus is not reading a SKEW alias."
+    },
+    {
+      "id": "SKEW.P_symmetric_data_is_zero",
+      "formula": "=ROUND(SKEW.P({1,2,3,4,5}),12)",
+      "description": "Perfectly symmetric data, whose skewness is exactly zero",
+      "expected": 0,
+      "expected_note": "A symmetric distribution has zero third central moment, so SKEW.P of 1,2,3,4,5 is exactly 0. A structural assertion with no derived constant, and a sharp one: it fails for an engine using a sample divisor in the wrong place only if that error is asymmetric, but it catches sign errors and any spurious offset immediately."
+    },
+    {
+      "id": "SKEW.P_two_points_is_div_zero",
+      "formula": "=SKEW.P(1,2)",
+      "description": "Fewer than three data points, which the page assigns an error code",
+      "expected": "#DIV/0!",
+      "expected_note": "The Remarks publish: \"If there are fewer than three data points, or the sample standard deviation is zero, SKEW.P returns the #DIV/0! Error value.\" (the capitalised \"Error\" is Microsoft's, recorded as published)."
+    },
+    {
+      "id": "SKEW.P_zero_variance_is_div_zero",
+      "formula": "=SKEW.P(5,5,5,5)",
+      "description": "Constant data, where the documented standard-deviation divisor is zero",
+      "expected": "#DIV/0!",
+      "expected_note": "The second half of the same Remark: a standard deviation of zero is a #DIV/0!. Four identical values give a population standard deviation of exactly 0, so the divisor in ((x-mu)/sigma)^3 vanishes."
+    }
+  ]
+}

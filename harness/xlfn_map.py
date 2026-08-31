@@ -257,6 +257,56 @@ _XLFN_FUNCTIONS = {
     # "All regular expressions for this function ... use the PCRE2 'flavor' of
     # regex".
     "PERCENTOF", "REGEXEXTRACT", "REGEXREPLACE", "REGEXTEST",
+    # Excel 2010 statistical renames, Excel 2013 additions and four Excel 365
+    # functions, from the alphabetical corpus batch G (RTD..ZTEST) -- the batch
+    # that closes the Excel-documented set. Every name below was probed
+    # empirically on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3,
+    # 25.8.7.3) in FIVE spellings -- plain, _xlfn., COM.MICROSOFT.,
+    # ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- before being written down,
+    # and the four builds agreed on every one.
+    #
+    # THE ELEVEN THAT LIBREOFFICE ANSWERS TO ONLY WHEN PREFIXED. Without an
+    # entry here each of these would have been published as unsupported in
+    # LibreOffice, which is false -- the largest single verdict-changing block
+    # this push has added. The bare name is #NAME? on every build while the
+    # _xlfn. form evaluates: _xlfn.SEC(1) = 1.85081571768093, _xlfn.SECH(1) =
+    # 0.648054273663886, _xlfn.SKEW.P(1,2,3,4,10) = 1.13841995766062,
+    # _xlfn.T.DIST(60,1,TRUE) = 0.994695326367377, _xlfn.T.DIST.2T(1.96,60) =
+    # 0.0546449297365292, _xlfn.T.DIST.RT(1.96,60) = 0.0273224648682646,
+    # _xlfn.T.INV(0.75,2) = 0.816496580927726, _xlfn.T.INV.2T(0.546449,60) =
+    # 0.606533075825754, _xlfn.T.TEST(...) = 0.196015784925282,
+    # _xlfn.WEIBULL.DIST(105,20,100,TRUE) = 0.929581390069277 and
+    # _xlfn.Z.TEST(...) = 0.0905741968513638. Their UNDOTTED legacy neighbours
+    # go the other way and correctly take no prefix: SIN, SINH, TAN, TANH,
+    # SQRTPI, SERIESSUM, SEARCHB, STEYX, SUMX2MY2, SUMX2PY2, SUMXMY2, TDIST,
+    # TINV, TTEST, WEIBULL, ZTEST and the whole TBILL*/YIELD* family were all
+    # probed plain and evaluate.
+    "SEC", "SECH", "SKEW.P",
+    "T.DIST", "T.DIST.2T", "T.DIST.RT", "T.INV", "T.INV.2T", "T.TEST",
+    "WEIBULL.DIST", "Z.TEST",
+    # THREE THAT LIBREOFFICE HAS UNDER NO SPELLING AT ALL, recorded for
+    # storage-form correctness only, exactly as COPILOT, DETECTLANGUAGE and the
+    # REGEX* trio above are: all five spellings are #NAME? on all four builds,
+    # so these entries cannot change a verdict. (VALUETOTEXT is in the same
+    # position and was already in the set above.)
+    "STOCKHISTORY", "TRANSLATE", "TRIMRANGE",
+    # WEBSERVICE IS DIFFERENT FROM ALL OF THE ABOVE AND THE DIFFERENCE IS WHY
+    # BATCH G DECLINED TO EXECUTE IT. It is an Excel 2013 web function like its
+    # neighbours ENCODEURL and FILTERXML, so it takes the prefix by the same
+    # post-2007 rule, and there is NO data/tests/WEBSERVICE.json -- this entry
+    # is unused by any test case. The probe is the reason it is recorded here
+    # anyway: on all four builds "=_xlfn.WEBSERVICE(...)" does NOT return
+    # #NAME?. It PARSES AND EVALUATES, returning #N/A for an unreachable host,
+    # while the plain, COM.MICROSOFT., ORG.OPENOFFICE. and
+    # _xlfn.ORG.OPENOFFICE. spellings are all #NAME?. So LibreOffice does
+    # implement WEBSERVICE, under the prefixed spelling, and this module would
+    # be wrong to omit it. What the corpus will not do is turn that #N/A into a
+    # published verdict: WEBSERVICE fetches a URL, its documented behaviour IS
+    # the network round trip, and the #N/A this harness sees describes the
+    # sandbox's DNS rather than the engine -- classify_verdict() would read it
+    # as "quirky", i.e. as a LibreOffice defect, which would be false. See the
+    # batch G commit message and site/audit-page/make_fixtures.py.
+    "WEBSERVICE",
 }
 
 
