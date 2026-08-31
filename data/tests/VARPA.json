@@ -1,0 +1,67 @@
+{
+  "function": "VARPA",
+  "cases": [
+    {
+      "id": "VARPA_documented_population_variance",
+      "formula": "=ROUND(VARPA(A1:A10),2)",
+      "description": "Microsoft's documented breaking-strength example: population variance of ten numeric readings",
+      "setup_cells": {
+        "A1": 1345,
+        "A2": 1301,
+        "A3": 1368,
+        "A4": 1322,
+        "A5": 1310,
+        "A6": 1370,
+        "A7": 1318,
+        "A8": 1350,
+        "A9": 1303,
+        "A10": 1299
+      },
+      "expected": 678.84,
+      "expected_note": "Microsoft publishes this example's result as 678.84 (the same page shows VAR over the same data as 754.27). Independently derived: mean = 13286/10 = 1328.6, sum of squared deviations = 6788.4, divided by n = 10 (population denominator) = 678.84"
+    },
+    {
+      "id": "VARPA_text_counted_as_zero",
+      "formula": "=ROUND(VARPA(A1:A4),4)",
+      "description": "DIVERGENCE PROBE: a text cell is counted as the value 0 and included in n",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": "x"
+      },
+      "expected": 1.25,
+      "expected_note": "Microsoft's VARPA page states 'Arguments that contain text or FALSE evaluate as 0 (zero)' (and, contradictorily, that range text is ignored -- resolved the same way as AVERAGEA's worked example resolves it). Under the counts-as-0 reading data become 1, 2, 3, 0 with mean 1.5; squared deviations 0.25+0.25+2.25+2.25 = 5, divided by n = 4 gives 1.25. An engine using VAR.P semantics on this range would return 0.6667 instead"
+    },
+    {
+      "id": "VARPA_logicals_true_is_one",
+      "formula": "=ROUND(VARPA(A1:A3),4)",
+      "description": "TRUE counts as 1 and FALSE as 0 inside a range",
+      "setup_cells": {
+        "A1": true,
+        "A2": false,
+        "A3": false
+      },
+      "expected": 0.2222,
+      "expected_note": "Microsoft documents 'Arguments that contain TRUE evaluate as 1; arguments that contain text or FALSE evaluate as 0' for VARPA: data 1, 0, 0 with mean 1/3; squared deviations (2/3)^2 + (1/3)^2 + (1/3)^2 = 2/3, divided by n = 3 gives 0.22222... -> 0.2222"
+    },
+    {
+      "id": "VARPA_single_value_is_zero",
+      "formula": "=VARPA(A1:A1)",
+      "description": "Population variance of a single data point is defined (0), unlike sample variance",
+      "setup_cells": {
+        "A1": 42
+      },
+      "expected": 0,
+      "expected_note": "The population denominator is n, not n-1, so one data point gives 0/1 = 0 rather than a division-by-zero error"
+    },
+    {
+      "id": "VARPA_empty_range_div0",
+      "formula": "=VARPA(A1:A3)",
+      "description": "With no data points at all there is nothing to divide by",
+      "setup_cells": {},
+      "expected": "#DIV/0!",
+      "expected_note": "DERIVED, not quoted: Microsoft's VARPA page documents NO error condition at all. Empty cells are documented as ignored, so an all-empty range leaves n = 0 and the population denominator is zero; #DIV/0! is the consistent result"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "function": "T",
+  "cases": [
+    {
+      "id": "T_documented_text_passthrough",
+      "formula": "=T(\"Rainfall\")",
+      "description": "Microsoft's documented example: T returns text arguments unchanged",
+      "expected": "Rainfall",
+      "expected_note": "Verbatim from Microsoft: 'If value is or refers to text, T returns value.' The page's own example returns Rainfall for a cell holding that text"
+    },
+    {
+      "id": "T_documented_number_gives_empty_text",
+      "formula": "=T(19)",
+      "description": "DIVERGENCE PROBE: a number is not text, so T returns empty text rather than the number",
+      "expected": "",
+      "expected_note": "Verbatim from Microsoft: 'If value does not refer to text, T returns \"\" (empty text)', and the page's example for the value 19 says 'Because the second value is a number, empty text is returned'. An engine that coerced the number to a string would return \"19\" instead"
+    },
+    {
+      "id": "T_documented_logical_gives_empty_text",
+      "formula": "=T(TRUE)",
+      "description": "A logical value is also not text, so the result is empty text",
+      "expected": "",
+      "expected_note": "Microsoft's example table covers this case explicitly: 'Because the third value is a logical value, empty text is returned'. There is no TRUE -> \"TRUE\" coercion"
+    },
+    {
+      "id": "T_text_cell_reference",
+      "formula": "=T(A1)",
+      "description": "A reference to a cell holding text returns that text",
+      "setup_cells": {
+        "A1": "hello"
+      },
+      "expected": "hello",
+      "expected_note": "The referenced value is text, so T passes it through unchanged"
+    },
+    {
+      "id": "T_numeric_cell_reference_gives_empty_text",
+      "formula": "=T(A1)",
+      "description": "A reference to a cell holding a number returns empty text",
+      "setup_cells": {
+        "A1": 42
+      },
+      "expected": "",
+      "expected_note": "The referenced value is a number, which is not text, so T returns \"\""
+    },
+    {
+      "id": "T_propagates_error",
+      "formula": "=T(1/0)",
+      "description": "An error value passed to T propagates rather than becoming empty text",
+      "expected": "#DIV/0!",
+      "expected_note": "Error values propagate through T; the argument itself evaluates to #DIV/0! and that error is the result of the whole expression"
+    }
+  ]
+}

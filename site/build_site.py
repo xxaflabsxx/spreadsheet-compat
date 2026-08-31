@@ -774,7 +774,15 @@ def build_function_title_desc(r):
                     f"result{'s' if total != 1 else ''}."
                 )
             elif excel_doc and sheets_doc:
-                title = f"{name} works in Excel, Google Sheets and LibreOffice (LibreOffice-tested)"
+                # Keep this phrasing SHORT. The <title> safety net below caps at
+                # 70 chars, and the longer "works in Excel, Google Sheets and
+                # LibreOffice (LibreOffice-tested)" form overflowed for any
+                # function name of 3+ characters -- the truncator then dropped
+                # the trailing "(LibreOffice-tested)" qualifier and left a bare
+                # "works in Excel, Google Sheets and LibreOffice", which reads as
+                # if all three engines had been executed. Naming what is docs and
+                # what is executed inline keeps it honest at any length.
+                title = f"{name} works in Excel & Sheets (docs), LibreOffice (tested)"
                 desc = (
                     f"All {total} executed test case{'s' if total != 1 else ''} for {name} "
                     f"match Excel's documented result{'s' if total != 1 else ''}."
@@ -828,8 +836,23 @@ def build_function_title_desc(r):
         # Hard safety net for very long function names (e.g.
         # FORECAST.ETS.SEASONALITY) that would otherwise blow past any
         # reasonable <title> length no matter how the sentence is phrased.
-        cut = title[:69].rsplit(" ", 1)[0]
-        title = (cut if len(cut) >= 20 else title[:69]).rstrip(" -—,;:")
+        #
+        # A trailing parenthetical is never dropped: it is the qualifier that
+        # says WHICH engines were actually executed ("(tested)",
+        # "(LibreOffice-tested)", "(executed)"). Truncating it away turns an
+        # honest title into an implied claim that every engine named was run,
+        # so the tag is detached, the sentence trimmed to fit around it, and
+        # the tag re-attached.
+        tag = ""
+        head = title
+        if title.endswith(")") and " (" in title:
+            head, _, tail = title.rpartition(" (")
+            tag = " (" + tail
+        limit = 70 - len(tag)
+        if len(head) > limit:
+            cut = head[: limit - 1].rsplit(" ", 1)[0]
+            head = (cut if len(cut) >= 20 else head[: limit - 1]).rstrip(" -—,;:")
+        title = head + tag
     return title, desc
 
 

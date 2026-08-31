@@ -1,0 +1,47 @@
+{
+  "function": "VDB",
+  "cases": [
+    {
+      "id": "VDB_documented_first_year",
+      "formula": "=ROUND(VDB(2400,300,10,0,1),2)",
+      "description": "Microsoft's documented example: first year's depreciation of a $2,400 asset with a 10-year life",
+      "expected": 480,
+      "expected_note": "Excel documents this example's result as $480.00. Derived from the default double-declining factor of 2: 2400 * 2/10 = 480 for the first full period, which still exceeds the straight-line alternative so no switch occurs"
+    },
+    {
+      "id": "VDB_documented_months_6_to_18",
+      "formula": "=ROUND(VDB(2400,300,120,6,18),2)",
+      "description": "Documented example: depreciation between the 6th and 18th month of a 120-month life",
+      "expected": 396.31,
+      "expected_note": "Excel documents this example's result as $396.31. Independently derived by accumulating the double-declining amount month by month (rate 2/120), summing months 6 through 17 -> 396.30605"
+    },
+    {
+      "id": "VDB_documented_factor_1_5",
+      "formula": "=ROUND(VDB(2400,300,120,6,18,1.5),2)",
+      "description": "Documented example: the same span with an explicit 1.5 declining-balance factor",
+      "expected": 311.81,
+      "expected_note": "Excel documents this example's result as $311.81. Same month-by-month accumulation with rate 1.5/120 -> 311.80894"
+    },
+    {
+      "id": "VDB_documented_partial_period",
+      "formula": "=ROUND(VDB(2400,300,10,0,0.875,1.5),2)",
+      "description": "Documented example: a fractional end_period, where the period's depreciation is prorated",
+      "expected": 315,
+      "expected_note": "Excel documents this example's result as $315.00. The first period's depreciation at factor 1.5 is 2400*1.5/10 = 360, and 0.875 of that period is 360*0.875 = 315 exactly"
+    },
+    {
+      "id": "VDB_no_switch_true_keeps_declining_balance",
+      "formula": "=ROUND(VDB(1000,0,5,3,5,2,TRUE),2)",
+      "description": "DIVERGENCE PROBE: no_switch TRUE suppresses the straight-line crossover in the late periods",
+      "expected": 138.24,
+      "expected_note": "Derived from the documented algorithm. Book values after three double-declining periods (rate 0.4) are 1000 -> 600 -> 360 -> 216. With no_switch TRUE periods 4 and 5 stay on declining balance: 216*0.4 = 86.4 and 129.6*0.4 = 51.84, totalling 138.24. With the default no_switch FALSE the same call switches to straight line and totals 216.00, so this case pins down whether the flag is honoured"
+    },
+    {
+      "id": "VDB_negative_life_num_error",
+      "formula": "=VDB(2400,300,-10,0,1)",
+      "description": "A negative life is outside the documented domain",
+      "expected": "#NUM!",
+      "expected_note": "DERIVED, not quoted: Microsoft's VDB page states 'All arguments except no_switch must be positive numbers' but does not name the error code. #NUM! is Excel's documented error for an out-of-domain argument across the rest of the depreciation family (DB, DDB, SLN, SYD all document #NUM! for a negative life), so #NUM! is what is asserted here"
+    }
+  ]
+}

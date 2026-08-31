@@ -1,0 +1,40 @@
+{
+  "function": "NORM.S.DIST",
+  "cases": [
+    {
+      "id": "NORM.S.DIST_cumulative_documented",
+      "formula": "=ROUND(NORM.S.DIST(1.333333,TRUE),6)",
+      "description": "Microsoft's documented example: standard normal cumulative distribution at z = 1.333333",
+      "expected": 0.908789,
+      "expected_note": "Microsoft publishes this example's result as 0.908788726. Independently verified against the standard normal CDF: Phi(1.333333) = 0.908788726 -> 0.908789 at 6 dp"
+    },
+    {
+      "id": "NORM.S.DIST_density_documented",
+      "formula": "=ROUND(NORM.S.DIST(1.333333,FALSE),6)",
+      "description": "Same z with cumulative FALSE returns the standard normal density",
+      "expected": 0.16401,
+      "expected_note": "Microsoft publishes this example's result as 0.164010148. Independently verified from the standard normal density exp(-z^2/2)/sqrt(2*pi) = 0.164010148 -> 0.164010 at 6 dp"
+    },
+    {
+      "id": "NORM.S.DIST_zero_cumulative",
+      "formula": "=ROUND(NORM.S.DIST(0,TRUE),7)",
+      "description": "The standard normal CDF at zero is one half",
+      "expected": 0.5,
+      "expected_note": "The standard normal is symmetric about 0, so Phi(0) = 0.5 exactly"
+    },
+    {
+      "id": "NORM.S.DIST_symmetry_negative_z",
+      "formula": "=ROUND(NORM.S.DIST(-1.333333,TRUE)+NORM.S.DIST(1.333333,TRUE),7)",
+      "description": "Symmetry check: Phi(-z) + Phi(z) must be exactly 1",
+      "expected": 1,
+      "expected_note": "Phi(-z) = 1 - Phi(z) for the standard normal, so the two cumulative values sum to 1 for any z"
+    },
+    {
+      "id": "NORM.S.DIST_text_argument_error",
+      "formula": "=NORM.S.DIST(\"x\",TRUE)",
+      "description": "A non-numeric z is a value error",
+      "expected": "#VALUE!",
+      "expected_note": "'If z is nonnumeric, NORM.S.DIST returns the #VALUE! error' -- the only error condition documented for this function"
+    }
+  ]
+}

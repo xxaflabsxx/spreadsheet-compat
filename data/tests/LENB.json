@@ -1,0 +1,47 @@
+{
+  "function": "LENB",
+  "cases": [
+    {
+      "id": "LENB_ascii_string",
+      "formula": "=LENB(\"Phoenix, AZ\")",
+      "description": "Microsoft's documented example string: byte length of an 11-character ASCII string",
+      "expected": 11,
+      "expected_note": "Microsoft's LEN/LENB page uses 'Phoenix, AZ' as its worked example and publishes LEN = 11. The DBCS rule (see the LENB_non_ascii_characters case) cannot change the answer here because every character is single-byte under either reading. NOTE: the current live page now states 'The LENB function is deprecated' and has dropped the DBCS explanation entirely"
+    },
+    {
+      "id": "LENB_empty_string",
+      "formula": "=LENB(\"\")",
+      "description": "An empty string has zero bytes",
+      "expected": 0,
+      "expected_note": "No characters means no bytes, under either the DBCS or the non-DBCS rule"
+    },
+    {
+      "id": "LENB_counts_trailing_spaces",
+      "formula": "=LENB(\"  One   \")",
+      "description": "Spaces are characters and are counted, including leading and trailing ones",
+      "expected": 8,
+      "expected_note": "Microsoft documents 'Spaces count as characters' for the text argument of LEN/LENB; the string here is two spaces, three letters and three spaces = 8"
+    },
+    {
+      "id": "LENB_number_argument_coerced",
+      "formula": "=LENB(1234)",
+      "description": "A numeric argument is converted to its text representation before measuring",
+      "expected": 4,
+      "expected_note": "The number 1234 becomes the four-character string \"1234\", so the byte length is 4 in a non-DBCS default language"
+    },
+    {
+      "id": "LENB_non_ascii_characters",
+      "formula": "=LENB(\"\u65e5\u672c\")",
+      "description": "DIVERGENCE PROBE: two CJK characters, where the byte count depends on the DBCS language rule",
+      "expected": 2,
+      "expected_note": "Verbatim from Microsoft's archived LEN/LENB page: 'LENB counts 2 bytes per character only when a DBCS language is set as the default language. Otherwise LENB behaves the same as LEN, counting 1 byte per character', with DBCS listed as Japanese, Chinese (Simplified/Traditional) and Korean. The harness runs under a non-DBCS default locale, so the documented answer is 2 (LEN semantics). An engine that always counts raw UTF-8 or UTF-16 bytes returns 6 or 4 instead -- recording which one each engine does is the point of this case"
+    },
+    {
+      "id": "LENB_propagates_error",
+      "formula": "=LENB(1/0)",
+      "description": "An error argument propagates instead of being measured",
+      "expected": "#DIV/0!",
+      "expected_note": "The argument evaluates to #DIV/0! before LENB sees it, so the error is the result"
+    }
+  ]
+}

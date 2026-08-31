@@ -1,0 +1,40 @@
+{
+  "function": "NORM.INV",
+  "cases": [
+    {
+      "id": "NORM.INV_documented",
+      "formula": "=ROUND(NORM.INV(0.908789,40,1.5),4)",
+      "description": "Microsoft's documented example: the inverse of the cumulative normal, which round-trips NORM.DIST",
+      "expected": 42,
+      "expected_note": "Excel documents this example's result as 42.000002. The probability 0.908789 is the rounded NORM.DIST(42,40,1.5,TRUE) value, so the inverse returns 42.00000201; rounding to 4 dp gives 42"
+    },
+    {
+      "id": "NORM.INV_standard_median",
+      "formula": "=ROUND(NORM.INV(0.5,0,1),7)",
+      "description": "The median of a standard normal is zero",
+      "expected": 0,
+      "expected_note": "Phi(0) = 0.5, so the inverse of 0.5 with mean 0 is exactly the mean, 0"
+    },
+    {
+      "id": "NORM.INV_shifts_with_mean",
+      "formula": "=ROUND(NORM.INV(0.5,100,15),7)",
+      "description": "The 50th percentile of any normal distribution is its mean",
+      "expected": 100,
+      "expected_note": "Symmetry puts the median at the mean regardless of the standard deviation"
+    },
+    {
+      "id": "NORM.INV_probability_zero_num_error",
+      "formula": "=NORM.INV(0,40,1.5)",
+      "description": "Probability 0 lies on the open-interval boundary of the domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if probability <= 0 or probability >= 1 (the normal quantile is unbounded at the endpoints)"
+    },
+    {
+      "id": "NORM.INV_negative_stdev_num_error",
+      "formula": "=NORM.INV(0.5,40,-1)",
+      "description": "A negative standard deviation is outside the domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! when standard_dev <= 0"
+    }
+  ]
+}

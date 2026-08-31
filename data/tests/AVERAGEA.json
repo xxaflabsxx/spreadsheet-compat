@@ -1,0 +1,61 @@
+{
+  "function": "AVERAGEA",
+  "cases": [
+    {
+      "id": "AVERAGEA_documented_text_counts_as_zero",
+      "formula": "=ROUND(AVERAGEA(A1:A5),4)",
+      "description": "Microsoft's documented example: four numbers plus a text cell, where the text is averaged in as 0",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 7,
+        "A3": 9,
+        "A4": 2,
+        "A5": "Not available"
+      },
+      "expected": 5.6,
+      "expected_note": "Microsoft publishes this example's result as 5.6 and explains it as 'The cell with the text \"Not available\" is used in the calculation', i.e. (10+7+9+2+0)/5. The text cell contributes a 0 AND is counted in the divisor, which is exactly how AVERAGEA differs from AVERAGE (AVERAGE would give 28/4 = 7). This worked example is what resolves the same text-vs-ignored contradiction that appears on the MAXA, MINA and VARPA pages"
+    },
+    {
+      "id": "AVERAGEA_logicals_true_one_false_zero",
+      "formula": "=ROUND(AVERAGEA(A1:A3),4)",
+      "description": "DIVERGENCE PROBE: TRUE is counted as 1 and FALSE as 0, both counted in the divisor",
+      "setup_cells": {
+        "A1": 1,
+        "A2": true,
+        "A3": false
+      },
+      "expected": 0.6667,
+      "expected_note": "Excel documents TRUE as 1 and FALSE as 0 for AVERAGEA: (1+1+0)/3 = 0.666666... -> 0.6667 at 4 dp. An engine using AVERAGE semantics (logicals in ranges ignored) would return 1"
+    },
+    {
+      "id": "AVERAGEA_blank_cells_ignored",
+      "formula": "=ROUND(AVERAGEA(A1:A3),4)",
+      "description": "Empty cells are ignored entirely -- not counted as 0 and not counted in the divisor",
+      "setup_cells": {
+        "A1": 10,
+        "A3": 20
+      },
+      "expected": 15,
+      "expected_note": "Microsoft's second worked example on the same page averages a range plus a separate cell and still returns 5.6 because the empty cell is not counted. Empty cells are ignored by AVERAGEA (only text and logicals are coerced), so the answer here is (10+20)/2 = 15, not (10+0+20)/3"
+    },
+    {
+      "id": "AVERAGEA_all_text_range",
+      "formula": "=ROUND(AVERAGEA(A1:A2),4)",
+      "description": "A range containing only text averages the coerced zeros rather than erroring",
+      "setup_cells": {
+        "A1": "x",
+        "A2": "y"
+      },
+      "expected": 0,
+      "expected_note": "Under the documented 'array or reference arguments that contain text evaluate as 0' rule both cells count as 0 and both count in the divisor: (0+0)/2 = 0. Microsoft's page also states explicitly that empty text (\"\") evaluates as 0"
+    },
+    {
+      "id": "AVERAGEA_no_data_points_div0",
+      "formula": "=AVERAGEA(A1:A3)",
+      "description": "A range of only empty cells has no data points at all",
+      "setup_cells": {},
+      "expected": "#DIV/0!",
+      "expected_note": "DERIVED, not quoted: Microsoft's AVERAGEA page documents no error condition. But it does document that empty cells are ignored, so a range of only empty cells leaves no data points and the average's divisor is zero -- #DIV/0! is the only consistent result"
+    }
+  ]
+}

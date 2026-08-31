@@ -1,0 +1,40 @@
+{
+  "function": "NORM.S.INV",
+  "cases": [
+    {
+      "id": "NORM.S.INV_documented",
+      "formula": "=ROUND(NORM.S.INV(0.908789),6)",
+      "description": "Microsoft's documented example: the inverse standard normal at probability 0.908789",
+      "expected": 1.333335,
+      "expected_note": "Excel documents this example's result as 1.3333347. The independently computed quantile is 1.33333467, which rounds to 1.333335 at 6 dp (the input probability is itself a 6-dp rounding of Phi(1.333333), which is why the answer is not exactly 1.333333)"
+    },
+    {
+      "id": "NORM.S.INV_median",
+      "formula": "=ROUND(NORM.S.INV(0.5),7)",
+      "description": "The 50th percentile of the standard normal is zero",
+      "expected": 0,
+      "expected_note": "Phi(0) = 0.5, so the inverse of 0.5 is exactly 0"
+    },
+    {
+      "id": "NORM.S.INV_round_trip",
+      "formula": "=ROUND(NORM.S.INV(NORM.S.DIST(1.5,TRUE)),6)",
+      "description": "NORM.S.INV inverts NORM.S.DIST exactly, so a full round trip returns the original z",
+      "expected": 1.5,
+      "expected_note": "The two functions are documented as inverses of each other; feeding the unrounded CDF value straight back must recover z = 1.5 to well within 6 dp"
+    },
+    {
+      "id": "NORM.S.INV_probability_one_num_error",
+      "formula": "=NORM.S.INV(1)",
+      "description": "Probability 1 is outside the open domain (the quantile is unbounded there)",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if probability <= 0 or probability >= 1"
+    },
+    {
+      "id": "NORM.S.INV_negative_probability_num_error",
+      "formula": "=NORM.S.INV(-0.5)",
+      "description": "A negative probability is outside the domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if probability <= 0 or probability >= 1"
+    }
+  ]
+}

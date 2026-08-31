@@ -1,0 +1,40 @@
+{
+  "function": "PDURATION",
+  "cases": [
+    {
+      "id": "PDURATION_documented_annual",
+      "formula": "=ROUND(PDURATION(0.025,2000,2200),2)",
+      "description": "Microsoft's documented example: periods required for 2,000 to reach 2,200 at 2.5% per period",
+      "expected": 3.86,
+      "expected_note": "Excel documents this example's result as 3.86 periods. Derived from the documented formula (LN(fv) - LN(pv)) / LN(1 + rate) = LN(1.1)/LN(1.025) = 3.85986616"
+    },
+    {
+      "id": "PDURATION_documented_monthly",
+      "formula": "=ROUND(PDURATION(0.025/12,1000,1200),1)",
+      "description": "Documented example: months for 1,000 to reach 1,200 at 2.5% annual interest",
+      "expected": 87.6,
+      "expected_note": "Excel documents this example's result as 87.6 months. Same formula with a monthly rate of 0.025/12 -> LN(1.2)/LN(1+0.0020833) = 87.60547642"
+    },
+    {
+      "id": "PDURATION_doubling_at_100pct",
+      "formula": "=ROUND(PDURATION(1,100,200),7)",
+      "description": "A clean closed-form case: doubling at a 100% rate takes exactly one period",
+      "expected": 1,
+      "expected_note": "LN(200/100)/LN(2) = LN(2)/LN(2) = 1 exactly"
+    },
+    {
+      "id": "PDURATION_zero_rate_num_error",
+      "formula": "=PDURATION(0,2000,2200)",
+      "description": "A rate of zero makes LN(1+rate) zero, so the value never grows",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if rate is less than or equal to 0 (with no growth the target is never reached)"
+    },
+    {
+      "id": "PDURATION_negative_fv_num_error",
+      "formula": "=PDURATION(0.025,2000,-2200)",
+      "description": "A non-positive future value is outside the logarithm's domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if pv or fv is less than or equal to 0, since the formula takes their natural logarithms"
+    }
+  ]
+}

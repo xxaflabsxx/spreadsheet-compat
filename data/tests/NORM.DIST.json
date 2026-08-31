@@ -1,0 +1,40 @@
+{
+  "function": "NORM.DIST",
+  "cases": [
+    {
+      "id": "NORM.DIST_cumulative_documented",
+      "formula": "=ROUND(NORM.DIST(42,40,1.5,TRUE),7)",
+      "description": "Microsoft's documented example: cumulative distribution at x=42 for mean 40, sd 1.5",
+      "expected": 0.9087888,
+      "expected_note": "Excel documents this example's result as 0.9087888. Independently verified against the normal CDF: z = (42-40)/1.5 = 1.33333, Phi(1.33333) = 0.90878878 -> 0.9087888 at 7 dp"
+    },
+    {
+      "id": "NORM.DIST_pdf_documented",
+      "formula": "=ROUND(NORM.DIST(42,40,1.5,FALSE),5)",
+      "description": "Same parameters with cumulative FALSE returns the probability density instead",
+      "expected": 0.10934,
+      "expected_note": "Excel documents this example's result as 0.10934. Independently verified from the density formula exp(-(x-mean)^2/(2*sd^2))/(sd*sqrt(2*pi)) = 0.10934005 -> 0.10934 at 5 dp"
+    },
+    {
+      "id": "NORM.DIST_standard_at_mean",
+      "formula": "=ROUND(NORM.DIST(0,0,1,TRUE),7)",
+      "description": "At the mean the cumulative normal is exactly one half",
+      "expected": 0.5,
+      "expected_note": "The normal distribution is symmetric about its mean, so the CDF at x = mean is 0.5 for any positive standard deviation"
+    },
+    {
+      "id": "NORM.DIST_zero_stdev_num_error",
+      "formula": "=NORM.DIST(42,40,0,TRUE)",
+      "description": "A standard deviation of zero is outside the domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! when standard_dev is less than or equal to 0"
+    },
+    {
+      "id": "NORM.DIST_text_argument_error",
+      "formula": "=NORM.DIST(\"x\",40,1.5,TRUE)",
+      "description": "A non-numeric argument is a value error rather than a numeric-domain error",
+      "expected": "#VALUE!",
+      "expected_note": "Excel documents #VALUE! when x, mean or standard_dev is non-numeric"
+    }
+  ]
+}

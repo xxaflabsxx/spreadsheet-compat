@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>104 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 104 divergences, every one executed — not copied from docs.">
+<title>124 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 124 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="104 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 104 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="124 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 124 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-08-29) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">104 quirks found across 56 functions
-(58 in LibreOffice, 46 in Google Sheets).
+<p class="search-hint">124 quirks found across 70 functions
+(78 in LibreOffice, 46 in Google Sheets).
 A further 4 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -645,6 +645,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dollarde.html">DOLLARDE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DOLLARDE(1.02,-4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents #NUM! if fraction is less than 0; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dollarde.html">DOLLARDE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DOLLARDE(1.02,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Verbatim from Microsoft: &#39;If fraction is greater than or equal to 0 and less than 1, DOLLARDE returns the #DIV/0! error value.&#39; Note the band is 0 &lt;= fraction &lt; 1, which is worded more widely than DOLLARFR&#39;s page (which names only fraction = 0) even though truncation makes the two equivalent in practice; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dollarfr.html">DOLLARFR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DOLLARFR(1.125,-4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents #NUM! if fraction is less than 0; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/dollarfr.html">DOLLARFR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=DOLLARFR(1.125,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Verbatim from Microsoft: &#39;If fraction is 0, DOLLARFR returns the #DIV/0! error value.&#39; The DOLLARDE page words the same condition as the wider band 0 &lt;= fraction &lt; 1; because fraction is truncated first the two are equivalent, but the published wording differs between the pages; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/drop.html">DROP</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=DROP(A1:C3,1,1)</div>
@@ -775,6 +827,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/fvschedule.html">FVSCHEDULE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=FVSCHEDULE(1,A1:A2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">1.09</dd>
+    <dt>Documented / expected</dt><dd class="mono">#VALUE!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Verbatim from Microsoft: &#39;any other value produces the #VALUE! error value for FVSCHEDULE&#39;. Note this is the opposite of most statistical functions, which ignore stray text in a reference, and it differs from an empty cell, which the same sentence documents as a zero rate; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got 1.09</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/hlookup.html">HLOOKUP</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=HLOOKUP(&#34;a&#34;,A1:C2,5,FALSE)</div>
@@ -824,6 +889,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Information</dd>
   </dl>
   <p>ISNUMBER(TRUE) = FALSE; use ISLOGICAL to detect booleans instead.; MISMATCH vs expected: expected False, got True</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/ispmt.html">ISPMT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ISPMT(0.1,1,0,8000000)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NUM!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>DERIVED, not quoted: Microsoft&#39;s ISPMT page documents no error conditions at all. The formula confirmed by both vendors&#39; worked examples divides per by nper, so nper = 0 is a division by zero and #DIV/0! is the consistent result; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#NUM!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -902,6 +980,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/lenb.html">LENB</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=LENB(&#34;日本&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">4</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>Verbatim from Microsoft&#39;s archived LEN/LENB page: &#39;LENB counts 2 bytes per character only when a DBCS language is set as the default language. Otherwise LENB behaves the same as LEN, counting 1 byte per character&#39;, with DBCS listed as Japanese, Chinese (Simplified/Traditional) and Korean. The harness runs under a non-DBCS default locale, so the documented answer is 2 (LEN semantics). An engine that always counts raw UTF-8 or UTF-16 bytes returns 6 or 4 instead -- recording which one each engine does is the point of this case; MISMATCH vs expected: expected 2, got 4</p>
 </li>
 
 <li class="quirk-entry">
@@ -1022,6 +1113,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/mirr.html">MIRR</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=MIRR(A1:A3,0.1,0.12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>With no negative cash flow the denominator NPV of the outflows is zero, and Excel documents that MIRR requires at least one positive and one negative value or it returns #DIV/0!; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/mode.html">MODE</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=MODE(A1:A4)</div>
@@ -1087,6 +1191,71 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/norm.dist.html">NORM.DIST</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=NORM.DIST(42,40,0,TRUE)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents #NUM! when standard_dev is less than or equal to 0; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/norm.inv.html">NORM.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=NORM.INV(0.5,40,-1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents #NUM! when standard_dev &lt;= 0; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/norm.inv.html">NORM.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=NORM.INV(0,40,1.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Compatibility</dd>
+  </dl>
+  <p>Excel documents #NUM! if probability &lt;= 0 or probability &gt;= 1 (the normal quantile is unbounded at the endpoints); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/norm.s.inv.html">NORM.S.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=NORM.S.INV(-0.5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents #NUM! if probability &lt;= 0 or probability &gt;= 1; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/norm.s.inv.html">NORM.S.INV</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=NORM.S.INV(1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents #NUM! if probability &lt;= 0 or probability &gt;= 1; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/numbervalue.html">NUMBERVALUE</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=NUMBERVALUE(&#34;1234.56&#34;,&#34;.&#34;,&#34;,&#34;)</div>
@@ -1149,6 +1318,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Lookup and reference</dd>
   </dl>
   <p>https://support.microsoft.com/en-us/office/offset-function-c8de19ae-dd79-4b9b-a14e-b4d906d11b66 -- &#39;If rows and cols offset reference over the edge of the worksheet, OFFSET returns the #REF! error value.&#39;; MISMATCH vs expected: expected &#39;#REF!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/pduration.html">PDURATION</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=PDURATION(0.025,2000,-2200)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents #NUM! if pv or fv is less than or equal to 0, since the formula takes their natural logarithms; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/pduration.html">PDURATION</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=PDURATION(0,2000,2200)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents #NUM! if rate is less than or equal to 0 (with no growth the target is never reached); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -1243,6 +1438,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/rri.html">RRI</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=RRI(0,10000,11000)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/rri.html">RRI</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=RRI(96,0,11000)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>Excel documents #NUM! if pv is less than or equal to 0; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/scan.html">SCAN</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=SCAN(0,A1:A3,LAMBDA(a,b,a+b))</div>
@@ -1253,6 +1474,19 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Logical</dd>
   </dl>
   <p>MISMATCH vs expected: value mismatch: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/skew.html">SKEW</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=SKEW(A1:A4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#DIV/0!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Excel documents #DIV/0! if the sample standard deviation is zero, since the formula standardizes each deviation by s; MISMATCH vs expected: expected &#39;#DIV/0!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -1617,6 +1851,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;_x0000_&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/var.p.html">VAR.P</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(VAR.P(A1:A3),4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">8.2222</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Statistical</dd>
+  </dl>
+  <p>Microsoft documents logical values in a reference as ignored by VAR.P. Data 4 and 8, mean 6, squared deviations 4+4 = 8, divided by n = 2 gives 4; MISMATCH vs expected: expected 4, got 8.2222</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/vdb.html">VDB</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=VDB(2400,300,-10,0,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#VALUE!</dd>
+    <dt>Documented / expected</dt><dd class="mono">#NUM!</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Financial</dd>
+  </dl>
+  <p>DERIVED, not quoted: Microsoft&#39;s VDB page states &#39;All arguments except no_switch must be positive numbers&#39; but does not name the error code. #NUM! is Excel&#39;s documented error for an out-of-domain argument across the rest of the depreciation family (DB, DDB, SLN, SYD all document #NUM! for a negative life), so #NUM! is what is asserted here; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
 </li>
 
 <li class="quirk-entry">

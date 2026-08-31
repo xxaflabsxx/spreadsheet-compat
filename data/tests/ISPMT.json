@@ -1,0 +1,47 @@
+{
+  "function": "ISPMT",
+  "cases": [
+    {
+      "id": "ISPMT_documented_first_month",
+      "formula": "=ROUND(ISPMT(0.1/12,1,3*12,8000000),4)",
+      "description": "Microsoft's documented example: interest paid in the first month of an 8,000,000 loan at 10% over three years",
+      "expected": -64814.8148,
+      "expected_note": "Microsoft's ISPMT page publishes no formula and no text example (its worked example is an image), and it contradicts itself on indexing: the argument table says per 'must be between 1 and Nper' while Remarks says 'ISPMT counts each period beginning with zero, not with one'. The even-principal formula ISPMT = pv * rate * (per/nper - 1) is confirmed by LibreOffice's own documented example (see the ISPMT_libreoffice_documented_example case) and reproduces Microsoft's own published figure of -64,814.8148 here: 8000000 * (0.1/12) * (1/36 - 1) = -64814.81481. Negative because it is cash paid out"
+    },
+    {
+      "id": "ISPMT_documented_first_year",
+      "formula": "=ROUND(ISPMT(0.1,1,3,8000000),2)",
+      "description": "Documented example: interest paid in the first year of the same loan on an annual schedule",
+      "expected": -533333.33,
+      "expected_note": "Same formula on an annual schedule: 8000000 * 0.1 * (1/3 - 1) = -533333.3333, matching the -533,333.33 figure published for this example"
+    },
+    {
+      "id": "ISPMT_last_period_is_zero",
+      "formula": "=ROUND(ISPMT(0.1,3,3,8000000),7)",
+      "description": "DIVERGENCE PROBE: at per = nper the remaining balance is zero, so the interest is exactly zero",
+      "expected": 0,
+      "expected_note": "The documented formula pv*rate*(per/nper - 1) gives 8000000*0.1*(3/3 - 1) = 0. This is the clearest test of ISPMT's period indexing: an engine that treats per as 0-based, or that uses (1 - per/nper) with the opposite sign convention, will not return 0 here"
+    },
+    {
+      "id": "ISPMT_period_zero_is_full_interest",
+      "formula": "=ROUND(ISPMT(0.1,0,3,8000000),4)",
+      "description": "At per = 0 the whole principal is still outstanding, so the interest is the full period charge",
+      "expected": -800000,
+      "expected_note": "8000000 * 0.1 * (0/3 - 1) = -800000, i.e. one period's interest on the undiminished balance"
+    },
+    {
+      "id": "ISPMT_libreoffice_documented_example",
+      "formula": "=ROUND(ISPMT(0.01,18,24,120000),7)",
+      "description": "Cross-vendor check: LibreOffice's help page publishes a worked example for the same function",
+      "expected": -300,
+      "expected_note": "LibreOffice's Calc help documents ISPMT(Rate; Period; TotalPeriods; Invest) with the worked example =ISPMT(1%;18;24;120000) = -300. That is exactly pv * rate * (per/nper - 1) = 120000 * 0.01 * (18/24 - 1) = -300, so both vendors' documentation agrees on the formula and on the sign convention"
+    },
+    {
+      "id": "ISPMT_zero_nper_div0",
+      "formula": "=ISPMT(0.1,1,0,8000000)",
+      "description": "A zero number of periods divides by zero inside the per/nper term",
+      "expected": "#DIV/0!",
+      "expected_note": "DERIVED, not quoted: Microsoft's ISPMT page documents no error conditions at all. The formula confirmed by both vendors' worked examples divides per by nper, so nper = 0 is a division by zero and #DIV/0! is the consistent result"
+    }
+  ]
+}

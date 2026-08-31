@@ -1,0 +1,47 @@
+{
+  "function": "DOLLARDE",
+  "cases": [
+    {
+      "id": "DOLLARDE_documented_sixteenths",
+      "formula": "=ROUND(DOLLARDE(1.02,16),7)",
+      "description": "Microsoft's documented example: 1 and 2/16 expressed in fractional notation converts to 1.125",
+      "expected": 1.125,
+      "expected_note": "Excel documents this example's result as 1.125. The fractional part .02 is read as 2 sixteenths: 1 + 2/16 = 1.125"
+    },
+    {
+      "id": "DOLLARDE_documented_thirtyseconds",
+      "formula": "=ROUND(DOLLARDE(1.1,32),7)",
+      "description": "Documented example: 1.1 in thirty-seconds notation is 1 and 10/32",
+      "expected": 1.3125,
+      "expected_note": "Excel documents this example's result as 1.3125. The fractional digits are padded to the width of the fraction denominator: .1 means 10 thirty-seconds, so 1 + 10/32 = 1.3125"
+    },
+    {
+      "id": "DOLLARDE_non_integer_fraction_truncated",
+      "formula": "=ROUND(DOLLARDE(1.02,16.9),7)",
+      "description": "DIVERGENCE PROBE: a non-integer fraction is documented as truncated to an integer",
+      "expected": 1.125,
+      "expected_note": "Verbatim from Microsoft: 'If fraction is not an integer, it is truncated.' Truncating 16.9 to 16 reproduces the first documented example exactly, 1.125. An engine that rounded 16.9 to 17, or used it as-is, would return a different value"
+    },
+    {
+      "id": "DOLLARDE_negative_dollar_value",
+      "formula": "=ROUND(DOLLARDE(-1.02,16),7)",
+      "description": "A negative fractional dollar keeps its sign through the conversion",
+      "expected": -1.125,
+      "expected_note": "The magnitude converts the same way as the documented positive example and the sign is preserved: -(1 + 2/16) = -1.125"
+    },
+    {
+      "id": "DOLLARDE_zero_fraction_div0",
+      "formula": "=DOLLARDE(1.02,0)",
+      "description": "A fraction denominator of zero cannot be divided by",
+      "expected": "#DIV/0!",
+      "expected_note": "Verbatim from Microsoft: 'If fraction is greater than or equal to 0 and less than 1, DOLLARDE returns the #DIV/0! error value.' Note the band is 0 <= fraction < 1, which is worded more widely than DOLLARFR's page (which names only fraction = 0) even though truncation makes the two equivalent in practice"
+    },
+    {
+      "id": "DOLLARDE_negative_fraction_num_error",
+      "formula": "=DOLLARDE(1.02,-4)",
+      "description": "A negative fraction denominator is outside the documented domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if fraction is less than 0"
+    }
+  ]
+}

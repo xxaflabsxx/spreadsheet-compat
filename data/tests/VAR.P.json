@@ -1,0 +1,70 @@
+{
+  "function": "VAR.P",
+  "cases": [
+    {
+      "id": "VAR.P_documented_population_variance",
+      "formula": "=ROUND(VAR.P(A1:A10),2)",
+      "description": "Microsoft's documented breaking-strength example: population variance of ten tool readings",
+      "setup_cells": {
+        "A1": 1345,
+        "A2": 1301,
+        "A3": 1368,
+        "A4": 1322,
+        "A5": 1310,
+        "A6": 1370,
+        "A7": 1318,
+        "A8": 1350,
+        "A9": 1303,
+        "A10": 1299
+      },
+      "expected": 678.84,
+      "expected_note": "Microsoft publishes this example's result as 678.84, alongside VAR.S over the same data as 754.27. Independently derived: mean 1328.6, sum of squared deviations 6788.4, divided by n = 10 = 678.84 (VAR.S divides by n-1 and so gives 754.2667)"
+    },
+    {
+      "id": "VAR.P_ignores_text_in_range",
+      "formula": "=ROUND(VAR.P(A1:A4),4)",
+      "description": "DIVERGENCE PROBE: the paired case to VARPA -- VAR.P IGNORES text rather than counting it as 0",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": "x"
+      },
+      "expected": 0.6667,
+      "expected_note": "Microsoft's VAR.P page is unambiguous where VARPA's is not: 'Empty cells, logical values, text, or error values in the array or reference are ignored.' Data are 1, 2, 3 with mean 2; squared deviations 1+0+1 = 2, divided by n = 3 gives 0.66667 -> 0.6667. The identical range under VARPA gives 1.25, so the two cases together pin down the coercion rule"
+    },
+    {
+      "id": "VAR.P_ignores_logicals_in_range",
+      "formula": "=ROUND(VAR.P(A1:A3),4)",
+      "description": "A logical inside a referenced range is ignored, so only the numbers are used",
+      "setup_cells": {
+        "A1": 4,
+        "A2": 8,
+        "A3": true
+      },
+      "expected": 4,
+      "expected_note": "Microsoft documents logical values in a reference as ignored by VAR.P. Data 4 and 8, mean 6, squared deviations 4+4 = 8, divided by n = 2 gives 4"
+    },
+    {
+      "id": "VAR.P_single_value_is_zero",
+      "formula": "=VAR.P(A1:A1)",
+      "description": "One data point has zero population variance",
+      "setup_cells": {
+        "A1": 7
+      },
+      "expected": 0,
+      "expected_note": "Population variance divides by n, so a single point gives 0/1 = 0"
+    },
+    {
+      "id": "VAR.P_no_numeric_values_div0",
+      "formula": "=VAR.P(A1:A2)",
+      "description": "A range holding only text leaves VAR.P with no data points",
+      "setup_cells": {
+        "A1": "a",
+        "A2": "b"
+      },
+      "expected": "#DIV/0!",
+      "expected_note": "DERIVED, not quoted: the VAR.P page documents no error condition. Text in a reference is documented as ignored, so n = 0 and the population denominator is zero -- #DIV/0!"
+    }
+  ]
+}

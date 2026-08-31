@@ -1,0 +1,67 @@
+{
+  "function": "MINA",
+  "cases": [
+    {
+      "id": "MINA_documented_false_is_smallest",
+      "formula": "=MINA(A1:A5)",
+      "description": "Microsoft's documented example: FALSE in the range evaluates to 0, which is the smallest value",
+      "setup_cells": {
+        "A1": false,
+        "A2": 0.2,
+        "A3": 0.5,
+        "A4": 0.4,
+        "A5": 0.8
+      },
+      "expected": 0,
+      "expected_note": "Microsoft's worked example for this exact data returns 0, explained on the page as 'Because a value of FALSE evaluates to 0, it is the smallest'. MIN over the same range would return 0.2, because MIN ignores logicals in a reference"
+    },
+    {
+      "id": "MINA_text_in_range_counts_as_zero",
+      "formula": "=MINA(A1:A3)",
+      "description": "DIVERGENCE PROBE: all-positive numbers plus a text cell -- Excel counts the text as 0, which becomes the minimum",
+      "setup_cells": {
+        "A1": 3,
+        "A2": 5,
+        "A3": "abc"
+      },
+      "expected": 0,
+      "expected_note": "Microsoft's MINA page carries the same self-contradicting pair as MAXA ('text ... evaluate as 0' vs 'text values in the array or reference are ignored'). We assert the text-evaluates-as-0 reading, which AVERAGEA's worked example confirms for the identical wording. Under that reading the answer is 0 (0 < 3); under the 'ignored' reading it would be 3. This case records which reading the engine implements"
+    },
+    {
+      "id": "MINA_true_only_range",
+      "formula": "=MINA(A1:A2)",
+      "description": "A range of logical TRUEs is a range of 1s",
+      "setup_cells": {
+        "A1": true,
+        "A2": true
+      },
+      "expected": 1,
+      "expected_note": "Both cells evaluate to 1, so the minimum is 1"
+    },
+    {
+      "id": "MINA_blank_cells_ignored",
+      "formula": "=MINA(A1:A4)",
+      "description": "Truly empty cells are ignored rather than counted as 0",
+      "setup_cells": {
+        "A1": 4,
+        "A3": 9
+      },
+      "expected": 4,
+      "expected_note": "Excel documents empty cells as ignored by MINA; if blanks counted as 0 the answer would be 0, so this distinguishes blank handling from text handling"
+    },
+    {
+      "id": "MINA_direct_text_argument_counts_as_zero",
+      "formula": "=MINA(\"abc\",5)",
+      "description": "A non-numeric string typed directly as an argument is documented as evaluating to 0, which then wins",
+      "expected": 0,
+      "expected_note": "Verbatim from Microsoft's MINA page: 'Arguments that contain text or FALSE evaluate as 0 (zero)'. Under that rule the literal \"abc\" becomes 0, which is smaller than 5. MIN's page carries the opposite rule, so this case checks the A-variant rule is applied"
+    },
+    {
+      "id": "MINA_error_value_propagates",
+      "formula": "=MINA(NA())",
+      "description": "An error value passed as an argument propagates instead of being coerced",
+      "expected": "#N/A",
+      "expected_note": "Error values are not coerced by MINA; NA() produces #N/A and that error is the result"
+    }
+  ]
+}

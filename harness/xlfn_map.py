@@ -67,7 +67,8 @@ _XLFN_FUNCTIONS = {
     # Excel 2010+ statistical ".INC"/".EQ"/".AVG"/".S"/".P" renames, plus a
     # handful of Excel 2013 additions, needed for the Phase-2 test batch.
     # Source: XlsxWriter's "Working with Formulas" future-function table.
-    "STDEV.S", "STDEV.P", "VAR.S",
+    "STDEV.S", "STDEV.P", "VAR.S", "VAR.P",
+    "NORM.DIST", "NORM.INV", "NORM.S.DIST", "NORM.S.INV",
     "MODE.SNGL", "MODE.MULT",
     "FORECAST.LINEAR", "FORECAST.ETS", "FORECAST.ETS.CONFINT",
     "FORECAST.ETS.SEASONALITY", "FORECAST.ETS.STAT",

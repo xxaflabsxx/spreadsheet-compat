@@ -1,0 +1,75 @@
+{
+  "function": "SKEW",
+  "cases": [
+    {
+      "id": "SKEW_documented_sample",
+      "formula": "=ROUND(SKEW(A1:A10),6)",
+      "description": "Microsoft's documented example: skewness of the ten-value sample 3,4,5,2,3,4,5,6,4,7",
+      "setup_cells": {
+        "A1": 3,
+        "A2": 4,
+        "A3": 5,
+        "A4": 2,
+        "A5": 3,
+        "A6": 4,
+        "A7": 5,
+        "A8": 6,
+        "A9": 4,
+        "A10": 7
+      },
+      "expected": 0.359543,
+      "expected_note": "Excel documents this example's result as 0.359543. Independently derived from the documented formula n/((n-1)(n-2)) * SUM(((x-mean)/s)^3) with n = 10, mean 4.3 and sample standard deviation s = 1.4181 -> 0.35954307"
+    },
+    {
+      "id": "SKEW_symmetric_data_is_zero",
+      "formula": "=ROUND(SKEW(A1:A5),7)",
+      "description": "A perfectly symmetric sample has zero skewness",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3,
+        "A4": 4,
+        "A5": 5
+      },
+      "expected": 0,
+      "expected_note": "The cubed standardized deviations of a symmetric set cancel exactly in pairs, so the sum and therefore the skewness is 0"
+    },
+    {
+      "id": "SKEW_right_tail_is_positive",
+      "formula": "=ROUND(SKEW(A1:A4),4)",
+      "description": "A single large outlier pulls the skewness positive",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 1,
+        "A3": 1,
+        "A4": 9
+      },
+      "expected": 2,
+      "expected_note": "Derived from the documented formula: mean 3, s = 4, standardized deviations -0.5, -0.5, -0.5, 1.5; sum of cubes = 3.0; n/((n-1)(n-2)) = 4/6 = 0.66667; 0.66667*3 = 2 exactly"
+    },
+    {
+      "id": "SKEW_fewer_than_three_points_div0",
+      "formula": "=SKEW(A1:A2)",
+      "description": "The n/((n-1)(n-2)) factor is undefined below three data points",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2
+      },
+      "expected": "#DIV/0!",
+      "expected_note": "Excel documents #DIV/0! if there are fewer than three data points, because (n-2) is zero"
+    },
+    {
+      "id": "SKEW_zero_variance_div0",
+      "formula": "=SKEW(A1:A4)",
+      "description": "Identical values give a zero sample standard deviation, which cannot be divided by",
+      "setup_cells": {
+        "A1": 5,
+        "A2": 5,
+        "A3": 5,
+        "A4": 5
+      },
+      "expected": "#DIV/0!",
+      "expected_note": "Excel documents #DIV/0! if the sample standard deviation is zero, since the formula standardizes each deviation by s"
+    }
+  ]
+}

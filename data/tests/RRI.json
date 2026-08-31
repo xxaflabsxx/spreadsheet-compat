@@ -1,0 +1,40 @@
+{
+  "function": "RRI",
+  "cases": [
+    {
+      "id": "RRI_documented",
+      "formula": "=ROUND(RRI(96,10000,11000),7)",
+      "description": "Microsoft's documented example: the equivalent interest rate for 10,000 growing to 11,000 over 96 months",
+      "expected": 0.0009933,
+      "expected_note": "Excel documents this example's result as 0.0009933 (0.09933% per month). Derived from the documented formula RRI = (fv/pv)^(1/nper) - 1 = 1.1^(1/96) - 1 = 0.00099331"
+    },
+    {
+      "id": "RRI_quadrupling_over_two_periods",
+      "formula": "=ROUND(RRI(2,100,400),7)",
+      "description": "A clean closed-form case: quadrupling in two periods is exactly 100% per period",
+      "expected": 1,
+      "expected_note": "(400/100)^(1/2) - 1 = 2 - 1 = 1 exactly, i.e. a 100% return each period"
+    },
+    {
+      "id": "RRI_loss_gives_negative_rate",
+      "formula": "=ROUND(RRI(4,10000,5000),6)",
+      "description": "A future value below the present value gives a negative equivalent rate",
+      "expected": -0.159104,
+      "expected_note": "(5000/10000)^(1/4) - 1 = 0.5^0.25 - 1 = -0.15910358 -> -0.159104 at 6 dp"
+    },
+    {
+      "id": "RRI_zero_nper_num_error",
+      "formula": "=RRI(0,10000,11000)",
+      "description": "Zero periods makes the exponent 1/nper undefined",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0)"
+    },
+    {
+      "id": "RRI_zero_pv_num_error",
+      "formula": "=RRI(96,0,11000)",
+      "description": "A present value of zero makes the fv/pv ratio undefined",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if pv is less than or equal to 0"
+    }
+  ]
+}

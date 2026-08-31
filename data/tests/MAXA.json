@@ -1,0 +1,75 @@
+{
+  "function": "MAXA",
+  "cases": [
+    {
+      "id": "MAXA_documented_logical_beats_numbers",
+      "formula": "=MAXA(A1:A5)",
+      "description": "Microsoft's documented example: the largest value in a range where TRUE is counted as 1",
+      "setup_cells": {
+        "A1": 0,
+        "A2": 0.2,
+        "A3": 0.5,
+        "A4": 0.4,
+        "A5": true
+      },
+      "expected": 1,
+      "expected_note": "Excel documents MAXA as evaluating a logical TRUE in a range as 1, so the answer is 1 rather than 0.5; MAX over the same range would return 0.5 because MAX ignores logicals in ranges"
+    },
+    {
+      "id": "MAXA_text_in_range_counts_as_zero",
+      "formula": "=MAXA(A1:A3)",
+      "description": "DIVERGENCE PROBE: all-negative numbers plus a text cell -- Excel counts the text as 0, which becomes the maximum",
+      "setup_cells": {
+        "A1": -3,
+        "A2": -5,
+        "A3": "abc"
+      },
+      "expected": 0,
+      "expected_note": "Microsoft's MAXA page carries two remarks that contradict each other for this exact input: 'Arguments that contain text or FALSE evaluate as 0 (zero)' and, one line later, 'Empty cells and text values in the array or reference are ignored'. We assert the text-evaluates-as-0 reading, because AVERAGEA's page carries the identical contradictory pair and settles it with a worked example (28/5 = 5.6) in which range text counts as 0. Under that reading the answer is 0 (0 > -3); under the 'ignored' reading it would be -3. The point of this case is to record which reading each engine actually implements"
+    },
+    {
+      "id": "MAXA_false_in_range_counts_as_zero",
+      "formula": "=MAXA(A1:A3)",
+      "description": "FALSE in a range is evaluated as 0, so it wins over negative numbers",
+      "setup_cells": {
+        "A1": -1,
+        "A2": -2,
+        "A3": false
+      },
+      "expected": 0,
+      "expected_note": "Excel documents logical FALSE as 0 for MAXA; 0 > -1 so the maximum is 0"
+    },
+    {
+      "id": "MAXA_direct_logical_argument",
+      "formula": "=MAXA(TRUE,0.5)",
+      "description": "A logical typed directly as an argument is also coerced (TRUE -> 1)",
+      "expected": 1,
+      "expected_note": "Excel documents that MAXA evaluates TRUE as 1 whether it comes from a range or is typed as an argument"
+    },
+    {
+      "id": "MAXA_blank_cells_ignored",
+      "formula": "=MAXA(A1:A4)",
+      "description": "Truly empty cells are ignored (they are not counted as 0)",
+      "setup_cells": {
+        "A1": -8,
+        "A3": -2
+      },
+      "expected": -2,
+      "expected_note": "Excel documents empty cells in a reference as ignored by MAXA (this remark is not contradicted elsewhere on the page, unlike the text remark), so the maximum is the largest actual number, -2, and NOT 0"
+    },
+    {
+      "id": "MAXA_direct_text_argument_counts_as_zero",
+      "formula": "=MAXA(\"abc\",-5)",
+      "description": "A non-numeric string typed directly as an argument is documented as evaluating to 0, which then wins",
+      "expected": 0,
+      "expected_note": "Verbatim from Microsoft's MAXA page: 'Arguments that contain text or FALSE evaluate as 0 (zero)'. Under that rule the literal \"abc\" becomes 0, which is larger than -5. (MAX's page carries the opposite rule -- text that cannot be translated into numbers causes an error -- so this case checks that an engine applies the A-variant rule and not MAX's)"
+    },
+    {
+      "id": "MAXA_error_value_propagates",
+      "formula": "=MAXA(NA())",
+      "description": "An error value passed as an argument propagates instead of being coerced",
+      "expected": "#N/A",
+      "expected_note": "Error values are not among the things MAXA coerces; NA() produces #N/A and that error is the result of the whole expression"
+    }
+  ]
+}

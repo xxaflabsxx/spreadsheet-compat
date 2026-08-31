@@ -1,0 +1,64 @@
+{
+  "function": "KURT",
+  "cases": [
+    {
+      "id": "KURT_documented_sample",
+      "formula": "=ROUND(KURT(A1:A10),4)",
+      "description": "Microsoft's documented example: kurtosis of the ten-value sample 3,4,5,2,3,4,5,6,4,7",
+      "setup_cells": {
+        "A1": 3,
+        "A2": 4,
+        "A3": 5,
+        "A4": 2,
+        "A5": 3,
+        "A6": 4,
+        "A7": 5,
+        "A8": 6,
+        "A9": 4,
+        "A10": 7
+      },
+      "expected": -0.1518,
+      "expected_note": "Excel documents this example's result as -0.1518. Independently derived from the documented excess-kurtosis formula n(n+1)/((n-1)(n-2)(n-3)) * SUM(((x-mean)/s)^4) - 3(n-1)^2/((n-2)(n-3)) with n = 10, mean 4.3, s = 1.4181 -> -0.15179964"
+    },
+    {
+      "id": "KURT_leptokurtic_outlier_positive",
+      "formula": "=ROUND(KURT(A1:A5),4)",
+      "description": "A heavy single outlier raises kurtosis above zero",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 1,
+        "A3": 1,
+        "A4": 1,
+        "A5": 9
+      },
+      "expected": 5,
+      "expected_note": "Derived from the documented formula: mean 2.6, s = 3.5777; standardized deviations are four copies of -0.44721 and one of 1.78885; sum of 4th powers = 10.4; n(n+1)/((n-1)(n-2)(n-3)) = 30/24 = 1.25; 1.25*10.4 = 13; minus 3(n-1)^2/((n-2)(n-3)) = 48/6 = 8; 13-8 = 5"
+    },
+    {
+      "id": "KURT_fewer_than_four_points_div0",
+      "formula": "=KURT(A1:A3)",
+      "description": "The (n-3) factor is undefined below four data points",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 3
+      },
+      "expected": "#DIV/0!",
+      "expected_note": "Excel documents #DIV/0! if there are fewer than four data points, because (n-3) is zero"
+    },
+    {
+      "id": "KURT_zero_variance_div0",
+      "formula": "=KURT(A1:A5)",
+      "description": "Identical values give a zero sample standard deviation",
+      "setup_cells": {
+        "A1": 2,
+        "A2": 2,
+        "A3": 2,
+        "A4": 2,
+        "A5": 2
+      },
+      "expected": "#DIV/0!",
+      "expected_note": "Excel documents #DIV/0! if the sample standard deviation of the data is zero"
+    }
+  ]
+}

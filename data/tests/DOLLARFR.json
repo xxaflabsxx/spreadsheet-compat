@@ -1,0 +1,47 @@
+{
+  "function": "DOLLARFR",
+  "cases": [
+    {
+      "id": "DOLLARFR_documented_sixteenths",
+      "formula": "=ROUND(DOLLARFR(1.125,16),7)",
+      "description": "Microsoft's documented example: 1.125 decimal converts to 1.02, read as 1 and 2/16",
+      "expected": 1.02,
+      "expected_note": "Excel documents this example's result as 1.02. 0.125 * 16 = 2 sixteenths, written in the fractional notation as .02"
+    },
+    {
+      "id": "DOLLARFR_documented_thirtyseconds",
+      "formula": "=ROUND(DOLLARFR(1.125,32),7)",
+      "description": "Documented example: the same decimal in thirty-seconds is 1.04, read as 1 and 4/32",
+      "expected": 1.04,
+      "expected_note": "Excel documents this example's result as 1.04. 0.125 * 32 = 4 thirty-seconds, written as .04"
+    },
+    {
+      "id": "DOLLARFR_round_trips_dollarde",
+      "formula": "=ROUND(DOLLARFR(DOLLARDE(1.02,16),16),7)",
+      "description": "DOLLARFR is documented as the inverse of DOLLARDE, so a round trip returns the original notation",
+      "expected": 1.02,
+      "expected_note": "DOLLARDE(1.02,16) = 1.125 and DOLLARFR(1.125,16) = 1.02, so the composition is the identity on this value"
+    },
+    {
+      "id": "DOLLARFR_non_integer_fraction_truncated",
+      "formula": "=ROUND(DOLLARFR(1.125,16.9),7)",
+      "description": "DIVERGENCE PROBE: a non-integer fraction is documented as truncated to an integer",
+      "expected": 1.02,
+      "expected_note": "Verbatim from Microsoft: 'If fraction is not an integer, it is truncated.' 16.9 truncates to 16, so the answer must match the first documented example, 1.02"
+    },
+    {
+      "id": "DOLLARFR_zero_fraction_div0",
+      "formula": "=DOLLARFR(1.125,0)",
+      "description": "A fraction denominator of zero is a division by zero",
+      "expected": "#DIV/0!",
+      "expected_note": "Verbatim from Microsoft: 'If fraction is 0, DOLLARFR returns the #DIV/0! error value.' The DOLLARDE page words the same condition as the wider band 0 <= fraction < 1; because fraction is truncated first the two are equivalent, but the published wording differs between the pages"
+    },
+    {
+      "id": "DOLLARFR_negative_fraction_num_error",
+      "formula": "=DOLLARFR(1.125,-4)",
+      "description": "A negative fraction denominator is outside the documented domain",
+      "expected": "#NUM!",
+      "expected_note": "Excel documents #NUM! if fraction is less than 0"
+    }
+  ]
+}
