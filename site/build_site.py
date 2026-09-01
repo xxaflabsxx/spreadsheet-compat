@@ -442,20 +442,6 @@ EXCEL_WEB_CASE_SKIP_REASONS = {
         "about the link, not about the function. The value is published as it came back and "
         "no verdict is drawn from it."
     ),
-    "corpus_case_suspect": (
-        "<strong>This case&rsquo;s expected value is under review and no engine is judged "
-        "on it.</strong> The formula passes <code>&quot;none&quot;</code> as the THIRD "
-        "argument, but the third argument of <code>TEXTBEFORE</code>/<code>TEXTAFTER</code> "
-        "is <code>instance_num</code>, not <code>if_not_found</code> &mdash; "
-        "<code>if_not_found</code> is the sixth. The corpus&rsquo;s own neighbouring case "
-        "<code>=TEXTBEFORE(&quot;a-b-c&quot;,&quot;-&quot;,2)</code> expects "
-        "<code>a-b</code> and is matched by every engine, which settles the argument order "
-        "from inside our own data. Text where a number is required is a "
-        "<code>#VALUE!</code>, and that is exactly what LibreOffice and Excel for the web "
-        "both return, so the divergence is in the authored expectation rather than in "
-        "either engine. Flagged for re-derivation from Microsoft&rsquo;s documentation; "
-        "until then the executed values are shown and no verdict rests on them."
-    ),
 }
 
 # --------------------------------------------------------------------------
@@ -467,10 +453,14 @@ EXCEL_WEB_CASE_SKIP_REASONS = {
 # engine wearing a quirk for the same case would be picking which result to
 # believe. Suppressing a case here therefore corrects LibreOffice's published
 # verdict too, and that is the point.
-CORPUS_SUSPECT_CASES = {
-    "TEXTBEFORE_not_found_custom": "corpus_case_suspect",
-    "TEXTAFTER_not_found_custom": "corpus_case_suspect",
-}
+#
+# Currently EMPTY. The two TEXTBEFORE/TEXTAFTER "if_not_found" cases that were
+# parked here (2026-09-01) have been RE-DERIVED from Microsoft's signature --
+# the third argument is instance_num, so text there is a #VALUE!, which Excel
+# for the web and LibreOffice 25.8 both return. The authored expected is now
+# corrected to #VALUE! (data/tests + results), so the cases are judged normally
+# and this suppression is no longer needed. The machinery stays for future use.
+CORPUS_SUSPECT_CASES = {}
 
 VERDICT_LABELS = {
     "supported": "Supported, behaves as documented",

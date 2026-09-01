@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TEXTBEFORE is not supported in Google Sheets (#NAME?, executed)</title>
-<meta name="description" content="#NAME? in Google Sheets for all 4 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
+<meta name="description" content="#NAME? in Google Sheets for all 5 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/textbefore.html">
 <meta property="og:title" content="TEXTBEFORE is not supported in Google Sheets (#NAME?, executed)">
-<meta property="og:description" content="#NAME? in Google Sheets for all 4 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
+<meta property="og:description" content="#NAME? in Google Sheets for all 5 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/textbefore.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -468,11 +468,6 @@ Sheets equivalent &mdash; see the
 
 
 
-<div class="not-live-tested">
-  <strong>One test case is under review and carries no verdict in any engine.</strong>
-  <strong>This case&rsquo;s expected value is under review and no engine is judged on it.</strong> The formula passes <code>&quot;none&quot;</code> as the THIRD argument, but the third argument of <code>TEXTBEFORE</code>/<code>TEXTAFTER</code> is <code>instance_num</code>, not <code>if_not_found</code> &mdash; <code>if_not_found</code> is the sixth. The corpus&rsquo;s own neighbouring case <code>=TEXTBEFORE(&quot;a-b-c&quot;,&quot;-&quot;,2)</code> expects <code>a-b</code> and is matched by every engine, which settles the argument order from inside our own data. Text where a number is required is a <code>#VALUE!</code>, and that is exactly what LibreOffice and Excel for the web both return, so the divergence is in the authored expectation rather than in either engine. Flagged for re-derivation from Microsoft&rsquo;s documentation; until then the executed values are shown and no verdict rests on them.
-</div>
-
 
 
 <div class="quirk-box">
@@ -524,6 +519,14 @@ Sheets equivalent &mdash; see the
       </li>
       
     
+      
+      <li>
+        <span class="formula">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;,&#34;none&#34;)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">#VALUE!</span>.
+        Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;
+      </li>
       
     
       
@@ -594,10 +597,10 @@ Sheets equivalent &mdash; see the
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;,&#34;none&#34;)</td>
-  <td>Delimiter not present with if_not_found supplied</td>
+  <td>Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">none</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
@@ -648,10 +651,10 @@ Sheets equivalent &mdash; see the
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;,&#34;none&#34;)</td>
-  <td>Delimiter not present with if_not_found supplied</td>
+  <td>Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
   <td class="result mono">#NAME?</td>
-  <td class="result mono">none</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
@@ -702,10 +705,10 @@ Sheets equivalent &mdash; see the
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;,&#34;none&#34;)</td>
-  <td>Delimiter not present with if_not_found supplied</td>
+  <td>Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">none</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
