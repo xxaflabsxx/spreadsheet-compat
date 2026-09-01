@@ -337,7 +337,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <tr><td><strong>Fixed-position slicing (chars 3-6)</strong></td><td>Wrong tool</td><td>Exactly what MID is for</td></tr>
 
-<tr><td><strong>Availability</strong></td><td>Excel 365, Sheets, LibreOffice 25.8+ (with executed QUIRKS — see their pages)</td><td>Universal, verified everywhere</td></tr>
+<tr><td><strong>Availability</strong></td><td>Excel 365 (documented) &amp; Excel for the web (executed); LibreOffice 25.8+ (executed, with quirk flags — see their pages). NOT in Google Sheets (executed: #NAME?)</td><td>Universal, verified everywhere</td></tr>
 
 </tbody>
 </table>
@@ -348,12 +348,12 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <li><strong>TEXTBEFORE/TEXTAFTER</strong> &mdash; Delimiter-based extraction on modern versions — clearer intent, saner edge cases, and chainable: TEXTBEFORE(TEXTAFTER(A2,&#34;(&#34;),&#34;)&#34;) reads like the task.</li>
 
-<li><strong>LEFT/MID/RIGHT</strong> &mdash; Position-based slicing (fixed-width codes), or any file that must open in older Excel/LibreOffice 24.2 — the classic patterns run everywhere and always will.</li>
+<li><strong>LEFT/MID/RIGHT</strong> &mdash; Position-based slicing (fixed-width codes), or any file that must open in Google Sheets or older Excel/LibreOffice 24.2 — the classic patterns run everywhere and always will.</li>
 
 </ul>
 
 <h2 class="section-title">Compatibility (Sheets &amp; LibreOffice executed; Excel per docs)</h2>
-<p>LEFT/MID/RIGHT/FIND execute identically in every LibreOffice version we test; Google Sheets matches in our executed run; Excel behavior matches per Microsoft&#39;s documentation, which we do not execute. TEXTBEFORE/TEXTAFTER first appear in LibreOffice 25.8 (executed: #NAME? in 24.2, 24.8 and 25.2) and carry verified quirk flags there — our executed cases found edge-case behavior differences vs Excel (see each function&#39;s page for the failing case), so test delimiter-missing paths when a sheet must round-trip.</p>
+<p>LEFT/MID/RIGHT/FIND execute identically in every LibreOffice version we test; Google Sheets matches in our executed run; Excel behavior matches per Microsoft&#39;s documentation, which we do not execute. TEXTBEFORE/TEXTAFTER first appear in LibreOffice 25.8 (executed: #NAME? in 24.2, 24.8 and 25.2) and are executed in Excel for the web; they are absent from Google Sheets (executed: #NAME? on 2026-08-29 — use REGEXEXTRACT, or MID+FIND, there). Where the modern functions do run they carry verified quirk flags — our executed cases found edge-case behavior differences vs Excel (see each function&#39;s page for the failing case), so test delimiter-missing paths when a sheet must round-trip.</p>
 
 <h2 class="section-title">Example formulas</h2>
 <div class="table-scroll">
