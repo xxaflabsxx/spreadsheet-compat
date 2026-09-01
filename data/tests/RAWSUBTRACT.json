@@ -1,0 +1,37 @@
+{
+  "function": "RAWSUBTRACT",
+  "cases": [
+    {
+      "id": "RAWSUBTRACT_published_example_recomputed",
+      "formula": "=ROUND(RAWSUBTRACT(0.987654321098765,0.9876543210987)*1E14,10)",
+      "description": "The page's own published example, asserting the value its own inputs produce",
+      "setup_cells": {},
+      "expected": 6.5059069243,
+      "expected_note": "LIBREOFFICE-PUBLISHED RESULT CORRECTED -- THE HELP PAGE'S ONLY NUMERIC EXAMPLE IS WRONG. The page prints: \"=RAWSUBTRACT(0.987654321098765, 0.9876543210987) returns 6.53921361504217E-14\". That figure does not belong to those inputs. RAWSUBTRACT's whole purpose, in the page's own words, is to subtract \"without eliminating small roundoff errors\", so its result is exactly the IEEE-754 double-precision difference of the two arguments, and that difference is determined entirely by the two literals -- there is nothing left for an implementation to choose. Derived independently by taking the exact decimal value of each argument as stored in a binary64 double (0.98765432109876505339940422345534898340702056884765625 and 0.98765432109869999433016118928208015859127044677734375) and subtracting them exactly: 6.50590692430341732688248157501220703125E-14. The published figure differs in the THIRD significant digit (6.539 vs 6.506), far too large to be a rounding or display artefact of the same computation, so it is a stale or mistyped constant rather than a variant of the right answer. The correct value is asserted here and the discrepancy recorded rather than buried, following this corpus's existing treatment of wrong published figures. Asserted after scaling by 1E14, because the result is of order 1E-14 and a bare ROUND() to any ordinary number of places would collapse it to zero and assert nothing at all. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's RAWSUBTRACT help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_rawsubtract.html."
+    },
+    {
+      "id": "RAWSUBTRACT_keeps_the_roundoff_that_minus_discards",
+      "formula": "=ROUND(RAWSUBTRACT(0.3,0.1,0.1,0.1)*1E17,10)",
+      "description": "The residue RAWSUBTRACT is documented to keep",
+      "setup_cells": {},
+      "expected": -2.7755575616,
+      "expected_note": "DERIVED, and this is the case the function exists for. The page's first sentence is \"Subtracts a set of numbers and gives the result without eliminating small roundoff errors\", and its argument-order note says \"RAWSUBTRACT() processes arguments from left to right. For example, RAWSUBTRACT(1;2;3;4) calculates 1-2-3-4 or ((1-2)-3)-4 in 'natural' order.\" Applying that stated order to 0.3, 0.1, 0.1, 0.1 in binary64: 0.3 - 0.1 = 0.19999999999999998, minus 0.1 = 0.09999999999999998, minus 0.1 = -2.7755575615628914E-17, which is one negative unit in the last place of 0.1. Derived independently by evaluating that sequence in IEEE-754 double precision. Scaled by 1E17 for the same reason as the case above. LibreOffice's RAWSUBTRACT help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_rawsubtract.html."
+    },
+    {
+      "id": "RAWSUBTRACT_ordinary_minus_operator_tidies_the_same_sum_to_zero",
+      "formula": "=0.3-0.1-0.1-0.1",
+      "description": "The contrast the page's first sentence implies, on the ordinary operator",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A CONTROL CASE, AND THE OTHER HALF OF THE ONE ABOVE. RAWSUBTRACT is documented as giving a result \"without eliminating small roundoff errors\", which is only a distinction if the ordinary subtraction operator DOES eliminate them -- so the sentence licenses a claim about the operator too, and this case makes it. The same arithmetic written with the plain minus operator returns exactly 0. The two cases together are the finding: identical arithmetic, two different answers, and the difference is the whole content of the function. Note this case contains no LibreOffice-only function at all and would run in any engine. LibreOffice's RAWSUBTRACT help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_rawsubtract.html."
+    },
+    {
+      "id": "RAWSUBTRACT_single_argument_is_an_error",
+      "formula": "=ISERROR(RAWSUBTRACT(0.987654321098765))",
+      "description": "The documented minimum of two arguments",
+      "setup_cells": {},
+      "expected": true,
+      "expected_note": "DERIVED from the page's second published example and the sentence beside it: \"=RAWSUBTRACT(0.987654321098765) returns Err:511 (Missing variable) because RAWSUBTRACT requires a minimum of two numbers\", reinforced by \"The function should be called with at least two parameters.\" THE PUBLISHED ERROR CODE IS DELIBERATELY NOT ASSERTED. Err:511 is a LibreOffice-internal code with no OOXML error token, so it cannot survive this harness's .xlsx transport as itself; asserting whatever it arrives as would be asserting a property of the file format rather than of the engine. ISERROR() asserts the part of the sentence that is about the function. LibreOffice's RAWSUBTRACT help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_rawsubtract.html."
+    }
+  ]
+}

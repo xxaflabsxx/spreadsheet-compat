@@ -1,0 +1,37 @@
+{
+  "function": "WEEKNUM_OOO",
+  "cases": [
+    {
+      "id": "WEEKNUM_OOO_published_mode_1_sunday",
+      "formula": "=WEEKNUM_OOO(DATE(1995,1,1),1)",
+      "description": "LibreOffice's own published example, mode 1 (Sunday)",
+      "setup_cells": {},
+      "expected": 1,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=WEEKNUM_OOO(DATE(1995;1;1);1) returns 1\". Mode 1 is documented as Sunday-start, and 1995-01-01 was a Sunday, so it opens week 1. THIS FUNCTION EXISTS ONLY AS A COMPATIBILITY SHIM AND THE PAGE SAYS SO: \"This function exists for interoperability with LibreOffice releases older than 5.1.0 and OpenOffice.org. It calculates week numbers for a week numbering system in that week number 1 is the week that contains the January 4th. This function does not provide interoperability with other spreadsheet applications. For new documents use the WEEKNUM or ISOWEEKNUM function instead.\" STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html."
+    },
+    {
+      "id": "WEEKNUM_OOO_published_mode_2_monday_iso",
+      "formula": "=WEEKNUM_OOO(DATE(1995,1,1),2)",
+      "description": "LibreOffice's own published example, mode 2 (Monday, ISO 8601)",
+      "setup_cells": {},
+      "expected": 52,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim including its explanation: \"=WEEKNUM_OOO(DATE(1995;1;1);2) returns 52. Week 1 starts on Monday, 1995-01-02.\" This pair of published examples is the sharpest thing in the batch: the SAME DATE returns 1 or 52 depending only on the Mode argument, so the case cannot be passed by an implementation that ignores it. LibreOffice's WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html."
+    },
+    {
+      "id": "WEEKNUM_OOO_other_mode_values_are_monday",
+      "formula": "=WEEKNUM_OOO(DATE(1995,1,1),5)-WEEKNUM_OOO(DATE(1995,1,1),2)",
+      "description": "The documented catch-all for Mode values other than 1 and 2",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A structural assertion with no derived constant, from the Mode parameter's own list: \"1 = Sunday / 2 = Monday (ISO 8601) / any other value = Monday (ISO 8601)\". Mode 5 is 'any other value', so it must agree with mode 2 exactly. LibreOffice's WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html."
+    },
+    {
+      "id": "WEEKNUM_OOO_week_one_contains_january_4th",
+      "formula": "=WEEKNUM_OOO(DATE(2021,1,4),2)",
+      "description": "The rule the page gives as the function's definition",
+      "setup_cells": {},
+      "expected": 1,
+      "expected_note": "DERIVED from the page's own definition of the numbering system it implements: \"week number 1 is the week that contains the January 4th\". 4 January 2021 must therefore be in week 1 whatever weekday it falls on -- it was a Monday. This is the defining property, asserted directly rather than through a published example. LibreOffice's WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html."
+    }
+  ]
+}

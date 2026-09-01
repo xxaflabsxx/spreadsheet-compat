@@ -1,0 +1,37 @@
+{
+  "function": "TO_PERCENT",
+  "cases": [
+    {
+      "id": "TO_PERCENT_value_survives_the_conversion",
+      "formula": "=ROUND(TO_PERCENT(0.40826)+0,10)",
+      "description": "The page's own Sample Usage input, asserted at the value layer",
+      "setup_cells": {},
+      "expected": 0.40826,
+      "expected_note": "DERIVED, not published: TO_PERCENT(0.40826) appears in Sample Usage with no result. The page states the operation is \"equivalent to clicking Format Number Percent from the menu bar\", i.e. a formatting change, so the underlying number must be unchanged. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format > Number command from the menu bar. What changes is the cell's number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a 'Sample Usage' block of FORMULAS WITH NO RESULTS and an 'Examples' section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page's own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice's own formula parser and its .xlsx export writes them back lower-cased -- 'to_date', 'uminus' -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google's TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284."
+    },
+    {
+      "id": "TO_PERCENT_result_is_still_a_number",
+      "formula": "=ISNUMBER(TO_PERCENT(0.5))",
+      "description": "The consequence of the documented 'apply a cell format' framing",
+      "setup_cells": {},
+      "expected": true,
+      "expected_note": "DERIVED from the same Format-menu sentence: applying a number format leaves a number. This is the discriminator against an implementation that returned a string like \"50%\"; the page never says the result is text. Google's TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function's LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.)"
+    },
+    {
+      "id": "TO_PERCENT_one_equals_one_hundred_percent",
+      "formula": "=ROUND(TO_PERCENT(UNARY_PERCENT(100))+0,10)",
+      "description": "The documented 1 = 100% convention, checked through its documented inverse",
+      "setup_cells": {},
+      "expected": 1,
+      "expected_note": "DERIVED from two sentences on two Google pages that agree with each other: TO_PERCENT's \"with the standard interpretation that 1 = 100%\" and UNARY_PERCENT's own description, which states its result inline as \"UNARY_PERCENT(100) equals 1\". UNARY_PERCENT(100) is therefore 1, and TO_PERCENT of 1 leaves the value 1 while displaying it as 100%. Nothing here asserts anything about the display. Google's TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284."
+    },
+    {
+      "id": "TO_PERCENT_non_numeric_argument_returned_unmodified",
+      "formula": "=TO_PERCENT(\"x\")",
+      "description": "The documented pass-through for a non-numeric argument",
+      "setup_cells": {},
+      "expected": "x",
+      "expected_note": "DERIVED from \"If value is not a number or a reference to a cell containing a numeric value, TO_PERCENT returns value without modification.\" Google's TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "function": "EASTERSUNDAY",
+  "cases": [
+    {
+      "id": "EASTERSUNDAY_published_serial_2000_plus_49",
+      "formula": "=EASTERSUNDAY(2000)+49",
+      "description": "LibreOffice's own published serial number, quoted exactly as printed",
+      "setup_cells": {},
+      "expected": 36688,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, and the only figure on the page given as a number rather than as a date: \"=EASTERSUNDAY(2000)+49 returns the internal serial number 36688. The result is 2000-06-11.\" It is quoted here in the exact form the page prints it -- with the +49 -- rather than back-solved to the Easter serial itself, so the assertion is the published one. Derived independently: Easter Sunday 2000 falls on 23 April by the Gregorian computus (Meeus/Jones/Butcher algorithm, computed here rather than looked up), which is serial 36639 in the 1899-12-30-origin system, and 36639 + 49 = 36688, matching the printed figure exactly. 49 days is the offset the page itself gives for Pentecost Sunday. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html."
+    },
+    {
+      "id": "EASTERSUNDAY_published_date_2000",
+      "formula": "=EASTERSUNDAY(2000)-DATE(2000,4,23)",
+      "description": "The page's other published example, asserted as a date rather than a serial",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT: \"=EASTERSUNDAY(2000) returns 2000-04-23.\" Asserted as a difference against DATE(2000,4,23) so the case depends on neither the locale's date format nor on whether the engine hands the harness a date object or a serial number -- the two published examples above and here therefore check the same underlying value through two independent routes. LibreOffice's EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html."
+    },
+    {
+      "id": "EASTERSUNDAY_derived_2026",
+      "formula": "=EASTERSUNDAY(2026)-DATE(2026,4,5)",
+      "description": "A year the page does not mention, computed independently",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "DERIVED, not published: the page publishes only the year 2000. Easter Sunday 2026 falls on 5 April by the Gregorian computus, computed independently here with the Meeus/Jones/Butcher algorithm. This is the case that tests the function rather than one memorised answer. LibreOffice's EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html."
+    },
+    {
+      "id": "EASTERSUNDAY_good_friday_offset",
+      "formula": "=EASTERSUNDAY(2026)-2-DATE(2026,4,3)",
+      "description": "One of the derived holidays the page tells the reader to compute this way",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A structural assertion with no derived constant beyond the Easter date above, from the page's own list: \"Good Friday = EASTERSUNDAY(Year) - 2\". Good Friday 2026 is therefore 3 April. LibreOffice's EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html."
+    }
+  ]
+}

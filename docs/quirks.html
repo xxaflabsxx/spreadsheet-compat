@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>818 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 818 divergences, every one executed — not copied from docs.">
+<title>851 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 851 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="818 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 818 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="851 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 851 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-09-01) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">818 quirks found across 254 functions
-(585 in LibreOffice, 233 in Google Sheets).
+<p class="search-hint">851 quirks found across 262 functions
+(618 in LibreOffice, 233 in Google Sheets).
 A further 9 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -10213,6 +10213,279 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_date.html">TO_DATE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_DATE(40826.4375)-DATE(2011,10,10),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.4375</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from &#34;fractional values indicate time of day past midnight&#34;, applied to the page&#39;s own Sample Usage formula TO_DATE(40826.4375) (again printed with no result). Derived independently: 1899-12-30 + 40826 days = 2011-10-10, and the remaining 0.4375 of a day is 10h30m past midnight. Asserted as the difference from DATE(2011,10,10) so both halves of the claim -- the date and the fraction -- are checked in one value without depending on a locale&#39;s time format. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 0.4375, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_date.html">TO_DATE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=N(TO_DATE(25405))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">25405</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the Notes bullet &#34;TO_DATE is the inverse of N as applied to a date&#34;. If TO_DATE only re-formats the number it is given, then N -- which reads a date back as its serial -- must return the original argument. No constant was taken from the page; 25405 is the page&#39;s own sample argument coming back out. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 25405, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_date.html">TO_DATE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TO_DATE(&#34;not a number&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">not a number</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the sentence &#34;If value is not a number or a reference to a cell containing a numeric value, TO_DATE returns value without modification.&#34; The page gives no example of this, so the argument here is a plain string chosen to be unambiguously non-numeric. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected &#39;not a number&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_date.html">TO_DATE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TO_DATE(25405)-DATE(1969,7,21)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED, not published: the page prints TO_DATE(25405) as a Sample Usage formula with NO result beside it. The rule it is derived from is the page&#39;s own sentence &#34;If value is a number or a reference to a cell containing a numeric value, TO_DATE returns value converted to a date, interpreting value as number of days since December 30, 1899.&#34; Derived independently: 1899-12-30 + 25405 days = 1969-07-21 (computed with Python&#39;s proleptic Gregorian calendar, which agrees with the 1899-12-30-origin serial system for every date after 1900-03-01). Asserted as a DIFFERENCE against DATE(1969,7,21) rather than as a serial or a formatted string, so the case is independent of the locale&#39;s date format and of whether the engine hands the harness a date object or a number. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format &gt; Number command from the menu bar. What changes is the cell&#39;s number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_date.html">TO_DATE</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_DATE(10/10/2000)+0,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.0005</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the Notes bullet, which states the arithmetic outright: &#34;TO_DATE does not autoconvert number formats in the same way as direct entry into cells. Therefore, TO_DATE(10/10/2000) is interpreted as TO_DATE(0.0005), the quotient of 10 divided by 10 divided by 2000.&#34; Derived independently: 10/10 = 1 and 1/2000 = 0.0005 exactly. The bullet names the intermediate value 0.0005 but prints no result for the call, so the assertion is that the VALUE survives -- +0 strips the date formatting the function applies, and ROUND(...,10) keeps the case free of last-bit formatting differences. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 0.0005, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_dollars.html">TO_DOLLARS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_DOLLARS(TO_PERCENT(0.5))+0,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.5</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the Notes bullet &#34;Because dates and percentages are backed by numbers, TO_DOLLARS will convert them successfully. However, these conversions are not typically meaningful.&#34; The page warns that the RESULT is not meaningful, not that it errors, so what is asserted is precisely that: the call succeeds and the underlying number is untouched. No claim is made about how it displays. Google&#39;s TO_DOLLARS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094241.; MISMATCH vs expected: expected 0.5, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_dollars.html">TO_DOLLARS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TO_DOLLARS(&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">abc</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from &#34;If value is not a number or a reference to a cell containing a numeric value, TO_DOLLARS returns value without modification.&#34; Google&#39;s TO_DOLLARS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094241.; MISMATCH vs expected: expected &#39;abc&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_dollars.html">TO_DOLLARS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ISNUMBER(TO_DOLLARS(5))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the Notes bullet &#34;TO_DOLLARS differs from the related function DOLLAR in that DOLLAR outputs text rather than applying a cell format to a number.&#34; That sentence makes two separable claims; this case asserts the TO_DOLLARS half (the result is still a number) and the next case asserts the DOLLAR half, so a failure identifies which of the two is wrong. Google&#39;s TO_DOLLARS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094241. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function&#39;s LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.); MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_dollars.html">TO_DOLLARS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_DOLLARS(40826.43)+0,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">40826.43</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED, not published: TO_DOLLARS(40826.43) appears in the Sample Usage block with no result beside it. The claim being checked is the page&#39;s own framing -- &#34;TO_DOLLARS is equivalent to applying Format -&gt; Number -&gt; Currency from the menu bar&#34; -- which makes the operation a formatting change, so the number must come back unchanged. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format &gt; Number command from the menu bar. What changes is the cell&#39;s number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_DOLLARS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094241.; MISMATCH vs expected: expected 40826.43, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_percent.html">TO_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TO_PERCENT(&#34;x&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">x</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from &#34;If value is not a number or a reference to a cell containing a numeric value, TO_PERCENT returns value without modification.&#34; Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.; MISMATCH vs expected: expected &#39;x&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_percent.html">TO_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_PERCENT(UNARY_PERCENT(100))+0,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from two sentences on two Google pages that agree with each other: TO_PERCENT&#39;s &#34;with the standard interpretation that 1 = 100%&#34; and UNARY_PERCENT&#39;s own description, which states its result inline as &#34;UNARY_PERCENT(100) equals 1&#34;. UNARY_PERCENT(100) is therefore 1, and TO_PERCENT of 1 leaves the value 1 while displaying it as 100%. Nothing here asserts anything about the display. Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_percent.html">TO_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ISNUMBER(TO_PERCENT(0.5))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the same Format-menu sentence: applying a number format leaves a number. This is the discriminator against an implementation that returned a string like &#34;50%&#34;; the page never says the result is text. Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function&#39;s LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.); MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_percent.html">TO_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_PERCENT(0.40826)+0,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.40826</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED, not published: TO_PERCENT(0.40826) appears in Sample Usage with no result. The page states the operation is &#34;equivalent to clicking Format Number Percent from the menu bar&#34;, i.e. a formatting change, so the underlying number must be unchanged. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format &gt; Number command from the menu bar. What changes is the cell&#39;s number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.; MISMATCH vs expected: expected 0.40826, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_pure_number.html">TO_PURE_NUMBER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ISTEXT(TO_PURE_NUMBER(&#34;abc&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the Notes bullet &#34;TO_PURE_NUMBER is similar to N, except that N returns 0 for non-numeric values except for TRUE which returns 1, whereas TO_PURE_NUMBER returns the value passed without modification for all non-numeric types.&#34; Only the TO_PURE_NUMBER half is asserted: N is a separate function with its own page and its own cases in this corpus. NOTHING IS ASSERTED ABOUT A BOOLEAN ARGUMENT -- the bullet says what N does with TRUE but never says whether TO_PURE_NUMBER counts a boolean as a non-numeric type, so the page settles nothing there and this file asserts nothing there. Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function&#39;s LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.); MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_pure_number.html">TO_PURE_NUMBER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TO_PURE_NUMBER(&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">abc</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED, AND THE SENTENCE IT IS DERIVED FROM CONTAINS A PUBLISHED ERROR WORTH RECORDING. The rule paragraph on TO_PURE_NUMBER&#39;s page reads, verbatim: &#34;If value is not a number or a reference to a cell containing a numeric value, TO_PERCENT returns value without modification.&#34; It names TO_PERCENT -- a different function, which has its own page carrying the same sentence correctly -- in the middle of TO_PURE_NUMBER&#39;s own rule block. The intended subject is unambiguous from position and from the parallel Notes bullet below it (&#34;TO_PURE_NUMBER returns the value passed without modification for all non-numeric types&#34;), so the behaviour asserted here is not in doubt; the copy-paste slip is recorded rather than silently read past. Re-fetched on a second request the same day to rule out a transcription error on this end: it says TO_PERCENT both times. Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243.; MISMATCH vs expected: expected &#39;abc&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_pure_number.html">TO_PURE_NUMBER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_PURE_NUMBER(TO_DOLLARS(12.5)),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">12.5</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from the page&#39;s opening sentence, which names its accepted inputs: &#34;Converts a provided date/time, percentage, currency or other formatted numeric value to a pure number without formatting.&#34; The currency value is produced by TO_DOLLARS, the function the page&#39;s own See Also list points at for that format. Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243.; MISMATCH vs expected: expected 12.5, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_pure_number.html">TO_PURE_NUMBER</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(TO_PURE_NUMBER(50%),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.5</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED, not published: TO_PURE_NUMBER(50%) is printed in Sample Usage with no result. The rule is the page&#39;s own &#34;If value is a number or a reference to a cell containing a numeric value, TO_PURE_NUMBER returns value with all formatting and interpretation removed&#34;, and 50% is the literal the page itself chose. Derived independently: a percent literal is one hundredth of its face value, so 50% is 0.5. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243.; MISMATCH vs expected: expected 0.5, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_text.html">TO_TEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=RIGHT(TO_TEXT(TO_PERCENT(0.5)),1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">%</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from &#34;Currencies appear as currencies, decimals as decimals, percentages as percentages, and dates as dates.&#34; THE PAGE NEVER STATES A DIGIT COUNT OR A FORMAT PATTERN, so no full string is asserted here -- &#34;50%&#34;, &#34;50.00%&#34; and &#34;50.0%&#34; are all consistent with what it says. What the sentence does license is that the result still reads as a percentage, and the last character is the smallest observable form of that claim. Google&#39;s TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285.; MISMATCH vs expected: expected &#39;%&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_text.html">TO_TEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TO_TEXT(&#34;abc&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">abc</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from &#34;If value is not a number or a reference to a cell containing a numeric value, TO_TEXT returns value without modification.&#34; Note this makes the function idempotent on text, which is the only reading under which the Notes bullet &#34;TO_TEXT is equivalent to prefixing a number with an apostrophe (&#39;)&#34; does not double up its own apostrophe. Google&#39;s TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285.; MISMATCH vs expected: expected &#39;abc&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_text.html">TO_TEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ISTEXT(TO_TEXT(24))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED, not published: TO_TEXT(24) is printed in Sample Usage with no result. The rule is &#34;If value is a number or a reference to a cell containing a numeric value, TO_TEXT returns value as a string&#34;. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function&#39;s LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.); MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/to_text.html">TO_TEXT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=TO_TEXT(24)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">24</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Parser</dd>
+  </dl>
+  <p>DERIVED from &#34;returns value as a string, with existing formatting retained&#34;. The page&#39;s own sample argument carries no format, so the retained formatting is none and the string is the bare digits. This is the weakest reading of the sentence that is still a testable claim: no assertion is made about how a FORMATTED number renders, because the page describes that only qualitatively (see the next case). Google&#39;s TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285.; MISMATCH vs expected: expected &#39;24&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/trim.html">TRIM</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=TRIM(CHAR(160)&amp;&#34;Hello&#34;&amp;CHAR(160))</div>
@@ -10486,6 +10759,110 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uminus.html">UMINUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(UMINUS(UMINUS(9)),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">9</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>A structural assertion with no derived constant, from the same one-line description: reversing a sign twice restores it. Google&#39;s UMINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093606.; MISMATCH vs expected: expected 9, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uminus.html">UMINUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(UMINUS(3.5)-(3.5*-1),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>A structural assertion with no derived constant, from the parameter description &#34;value - The number to have its sign reversed. Equivalently, the number to multiply by -1.&#34; Google&#39;s UMINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093606.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uminus.html">UMINUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=UMINUS(7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">-7</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>DERIVED from the same sentence. The page gives only a negative sample, so the positive direction is asserted here to pin &#34;sign reversed&#34; rather than &#34;absolute value&#34; -- two readings the page&#39;s single sample cannot distinguish. Google&#39;s UMINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093606.; MISMATCH vs expected: expected -7, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uminus.html">UMINUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=UMINUS(-4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">4</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>DERIVED, not published: UMINUS(-4) is printed in Sample Usage with no result. The rule is the page&#39;s one-line description, &#34;Returns a number with the sign reversed&#34;. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s UMINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093606.; MISMATCH vs expected: expected 4, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/unary_percent.html">UNARY_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(UNARY_PERCENT(50)-50%,12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>A structural assertion with no derived constant, from &#34;Returns a value interpreted as a percentage&#34;: whatever the engine means by the literal 50%, UNARY_PERCENT(50) must mean the same thing. This is the case that would catch an implementation that divided by 100 only for display. Google&#39;s UNARY_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093982.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/unary_percent.html">UNARY_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(UNARY_PERCENT(UNARY_PERCENT(10000)),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>A structural assertion. THE PAGE&#39;S OWN INVERSE CLAIM IS DELIBERATELY NOT ASSERTED: the Notes bullet says &#34;UNARY_PERCENT is roughly equivalent to the inverse of TO_PERCENT&#34;, and the word ROUGHLY is doing real work -- TO_PERCENT changes a format and leaves the value alone, while UNARY_PERCENT changes the value, so the two are not inverses at the value layer at all and a case asserting that they are would be asserting something the page hedges. What is asserted instead is the unhedged rule applied twice: 10000 -&gt; 100 -&gt; 1. Google&#39;s UNARY_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093982.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/unary_percent.html">UNARY_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=UNARY_PERCENT(100)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>GOOGLE&#39;S OWN PUBLISHED RESULT, and the single exception to this group&#39;s rule that nothing is published: UNARY_PERCENT&#39;s one-line description reads, verbatim, &#34;Returns a value interpreted as a percentage; that is, `UNARY_PERCENT(100)` equals `1`.&#34; It is not in a Formula/Result table -- it is inside the sentence -- but it is a formula and its result, printed in the article body, so it is quoted here as published rather than derived. The same sentence is repeated verbatim in the See Also blocks of the TO_PERCENT and UPLUS pages. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s UNARY_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093982.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/unary_percent.html">UNARY_PERCENT</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(UNARY_PERCENT(93),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.93</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>DERIVED from the published 100 -&gt; 1 relation applied to the page&#39;s other Sample Usage formula, UNARY_PERCENT(93), which is printed with no result: a value interpreted as a percentage is one hundredth of its face value, so 93 gives 0.93. Google&#39;s UNARY_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093982.; MISMATCH vs expected: expected 0.93, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/unichar.html">UNICHAR</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=UNICHAR(0)</div>
@@ -10496,6 +10873,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;_x0000_&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uplus.html">UPLUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(UPLUS(3.5)-3.5,12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>A structural assertion from &#34;Returns a specified number, unchanged&#34;: the difference between the result and the argument is zero. A non-integer argument is used so the case would also catch an implementation that truncated. Google&#39;s UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uplus.html">UPLUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=ROUND(UPLUS(UMINUS(9))+9,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>A structural assertion with no derived constant. Each of the two pages lists the other in its See Also block with a one-line summary, and the composition follows from those two summaries alone: UMINUS(9) reverses the sign and UPLUS returns it unchanged, so adding 9 gives zero. Google&#39;s UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uplus.html">UPLUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=UPLUS(7)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">7</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>DERIVED from the same sentence. Google&#39;s UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608.; MISMATCH vs expected: expected 7, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/uplus.html">UPLUS</a>
+  <span class="badge badge-quirk">LibreOffice Calc</span></h2>
+  <div class="formula mono">=UPLUS(-4)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">-4</dd>
+    <dt>Engine</dt><dd>LibreOffice Calc 25.8.7.3</dd>
+    <dt>Category</dt><dd>Operator</dd>
+  </dl>
+  <p>DERIVED, not published: UPLUS(-4) is printed in Sample Usage with no result. The rule is the page&#39;s one-line description, &#34;Returns a specified number, unchanged&#34;, and its parameter description &#34;value - The number to return&#34;. The sample is deliberately negative, which is the case that separates UPLUS from ABS. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608.; MISMATCH vs expected: expected -4, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">

@@ -1,0 +1,37 @@
+{
+  "function": "TO_PURE_NUMBER",
+  "cases": [
+    {
+      "id": "TO_PURE_NUMBER_strips_a_percentage_format",
+      "formula": "=ROUND(TO_PURE_NUMBER(50%),10)",
+      "description": "The page's own Sample Usage input",
+      "setup_cells": {},
+      "expected": 0.5,
+      "expected_note": "DERIVED, not published: TO_PURE_NUMBER(50%) is printed in Sample Usage with no result. The rule is the page's own \"If value is a number or a reference to a cell containing a numeric value, TO_PURE_NUMBER returns value with all formatting and interpretation removed\", and 50% is the literal the page itself chose. Derived independently: a percent literal is one hundredth of its face value, so 50% is 0.5. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a 'Sample Usage' block of FORMULAS WITH NO RESULTS and an 'Examples' section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page's own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice's own formula parser and its .xlsx export writes them back lower-cased -- 'to_date', 'uminus' -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google's TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243."
+    },
+    {
+      "id": "TO_PURE_NUMBER_strips_a_currency_format",
+      "formula": "=ROUND(TO_PURE_NUMBER(TO_DOLLARS(12.5)),10)",
+      "description": "The documented removal of a currency format, using this page's own list of inputs",
+      "setup_cells": {},
+      "expected": 12.5,
+      "expected_note": "DERIVED from the page's opening sentence, which names its accepted inputs: \"Converts a provided date/time, percentage, currency or other formatted numeric value to a pure number without formatting.\" The currency value is produced by TO_DOLLARS, the function the page's own See Also list points at for that format. Google's TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243."
+    },
+    {
+      "id": "TO_PURE_NUMBER_non_numeric_argument_returned_unmodified",
+      "formula": "=TO_PURE_NUMBER(\"abc\")",
+      "description": "The documented pass-through, from the sentence that names the wrong function",
+      "setup_cells": {},
+      "expected": "abc",
+      "expected_note": "DERIVED, AND THE SENTENCE IT IS DERIVED FROM CONTAINS A PUBLISHED ERROR WORTH RECORDING. The rule paragraph on TO_PURE_NUMBER's page reads, verbatim: \"If value is not a number or a reference to a cell containing a numeric value, TO_PERCENT returns value without modification.\" It names TO_PERCENT -- a different function, which has its own page carrying the same sentence correctly -- in the middle of TO_PURE_NUMBER's own rule block. The intended subject is unambiguous from position and from the parallel Notes bullet below it (\"TO_PURE_NUMBER returns the value passed without modification for all non-numeric types\"), so the behaviour asserted here is not in doubt; the copy-paste slip is recorded rather than silently read past. Re-fetched on a second request the same day to rule out a transcription error on this end: it says TO_PERCENT both times. Google's TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243."
+    },
+    {
+      "id": "TO_PURE_NUMBER_keeps_text_as_text_where_N_would_not",
+      "formula": "=ISTEXT(TO_PURE_NUMBER(\"abc\"))",
+      "description": "The documented contrast with N, asserted on the TO_PURE_NUMBER side only",
+      "setup_cells": {},
+      "expected": true,
+      "expected_note": "DERIVED from the Notes bullet \"TO_PURE_NUMBER is similar to N, except that N returns 0 for non-numeric values except for TRUE which returns 1, whereas TO_PURE_NUMBER returns the value passed without modification for all non-numeric types.\" Only the TO_PURE_NUMBER half is asserted: N is a separate function with its own page and its own cases in this corpus. NOTHING IS ASSERTED ABOUT A BOOLEAN ARGUMENT -- the bullet says what N does with TRUE but never says whether TO_PURE_NUMBER counts a boolean as a non-numeric type, so the page settles nothing there and this file asserts nothing there. Google's TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function's LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.)"
+    }
+  ]
+}

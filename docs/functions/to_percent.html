@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TO_PERCENT: Google Sheets only — not in Excel or LibreOffice</title>
-<meta name="description" content="TO_PERCENT (Parser) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>TO_PERCENT is not supported in LibreOffice Calc (Sheets only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for TO_PERCENT in 3 of its 4 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/to_percent.html">
-<meta property="og:title" content="TO_PERCENT: Google Sheets only — not in Excel or LibreOffice">
-<meta property="og:description" content="TO_PERCENT (Parser) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="TO_PERCENT is not supported in LibreOffice Calc (Sheets only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for TO_PERCENT in 3 of its 4 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/to_percent.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>TO_PERCENT</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Parser</p>
+<p class="category-tag">Category: Parser &middot; Last tested 2026-09-01</p>
+
+
+<p class="lede">Real compatibility results for the <strong>TO_PERCENT</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document TO_PERCENT, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for TO_PERCENT yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,117 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+TO_PERCENT&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't TO_PERCENT working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>TO_PERCENT</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(TO_PERCENT(0.40826)+0,10)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.40826</span>.
+        DERIVED, not published: TO_PERCENT(0.40826) appears in Sample Usage with no result. The page states the operation is &#34;equivalent to clicking Format Number Percent from the menu bar&#34;, i.e. a formatting change, so the underlying number must be unchanged. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format &gt; Number command from the menu bar. What changes is the cell&#39;s number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.; MISMATCH vs expected: expected 0.40826, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ISNUMBER(TO_PERCENT(0.5))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">False</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        DERIVED from the same Format-menu sentence: applying a number format leaves a number. This is the discriminator against an implementation that returned a string like &#34;50%&#34;; the page never says the result is text. Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function&#39;s LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.); MISMATCH vs expected: expected True, got False
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(TO_PERCENT(UNARY_PERCENT(100))+0,10)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">1</span>.
+        DERIVED from two sentences on two Google pages that agree with each other: TO_PERCENT&#39;s &#34;with the standard interpretation that 1 = 100%&#34; and UNARY_PERCENT&#39;s own description, which states its result inline as &#34;UNARY_PERCENT(100) equals 1&#34;. UNARY_PERCENT(100) is therefore 1, and TO_PERCENT of 1 leaves the value 1 while displaying it as 100%. Nothing here asserts anything about the display. Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=TO_PERCENT(&#34;x&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">x</span>.
+        DERIVED from &#34;If value is not a number or a reference to a cell containing a numeric value, TO_PERCENT returns value without modification.&#34; Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.; MISMATCH vs expected: expected &#39;x&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +504,50 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-01)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for TO_PERCENT yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(TO_PERCENT(0.40826)+0,10)</td>
+  <td>The page&#39;s own Sample Usage input, asserted at the value layer</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.40826<br><span class="category-tag">DERIVED, not published: TO_PERCENT(0.40826) appears in Sample Usage with no result. The page states the operation is &#34;equivalent to clicking Format Number Percent from the menu bar&#34;, i.e. a formatting change, so the underlying number must be unchanged. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format &gt; Number command from the menu bar. What changes is the cell&#39;s number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISNUMBER(TO_PERCENT(0.5))</td>
+  <td>The consequence of the documented &#39;apply a cell format&#39; framing</td>
+  <td class="result mono">False</td>
+  <td class="result mono">True<br><span class="category-tag">DERIVED from the same Format-menu sentence: applying a number format leaves a number. This is the discriminator against an implementation that returned a string like &#34;50%&#34;; the page never says the result is text. Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function&#39;s LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.)</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TO_PERCENT(UNARY_PERCENT(100))+0,10)</td>
+  <td>The documented 1 = 100% convention, checked through its documented inverse</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">1<br><span class="category-tag">DERIVED from two sentences on two Google pages that agree with each other: TO_PERCENT&#39;s &#34;with the standard interpretation that 1 = 100%&#34; and UNARY_PERCENT&#39;s own description, which states its result inline as &#34;UNARY_PERCENT(100) equals 1&#34;. UNARY_PERCENT(100) is therefore 1, and TO_PERCENT of 1 leaves the value 1 while displaying it as 100%. Nothing here asserts anything about the display. Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TO_PERCENT(&#34;x&#34;)</td>
+  <td>The documented pass-through for a non-numeric argument</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">x<br><span class="category-tag">DERIVED from &#34;If value is not a number or a reference to a cell containing a numeric value, TO_PERCENT returns value without modification.&#34; Google&#39;s TO_PERCENT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094284.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

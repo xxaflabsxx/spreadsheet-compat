@@ -1,0 +1,29 @@
+{
+  "function": "WEEKSINYEAR",
+  "cases": [
+    {
+      "id": "WEEKSINYEAR_published_1970",
+      "formula": "=WEEKSINYEAR(DATE(1970,2,17))",
+      "description": "LibreOffice's own published example: a 53-week year",
+      "setup_cells": {},
+      "expected": 53,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT: \"WEEKSINYEAR(A1) returns 53 if A1 contains 1970-02-17, a valid date for the year 1970.\" (The page prints the example without a leading '=', unlike its neighbours; the formula is otherwise as published, with DATE() substituted for the cell reference for the reason the sibling ISLEAPYEAR entry gives.) Derived independently as well: 1 January 1970 was a Thursday, and under the ISO rule the page states -- \"Following ISO 8601, this function considers Monday to be the first day of the week, and the first week of a year is the one with most days in this year\" -- a common year beginning on a Thursday has 53 ISO weeks. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "WEEKSINYEAR_ordinary_52_week_year",
+      "formula": "=WEEKSINYEAR(DATE(2025,6,1))",
+      "description": "A 52-week year, the ordinary case the page does not publish",
+      "setup_cells": {},
+      "expected": 52,
+      "expected_note": "DERIVED from the ISO rule the page states. 1 January 2025 was a Wednesday and 2025 is not a leap year, so it has 52 ISO weeks. The page publishes only a 53-week year, so this is the case that shows the function is computing rather than returning a constant. LibreOffice's WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "WEEKSINYEAR_leap_year_starting_thursday",
+      "formula": "=WEEKSINYEAR(DATE(2026,6,1))",
+      "description": "A second 53-week year, on the other of the two ISO rules that produce one",
+      "setup_cells": {},
+      "expected": 53,
+      "expected_note": "DERIVED from the same ISO rule. A year has 53 ISO weeks when it begins on a Thursday, or when it is a leap year beginning on a Wednesday; 1 January 2026 is a Thursday. Computed independently here from the ISO week-date calendar rather than looked up. LibreOffice's WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    }
+  ]
+}

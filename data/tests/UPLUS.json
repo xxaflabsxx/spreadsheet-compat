@@ -1,0 +1,37 @@
+{
+  "function": "UPLUS",
+  "cases": [
+    {
+      "id": "UPLUS_sample_negative_argument",
+      "formula": "=UPLUS(-4)",
+      "description": "The page's own Sample Usage input",
+      "setup_cells": {},
+      "expected": -4,
+      "expected_note": "DERIVED, not published: UPLUS(-4) is printed in Sample Usage with no result. The rule is the page's one-line description, \"Returns a specified number, unchanged\", and its parameter description \"value - The number to return\". The sample is deliberately negative, which is the case that separates UPLUS from ABS. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a 'Sample Usage' block of FORMULAS WITH NO RESULTS and an 'Examples' section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page's own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice's own formula parser and its .xlsx export writes them back lower-cased -- 'to_date', 'uminus' -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google's UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608."
+    },
+    {
+      "id": "UPLUS_positive_argument",
+      "formula": "=UPLUS(7)",
+      "description": "The same rule on a positive argument",
+      "setup_cells": {},
+      "expected": 7,
+      "expected_note": "DERIVED from the same sentence. Google's UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608."
+    },
+    {
+      "id": "UPLUS_is_the_identity_on_a_non_integer",
+      "formula": "=ROUND(UPLUS(3.5)-3.5,12)",
+      "description": "'Unchanged' asserted structurally, with no constant taken from the page",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A structural assertion from \"Returns a specified number, unchanged\": the difference between the result and the argument is zero. A non-integer argument is used so the case would also catch an implementation that truncated. Google's UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608."
+    },
+    {
+      "id": "UPLUS_is_the_inverse_of_UMINUS",
+      "formula": "=ROUND(UPLUS(UMINUS(9))+9,10)",
+      "description": "The two unary operators composed, using each page's own description of the other",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A structural assertion with no derived constant. Each of the two pages lists the other in its See Also block with a one-line summary, and the composition follows from those two summaries alone: UMINUS(9) reverses the sign and UPLUS returns it unchanged, so adding 9 gives zero. Google's UPLUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093608."
+    }
+  ]
+}

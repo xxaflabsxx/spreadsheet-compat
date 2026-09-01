@@ -1,0 +1,37 @@
+{
+  "function": "TO_TEXT",
+  "cases": [
+    {
+      "id": "TO_TEXT_result_is_text",
+      "formula": "=ISTEXT(TO_TEXT(24))",
+      "description": "The page's own Sample Usage input, asserted for its documented result type",
+      "setup_cells": {},
+      "expected": true,
+      "expected_note": "DERIVED, not published: TO_TEXT(24) is printed in Sample Usage with no result. The rule is \"If value is a number or a reference to a cell containing a numeric value, TO_TEXT returns value as a string\". BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a 'Sample Usage' block of FORMULAS WITH NO RESULTS and an 'Examples' section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page's own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice's own formula parser and its .xlsx export writes them back lower-cased -- 'to_date', 'uminus' -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google's TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function's LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.)"
+    },
+    {
+      "id": "TO_TEXT_unformatted_number_becomes_its_plain_digits",
+      "formula": "=TO_TEXT(24)",
+      "description": "The same sample, asserted as the string it must produce for an unformatted number",
+      "setup_cells": {},
+      "expected": "24",
+      "expected_note": "DERIVED from \"returns value as a string, with existing formatting retained\". The page's own sample argument carries no format, so the retained formatting is none and the string is the bare digits. This is the weakest reading of the sentence that is still a testable claim: no assertion is made about how a FORMATTED number renders, because the page describes that only qualitatively (see the next case). Google's TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285."
+    },
+    {
+      "id": "TO_TEXT_a_percentage_still_reads_as_a_percentage",
+      "formula": "=RIGHT(TO_TEXT(TO_PERCENT(0.5)),1)",
+      "description": "The documented retention of a percentage format, asserted only as far as the page goes",
+      "setup_cells": {},
+      "expected": "%",
+      "expected_note": "DERIVED from \"Currencies appear as currencies, decimals as decimals, percentages as percentages, and dates as dates.\" THE PAGE NEVER STATES A DIGIT COUNT OR A FORMAT PATTERN, so no full string is asserted here -- \"50%\", \"50.00%\" and \"50.0%\" are all consistent with what it says. What the sentence does license is that the result still reads as a percentage, and the last character is the smallest observable form of that claim. Google's TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285."
+    },
+    {
+      "id": "TO_TEXT_non_numeric_argument_returned_unmodified",
+      "formula": "=TO_TEXT(\"abc\")",
+      "description": "The documented pass-through for a non-numeric argument",
+      "setup_cells": {},
+      "expected": "abc",
+      "expected_note": "DERIVED from \"If value is not a number or a reference to a cell containing a numeric value, TO_TEXT returns value without modification.\" Note this makes the function idempotent on text, which is the only reading under which the Notes bullet \"TO_TEXT is equivalent to prefixing a number with an apostrophe (')\" does not double up its own apostrophe. Google's TO_TEXT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094285."
+    }
+  ]
+}

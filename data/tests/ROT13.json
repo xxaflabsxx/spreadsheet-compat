@@ -1,0 +1,29 @@
+{
+  "function": "ROT13",
+  "cases": [
+    {
+      "id": "ROT13_published_foundation_sentence",
+      "formula": "=ROT13(\"Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.\")",
+      "description": "LibreOffice's own published example, quoted verbatim in both directions",
+      "setup_cells": {},
+      "expected": "The Document Foundation was founded in September 2010.",
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=ROT13(\"Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.\") returns the string \"The Document Foundation was founded in September 2010.\". Notice how spaces, digits, and full stops are unaffected by ROT13.\" The example is unusually well chosen: it carries the alphabetic rotation, the case preservation, and the pass-through of spaces, digits and punctuation in a single string, and the page's own closing sentence says so. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "ROT13_is_its_own_inverse",
+      "formula": "=ROT13(ROT13(\"Hello, World! 123\"))",
+      "description": "The documented involution",
+      "setup_cells": {},
+      "expected": "Hello, World! 123",
+      "expected_note": "A structural assertion with no constant taken from the page, from the Text parameter's own sentence: \"ROT13(ROT13(Text)) decrypts the code.\" The argument mixes upper case, lower case, punctuation, a space and digits so that the round trip covers every character class the published example mentions. LibreOffice's ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "ROT13_wraps_past_z",
+      "formula": "=ROT13(\"abcXYZ\")",
+      "description": "The documented wrap at the end of the alphabet, in both cases",
+      "setup_cells": {},
+      "expected": "nopKLM",
+      "expected_note": "DERIVED from the description: \"Encrypts a character string by moving the characters 13 positions in the alphabet. After the letter Z, the alphabet begins again (Rotation).\" a b c move forward to n o p, while X Y Z pass the end and wrap to K L M. The published example above contains no letter beyond m in the second half of the alphabet in a position that shows the wrap unambiguously, so this case is what actually tests the sentence about beginning again. LibreOffice's ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    }
+  ]
+}

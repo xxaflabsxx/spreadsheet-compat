@@ -1,0 +1,37 @@
+{
+  "function": "WEEKS",
+  "cases": [
+    {
+      "id": "WEEKS_published_type_0_five_days",
+      "formula": "=WEEKS(\"2022-01-12\",\"2022-01-17\",0)",
+      "description": "LibreOffice's own published example: Type 0 counts only whole 7-day spans",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=WEEKS(\"2022-01-12\",\"2022-01-17\",0) returns 0 because Type was set to 0 and there are only 5 days in the interval.\" All four of this file's published cases keep the page's own ISO-8601 date STRINGS rather than converting them to DATE() calls, because the page introduces them deliberately -- \"In the following examples, dates are passed as strings. However, they can also be stored in separate cells and be passed as references\" -- and the string form is therefore part of what is published. Type 0 is documented as \"the function will assume that 7 days is equivalent to one week without considering any specific day to mark the beginning of a week.\" STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "WEEKS_published_type_0_seven_days",
+      "formula": "=WEEKS(\"2022-01-12\",\"2022-01-19\",0)",
+      "description": "LibreOffice's own published example: Type 0 at exactly seven days",
+      "setup_cells": {},
+      "expected": 1,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=WEEKS(\"2022-01-12\",\"2022-01-19\",0) returns 1 because Type was set to 0 and there are 7 days in the interval.\" With the case above this brackets the Type 0 boundary exactly: five days gives 0, seven days gives 1. LibreOffice's WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "WEEKS_published_type_1_crosses_a_monday",
+      "formula": "=WEEKS(\"2022-01-12\",\"2022-01-17\",1)",
+      "description": "LibreOffice's own published example: Type 1 counts Mondays, not elapsed days",
+      "setup_cells": {},
+      "expected": 1,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=WEEKS(\"2022-01-12\",\"2022-01-17\",1) returns 1 because Type was set to 1 and the interval contains a Monday, since 2022-01-12 is a Wednesday and 2022-01-17 is a Monday.\" THE SAME DATE PAIR AS THE FIRST CASE, with only the Type changed, and the answer changes from 0 to 1 -- so this pair is what makes the Type argument observable. Type 1 is documented as \"the function will consider Monday to be the first day of the week. Therefore, except for the start date, each occurrence of a Monday in the interval is counted as an additional week\", and the page adds that it does so \"regardless of the current locale settings.\" LibreOffice's WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "WEEKS_published_type_1_no_monday",
+      "formula": "=WEEKS(\"2022-01-12\",\"2022-01-15\",1)",
+      "description": "LibreOffice's own published example: Type 1 with no Monday in the interval",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=WEEKS(\"2022-01-12\",\"2022-01-15\",1) returns 0 because Type was set to 1 and the interval does not contain any Mondays, except for the start date.\" LibreOffice's WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    }
+  ]
+}

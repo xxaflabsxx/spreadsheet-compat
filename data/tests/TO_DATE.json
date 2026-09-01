@@ -1,0 +1,45 @@
+{
+  "function": "TO_DATE",
+  "cases": [
+    {
+      "id": "TO_DATE_serial_is_days_since_1899_12_30",
+      "formula": "=TO_DATE(25405)-DATE(1969,7,21)",
+      "description": "The page's own Sample Usage input, asserted against the date its own rule requires",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "DERIVED, not published: the page prints TO_DATE(25405) as a Sample Usage formula with NO result beside it. The rule it is derived from is the page's own sentence \"If value is a number or a reference to a cell containing a numeric value, TO_DATE returns value converted to a date, interpreting value as number of days since December 30, 1899.\" Derived independently: 1899-12-30 + 25405 days = 1969-07-21 (computed with Python's proleptic Gregorian calendar, which agrees with the 1899-12-30-origin serial system for every date after 1900-03-01). Asserted as a DIFFERENCE against DATE(1969,7,21) rather than as a serial or a formatted string, so the case is independent of the locale's date format and of whether the engine hands the harness a date object or a number. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format > Number command from the menu bar. What changes is the cell's number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a 'Sample Usage' block of FORMULAS WITH NO RESULTS and an 'Examples' section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page's own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice's own formula parser and its .xlsx export writes them back lower-cased -- 'to_date', 'uminus' -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google's TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239."
+    },
+    {
+      "id": "TO_DATE_is_the_inverse_of_N_on_a_date",
+      "formula": "=N(TO_DATE(25405))",
+      "description": "The documented inverse relationship with N, asserted structurally",
+      "setup_cells": {},
+      "expected": 25405,
+      "expected_note": "DERIVED from the Notes bullet \"TO_DATE is the inverse of N as applied to a date\". If TO_DATE only re-formats the number it is given, then N -- which reads a date back as its serial -- must return the original argument. No constant was taken from the page; 25405 is the page's own sample argument coming back out. Google's TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239."
+    },
+    {
+      "id": "TO_DATE_slashes_are_division_not_a_date",
+      "formula": "=ROUND(TO_DATE(10/10/2000)+0,10)",
+      "description": "The page's explicit warning that TO_DATE does not parse a slash-separated date",
+      "setup_cells": {},
+      "expected": 0.0005,
+      "expected_note": "DERIVED from the Notes bullet, which states the arithmetic outright: \"TO_DATE does not autoconvert number formats in the same way as direct entry into cells. Therefore, TO_DATE(10/10/2000) is interpreted as TO_DATE(0.0005), the quotient of 10 divided by 10 divided by 2000.\" Derived independently: 10/10 = 1 and 1/2000 = 0.0005 exactly. The bullet names the intermediate value 0.0005 but prints no result for the call, so the assertion is that the VALUE survives -- +0 strips the date formatting the function applies, and ROUND(...,10) keeps the case free of last-bit formatting differences. Google's TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239."
+    },
+    {
+      "id": "TO_DATE_non_numeric_argument_returned_unmodified",
+      "formula": "=TO_DATE(\"not a number\")",
+      "description": "The documented pass-through for a non-numeric argument",
+      "setup_cells": {},
+      "expected": "not a number",
+      "expected_note": "DERIVED from the sentence \"If value is not a number or a reference to a cell containing a numeric value, TO_DATE returns value without modification.\" The page gives no example of this, so the argument here is a plain string chosen to be unambiguously non-numeric. Google's TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239."
+    },
+    {
+      "id": "TO_DATE_fraction_is_time_of_day",
+      "formula": "=ROUND(TO_DATE(40826.4375)-DATE(2011,10,10),10)",
+      "description": "The page's second Sample Usage input, whose fractional part is a time of day",
+      "setup_cells": {},
+      "expected": 0.4375,
+      "expected_note": "DERIVED from \"fractional values indicate time of day past midnight\", applied to the page's own Sample Usage formula TO_DATE(40826.4375) (again printed with no result). Derived independently: 1899-12-30 + 40826 days = 2011-10-10, and the remaining 0.4375 of a day is 10h30m past midnight. Asserted as the difference from DATE(2011,10,10) so both halves of the claim -- the date and the fraction -- are checked in one value without depending on a locale's time format. Google's TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239."
+    }
+  ]
+}

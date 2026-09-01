@@ -1,0 +1,37 @@
+{
+  "function": "DAYSINMONTH",
+  "cases": [
+    {
+      "id": "DAYSINMONTH_published_february_1968",
+      "formula": "=DAYSINMONTH(DATE(1968,2,17))",
+      "description": "LibreOffice's own published example: February of a leap year",
+      "setup_cells": {},
+      "expected": 29,
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT: \"=DAYSINMONTH(A1) returns 29 days if A1 contains 1968-02-17, a valid date for February 1968.\" The published example passes the date through a cell reference; it is written here as DATE(1968,2,17) instead, because the page's own sibling entry ISLEAPYEAR warns in the same words that a date typed with slashes is evaluated as arithmetic (\"Never use =ISLEAPYEAR(2/29/68), because this would first evaluate 2 divided by 29 divided by 68\"), and DATE() is the locale-independent form that page recommends. Derived independently as well: 1968 is divisible by 4 and not by 100, so February has 29 days. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "DAYSINMONTH_february_non_leap_year",
+      "formula": "=DAYSINMONTH(DATE(2026,2,1))",
+      "description": "The same month in a non-leap year",
+      "setup_cells": {},
+      "expected": 28,
+      "expected_note": "DERIVED from \"Calculates the number of days of the month in which the date entered occurs.\" 2026 is not divisible by 4, so February has 28 days. Paired with the published leap-year case above, this is what shows the function reads the YEAR of its argument and not just the month. LibreOffice's DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "DAYSINMONTH_thirty_day_month",
+      "formula": "=DAYSINMONTH(DATE(2026,4,30))",
+      "description": "A 30-day month, from a date on the last day of it",
+      "setup_cells": {},
+      "expected": 30,
+      "expected_note": "DERIVED from the same sentence. April has 30 days. The argument is the last day of the month, which is the boundary an off-by-one implementation would get wrong. LibreOffice's DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    },
+    {
+      "id": "DAYSINMONTH_thirty_one_day_month",
+      "formula": "=DAYSINMONTH(DATE(2026,8,1))",
+      "description": "A 31-day month, from a date on the first day of it",
+      "setup_cells": {},
+      "expected": 31,
+      "expected_note": "DERIVED from the same sentence. August has 31 days; the argument is the first day of the month, the other boundary. LibreOffice's DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html."
+    }
+  ]
+}

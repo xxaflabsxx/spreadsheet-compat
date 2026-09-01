@@ -310,6 +310,115 @@ _XLFN_FUNCTIONS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# LIBREOFFICE-ONLY FUNCTIONS: A SECOND, DIFFERENT STORAGE PROBLEM
+# ---------------------------------------------------------------------------
+# Everything above is about functions EXCEL has and OOXML froze out, so the
+# token is whatever Excel writes. The names below are the mirror image:
+# functions LIBREOFFICE has and Excel does not, which therefore have no OOXML
+# name at all. LibreOffice invents one, and a workbook this harness writes must
+# use exactly the token LibreOffice's own .xlsx filter reads back, or a fully
+# implemented function is recorded as #NAME? and published as unsupported.
+#
+# There is no vendor table to copy here -- Microsoft has no opinion about
+# LibreOffice's own functions -- so every entry below was measured, in BOTH
+# directions, on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3,
+# 25.8.7.3) before it was written down:
+#
+#   IMPORT.  Each candidate spelling was written into a workbook with openpyxl
+#            (which caches no value, so the engine must evaluate from scratch)
+#            and round-tripped through `soffice --headless --convert-to xlsx`.
+#            Nine spellings were tried per function: plain, _xlfn.,
+#            COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE.,
+#            ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT.
+#            and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS.
+#   EXPORT.  The same formulas were then fed to each build through its OWN
+#            formula parser (a CSV import with the "evaluate formulas" filter
+#            token on) and written back out to .xlsx, and the stored token was
+#            read straight out of the raw sheet XML. This is what LibreOffice
+#            itself writes, which is the thing this module is supposed to
+#            record.
+#
+# The two directions agree on every entry below, which is why these are the
+# tokens used. Three findings are worth keeping next to the table:
+#
+# 1. THE ORG.OPENOFFICE. GROUP CHANGED ITS EXPORT TOKEN BETWEEN 24.2 AND 24.8.
+#    For DAYSINMONTH, DAYSINYEAR, ISLEAPYEAR, MONTHS, ROT13, WEEKS,
+#    WEEKSINYEAR and YEARS, LibreOffice 24.2.0.3 writes "ORG.OPENOFFICE.<NAME>"
+#    while 24.8.7.2, 25.2.0.3 and 25.8.7.3 all write the BARE "<NAME>". The
+#    import side matches: 24.2 accepts only the ORG.OPENOFFICE. form (the bare
+#    name is #NAME? there, and "=ROT13(...)" is #VALUE! rather than #NAME?),
+#    while 24.8+ accept both. So a .xlsx written by LibreOffice 24.8 or later
+#    using any of these eight functions OPENS IN 24.2 AS #NAME? -- a real
+#    forward-incompatibility inside one application's own file format, and one
+#    this corpus can show because it runs four builds. The ORG.OPENOFFICE.
+#    form is the token recorded here precisely because it is the one all four
+#    builds read; using the bare name would have silently produced eight false
+#    "unsupported in LibreOffice 24.2" verdicts.
+#
+# 2. THE NAMESPACE SPLIT IS OOo-ERA VS LIBREOFFICE-ERA, and LibreOffice's help
+#    states it per function under "Technical information" ("The name space is
+#    ORG.LIBREOFFICE.RAWSUBTRACT"). Functions inherited from OpenOffice.org
+#    take ORG.OPENOFFICE.; functions LibreOffice added after the fork take
+#    ORG.LIBREOFFICE.. The help's namespace sentence is about ODF/OpenFormula,
+#    not OOXML, so it is corroboration rather than authority -- the tokens here
+#    are the measured OOXML ones. Note EASTERSUNDAY and ERRORTYPE are
+#    OOo-era yet take the _xlfn. prefix on top of ORG.OPENOFFICE. on all four
+#    builds, where their eight neighbours in finding (1) do not: LibreOffice is
+#    not internally consistent about this and the table reflects what it does,
+#    not what would be tidy.
+#
+# 3. CONVERT_OOO IS RENAMED, NOT PREFIXED. Its OOXML token is
+#    _xlfn.ORG.OPENOFFICE.CONVERT -- the "_OOO" suffix is dropped, because in
+#    ODF the name that needs distinguishing is CONVERT (LibreOffice's currency
+#    converter) versus Excel's unit-converting CONVERT, and the namespace is
+#    what separates them there. This is why the map below stores whole tokens
+#    rather than prefixes: no prefix rule can express a rename.
+#
+# WHAT IS NOT HERE, AND WHY (this is a finding, not an omission). Eleven
+# LibreOffice-only names have NO reachable OOXML token at all, because
+# LibreOffice's own export COLLAPSES THEM ONTO ANOTHER FUNCTION'S token:
+#     CUMIPMT_ADD -> CUMIPMT          CUMPRINC_ADD -> CUMPRINC
+#     EFFECT_ADD  -> EFFECT           NOMINAL_ADD  -> NOMINAL
+#     GCD_EXCEL2003 -> GCD            LCM_EXCEL2003 -> LCM
+#     ISEVEN_ADD  -> ISEVEN           ISODD_ADD    -> ISODD
+#     WEEKNUM_EXCEL2003 -> WEEKNUM
+#     FORMULA     -> _xlfn.FORMULATEXT
+#     SKEWP       -> _xlfn.SKEW.P
+# All eleven return #NAME? on all four builds under all nine spellings probed,
+# and the export direction explains why: save a .xlsx from LibreOffice and the
+# alias is simply gone, replaced by its modern namesake. They are therefore NOT
+# executable through this harness's .xlsx transport, and no entry here could
+# make them so -- writing "CUMIPMT" would test CUMIPMT, not CUMIPMT_ADD. There
+# is deliberately no data/tests file for any of them: a #NAME? run would have
+# published "unsupported in LibreOffice" for eleven functions LibreOffice
+# genuinely implements, which would be false. This follows batch G's WEBSERVICE
+# precedent -- record the finding, decline the verdict.
+_LO_STORAGE_NAMES = {
+    # OOo-era, bare ORG.OPENOFFICE. token (see finding 1 above).
+    "DAYSINMONTH": "ORG.OPENOFFICE.DAYSINMONTH",
+    "DAYSINYEAR": "ORG.OPENOFFICE.DAYSINYEAR",
+    "ISLEAPYEAR": "ORG.OPENOFFICE.ISLEAPYEAR",
+    "MONTHS": "ORG.OPENOFFICE.MONTHS",
+    "ROT13": "ORG.OPENOFFICE.ROT13",
+    "WEEKS": "ORG.OPENOFFICE.WEEKS",
+    "WEEKSINYEAR": "ORG.OPENOFFICE.WEEKSINYEAR",
+    "YEARS": "ORG.OPENOFFICE.YEARS",
+    # OOo-era, but _xlfn.-prefixed on every build (see finding 2 above).
+    "EASTERSUNDAY": "_xlfn.ORG.OPENOFFICE.EASTERSUNDAY",
+    "ERRORTYPE": "_xlfn.ORG.OPENOFFICE.ERRORTYPE",
+    # Renamed, not merely prefixed (see finding 3 above).
+    "CONVERT_OOO": "_xlfn.ORG.OPENOFFICE.CONVERT",
+    # LibreOffice-era additions.
+    "RAWSUBTRACT": "_xlfn.ORG.LIBREOFFICE.RAWSUBTRACT",
+    "REGEX": "_xlfn.ORG.LIBREOFFICE.REGEX",
+    "WEEKNUM_OOO": "_xlfn.ORG.LIBREOFFICE.WEEKNUM_OOO",
+    # CHISQDIST and CHISQINV are deliberately ABSENT: both are read and written
+    # by all four builds under their bare names, so they need no translation.
+    # Verified the same two ways as every entry above.
+}
+
+
 def to_storage_formula(formula: str, function_name: str) -> str:
     """
     Given a formula string as a human would type it in the Excel UI
@@ -327,20 +436,28 @@ def to_storage_formula(formula: str, function_name: str) -> str:
     import re
 
     name = function_name.upper()
-    if name in _XLWS_FUNCTIONS:
-        prefix = "_xlfn._xlws."
+    if name in _LO_STORAGE_NAMES:
+        # A LibreOffice-only function: the whole token is replaced, not
+        # prefixed, because one of them (CONVERT_OOO) is genuinely renamed.
+        replacement = _LO_STORAGE_NAMES[name]
+    elif name in _XLWS_FUNCTIONS:
+        replacement = "_xlfn._xlws." + name
     elif name in _XLFN_FUNCTIONS:
-        prefix = "_xlfn."
+        replacement = "_xlfn." + name
     else:
         return formula  # no translation needed (legacy / pre-2007 function)
 
     pattern = re.compile(r"(?<![A-Za-z0-9_.])" + re.escape(name) + r"(?=\()", re.IGNORECASE)
-    return pattern.sub(prefix + name, formula)
+    return pattern.sub(replacement.replace("\\", "\\\\"), formula)
 
 
 def storage_function_names():
-    """Return the set of all function names known to need a storage prefix."""
-    return set(_XLFN_FUNCTIONS) | set(_XLWS_FUNCTIONS)
+    """Return the set of all function names needing a storage-form rewrite.
+
+    Includes the LibreOffice-only names, whose rewrite is a whole-token
+    replacement rather than a prefix -- see _LO_STORAGE_NAMES.
+    """
+    return set(_XLFN_FUNCTIONS) | set(_XLWS_FUNCTIONS) | set(_LO_STORAGE_NAMES)
 
 
 def to_storage_formula_all(formula: str) -> str:
@@ -365,8 +482,16 @@ def to_storage_formula_all(formula: str) -> str:
 
     out = formula
     for name in sorted(storage_function_names(), key=len, reverse=True):
-        prefix = "_xlfn._xlws." if name in _XLWS_FUNCTIONS else "_xlfn."
+        if name in _LO_STORAGE_NAMES:
+            replacement = _LO_STORAGE_NAMES[name]
+        elif name in _XLWS_FUNCTIONS:
+            replacement = "_xlfn._xlws." + name
+        else:
+            replacement = "_xlfn." + name
         pattern = re.compile(
             r"(?<![A-Za-z0-9_.])" + re.escape(name) + r"(?=\()", re.IGNORECASE)
-        out = pattern.sub(prefix + name, out)
+        # re.sub() treats backslashes in the replacement as group references;
+        # none of these tokens contains one, but escape defensively so a future
+        # entry cannot silently corrupt a formula.
+        out = pattern.sub(replacement.replace("\\", "\\\\"), out)
     return out

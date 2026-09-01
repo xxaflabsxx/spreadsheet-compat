@@ -1,0 +1,29 @@
+{
+  "function": "CHISQINV",
+  "cases": [
+    {
+      "id": "CHISQINV_median_two_degrees_of_freedom",
+      "formula": "=ROUND(CHISQINV(0.5,2),12)",
+      "description": "The inverse at probability 0.5 with 2 degrees of freedom",
+      "setup_cells": {},
+      "expected": 1.38629436112,
+      "expected_note": "NOTHING ON THIS PAGE IS A PUBLISHED RESULT: like CHISQDIST above, CHISQINV's entry carries a description and a Syntax block and no Example section, while the COM.MICROSOFT-namespaced CHISQ.INV immediately above it on the same page does publish one. DERIVED from the page's whole description, which is one sentence: \"Returns the inverse of CHISQDIST.\" Read together with CHISQDIST's own page that makes this the inverse of the CUMULATIVE branch (the default branch), i.e. the left-tailed quantile -- and the two cases below check that reading rather than assuming it. Derived independently: with two degrees of freedom the cumulative function is 1 - exp(-x/2), so its inverse at 0.5 is 2*ln(2) = 1.386294361119890618834464242916353136151 (mpmath, 40 digits). STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html."
+    },
+    {
+      "id": "CHISQINV_round_trips_through_CHISQDIST",
+      "formula": "=ROUND(CHISQDIST(CHISQINV(0.7,4),4,1),10)",
+      "description": "'the inverse of CHISQDIST' asserted as an actual round trip",
+      "setup_cells": {},
+      "expected": 0.7,
+      "expected_note": "A structural assertion with no derived constant, and the case that carries the page's entire documented claim: feeding CHISQINV's output back into CHISQDIST must return the probability it started from. This is also what pins the inverse to the cumulative branch -- the density is not monotonic, so no such round trip exists for it. Asserted at 10 places rather than 12 to leave room for the root-finder's own convergence tolerance, which the page does not specify. LibreOffice's CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html."
+    },
+    {
+      "id": "CHISQINV_upper_tail_one_degree_of_freedom",
+      "formula": "=ROUND(CHISQINV(0.95,1),12)",
+      "description": "A second point, at one degree of freedom, well away from the median",
+      "setup_cells": {},
+      "expected": 3.841458820694,
+      "expected_note": "DERIVED independently as the solution of P(0.5, x/2) = 0.95, which is 3.841458820694124469101699415925084172617 (mpmath, 40 digits). Chosen because a left-tailed and a right-tailed reading of \"the inverse\" give wildly different answers here (3.8414588 versus 0.0039321), so the case would catch a tail-convention error that the symmetric-looking median case above could not. LibreOffice's CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html."
+    }
+  ]
+}

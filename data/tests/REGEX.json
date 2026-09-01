@@ -1,0 +1,53 @@
+{
+  "function": "REGEX",
+  "cases": [
+    {
+      "id": "REGEX_published_replace_first_digit",
+      "formula": "=REGEX(\"123456ABCDEF\",\"[:digit:]\",\"Z\")",
+      "description": "LibreOffice's own published example: replace the first match",
+      "setup_cells": {},
+      "expected": "Z23456ABCDEF",
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=REGEX(\"123456ABCDEF\";\"[:digit:]\";\"Z\") returns \"Z23456ABCDEF\", where the first match of a digit is replaced by \"Z\".\" This page is the best-documented in the whole batch -- five worked examples with printed results -- so five of the six cases here are published rather than derived. THE REGEX FLAVOUR IS PART OF THE FINDING AND THE PAGE STATES IT: \"Expression: A text representing the regular expression, using ICU regular expressions.\" That is a different flavour from the PCRE2 that Microsoft's REGEXEXTRACT/REGEXREPLACE/REGEXTEST pages specify, which is why this corpus keeps LibreOffice's REGEX and Microsoft's REGEX* trio as separate functions rather than treating either as the other's alias. Note also that the bracket expression published here is \"[:digit:]\" -- a bracketed set of the six characters : d g i t, not the POSIX class [[:digit:]] -- which happens to match the digits in this input anyway; the value asserted is the one the page publishes for the expression the page publishes. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html."
+    },
+    {
+      "id": "REGEX_published_replace_all_with_g_flag",
+      "formula": "=REGEX(\"123456ABCDEF\",\"[:digit:]\",\"Z\",\"g\")",
+      "description": "LibreOffice's own published example: the g flag replaces every match",
+      "setup_cells": {},
+      "expected": "ZZZZZZABCDEF",
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=REGEX(\"123456ABCDEF\";\"[:digit:]\";\"Z\";\"g\") returns \"ZZZZZZABCDEF\", where all digits were replaced by \"Z\".\" Matches the documented Flags parameter: \"'g' replaces all matches of Expression in Text, not extracted.\" LibreOffice's REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html."
+    },
+    {
+      "id": "REGEX_published_delete_by_empty_replacement",
+      "formula": "=REGEX(\"123456ABCDEF\",\"[126]\",\"\",\"g\")",
+      "description": "LibreOffice's own published example: an empty replacement deletes",
+      "setup_cells": {},
+      "expected": "345ABCDEF",
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=REGEX(\"123456ABCDEF\";\"[126]\";\"\";\"g\") returns \"345ABCDEF\", where any occurrence of \"1\", \"2\" or \"6\" is replaced by the empty string, thus deleted.\" LibreOffice's REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html."
+    },
+    {
+      "id": "REGEX_published_extract_nth_occurrence",
+      "formula": "=REGEX(\"axbxcxd\",\".x\",,2)",
+      "description": "LibreOffice's own published example: the Occurrence argument extracts",
+      "setup_cells": {},
+      "expected": "bx",
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=REGEX(\"axbxcxd\";\".x\";;2) returns \"bx\", the second match of \".x\".\" The empty third argument is the page's own -- Replacement omitted turns the call from a replace into an extract, per \"Occurrence: ... Number to indicate which match of Expression in Text is to be extracted or replaced.\" It is written here exactly as published, empty argument included. LibreOffice's REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html."
+    },
+    {
+      "id": "REGEX_published_capture_group_replacement",
+      "formula": "=REGEX(\"axbxcxd\",\"(.)x\",\"$1y\",2)",
+      "description": "LibreOffice's own published example: a capture-group reference in the replacement",
+      "setup_cells": {},
+      "expected": "axbycxd",
+      "expected_note": "LIBREOFFICE'S OWN PUBLISHED RESULT, quoted verbatim: \"=REGEX(\"axbxcxd\";\"(.)x\";\"$1y\";2) returns \"axbycxd\", the second match of \"(.)x\" (i.e. \"bx\") replaced with the captured group of one character (i.e. \"b\") followed by \"y\".\" This is the case that exercises the documented \"references to capture groups\" in the Replacement parameter, and the $1 syntax is ICU's. LibreOffice's REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html."
+    },
+    {
+      "id": "REGEX_no_match_without_replacement_is_NA",
+      "formula": "=ISNA(REGEX(\"abc\",\"z\"))",
+      "description": "The documented #N/A for a failed match with no replacement given",
+      "setup_cells": {},
+      "expected": true,
+      "expected_note": "DERIVED, and the one case in this file that is not published: the Expression parameter's description states \"If there is no match and Replacement is not given, #N/A is returned\", and the Occurrence description repeats it. This is the only place in the batch where a LibreOffice page names a specific error value, so it is the only place an error value is asserted. LibreOffice's REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html."
+    }
+  ]
+}

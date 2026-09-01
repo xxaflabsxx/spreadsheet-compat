@@ -1,0 +1,37 @@
+{
+  "function": "CONVERT_OOO",
+  "cases": [
+    {
+      "id": "CONVERT_OOO_euro_to_deutschmark_fixed_rate",
+      "formula": "=ROUND(CONVERT_OOO(1,\"EUR\",\"DEM\"),10)",
+      "description": "The euro-to-mark conversion at the fixed entry rate",
+      "setup_cells": {},
+      "expected": 1.95583,
+      "expected_note": "THE PAGE PUBLISHES THE RULE BUT NOT THE RATES, SO THIS CASE CITES A SECOND AUTHORITY FOR THE NUMBER. LibreOffice's page states the semantics -- \"Converts to euros a currency value expressed in one of the legacy currencies of 19 member states of the Eurozone, and vice versa. The conversion uses the fixed exchange rates at which the legacy currencies entered the euro\" -- and prints two examples, =CONVERT_OOO(100;\"ATS\";\"EUR\") and =CONVERT_OOO(100;\"EUR\";\"DEM\"), BOTH OF WHICH ARE DESCRIBED IN WORDS RATHER THAN GIVEN A RESULT (\"returns the euro value of 100 Austrian schillings\"). The rates themselves are not on the page. The rate used here is the irrevocably fixed conversion rate adopted by the Council of the European Union, Council Regulation (EC) No 2866/98 of 31 December 1998 on the conversion rates between the euro and the currencies of the Member States adopting the euro: 1 EUR = 1.95583 DEM. That is a legal constant, not a market quotation, which is exactly why the page can call it fixed. The case is written EUR -> DEM so that the asserted number IS the published rate rather than its reciprocal. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel's function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice's own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is LibreOffice's own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice's CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html."
+    },
+    {
+      "id": "CONVERT_OOO_round_trips_through_the_euro",
+      "formula": "=ROUND(CONVERT_OOO(CONVERT_OOO(100,\"ATS\",\"EUR\"),\"EUR\",\"ATS\"),8)",
+      "description": "The page's own first example, composed with its inverse so no rate is needed",
+      "setup_cells": {},
+      "expected": 100,
+      "expected_note": "A structural assertion with no constant from any source: whatever fixed rate the implementation holds for the Austrian schilling, converting to euros and back must return the original amount. This is the strongest claim that can be made from LibreOffice's page alone, since it prints the example but not its value. LibreOffice's CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html."
+    },
+    {
+      "id": "CONVERT_OOO_requires_one_side_to_be_the_euro",
+      "formula": "=ISERROR(CONVERT_OOO(100,\"ATS\",\"DEM\"))",
+      "description": "The documented constraint that exactly one side must be EUR",
+      "setup_cells": {},
+      "expected": true,
+      "expected_note": "DERIVED from the page's sentence \"One, and only one, of Text1 or Text2 must be equal to 'EUR'.\" NO ERROR CODE IS ASSERTED, because the page names none -- it states the requirement and stops -- so this case asserts only that the requirement is enforced. Both currencies here are on the page's own list of accepted values, so the only thing wrong with the call is the missing euro. LibreOffice's CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html."
+    },
+    {
+      "id": "CONVERT_OOO_rejects_a_currency_off_the_list",
+      "formula": "=ISERROR(CONVERT_OOO(100,\"XXX\",\"EUR\"))",
+      "description": "The documented closed list of currency codes",
+      "setup_cells": {},
+      "expected": true,
+      "expected_note": "DERIVED from \"Text1 and Text2 must each take one of the following values: 'ATS', 'BEF', 'CYP', 'DEM', 'EEK', 'ESP', 'EUR', 'FIM', 'FRF', 'GRD', 'IEP', 'ITL', 'LTL', 'LUF', 'LVL', 'MTL', 'NLG', 'PTE', 'SIT', and 'SKK'.\" XXX is the ISO 4217 code reserved for 'no currency', so it is guaranteed never to join that list. Again no error code is asserted, only that the constraint is enforced. LibreOffice's CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html."
+    }
+  ]
+}
