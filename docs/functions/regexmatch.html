@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>REGEXMATCH is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for REGEXMATCH in all 5 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<title>REGEXMATCH is not supported in LibreOffice Calc (works in Sheets)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for REGEXMATCH in all 5 executed test cases; all 5 Go… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/regexmatch.html">
-<meta property="og:title" content="REGEXMATCH is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for REGEXMATCH in all 5 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta property="og:title" content="REGEXMATCH is not supported in LibreOffice Calc (works in Sheets)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for REGEXMATCH in all 5 executed test cases; all 5 Go… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/regexmatch.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>REGEXMATCH</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document REGEXMATCH, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>REGEXMATCH</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document REGEXMATCH, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -446,6 +446,16 @@ we re-run every test on each new release, so it will flip to Supported here as s
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -510,6 +520,57 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=REGEXMATCH(&#34;Spreadsheets&#34;, &#34;S.r&#34;)</td>
+  <td>The page&#39;s single Sample Usage line</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">The page prints REGEXMATCH(&#34;Spreadsheets&#34;, &#34;S.r&#34;) and NO result, so TRUE is DERIVED. &#34;S.r&#34; matches the substring &#34;Spr&#34; at the start of &#34;Spreadsheets&#34;. THE PAGE NEVER SAYS WHETHER THE MATCH IS ANCHORED OR A SUBSTRING SEARCH -- there is no such sentence on it. Two things settle it: RE2&#39;s linked syntax reference defines an unanchored match, and the page would not print this pattern as its one and only sample if the answer were FALSE. That reasoning is recorded here rather than presented as a Google claim. THE AUTHORITY FOR REGEX SEMANTICS ON THIS PAGE IS A LINK, AND IT IS CITED AS ONE. The page states: &#34;Google products use RE2 for regular expressions. Google Sheets supports RE2 except Unicode character class matching&#34;, and links the syntax to https://github.com/google/re2/wiki/syntax. Google&#39;s REGEXMATCH page, read live on 2026-08-31 at https://support.google.com/docs/answer/3098292. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXMATCH(&#34;Spreadsheets&#34;, &#34;^S.r$&#34;)</td>
+  <td>The same pattern anchored at both ends</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">The companion to the case above, and the reason it is here: with ^ and $ the pattern must consume the whole string, and &#34;Spreadsheets&#34; is twelve characters, not three. If both this case and the unanchored one return the same answer, the engine is not honouring anchors. Anchors are RE2 syntax; the page itself says nothing about them. THE AUTHORITY FOR REGEX SEMANTICS ON THIS PAGE IS A LINK, AND IT IS CITED AS ONE. The page states: &#34;Google products use RE2 for regular expressions. Google Sheets supports RE2 except Unicode character class matching&#34;, and links the syntax to https://github.com/google/re2/wiki/syntax. Google&#39;s REGEXMATCH page, read live on 2026-08-31 at https://support.google.com/docs/answer/3098292.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXMATCH(&#34;ABC&#34;, &#34;abc&#34;)</td>
+  <td>A lowercase pattern against uppercase text</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">THE PAGE SAYS NOTHING ABOUT CASE SENSITIVITY -- searched for twice, on two separate fetches; there is no such sentence. FALSE is derived from RE2&#39;s linked syntax reference, under which matching is case sensitive unless a flag says otherwise. THE AUTHORITY FOR REGEX SEMANTICS ON THIS PAGE IS A LINK, AND IT IS CITED AS ONE. The page states: &#34;Google products use RE2 for regular expressions. Google Sheets supports RE2 except Unicode character class matching&#34;, and links the syntax to https://github.com/google/re2/wiki/syntax. Google&#39;s REGEXMATCH page, read live on 2026-08-31 at https://support.google.com/docs/answer/3098292.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXMATCH(&#34;ABC&#34;, &#34;(?i)abc&#34;)</td>
+  <td>The same comparison with RE2&#39;s inline case-insensitivity flag</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">The pair that makes the previous case mean something: (?i) is RE2&#39;s inline flag for case-insensitive matching, from the linked syntax reference. Google&#39;s page mentions neither the flag nor the default. THE AUTHORITY FOR REGEX SEMANTICS ON THIS PAGE IS A LINK, AND IT IS CITED AS ONE. The page states: &#34;Google products use RE2 for regular expressions. Google Sheets supports RE2 except Unicode character class matching&#34;, and links the syntax to https://github.com/google/re2/wiki/syntax. Google&#39;s REGEXMATCH page, read live on 2026-08-31 at https://support.google.com/docs/answer/3098292.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXMATCH(TEXT(123,&#34;0&#34;), &#34;2&#34;)</td>
+  <td>The page&#39;s own remedy for numeric input</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">The page states: &#34;This function only works with text (not numbers) as input and returns a logical value, i.e. TRUE or FALSE, as output. If numbers are used as input, convert them to text using the TEXT function.&#34; It names NO error value for the rejected numeric case, so this corpus asserts nothing about REGEXMATCH(123, ...) and instead executes the workaround the page prescribes. Google&#39;s REGEXMATCH page, read live on 2026-08-31 at https://support.google.com/docs/answer/3098292.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

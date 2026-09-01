@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ISBETWEEN is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for ISBETWEEN in all 6 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<title>ISBETWEEN is not supported in LibreOffice Calc (works in Sheets)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for ISBETWEEN in all 6 executed test cases; all 6 Goo… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/isbetween.html">
-<meta property="og:title" content="ISBETWEEN is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for ISBETWEEN in all 6 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta property="og:title" content="ISBETWEEN is not supported in LibreOffice Calc (works in Sheets)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for ISBETWEEN in all 6 executed test cases; all 6 Goo… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/isbetween.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Operator &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ISBETWEEN</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document ISBETWEEN, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ISBETWEEN</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document ISBETWEEN, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -446,6 +446,18 @@ we re-run every test on each new release, so it will flip to Supported here as s
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -520,6 +532,65 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ISBETWEEN(7.9, 1.2, 12.45)</td>
+  <td>Published row 1: a value strictly inside the range, both flags defaulted</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">This IS one of Google&#39;s own published results: the page carries a real Formula/Result table in the article body (not an embedded live sheet), and this row is quoted from it verbatim. ISBETWEEN is one of the few pages in this batch that publishes a complete Formula/Output table in the article body, so every case in this file is Google&#39;s own printed result rather than a derivation. The six rows below are the whole table. Google&#39;s ISBETWEEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10538337. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISBETWEEN(1.2, 1.2, 12.45, TRUE)</td>
+  <td>Published row 2: the lower bound itself, with lower_value_is_inclusive TRUE</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">This IS one of Google&#39;s own published results: the page carries a real Formula/Result table in the article body (not an embedded live sheet), and this row is quoted from it verbatim. The argument description reads: &#34;Whether the range of values includes the `lower_value`. By default this is TRUE&#34;. Google&#39;s ISBETWEEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10538337.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISBETWEEN(1.2, 1.2, 12.45, FALSE)</td>
+  <td>Published row 3: the same lower bound with the flag turned off</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">This IS one of Google&#39;s own published results: the page carries a real Formula/Result table in the article body (not an embedded live sheet), and this row is quoted from it verbatim. Rows 2 and 3 differ only in that flag, which is what makes the pair worth executing. Google&#39;s ISBETWEEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10538337.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISBETWEEN(12.45, 1.2, 12.45, TRUE, TRUE)</td>
+  <td>Published row 4: the upper bound with both flags explicitly TRUE</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">This IS one of Google&#39;s own published results: the page carries a real Formula/Result table in the article body (not an embedded live sheet), and this row is quoted from it verbatim. Google&#39;s ISBETWEEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10538337.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISBETWEEN(12.45, 1.2, 12.45, TRUE, FALSE)</td>
+  <td>Published row 5: the upper bound with upper_value_is_inclusive FALSE</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">This IS one of Google&#39;s own published results: the page carries a real Formula/Result table in the article body (not an embedded live sheet), and this row is quoted from it verbatim. Google&#39;s ISBETWEEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10538337.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISBETWEEN(7.9, 1.2, 12.45, FALSE, FALSE)</td>
+  <td>Published row 6: an interior value is unaffected by either flag</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">This IS one of Google&#39;s own published results: the page carries a real Formula/Result table in the article body (not an embedded live sheet), and this row is quoted from it verbatim. The row that shows the flags govern the endpoints only. THE PAGE SAYS NOTHING ABOUT TEXT OR DATES: all six published rows use plain numbers and no sentence on the page mentions comparing text or date values, so this corpus asserts nothing about them. Google&#39;s ISBETWEEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10538337.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IMTANH is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for IMTANH in all 4 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<title>IMTANH is not supported in LibreOffice Calc (works in Sheets)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for IMTANH in all 4 executed test cases; all 4 Google… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/imtanh.html">
-<meta property="og:title" content="IMTANH is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for IMTANH in all 4 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta property="og:title" content="IMTANH is not supported in LibreOffice Calc (works in Sheets)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for IMTANH in all 4 executed test cases; all 4 Google… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/imtanh.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Engineering &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>IMTANH</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document IMTANH, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>IMTANH</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document IMTANH, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -446,6 +446,14 @@ we re-run every test on each new release, so it will flip to Supported here as s
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -500,6 +508,49 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMTANH(COMPLEX(4,1))</td>
+  <td>Published row 1, asserted as the exact result string Google prints</td>
+  <td class="result mono">1.00027905623447+0.00061024092137626i</td>
+  <td class="result mono">1.00027905623447+0.00061024092137626i<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT, quoted verbatim from the Formula/Result table: =IMTANH(COMPLEX(4,1)) -&gt; 1.00027905623447+0.00061024092137626i. Derived independently as tanh(4+i) = 1.000279056234465568359093202101514584404 + 0.000610240921376259785352673334029321933866i. NOTE THAT THE PAGE&#39;S TWO LISTS DISAGREE ON THEIR INPUTS: the &#39;Sample formulas&#39; block uses COMPLEX(4,6), 4 and &#34;2+3i&#34;, while the Formula/Result table uses COMPLEX(4,1), 3.5 and &#34;3+2i&#34;. Only the table&#39;s rows carry results, and only those are asserted here. INDEPENDENT DERIVATION. Every figure quoted from these three pages was recomputed here at 40 decimal digits with mpmath before it was written down -- coth/tanh/log evaluated directly on the complex argument -- and all nine of Google&#39;s published results reproduce EXACTLY at the 15 significant digits the pages print, correctly rounded. Nothing on these pages needed correcting. NOTE ON THE RESULT FORMAT, WHICH THE PAGE NEVER STATES. None of the three pages contains a sentence describing the shape of the returned complex value -- no &#34;a+bi&#34; rule, no i-versus-j statement, no precision or rounding rule. The format is visible ONLY in the literal result strings the pages print. That is why this file asserts the string form in exactly one case per function and asserts the numeric components through IMREAL/IMAGINARY everywhere else: a difference in formatting and a difference in the mathematics are different findings and should not be able to masquerade as each other. Google&#39;s IMTANH page, read live on 2026-08-31 at https://support.google.com/docs/answer/9366655. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(IMTANH(3.5),15)</td>
+  <td>Published row 2: a real argument read as a complex number</td>
+  <td class="result mono">0.9981778976</td>
+  <td class="result mono">0.998177897611199<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: =IMTANH(3.5) -&gt; 0.998177897611199. Derived independently as tanh(3.5) = 0.9981778976111987092842733524506117173517. Google&#39;s IMTANH page, read live on 2026-08-31 at https://support.google.com/docs/answer/9366655.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(IMREAL(IMTANH(&#34;3+2i&#34;)),14)</td>
+  <td>Published row 3, real part, from a string-form argument</td>
+  <td class="result mono">1.003238627</td>
+  <td class="result mono">1.00323862735361<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: =IMTANH(&#34;3+2i&#34;) -&gt; 1.00323862735361-0.00376402564150425i. Real part derived independently as 1.003238627353609801446358597821927259808. Google&#39;s IMTANH page, read live on 2026-08-31 at https://support.google.com/docs/answer/9366655.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(IMAGINARY(IMTANH(&#34;3+2i&#34;)),17)</td>
+  <td>The imaginary part of the same row, which is negative</td>
+  <td class="result mono">-0.003764025642</td>
+  <td class="result mono">-0.00376402564150425<br><span class="category-tag">The imaginary half of the same published result, derived independently as -0.003764025641504248292751221130322690839631. The sign is the point: IMCOTH on the same argument has a POSITIVE imaginary part, so this pair also checks that the two functions are not the same code. Google&#39;s IMTANH page, read live on 2026-08-31 at https://support.google.com/docs/answer/9366655.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
