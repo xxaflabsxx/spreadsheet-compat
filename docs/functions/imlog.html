@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IMLOG is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for IMLOG in all 6 executed test cases. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
+<title>IMLOG is not supported in LibreOffice Calc (works in Sheets)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for IMLOG in all 6 executed test cases; all 6 Google… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/imlog.html">
-<meta property="og:title" content="IMLOG is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for IMLOG in all 6 executed test cases. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
+<meta property="og:title" content="IMLOG is not supported in LibreOffice Calc (works in Sheets)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for IMLOG in all 6 executed test cases; all 6 Google… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/imlog.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,7 +321,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>IMLOG</h1>
   
-    <span class="badge badge-quirk">Quirk found</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Engineering &middot; Last tested 2026-09-01</p>
@@ -362,7 +362,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-quirk">Quirk found</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -435,14 +435,6 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
-<h2 class="section-title">Why isn&rsquo;t IMLOG working in Google Sheets?</h2>
-
-<p><code>IMLOG</code> runs in Google Sheets, but our executed cases show it does not match
-Excel&rsquo;s documented behavior on every input (the failing cases are listed on this page). If a
-formula that behaves one way in Excel gives you a different answer in Sheets, compare your usage
-against those cases before assuming your data is wrong.</p>
-
-
 
 
 
@@ -454,14 +446,6 @@ against those cases before assuming your data is wrong.</p>
     
   
     
-      
-      <li>
-        <span class="formula">=IMLOG(100,10)</span> on
-        <strong>Google Sheets</strong> returned
-        <span class="formula">2</span>, but the documented/expected
-        result is <span class="formula">2</span>.
-        GOOGLE&#39;S OWN PUBLISHED RESULT: =IMLOG(100, 10) -&gt; 2. IMLOG&#39;s page is the only one of the three complex pages in this batch whose Sample-formulas inputs and Formula/Result table rows MATCH each other, so its three published results can be paired with its three samples directly. INDEPENDENT DERIVATION. Every figure quoted from these three pages was recomputed here at 40 decimal digits with mpmath before it was written down -- coth/tanh/log evaluated directly on the complex argument -- and all nine of Google&#39;s published results reproduce EXACTLY at the 15 significant digits the pages print, correctly rounded. Nothing on these pages needed correcting. Google&#39;s IMLOG page, read live on 2026-08-31 at https://support.google.com/docs/answer/9366486. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.; MISMATCH vs expected: expected 2, got &#39;2&#39;
-      </li>
       
     
       
@@ -561,7 +545,7 @@ against those cases before assuming your data is wrong.</p>
   <td>Published row 3: a real argument and base 10, whose result is an integer</td>
   <td class="result mono">2</td>
   <td class="result mono">2<br><span class="category-tag">TYPE CORRECTION (2026-09-01, post-ingest): first authored as the number 2; the executed engine returns the TEXT string &#39;2&#39; -- like every IM* function, IMLOG returns complex results as text, and Google&#39;s published table prints the figure typelessly. The expected is now the string, matching the engine&#39;s actual (and documented-family-consistent) return type; the printed figure itself was never in dispute. GOOGLE&#39;S OWN PUBLISHED RESULT: =IMLOG(100, 10) -&gt; 2. IMLOG&#39;s page is the only one of the three complex pages in this batch whose Sample-formulas inputs and Formula/Result table rows MATCH each other, so its three published results can be paired with its three samples directly. INDEPENDENT DERIVATION. Every figure quoted from these three pages was recomputed here at 40 decimal digits with mpmath before it was written down -- coth/tanh/log evaluated directly on the complex argument -- and all nine of Google&#39;s published results reproduce EXACTLY at the 15 significant digits the pages print, correctly rounded. Nothing on these pages needed correcting. Google&#39;s IMLOG page, read live on 2026-08-31 at https://support.google.com/docs/answer/9366486. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
