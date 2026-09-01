@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PERCENTRANK significance: Excel truncates, both other engines round</title>
+<meta name="description" content="Executed: PERCENTRANK.INC(A2:A11,4) returns 0.556 in LibreOffice 25.8.7.3 and Google Sheets where Microsoft publishes 0.555, and at significance 1 PERCENTRANK.EXC returns 0.4 against a published 0.3. The ranking arithmetic matches everywhere; only the significance step differs, and only on repeating decimals.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:title" content="PERCENTRANK significance: Excel truncates, both other engines round">
+<meta property="og:description" content="Executed: PERCENTRANK.INC(A2:A11,4) returns 0.556 in LibreOffice 25.8.7.3 and Google Sheets where Microsoft publishes 0.555, and at significance 1 PERCENTRANK.EXC returns 0.4 against a published 0.3. The ranking arithmetic matches everywhere; only the significance step differs, and only on repeating decimals.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"PERCENTRANK significance: Excel truncates, both other engines round","item":"https://canispreadsheet.com/guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>PERCENTRANK: Excel truncates to significance, LibreOffice and Google Sheets round</h1>
+
+<p>The <code>significance</code> argument of <code>PERCENTRANK</code> is the least interesting-looking
+argument in the statistics library. It does not change the ranking; it only says how many digits of the
+answer you want, and it defaults to three. It is also the argument on which Microsoft&rsquo;s
+documentation and both engines we execute part company, silently, in the third decimal place of an
+ordinary percentile rank.</p>
+
+<p>The rule Microsoft publishes is <strong>truncation</strong>. The rule both executed engines
+implement is <strong>rounding</strong>. On any input whose exact rank is a repeating decimal &mdash;
+5/9, 6/9, and every other rank you get from a list of ten values &mdash; those two rules give different
+answers, and nothing errors, warns, or flags the difference.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>This is not a LibreOffice-versus-Google split. LibreOffice Calc 25.8.7.3 and Google Sheets return
+  <em>the same</em> answer on every case in this guide, and it is the answer Microsoft&rsquo;s pages do
+  not publish. <code>=PERCENTRANK.INC(A2:A11,4)</code> over Microsoft&rsquo;s own documented data is
+  <strong>0.555</strong> on Microsoft&rsquo;s page and <strong>0.556</strong> in both engines we ran.
+  At <code>significance</code> 1 the same disagreement moves the answer by a third of its own size:
+  Microsoft publishes <strong>0.3</strong>, both engines return <strong>0.4</strong>. All four
+  LibreOffice builds we test (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) agree with each other on every
+  row.</p>
+</div>
+
+<h2 class="section-title">Executed: the three rows that separate truncation from rounding</h2>
+<p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus &mdash; in
+these three rows it is a figure Microsoft prints in its own worked-example table. It is the yardstick,
+and we do not run Excel. The Google Sheets column is executed output from the dated Drive-import run of
+2026-08-31; the LibreOffice column is Calc 25.8.7.3, with the same result on the other three pinned
+builds.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Exact rank</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,4)</td><td>5/9 = 0.5555&hellip;</td><td>0.555</td><td class="result"><strong>0.556</strong></td><td class="result"><strong>0.556</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,8)</td><td>6/9 = 0.6666&hellip;</td><td>0.666</td><td class="result"><strong>0.667</strong></td><td class="result"><strong>0.667</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,5.43,1)</td><td>0.381, cut to 1 digit</td><td>0.3</td><td class="result"><strong>0.4</strong></td><td class="result"><strong>0.4</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p>The <code>.INC</code> rows run over Microsoft&rsquo;s published data <code>13, 12, 11, 8, 4, 3, 2, 1,
+1, 1</code> in <code>A2:A11</code>; the <code>.EXC</code> row runs over its published data
+<code>1, 2, 3, 6, 6, 6, 7, 8, 9</code> in <code>A2:A10</code>. Both data sets are Microsoft&rsquo;s own,
+and so are the three figures in the Excel column.</p>
+
+<h2 class="section-title">Why the exact rank is the whole story</h2>
+<p><code>PERCENTRANK.INC</code> gives the r-th smallest of n values the rank <code>r/(n-1)</code>,
+counting r from zero, so the smallest scores 0 and the largest scores 1. With ten values the
+denominator is 9, and a numerator of 5 or 6 produces a rank that never terminates in decimal. Five of
+the ten values are below 4, so <code>=PERCENTRANK.INC(A2:A11,4)</code> is exactly 5/9 =
+0.55555&hellip;, and Microsoft even spells the arithmetic out on the page for a neighbouring row
+(&ldquo;3 values in the set are smaller than 2, and 6 are larger&hellip; 3/(3+6)=0.333&rdquo;).</p>
+<p>Now cut that to three significant digits two different ways:</p>
+<ul>
+<li><strong>Truncate</strong> 0.55555&hellip; &rarr; <code>0.555</code>. This is what Microsoft
+publishes.</li>
+<li><strong>Round</strong> 0.55555&hellip; &rarr; <code>0.556</code>. This is what both engines
+returned.</li>
+</ul>
+<p>The companion row runs the test in the other direction, which is what makes the reading
+unambiguous rather than a possible typo on one page: 6/9 = 0.6666&hellip; truncates to
+<code>0.666</code> and rounds to <code>0.667</code>, and Microsoft publishes <code>0.666</code> while
+both engines returned <code>0.667</code>. Two rows, two directions, one rule each.</p>
+<p><code>PERCENTRANK.EXC</code> shows it a third time, and much more loudly. Its interpolated example
+is exactly 0.381 (3.81/10, computed in rational arithmetic), and Microsoft&rsquo;s page passes
+<code>significance</code> = 1 to it and prints <code>0.3</code>, adding the gloss &ldquo;displaying
+only 1 significant digit in the result (the default is 3)&rdquo;. Cutting 0.381 to one significant
+digit gives 0.3; rounding it gives 0.4. Both engines returned <strong>0.4</strong>.</p>
+
+<h2 class="section-title">The ranking itself is right &mdash; only the last step differs</h2>
+<p>This is worth stating plainly, because it bounds the damage. Every case in our corpus whose exact
+rank terminates at the requested precision passed in both engines, including the ones that pin which
+definition of &ldquo;percent rank&rdquo; each engine implements:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>What it pins down</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2)</td><td>Microsoft&rsquo;s headline example, 3/9</td><td>0.333</td><td class="result">0.333</td><td class="result">0.333</td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,5)</td><td>interpolation between two data points</td><td>0.583</td><td class="result">0.583</td><td class="result">0.583</td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,13)</td><td>the largest value; .INC sends it to 1</td><td>1</td><td class="result">1</td><td class="result">1</td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,7)</td><td>an exact member, 7/(9+1)</td><td>0.7</td><td class="result">0.7</td><td class="result">0.7</td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,5.43)</td><td>interpolation at the default 3 digits</td><td>0.381</td><td class="result">0.381</td><td class="result">0.381</td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,1)</td><td>the smallest value; .EXC keeps it above 0</td><td>0.1</td><td class="result">0.1</td><td class="result">0.1</td></tr>
+  </tbody>
+</table>
+</div>
+<p>So the ordering, the interpolation, the inclusive-versus-exclusive endpoints and the arithmetic are
+all correct in both engines. The disagreement lives entirely in the step that turns a full-precision
+rank into a significance-limited one, which is why it is so easy to miss: an engine that had the
+ranking wrong would show it everywhere, and an engine that only rounds instead of truncating shows it
+nowhere except on repeating decimals.</p>
+
+<h2 class="section-title">The legacy PERCENTRANK is not the same test</h2>
+<p><code>PERCENTRANK</code> without a suffix is still present in all three products and is the spelling
+most old workbooks use. Our corpus executes four cases for it, and all four match in both engines:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,10)</td><td>0</td><td class="result">0</td><td class="result">0</td></tr>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,25)</td><td>0.5</td><td class="result">0.5</td><td class="result">0.5</td></tr>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,30)</td><td>0.667</td><td class="result">0.667</td><td class="result">0.667</td></tr>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,40)</td><td>1</td><td class="result">1</td><td class="result">1</td></tr>
+  </tbody>
+</table>
+</div>
+<p>That is a clean pass, and it is also a warning about what a clean pass is worth. Three of those four
+values are exact at three digits no matter which rule you apply, and the fourth &mdash; 2/3 over four
+data points &mdash; is asserted in our corpus as 0.667, the rounded form, so it could never have
+distinguished the two rules either. The legacy file was written before the truncation question was
+asked, and it passes for that reason and no other. Those four cases were executed in LibreOffice on
+2026-08-04 and in Google Sheets on 2026-08-29; the <code>.INC</code> and <code>.EXC</code> cases above
+ran in both engines on 2026-08-31. We have <strong>no</strong> executed case that puts the legacy
+spelling on a repeating-decimal rank, so this guide makes no claim about whether it truncates or
+rounds. If your workbook uses the unsuffixed name, treat it as untested on this point rather than as
+cleared.</p>
+
+<h2 class="section-title">The two documented errors are a separate divergence</h2>
+<p>Both Microsoft pages exclude two inputs in the same words &mdash; &ldquo;If significance &lt; 1,
+PERCENTRANK.INC returns the #NUM! error value&rdquo; and &ldquo;If array is empty, PERCENTRANK.INC
+returns the #NUM! error value&rdquo; &mdash; and neither engine reproduces that, in two different
+directions:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2,0)</td><td>#NUM!</td><td class="result"><strong>0.333</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,7,0)</td><td>#NUM!</td><td class="result"><strong>0.7</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(D20:D25,2)</td><td>#NUM!</td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(D20:D25,7)</td><td>#NUM!</td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p><code>D20:D25</code> is deliberately left blank in the test workbook; nothing is written into it.
+Two things follow. Google Sheets does not treat <code>significance</code> = 0 as an error at all
+&mdash; it returns the ordinary three-digit answer, so a guard that expects a zero or a stray blank to
+raise <code>#NUM!</code> simply never fires there. LibreOffice does raise an error, but the wrong one:
+<code>#VALUE!</code> rather than <code>#NUM!</code>, which is the same substitution we find across the
+corpus and document in <a href="../guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">every
+error code LibreOffice reports as #VALUE!</a>. <code>IFERROR</code> and <code>ISERROR</code> are
+unaffected either way, because they catch every code; a branch on
+<code>ERROR.TYPE(...)=6</code> is not.</p>
+
+<h2 class="section-title">What to audit</h2>
+<p><strong>Find the repeating denominators, not the formulas.</strong> The rows that can move are the
+ones whose exact rank does not terminate at the requested number of digits, and that is a property of
+your <em>data length</em>, not of your formula text. For <code>PERCENTRANK.INC</code> the denominator
+is <code>n-1</code>; a list of 10, 4, 7, 8, 13 or 19 values (denominators 9, 3, 6, 7, 12, 18) produces
+repeating ranks for most numerators. For <code>PERCENTRANK.EXC</code> the denominator is
+<code>n+1</code>. Lists whose length makes the denominator a product of 2s and 5s &mdash; 11, 21, 26
+values for <code>.INC</code>, giving 10, 20, 25 &mdash; can never show the difference.</p>
+<p><strong>Look at what consumes the rank.</strong> A rank that is displayed, or fed to a chart, or
+compared with a wide band, will not care about the third decimal. A rank compared against a hard
+threshold will: <code>=IF(PERCENTRANK.INC(range,x)&gt;=0.556,"top half","bottom half")</code> flips
+on exactly the input this guide is about, and so does anything that does an equality test against a
+stored rank from a previous run.</p>
+<p><strong>Ask for full precision when you can.</strong> Nothing in the documented or executed
+behaviour above changes if you ask for more digits than the answer needs. A rank taken at high
+significance and rounded yourself &mdash; <code>=ROUND(PERCENTRANK.INC(range,x),3)</code> instead of
+the default three-digit significance &mdash; produces the rounded value in every engine, deliberately
+and visibly, rather than the engine&rsquo;s undocumented choice. That is a construction we are
+describing from the behaviour above, not a case we ran; treat it as a suggested shape rather than as a
+measured result.</p>
+<p><strong>Do not expect the migration direction to matter.</strong> Because LibreOffice and Google
+Sheets agree here, moving a workbook between those two changes nothing. The exposure is a workbook
+authored against Excel&rsquo;s documented output, or a figure copied out of Excel and compared to one
+of the other two.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column throughout is Microsoft&rsquo;s documented behaviour as recorded in our test
+corpus, and in the sharp rows it is a figure Microsoft prints on its own <code>PERCENTRANK.INC</code>
+and <code>PERCENTRANK.EXC</code> pages. We do not run Excel, and no value in that column is a
+measurement. What we can say is narrow and factual: the published figures and the executed figures
+differ, and the published figures are the ones consistent with the truncation rule the same pages
+describe.</p>
+<p>The Google Sheets column is executed output from a dated run, because Sheets has no version number
+to pin: a formula-only <code>.xlsx</code> carrying no cached results goes to Google Drive, is
+recalculated by Google&rsquo;s engine, and comes back as <code>.xlsx</code> for readback, with a
+deterministic <code>=1111+2222</code> canary in every sheet proving the recalculation happened. The
+<code>.INC</code> and <code>.EXC</code> cases ran on 2026-08-31, the legacy <code>PERCENTRANK</code>
+cases on 2026-08-29.</p>
+<p>The LibreOffice column is executed output from Calc 25.8.7.3, and every case above returned the
+identical result on 24.2.0.3, 24.8.7.2 and 25.2.0.3. Those four builds are the only ones we tested.
+Note that both dotted names are stored in a <code>.xlsx</code> as
+<code>_xlfn.PERCENTRANK.INC</code> and <code>_xlfn.PERCENTRANK.EXC</code>; LibreOffice reads those
+tokens and evaluates them, so nothing here is a storage-form artefact &mdash; see
+<a href="../guides/xlfn-storage-tokens-libreoffice-name-error-imcot-imsec-legacy-aliases.html">when a
+function exists but the file cannot say so</a> for the cases where it is.</p>
+<p>Scope. Seventeen cases across the three spellings is the entire <code>PERCENTRANK</code> corpus.
+Untested here: the legacy <code>PERCENTRANK</code> on any repeating-decimal rank, significance values
+above 3, non-integer significance, arrays containing text or logicals, duplicated values at the query
+point under <code>.EXC</code>, and whether the two engines&rsquo; agreement extends to
+<code>PERCENTILE</code> and <code>QUARTILE</code>, which have their own significance-free rounding
+story. See <a href="../methodology.html">our methodology</a> for how recalculation is proven rather
+than assumed, and the function pages for
+<a href="../functions/percentrank.inc.html">PERCENTRANK.INC</a>,
+<a href="../functions/percentrank.exc.html">PERCENTRANK.EXC</a> and
+<a href="../functions/percentrank.html">PERCENTRANK</a> for the per-engine support matrices.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

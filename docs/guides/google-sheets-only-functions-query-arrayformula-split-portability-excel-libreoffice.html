@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google-only functions: what ports to Excel and LibreOffice, and what does not</title>
+<meta name="description" content="Executed: 47 functions Google documents and neither Microsoft nor LibreOffice does, 189 cases, 183 of them #NAME? in LibreOffice on all four pinned builds after five- and nine-spelling probes. QUERY and ARRAYFORMULA do not port; the operator functions do exactly; REGEXMATCH, REGEXTEST and REGEX are three different functions with three regex flavours.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">
+<meta property="og:title" content="Google-only functions: what ports to Excel and LibreOffice, and what does not">
+<meta property="og:description" content="Executed: 47 functions Google documents and neither Microsoft nor LibreOffice does, 189 cases, 183 of them #NAME? in LibreOffice on all four pinned builds after five- and nine-spelling probes. QUERY and ARRAYFORMULA do not port; the operator functions do exactly; REGEXMATCH, REGEXTEST and REGEX are three different functions with three regex flavours.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"Google-only functions: what ports to Excel and LibreOffice, and what does not","item":"https://canispreadsheet.com/guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>Google-only functions and portability: what survives an export, and what has to be rewritten</h1>
+
+<p>Google Sheets has a large private function library. Some of it is famous &mdash;
+<code>QUERY</code>, <code>ARRAYFORMULA</code>, <code>IMPORTRANGE</code> &mdash; and some of it is
+quietly everywhere, like the operator functions <code>ADD</code>, <code>MINUS</code> and
+<code>DIVIDE</code> that Sheets writes when it converts certain imported formulas. None of it is in
+Excel&rsquo;s documentation, and none of it is in LibreOffice&rsquo;s.</p>
+
+<p>The catalog behind this site holds <strong>47 functions that Google documents and neither Microsoft
+nor The Document Foundation does</strong>. We executed all 47: <strong>189 test cases</strong>, in
+Google Sheets by Drive import and in LibreOffice Calc on four pinned builds. In LibreOffice,
+<strong>183 of the 189 cases returned <code>#NAME?</code></strong> outright, and the six that did not
+are wrapper artefacts rather than partial support (section 2 below). In Google Sheets, 179 of the 180
+assertable cases matched, nine more are deliberate probes with nothing to assert, and the single miss
+is a defect in Google&rsquo;s own documentation rather than in its engine.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>The absence is not a version gap that a newer LibreOffice will close &mdash; it is total, and it
+  was measured rather than assumed. Each of these functions was written into a workbook under every
+  spelling LibreOffice could plausibly accept, on all four builds, before any verdict was published.
+  For the Google service-bound set that meant <strong>nine spellings &times; four builds = 36
+  combinations, every one of them <code>#NAME?</code></strong>. LibreOffice&rsquo;s parser also writes
+  the name back into the converted file <em>lower-cased</em> &mdash;
+  <code>=googlefinance("NASDAQ:GOOG","price")</code> &mdash; which is what it does with an identifier
+  it does not recognise as a function at all.</p>
+</div>
+
+<h2 class="section-title">1. What is actually missing</h2>
+<p>The Excel column throughout is Microsoft&rsquo;s documented behaviour as recorded in our test corpus
+&mdash; for these functions there is no Microsoft page at all, so the column simply records that, and
+we do not run Excel. The Google Sheets column is executed output from the dated Drive-import run of
+2026-09-01 unless a row says otherwise. The LibreOffice column is Calc 25.8.7.3, with the same result
+on 24.2.0.3, 24.8.7.2 and 25.2.0.3 everywhere except the one row that says otherwise.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel</th><th>Google Sheets (executed 2026-09-01)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=QUERY(A1:E6,"select A where C &gt; 700",0)</td><td>not documented</td><td class="result">John, Mike</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=SUM(QUERY(A1:E6,"select max(C) group by B",0))</td><td>not documented</td><td class="result">2200</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ARRAYFORMULA(A1:C1+A2:C2)</td><td>not documented</td><td class="result">11, 22, 33</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=SUM(ARRAYFORMULA(LEN(A1:A3)))</td><td>not documented</td><td class="result">6</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=SPLIT("Alas, poor Yorick"," ")</td><td>not documented</td><td class="result">Alas, &nbsp;poor &nbsp;Yorick</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=JOIN(" and-a ",{1,2,"1 2 3 4"})</td><td>not documented</td><td class="result">1 and-a 2 and-a 1 2 3 4</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=FLATTEN(B1:B2, A1:A2)</td><td>not documented</td><td class="result">2, 4, 1, 3</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=SORTN(A2:C6)</td><td>not documented</td><td class="result">Alice, 100, 90</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=COUNTUNIQUE(1,1,2,3,5,8,13)</td><td>not documented</td><td class="result">6</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ISBETWEEN(7.9, 1.2, 12.45)</td><td>not documented</td><td class="result">TRUE</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ISEMAIL("noreply@google.com")</td><td>not documented</td><td class="result">TRUE</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ISURL("mailto:someone@example.com")</td><td>not documented</td><td class="result">TRUE</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=TEXT(EPOCHTODATE(1655906710,1),"yyyy-mm-dd hh:mm:ss")</td><td>not documented</td><td class="result">2022-06-22 14:05:10</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ROUND(MARGINOFERROR(A1:A4,0.95),6)</td><td>not documented</td><td class="result">3.528308</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ROUND(AVERAGE.WEIGHTED(2,10,4,15),10)</td><td>not documented</td><td class="result">3.2</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ARRAY_CONSTRAIN(A1:C10, 2, 3)</td><td>not documented</td><td class="result">1, 2, 3 / 4, 5, 6</td><td class="result"><strong>#NAME?</strong></td></tr>
+    <tr><td class="formula">=ARRAY_CONSTRAIN(SORT(A1:C10,1,FALSE),2,3)</td><td>not documented</td><td class="result">28, 29, 30 / 25, 26, 27</td><td class="result"><strong>#VALUE!</strong> on 24.8.7.2, 25.2.0.3, 25.8.7.3; <strong>#NAME?</strong> on 24.2.0.3</td></tr>
+  </tbody>
+</table>
+</div>
+<p>That last row is the only place in the whole 189 where the four builds disagree, and it is a
+useful illustration of how misleading an error code can be. In 24.2 the inner <code>SORT</code> is
+also unrecognised, so the whole expression is <code>#NAME?</code>. From 24.8 onward <code>SORT</code>
+resolves and produces an array, which the still-unrecognised <code>ARRAY_CONSTRAIN</code> then turns
+into <code>#VALUE!</code>. Nothing about <code>ARRAY_CONSTRAIN</code> changed between the builds; the
+error code moved because its neighbour got better.</p>
+<p>The absence evidence is recorded per function in the test corpus, in one sentence: probed on all
+four pinned builds in five storage spellings &mdash; plain, <code>_xlfn.</code>,
+<code>COM.MICROSOFT.</code>, <code>ORG.OPENOFFICE.</code> and <code>_xlfn.ORG.OPENOFFICE.</code>
+&mdash; and <code>#NAME?</code> under every one of them. That matters because a <code>#NAME?</code>
+under the wrong spelling proves nothing at all; our
+<a href="../guides/xlfn-storage-tokens-libreoffice-name-error-imcot-imsec-legacy-aliases.html">guide to
+storage tokens</a> is about the eight functions where exactly that mistake would have published a
+false verdict.</p>
+
+<h2 class="section-title">2. The six cases that are not <code>#NAME?</code>, and why they are not support</h2>
+<p>Five of the 189 cases wrap the Google function in <code>ISNUMBER</code> or <code>ISTEXT</code>,
+because the property under test is the result&rsquo;s <em>type</em> rather than its value. Those
+wrappers do not propagate an error &mdash; <code>ISNUMBER(#NAME?)</code> is simply
+<code>FALSE</code>:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Google Sheets (executed 2026-09-01)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th><th>What the LibreOffice cell means</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ISNUMBER(TO_PERCENT(0.5))</td><td class="result">TRUE</td><td class="result">FALSE</td><td>wrapper over an unrecognised name</td></tr>
+    <tr><td class="formula">=ISTEXT(TO_TEXT(24))</td><td class="result">TRUE</td><td class="result">FALSE</td><td>wrapper over an unrecognised name</td></tr>
+    <tr><td class="formula">=ISNUMBER(TO_DOLLARS(5))</td><td class="result">TRUE</td><td class="result">FALSE</td><td>wrapper over an unrecognised name</td></tr>
+    <tr><td class="formula">=ISTEXT(TO_PURE_NUMBER("abc"))</td><td class="result">TRUE</td><td class="result">FALSE</td><td>wrapper over an unrecognised name</td></tr>
+    <tr><td class="formula">=ISTEXT(DOLLAR(5))</td><td class="result">TRUE</td><td class="result">TRUE</td><td>a control &mdash; DOLLAR <em>is</em> a LibreOffice function</td></tr>
+  </tbody>
+</table>
+</div>
+<p>We flag this rather than quietly counting the FALSEs, because it is exactly the shape of mistake
+that produces confident wrong compatibility data. A cell that says <code>FALSE</code> looks like an
+answer. It is the absence of one.</p>
+<p>The <code>TO_*</code> group carries a second caveat of its own that no execution can lift. Google
+describes these as formatting functions &mdash; <code>TO_PERCENT</code>&rsquo;s page says the operation
+is &ldquo;equivalent to clicking Format Number Percent from the menu bar&rdquo; &mdash; so what changes
+is the cell&rsquo;s number format, not the number. Our harness reads the computed value back out of a
+recalculated <code>.xlsx</code>, which means the formatting half of the documented behaviour is
+invisible to it and is asserted nowhere in this corpus.</p>
+
+<h2 class="section-title">3. The operator functions: absent, and trivially replaceable</h2>
+<p>Fourteen of the 47 are function spellings of ordinary operators: <code>ADD</code>,
+<code>MINUS</code>, <code>MULTIPLY</code>, <code>DIVIDE</code>, <code>POW</code>, <code>EQ</code>,
+<code>NE</code>, <code>GT</code>, <code>GTE</code>, <code>LT</code>, <code>LTE</code>,
+<code>UMINUS</code>, <code>UPLUS</code> and <code>UNARY_PERCENT</code>. Every one of their 59 cases is
+<code>#NAME?</code> in LibreOffice on all four builds, and every one of them matched in Google
+Sheets.</p>
+<p>They are also the easiest thing on this page to port, because Google&rsquo;s own pages define them
+as equivalences and our corpus asserts the equivalence rather than the value. <code>ADD</code>&rsquo;s
+page says it is &ldquo;Equivalent to the <code>+</code> operator&rdquo;, so the case that runs is
+<code>=ADD(A2,A3)-(A2+A3)</code>, which must be exactly 0 whatever the engine computes &mdash; and in
+Sheets it is. Likewise <code>=POW(2,5)-POWER(2,5)</code> is 0, <code>=MULTIPLY(A2,B2)-(A2*B2)</code> is
+0, and the six comparison functions are each asserted only against the operator they are documented to
+be equivalent to. Rewriting <code>=ADD(a,b)</code> as <code>=a+b</code> is therefore not a guess; it is
+what the function is documented to be.</p>
+<p>One trap inside that group is Google&rsquo;s own doing. <code>DIVIDE</code>&rsquo;s Notes section
+says flatly &ldquo;DIVIDE is equivalent to QUOTIENT&rdquo;, which contradicts the same page&rsquo;s
+headline definition (<code>DIVIDE</code> = <code>/</code>). They cannot both hold: our executed case
+<code>=DIVIDE(7,2)-QUOTIENT(7,2)</code> returned <strong>0.5</strong> in Google Sheets, not 0. If you
+port <code>DIVIDE</code> to <code>QUOTIENT</code> on the strength of that sentence you will silently
+drop every remainder in the column. Port it to <code>/</code>.</p>
+
+<h2 class="section-title">4. Three regex families, three flavours, three sets of names</h2>
+<p>This is the messiest corner of cross-engine portability and it is worth laying out flat, because the
+names collide in a way that makes a formula look portable when it is not.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Name</th><th>Whose function it is</th><th>Google Sheets (executed)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">REGEXMATCH(text, regex)</td><td>Google</td><td class="result">works (2026-09-01)</td><td class="result"><strong>#NAME?</strong> on all four builds</td></tr>
+    <tr><td class="formula">REGEXEXTRACT(text, regex)</td><td>Google &mdash; and, under the same name and a different argument shape, Microsoft</td><td class="result">works (2026-08-31)</td><td class="result"><strong>#NAME?</strong> on all four builds</td></tr>
+    <tr><td class="formula">REGEXREPLACE(text, regex, replacement)</td><td>Google &mdash; same collision</td><td class="result">works (2026-08-31)</td><td class="result"><strong>#NAME?</strong> on all four builds</td></tr>
+    <tr><td class="formula">REGEXTEST(text, regex)</td><td>Microsoft only</td><td class="result"><strong>#NAME?</strong> (2026-08-31)</td><td class="result"><strong>#NAME?</strong> on all four builds</td></tr>
+    <tr><td class="formula">REGEX(text, expression, [replacement], [flags|occurrence])</td><td>LibreOffice only</td><td class="result"><strong>#NAME?</strong> (2026-09-01)</td><td class="result">works &mdash; <code>=REGEX("123456ABCDEF","[:digit:]","Z","g")</code> returns ZZZZZZABCDEF</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Microsoft&rsquo;s <code>REGEXEXTRACT</code> and <code>REGEXREPLACE</code> take extra arguments that
+Google&rsquo;s same-named functions do not. Our corpus executed the Microsoft forms in Sheets and the
+first two arguments carried over &mdash; <code>=REGEXEXTRACT(A2,"[A-Z][a-z]+")</code> over
+<code>DylanWilliams</code> returned <code>Dylan</code> in Sheets &mdash; while the documented
+third and fourth arguments did not: <code>=REGEXEXTRACT("2024-08-31","-([0-9]{2})-",2)</code> and
+<code>=REGEXREPLACE("a1b2c3","[0-9]","#",-1)</code> both came back <code>#N/A</code>. That is the worst
+possible failure mode for a migration: the simple calls survive and look like proof that the whole
+family ported, and the calls with options break.</p>
+<p>And the dialects differ. Google&rsquo;s <code>REGEXMATCH</code> page says &ldquo;Google products use
+RE2 for regular expressions. Google Sheets supports RE2 except Unicode character class
+matching&rdquo;. Microsoft&rsquo;s three pages each say &ldquo;All regular expressions for this
+function&hellip; use the PCRE2 &lsquo;flavor&rsquo; of regex&rdquo;. LibreOffice&rsquo;s
+<code>REGEX</code> page says its expression argument uses &ldquo;ICU regular expressions&rdquo;. Our
+patterns stay inside character classes, quantifiers and anchors, which mean the same thing in all
+three, precisely so that a difference we report is a difference about the function and not about
+dialect corners &mdash; but your patterns almost certainly do not stay inside that fence.</p>
+<p>So: a workbook using <code>REGEXTEST</code> or the option arguments of
+<code>REGEXEXTRACT</code> does not open and run in LibreOffice. It has to be rewritten to
+<code>REGEX</code>, which has a different name, a different argument shape and a different flavour.</p>
+
+<h2 class="section-title">5. The service-bound set: nine functions no offline engine can have</h2>
+<p><code>GOOGLEFINANCE</code>, <code>GOOGLETRANSLATE</code>, <code>IMPORTDATA</code>,
+<code>IMPORTFEED</code>, <code>IMPORTHTML</code>, <code>IMPORTRANGE</code>, <code>IMPORTXML</code>,
+<code>SPARKLINE</code> and <code>AI</code> are a category of their own, and the honest handling of them
+is different at each end.</p>
+<p><strong>In LibreOffice the verdict is ordinary and publishable.</strong> All nine were probed with
+nine storage spellings on all four builds &mdash; 36 combinations per function &mdash; and every one
+returned <code>#NAME?</code>, with the lower-casing tell described above confirming the parser does not
+know the name. &ldquo;Unsupported in LibreOffice&rdquo; is a real executed verdict here even though the
+returned <em>value</em> is not something any test could assert.</p>
+<p><strong>In Google Sheets, seven of the nine carry no verdict at all, by design.</strong> They ran,
+we publish what came back, and we draw no conclusion:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Google Sheets returned (executed 2026-09-01)</th><th>Why no verdict</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=GOOGLEFINANCE("NASDAQ:GOOG","price")</td><td class="result">335.41</td><td>documented as &ldquo;delayed by up to 20 minutes&rdquo; &mdash; a quote no test can be held to</td></tr>
+    <tr><td class="formula">=GOOGLETRANSLATE("Hello World","en","es")</td><td class="result">Hola Mundo</td><td>a service&rsquo;s choice among several correct renderings</td></tr>
+    <tr><td class="formula">=IMPORTDATA("https://example.com/data.csv")</td><td class="result">#REF!</td><td>the call is well formed; only the host is inert</td></tr>
+    <tr><td class="formula">=IMPORTFEED("https://example.com/feed.xml")</td><td class="result">#REF!</td><td>a feed exists in order to change</td></tr>
+    <tr><td class="formula">=IMPORTHTML("https://example.com/page.html","table",1)</td><td class="result">#REF!</td><td>a slice of somebody else&rsquo;s page</td></tr>
+    <tr><td class="formula">=IMPORTRANGE("https://docs.google.com/&hellip;","Sheet1!A1")</td><td class="result">#REF!</td><td>documented as requiring a human to click Allow Access</td></tr>
+    <tr><td class="formula">=IMPORTXML("https://example.com/page.html","//a/@href")</td><td class="result">#REF!</td><td>a document this project does not control</td></tr>
+    <tr><td class="formula">=SPARKLINE(A1:A5)</td><td class="result">an empty cell</td><td>&ldquo;Creates a miniature chart contained within a single cell&rdquo; &mdash; a picture, not a value</td></tr>
+    <tr><td class="formula">=AI("Generate slogan for event in 10 words or less", A2)</td><td class="result">its own formula text, returned verbatim</td><td>generated text, gated by plan and rationed by quota</td></tr>
+  </tbody>
+</table>
+</div>
+<p><code>GOOGLEFINANCE</code> and <code>GOOGLETRANSLATE</code> keep an ordinary executed
+&ldquo;supported&rdquo; verdict &mdash; they evaluated and returned a value of the documented kind
+&mdash; with the values themselves published but not asserted. The other seven are declared
+unverdictable and appear in the
+<a href="../methodology.html#coverage">Executed, but no verdict drawn</a> table with the reason. The
+<code>SPARKLINE</code> blank is the one to be most careful with, and our test file said so in writing
+<em>before</em> the run: a chart-in-cell has no cached scalar, so a successful evaluation may read back
+as an empty cell, and that blank means &ldquo;this cell holds a picture&rdquo; &mdash; it must never be
+reported as &ldquo;<code>SPARKLINE</code> returned an empty result&rdquo;. The <code>AI</code> cell
+coming back holding its own formula text is evidence that nothing evaluated it on this account, which
+is evidence about the account and not about the function.</p>
+
+<h2 class="section-title">What survives, what rewrites, what does not port</h2>
+<p><strong>Survives with an exact, vendor-documented replacement.</strong> The fourteen operator
+functions, replaced by their operators. <code>MARGINOFERROR</code>, which our corpus checks against
+<code>CONFIDENCE.T</code> directly: <code>=ROUND(MARGINOFERROR(A1:A4,0.95)-CONFIDENCE.T(1-0.95,
+STDEV(A1:A4), COUNT(A1:A4)),12)</code> returned <strong>0</strong> in Google Sheets on 2026-09-01, and
+<code>CONFIDENCE.T</code> is executed and supported in both engines. <code>TO_PURE_NUMBER</code> and
+<code>TO_DATE</code> against <code>N</code>, and <code>TO_DOLLARS</code> against
+<code>DOLLAR</code>, in each case with the difference Google&rsquo;s own Notes state &mdash;
+<code>DOLLAR</code> outputs text where <code>TO_DOLLARS</code> applies a format to a number.</p>
+<p><strong>Rewrites, with an equivalent that exists but is not the same function.</strong>
+<code>SPLIT</code> has no counterpart in the corpus that is documented as its equal, but
+<code>TEXTSPLIT</code> occupies the same ground and we have executed it: it works in LibreOffice
+<strong>25.8.7.3 only</strong> (<code>#NAME?</code> on 24.2.0.3, 24.8.7.2 and 25.2.0.3, executed
+2026-07-29) and is <code>#NAME?</code> in Google Sheets (2026-08-29), so it is a target for a
+Sheets&rarr;LibreOffice move and a dead end in the other direction. <code>JOIN</code> maps onto
+<code>TEXTJOIN</code>, which is the healthiest option on this page: executed in both engines and
+matching on every case, on all four LibreOffice builds. <code>FLATTEN</code> maps onto
+<code>TOCOL</code>, executed and working in Google Sheets and in LibreOffice 25.8.7.3, and
+<code>#NAME?</code> on the three older builds. Those three mappings are our authorship, offered as
+suggested shapes from the executed availability data above &mdash; no vendor documents any of them as
+an equivalence, and our corpus asserts none.</p>
+<p><strong>Does not port.</strong> <code>QUERY</code> is the big one: it embeds a whole separate query
+language (the Google Visualization API Query Language, a separate document with its own versioning) and
+nothing in Excel or LibreOffice parses it. <code>ARRAYFORMULA</code> is a close second, but for the
+opposite reason &mdash; it is not a function so much as an evaluation mode, and its work is done in the
+other engines by their own implicit array rules, which is a rewrite of the surrounding formula rather
+than a substitution. <code>SORTN</code>, <code>ARRAY_CONSTRAIN</code>, <code>ISEMAIL</code>,
+<code>ISURL</code>, <code>ISDATE</code>, <code>EPOCHTODATE</code> and <code>COUNTUNIQUE</code> are all
+expressible in other functions, but each as a small formula rather than a rename. And the nine
+service-bound functions do not port at all in any meaningful sense: an offline engine cannot fetch a
+quote, and an engine that produced &ldquo;es&rdquo; from a local language table would not thereby be
+compatible with the documented service.</p>
+
+<h2 class="section-title">One more reason to test rather than read</h2>
+<p>The single Google Sheets miss in all 189 cases is <code>=ISDATE("1969-20-07")</code>. Google&rsquo;s
+own Formula/Result table publishes <code>TRUE</code> for it, which is only consistent with a
+year-day-month reading, and the page says nothing about locale. The live engine returned
+<strong>FALSE</strong> on 2026-09-01. Our test file predicted the shape of this in writing before the
+run &mdash; if the engine returns FALSE, the page is what will be wrong &mdash; and it did. That, and
+the <code>DIVIDE</code>/<code>QUOTIENT</code> contradiction in section 3, and
+<code>EPOCHTODATE</code>&rsquo;s off-by-one epoch constant, are collected with their derivations in
+<a href="../guides/vendor-documentation-defects-executed-verdicts-excel-google-sheets-libreoffice.html">when
+the documentation is wrong</a>.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column throughout says &ldquo;not documented&rdquo;, which is a statement about
+Microsoft&rsquo;s function documentation and nothing more. We do not run Excel, and nothing on this
+page is a measurement of it.</p>
+<p>The Google Sheets column is executed output from dated runs, because Sheets has no version number to
+pin: a formula-only <code>.xlsx</code> carrying no cached results goes to Google Drive, is recalculated
+by Google&rsquo;s engine, and comes back as <code>.xlsx</code> for readback, with a deterministic
+<code>=1111+2222</code> canary in every sheet proving the recalculation happened. Most cases here ran
+on 2026-09-01; the Microsoft <code>REGEX*</code> trio, <code>IMAGE</code> and
+<code>DETECTLANGUAGE</code> ran on 2026-08-31; <code>TEXTSPLIT</code>, <code>TEXTJOIN</code> and
+<code>TOCOL</code> ran on 2026-08-29. Sheets&rsquo; <code>.xlsx</code> export rounds floats to ten
+significant digits, so a full-precision comparison can differ in the readback rather than in the
+engine.</p>
+<p>The LibreOffice column is executed output from Calc 25.8.7.3, and every case here returned identical
+results on 24.2.0.3, 24.8.7.2 and 25.2.0.3 except the <code>ARRAY_CONSTRAIN</code>-over-<code>SORT</code>
+row and the <code>TEXTSPLIT</code>/<code>TOCOL</code> availability noted above. Those four builds are
+the only ones we tested, so &ldquo;absent in LibreOffice&rdquo; means absent in those four and does not
+predict a future release.</p>
+<p>The spelling probes &mdash; five spellings for the Google-documented set, nine for the service-bound
+set, on every build &mdash; are measurements recorded in the test corpus rather than published test
+cases with verdicts of their own.</p>
+<p>Scope. 47 functions and 189 cases is the whole Google-only set as our catalog defines it: documented
+by Google, not by Microsoft, not by The Document Foundation. Functions all three vendors document, and
+the Excel-only set, are elsewhere on this site. Untested here: <code>QUERY</code>&rsquo;s error
+behaviour (Google&rsquo;s pages name no error value for it at all, so we assert none), whether a
+<code>QUERY</code> result carries a header row (neither page states it), locale-dependent parsing in
+<code>ISDATE</code> and <code>TO_DATE</code>, and the formatting half of every <code>TO_*</code>
+function. See <a href="../methodology.html">our methodology</a> for how recalculation is proven rather
+than assumed, and the function pages for
+<a href="../functions/query.html">QUERY</a>,
+<a href="../functions/arrayformula.html">ARRAYFORMULA</a>,
+<a href="../functions/split.html">SPLIT</a> and
+<a href="../functions/regexmatch.html">REGEXMATCH</a> for the per-engine support matrices.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

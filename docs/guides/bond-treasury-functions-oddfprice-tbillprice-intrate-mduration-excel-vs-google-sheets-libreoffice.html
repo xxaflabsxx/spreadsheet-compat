@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bond and treasury functions after a migration: what actually breaks</title>
+<meta name="description" content="Executed across 26 fixed-income functions and 161 cases: ODDFPRICE and ODDFYIELD are literal stubs in LibreOffice, TBILLPRICE prices a two-year bill, INTRATE&#39;s default basis loses a day, and MDURATION is wrong on actual/actual. 83 of 84 documented #NUM! cases arrive as #VALUE!. Google Sheets matched 127 of 161.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:title" content="Bond and treasury functions after a migration: what actually breaks">
+<meta property="og:description" content="Executed across 26 fixed-income functions and 161 cases: ODDFPRICE and ODDFYIELD are literal stubs in LibreOffice, TBILLPRICE prices a two-year bill, INTRATE&#39;s default basis loses a day, and MDURATION is wrong on actual/actual. 83 of 84 documented #NUM! cases arrive as #VALUE!. Google Sheets matched 127 of 161.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"Bond and treasury functions after a migration: what actually breaks","item":"https://canispreadsheet.com/guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav a { margin-left: 1.25rem; color: var(--text-muted); font-weight: 500; }
+nav.site-nav a:first-child { margin-left: 0; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>Bond and treasury functions after a migration: the finance-desk checklist</h1>
+
+<p>Fixed-income sheets are the worst possible thing to migrate on faith. The formulas are short, the
+inputs are dates, and every answer is a plausible-looking number &mdash; there is no shape to a wrong
+bond price that tells you it is wrong. So we executed the whole bond and treasury family: <strong>26
+functions, 161 test cases</strong>, in LibreOffice Calc on four pinned builds and in Google Sheets by
+Drive import, all on 2026-08-31.</p>
+
+<p>The headline is not close. In LibreOffice, <strong>64 of the 161 cases matched</strong> the
+documented result. Of the 97 that did not, <strong>83 are the same error-code substitution</strong>
+(a documented <code>#NUM!</code> arriving as <code>#VALUE!</code>), and the remaining
+<strong>14 are real</strong>: two functions that compute nothing at all, one that ignores its own
+documented domain rule, and three that return a wrong number with no error. In Google Sheets,
+<strong>127 of the 161 matched</strong>; 28 of the 34 misses are the four <code>ODD*</code> functions,
+which Google does not have.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p><code>ODDFPRICE</code> and <code>ODDFYIELD</code> are not slow, buggy or approximate in
+  LibreOffice. They are <em>stubs</em>. LibreOffice&rsquo;s own source says so in as many words:
+  <code>scaddins/source/analysis/analysishelper.cxx</code> defines <code>GetOddfprice()</code> and
+  <code>GetOddfyield()</code> as bodies that do nothing but <code>throw uno::RuntimeException()</code>,
+  and <code>financial.cxx</code> wraps both call sites under the comment &ldquo;Encapsulation
+  violation: We *know* that GetOddfprice() always throws.&rdquo; The functions are listed in the
+  function wizard, documented in LibreOffice&rsquo;s own help, accept and validate their nine
+  arguments &mdash; and then return <code>#VALUE!</code> for every input. All 13 of our cases across
+  the two, on all four builds. Their <code>ODDL*</code> siblings, by contrast, reproduce the
+  documented values exactly.</p>
+</div>
+
+<h2 class="section-title">The family at a glance</h2>
+<p>The Excel column throughout this guide is Microsoft&rsquo;s documented behaviour as recorded in our
+test corpus &mdash; it is the yardstick, and we do not run Excel. The Google Sheets column is executed
+output from the dated Drive-import run of 2026-08-31. The LibreOffice column is Calc 25.8.7.3, and
+every row below returned the identical result on 24.2.0.3, 24.8.7.2 and 25.2.0.3.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Function</th><th>Cases</th><th>Matched in LibreOffice 25.8.7.3</th><th>Matched in Google Sheets (2026-08-31)</th><th>What is wrong</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">ODDFPRICE</td><td>7</td><td class="result"><strong>1</strong></td><td class="result"><strong>0</strong></td><td>LO: a stub that always throws. Sheets: no such function</td></tr>
+    <tr><td class="formula">ODDFYIELD</td><td>6</td><td class="result"><strong>0</strong></td><td class="result"><strong>0</strong></td><td>LO: a stub that always throws. Sheets: no such function</td></tr>
+    <tr><td class="formula">ODDLPRICE</td><td>7</td><td class="result">4</td><td class="result"><strong>0</strong></td><td>LO: values exact, error codes wrong. Sheets: no such function</td></tr>
+    <tr><td class="formula">ODDLYIELD</td><td>8</td><td class="result">5</td><td class="result"><strong>0</strong></td><td>LO: values exact, error codes wrong. Sheets: no such function</td></tr>
+    <tr><td class="formula">TBILLPRICE</td><td>6</td><td class="result">4</td><td class="result">6</td><td>LO: the one-year rule is not enforced, and not monotonically</td></tr>
+    <tr><td class="formula">TBILLEQ</td><td>6</td><td class="result">3</td><td class="result">6</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">TBILLYIELD</td><td>6</td><td class="result">3</td><td class="result">6</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">INTRATE</td><td>7</td><td class="result">2</td><td class="result">7</td><td>LO: the <em>default</em> basis loses a day</td></tr>
+    <tr><td class="formula">MDURATION</td><td>9</td><td class="result">2</td><td class="result">9</td><td>LO: actual/actual duration is wrong in the third decimal</td></tr>
+    <tr><td class="formula">DURATION</td><td>6</td><td class="result">1</td><td class="result">6</td><td>LO: the same actual/actual defect</td></tr>
+    <tr><td class="formula">ACCRINT</td><td>6</td><td class="result">1</td><td class="result">6</td><td>LO: both eight-argument documented examples return #VALUE!</td></tr>
+    <tr><td class="formula">YIELD</td><td>7</td><td class="result">3</td><td class="result">7</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">YIELDDISC</td><td>6</td><td class="result">3</td><td class="result">5</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">YIELDMAT</td><td>7</td><td class="result">3</td><td class="result">7</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">PRICE</td><td>8</td><td class="result">4</td><td class="result">7</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">PRICEDISC</td><td>6</td><td class="result">3</td><td class="result">5</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">PRICEMAT</td><td>7</td><td class="result">4</td><td class="result">6</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">RECEIVED</td><td>7</td><td class="result">3</td><td class="result">6</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">DISC</td><td>5</td><td class="result">2</td><td class="result">4</td><td>LO: error codes only. See the documentation note below</td></tr>
+    <tr><td class="formula">ACCRINTM</td><td>4</td><td class="result">1</td><td class="result">4</td><td>LO: error codes only</td></tr>
+    <tr><td class="formula">COUPDAYBS, COUPDAYS, COUPDAYSNC, COUPNCD, COUPNUM, COUPPCD</td><td>5 each</td><td class="result">2 each</td><td class="result">5 each</td><td>LO: error codes only</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Read the LibreOffice column carefully before drawing a conclusion from it. &ldquo;Error codes
+only&rdquo; means every <em>value</em> the function returns is right and only the failure codes differ;
+those functions are safe to migrate as long as nothing branches on the code. The five rows in bold are
+the ones that change money.</p>
+
+<h2 class="section-title">1. ODDFPRICE and ODDFYIELD compute nothing in LibreOffice</h2>
+<p>The odd-first-coupon pair is the one place in this family where LibreOffice does not disagree with
+Excel &mdash; it declines to answer at all.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),2)</td><td>113.6</td><td class="result">#NAME?</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</td><td>113.59771747</td><td class="result">#NAME?</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=ROUND(ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,0),8)</td><td>113.59920583</td><td class="result">#NAME?</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=ODDFPRICE(A2,A3,A4,A5,A6,A7,A8,A9,5)</td><td>#NUM!</td><td class="result">#NAME?</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</td><td>0.07724554</td><td class="result">#NAME?</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=ROUND(ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,A9),10)</td><td>99.8782860147</td><td class="result">#NAME?</td><td class="result">99.8782860147</td></tr>
+    <tr><td class="formula">=ROUND(ODDLYIELD(A2,A3,A4,A5,A6,A7,A8,A9),10)</td><td>0.0451922356</td><td class="result">#NAME?</td><td class="result">0.0451922356</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The bond in the <code>ODDFPRICE</code> rows is Microsoft&rsquo;s published example &mdash; settled
+2008-11-11, maturing 2021-03-01, issued 2008-10-15, first coupon 2009-03-01, 7.85% coupon, 6.25%
+yield, redemption 100, semiannual, actual/actual &mdash; for which Microsoft prints
+&ldquo;$&nbsp;113.60&rdquo;. Our corpus does not take that figure on trust: it re-derives the price
+from the odd-short-first-coupon formula in exact rational day counts at 50 digits and gets
+113.5977174740789&hellip;, which is 113.60 at Microsoft&rsquo;s two printed decimals, and asserts the
+eight-decimal form so that a quasi-coupon schedule off by a single day would fail.</p>
+<p>The reason nothing computes is in LibreOffice&rsquo;s source, and it is unusually explicit. The
+argument validation in front of the two functions is real &mdash; negative rate, invalid frequency and
+date ordering are all checked &mdash; but every path that survives validation ends in the same
+exception, which is also why the <em>error</em> cases come back <code>#VALUE!</code> rather than the
+documented <code>#NUM!</code>. Our corpus probed this from several directions before recording it: the
+plain spelling parses (so this is not a storage-token problem &mdash; <code>_xlfn.ODDFPRICE</code>,
+<code>COM.MICROSOFT.ODDFPRICE</code> and <code>ORG.OPENOFFICE.ODDFPRICE</code> are all
+<code>#NAME?</code>), the same <code>#VALUE!</code> appears when LibreOffice parses the formula
+natively rather than reading it from OOXML, and five bases, three frequencies, settlement before and
+after the first coupon, dates as serials and as <code>DATE()</code> calls and as text, and a bond whose
+first period is deliberately regular all produce it. Not one input produced a number.</p>
+<p>In Google Sheets the same four <code>ODD*</code> functions are simply absent: all 28 cases return
+<code>#NAME?</code>. That is the honest verdict rather than a defect &mdash; Google does not document
+these functions &mdash; but for a migration it has the same consequence.</p>
+
+<h2 class="section-title">2. TBILLPRICE does not enforce the one-year rule, and its permissiveness is not monotonic</h2>
+<p>Microsoft&rsquo;s Remarks are unambiguous: &ldquo;If settlement &gt; maturity, or if maturity is
+more than one year after settlement, TBILLPRICE returns the #NUM! error value.&rdquo; A treasury bill
+that matures more than a year out is not a treasury bill.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ROUND(TBILLPRICE(A2,A3,A4),2)</td><td>98.45</td><td class="result">98.45</td><td class="result">98.45</td></tr>
+    <tr><td class="formula">=TBILLPRICE(A2,A2+400,A4)</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result"><strong>90.1</strong></td></tr>
+    <tr><td class="formula">=TBILLEQ(A2,A2+400,A4)</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+    <tr><td class="formula">=TBILLYIELD(A2,A2+400,A4)</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result">#VALUE!</td></tr>
+  </tbody>
+</table>
+</div>
+<p>So the two siblings reject the out-of-range bill (with the wrong code, but they reject it) and
+<code>TBILLPRICE</code> quietly prices it. Our test file records the probe that establishes the shape
+of this: on LibreOffice 25.8.7.3, with the same settlement and maturities 365, 366, 370, 400, 500 and
+730 days out, <code>TBILLPRICE</code> returned a price for every one of them &mdash; 90.975, 90.95,
+90.85, 90.1, 87.65 and 81.975, a two-year bill priced without complaint &mdash; while
+<code>TBILLEQ</code> and <code>TBILLYIELD</code> rejected all six.</p>
+<p>And the boundary behaves backwards. At <strong>364</strong> days &mdash; a maturity comfortably
+<em>inside</em> the documented range &mdash; the same probe found <code>#VALUE!</code>, while 365 days
+and beyond return a price. The one input near the boundary that <code>TBILLPRICE</code> rejects is the
+legal one.</p>
+<p>The prices it invents do not follow the documented formula either. Microsoft&rsquo;s
+<code>TBILLPRICE</code> is <code>100 &times; (1 - discount &times; DSM/360)</code> with DSM the days
+from settlement to maturity, and the executed 98.45 for the documented 62-day bill confirms that
+LibreOffice uses the actual day count there (62 actual days give exactly 98.45; the 30/360 count of 61
+would give 98.475). But 90.1 at a 400-day maturity implies DSM = 396, which is neither the actual
+count (400) nor the US 30/360 count (395). Whatever the out-of-range branch is computing, it is not the
+documented function.</p>
+
+<h2 class="section-title">3. INTRATE&rsquo;s default basis disagrees with LibreOffice&rsquo;s own day counter</h2>
+<p>This is the quietest defect in the family and the most likely one to be in your workbook, because
+it fires on the <em>shortest correct formula</em>: the one that leaves <code>basis</code> off.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ROUND(INTRATE(A2,A3,A4,A5,2),10)</td><td>0.05768</td><td class="result">0.05768</td><td class="result">0.05768</td></tr>
+    <tr><td class="formula">=ROUND(INTRATE(A2,A3,A4,A5,0),10)</td><td>0.05768</td><td class="result">0.05768</td><td class="result"><strong>0.0583280899</strong></td></tr>
+    <tr><td class="formula">=ROUND(INTRATE(A2,A3,A4,A5),10)</td><td>0.05768</td><td class="result">0.05768</td><td class="result"><strong>0.0583280899</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p>The security is Microsoft&rsquo;s own example: settlement 2008-02-15, maturity 2008-05-15,
+investment 1,000,000, redemption 1,014,420, and the page spells the underlying figure out in its
+Description column as &ldquo;0.05768 or 5.77%&rdquo;. Our corpus derives it rather than copying it.
+Microsoft states the formula in full &mdash; <code>((redemption - investment) / investment) &times;
+(B / DIM)</code> &mdash; and on basis 2 (actual/360) DIM is the actual count 90 and B is 360, so the
+rate is 0.01442 &times; 4 = 721/12500 = 0.05768 exactly, a terminating decimal with no rounding
+anywhere.</p>
+<p>The basis-0 rows are the point. Under US 30/360 the days from 2008-02-15 to 2008-05-15 are
+(5&minus;2)&times;30 + (15&minus;15) = <strong>90</strong> &mdash; the same 90 as the actual count,
+because the two dates share a day of the month and neither is the 31st. So basis 0 and basis 2 are
+<em>forced</em> to give the same answer for this security, and any engine that returns something else
+has a day-count bug and nothing else can explain it.</p>
+<p>Work backwards through the documented formula and 0.01442 &times; 360/DIM = 0.0583280899 puts
+LibreOffice&rsquo;s DIM at <strong>89</strong>. It is losing one day. What makes this a
+self-inconsistency rather than a defensible reading of the standard is that <em>the same engine</em>
+already counts these two dates correctly elsewhere: our test file records that LibreOffice&rsquo;s own
+<code>DAYS360</code> returns <strong>90</strong> for this date pair on all four builds, and its
+<code>YEARFRAC(&hellip;,0)</code> returns 0.25. One 30/360 code path out of several disagrees with the
+others, and it is the one <code>INTRATE</code> uses by default. The error is 1.1% of the rate, on a
+function whose entire job is to produce a rate, with no error and no warning.</p>
+
+<h2 class="section-title">4. MDURATION and DURATION are wrong on actual/actual &mdash; and right on 30/360</h2>
+<p>Microsoft&rsquo;s <code>MDURATION</code> example is a bond settled 2008-01-01, maturing 2016-01-01,
+8% coupon, 9% yield, semiannual, basis 1, and it publishes 5.736. Our corpus recomputes it from the
+definition at 50 digits over the sixteen individual discounted cash flows &mdash; not from a closed-form
+annuity shortcut &mdash; giving a price of 94.382992475446753, a Macaulay duration of
+5.9937749555451836 years and a modified duration of 5.7356698139188359. That is 5.736 at
+Microsoft&rsquo;s three printed decimals: the published figure, reproduced.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ROUND(MDURATION(A2,A3,A4,A5,A6,1),3)</td><td>5.736</td><td class="result">5.736</td><td class="result"><strong>5.734</strong></td></tr>
+    <tr><td class="formula">=ROUND(MDURATION(A2,A3,A4,A5,A6,1),10)</td><td>5.7356698139</td><td class="result">5.735669814</td><td class="result"><strong>5.7339235771</strong></td></tr>
+    <tr><td class="formula">=ROUND(MDURATION(A2,A3,A4,A5,A6,0),10)</td><td>5.7356698139</td><td class="result">5.735669814</td><td class="result">5.7356698139</td></tr>
+    <tr><td class="formula">=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,1),7)</td><td>10.9191453</td><td class="result">10.9191453</td><td class="result"><strong>10.921574</strong></td></tr>
+    <tr><td class="formula">=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,0),7)</td><td>10.9191453</td><td class="result">10.9191453</td><td class="result">10.9191453</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The basis-0 row is what turns this from an opinion into a finding. In this example the settlement
+date falls <em>exactly on a coupon date</em>, so the only place the basis argument enters the
+calculation &mdash; the ratio of days from settlement to the next coupon over days in that coupon
+period &mdash; is 1 under both rulers: 180 of 180 under 30/360, 182 of 182 under actual/actual. The two
+bases <strong>cannot</strong> legitimately disagree here, and LibreOffice&rsquo;s own basis-0 answer is
+exactly the derived value. So one of its two day-count paths is wrong, and the pair of cases says which
+one.</p>
+<p>The same split appears in <code>DURATION</code> on the same bond, which is where the defect
+actually lives: our test file records LibreOffice returning a Macaulay duration of 5.991950138 on basis
+1 against 5.9937749555 on basis 0 for the <code>MDURATION</code> bond, so the error is in the shared
+coupon-period code rather than in <code>MDURATION</code>&rsquo;s final division by
+<code>(1 + yld/frequency)</code>. The visible damage is 0.0017 years, about 0.03% &mdash; small enough
+to survive a review, large enough to move a hedge ratio.</p>
+
+<h2 class="section-title">5. ACCRINT&rsquo;s eight-argument examples do not run</h2>
+<p>Microsoft&rsquo;s <code>ACCRINT</code> page carries three worked examples. The seven-argument one
+matches everywhere. The two that pass the optional eighth argument (the <code>calc_method</code> flag,
+with a <code>DATE()</code> settlement) do not run in LibreOffice at all:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=ROUND(ACCRINT(A2,A3,A4,A5,A6,A7,A8),6)</td><td>16.666667</td><td class="result">16.666667</td><td class="result">16.666667</td></tr>
+    <tr><td class="formula">=ROUND(ACCRINT(DATE(2008,3,5),A3,A4,A5,A6,A7,A8,FALSE),6)</td><td>15.555556</td><td class="result">15.555556</td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=ROUND(ACCRINT(DATE(2008,4,5),A3,A4,A5,A6,A7,A8,TRUE),7)</td><td>7.2222222</td><td class="result">7.2222222</td><td class="result"><strong>#VALUE!</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p>Both published figures re-derive cleanly on the documented 30/360 basis: 2008-03-05 to 2008-05-01 is
+56 days, so 1000 &times; 0.1 &times; 56/360 = 15.555556, and 2008-04-05 to 2008-05-01 is 26 days, giving
+7.2222222. Google Sheets returns both. We are deliberately not naming a cause: the two failing cases
+change <em>two</em> things at once relative to the passing one &mdash; the eighth argument and a
+<code>DATE()</code> settlement instead of a cell reference &mdash; and our corpus has no probe that
+isolates them. What is executed and reportable is that the two documented eight-argument forms return
+<code>#VALUE!</code> on all four builds.</p>
+
+<h2 class="section-title">6. The error codes: 83 substitutions out of 84</h2>
+<p>This is the bulk of the divergence and the easiest part to reason about. Across the 26 functions,
+<strong>84 executed cases expect <code>#NUM!</code></strong> &mdash; a negative rate, an out-of-range
+basis, settlement after maturity, a zero price, an invalid frequency. LibreOffice returns
+<code>#VALUE!</code> on <strong>83 of them</strong>. The single exception is
+<code>TBILLPRICE</code>&rsquo;s over-a-year case from section 2, which returns a price instead of any
+error at all.</p>
+<p>Google Sheets returns the documented <code>#NUM!</code> on every one of the 84, in every function
+that it implements.</p>
+<p>What this breaks is narrow but real. <code>IFERROR</code>, <code>ISERROR</code> and
+<code>ISERR</code> are unaffected, because they catch every code &mdash; if your desk wraps its pricing
+calls in <code>IFERROR</code> and shows a dash, nothing here changes behaviour. What stops firing is
+any branch that distinguishes <em>kinds</em> of failure: <code>=IF(ERROR.TYPE(x)=6,"bad
+inputs",x)</code> tests for <code>#NUM!</code>, code 6, and receives <code>#VALUE!</code>, code 3.
+That distinction is worth something on a bond desk &mdash; &ldquo;this security is outside the model&rsquo;s
+domain&rdquo; is a different alert from &ldquo;this cell is not a date&rdquo; &mdash; and it is the
+distinction that does not survive. The pattern is not specific to fixed income; the corpus-wide
+count and the exceptions that run the other way are in
+<a href="../guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">every error
+code LibreOffice reports as #VALUE!</a>.</p>
+<p>One boundary is worth noting: LibreOffice is consistent about <code>#VALUE!</code> for a malformed
+<em>date</em>, which is what Microsoft documents for that case too. Every &ldquo;not a date&rdquo; case
+in the family matches in all three columns. It is only the out-of-domain cases that collapse onto the
+wrong code.</p>
+
+<h2 class="section-title">A note on the documentation itself</h2>
+<p>Two of the figures in this family are not reproducible from the vendor&rsquo;s own inputs, and it is
+worth saying which so that nobody chases an engine for them.</p>
+<p><code>DISC</code>&rsquo;s Microsoft example uses settlement 2018-07-01, maturity 2048-01-01, price
+97.975, redemption 100 and basis 1, and prints the result <strong>0.001038</strong>. That figure does
+not belong to those inputs. From the formula the page itself states &mdash; <code>((redemption -
+pr)/redemption) &times; (B/DSM)</code> &mdash; the discount rate is 0.000686384169&hellip;, and the
+printed 0.001038 is reproducible only by moving the maturity back ten years to 2038-01-01. It is a
+stale figure left behind when the example&rsquo;s dates were rolled forward. Our corpus asserts the
+derived value, and <strong>all four LibreOffice builds return 0.000686384169</strong>, matching to full
+double precision. Google Sheets returned 0.000686345065 on 2026-08-31 &mdash; close, but a genuinely
+different number, which puts a small actual/actual year-length difference between the two executed
+engines on the same bond.</p>
+<p>That is one of a number of published figures in this corpus that do not reproduce from their own
+pages; the full set, with the derivations, is in
+<a href="../guides/vendor-documentation-defects-executed-verdicts-excel-google-sheets-libreoffice.html">when
+the documentation is wrong</a>.</p>
+
+<h2 class="section-title">The finance-desk migration checklist</h2>
+<p><strong>Grep for <code>ODDFPRICE</code> and <code>ODDFYIELD</code> first.</strong> These are the only
+two functions in the family that cannot be made to work in either target engine. If either appears
+anywhere in the workbook, that formula needs replacing before anything else is decided &mdash; with
+<code>PRICE</code>/<code>YIELD</code> if the first period turns out to be regular after all, or with an
+explicit cash-flow model built out of <code>COUPNCD</code>, <code>COUPDAYS</code> and discounting, or
+with a source outside the spreadsheet.</p>
+<p><strong>Then grep for every bare <code>INTRATE(</code> and <code>RECEIVED(</code> with four
+arguments.</strong> A missing <code>basis</code> is the highest-frequency, lowest-visibility exposure
+on this page: the formula looks right, the answer looks right, and it is off by about 1%. Adding an
+explicit basis does not fix it &mdash; explicit basis 0 gives the same wrong answer &mdash; so the fix is
+to state a basis LibreOffice gets right (bases 2 and 4 both reproduce the documented figure on our
+example) or to recompute the rate from the day count yourself.</p>
+<p><strong>Re-run every duration on basis 0 as a control.</strong> If a duration changes when you flip
+basis 1 to basis 0 on a bond whose settlement falls on a coupon date, you are looking at the defect in
+section 4, not at a modelling choice.</p>
+<p><strong>Audit the guards, not the prices.</strong> Search the neighbourhood of every bond function
+for <code>ERROR.TYPE</code>, <code>ISNA(</code>, <code>IFNA(</code> and <code>ISERR(</code>. Those are
+the formulas whose <em>meaning</em> changes under the 83 substitutions, and they are usually the ones
+driving an alert or a suppression rule.</p>
+<p><strong>Validate the treasury-bill tenor before the call.</strong> Because
+<code>TBILLPRICE</code> will price a two-year bill, the domain check has to live in your sheet rather
+than in the function. Something in the shape of <code>=IF(maturity-settlement&gt;365,"not a
+bill",TBILLPRICE(settlement,maturity,discount))</code> gives the same answer in every engine. That is a
+construction we are describing from the documented and executed behaviour above, not a case we ran
+&mdash; treat it as a suggested shape, not as a measured result.</p>
+<p><strong>Do not assume Google Sheets is the safe target either.</strong> It matched 127 of 161, which
+is much better than LibreOffice &mdash; but 28 of its 34 misses are the entire <code>ODD*</code> family
+being absent, and it is the engine that disagreed on <code>DISC</code>.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p>The Excel column throughout, including every published worked example, every documented
+<code>#NUM!</code> condition and every basis-table reading, is Microsoft&rsquo;s documented behaviour
+as recorded in our test corpus. We do not run Excel, and no value in that column is a measurement.
+Where our corpus asserts a figure Microsoft also prints, the figure was independently re-derived first
+&mdash; in exact rational day counts and 50-digit arithmetic, from a clean-room implementation of the
+OpenFormula day-count procedures written for this corpus and used by no engine &mdash; and the
+derivation is what is asserted.</p>
+<p>The Google Sheets column is executed output from a dated run, because Sheets has no version number
+to pin: a formula-only <code>.xlsx</code> carrying no cached results goes to Google Drive, is
+recalculated by Google&rsquo;s engine, and comes back as <code>.xlsx</code> for readback, with a
+deterministic <code>=1111+2222</code> canary in every sheet proving the recalculation happened. Every
+case in this guide ran on 2026-08-31. Sheets&rsquo; <code>.xlsx</code> export rounds floats to ten
+significant digits, which is why five full-precision rows in the family (in <code>PRICE</code>,
+<code>PRICEDISC</code>, <code>PRICEMAT</code>, <code>RECEIVED</code> and <code>YIELDDISC</code>) are
+counted as misses above even though the difference is in the readback rather than in the engine; the
+<code>DISC</code> disagreement is not one of those and is a real difference.</p>
+<p>The LibreOffice column is executed output from Calc 25.8.7.3, and all 161 cases returned identical
+results on 24.2.0.3, 24.8.7.2 and 25.2.0.3. Those four builds are the only ones we tested. The source
+citation for the <code>ODDFPRICE</code>/<code>ODDFYIELD</code> stubs is a reading of
+LibreOffice&rsquo;s published source, which explains the executed result but is not itself an executed
+result. The 364-day <code>TBILLPRICE</code> boundary and the multi-maturity price list in section 2,
+and the <code>DAYS360</code>, <code>YEARFRAC</code> and <code>DURATION</code> cross-checks in sections 3
+and 4, come from probes recorded in the test files rather than from published corpus cases &mdash; they
+are reproducible the same way, but they are not rows in the tables above.</p>
+<p>Scope. 161 cases across 26 functions is the whole fixed-income corpus, and it is built around each
+vendor&rsquo;s documented examples plus their documented exclusions. Untested here: negative yields and
+negative prices beyond the documented error rows, bases 3 (actual/365) and 4 (European 30/360) on most
+functions, frequency 4, settlement dates inside a stub period other than the published ones, leap-day
+settlements, and the whole of <code>AMORDEGRC</code>/<code>AMORLINC</code> and the depreciation family,
+which are a separate story. See <a href="../methodology.html">our methodology</a> for how recalculation
+is proven rather than assumed, and the function pages for
+<a href="../functions/oddfprice.html">ODDFPRICE</a>,
+<a href="../functions/tbillprice.html">TBILLPRICE</a>,
+<a href="../functions/intrate.html">INTRATE</a> and
+<a href="../functions/mduration.html">MDURATION</a> for the per-engine support matrices.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
