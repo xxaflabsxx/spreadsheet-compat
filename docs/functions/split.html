@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SPLIT: Google Sheets only — not in Excel or LibreOffice</title>
-<meta name="description" content="SPLIT (Text) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>SPLIT is not supported in LibreOffice Calc (Sheets only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for SPLIT in all 6 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/split.html">
-<meta property="og:title" content="SPLIT: Google Sheets only — not in Excel or LibreOffice">
-<meta property="og:description" content="SPLIT (Text) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="SPLIT is not supported in LibreOffice Calc (Sheets only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for SPLIT in all 6 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/split.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>SPLIT</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Text</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
+
+
+<p class="lede">Real compatibility results for the <strong>SPLIT</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document SPLIT, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for SPLIT yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,137 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+SPLIT&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't SPLIT working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>SPLIT</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=SPLIT(&#34;Alas, poor Yorick&#34;,&#34; &#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{Alas,, poor, Yorick}</span>.
+        The page&#39;s own sample formula. DERIVED from the definition &#34;Divides text around a specified character or string, and puts each fragment into a separate cell in the row&#34; together with the Note &#34;Note that the character or characters to split the string around will not be contained in the result themselves&#34; -- so the spaces vanish and the comma, which is not the delimiter, stays attached to &#34;Alas,&#34;. This sample was chosen over the page&#39;s SPLIT(&#34;1,2,3&#34;, &#34;,&#34;) line deliberately: that one&#39;s fragments look like numbers and would test type coercion rather than splitting. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. SPLIT&#39;s page publishes NO results: three Sample Usage formulas, and an Examples section that is only a &#34;Make a copy&#34; link to an external spreadsheet, which is not article text. Every value below is DERIVED from the argument descriptions, which are unusually explicit for this batch. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.; MISMATCH vs expected: value mismatch: expected &#39;Alas,&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SPLIT(&#34;mother&#34;,&#34;the&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{mo, r}</span>.
+        DERIVED FROM THE PAGE&#39;S OWN WORDED EXAMPLE, which it never executes: &#34;By default, each character in delimiter is considered individually, e.g. if delimiter is \&#34;the\&#34;, then text is divided around the characters \&#34;t\&#34;, \&#34;h\&#34;, and \&#34;e\&#34;.&#34; Splitting &#34;mother&#34; on {t, h, e} gives &#34;mo&#34;, &#34;&#34;, &#34;&#34;, &#34;r&#34;; remove_empty_text defaults to TRUE, which the page says means &#34;treat consecutive delimiters as one&#34;, so the empties drop and two fragments remain. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.; MISMATCH vs expected: value mismatch: expected &#39;mo&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SPLIT(&#34;a-the-b&#34;,&#34;the&#34;,FALSE)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{a-, -b}</span>.
+        DERIVED from &#34;Set split_by_each to FALSE to turn off this behavior&#34;, i.e. the delimiter is then matched as one whole string. &#34;a-the-b&#34; contains &#34;the&#34; once, so it yields two fragments and the hyphens -- which the previous case&#39;s character-set reading would have left untouched anyway -- survive. This is the exact pair that shows the flag doing something. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.; MISMATCH vs expected: value mismatch: expected &#39;a-&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=COLUMNS(SPLIT(&#34;a,,b&#34;,&#34;,&#34;))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">2</span>.
+        DERIVED from the remove_empty_text description: &#34;[OPTIONAL - TRUE by default] ... The default behavior is to treat consecutive delimiters as one (if TRUE).&#34; Counted through COLUMNS rather than compared as a spilled array, because the interesting quantity is HOW MANY cells come back and an empty cell is exactly the thing that is hard to compare. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=COLUMNS(SPLIT(&#34;a,,b&#34;,&#34;,&#34;,TRUE,FALSE))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">3</span>.
+        DERIVED from the rest of the same sentence: &#34;If FALSE, empty cells values are added between consecutive delimiters.&#34; The pair with the previous case is what makes either meaningful: 2 against 3. Note the third argument must be supplied positionally to reach the fourth. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.; MISMATCH vs expected: expected 3, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=COUNTIF(SPLIT(&#34;a-b-c&#34;,&#34;-&#34;),&#34;*-*&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        A structural assertion with no derived constant, from the Note: &#34;Note that the character or characters to split the string around will not be contained in the result themselves.&#34; COUNTIF with the wildcard pattern &#34;*-*&#34; counts fragments still containing a hyphen, and the Note says that must be none. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +524,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-01)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for SPLIT yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SPLIT(&#34;Alas, poor Yorick&#34;,&#34; &#34;)</td>
+  <td>The page&#39;s second Sample Usage line, verbatim</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{Alas,, poor, Yorick}<br><span class="category-tag">The page&#39;s own sample formula. DERIVED from the definition &#34;Divides text around a specified character or string, and puts each fragment into a separate cell in the row&#34; together with the Note &#34;Note that the character or characters to split the string around will not be contained in the result themselves&#34; -- so the spaces vanish and the comma, which is not the delimiter, stays attached to &#34;Alas,&#34;. This sample was chosen over the page&#39;s SPLIT(&#34;1,2,3&#34;, &#34;,&#34;) line deliberately: that one&#39;s fragments look like numbers and would test type coercion rather than splitting. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. SPLIT&#39;s page publishes NO results: three Sample Usage formulas, and an Examples section that is only a &#34;Make a copy&#34; link to an external spreadsheet, which is not article text. Every value below is DERIVED from the argument descriptions, which are unusually explicit for this batch. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SPLIT(&#34;mother&#34;,&#34;the&#34;)</td>
+  <td>The page&#39;s own worked description of split_by_each, executed</td>
+  <td class="result mono">{#NAME?, #NAME?}</td>
+  <td class="result mono">{mo, r}<br><span class="category-tag">DERIVED FROM THE PAGE&#39;S OWN WORDED EXAMPLE, which it never executes: &#34;By default, each character in delimiter is considered individually, e.g. if delimiter is \&#34;the\&#34;, then text is divided around the characters \&#34;t\&#34;, \&#34;h\&#34;, and \&#34;e\&#34;.&#34; Splitting &#34;mother&#34; on {t, h, e} gives &#34;mo&#34;, &#34;&#34;, &#34;&#34;, &#34;r&#34;; remove_empty_text defaults to TRUE, which the page says means &#34;treat consecutive delimiters as one&#34;, so the empties drop and two fragments remain. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SPLIT(&#34;a-the-b&#34;,&#34;the&#34;,FALSE)</td>
+  <td>The same delimiter with split_by_each turned off</td>
+  <td class="result mono">{#NAME?, #NAME?}</td>
+  <td class="result mono">{a-, -b}<br><span class="category-tag">DERIVED from &#34;Set split_by_each to FALSE to turn off this behavior&#34;, i.e. the delimiter is then matched as one whole string. &#34;a-the-b&#34; contains &#34;the&#34; once, so it yields two fragments and the hyphens -- which the previous case&#39;s character-set reading would have left untouched anyway -- survive. This is the exact pair that shows the flag doing something. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=COLUMNS(SPLIT(&#34;a,,b&#34;,&#34;,&#34;))</td>
+  <td>Two adjacent delimiters with remove_empty_text left at its default</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">2<br><span class="category-tag">DERIVED from the remove_empty_text description: &#34;[OPTIONAL - TRUE by default] ... The default behavior is to treat consecutive delimiters as one (if TRUE).&#34; Counted through COLUMNS rather than compared as a spilled array, because the interesting quantity is HOW MANY cells come back and an empty cell is exactly the thing that is hard to compare. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=COLUMNS(SPLIT(&#34;a,,b&#34;,&#34;,&#34;,TRUE,FALSE))</td>
+  <td>The same string with the flag turned off</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">3<br><span class="category-tag">DERIVED from the rest of the same sentence: &#34;If FALSE, empty cells values are added between consecutive delimiters.&#34; The pair with the previous case is what makes either meaningful: 2 against 3. Note the third argument must be supplied positionally to reach the fourth. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=COUNTIF(SPLIT(&#34;a-b-c&#34;,&#34;-&#34;),&#34;*-*&#34;)</td>
+  <td>The Note&#39;s claim about the delimiter, asserted structurally</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">A structural assertion with no derived constant, from the Note: &#34;Note that the character or characters to split the string around will not be contained in the result themselves.&#34; COUNTIF with the wildcard pattern &#34;*-*&#34; counts fragments still containing a hyphen, and the Note says that must be none. Google&#39;s SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

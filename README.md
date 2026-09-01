@@ -134,7 +134,7 @@ engine runners (what actually happens) → results (raw truth) → site
   anti-bot wall and is recorded honestly as `fetched: false` — LibreOffice
   coverage instead comes from `help.libreoffice.org`'s category pages (18
   pages fetched), which gave full, real coverage anyway.
-- `data/tests/`: 519 functions, 2076 hand-authored test cases. Phase 1
+- `data/tests/`: 549 functions, 2222 hand-authored test cases. Phase 1
   covered 31 functions (125 cases); the Phase-2 batch added 117 more
   workhorse/compat-interesting functions (479 cases) spanning math
   (CEILING/FLOOR + .MATH variants, MROUND, INT-vs-TRUNC...), statistics

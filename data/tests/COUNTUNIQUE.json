@@ -1,0 +1,49 @@
+{
+  "function": "COUNTUNIQUE",
+  "cases": [
+    {
+      "id": "COUNTUNIQUE_documented_sample_inline_values",
+      "formula": "=COUNTUNIQUE(1,1,2,3,5,8,13)",
+      "description": "The inline-value half of the page's own Sample Usage line",
+      "setup_cells": {},
+      "expected": 6,
+      "expected_note": "The page's Sample Usage prints COUNTUNIQUE(1,1,2,3,5,8,13,A2,B6:B9) and NO result. This case takes the literal head of that sample; 6 is DERIVED from the definition \"Counts the number of unique values in a list of specified values and ranges\" -- the seven arguments hold six distinct values because 1 appears twice. Google's COUNTUNIQUE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093405. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence."
+    },
+    {
+      "id": "COUNTUNIQUE_range_with_repeats",
+      "formula": "=COUNTUNIQUE(A1:A5)",
+      "description": "The page's other Sample Usage shape: a single range with repeated values",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "A3": 2,
+        "A4": 3,
+        "A5": 3
+      },
+      "expected": 3,
+      "expected_note": "Derived from the same definition; the page publishes no results and populates none of the cells its samples name. Google's COUNTUNIQUE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093405."
+    },
+    {
+      "id": "COUNTUNIQUE_documented_sample_values_and_ranges_mixed",
+      "formula": "=COUNTUNIQUE(1,1,2,3,5,8,13,A2,B6:B9)",
+      "description": "The page's Sample Usage line in full: literals, a cell and a range together",
+      "setup_cells": {
+        "A2": 2,
+        "B6": 21,
+        "B7": 34,
+        "B8": 55,
+        "B9": 1
+      },
+      "expected": 9,
+      "expected_note": "The page's own sample formula, with the cells it names populated by this corpus (Google leaves them unset). The union of {1,2,3,5,8,13}, {2} and {21,34,55,1} has nine distinct members -- A2's 2 and B9's 1 are both already present, which is the point of choosing them. DERIVED, not published. Google's COUNTUNIQUE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093405."
+    },
+    {
+      "id": "COUNTUNIQUE_more_than_thirty_arguments",
+      "formula": "=COUNTUNIQUE(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35)",
+      "description": "Thirty-five arguments, past the limit the page says is only nominal",
+      "setup_cells": {},
+      "expected": 35,
+      "expected_note": "DERIVED FROM THE PAGE'S ONE NOTE, which is the only substantive claim it makes: \"Although COUNTUNIQUE is specified as taking a maximum of 30 arguments, Google Sheets supports an arbitrary number of arguments for this function.\" Thirty-five distinct arguments therefore must count 35. Without that Note the same call would be a documented error rather than a documented value. Google's COUNTUNIQUE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093405."
+    }
+  ]
+}

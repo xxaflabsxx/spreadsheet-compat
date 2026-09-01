@@ -1,0 +1,48 @@
+{
+  "function": "POW",
+  "cases": [
+    {
+      "id": "POW_documented_sample_fractional_exponent",
+      "formula": "=POW(4,0.5)",
+      "description": "The page's own Sample Usage line with a fractional exponent",
+      "setup_cells": {},
+      "expected": 2,
+      "expected_note": "Google's Sample Usage prints POW(4,0.5) with no result; 2 is DERIVED from the page's definition, \"Returns a number raised to a power\", i.e. the positive square root of 4. Google's POW page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093603. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence."
+    },
+    {
+      "id": "POW_documented_sample_integer_exponent",
+      "formula": "=POW(2,5)",
+      "description": "The page's other literal Sample Usage line",
+      "setup_cells": {},
+      "expected": 32,
+      "expected_note": "Derived from the same definition; the page publishes no results. Google's POW page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093603."
+    },
+    {
+      "id": "POW_documented_sample_cell_refs",
+      "formula": "=POW(A2,B2)",
+      "description": "The page's cell-reference Sample Usage line",
+      "setup_cells": {
+        "A2": 3,
+        "B2": 4
+      },
+      "expected": 81,
+      "expected_note": "Derived; cells chosen by this corpus, since the page names A2/B2 without populating them. Google's POW page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093603."
+    },
+    {
+      "id": "POW_equals_POWER",
+      "formula": "=POW(2,5)-POWER(2,5)",
+      "description": "The documented equivalence to POWER, asserted structurally",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A structural assertion with no derived constant. The page states \"POW is equivalent to the POWER function.\" Google's POW page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093603."
+    },
+    {
+      "id": "POW_negative_base_integer_exponent",
+      "formula": "=POW(-3,3)",
+      "description": "The one constraint the page states, exercised on its permitted side",
+      "setup_cells": {},
+      "expected": -27,
+      "expected_note": "The `base` argument description is the page's only constraint: \"If `base` is negative, `exponent` must be an integer.\" An integer exponent over a negative base is therefore the documented-legal case and -27 follows from the definition. The page names NO error value for the forbidden case (negative base, fractional exponent), so this corpus asserts nothing about it. Google's POW page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093603."
+    }
+  ]
+}

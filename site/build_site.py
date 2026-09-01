@@ -691,6 +691,39 @@ def _case_mismatch_phrase(case, func_name, max_len=70):
     return phrase[: max_len - 1].rstrip() + "…"
 
 
+def _name_error_cases(cases):
+    """How many of these executed cases actually returned #NAME?.
+
+    The "unsupported" verdict only requires that SOME case came back #NAME?
+    (see classify_verdict), so "returns #NAME? in all N executed test cases"
+    is not a claim the verdict licenses -- it happened to be true for every
+    unsupported function through batch G because those functions were absent
+    outright and every case failed the same way. Batch H produced the first
+    counterexample: ARRAY_CONSTRAIN's nested-SORT case returns #VALUE! rather
+    than #NAME? on 24.8.7.2 and later, because LibreOffice reports an unknown
+    function differently once its arguments resolve. Counting rather than
+    assuming keeps the sentence true either way.
+    """
+    n = 0
+    for c in cases:
+        rv = c.get("range_values")
+        if rv:
+            if all(v == "#NAME?" for v in rv):
+                n += 1
+        elif c.get("value") == "#NAME?":
+            n += 1
+    return n
+
+
+def _name_error_phrase(cases, total):
+    """'in all 4 executed test cases' / 'in 3 of its 4 executed test cases'."""
+    n = _name_error_cases(cases)
+    word = "case" if total == 1 else "cases"
+    if n == total:
+        return f"in all {total} executed test {word}"
+    return f"in {n} of its {total} executed test {word}"
+
+
 def build_function_title_desc(r):
     """Derive (page_title, meta_description) for one function record from its
     own data: documented flags, tested verdict, executed case counts, and (for
@@ -786,8 +819,8 @@ def build_function_title_desc(r):
             else:
                 title = f"{name} is not supported in LibreOffice Calc"
             desc = (
-                f"LibreOffice returns #NAME? (unrecognized) for {name} in all "
-                f"{total} executed test case{'s' if total != 1 else ''}"
+                f"LibreOffice returns #NAME? (unrecognized) for {name} "
+                + _name_error_phrase(le["cases"], total)
             )
             if sheets_verdict == "supported":
                 n_s = len(sheets_cases)
@@ -903,8 +936,8 @@ def build_function_title_desc(r):
         if verdict == "unsupported":
             title = f"{name} is not supported in {run_full} (#NAME?, executed)"
             desc = (
-                f"{run_full} returns #NAME? (unrecognized) for {name} in all "
-                f"{total} executed test {case_word}."
+                f"{run_full} returns #NAME? (unrecognized) for {name} "
+                + _name_error_phrase(cases, total) + "."
             )
         elif verdict == "quirky":
             first = mismatches[0] if mismatches else None

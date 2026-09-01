@@ -1,0 +1,85 @@
+{
+  "function": "FLATTEN",
+  "cases": [
+    {
+      "id": "FLATTEN_published_example_with_a_literal_between_two_ranges",
+      "formula": "=FLATTEN(A1:B2, \"sample middle\", B3:B4)",
+      "description": "The page's published worked example, formula and data both",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "A2": 3,
+        "B2": 4,
+        "B3": 5,
+        "B4": 6
+      },
+      "expected": [
+        1,
+        2,
+        3,
+        4,
+        "sample middle",
+        5,
+        6
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED EXAMPLE, formula and output together: with A1=1, B1=2, A2=3, B2=4, B3=5, B4=6, the page prints =FLATTEN(A1:B2, \"sample middle\", B3:B4) producing D1..D7 = 1, 2, 3, 4, \"sample middle\", 5, 6. Note that the second range is B3:B4 -- COLUMN B rows 3 and 4 -- not a continuation of column A; the page's own values were re-read on a second fetch to confirm that, because the two readings give different output. This row demonstrates every claim the Notes make at once: row-major within a range, arguments in order, and a bare literal accepted as an argument. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's FLATTEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10307761. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.",
+      "check_range": "A30:A36"
+    },
+    {
+      "id": "FLATTEN_row_major_within_one_range",
+      "formula": "=FLATTEN(A1:B2)",
+      "description": "A single 2x2 range, which fixes the within-range order",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "A2": 3,
+        "B2": 4,
+        "B3": 5,
+        "B4": 6
+      },
+      "expected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "expected_note": "DERIVED from the Notes bullet, quoted in full: \"Values are ordered by argument, then row, then column. So, the entire first row of an input is added before the second row (also known as row-major order).\" Row-major gives 1, 2, 3, 4; column-major would give 1, 3, 2, 4, and that is the whole content of this case. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's FLATTEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10307761.",
+      "check_range": "A30:A33"
+    },
+    {
+      "id": "FLATTEN_ordered_by_argument_before_row",
+      "formula": "=FLATTEN(B1:B2, A1:A2)",
+      "description": "Two ranges passed in the reverse of their sheet order",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "A2": 3,
+        "B2": 4,
+        "B3": 5,
+        "B4": 6
+      },
+      "expected": [
+        2,
+        4,
+        1,
+        3
+      ],
+      "expected_note": "DERIVED from the first clause of the same Notes bullet, \"ordered by argument\": the second range is exhausted only after the first, so passing column B first puts 2 and 4 ahead of 1 and 3 even though they sit to the right on the sheet. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's FLATTEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10307761.",
+      "check_range": "A30:A33"
+    },
+    {
+      "id": "FLATTEN_empty_cells_are_not_skipped",
+      "formula": "=ROWS(FLATTEN(A1:B3))",
+      "description": "A 3x2 range in which one cell is DELIBERATELY left empty and unset",
+      "setup_cells": {
+        "A1": 1,
+        "B1": 2,
+        "A2": 3,
+        "B2": 4,
+        "B3": 5
+      },
+      "expected": 6,
+      "expected_note": "DERIVED from the second Notes bullet: \"Empty values are not skipped; the FILTER function can be used to remove those.\" A3 IS DELIBERATELY BLANK AND UNPOPULATED -- its emptiness is the whole content of the case. Six cells go in, so six rows must come out; a function that skipped blanks would return 5. Asserted through ROWS rather than as a spilled array so that the blank does not have to be represented in the comparison. Google's FLATTEN page, read live on 2026-08-31 at https://support.google.com/docs/answer/10307761."
+    }
+  ]
+}

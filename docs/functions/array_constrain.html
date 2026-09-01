@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ARRAY_CONSTRAIN: Google Sheets only — not in Excel or LibreOffice</title>
-<meta name="description" content="ARRAY_CONSTRAIN (Array) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>ARRAY_CONSTRAIN is not supported in LibreOffice Calc (Sheets only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for ARRAY_CONSTRAIN in 3 of its 4 executed test cas… Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/array_constrain.html">
-<meta property="og:title" content="ARRAY_CONSTRAIN: Google Sheets only — not in Excel or LibreOffice">
-<meta property="og:description" content="ARRAY_CONSTRAIN (Array) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="ARRAY_CONSTRAIN is not supported in LibreOffice Calc (Sheets only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for ARRAY_CONSTRAIN in 3 of its 4 executed test cas… Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/array_constrain.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>ARRAY_CONSTRAIN</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Array</p>
+<p class="category-tag">Category: Array &middot; Last tested 2026-09-01</p>
+
+
+<p class="lede">Real compatibility results for the <strong>ARRAY_CONSTRAIN</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document ARRAY_CONSTRAIN, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for ARRAY_CONSTRAIN yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,117 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+ARRAY_CONSTRAIN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't ARRAY_CONSTRAIN working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>ARRAY_CONSTRAIN</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ARRAY_CONSTRAIN(A1:C10, 2, 3)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{1, 2, 3}, {4, 5, 6}}</span>.
+        The page&#39;s first sample formula, verbatim. The result is the TOP-LEFT 2x3 block, which is what &#34;constrains&#34; has to mean if the function is to be usable at all -- the page never says which corner it keeps, and this case is what makes that concrete. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. ARRAY_CONSTRAIN&#39;s page publishes NO results at all: two Sample Usage formulas, a three-line argument list and one Note. Every value below is DERIVED from the one-line definition, &#34;Constrains an array result to a specified size&#34;, plus the argument descriptions &#34;the number of rows the result should contain&#34; and &#34;the number of columns the result should contain&#34;. The 10x3 block of the integers 1..30, filled row-major, is this corpus&#39;s; the page names A1:C10 without populating it. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.; MISMATCH vs expected: value mismatch: expected 1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ARRAY_CONSTRAIN(A1:C10, 3, 1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{1, 4, 7}</span>.
+        DERIVED. Rows and columns are constrained independently, so 3 rows by 1 column keeps the first cell of each of the first three rows. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036.; MISMATCH vs expected: value mismatch: expected 1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ARRAY_CONSTRAIN(A1:C10, 1, 1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">1</span>.
+        DERIVED; a 1x1 result is a single value and needs no spill range. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ARRAY_CONSTRAIN(SORT(A1:C10, 1, FALSE), 2, 3)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#VALUE!</span>, but the documented/expected
+        result is <span class="formula">{{28, 29, 30}, {25, 26, 27}}</span>.
+        The shape of the page&#39;s second Sample Usage line, ARRAY_CONSTRAIN(SORT(A1:F100, 1, TRUE), 10, 6), scaled to this corpus&#39;s 10x3 block and sorted DESCENDING so the constrained result cannot coincide with the unsorted one. It is the case the page&#39;s Note is about: &#34;Generally used in combination with other functions that return an array result when a fewer number of rows or columns are desired.&#34; Sorting 1..30 by its first column descending puts row (28,29,30) first and (25,26,27) second. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036. POST-EXECUTION ADDENDUM -- THE ONLY CROSS-BUILD DIFFERENCE IN THIS BATCH, AND IT IS ABOUT AN ERROR CODE, NOT A VALUE. This case returns #NAME? on 24.2.0.3 but #VALUE! on 24.8.7.2, 25.2.0.3 and 25.8.7.3. ARRAY_CONSTRAIN is absent from all four builds under all five storage spellings, so the difference is not about ARRAY_CONSTRAIN at all -- it is about the nested SORT. The harness stores SORT as _xlfn._xlws.SORT; 24.2 does not implement it, so the whole expression fails to resolve a name and the result is #NAME?, while on the three later builds SORT resolves and LibreOffice reports the still-unrecognised OUTER name as #VALUE! instead. LibreOffice&#39;s error code for an unknown function is therefore not stable: it depends on whether that function&#39;s ARGUMENTS resolved. Every other ARRAY_CONSTRAIN case in this file is #NAME? on all four builds, which is what the published verdict rests on.; MISMATCH vs expected: value mismatch: expected 28, got &#39;#VALUE!&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +504,50 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-01)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for ARRAY_CONSTRAIN yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ARRAY_CONSTRAIN(A1:C10, 2, 3)</td>
+  <td>The page&#39;s own Sample Usage line: a 10x3 range constrained to 2x3</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{1, 2, 3}, {4, 5, 6}}<br><span class="category-tag">The page&#39;s first sample formula, verbatim. The result is the TOP-LEFT 2x3 block, which is what &#34;constrains&#34; has to mean if the function is to be usable at all -- the page never says which corner it keeps, and this case is what makes that concrete. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. ARRAY_CONSTRAIN&#39;s page publishes NO results at all: two Sample Usage formulas, a three-line argument list and one Note. Every value below is DERIVED from the one-line definition, &#34;Constrains an array result to a specified size&#34;, plus the argument descriptions &#34;the number of rows the result should contain&#34; and &#34;the number of columns the result should contain&#34;. The 10x3 block of the integers 1..30, filled row-major, is this corpus&#39;s; the page names A1:C10 without populating it. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ARRAY_CONSTRAIN(A1:C10, 3, 1)</td>
+  <td>Constraining columns harder than rows</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{1, 4, 7}<br><span class="category-tag">DERIVED. Rows and columns are constrained independently, so 3 rows by 1 column keeps the first cell of each of the first three rows. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ARRAY_CONSTRAIN(A1:C10, 1, 1)</td>
+  <td>The smallest constraint the arguments allow</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">1<br><span class="category-tag">DERIVED; a 1x1 result is a single value and needs no spill range. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ARRAY_CONSTRAIN(SORT(A1:C10, 1, FALSE), 2, 3)</td>
+  <td>The composition the page&#39;s second sample and its Note are about</td>
+  <td class="result mono">{#VALUE!, #VALUE!, #VALUE!, #VALUE!, #VALUE!, #VALUE!}</td>
+  <td class="result mono">{{28, 29, 30}, {25, 26, 27}}<br><span class="category-tag">The shape of the page&#39;s second Sample Usage line, ARRAY_CONSTRAIN(SORT(A1:F100, 1, TRUE), 10, 6), scaled to this corpus&#39;s 10x3 block and sorted DESCENDING so the constrained result cannot coincide with the unsorted one. It is the case the page&#39;s Note is about: &#34;Generally used in combination with other functions that return an array result when a fewer number of rows or columns are desired.&#34; Sorting 1..30 by its first column descending puts row (28,29,30) first and (25,26,27) second. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s ARRAY_CONSTRAIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3267036. POST-EXECUTION ADDENDUM -- THE ONLY CROSS-BUILD DIFFERENCE IN THIS BATCH, AND IT IS ABOUT AN ERROR CODE, NOT A VALUE. This case returns #NAME? on 24.2.0.3 but #VALUE! on 24.8.7.2, 25.2.0.3 and 25.8.7.3. ARRAY_CONSTRAIN is absent from all four builds under all five storage spellings, so the difference is not about ARRAY_CONSTRAIN at all -- it is about the nested SORT. The harness stores SORT as _xlfn._xlws.SORT; 24.2 does not implement it, so the whole expression fails to resolve a name and the result is #NAME?, while on the three later builds SORT resolves and LibreOffice reports the still-unrecognised OUTER name as #VALUE! instead. LibreOffice&#39;s error code for an unknown function is therefore not stable: it depends on whether that function&#39;s ARGUMENTS resolved. Every other ARRAY_CONSTRAIN case in this file is #NAME? on all four builds, which is what the published verdict rests on.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

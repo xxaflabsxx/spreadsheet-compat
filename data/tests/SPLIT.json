@@ -1,0 +1,66 @@
+{
+  "function": "SPLIT",
+  "cases": [
+    {
+      "id": "SPLIT_documented_sample_on_a_space",
+      "formula": "=SPLIT(\"Alas, poor Yorick\",\" \")",
+      "description": "The page's second Sample Usage line, verbatim",
+      "setup_cells": {},
+      "expected": [
+        "Alas,",
+        "poor",
+        "Yorick"
+      ],
+      "expected_note": "The page's own sample formula. DERIVED from the definition \"Divides text around a specified character or string, and puts each fragment into a separate cell in the row\" together with the Note \"Note that the character or characters to split the string around will not be contained in the result themselves\" -- so the spaces vanish and the comma, which is not the delimiter, stays attached to \"Alas,\". This sample was chosen over the page's SPLIT(\"1,2,3\", \",\") line deliberately: that one's fragments look like numbers and would test type coercion rather than splitting. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. SPLIT's page publishes NO results: three Sample Usage formulas, and an Examples section that is only a \"Make a copy\" link to an external spreadsheet, which is not article text. Every value below is DERIVED from the argument descriptions, which are unusually explicit for this batch. Google's SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.",
+      "check_range": "A30:C30"
+    },
+    {
+      "id": "SPLIT_delimiter_is_a_set_of_characters_by_default",
+      "formula": "=SPLIT(\"mother\",\"the\")",
+      "description": "The page's own worked description of split_by_each, executed",
+      "setup_cells": {},
+      "expected": [
+        "mo",
+        "r"
+      ],
+      "expected_note": "DERIVED FROM THE PAGE'S OWN WORDED EXAMPLE, which it never executes: \"By default, each character in delimiter is considered individually, e.g. if delimiter is \\\"the\\\", then text is divided around the characters \\\"t\\\", \\\"h\\\", and \\\"e\\\".\" Splitting \"mother\" on {t, h, e} gives \"mo\", \"\", \"\", \"r\"; remove_empty_text defaults to TRUE, which the page says means \"treat consecutive delimiters as one\", so the empties drop and two fragments remain. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.",
+      "check_range": "A30:B30"
+    },
+    {
+      "id": "SPLIT_by_whole_string_when_split_by_each_is_FALSE",
+      "formula": "=SPLIT(\"a-the-b\",\"the\",FALSE)",
+      "description": "The same delimiter with split_by_each turned off",
+      "setup_cells": {},
+      "expected": [
+        "a-",
+        "-b"
+      ],
+      "expected_note": "DERIVED from \"Set split_by_each to FALSE to turn off this behavior\", i.e. the delimiter is then matched as one whole string. \"a-the-b\" contains \"the\" once, so it yields two fragments and the hyphens -- which the previous case's character-set reading would have left untouched anyway -- survive. This is the exact pair that shows the flag doing something. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136.",
+      "check_range": "A30:B30"
+    },
+    {
+      "id": "SPLIT_consecutive_delimiters_collapse_by_default",
+      "formula": "=COLUMNS(SPLIT(\"a,,b\",\",\"))",
+      "description": "Two adjacent delimiters with remove_empty_text left at its default",
+      "setup_cells": {},
+      "expected": 2,
+      "expected_note": "DERIVED from the remove_empty_text description: \"[OPTIONAL - TRUE by default] ... The default behavior is to treat consecutive delimiters as one (if TRUE).\" Counted through COLUMNS rather than compared as a spilled array, because the interesting quantity is HOW MANY cells come back and an empty cell is exactly the thing that is hard to compare. Google's SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136."
+    },
+    {
+      "id": "SPLIT_consecutive_delimiters_kept_when_remove_empty_text_is_FALSE",
+      "formula": "=COLUMNS(SPLIT(\"a,,b\",\",\",TRUE,FALSE))",
+      "description": "The same string with the flag turned off",
+      "setup_cells": {},
+      "expected": 3,
+      "expected_note": "DERIVED from the rest of the same sentence: \"If FALSE, empty cells values are added between consecutive delimiters.\" The pair with the previous case is what makes either meaningful: 2 against 3. Note the third argument must be supplied positionally to reach the fourth. Google's SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136."
+    },
+    {
+      "id": "SPLIT_delimiter_absent_from_the_fragments",
+      "formula": "=COUNTIF(SPLIT(\"a-b-c\",\"-\"),\"*-*\")",
+      "description": "The Note's claim about the delimiter, asserted structurally",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A structural assertion with no derived constant, from the Note: \"Note that the character or characters to split the string around will not be contained in the result themselves.\" COUNTIF with the wildcard pattern \"*-*\" counts fragments still containing a hyphen, and the Note says that must be none. Google's SPLIT page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094136."
+    }
+  ]
+}

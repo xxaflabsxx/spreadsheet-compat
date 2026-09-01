@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EPOCHTODATE: Google Sheets only — not in Excel or LibreOffice</title>
-<meta name="description" content="EPOCHTODATE (Date) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>EPOCHTODATE is not supported in LibreOffice Calc (Sheets only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for EPOCHTODATE in all 6 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/epochtodate.html">
-<meta property="og:title" content="EPOCHTODATE: Google Sheets only — not in Excel or LibreOffice">
-<meta property="og:description" content="EPOCHTODATE (Date) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="EPOCHTODATE is not supported in LibreOffice Calc (Sheets only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for EPOCHTODATE in all 6 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/epochtodate.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>EPOCHTODATE</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Date</p>
+<p class="category-tag">Category: Date &middot; Last tested 2026-09-01</p>
+
+
+<p class="lede">Real compatibility results for the <strong>EPOCHTODATE</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document EPOCHTODATE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for EPOCHTODATE yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,137 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+EPOCHTODATE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't EPOCHTODATE working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>EPOCHTODATE</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=TEXT(EPOCHTODATE(1655906710,1),&#34;yyyy-mm-dd hh:mm:ss&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">2022-06-22 14:05:10</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 1655906710 with =EPOCHTODATE(A3,1) -&gt; 6/22/2022 14:05:10. Independently recomputed as 1970-01-01T00:00:00Z + 1655906710 s = 2022-06-22T14:05:10Z. Asserted through TEXT with an explicit unambiguous pattern rather than against the page&#39;s US-format display string, so that a cell&#39;s number format cannot decide the case. The Note that makes UTC the right frame reads: &#34;The result will be in UTC, not the local time zone of your spreadsheet.&#34; EPOCHTODATE&#39;s page carries a real Timestamp/Result/Formula table in the article body, so the five rows below are Google&#39;s own published outputs rather than derivations. Each was independently recomputed here from the Unix epoch in UTC before being written down, and all five reproduce. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.; MISMATCH vs expected: expected &#39;2022-06-22 14:05:10&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=TEXT(EPOCHTODATE(1584033897),&#34;yyyy-mm-dd hh:mm:ss&#34;)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">2020-03-12 17:24:57</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 1584033897 with =EPOCHTODATE(A5) -&gt; 3/12/2020 17:24:57. Independently recomputed as 2020-03-12T17:24:57Z. This is the row that pins the default, and the Note agrees: &#34;Seconds is the default unit of time.&#34; Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.; MISMATCH vs expected: expected &#39;2020-03-12 17:24:57&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EPOCHTODATE(0,2)-DATE(1970,1,1)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 0 with =EPOCHTODATE(A4,2) -&gt; 1/1/1970 0:00:00. Asserted as a difference against DATE(1970,1,1) so that no date format enters the comparison. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(EPOCHTODATE(0,2),6)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">25569</span>.
+        A PUBLISHED CONSTANT THAT IS WRONG, CONTRADICTED BY THE PAGE&#39;S OWN EXAMPLE TABLE. The last Notes bullet reads: &#34;The result is computed by dividing the timestamp (converted to milliseconds) by the number of milliseconds in a day and adding 25,568.&#34; For timestamp 0 that recipe yields serial 25,568. But the same page&#39;s example table prints timestamp 0 -&gt; 1/1/1970 0:00:00, and in the 1899-12-30-origin serial system Google Sheets uses, 1970-01-01 is serial 25569, not 25568: (1970-01-01) - (1899-12-30) = 25569 days, verified independently. The constant in the Notes is one day short. This corpus asserts 25569 -- the value the page&#39;s own worked example requires -- and records the Notes bullet as the error. The bullet was re-read on a second, separate fetch on 2026-08-31 to rule out a transcription slip; it says 25,568 both times. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.; MISMATCH vs expected: expected 25569, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND((EPOCHTODATE(1655906568893,2)-DATE(2022,6,22))*86400,3)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">50568.893</span>.
+        GOOGLE&#39;S OWN PUBLISHED ROW, ASSERTED BELOW THE PRECISION IT DISPLAYS. The table prints timestamp 1655906568893 with =EPOCHTODATE(A2,2) -&gt; 6/22/2022 14:02:49, but 1655906568.893 s after the epoch is 14:02:48.893 UTC, not 14:02:49 -- the published cell is the DISPLAY of a value whose seconds field has been rounded by the cell&#39;s number format, not a different value. This case asserts the underlying quantity as seconds past midnight, 14*3600 + 2*60 + 48.893 = 50568.893, which is consistent with the published display and with the Note &#34;Fractional amounts of milliseconds are shortened&#34;. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.; MISMATCH vs expected: expected 50568.893, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND((EPOCHTODATE(1656356678000410,3)-DATE(2022,6,27))*86400,3)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">68678.0</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 1656356678000410 with =EPOCHTODATE(A6,3) -&gt; 6/27/2022 19:04:38. Independently recomputed as 2022-06-27T19:04:38.000410Z, i.e. 19*3600 + 4*60 + 38 = 68678 seconds past midnight. Asserted at three decimals, ONE THOUSAND TIMES COARSER than the input&#39;s resolution, deliberately: 410 microseconds is far below what a day-based serial number can carry, so asserting it would test the float, not the function. What this case does establish is that unit 3 divides by a million -- any other unit puts the result in a different year. &#34;Negative timestamps aren&#39;t accepted&#34; is the page&#39;s only other constraint and it names no error value, so nothing is asserted about negative input. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.; MISMATCH vs expected: expected 68678.0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +524,66 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-01)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for EPOCHTODATE yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=TEXT(EPOCHTODATE(1655906710,1),&#34;yyyy-mm-dd hh:mm:ss&#34;)</td>
+  <td>Published row 2: a whole-second timestamp with unit 1</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">2022-06-22 14:05:10<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 1655906710 with =EPOCHTODATE(A3,1) -&gt; 6/22/2022 14:05:10. Independently recomputed as 1970-01-01T00:00:00Z + 1655906710 s = 2022-06-22T14:05:10Z. Asserted through TEXT with an explicit unambiguous pattern rather than against the page&#39;s US-format display string, so that a cell&#39;s number format cannot decide the case. The Note that makes UTC the right frame reads: &#34;The result will be in UTC, not the local time zone of your spreadsheet.&#34; EPOCHTODATE&#39;s page carries a real Timestamp/Result/Formula table in the article body, so the five rows below are Google&#39;s own published outputs rather than derivations. Each was independently recomputed here from the Unix epoch in UTC before being written down, and all five reproduce. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TEXT(EPOCHTODATE(1584033897),&#34;yyyy-mm-dd hh:mm:ss&#34;)</td>
+  <td>Published row 4: the unit argument omitted entirely</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">2020-03-12 17:24:57<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 1584033897 with =EPOCHTODATE(A5) -&gt; 3/12/2020 17:24:57. Independently recomputed as 2020-03-12T17:24:57Z. This is the row that pins the default, and the Note agrees: &#34;Seconds is the default unit of time.&#34; Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EPOCHTODATE(0,2)-DATE(1970,1,1)</td>
+  <td>Published row 3: timestamp zero, asserted as a date difference</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 0 with =EPOCHTODATE(A4,2) -&gt; 1/1/1970 0:00:00. Asserted as a difference against DATE(1970,1,1) so that no date format enters the comparison. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(EPOCHTODATE(0,2),6)</td>
+  <td>The serial number of the Unix epoch, which the page&#39;s Notes get wrong by one day</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">25569<br><span class="category-tag">A PUBLISHED CONSTANT THAT IS WRONG, CONTRADICTED BY THE PAGE&#39;S OWN EXAMPLE TABLE. The last Notes bullet reads: &#34;The result is computed by dividing the timestamp (converted to milliseconds) by the number of milliseconds in a day and adding 25,568.&#34; For timestamp 0 that recipe yields serial 25,568. But the same page&#39;s example table prints timestamp 0 -&gt; 1/1/1970 0:00:00, and in the 1899-12-30-origin serial system Google Sheets uses, 1970-01-01 is serial 25569, not 25568: (1970-01-01) - (1899-12-30) = 25569 days, verified independently. The constant in the Notes is one day short. This corpus asserts 25569 -- the value the page&#39;s own worked example requires -- and records the Notes bullet as the error. The bullet was re-read on a second, separate fetch on 2026-08-31 to rule out a transcription slip; it says 25,568 both times. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND((EPOCHTODATE(1655906568893,2)-DATE(2022,6,22))*86400,3)</td>
+  <td>Published row 1: a millisecond timestamp, asserted at millisecond resolution</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">50568.893<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED ROW, ASSERTED BELOW THE PRECISION IT DISPLAYS. The table prints timestamp 1655906568893 with =EPOCHTODATE(A2,2) -&gt; 6/22/2022 14:02:49, but 1655906568.893 s after the epoch is 14:02:48.893 UTC, not 14:02:49 -- the published cell is the DISPLAY of a value whose seconds field has been rounded by the cell&#39;s number format, not a different value. This case asserts the underlying quantity as seconds past midnight, 14*3600 + 2*60 + 48.893 = 50568.893, which is consistent with the published display and with the Note &#34;Fractional amounts of milliseconds are shortened&#34;. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND((EPOCHTODATE(1656356678000410,3)-DATE(2022,6,27))*86400,3)</td>
+  <td>Published row 5: unit 3, sixteen digits of microseconds</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">68678.0<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: timestamp 1656356678000410 with =EPOCHTODATE(A6,3) -&gt; 6/27/2022 19:04:38. Independently recomputed as 2022-06-27T19:04:38.000410Z, i.e. 19*3600 + 4*60 + 38 = 68678 seconds past midnight. Asserted at three decimals, ONE THOUSAND TIMES COARSER than the input&#39;s resolution, deliberately: 410 microseconds is far below what a day-based serial number can carry, so asserting it would test the float, not the function. What this case does establish is that unit 3 divides by a million -- any other unit puts the result in a different year. &#34;Negative timestamps aren&#39;t accepted&#34; is the page&#39;s only other constraint and it names no error value, so nothing is asserted about negative input. Google&#39;s EPOCHTODATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/13193461.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

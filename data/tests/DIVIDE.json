@@ -1,0 +1,51 @@
+{
+  "function": "DIVIDE",
+  "cases": [
+    {
+      "id": "DIVIDE_documented_sample_literals",
+      "formula": "=DIVIDE(4,2)",
+      "description": "The page's own Sample Usage line on literal arguments",
+      "setup_cells": {},
+      "expected": 2,
+      "expected_note": "Google's Sample Usage prints DIVIDE(4,2) with no result; 2 is DERIVED from the page's definition, \"Returns one number divided by another. Equivalent to the `/` operator.\" Google's DIVIDE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093973. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence."
+    },
+    {
+      "id": "DIVIDE_documented_sample_cell_refs",
+      "formula": "=DIVIDE(A2,B2)",
+      "description": "The second Sample Usage line, over two populated cells",
+      "setup_cells": {
+        "A2": 9,
+        "B2": 4
+      },
+      "expected": 2.25,
+      "expected_note": "Derived from the same definition; the page publishes no results. Google's DIVIDE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093973."
+    },
+    {
+      "id": "DIVIDE_equals_slash_operator",
+      "formula": "=DIVIDE(A2,B2)-(A2/B2)",
+      "description": "The documented operator equivalence, asserted structurally",
+      "setup_cells": {
+        "A2": 9,
+        "B2": 4
+      },
+      "expected": 0,
+      "expected_note": "A structural assertion with no derived constant, from the `/` operator equivalence. Google's DIVIDE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093973."
+    },
+    {
+      "id": "DIVIDE_is_NOT_equivalent_to_QUOTIENT",
+      "formula": "=DIVIDE(7,2)-QUOTIENT(7,2)",
+      "description": "The Notes claim that DIVIDE equals QUOTIENT, tested where the two must part",
+      "setup_cells": {},
+      "expected": 0.5,
+      "expected_note": "THE PAGE CONTRADICTS ITSELF AND THIS CASE ASSERTS THE SIDE THAT WINS. The Notes section says flatly: \"DIVIDE is equivalent to QUOTIENT.\" The same page's own See-also list describes QUOTIENT as \"Returns one number divided by another, WITHOUT THE REMAINDER\", and the page's headline definition equates DIVIDE with the `/` operator. Those cannot both hold: 7/2 is 3.5 and QUOTIENT(7,2) is 3, so the difference is 0.5, not 0. This corpus asserts 0.5 -- the value implied by the two statements that agree with each other -- and records the Notes bullet as wrong rather than quietly asserting around it. Google's DIVIDE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093973."
+    },
+    {
+      "id": "DIVIDE_non_terminating_quotient",
+      "formula": "=ROUND(DIVIDE(1,3),9)",
+      "description": "A quotient with no exact binary or decimal representation",
+      "setup_cells": {},
+      "expected": 0.333333333,
+      "expected_note": "Derived from the `/` equivalence and ROUND-wrapped. The page states that divisor \"cannot equal 0\" but names NO error value for that case, so this corpus asserts nothing about division by zero. Google's DIVIDE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093973."
+    }
+  ]
+}

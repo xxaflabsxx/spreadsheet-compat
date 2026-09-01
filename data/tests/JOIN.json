@@ -1,0 +1,56 @@
+{
+  "function": "JOIN",
+  "cases": [
+    {
+      "id": "JOIN_documented_sample_multiword_delimiter",
+      "formula": "=JOIN(\" and-a \",{1,2,\"1 2 3 4\"})",
+      "description": "The page's first Sample Usage line, verbatim",
+      "setup_cells": {},
+      "expected": "1 and-a 2 and-a 1 2 3 4",
+      "expected_note": "The page's own sample formula. DERIVED: three elements joined by \" and-a \" give two separators, and the third element already contains spaces, which is what makes it a useful sample -- the delimiter is inserted BETWEEN elements and never inside one. JOIN's page publishes NO results -- three Sample Usage formulas and one Note. Every value below is DERIVED from the definition \"Concatenates the elements of one or more one-dimensional arrays using a specified delimiter\" and from the argument order the syntax line fixes, JOIN(delimiter, value_or_array1, [value_or_array2, ...]), with the delimiter FIRST. Google's JOIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094077. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence."
+    },
+    {
+      "id": "JOIN_documented_sample_two_arrays",
+      "formula": "=JOIN(\",\",{1,2,3},{4;5;6})",
+      "description": "The page's second sample: a row array and a column array in one call",
+      "setup_cells": {},
+      "expected": "1,2,3,4,5,6",
+      "expected_note": "The page's own sample formula, which is also the only evidence it offers that JOIN takes more than one array: the syntax line's [value_or_array2, ...] and this line. DERIVED. The second literal uses semicolons, making it a COLUMN; the page says nothing about orientation, and this case records that both orientations flatten into one delimited string in argument order. Google's JOIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094077."
+    },
+    {
+      "id": "JOIN_over_a_range",
+      "formula": "=JOIN(\"-\",A1:A5)",
+      "description": "The page's third sample shape, over a populated range",
+      "setup_cells": {
+        "A1": 10,
+        "A2": 20,
+        "A3": 30,
+        "A4": 40,
+        "A5": 50
+      },
+      "expected": "10-20-30-40-50",
+      "expected_note": "The page's third sample, JOIN(\"-\",A1:A100), scaled to five populated cells -- Google names A1:A100 without populating any of it. DERIVED. THE PAGE SAYS NOTHING ABOUT EMPTY CELLS INSIDE THE RANGE, so this case uses a fully populated one and the corpus asserts nothing about blanks. Google's JOIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094077."
+    },
+    {
+      "id": "JOIN_blank_delimiter",
+      "formula": "=JOIN(,{1,2,3})",
+      "description": "The page's own example of an omitted delimiter",
+      "setup_cells": {},
+      "expected": "123",
+      "expected_note": "The `delimiter` argument description carries this example verbatim: \"delimiter may be specified as blank, e.g. JOIN(,{1,2,3})\". DERIVED: with nothing between them the three elements concatenate. The Note adds \"When delimiter is omitted, the result of JOIN is similar to that of CONCATENATE\" -- \"similar\" is the page's word and is too weak to assert an identity from, so this case asserts the concatenation itself rather than an equivalence. Google's JOIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094077."
+    },
+    {
+      "id": "JOIN_two_ranges_in_argument_order",
+      "formula": "=JOIN(\"|\",A1:A2,B1:B2)",
+      "description": "Two ranges, to fix the order elements are consumed in",
+      "setup_cells": {
+        "A1": 1,
+        "A2": 2,
+        "B1": 3,
+        "B2": 4
+      },
+      "expected": "1|2|3|4",
+      "expected_note": "DERIVED from the syntax line's argument order. The first range is exhausted before the second begins, exactly as with two array literals. Google's JOIN page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094077."
+    }
+  ]
+}

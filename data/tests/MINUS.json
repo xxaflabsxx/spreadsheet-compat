@@ -1,0 +1,43 @@
+{
+  "function": "MINUS",
+  "cases": [
+    {
+      "id": "MINUS_documented_sample_literals",
+      "formula": "=MINUS(3,4)",
+      "description": "The page's own Sample Usage line, whose result is negative",
+      "setup_cells": {},
+      "expected": -1,
+      "expected_note": "Google's Sample Usage prints MINUS(3,4) with no result; -1 is DERIVED from the page's definition, \"Returns the difference of two numbers. Equivalent to the `-` operator\", together with its argument descriptions (\"value1 - The minuend, or number to be subtracted from\", \"value2 - The subtrahend\"), which fix the direction of the subtraction. Google's MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence."
+    },
+    {
+      "id": "MINUS_documented_sample_cell_refs",
+      "formula": "=MINUS(A2,A3)",
+      "description": "The second Sample Usage line, over two populated cells",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 2.5
+      },
+      "expected": 7.5,
+      "expected_note": "Derived from the same definition; the page publishes no results. Its Examples section is an embedded live spreadsheet whose cells are not part of the article text. Google's MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977."
+    },
+    {
+      "id": "MINUS_equals_dash_operator",
+      "formula": "=MINUS(A2,A3)-(A2-A3)",
+      "description": "The documented operator equivalence, asserted structurally",
+      "setup_cells": {
+        "A2": 10,
+        "A3": 2.5
+      },
+      "expected": 0,
+      "expected_note": "A structural assertion with no derived constant, from the `-` operator equivalence. Google's MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977."
+    },
+    {
+      "id": "MINUS_antisymmetric_in_its_arguments",
+      "formula": "=MINUS(3,4)+MINUS(4,3)",
+      "description": "Swapping minuend and subtrahend must negate the result",
+      "setup_cells": {},
+      "expected": 0,
+      "expected_note": "A structural consequence of the minuend/subtrahend argument descriptions: if the order of the two arguments decides the sign, the two orderings must sum to zero. No constant is derived. Google's MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977."
+    }
+  ]
+}

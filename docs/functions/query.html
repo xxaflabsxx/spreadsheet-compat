@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QUERY: Google Sheets only — not in Excel or LibreOffice</title>
-<meta name="description" content="QUERY (Google) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
-<meta name="robots" content="noindex,follow">
+<title>QUERY is not supported in LibreOffice Calc (Sheets only)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for QUERY in all 9 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+
 <link rel="canonical" href="https://canispreadsheet.com/functions/query.html">
-<meta property="og:title" content="QUERY: Google Sheets only — not in Excel or LibreOffice">
-<meta property="og:description" content="QUERY (Google) is documented for Google Sheets, not for Excel or LibreOffice. Not yet live-tested by any engine.">
+<meta property="og:title" content="QUERY is not supported in LibreOffice Calc (Sheets only)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for QUERY in all 9 executed test cases. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/query.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,10 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>QUERY</h1>
   
-    <span class="badge badge-unknown">not yet live-tested</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Google</p>
+<p class="category-tag">Category: Google &middot; Last tested 2026-09-01</p>
+
+
+<p class="lede">Real compatibility results for the <strong>QUERY</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document QUERY, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -332,15 +335,6 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
-
-
-<div class="not-live-tested">
-  <strong>Not yet live-tested.</strong> No engine has executed real test cases
-  for QUERY yet. The table below reflects only whether each vendor's
-  official documentation lists this function; it is inventory data, not a
-  tested result. Check back as the test corpus grows, or see the
-  <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">project repo</a> to contribute a test file.
-</div>
 
 
 <h2 class="section-title">Support matrix</h2>
@@ -377,10 +371,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>LibreOffice Calc</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -390,6 +384,167 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </div>
 
 
+<h2 class="section-title">LibreOffice version history</h2>
+<p>We executed the same test cases under each LibreOffice release to show exactly when
+QUERY&rsquo;s support changed &mdash; not documentation claims, real results.</p>
+<div class="table-scroll">
+<table class="verhist">
+<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
+<tbody>
+
+<tr class="">
+  <td>24.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>24.8.7.2</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.2.0.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+<tr class="">
+  <td>25.8.7.3</td>
+  <td><span class="badge badge-bad">Unsupported (not recognized)</span></td>
+  <td>2026-09-01</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+<h2 class="section-title">Why isn't QUERY working in LibreOffice?</h2>
+
+<p>LibreOffice Calc does not implement <code>QUERY</code> as of 25.8.7.3 &mdash; in our
+executed tests it returns a <code>#NAME?</code> (unrecognized function) error. This is not a typo or a
+settings problem, and saving the file as .xlsx does not change it: the function simply isn&rsquo;t
+available yet.
+
+Watch the <a href="../libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+
+
+
+
+
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select A where C &gt; 700&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{John, Mike}</span>.
+        GOOGLE&#39;S OWN PUBLISHED EXAMPLE, translated only in its column identifiers. The query language reference prints the query `select name where salary &gt; 700` over this exact table and then prints its output in full: John, Mike. Here `name` is column A and `salary` is column C. ARRAY RESULT: compared over an explicit check_range in row-major order. THE DATA IS GOOGLE&#39;S, THE COLUMN LETTERS ARE NOT. Both Google pages build their examples on the same six-employee table (John/Dave/Sally/Eng, Ben/Dana/Sales, Mike/Marketing, with salaries 1000, 500, 600, 400, 350, 800 and ages 35, 27, 30, 32, 25, 24), and this file uses it. The query language reference names its columns by the identifiers `name`, `dept`, `salary`, ... because its examples run against a data source with named columns; inside the QUERY function the identifiers are the SHEET&#39;S column letters, which the reference states flatly: &#34;in a Google Spreadsheet, column identifiers are the one or two character column letter (A, B, C, ...)&#34; and &#34;column IDs in spreadsheets are always letters; the column heading text shown in the published spreadsheet are labels, not IDs. You must use the ID, not the label, in your query string.&#34; So `salary` becomes C here and `dept` becomes B. The lunchTime, hireDate and seniorityStartTime columns are omitted: they are time and date values whose text form would put a locale into every assertion. The range is HEADERLESS and every case passes headers = 0 explicitly, rather than relying on the `headers` argument&#39;s documented fallback (&#34;If omitted or set to -1, the value is guessed based on the content of data&#34;) -- a guess is not something to assert against. TWO GAPS IN THE DOCUMENTATION THAT SHAPED THIS FILE. (1) NEITHER PAGE STATES WHETHER A QUERY RESULT CARRIES A HEADER ROW. The function page is silent; the language reference never uses the phrase. The only primary-source evidence either way is the behaviour of the example sheet the function page embeds, where an aggregate query does emit one. Rather than assert a header row this corpus cannot cite a sentence for, the aggregate cases below are asserted through SUM and COUNTA, which are unaffected by a leading text row. (2) NEITHER PAGE NAMES ANY ERROR VALUE. There is no statement anywhere about what an invalid query, an empty result or a type-mismatched column returns, so this corpus asserts no error behaviour for QUERY at all and every case below is written to match at least one row. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.; MISMATCH vs expected: value mismatch: expected &#39;John&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select B, A where C &gt; 700&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Eng, John}, {Marketing, Mike}}</span>.
+        DERIVED from the select clause&#39;s documented purpose: &#34;Selects which columns to return, and IN WHAT ORDER.&#34; The rows are the two the previous case returns, so only the column order is under test; row order is unchanged because no order by clause is given. ARRAY RESULT over a check_range. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343.; MISMATCH vs expected: value mismatch: expected &#39;Eng&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select A where B = &#39;Eng&#39;&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{John, Dave, Sally}</span>.
+        DERIVED. Three employees are in Eng. The language reference has a dedicated case-sensitivity section, quoted in full: &#34;Identifiers and string literals are case-sensitive. All other language elements are case-insensitive.&#34; It also fixes the quoting: &#34;A string literal should be enclosed in either single or double quotes&#34;, and single quotes are used here so the query string&#39;s own double quotes are not disturbed. The three Eng employees come back in source order, which is also exactly the output QUERY&#39;s own embedded example sheet publishes for the equivalent Col-notation query. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.; MISMATCH vs expected: value mismatch: expected &#39;John&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select A where lower(B) = &#39;eng&#39;&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{John, Dave, Sally}</span>.
+        DERIVED, and the pair that makes the previous case mean something. The reference&#39;s own remedy is quoted there: &#34;String matching is case sensitive (you can use upper() or lower() scalar functions to work around that).&#34; A lowercase literal that matches through lower() must not match without it, so this case and the one above must return the same three rows while a bare &#39;eng&#39; returns none. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.; MISMATCH vs expected: value mismatch: expected &#39;John&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SUM(QUERY(A1:E6, &#34;select max(C) group by B&#34;, 0))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">2200</span>.
+        DERIVED. The reference documents max() as &#34;Returns the maximum value in the column for a group&#34; and group by as &#34;A single row is created for each distinct combination of values in the group-by clause&#34;. The three departments&#39; maximum salaries are Eng 1000, Marketing 800 and Sales 400, which sum to 2200 -- and the function page&#39;s own embedded example sheet runs the same query shape, `select B, MAX(D) group by B`, and prints exactly those three values. SUM is used rather than a spilled comparison precisely because neither page says whether an aggregate result carries a header row; SUM ignores a leading text cell either way. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice.; MISMATCH vs expected: expected 2200, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select A order by C desc limit 2&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{John, Mike}</span>.
+        DERIVED. The reference&#39;s order by example is `order by dept, salary desc` and its limit example is `limit 100`; the clause order used here, order by before limit, is the order the reference&#39;s own clause table mandates (&#34;The order of the clauses must be as follows&#34;: select, where, group by, pivot, order by, limit, offset, label, format, options). Salaries descending run 1000, 800, 600, 500, 400, 350, so the first two are John and Mike. NOTE THAT `asc` IS NEVER SHOWN in the reference&#39;s order by section and no default direction is stated, which is why only the explicit `desc` form is asserted. ARRAY RESULT over a check_range. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice.; MISMATCH vs expected: value mismatch: expected &#39;John&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select A order by C desc limit 2 offset 1&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{Mike, Sally}</span>.
+        DERIVED from the one sentence that fixes the interaction: &#34;The offset clause is used to skip a given number of first rows. If a limit clause is used, offset is applied first: for example, limit 15 offset 30 returns rows 31 through 45.&#34; Skipping one row of the descending salary order and taking two gives Mike (800) and Sally (600). ARRAY RESULT over a check_range. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice.; MISMATCH vs expected: value mismatch: expected &#39;Mike&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select A where A contains &#39;a&#39;&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{Dave, Sally, Dana}</span>.
+        DERIVED. The reference defines contains as &#34;A substring match. whole contains part is true if part is anywhere within whole&#34;, and its own example spells out the case rule: &#34;where name contains &#39;John&#39;&#34; matches &#39;John&#39;, &#39;John Adams&#39;, &#39;Long John Silver&#39; but NOT &#39;john adams&#39;. Of the six names, Dave, Sally and Dana contain a lowercase &#39;a&#39;; John, Ben and Mike do not -- and Dana is the case that matters, since an uppercase-insensitive match would also pull in nothing extra here but a case-FOLDING one would not change the answer, whereas &#39;A&#39; as the pattern would return only Dave and Dana&#39;s neighbours. The three are returned in source order. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.; MISMATCH vs expected: value mismatch: expected &#39;Dave&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=QUERY(A1:E6, &#34;select Col1 where Col2 = &#39;Eng&#39;&#34;, 0)</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{John, Dave, Sally}</span>.
+        THE TWO PAGES DISAGREE HERE AND THIS CASE EXECUTES THE ONE THAT IS SPECIFIC TO SHEETS. The query language reference says identifiers in a spreadsheet are &#34;always letters&#34; and the string `Col1` appears nowhere on it. QUERY&#39;s own function page says, in its Examples section, &#34;QUERY can accept either \&#34;Col\&#34; notation or \&#34;A, B\&#34; notation&#34;, and its embedded example sheet runs `select Col1 where Col2 = &#39;Eng&#39;` against a sheet range and returns John, Dave, Sally -- the same three this case counts. Neither page says when the Col form becomes REQUIRED rather than merely accepted, so this corpus asserts only that it is accepted and returns the same three rows as the letter form two cases above -- which are also the three names Google&#39;s own embedded sheet prints for this exact query. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.; MISMATCH vs expected: value mismatch: expected &#39;John&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+  </ul>
+</div>
+
+
+
+<h2 class="section-title">Executed test cases</h2>
 
 
 
@@ -399,10 +554,90 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-01)</h3>
 
-<h2 class="section-title">Test cases</h2>
-<p>No test cases have been authored for QUERY yet. This function's
-entry above reflects documentation inventory only.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select A where C &gt; 700&#34;, 0)</td>
+  <td>The language reference&#39;s own worked example, on the sheet&#39;s column letters</td>
+  <td class="result mono">{#NAME?, #NAME?}</td>
+  <td class="result mono">{John, Mike}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED EXAMPLE, translated only in its column identifiers. The query language reference prints the query `select name where salary &gt; 700` over this exact table and then prints its output in full: John, Mike. Here `name` is column A and `salary` is column C. ARRAY RESULT: compared over an explicit check_range in row-major order. THE DATA IS GOOGLE&#39;S, THE COLUMN LETTERS ARE NOT. Both Google pages build their examples on the same six-employee table (John/Dave/Sally/Eng, Ben/Dana/Sales, Mike/Marketing, with salaries 1000, 500, 600, 400, 350, 800 and ages 35, 27, 30, 32, 25, 24), and this file uses it. The query language reference names its columns by the identifiers `name`, `dept`, `salary`, ... because its examples run against a data source with named columns; inside the QUERY function the identifiers are the SHEET&#39;S column letters, which the reference states flatly: &#34;in a Google Spreadsheet, column identifiers are the one or two character column letter (A, B, C, ...)&#34; and &#34;column IDs in spreadsheets are always letters; the column heading text shown in the published spreadsheet are labels, not IDs. You must use the ID, not the label, in your query string.&#34; So `salary` becomes C here and `dept` becomes B. The lunchTime, hireDate and seniorityStartTime columns are omitted: they are time and date values whose text form would put a locale into every assertion. The range is HEADERLESS and every case passes headers = 0 explicitly, rather than relying on the `headers` argument&#39;s documented fallback (&#34;If omitted or set to -1, the value is guessed based on the content of data&#34;) -- a guess is not something to assert against. TWO GAPS IN THE DOCUMENTATION THAT SHAPED THIS FILE. (1) NEITHER PAGE STATES WHETHER A QUERY RESULT CARRIES A HEADER ROW. The function page is silent; the language reference never uses the phrase. The only primary-source evidence either way is the behaviour of the example sheet the function page embeds, where an aggregate query does emit one. Rather than assert a header row this corpus cannot cite a sentence for, the aggregate cases below are asserted through SUM and COUNTA, which are unaffected by a leading text row. (2) NEITHER PAGE NAMES ANY ERROR VALUE. There is no statement anywhere about what an invalid query, an empty result or a type-mismatched column returns, so this corpus asserts no error behaviour for QUERY at all and every case below is written to match at least one row. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select B, A where C &gt; 700&#34;, 0)</td>
+  <td>Two columns named in the reverse of their sheet order</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Eng, John}, {Marketing, Mike}}<br><span class="category-tag">DERIVED from the select clause&#39;s documented purpose: &#34;Selects which columns to return, and IN WHAT ORDER.&#34; The rows are the two the previous case returns, so only the column order is under test; row order is unchanged because no order by clause is given. ARRAY RESULT over a check_range. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select A where B = &#39;Eng&#39;&#34;, 0)</td>
+  <td>A string literal matching exactly</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{John, Dave, Sally}<br><span class="category-tag">DERIVED. Three employees are in Eng. The language reference has a dedicated case-sensitivity section, quoted in full: &#34;Identifiers and string literals are case-sensitive. All other language elements are case-insensitive.&#34; It also fixes the quoting: &#34;A string literal should be enclosed in either single or double quotes&#34;, and single quotes are used here so the query string&#39;s own double quotes are not disturbed. The three Eng employees come back in source order, which is also exactly the output QUERY&#39;s own embedded example sheet publishes for the equivalent Col-notation query. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select A where lower(B) = &#39;eng&#39;&#34;, 0)</td>
+  <td>The same match through the scalar function the reference recommends</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{John, Dave, Sally}<br><span class="category-tag">DERIVED, and the pair that makes the previous case mean something. The reference&#39;s own remedy is quoted there: &#34;String matching is case sensitive (you can use upper() or lower() scalar functions to work around that).&#34; A lowercase literal that matches through lower() must not match without it, so this case and the one above must return the same three rows while a bare &#39;eng&#39; returns none. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SUM(QUERY(A1:E6, &#34;select max(C) group by B&#34;, 0))</td>
+  <td>An aggregation over groups, summed so no header row can affect it</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">2200<br><span class="category-tag">DERIVED. The reference documents max() as &#34;Returns the maximum value in the column for a group&#34; and group by as &#34;A single row is created for each distinct combination of values in the group-by clause&#34;. The three departments&#39; maximum salaries are Eng 1000, Marketing 800 and Sales 400, which sum to 2200 -- and the function page&#39;s own embedded example sheet runs the same query shape, `select B, MAX(D) group by B`, and prints exactly those three values. SUM is used rather than a spilled comparison precisely because neither page says whether an aggregate result carries a header row; SUM ignores a leading text cell either way. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select A order by C desc limit 2&#34;, 0)</td>
+  <td>Sorting descending and truncating, both documented clauses</td>
+  <td class="result mono">{#NAME?, #NAME?}</td>
+  <td class="result mono">{John, Mike}<br><span class="category-tag">DERIVED. The reference&#39;s order by example is `order by dept, salary desc` and its limit example is `limit 100`; the clause order used here, order by before limit, is the order the reference&#39;s own clause table mandates (&#34;The order of the clauses must be as follows&#34;: select, where, group by, pivot, order by, limit, offset, label, format, options). Salaries descending run 1000, 800, 600, 500, 400, 350, so the first two are John and Mike. NOTE THAT `asc` IS NEVER SHOWN in the reference&#39;s order by section and no default direction is stated, which is why only the explicit `desc` form is asserted. ARRAY RESULT over a check_range. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select A order by C desc limit 2 offset 1&#34;, 0)</td>
+  <td>The interaction the reference spells out arithmetically</td>
+  <td class="result mono">{#NAME?, #NAME?}</td>
+  <td class="result mono">{Mike, Sally}<br><span class="category-tag">DERIVED from the one sentence that fixes the interaction: &#34;The offset clause is used to skip a given number of first rows. If a limit clause is used, offset is applied first: for example, limit 15 offset 30 returns rows 31 through 45.&#34; Skipping one row of the descending salary order and taking two gives Mike (800) and Sally (600). ARRAY RESULT over a check_range. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select A where A contains &#39;a&#39;&#34;, 0)</td>
+  <td>The reference&#39;s `contains` operator, on a lowercase letter</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{Dave, Sally, Dana}<br><span class="category-tag">DERIVED. The reference defines contains as &#34;A substring match. whole contains part is true if part is anywhere within whole&#34;, and its own example spells out the case rule: &#34;where name contains &#39;John&#39;&#34; matches &#39;John&#39;, &#39;John Adams&#39;, &#39;Long John Silver&#39; but NOT &#39;john adams&#39;. Of the six names, Dave, Sally and Dana contain a lowercase &#39;a&#39;; John, Ben and Mike do not -- and Dana is the case that matters, since an uppercase-insensitive match would also pull in nothing extra here but a case-FOLDING one would not change the answer, whereas &#39;A&#39; as the pattern would return only Dave and Dana&#39;s neighbours. The three are returned in source order. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=QUERY(A1:E6, &#34;select Col1 where Col2 = &#39;Eng&#39;&#34;, 0)</td>
+  <td>The alternative identifier style, which only the function page documents</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{John, Dave, Sally}<br><span class="category-tag">THE TWO PAGES DISAGREE HERE AND THIS CASE EXECUTES THE ONE THAT IS SPECIFIC TO SHEETS. The query language reference says identifiers in a spreadsheet are &#34;always letters&#34; and the string `Col1` appears nowhere on it. QUERY&#39;s own function page says, in its Examples section, &#34;QUERY can accept either \&#34;Col\&#34; notation or \&#34;A, B\&#34; notation&#34;, and its embedded example sheet runs `select Col1 where Col2 = &#39;Eng&#39;` against a sheet range and returns John, Dave, Sally -- the same three this case counts. Neither page says when the Col form becomes REQUIRED rather than merely accepted, so this corpus asserts only that it is accepted and returns the same three rows as the letter form two cases above -- which are also the three names Google&#39;s own embedded sheet prints for this exact query. Google&#39;s QUERY page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093343. THE QUERY LANGUAGE IS A SEPARATE DOCUMENT AND IS CITED SEPARATELY: Google Visualization API Query Language Reference (Version 0.7), footer &#34;Last updated 2024-07-10 UTC&#34;, read live on 2026-08-31 at https://developers.google.com/chart/interactive/docs/querylanguage. QUERY&#39;s own function page does not define the language -- it says only &#34;Runs a Google Visualization API Query Language query across data&#34; and links there twice. WHY THIS CASE IS A SPILLED ARRAY AND NOT A COUNTA. It was first authored as =COUNTA(QUERY(...)) so that no assumption about an output header row could enter, and the LibreOffice run showed why that was a mistake: COUNTA counts an error cell as one non-empty value, so all four builds returned 1 -- a plausible-looking NUMBER that completely masked the #NAME? underneath, and would have been published as a wrong answer rather than as an absent function. (Batch G recorded the same trap the other way round, where COUNT(TRIMRANGE(...)) returned 0 instead of propagating #NAME?.) A plain select with headers = 0 emits no header row -- QUERY&#39;s own embedded example sheet shows `select Col1 where Col2 = &#39;Eng&#39;` returning exactly three names and nothing else -- so the rows can simply be asserted directly, and an unrecognised function then propagates into every cell of the check_range where it belongs.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
 
 
 <h2 class="section-title">Docs &amp; syntax</h2>

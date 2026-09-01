@@ -1,0 +1,313 @@
+{
+  "function": "SORTN",
+  "cases": [
+    {
+      "id": "SORTN_published_defaults",
+      "formula": "=SORTN(A2:C6)",
+      "description": "Published row 1: every optional argument defaulted",
+      "setup_cells": {
+        "A1": "Student",
+        "B1": "Test 1 score",
+        "C1": "Test 2 score",
+        "A2": "Alice",
+        "B2": 100,
+        "C2": 90,
+        "A3": "Bob",
+        "B3": 75,
+        "C3": 85,
+        "A4": "Carol",
+        "B4": 80,
+        "C4": 85,
+        "A5": "Devon",
+        "B5": 100,
+        "C5": 95,
+        "A6": "Eloise",
+        "B6": 80,
+        "C6": 90
+      },
+      "expected": [
+        [
+          "Alice",
+          100,
+          90
+        ]
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED RESULT: =SORTN(A2:C6) -> Alice 100 90. Two defaults are doing the work and the page states both: n is \"[OPTIONAL - 1 by default]\", and the Notes say \"If sort_column1 and is_ascending1 aren't included, the sort is performed on the lowest-index column in range\" -- column A, the names, ascending, where Alice sorts first. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. SORTN's page carries a real Examples block in the article body: a source table (\"The following table is used for the examples below\") of five students with two scores each, and seven Formula/Result rows over it. This file executes all seven, on that exact data. EVERY EXPECTED VALUE HERE IS GOOGLE'S OWN PUBLISHED OUTPUT, and each was additionally re-derived by hand from the display_ties_mode definitions before being written down; all seven reproduce. Google's SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor's documentation. The authority is Google's own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a 'Sample Usage' block of FORMULAS WITH NO RESULTS. Where a value below is Google's own published output the note says so; where it is derived from the page's stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.",
+      "check_range": "A30:C30"
+    },
+    {
+      "id": "SORTN_published_n_equals_two",
+      "formula": "=SORTN(A2:C6, 2)",
+      "description": "Published row 2: n given, sort still defaulted",
+      "setup_cells": {
+        "A1": "Student",
+        "B1": "Test 1 score",
+        "C1": "Test 2 score",
+        "A2": "Alice",
+        "B2": 100,
+        "C2": 90,
+        "A3": "Bob",
+        "B3": 75,
+        "C3": 85,
+        "A4": "Carol",
+        "B4": 80,
+        "C4": 85,
+        "A5": "Devon",
+        "B5": 100,
+        "C5": 95,
+        "A6": "Eloise",
+        "B6": 80,
+        "C6": 90
+      },
+      "expected": [
+        [
+          "Alice",
+          100,
+          90
+        ],
+        [
+          "Bob",
+          75,
+          85
+        ]
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED RESULT: -> Alice 100 90 / Bob 75 85. Still sorted by the name column, so the two lowest names come back regardless of score. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.",
+      "check_range": "A30:C31"
+    },
+    {
+      "id": "SORTN_published_ties_mode_0",
+      "formula": "=SORTN(A2:C6, 3, 0, B2:B6, FALSE)",
+      "description": "Published row 3: ties mode 0, sorted by Test 1 score descending",
+      "setup_cells": {
+        "A1": "Student",
+        "B1": "Test 1 score",
+        "C1": "Test 2 score",
+        "A2": "Alice",
+        "B2": 100,
+        "C2": 90,
+        "A3": "Bob",
+        "B3": 75,
+        "C3": 85,
+        "A4": "Carol",
+        "B4": 80,
+        "C4": 85,
+        "A5": "Devon",
+        "B5": 100,
+        "C5": 95,
+        "A6": "Eloise",
+        "B6": 80,
+        "C6": 90
+      },
+      "expected": [
+        [
+          "Alice",
+          100,
+          90
+        ],
+        [
+          "Devon",
+          100,
+          95
+        ],
+        [
+          "Carol",
+          80,
+          85
+        ]
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED RESULT: -> Alice 100 90 / Devon 100 95 / Carol 80 85. Mode 0 is \"Show at most the first n rows in the sorted range\", so the tie between Alice and Devon at 100 is simply truncated at three rows and Eloise, also on 80, is cut off. The relative order within a tie follows the source, which the Notes support: \"range is sorted only by the specified columns. Other columns are returned in the order they originally appear.\" ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.",
+      "check_range": "A30:C32"
+    },
+    {
+      "id": "SORTN_published_ties_mode_1",
+      "formula": "=SORTN(A2:C6, 3, 1, B2:B6, FALSE)",
+      "description": "Published row 4: ties mode 1 pulls in a fourth row",
+      "setup_cells": {
+        "A1": "Student",
+        "B1": "Test 1 score",
+        "C1": "Test 2 score",
+        "A2": "Alice",
+        "B2": 100,
+        "C2": 90,
+        "A3": "Bob",
+        "B3": 75,
+        "C3": 85,
+        "A4": "Carol",
+        "B4": 80,
+        "C4": 85,
+        "A5": "Devon",
+        "B5": 100,
+        "C5": 95,
+        "A6": "Eloise",
+        "B6": 80,
+        "C6": 90
+      },
+      "expected": [
+        [
+          "Alice",
+          100,
+          90
+        ],
+        [
+          "Devon",
+          100,
+          95
+        ],
+        [
+          "Carol",
+          80,
+          85
+        ],
+        [
+          "Eloise",
+          80,
+          90
+        ]
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED RESULT: -> Alice 100 90 / Devon 100 95 / Carol 80 85 / Eloise 80 90. Mode 1 is \"Show at most the first n rows, plus any additional rows that are identical to the nth row\". The nth row is Carol; Eloise is NOT identical to Carol as a row (85 against 90 on Test 2) but ties her on the sort column, and the published output includes her. A NOTE THE PAGE NEEDS AND DOES NOT HAVE: its display_ties_mode wording talks about \"rows that are identical to the nth row\" and \"removing duplicate rows\", but no two rows in its own example data are identical -- Alice and Devon share only their Test 1 score, as do Carol and Eloise. The published outputs are only consistent with \"identical\" and \"duplicate\" meaning EQUAL IN THE SORT COLUMN OR COLUMNS, not equal as whole rows. That reading is recorded here because it is derived from Google's results rather than stated in Google's prose. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.",
+      "check_range": "A30:C33"
+    },
+    {
+      "id": "SORTN_published_ties_mode_2",
+      "formula": "=SORTN(A2:C6, 3, 2, B2:B6, FALSE)",
+      "description": "Published row 5: ties mode 2 drops rows the other modes keep",
+      "setup_cells": {
+        "A1": "Student",
+        "B1": "Test 1 score",
+        "C1": "Test 2 score",
+        "A2": "Alice",
+        "B2": 100,
+        "C2": 90,
+        "A3": "Bob",
+        "B3": 75,
+        "C3": 85,
+        "A4": "Carol",
+        "B4": 80,
+        "C4": 85,
+        "A5": "Devon",
+        "B5": 100,
+        "C5": 95,
+        "A6": "Eloise",
+        "B6": 80,
+        "C6": 90
+      },
+      "expected": [
+        [
+          "Alice",
+          100,
+          90
+        ],
+        [
+          "Carol",
+          80,
+          85
+        ],
+        [
+          "Bob",
+          75,
+          85
+        ]
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED RESULT: -> Alice 100 90 / Carol 80 85 / Bob 75 85. Mode 2 is \"Show at most the first n rows after removing duplicate rows\", and this is the row that proves \"duplicate\" cannot mean what it says: no two rows in the data are identical, yet Devon and Eloise are both removed. They are the second row at each of the tied scores 100 and 80. A NOTE THE PAGE NEEDS AND DOES NOT HAVE: its display_ties_mode wording talks about \"rows that are identical to the nth row\" and \"removing duplicate rows\", but no two rows in its own example data are identical -- Alice and Devon share only their Test 1 score, as do Carol and Eloise. The published outputs are only consistent with \"identical\" and \"duplicate\" meaning EQUAL IN THE SORT COLUMN OR COLUMNS, not equal as whole rows. That reading is recorded here because it is derived from Google's results rather than stated in Google's prose. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.",
+      "check_range": "A30:C32"
+    },
+    {
+      "id": "SORTN_published_ties_mode_3",
+      "formula": "=SORTN(A2:C6, 3, 3, B2:B6, FALSE)",
+      "description": "Published row 6: ties mode 3 returns five rows for n = 3",
+      "setup_cells": {
+        "A1": "Student",
+        "B1": "Test 1 score",
+        "C1": "Test 2 score",
+        "A2": "Alice",
+        "B2": 100,
+        "C2": 90,
+        "A3": "Bob",
+        "B3": 75,
+        "C3": 85,
+        "A4": "Carol",
+        "B4": 80,
+        "C4": 85,
+        "A5": "Devon",
+        "B5": 100,
+        "C5": 95,
+        "A6": "Eloise",
+        "B6": 80,
+        "C6": 90
+      },
+      "expected": [
+        [
+          "Alice",
+          100,
+          90
+        ],
+        [
+          "Devon",
+          100,
+          95
+        ],
+        [
+          "Carol",
+          80,
+          85
+        ],
+        [
+          "Eloise",
+          80,
+          90
+        ],
+        [
+          "Bob",
+          75,
+          85
+        ]
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED RESULT: all five students come back. Mode 3 is \"Show at most the first n unique rows, but show every duplicate of these rows\": the three distinct Test 1 scores are 100, 80 and 75, and every row carrying one of them is returned. It is the clearest demonstration that n counts DISTINCT SORT KEYS in this mode, not output rows. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.",
+      "check_range": "A30:C34"
+    },
+    {
+      "id": "SORTN_published_two_sort_columns_by_index",
+      "formula": "=SORTN(A2:C6, 3, 3, 2, FALSE, 3, FALSE)",
+      "description": "Published row 7: two sort columns given as indices rather than ranges",
+      "setup_cells": {
+        "A1": "Student",
+        "B1": "Test 1 score",
+        "C1": "Test 2 score",
+        "A2": "Alice",
+        "B2": 100,
+        "C2": 90,
+        "A3": "Bob",
+        "B3": 75,
+        "C3": 85,
+        "A4": "Carol",
+        "B4": 80,
+        "C4": 85,
+        "A5": "Devon",
+        "B5": 100,
+        "C5": 95,
+        "A6": "Eloise",
+        "B6": 80,
+        "C6": 90
+      },
+      "expected": [
+        [
+          "Devon",
+          100,
+          95
+        ],
+        [
+          "Alice",
+          100,
+          90
+        ],
+        [
+          "Eloise",
+          80,
+          90
+        ]
+      ],
+      "expected_note": "GOOGLE'S OWN PUBLISHED RESULT: -> Devon 100 95 / Alice 100 90 / Eloise 80 90. This row looks malformed beside the others and is not: sort_column1 is documented as \"the INDEX of the column in range or a range outside of range\", so the bare 2 and 3 are column indices, each followed by its own is_ascending flag. Sorting descending by Test 1 then by Test 2 orders Devon (100,95) ahead of Alice (100,90) -- reversing them relative to every other row in the table, which is what makes this the one case that proves the second sort key is honoured. Mode 3 then counts DISTINCT COMBINED SORT KEYS, not distinct Test 1 scores: the pairs (100,95), (100,90) and (80,90) are the first three, none of them duplicated, so exactly three rows come back -- where the single-column mode-3 row above returned all five. That refinement is derived from this published output; the page never says uniqueness is measured over the whole set of sort columns. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google's SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.",
+      "check_range": "A30:C32"
+    }
+  ]
+}
