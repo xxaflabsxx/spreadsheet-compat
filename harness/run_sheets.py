@@ -1166,8 +1166,8 @@ def cmd_build_recipes(args):
     if skipped:
         print(f"\nSkipped {len(skipped)} multi-sheet recipe(s) "
               f"({sum(r['n_checks'] for r in skipped)} check(s)) -- these need extra "
-              f"worksheets; run build-recipes-multisheet to execute them in Sheets (see manifest "
-              f"'skipped_multi_sheet_reason':")
+              f"worksheets; run build-recipes-multisheet to execute them in Sheets "
+              f"(see the manifest's 'skipped_multi_sheet_reason'):")
         for r in skipped:
             print(f"  {r['slug']:45} {r['n_checks']:>3} check(s)  "
                   f"tabs: {', '.join(r['setup_sheet_names'])}")
