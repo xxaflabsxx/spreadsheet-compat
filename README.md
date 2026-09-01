@@ -9,8 +9,11 @@ Live site: <https://canispreadsheet.com/> &middot; Open dataset (CC BY 4.0): [`c
 
 The entire value of this project is that every number in it was actually
 computed by the engine in question, not inferred from documentation. Phase 1
-builds the pipeline and proves out the hardest part of that promise: getting
-LibreOffice to genuinely recalculate headless, with proof.
+built the pipeline and proved out the hardest part of that promise: getting
+LibreOffice to genuinely recalculate headless, with proof. Today 586 of the
+600 catalogued functions — 2334 authored cases — are executed in **both**
+non-Excel engines: four pinned LibreOffice builds and Google Sheets via the
+Drive import route. Excel stays documentation-only.
 
 ## Architecture
 
@@ -20,12 +23,14 @@ data/functions.json        Function inventory: every function name, its
                             Sheets, and LibreOffice Calc document it
                             (with source URLs).
 
-data/tests/<FUNCTION>.json One file per function under test. Each file is a
-                            list of test cases: {id, formula, setup_cells,
-                            description, expected, expected_note,
-                            check_range}. Formulas are written exactly as a
-                            human would type them in the Excel UI — no
-                            engine-specific storage quirks belong here.
+data/tests/<FUNCTION>.json One file per function under test:
+                            {function, cases: [...]}, each case
+                            {id, formula, setup_cells, description, expected,
+                            expected_note, check_range}. Formulas are written
+                            exactly as a human would type them in the Excel UI
+                            — no engine-specific storage quirks belong here.
+                            `expected: null` marks a probe: it asserts only
+                            that the engine evaluated the call.
 
 harness/xlfn_map.py         Translates modern function names to the
                             "_xlfn."/"_xlfn._xlws." prefixed form Excel
@@ -41,10 +46,16 @@ harness/corpus.py           Engine-agnostic shared machinery both runners
 harness/run_lo.py           Engine runner for LibreOffice Calc: builds one
                             .xlsx from data/tests/*.json, forces a real
                             LibreOffice recalculation, reads back computed
-                            values, writes results/libreoffice-24.2.json.
+                            values, writes
+                            results/libreoffice-<major.minor>.json. The tag
+                            comes from the binary's own reported version, so
+                            each of the four pinned builds writes its own
+                            file (24.2, 24.8, 25.2, 25.8).
 
 results/<engine>-<ver>.json Output of each engine runner: real, executed
-                            values per test id, plus a canary block proving
+                            values per test id, an `executed_at` date on every
+                            function block, a `subset_runs` log of the merges
+                            that built the file, and a canary block proving
                             recalculation actually happened.
 
 scripts/check_test_setup_refs.py
@@ -61,19 +72,21 @@ scripts/check_test_setup_refs.py
                             E authored five such cases; run this (exit 1 on
                             violation) before any engine run.
 
-scripts/gen_test_cases.py   Generator that produced the current
-                            data/tests/*.json files (kept for reference /
-                            as a pattern to follow when adding more
-                            functions in bulk; hand-editing the JSON
-                            directly is equally fine going forward).
+scripts/gen_test_cases.py   Generator that produced the Phase-1
+                            data/tests/*.json files (2026-07-04, unchanged
+                            since; the later batches were hand-authored).
+                            Kept for reference / as a pattern to follow when
+                            adding more functions in bulk; hand-editing the
+                            JSON directly is equally fine.
 
 harness/run_sheets.py       Engine runner for Google Sheets: builds chunked
                             .xlsx workbooks for Drive auto-conversion,
                             ingests the exported .xlsx readback, writes
                             results/google-sheets.json. See "Phase 2:
                             Google Sheets runner" below. Its
-                            build-recipes / ingest-recipes / selftest-recipes
-                            subcommands do the same for the RECIPE corpus.
+                            build-recipes / build-recipes-multisheet /
+                            ingest-recipes / selftest-recipes subcommands do
+                            the same for the RECIPE corpus.
 
 data/recipes/<slug>.json   One file per how-to recipe: the task, the
                             per-app formulas, the explanation, a "verify"
@@ -100,44 +113,70 @@ scripts/verify_recipes.py   Engine runner for the RECIPE corpus in headless
                             The Google Sheets counterpart writes
                             results/recipes-verified-sheets.json.
 
+site/build_site.py          Static site generator consuming data/ +
+                            results/ -> docs/, deployed to GitHub Pages. It
+                            also owns the two declared lists the methodology
+                            page renders: NO_VERDICT_CASES (executed, no
+                            verdict drawn) and DOCUMENTED_SKIPS (deliberately
+                            not executed).
+
 (not built yet)
 harness/run_excel.py         Excel engine runner (see Phase-2 notes below).
-site/                        Static site generator consuming data/ + results/
-                              -> deployed to GitHub Pages.
 ```
 
 **Pipeline**: inventory (what exists) → tests (what behavior to check) →
 engine runners (what actually happens) → results (raw truth) → site
-(presentation layer, Phase 2+).
+(presentation layer, live at canispreadsheet.com).
 
 ## Status (Phase 1 + Phase-2 corpus expansion)
 
-- **Google Sheets is now EXECUTED.** `results/google-sheets.json` (2026-08-29)
-  holds the whole corpus — 278 functions / 841 cases — run through the Drive
-  import route (upload .xlsx → Sheets recalculation → .xlsx export readback),
-  canary 841/841, `trusted: true`. Two engines are executed now: LibreOffice
-  Calc (four pinned builds) and Google Sheets (one dated run — Sheets has no
-  version to pin, so its `engine_version` is a DATE LABEL and must never be
-  parsed as a version). **Microsoft Excel is still not executed** and its
-  column remains documentation-only everywhere on the site.
-  Five functions (BYCOL, BYROW, FILTER, MAKEARRAY, SORT) carry the verdict
-  `inconclusive` because Google's importer did not map the OOXML storage
-  prefix our Excel-authored workbooks use for them — see "Google Sheets
-  execution caveats" in `DATASET_CARD.md`. They are NOT reported as
-  unsupported.
+- **Two engines are EXECUTED over the whole corpus.** Each of
+  `results/google-sheets.json` and the four `results/libreoffice-*.json` files
+  holds **586 functions / 2334 cases**, all five `trusted: true`, with the
+  deterministic arithmetic canary reading back 3333 on 2334/2334 sheets. That
+  is 586 of the 600 catalog names; the other 14 are documented skips, not a
+  backlog ("Coverage is now complete except for documented skips", below, and
+  the methodology page). LibreOffice runs on four pinned builds — 24.2.0.3,
+  24.8.7.2, 25.2.0.3, 25.8.7.3 — and Google Sheets runs through the Drive
+  import route (upload .xlsx → Sheets recalculation → .xlsx export readback).
+  Sheets has no version to pin, so its `engine_version` is a DATE LABEL and
+  must never be parsed as a version: the corpus was executed over 14 subset
+  runs carrying three labels — 2026-08-29 (278 functions), 2026-08-31 (241)
+  and 2026-09-01 (67) — and each function block records its own
+  `executed_at`. *(History: the first full Sheets sweep, on 2026-08-29,
+  covered the corpus as it then stood, 278 functions / 841 cases.)*
+  **Microsoft Excel is still not executed** and its column remains
+  documentation-only everywhere on the site.
+  No function's Sheets verdict is `inconclusive` because of Google's importer
+  any more: the five that were (BYCOL, BYROW, FILTER, MAKEARRAY, SORT) were
+  resolved by the 2026-08-29 plain-name re-run. Eight functions carry
+  `inconclusive` for the *other* reason — executed, but no verdict drawn: `AI`,
+  the five `IMPORT*` and `SPARKLINE` in Sheets, `DDE` in LibreOffice. Nine
+  further Sheets *cases* (in DEGREES, INDIRECT, PRICE, PRICEDISC, PRICEMAT,
+  RECEIVED, SORT, TRANSPOSE, YIELDDISC) are inconclusive because the `.xlsx`
+  export readback, not Sheets, explains them. See "Google Sheets execution
+  caveats" and "Executed, but no verdict drawn" in `DATASET_CARD.md`. None of
+  these is reported as unsupported.
 
 - `data/functions.json`: 600 distinct function names inventoried from live
-  official docs. Excel: 522 documented, Google Sheets: 515, LibreOffice: 469,
-  documented in all three: 421. Sources actually fetched are listed in the
+  official docs. Excel: 522 documented, Google Sheets: 516, LibreOffice: 507,
+  documented in all three: 451. Sources actually fetched are listed in the
   `sources` array; one attempted source
   (`wiki.documentfoundation.org/List_of_Calc_Functions`) was blocked by an
   anti-bot wall and is recorded honestly as `fetched: false` — LibreOffice
-  coverage instead comes from `help.libreoffice.org`'s category pages (18
-  pages fetched), which gave full, real coverage anyway.
+  coverage instead comes from `help.libreoffice.org`'s category index plus the
+  19 category sub-pages it links (each one named in that source's own `notes`),
+  which gave full, real coverage anyway. Two later corrections are recorded in
+  the same place: a sweep of stale LibreOffice `documented` flags against
+  verified per-function help URLs (2026-08-28), which moved that count from
+  469 to 507, and XMATCH's Google Sheets flag, fixed against its dedicated
+  help article after the executed run computed a real value for it
+  (2026-08-29, 515 -> 516).
 - `data/tests/`: 586 functions, 2334 hand-authored test cases. Phase 1
-  covered 31 functions (125 cases); the Phase-2 batch added 117 more
-  workhorse/compat-interesting functions (479 cases) spanning math
-  (CEILING/FLOOR + .MATH variants, MROUND, INT-vs-TRUNC...), statistics
+  (2026-07-04) covered 31 functions (125 cases); the first Phase-2 batch
+  (2026-07-04) added 117 more workhorse/compat-interesting functions (479
+  cases) spanning math (CEILING/FLOOR + .MATH variants, MROUND,
+  INT-vs-TRUNC...), statistics
   (STDEV/RANK/PERCENTILE families), text (TEXT format codes, FIND/SEARCH,
   TRIM/CLEAN, CHAR/CODE/UNICHAR/UNICODE...), date/time (WEEKDAY return
   types, YEARFRAC bases, WEEKNUM vs ISOWEEKNUM, DAYS360 US/EU...),
@@ -201,14 +240,20 @@ engine runners (what actually happens) → results (raw truth) → site
   renders that list with a reason per function, derived from the same data the
   function pages are, and prints any unclassified leftover rather than
   absorbing it into the percentage.
-- `harness/run_lo.py` executed against LibreOffice 24.2.7.2, results
-  committed at `results/libreoffice-24.2.json`. **Recalculation is proven
-  genuine** — see "How the LO runner forces recalculation" below. Of the
-  604 cases: 513 matched their documented expectation, 86 diverged
-  (preserved as `matched_expected: false` — divergences are the product,
-  never "fixed" to match the engine), and 5 are intentionally
-  non-deterministic existence probes (TODAY/RAND family). See "Phase-2
-  headline quirks" below for the most interesting new divergences.
+- `harness/run_lo.py` executes the corpus against each of the four pinned
+  LibreOffice builds, one results file per build. **Recalculation is proven
+  genuine** — see "How the LO runner forces recalculation" below. On the newest
+  build (25.8.7.3, `results/libreoffice-25.8.json`), of the 2334 cases: 1660
+  matched their documented expectation, 618 diverged (preserved as
+  `matched_expected: false` — divergences are the product, never "fixed" to
+  match the engine), and 56 are probes carrying `expected: null` — intentionally
+  non-deterministic (TODAY/RAND family) or otherwise unassertable. The older
+  builds diverge more, as you would expect: 672 on 24.2.0.3, 642 on both
+  24.8.7.2 and 25.2.0.3. See "Phase-2 headline quirks" below for the most
+  interesting families.
+  *(History: this bullet's first version reported the 2026-07-04 run against
+  LibreOffice 24.2.7.2 on the then 148-function / 604-case corpus — 513
+  matched, 86 diverged, 5 non-deterministic probes.)*
 
 ## How the LO runner forces recalculation (and how we know it's real)
 
@@ -228,10 +273,10 @@ here:
      ~2 seconds apart, and the two `NOW()` values must differ. If
      LibreOffice were just echoing something static, they'd be identical.
 
-   Both checks are in `results/libreoffice-24.2.json` under `"canary"`, and
-   the run sets a top-level `"trusted": true/false` flag. **If `trusted` is
-   ever `false`, treat every value in that results file as unverified.**
-   From our Phase-1 run:
+   Both checks are in every `results/libreoffice-*.json` under `"canary"`,
+   and each run sets a top-level `"trusted": true/false` flag. **If `trusted`
+   is ever `false`, treat every value in that results file as unverified.**
+   From the Phase-1 run (2026-07-04); the same keys are in the current files:
    ```json
    "canary": {
      "arithmetic_actual": 3333,
@@ -293,7 +338,15 @@ declares a `check_range` in `ArrayFormula`. Test cases that only need a
 single output cell don't set `check_range` and are written as plain
 formulas.
 
-## Phase 1 result summary — LibreOffice Calc 24.2.7.2
+## Phase 1 result summary — LibreOffice Calc 24.2.7.2, run of 2026-07-04 (historical)
+
+This is the original Phase-1 run and is kept as a record of it, not as a
+current claim. Of the eleven functions in its "Unsupported" row, six are
+`supported` on the newest pinned build today (XLOOKUP, LET, SORT, UNIQUE and
+SEQUENCE from 24.8.7.2, TEXTSPLIT from 25.8.7.3), four are recognized but
+divergent (`quirky`: LAMBDA, FILTER, TEXTBEFORE, TEXTAFTER) and one is still
+`unsupported` (ARRAYTOTEXT). See "Current result summary" below for where
+things stand now.
 
 Of the 31 functions tested (125 total cases):
 
@@ -332,15 +385,43 @@ Of the 31 functions tested (125 total cases):
    `n - d*FLOOR(n/d)`) rather than C-style truncated-remainder semantics.
    Verified correct, not a quirk, but a common source of porting bugs.
 
-All 45 `#NAME?` results plus the `#VALUE!`/other-error cases above are
-recorded with matched engine version, formula (display + literal .xlsx
-storage form), and full notes in `results/libreoffice-24.2.json`.
+All 45 `#NAME?` results of that run, plus the `#VALUE!`/other-error cases
+above, were recorded with matched engine version, formula (display + literal
+.xlsx storage form) and full notes in `results/libreoffice-24.2.json`. That
+file has since been re-executed on the pinned 24.2.0.3 build against the whole
+586-function corpus, so it now holds that run, not this one.
 
-## Phase-2 headline quirks — LibreOffice Calc 24.2.7.2 vs documented Excel behavior
+## Current result summary — the executed engines today
 
-The full list is every `matched_expected: false` entry in
-`results/libreoffice-24.2.json` (86 of them) and on the generated
-`docs/quirks.html` page; these are the most interesting families:
+Derived from `results/*.json` (and mirrored in `docs/data/compat.json`), over
+the 600-function catalog:
+
+| Verdict | LibreOffice 25.8.7.3 | Google Sheets (dated runs) |
+|---|---|---|
+| Supported, behaves as documented | 321 | 455 |
+| Quirk found | 177 | 56 |
+| Unsupported (not recognized) | 87 | 68 |
+| Inconclusive — executed, no verdict drawn | 1 (DDE) | 7 (AI, five IMPORT*, SPARKLINE) |
+| Not executed (documented skips) | 14 | 14 |
+
+At case level, 908 divergences are published as quirks across 278 functions
+(618 LibreOffice on 25.8.7.3, 290 Google Sheets); 9 further Sheets cases are
+held `inconclusive` because the `.xlsx` export readback, not Sheets, explains
+them. Twenty functions carry a `libreoffice_newly_supported_in` version from
+running all four builds: 8 first worked in 24.8.7.2 (LET, RANDARRAY, SEQUENCE,
+SORT, SORTBY, UNIQUE, XLOOKUP, XMATCH) and 12 in 25.8.7.3 (CHOOSECOLS,
+CHOOSEROWS, DROP, EXPAND, HSTACK, TAKE, TEXTSPLIT, TOCOL, TOROW, VSTACK,
+WRAPCOLS, WRAPROWS).
+
+## Phase-2 headline quirks — LibreOffice Calc 24.2.7.2 vs documented Excel behavior (run of 2026-07-04)
+
+These were picked out of that run's 86 `matched_expected: false` entries. Every
+family below still holds on the newest pinned build — the divergent ones still
+diverge and the "verified correct" ones still match: each formula quoted here
+was re-checked against `results/libreoffice-25.8.json` while updating this
+section. The current full list is every `matched_expected: false` entry in the
+four `results/libreoffice-*.json` files (618 of them on 25.8.7.3) plus the
+Sheets ones, rendered on the generated `docs/quirks.html` page:
 
 1. **Booleans are numbers in LO.** `=ISNUMBER(TRUE)` → `TRUE` (Excel docs:
    FALSE — booleans are their own type); `=TYPE(TRUE)` → `1` (Excel: 4);
@@ -418,9 +499,9 @@ middle is done by whatever has Drive access (the orchestrator).
 ### The orchestrator loop
 
 ```
-# 1. Build the chunk workbooks + manifest (all 278 functions, ~40 per chunk)
+# 1. Build the chunk workbooks + manifest (all 586 functions, 40 per chunk)
 python3 harness/run_sheets.py build
-#    -> harness/sheets_chunks/chunk-01.xlsx ... chunk-07.xlsx
+#    -> harness/sheets_chunks/chunk-01.xlsx ... chunk-15.xlsx
 #    -> harness/sheets_chunks/manifest.json
 
 # 2. For each chunk-NN.xlsx, via the Drive API / an MCP Drive tool:
@@ -434,7 +515,7 @@ python3 harness/run_sheets.py build
 # 3. Ingest — incremental, so run it per chunk as each export lands
 python3 harness/run_sheets.py ingest \
     --export harness/sheets_exports/chunk-01-export.xlsx \
-    --engine-label "Google Sheets (Drive import, 2026-08-29)"
+    --engine-label "Google Sheets (Drive import, 2026-09-01)"
 #    -> results/google-sheets.json   (merged, never clobbered)
 ```
 
@@ -445,31 +526,42 @@ sheet.
 ### Why the workbooks are chunked
 
 The `.xlsx` bytes travel through the orchestrator's context as base64
-(~4/3 inflation), so the single 841-sheet ~430 KB workbook the LO runner
+(~4/3 inflation), so the single 2,335-sheet ~1.2 MB workbook the LO runner
 builds is not transportable. `build` splits the corpus **by function**
 (never splitting one function's cases across two files, since results merge
 per-function) into chunks of ~40 functions. Measured on the current
-278-function corpus:
+586-function corpus:
 
 | chunk | functions | cases | bytes |
 |-------|-----------|-------|-------|
-| chunk-01 | 40 | 126 | 67,715 |
-| chunk-02 | 40 | 107 | 59,763 |
-| chunk-03 | 40 | 119 | 64,959 |
-| chunk-04 | 40 | 137 | 73,798 |
-| chunk-05 | 40 | 108 | 60,096 |
-| chunk-06 | 40 | 123 | 67,277 |
-| chunk-07 | 38 | 121 | 66,561 |
-| **total** | **278** | **841** | **460,169** (~614 KB base64) |
+| chunk-01 | 40 | 164 | 90,110 |
+| chunk-02 | 40 | 161 | 86,621 |
+| chunk-03 | 40 | 134 | 74,500 |
+| chunk-04 | 40 | 125 | 75,181 |
+| chunk-05 | 40 | 162 | 87,065 |
+| chunk-06 | 40 | 171 | 114,226 |
+| chunk-07 | 40 | 134 | 71,035 |
+| chunk-08 | 40 | 168 | 88,669 |
+| chunk-09 | 40 | 181 | 99,607 |
+| chunk-10 | 40 | 174 | 96,722 |
+| chunk-11 | 40 | 157 | 89,995 |
+| chunk-12 | 40 | 154 | 84,602 |
+| chunk-13 | 40 | 182 | 99,710 |
+| chunk-14 | 40 | 158 | 86,188 |
+| chunk-15 | 26 | 109 | 64,329 |
+| **total** | **586** | **2334** | **1,308,560** (~1.7 MB base64) |
+
+*(History: the first full sweep, 2026-08-29, ran the corpus as it then stood —
+278 functions / 841 cases in 7 chunks, 460,169 bytes.)*
 
 (Byte counts vary by a byte or two between builds — zip metadata — so the
 manifest records the actual `sha256` and `bytes` of the files it wrote.)
 
-Every chunk is comfortably under the ~150 KB per-workbook budget. Sheet
-names are the test ids, sanitized to ≤31 chars with `[ ] * ? / \ :`
-stripped — valid OOXML *and* within Google Sheets' own rules (≤100 chars,
-same forbidden characters), and `build` asserts this for every sheet
-before writing.
+Every chunk is under the ~150 KB per-workbook budget — the largest,
+chunk-06, is 114 KB. Sheet names are the test ids, sanitized to ≤31 chars
+with `[ ] * ? / \ :` stripped — valid OOXML *and* within Google Sheets' own
+rules (≤100 chars, same forbidden characters), and `build` asserts this for
+every sheet before writing.
 
 ### The canary, and how strong it actually is
 
@@ -493,14 +585,26 @@ deterministic canary is the load-bearing proof. If any deterministic canary
 fails, the whole run is `"trusted": false` and each affected case gets an
 `UNTRUSTED_RECALC` note.
 
-### The `_xlfn.` prefix: Sheets understands it (verified)
+### The `_xlfn.` prefix: Sheets honours it for most names, not all
 
-Google Sheets **does** honour the OOXML `_xlfn.` storage prefix on import —
-verified empirically: `_xlfn.XLOOKUP(...)` imported and computed a real
-value, it did *not* come back `#NAME?`. So the Sheets path uses
-`harness/xlfn_map.py` **identically** to the LibreOffice path, with no
-Sheets-specific special-casing. Writing the bare unprefixed name would be
-the thing that breaks it.
+Google Sheets **does** honour the OOXML `_xlfn.` storage prefix on import for
+most functions — verified empirically: `_xlfn.XLOOKUP(...)` imported and
+computed a real value, it did *not* come back `#NAME?`, and the same held for
+`_xlfn.MAP` and `_xlfn.LAMBDA`. It does not honour every form:
+`_xlfn._xlws.FILTER` and `_xlfn._xlws.SORT` came back `#NAME?`, and
+BYROW/BYCOL/MAKEARRAY came back `#ERROR!`, all five despite Google
+documenting them.
+
+So `build` still defaults to the same `harness/xlfn_map.py` translation the
+LibreOffice path uses, but the run that resolved those five wrote plain,
+unprefixed names (`--plain-names`) and every Sheets batch since 2026-08-29 has
+been built that way. Which serialization produced a given value is recorded,
+not assumed: each case carries `serialization` (`plain` on 1575 of the 2334
+cases; the other 759 came from the original xlfn-translated sweep) and each
+`subset_runs` entry records it for the whole run. Of those, 129 cases across
+41 functions still hold a `_xlfn.`-prefixed stored formula — and all 41 came
+back `supported`, which is the direct evidence that Sheets does map the
+single-prefix form.
 
 ### Honesty labelling — Sheets has no version
 
@@ -511,7 +615,7 @@ is a dated label recording *when* the corpus was executed:
 
 ```
 "engine":          "google_sheets",
-"engine_version":  "Google Sheets (Drive import, 2026-08-29)",
+"engine_version":  "Google Sheets (Drive import, 2026-09-01)",
 "recalc_method":   "Drive import + xlsx export readback",
 ```
 
@@ -577,8 +681,9 @@ python3 harness/run_sheets.py selftest --only COUNT SUM MROUND XLOOKUP DATEDIF I
 `selftest` builds the chunks, stands **LibreOffice** in for Drive
 (`soffice --headless --convert-to xlsx`), and ingests the result as if it
 were a Sheets export — proving the chunk → sheet → anchor-cell → test-id
-mapping end-to-end. On the 6-function set it recovers values byte-identical
-to `results/libreoffice-25.8.json` for all 28 cases.
+mapping end-to-end. On that 6-function set (28 cases, counted from
+`data/tests/`) it recovers values byte-identical to
+`results/libreoffice-25.8.json`.
 
 The values it recovers are LibreOffice's, so two guards keep them out of the
 published dataset: `site/build_site.py` discovers engines by globbing
@@ -606,10 +711,18 @@ separate from the function corpus in `data/tests/*.json`. They have been
 executed in headless LibreOffice since day one
 (`scripts/verify_recipes.py` -> `results/recipes-verified.json`, which is
 what the "Verified, not just documented" block on every how-to page
-renders). `run_sheets.py` now gives them the same Drive-import treatment:
+renders; 282 recipes / 325 LibreOffice-scoped checks, all 282 verified).
+
+`run_sheets.py` gives them the same Drive-import treatment, and **all 282 are
+now executed in Google Sheets too** (`results/recipes-verified-sheets.json`,
+run label `Google Sheets (Drive import, 2026-08-30)`): 265 came back with
+exactly the values LibreOffice produced, and 17 disagreed on at least one
+formula — those 17 are the interesting ones, and the side-by-side columns on
+their pages show what each engine actually returned.
 
 ```
-# 1. Build the chunk workbooks + manifest (all recipes, 60 per chunk)
+# 1. Build the chunk workbooks + manifest (the 276 single-sheet recipes,
+#    60 per chunk; the 6 multi-sheet ones have their own builder, below)
 python3 harness/run_sheets.py build-recipes
 python3 harness/run_sheets.py build-recipes --chunk-size 40
 python3 harness/run_sheets.py build-recipes --only how-to-use-xlookup add-days-to-a-date
@@ -633,10 +746,12 @@ python3 harness/run_sheets.py selftest-recipes
 ```
 
 **One worksheet per CHECK.** A recipe contributes its main worked example
-plus one check per `variants[].verify` entry, so 276 recipes become 291
-sheets. Sheet names are `r<index>_<slug>` / `r<index>v<n>c<n>_<slug>`
-truncated to 31 chars — the index prefix makes them unique and stable (a
-`--only` build puts a check on the same sheet a full build would), the slug
+plus one check per `variants[].verify` entry, so `build-recipes`' 276
+single-sheet recipes become 308 sheets (the six multi-sheet recipes and their
+34 checks are built separately — see below). Sheet names are
+`r<index>_<slug>` / `r<index>v<n>c<n>_<slug>` truncated to 31 chars — the
+index prefix makes them unique and stable (a `--only` build puts a check on
+the same sheet a full build would), the slug
 tail is so a human opening the workbook in Drive can tell what they are
 looking at. Each sheet carries that check's `setup_cells`, the formula at
 the same anchor `verify_recipes.py` uses (`H1`, or the top-left cell of
@@ -699,30 +814,31 @@ the run lands. `scripts/check_honesty.py` enforces the pairing: the number of
 number of "n/a (Sheets-only formula)" cells, and such a label may only
 appear on a page that carries real Sheets execution provenance.
 
-Measured on the current 282-recipe corpus (`--chunk-size 60`):
+Measured on the current 282-recipe corpus (`--chunk-size 60`; 17 of these 308
+checks are `google_sheets`-scoped, the rest run in every engine):
 
 | chunk | recipes | checks | bytes |
 |-------|---------|--------|-------|
-| chunk-01 | 60 | 60 | 36,734 |
-| chunk-02 | 60 | 60 | 36,986 |
-| chunk-03 | 60 | 60 | 37,554 |
-| chunk-04 | 60 | 60 | 37,503 |
-| chunk-05 | 36 | 51 | 34,885 |
-| **total** | **276** | **291** | **183,662** (~245 KB base64) |
+| chunk-01 | 60 | 62 | 37,862 |
+| chunk-02 | 60 | 61 | 37,528 |
+| chunk-03 | 60 | 62 | 38,660 |
+| chunk-04 | 60 | 65 | 40,384 |
+| chunk-05 | 36 | 58 | 38,966 |
+| **total** | **276** | **308** | **193,400** (~258 KB base64) |
 
 Every chunk is roughly a quarter of the ~150 KB per-workbook budget.
 
-### Multi-sheet recipes are skipped, and listed
+### Multi-sheet recipes: skipped by `build-recipes`, built one workbook per check
 
 Six recipes need extra worksheets to exist (`setup_sheets`). `build-recipes`
 does **not** build them; it lists them in the manifest under
 `skipped_multi_sheet` (with the tab names each one wants) and prints them at
-the end of the build. They stay LibreOffice-executed only.
+the end of the build.
 
-That is the *simpler correct* option here, not a shortcut. The obvious
-alternative — give every check its own copy of the tabs, prefixed to avoid
-collisions, and rewrite the formula's sheet references — silently breaks the
-very things these recipes test:
+Leaving them out of *that* builder is the simpler correct option, not a
+shortcut. The obvious alternative — give every check its own copy of the tabs,
+prefixed to avoid collisions, and rewrite the formula's sheet references —
+silently breaks the very things these recipes test:
 
 - `=INDIRECT(A1&"!B2")` builds the reference out of a **cell value**, so
   renaming a tab changes the answer unless the setup data is rewritten too —
@@ -738,8 +854,32 @@ very things these recipes test:
   them with different contents, so even one-workbook-per-recipe does not
   de-collide them.
 
-A future version that uploads one workbook per **check** would cover all six
-honestly with no rewriting at all, at the cost of ~34 more Drive round-trips.
+The version that uploads one workbook per **check** covers all six honestly
+with no rewriting at all, and it now exists as `build-recipes-multisheet`:
+
+```
+python3 harness/run_sheets.py build-recipes-multisheet
+#    -> harness/recipe_chunks_multisheet/ms-*.xlsx  (one per check)
+python3 harness/run_sheets.py ingest-recipes \
+    --chunkdir harness/recipe_chunks_multisheet \
+    --export-dir harness/recipe_exports_multisheet \
+    --engine-label "Google Sheets (Drive import, YYYY-MM-DD)"
+python3 harness/run_sheets.py selftest-recipes-multisheet
+```
+
+Each workbook is `_meta`, the formula sheet, then that check's data tabs in
+the recipe's own JSON order — the tabs stay consecutive so a 3-D reference
+(`Q1:Q3!A1`) keeps meaning what the recipe says it means, and their names are
+the recipe's literal names, nothing renamed, prefixed or truncated. The price
+is one Drive round-trip per check — 34 workbooks for the 34 checks across the
+six recipes — and the data tabs, which carry no canary
+because these checks aggregate whole columns and 3-D spans, are proved
+instead by reading their setup literals back unchanged (`setup_intact`).
+Where Drive's importer renamed a tab it is recorded rather than reversed:
+`Jon's Data` came back as `Jons Data`, and that one check (`v0c2` of
+`reference-a-cell-on-another-sheet`) is kept out of the recipe's verdict as
+**not comparable**, both names verbatim in its notes. All six recipes are
+ingested, so `results/recipes-verified-sheets.json` covers all 282.
 
 ### Shared code: `harness/recipe_corpus.py`
 
@@ -772,10 +912,12 @@ pages are byte-identical to before. With it, and only when the file's
   hide;
 - that recipe's meta description becomes *"Recipe executed in LibreOffice
   Calc and Google Sheets; Excel per docs"*. A recipe **without** a Sheets
-  result keeps the LibreOffice-only wording, so the skipped multi-sheet
-  recipes never over-claim;
+  result keeps the LibreOffice-only wording — no recipe is in that state today
+  (all 282 have Sheets results), but the branch stays, because it is what keeps
+  a newly authored recipe from over-claiming before its run lands;
 - the how-to index lede and the methodology page state how many recipes have
-  been through Sheets, and why the rest have not;
+  been through Sheets — all 282 as of the 2026-08-30 run — and, when that is
+  ever less than the whole corpus again, why the rest have not;
 - a check scoped to Google Sheets alone (`"engines": ["google_sheets"]`)
   renders in that column only — labelled **"Google Sheets alternative
   (executed `<date>`)"** beside the value Google returned — while the
@@ -965,20 +1107,29 @@ preserves every non-formula cell and every non-sheet zip part byte-for-byte.
      `_XLWS_FUNCTIONS` there. Check XlsxWriter's "Working with Formulas"
      docs if you're not sure which.
 3. Run `python3 harness/run_lo.py SOMEFUNC` to test just that function (or
-   omit args to run everything), and check `results/libreoffice-24.2.json`
-   for the outcome and `"trusted"` flag.
-4. Commit `data/tests/SOMEFUNC.json` and the updated results file together.
+   omit args to run everything), once per pinned build (`SOFFICE_BIN=...`),
+   and check the matching `results/libreoffice-<major.minor>.json` for the
+   outcome and `"trusted"` flag.
+4. Commit `data/tests/SOMEFUNC.json` and the updated results files together.
+5. To give it a Google Sheets verdict too, build and ingest just that function
+   through the Drive route: `python3 harness/run_sheets.py build --only
+   SOMEFUNC`, then `ingest` the exported workbook (see "The orchestrator loop"
+   above). A function with no Sheets result renders with an empty
+   `google_sheets_verdict`, which is honest but incomplete — every function in
+   the corpus today has one.
 
-## Phase 2 notes (not built yet)
+## Phase 2 notes
 
 - **Google Sheets engine.** ✅ Built — see "Phase 2: Google Sheets runner"
   above. It takes the Drive-import route (upload a formula-only .xlsx,
   Drive auto-converts and recalculates, export back as .xlsx) rather than
   the Sheets API, which needs no service account and no per-cell API
-  traffic. ✅ The full 7-chunk sweep ran on 2026-08-29 and
+  traffic. ✅ The first full sweep (7 chunks) ran on 2026-08-29 and
   `results/google-sheets.json` is wired into the site (verdicts, guides,
-  `compat.json` `gv`/`gver`, checker, Migration Audit). Remaining: a re-run
-  writing plain function names to resolve the five `inconclusive` verdicts.
+  `compat.json` `gv`/`gver`, checker, Migration Audit). ✅ The plain-name
+  re-run that resolved the five importer-`inconclusive` verdicts also ran on
+  2026-08-29. ✅ The corpus has since grown to 586 functions, all of them
+  executed in Sheets (last batch 2026-09-01).
 - **Excel engine.** No good headless Linux path exists (no real Excel
   calculation engine on Linux). Two options, in order of preference:
   1. **Windows + Office Scripts / VBA automation**: a small Windows runner
@@ -993,45 +1144,62 @@ preserves every non-formula cell and every non-sheet zip part byte-for-byte.
      "per Microsoft documentation, not independently executed" — never
      presented with the same confidence as an executed LibreOffice/Sheets
      result).
-- **Static site.** A generator (plain Python + Jinja2, or a static-site
-  tool) that reads `data/functions.json` + all `results/*.json` and emits
-  one page per function showing a compatibility matrix (supported /
-  unsupported / quirky per engine) plus the exact formula and result for
-  every test case, deployed to GitHub Pages. This is the actual
-  "caniuse.com for spreadsheets" product surface — everything before this
-  point is the data pipeline that makes it trustworthy.
+- **Static site.** ✅ Built — `site/build_site.py` reads
+  `data/functions.json` + all `results/*.json` and emits `docs/`, deployed to
+  GitHub Pages at <https://canispreadsheet.com/>: one page per function (600)
+  showing the compatibility matrix (supported / unsupported / quirky /
+  inconclusive per engine) plus the exact formula and result for every test
+  case, the how-to recipes, the comparison and guide pages, the quirks index,
+  the checker and the Migration Audit. This is the actual "caniuse.com for
+  spreadsheets" product surface — everything before this point is the data
+  pipeline that makes it trustworthy. `scripts/check_honesty.py` re-reads the
+  generated pages and fails the build on execution claims the results files do
+  not support.
 
 ## Known gaps / honesty notes
 
 - LibreOffice function-inventory coverage in `data/functions.json` comes
   from `help.libreoffice.org` category pages, not the (blocked) wiki page;
-  a handful of functions LibreOffice actually implements may be
-  under-counted there. The **executed** results in
-  `results/libreoffice-24.2.json` are the authoritative source of truth for
-  actual LO 24.2 behavior — treat `data/functions.json`'s `documented` flags
-  as "what the docs say," not "what's actually implemented." (We saw one
-  concrete instance of this gap: MAXIFS computes correctly in LO 24.2 but
-  wasn't found on the specific help page category we scraped.)
+  functions LibreOffice actually implements can be under-counted there. The
+  **executed** results in the four `results/libreoffice-*.json` files are the
+  authoritative source of truth for actual LO behavior — treat
+  `data/functions.json`'s `documented` flags as "what the docs say," not
+  "what's actually implemented." (The gap was real and measurable: MAXIFS
+  computes correctly in LibreOffice but was missing from the category page we
+  scraped. Executing the corpus surfaced a batch of such stale flags, all
+  corrected against verified per-function help URLs on 2026-08-28 — which is
+  why the LibreOffice documented count moved from 469 to 507.)
 - LibreOffice and Google Sheets both have executed results in `results/`.
-  The Sheets sweep ran on 2026-08-29 via `harness/run_sheets.py`; its
+  The Sheets corpus was built up over 14 subset runs via
+  `harness/run_sheets.py`, dated 2026-08-29 through 2026-09-01; its
   `engine_version` is a dated import label, **not** a version — Sheets is a
   hosted product that changes under us, so a Sheets verdict is a dated
-  observation rather than a release guarantee. `_version_tuple()` in
+  observation rather than a release guarantee, and different functions
+  legitimately carry different dates (`executed_at`). `_version_tuple()` in
   `site/build_site.py` deliberately sorts any non-numeric label as `(0,)`
   so the label can never be compared as a version.
-- The Sheets corpus was executed from the **Excel-authored** workbooks, so a
-  handful of results describe the import path rather than Sheets. Those are
-  classified `inconclusive` (never `unsupported`): see
-  `sheets_case_inconclusive()` in `site/build_site.py` and the caveats in
-  `DATASET_CARD.md`. A follow-up Sheets run writing plain, unprefixed
-  function names is the fix.
-- The **recipe** corpus (`results/recipes-verified.json`) is LibreOffice-only.
-  How-to pages therefore carry Sheets-executed FUNCTION verdicts but a
-  LibreOffice-only worked example, and their copy says exactly that.
+- The Sheets corpus is executed from the **Excel-authored** workbooks, so a
+  few results describe the transport rather than Sheets. Those are classified
+  `inconclusive` (never `unsupported`): see `sheets_case_inconclusive()` in
+  `site/build_site.py` and the caveats in `DATASET_CARD.md`. The
+  storage-prefix half of that was fixed by the 2026-08-29 plain-name re-run
+  and no function's verdict rests on it now; what remains is the export
+  readback — 9 cases across 9 functions (DEGREES, INDIRECT, PRICE, PRICEDISC,
+  PRICEMAT, RECEIVED, SORT, TRANSPOSE, YIELDDISC), where Sheets' `.xlsx`
+  export rounds floats to 10 significant digits or writes an empty cell for a
+  blank result.
+- The **recipe** corpus is executed in both engines now:
+  `results/recipes-verified.json` (LibreOffice 25.8.7.3, 282/282 verified) and
+  `results/recipes-verified-sheets.json` (Google Sheets, Drive import
+  2026-08-30, all 282 recipes; 265 agree with LibreOffice, 17 disagree on at
+  least one formula). How-to pages print both engines side by side and flag
+  the disagreements; Excel stays documentation-only there too.
 - Excel columns in any compatibility matrix must not be populated with
   executed data until an Excel engine exists, per the quality bar for this
   project.
-- `data/functions.json`'s per-function doc URLs point at the listing page
-  each function was found on (the umbrella alphabetical/category page),
-  not a dedicated per-function help article — no per-function URL was
-  fabricated.
+- Most of `data/functions.json`'s per-function doc URLs point at the listing
+  page each function was found on (the umbrella alphabetical/category page)
+  rather than a dedicated per-function help article — no per-function URL was
+  fabricated. The exceptions are the 34 entries whose flag was corrected by
+  fetching the function's own help page (33 LibreOffice, 1 Google Sheets:
+  XMATCH); those carry that article's URL.
