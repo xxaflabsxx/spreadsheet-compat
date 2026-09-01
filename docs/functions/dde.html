@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DDE: no LibreOffice verdict published (executed)</title>
-<meta name="description" content="DDE was executed in LibreOffice (1 case), but its documented behaviour needs something no test workbook can supply, so n… Executed in LibreOffice 25.8.7.3.">
+<title>DDE is not supported in Google Sheets (#NAME?, executed)</title>
+<meta name="description" content="#NAME? in Google Sheets for all 1 executed case; has no LibreOffice verdict. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/dde.html">
-<meta property="og:title" content="DDE: no LibreOffice verdict published (executed)">
-<meta property="og:description" content="DDE was executed in LibreOffice (1 case), but its documented behaviour needs something no test workbook can supply, so n… Executed in LibreOffice 25.8.7.3.">
+<meta property="og:title" content="DDE is not supported in Google Sheets (#NAME?, executed)">
+<meta property="og:description" content="#NAME? in Google Sheets for all 1 executed case; has no LibreOffice verdict. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/dde.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>DDE</h1>
   
-    <span class="badge badge-unknown">Unknown</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Spreadsheet &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>DDE</strong> function: executed in LibreOffice Calc (2026-09-01), measured against LibreOffice&rsquo;s published documentation. Excel does not document DDE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>DDE</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document DDE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -424,6 +424,17 @@ DDE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+<h2 class="section-title">Why isn&rsquo;t DDE working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>DDE</code>: we imported the formula into
+Sheets on 2026-09-01 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
+
+
 
 
 <div class="not-live-tested">
@@ -442,6 +453,25 @@ DDE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DDE(&#34;NoSuchDDEServer&#34;,&#34;NoSuchFile&#34;,&#34;NoSuchTopic&#34;)</td>
+  <td>Existence probe only: DDE resolves a link into another running application, which no flat workbook can supply; this records the engine&#39;s no-server result verbatim</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">NOT EXECUTABLE AS DOCUMENTED, and deliberately recorded as a probe rather than a support claim -- DDE is RTD&#39;s twin and takes RTD&#39;s treatment. LibreOffice documents it as &#34;Returns the result of a DDE-based link.&#34;, whose first argument &#34;is the name of a server application&#34; (&#34;LibreOffice applications have the server name \&#34;soffice\&#34;&#34;), whose second &#34;is the complete file name, including path specification&#34; and whose third &#34;is the area containing the data to be evaluated&#34;. Every one of those points outside the workbook: the documented behaviour IS the link to another application&#39;s live document, and the help&#39;s own example makes that concrete -- edit the text in the linked Writer file and &#34;the motto is updated in all LibreOffice Calc cells in which this DDE link is defined&#34;. A .xlsx carries no DDE server, and a headless conversion has no application on the other end of the link, so the documented behaviour cannot be reproduced by this harness in any engine. WHAT THE RUN ACTUALLY RECORDED, VERBATIM: this formula returns #N/A on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3). THAT #N/A IS NOT A LIBREOFFICE DEFECT AND IS NOT PUBLISHED AS ONE. It is what a link to an absent server evaluates to, exactly as batch G refused to let WEBSERVICE&#39;s sandbox-DNS #N/A become a &#39;quirky&#39; verdict; the difference is that WEBSERVICE&#39;s obstacle was this sandbox&#39;s network while DDE&#39;s is intrinsic -- no flat file anywhere has a DDE server behind it. This function&#39;s LibreOffice cases are therefore declared unverdictable in site/build_site.py (NO_VERDICT_CASES): the executed values are published exactly as they came back, and the engine&#39;s Verdict cell reads Inconclusive rather than a support claim in either direction. THE SERVER NAME IS DELIBERATELY BOGUS. LibreOffice&#39;s published examples use the server &#34;soffice&#34; -- naming the running office suite itself. This case does not, because a corpus run must not be able to reach out and start or attach to another process; &#34;NoSuchDDEServer&#34; is well formed, is shaped exactly like the documented syntax DDE(&#34;Server&#34;; &#34;File&#34;; &#34;Range&#34; [; Mode]), and cannot connect to anything. STORAGE FORM, MEASURED: unlike the rest of group C3, DDE&#39;s readable token is the BARE name. All nine candidate spellings (plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE., ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT. and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS.) were round-tripped through all four builds: the plain name evaluates and every prefixed form is #NAME?, and LibreOffice writes the plain name back out unchanged, so harness/xlfn_map.py deliberately has no entry for DDE. The help&#39;s DDE section carries no Technical information block at all -- no namespace sentence and no &#39;available since&#39; sentence -- which is consistent with a name that never needed one. LibreOffice&#39;s Spreadsheet-functions help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060109.html. BATCH PROVENANCE (batch J, group C3 of sheets-lo-only-plan.md -- LibreOffice-only and either nondeterministic or context-bound; the final batch of the completeness push). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose -- scripts/check_honesty.py bans the blanket negative shape of that sentence, and the guard is worth keeping blunt.)</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

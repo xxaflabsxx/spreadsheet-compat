@@ -22,9 +22,9 @@ executed engines are measured against. As far as we know this is the only openly
 | `in_excel` | bool | Documented as available in Microsoft Excel. |
 | `in_google_sheets` | bool | Documented as available in Google Sheets. |
 | `in_libreoffice` | bool | Documented as available in LibreOffice Calc. |
-| `google_sheets_verdict` | string | Result of executing a real test case in Google Sheets: `supported`, `quirky`, `unsupported`, or `inconclusive`; empty if the function is not yet in the executed test set. **`inconclusive` is not a verdict** — see "Google Sheets execution caveats" below. |
+| `google_sheets_verdict` | string | Result of executing a real test case in Google Sheets: `supported`, `quirky`, `unsupported`, or `inconclusive`; empty if the function is not yet in the executed test set. **`inconclusive` is not a verdict** — see "Google Sheets execution caveats" and "Executed, but no verdict drawn" below. |
 | `google_sheets_executed` | string | Label for the Google Sheets run that executed **this function**, e.g. `Google Sheets (Drive import, 2026-08-29)`. This is a **date, not a version**: Sheets is a rolling service with no release to pin, so never parse or compare it as a version string. Rows can carry different dates — a later run that re-executes part of the corpus re-dates only the functions it covered. Empty if not executed. |
-| `libreoffice_verdict` | string | Result of executing a real test case in LibreOffice (e.g. `supported`, `unsupported`); empty if the function is documented-only and not yet in the executed test set. |
+| `libreoffice_verdict` | string | Result of executing a real test case in LibreOffice: `supported`, `quirky`, `unsupported`, or `inconclusive`; empty if the function is documented-only and not yet in the executed test set. **`inconclusive` is not a verdict** — see "Executed, but no verdict drawn" below. |
 | `libreoffice_version_tested` | string | LibreOffice version the executed test ran on (e.g. `25.8.7.3`). |
 | `libreoffice_newly_supported_in` | string | LibreOffice version in which the function first started working, when known (from testing across multiple versions); empty otherwise. |
 
@@ -64,6 +64,30 @@ that is **not** Google Sheets behaviour. Where a result is explained by it, the 
    (`PI()` exports as 3.141592654) and writes an empty cell for a blank/zero-length result.
    Where that is the only disagreement with the expected value (DEGREES(1), INDIRECT to a blank
    cell, TRANSPOSE of a blank cell) the difference is in the export, not the engine.
+
+## Executed, but no verdict drawn
+
+`inconclusive` has a second cause, and it applies to **either** executed engine. Some functions'
+documented behaviour depends on something no flat test workbook can supply — an external data
+server, a live fetch, another user's authorization, a plan entitlement — so the engine evaluates
+the call and returns something that describes the **missing dependency** rather than the engine.
+Scoring that as `quirky` would publish a defect the run never demonstrated, so those cases are
+excluded from the verdict, the value is still published as it came back, and the reason is
+printed beside it. As of the 2026-09-01 run there are 8 such cases across 8 functions:
+
+| Function | Engine | What came back |
+|---|---|---|
+| `DDE` | LibreOffice | `#N/A` — a DDE link needs a running server application |
+| `AI` | Google Sheets | the formula's own text, i.e. nothing evaluated it (the feature needs an eligible Workspace/AI plan) |
+| `IMPORTDATA`, `IMPORTFEED`, `IMPORTHTML`, `IMPORTXML` | Google Sheets | `#REF!` — the corpus URL is deliberately inert and the workbook was uploaded, not authorised |
+| `IMPORTRANGE` | Google Sheets | `#REF!` — nobody clicked **Allow Access**, which Google documents as required |
+| `SPARKLINE` | Google Sheets | an empty cell — the function draws a chart *in* the cell, and a drawing has no cached value for an `.xlsx` export to carry |
+
+Two neighbours in the same batch went the other way and keep ordinary `supported` verdicts,
+because they genuinely evaluated in the engine that documents them: `GOOGLEFINANCE` returned a
+live quote and `GOOGLETRANSLATE` returned a translation. Their **values** are still unasserted —
+Google documents the quote as "delayed by up to 20 minutes" — so their cases are probes and the
+verdict means "this engine evaluated the call and returned a value of the documented kind".
 
 A `#NAME?` from Sheets on a formula with *no* storage prefix, or for a function Google does not
 document (TEXTSPLIT, TAKE, DROP, AGGREGATE, ARRAYTOTEXT, FORECAST.ETS, GROUPBY, NUMBERVALUE,

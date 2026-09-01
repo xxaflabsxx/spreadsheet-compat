@@ -175,7 +175,23 @@ engine runners (what actually happens) → results (raw truth) → site
   inclusive bounds); `DDE` returns `#N/A` on all four because no flat workbook
   has a DDE server behind it, and is therefore **executed with no verdict
   drawn** (`NO_VERDICT_CASES` in `site/build_site.py`) rather than published as
-  a LibreOffice quirk.
+  a LibreOffice quirk. Eight cases across eight functions now carry that
+  treatment — see "Executed, but no verdict drawn" in `DATASET_CARD.md`.
+
+  **Batch J is executed in BOTH engines.** The Sheets ingest (2026-09-01) split
+  the nine Google functions three ways, and only running them could have told
+  them apart: `GOOGLEFINANCE` returned a live quote (335.41) and
+  `GOOGLETRANSLATE` returned `Hola Mundo` for Google's own sample call — both
+  keep an ordinary executed **supported** verdict, with the values still
+  unasserted; the five `IMPORT*` returned `#REF!` and `SPARKLINE` returned an
+  **empty cell** (the reader warning that an unsupported Sparkline Group
+  extension was present — exactly the chart-in-cell serialization its test file
+  predicted in writing *before* the run); and `AI` came back holding **its own
+  formula text**, which is evidence that nothing evaluated it rather than
+  evidence about the function. Those seven are declared unverdictable for Sheets
+  (`NO_VERDICT_CASES`), so their values are published with the reason and no
+  verdict is drawn. The four LibreOffice-only functions are `#NAME?` in Sheets,
+  which is an honest executed **unsupported** verdict and is published as one.
 
   **Coverage is now complete except for documented skips.** 586 of the 600
   catalog functions have executed cases; the other 14 are the eleven aliases

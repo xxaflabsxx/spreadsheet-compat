@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IMPORTHTML is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for IMPORTHTML in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for IMPORTHTML in all 1 executed test case. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/importhtml.html">
 <meta property="og:title" content="IMPORTHTML is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for IMPORTHTML in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for IMPORTHTML in all 1 executed test case. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/importhtml.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Web &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>IMPORTHTML</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document IMPORTHTML, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>IMPORTHTML</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document IMPORTHTML, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-unknown">Inconclusive (no verdict published)</span>
     
   </td>
 </tr>
@@ -437,6 +437,12 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+<div class="not-live-tested">
+  <strong>Google Sheets: executed, but no verdict published.</strong>
+  Google executed the call and returned <code>#REF!</code>. That is not a verdict about IMPORTHTML: the URL in the corpus formula is a deliberately inert <code>example.com</code> address (a real one returns an unbounded array, which would spill across the per-sheet recalculation canary and mark the whole run untrusted for a reason that has nothing to do with the engine), and the workbook reached Google as an uploaded <code>.xlsx</code> conversion rather than as a sheet a person opened and authorised. Either of those is enough to produce this error and this run cannot tell them apart. What it cannot do either way is show what IMPORTHTML does when the fetch succeeds &mdash; and the fetch <em>is</em> the documented behaviour, which is why the value is published exactly as it came back and no verdict is drawn from it.
+  Every executed case is shown below with exactly what Google returned.
+</div>
+
 
 
 
@@ -447,6 +453,25 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMPORTHTML(&#34;https://example.com/page.html&#34;,&#34;table&#34;,1)</td>
+  <td>Existence probe only: the documented behaviour is scraping a table out of a remote HTML page</td>
+  <td class="result mono">#REF!</td>
+  <td class="result mono"><br><span class="category-tag">NOT ASSERTABLE BY DESIGN, and deliberately recorded as a probe (expected: null) rather than a support claim -- the treatment batch B gave the CUBE* family and COPILOT, batch C gave DETECTLANGUAGE, and batch G gave RTD, STOCKHISTORY and TRANSLATE. Google describes the function as &#34;Imports data from a table or list within an HTML page.&#34;, with its url argument being &#34;The URL of the page to examine, including protocol (e.g. `http://`).&#34; The value is a slice of somebody else&#39;s web page, which they may rewrite at any time; Google&#39;s shared Import-functions page states that &#34;All three functions automatically check for updates every hour while the document is open, even if the formula and sheet don&#39;t change.&#34;, and IMPORTHTML is one of the three. Nothing about that is assertable, and a divergence recorded against it would be a fact about a website. WHY THE URL IS example.com AND NOT GOOGLE&#39;S OWN SAMPLE URL. Google&#39;s Sample Usage points at a live third-party document. Two harness facts rule that out: (a) an import that succeeds returns an ARRAY, and this corpus writes each case&#39;s formula at F1 with the per-sheet recalculation canary at Z1, so an unbounded spill would overwrite the canary and mark the whole run untrusted for a reason that has nothing to do with the engine; (b) a corpus that is re-executed on four builds per batch should not repeatedly fetch someone else&#39;s server. The call here is well formed and shaped exactly like Google&#39;s documented syntax; only the host is inert. Since no value is asserted either way, nothing is lost by it. LIBREOFFICE, MEASURED BEFORE THIS FILE WAS AUTHORED. All four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) were probed with NINE storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE., ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT. and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS. -- and every one of those 36 combinations returned #NAME?. LibreOffice&#39;s own parser additionally wrote the name back into the converted file LOWER-CASED (&#39;=importhtml(&#34;https://example.com/page.html&#34;,&#34;table&#34;,1)&#39;), which is what it does with an identifier it does not recognise as a function at all rather than with a function it knows under a different storage token. A #NAME? under all nine storage forms on all four builds is therefore a genuine absence and not a storage-form artifact of this harness, which is why &#39;unsupported in LibreOffice&#39; IS a verdict this file publishes even though the returned VALUE is not assertable in any engine. BATCH PROVENANCE (batch J, group B of sheets-lo-only-plan.md -- Google-documented, service- or context-bound; the final batch of the completeness push). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes no claim about Excel, nothing here is measured against Microsoft&#39;s documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is Google&#39;s own function help, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for Sheets, so a bare URL dates nothing. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record what the service returns for this call. Until that ingest lands the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose -- scripts/check_honesty.py bans the blanket negative shape of that sentence, and the guard is worth keeping blunt.) Google&#39;s IMPORTHTML help page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093339, and the Import-functions page at https://support.google.com/docs/answer/12188454, read the same day.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

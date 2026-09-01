@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RAND.NV works in LibreOffice (tested)</title>
-<meta name="description" content="All 2 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<title>RAND.NV is not supported in Google Sheets (#NAME?, executed)</title>
+<meta name="description" content="#NAME? in Google Sheets for all 2 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/rand.nv.html">
-<meta property="og:title" content="RAND.NV works in LibreOffice (tested)">
-<meta property="og:description" content="All 2 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<meta property="og:title" content="RAND.NV is not supported in Google Sheets (#NAME?, executed)">
+<meta property="og:description" content="#NAME? in Google Sheets for all 2 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/rand.nv.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>RAND.NV</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Mathematical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>RAND.NV</strong> function: executed in LibreOffice Calc (2026-09-01), measured against LibreOffice&rsquo;s published documentation. Excel does not document RAND.NV, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>RAND.NV</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document RAND.NV, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -424,6 +424,17 @@ RAND.NV&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 
 
+<h2 class="section-title">Why isn&rsquo;t RAND.NV working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>RAND.NV</code>: we imported the formula into
+Sheets on 2026-09-01 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
+
+
 
 
 
@@ -436,6 +447,33 @@ RAND.NV&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=RAND.NV()</td>
+  <td>Probe: proves the function evaluates and records the draw each build produced</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">PROBE ONLY (expected: null): A RANDOM DRAW HAS NO EXPECTED VALUE. LibreOffice&#39;s help says &#34;Returns a non-volatile random number between 0 and 1.&#34; and its example is this exact formula: &#34;=RAND.NV() ... returns a non-volatile random number between 0 and 1.&#34; The four pinned builds each returned a different number, as they should; those four values are recorded in the results files and none of them is a claim about any other run. What the case does establish is that the name resolves and the call evaluates without error on 24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3, which is the whole of the support question for a function like this. NON-VOLATILITY IS REAL BUT THIS TRANSPORT CANNOT SEE IT, AND THAT IS ITSELF A FINDING. The help defines the property as &#34;This function produces a non-volatile random number on input. A non-volatile function is not recalculated at new input events. The function does not recalculate when pressing F9, except when the cursor is on the cell containing the function or using the Recalculate Hard command (Shift+Ctrl+F9). The function is recalculated when opening the file.&#34; -- and the last of those sentences is the obstacle: this harness&#39;s only way to make an engine compute anything is to OPEN the file (`soffice --headless --convert-to xlsx` over a workbook openpyxl wrote with no cached values). Every observation this corpus can make is therefore taken at exactly the moment the documentation says a recalculation happens, so a changed value between two runs would prove nothing and an unchanged one would prove less. The plan of record hoped to assert non-volatility here; the documentation itself rules the measurement out, and saying so is more useful than a test that could not fail. NONDETERMINISM CLASS, PER THE COPILOT PRECEDENT. The corpus records a probe (expected: null) whenever the documented behaviour depends on something the harness cannot fix: a service (COPILOT, DETECTLANGUAGE, TRANSLATE), a live market (STOCKHISTORY), an external server (RTD), a network fetch or an authorization (batch J&#39;s Google nine). The two .NV functions are the fourth class -- a pseudo-random draw -- and CURRENT is the fifth: a value defined by its own POSITION inside the formula that encloses it. In every class the note says which dependency makes the value unassertable, and the verdict is carried by whether the call evaluates at all. STORAGE FORM, ESTABLISHED EMPIRICALLY BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own filter reads or a fully implemented function is recorded as #NAME? and published as unsupported. All NINE candidate spellings (plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE., ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT. and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS.) were written into a workbook with openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3); the same round trip also reports the EXPORT direction, because the converted file carries whichever token LibreOffice itself chose to write. Exactly ONE spelling works: _xlfn.ORG.LIBREOFFICE.RAND.NV evaluates on all four builds and the other eight are #NAME? on all four, including the bare name -- so a workbook written with &#39;=RAND.NV()&#39; verbatim would have published a false &#39;unsupported&#39; verdict. Every build writes the same token back out, and the help&#39;s Technical information block agrees: &#34;The name space is&#34; ORG.LIBREOFFICE.RAND.NV. The same block dates the function -- &#34;This function is available since LibreOffice 7.0.&#34; -- which is older than all four builds the corpus runs, so no version boundary is expected or found here. The token recorded for this function in harness/xlfn_map.py is _xlfn.ORG.LIBREOFFICE.RAND.NV. BATCH PROVENANCE (batch J, group C3 of sheets-lo-only-plan.md -- LibreOffice-only and either nondeterministic or context-bound; the final batch of the completeness push). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose -- scripts/check_honesty.py bans the blanket negative shape of that sentence, and the guard is worth keeping blunt.) LibreOffice&#39;s Mathematical-functions help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=AND(RAND.NV()&gt;=0,RAND.NV()&lt;=1)</td>
+  <td>The one property the documentation licenses: two independent draws both lie between 0 and 1</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">THE STRUCTURAL PROPERTY, MEASURED RATHER THAN ASSERTED. The only thing LibreOffice&#39;s help fixes about the value is its range -- &#34;Returns a non-volatile random number between 0 and 1.&#34; -- so that, and nothing else, is what this case exercises: two independent draws inside one formula, each tested against both ends. What every build returned is recorded in this file&#39;s results entry. A PRECISION THE PAGE DOES NOT GIVE, SO THIS FILE DOES NOT EITHER: the help says &#34;between 0 and 1&#34; with NO inclusive/exclusive qualifier anywhere on the page, and its keyword index repeats the same unqualified phrase. This case therefore uses the INCLUSIVE reading (&gt;=0 and &lt;=1), which is the weaker of the two and is entailed by either; a test written as &lt;1 would be asserting a boundary the documentation never states. WHY expected IS null EVEN THOUGH THIS PARTICULAR FORMULA LOOKS DETERMINISTIC. Every case in batch J is a probe by construction: the batch&#39;s whole subject is calls whose VALUE no engine can be held to, and mixing asserted and unasserted cases inside one such function would let a reader take the function&#39;s pass/fail count as a statement about the random draw itself. The structural property is therefore stated here and measured on all four builds rather than encoded as an expected value; what the run recorded is in this file&#39;s results entry, and the case&#39;s published verdict is &#39;Ran OK&#39; -- it evaluated, without error, on every build. LibreOffice&#39;s Mathematical-functions help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

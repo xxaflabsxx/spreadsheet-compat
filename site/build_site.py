@@ -114,20 +114,45 @@ LO_STORAGE_FORM_GAP = {
 # are excluded from the verdict (so the engine's verdict is "inconclusive" --
 # no claim in either direction), and the reason is printed beside them.
 #
-# THE NEXT BATCH WILL PROBABLY NEED MORE ENTRIES HERE, AND THIS IS THE WARNING.
-# harness/sheets_chunks_batch12 carries batch J's nine Google service functions
-# (AI, GOOGLEFINANCE, GOOGLETRANSLATE, the five IMPORT*, SPARKLINE). When that
-# chunk is ingested, Sheets will return a real value for some of them and an
-# error for others -- #REF! for IMPORTRANGE until a human clicks Allow Access,
-# #N/A or #ERROR! for a fetch that finds nothing, a blank cell for SPARKLINE's
-# chart-in-cell. classify_verdict() reads any non-#NAME? error as "quirky", so
-# whichever of the nine come back that way need a ("google_sheets", NAME) entry
-# here BEFORE the site is rebuilt, or the page publishes a Google defect that
-# the absent dependency, not Google, caused. The ones that return real data can
-# and should keep their ordinary "supported" verdict -- decide per function
-# from what the run actually returns, which is exactly why nothing is
-# pre-declared for Sheets now.
+# THE SHEETS SIDE OF BATCH J WAS DECIDED FROM WHAT THE RUN ACTUALLY RETURNED,
+# WHICH IS WHY NOTHING HERE WAS PRE-DECLARED FOR IT. The batch12 ingest
+# (2026-09-01) split the nine Google service functions three ways, and the split
+# is not the one a guess would have produced:
+#   * GOOGLEFINANCE returned 335.41 and GOOGLETRANSLATE returned "Hola Mundo"
+#     for Google's own sample call. Both EVALUATED in the engine that documents
+#     them, which is exactly what their probes were written to establish, so
+#     both keep an ordinary "supported" verdict and neither appears below. The
+#     VALUES stay unasserted (expected: null) -- see each function's note.
+#   * The five IMPORT* came back #REF! and SPARKLINE came back BLANK. Those are
+#     declared below.
+#   * AI came back holding its own formula text. Also declared below, and the
+#     most interesting of the three cases: the readback is neither a result nor
+#     an error.
+# The general rule this leaves behind: a probe that EVALUATES is a verdict, a
+# probe whose result describes the absent dependency is not, and the difference
+# can only be seen after the run.
 NO_VERDICT_CASES = {
+    ("google_sheets", 'AI'): (
+        "Google returned <strong>the formula&rsquo;s own text</strong>: the cell came back holding the string <code>=AI(&hellip;)</code> rather than any generated answer. A value identical to the formula that was supposed to produce it is evidence that nothing evaluated it, not evidence about what the function does &mdash; and Google&rsquo;s page gates the feature behind &ldquo;an eligible Google Workspace or Google AI plan.&rdquo; Treating the string as a result would publish a formula as AI&rsquo;s output; treating it as a failure would blame Google for an entitlement this account does not carry. Neither is supportable, so the readback is published verbatim and no verdict is drawn."
+    ),
+    ("google_sheets", 'IMPORTDATA'): (
+        "Google executed the call and returned <code>#REF!</code>. That is not a verdict about IMPORTDATA: the URL in the corpus formula is a deliberately inert <code>example.com</code> address (a real one returns an unbounded array, which would spill across the per-sheet recalculation canary and mark the whole run untrusted for a reason that has nothing to do with the engine), and the workbook reached Google as an uploaded <code>.xlsx</code> conversion rather than as a sheet a person opened and authorised. Either of those is enough to produce this error and this run cannot tell them apart. What it cannot do either way is show what IMPORTDATA does when the fetch succeeds &mdash; and the fetch <em>is</em> the documented behaviour, which is why the value is published exactly as it came back and no verdict is drawn from it."
+    ),
+    ("google_sheets", 'IMPORTFEED'): (
+        "Google executed the call and returned <code>#REF!</code>. That is not a verdict about IMPORTFEED: the URL in the corpus formula is a deliberately inert <code>example.com</code> address (a real one returns an unbounded array, which would spill across the per-sheet recalculation canary and mark the whole run untrusted for a reason that has nothing to do with the engine), and the workbook reached Google as an uploaded <code>.xlsx</code> conversion rather than as a sheet a person opened and authorised. Either of those is enough to produce this error and this run cannot tell them apart. What it cannot do either way is show what IMPORTFEED does when the fetch succeeds &mdash; and the fetch <em>is</em> the documented behaviour, which is why the value is published exactly as it came back and no verdict is drawn from it."
+    ),
+    ("google_sheets", 'IMPORTHTML'): (
+        "Google executed the call and returned <code>#REF!</code>. That is not a verdict about IMPORTHTML: the URL in the corpus formula is a deliberately inert <code>example.com</code> address (a real one returns an unbounded array, which would spill across the per-sheet recalculation canary and mark the whole run untrusted for a reason that has nothing to do with the engine), and the workbook reached Google as an uploaded <code>.xlsx</code> conversion rather than as a sheet a person opened and authorised. Either of those is enough to produce this error and this run cannot tell them apart. What it cannot do either way is show what IMPORTHTML does when the fetch succeeds &mdash; and the fetch <em>is</em> the documented behaviour, which is why the value is published exactly as it came back and no verdict is drawn from it."
+    ),
+    ("google_sheets", 'IMPORTRANGE'): (
+        "Google executed the call and returned <code>#REF!</code>, which is the documented consequence of an unauthorised link rather than a defect. Google&rsquo;s own page states the gate: &ldquo;Spreadsheets must be explicitly granted permission to pull data from other spreadsheets using IMPORTRANGE&rdquo;, and the permission is granted by a human clicking <strong>Allow Access</strong>. Nobody clicked it &mdash; the corpus workbook was uploaded and converted, not opened and authorised &mdash; and the spreadsheet id in the formula is a placeholder naming no real document. The value is published exactly as it came back and no verdict is drawn from it."
+    ),
+    ("google_sheets", 'IMPORTXML'): (
+        "Google executed the call and returned <code>#REF!</code>. That is not a verdict about IMPORTXML: the URL in the corpus formula is a deliberately inert <code>example.com</code> address (a real one returns an unbounded array, which would spill across the per-sheet recalculation canary and mark the whole run untrusted for a reason that has nothing to do with the engine), and the workbook reached Google as an uploaded <code>.xlsx</code> conversion rather than as a sheet a person opened and authorised. Either of those is enough to produce this error and this run cannot tell them apart. What it cannot do either way is show what IMPORTXML does when the fetch succeeds &mdash; and the fetch <em>is</em> the documented behaviour, which is why the value is published exactly as it came back and no verdict is drawn from it."
+    ),
+    ("google_sheets", 'SPARKLINE'): (
+        "Google executed the call and the exported cell came back <strong>empty</strong>, with the reader warning that a Sparkline Group extension it does not support was present in the file. That is exactly what this function&rsquo;s test file predicted <em>before</em> the run: SPARKLINE &ldquo;Creates a miniature chart contained within a single cell&rdquo;, a drawing has no cached scalar for an <code>.xlsx</code> export to carry, and a blank here means <em>this cell holds a picture</em> &mdash; not <em>the function returned nothing</em>. Publishing a verdict from it and publishing an empty result from it would be wrong in opposite directions, so the readback is shown as it came and no verdict is drawn."
+    ),
     ("libreoffice", "DDE"): (
         "DDE resolves a link into another running application &mdash; LibreOffice&rsquo;s own "
         "help describes the first argument as &ldquo;the name of a server application&rdquo;, "
@@ -560,6 +585,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "executed_at": None,
                 "cases": [],
                 "inconclusive_count": 0,
+                "no_verdict_count": 0,
                 "exec_header": None,
                 "tested_cell": None,
                 # Set when this engine's cases for this function are declared
@@ -620,6 +646,15 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     trusted=res_blob.get("trusted"),
                     cases=merged_cases,
                     inconclusive_count=len(inconclusive_by_id),
+                    # Split out from the total: the two causes of an
+                    # inconclusive case need different sentences, and the
+                    # quirks page used to attribute all of them to the .xlsx
+                    # round trip -- true until batch J, false the moment a
+                    # declared external dependency produced one.
+                    no_verdict_count=sum(
+                        1 for v in inconclusive_by_id.values()
+                        if v == "external_dependency"
+                    ),
                     exec_header=engine_exec_header(ek, res_blob, executed_at),
                     tested_cell=engine_tested_cell(ek, res_blob, executed_at),
                 )
@@ -717,6 +752,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
             for c in e["cases"]
             if c.get("inconclusive_reason")
         )
+        no_verdict_count = sum(e.get("no_verdict_count") or 0 for e in engines.values())
         tested_case_count = sum(len(e["cases"]) for e in engines.values())
         verdicts_present = [
             e["verdict"]
@@ -751,6 +787,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "any_tested": any_tested,
                 "quirk_count": quirk_count,
                 "inconclusive_count": inconclusive_count,
+                "no_verdict_count": no_verdict_count,
                 "tested_case_count": tested_case_count,
                 "primary_verdict": primary_verdict,
                 "last_tested": last_tested,
@@ -1957,9 +1994,18 @@ against those cases before assuming your data is wrong.</p>
 {% endif %}
 {% endif %}
 
-{% if ge.tested and ge.inconclusive_count %}
+{% if ge.tested and ge.no_verdict_reason and ge.no_verdict_count %}
 <div class="not-live-tested">
-  <strong>Google Sheets: {{ ge.inconclusive_count }} case{{ 's' if ge.inconclusive_count != 1 else '' }} inconclusive.</strong>
+  <strong>Google Sheets: executed, but no verdict published.</strong>
+  {{ ge.no_verdict_reason|safe }}
+  Every executed case is shown below with exactly what Google returned.
+</div>
+{% endif %}{# The two boxes are mutually exclusive by construction: the block #}
+{#- below explains an IMPORTER artifact and must never render for a case #}
+{#- excluded because of a declared external dependency, which is not an #}
+{#- artifact of anything. #}{% if ge.tested and ge.inconclusive_count > ge.no_verdict_count %}
+<div class="not-live-tested">
+  <strong>Google Sheets: {{ ge.inconclusive_count - ge.no_verdict_count }} case{{ 's' if (ge.inconclusive_count - ge.no_verdict_count) != 1 else '' }} inconclusive.</strong>
   {% if ge.verdict == 'inconclusive' %}Every Sheets case for {{ r.name }} came back inconclusive, so we publish no Sheets verdict for it.{% endif %}
   Our corpus is an Excel-authored .xlsx, and Google&rsquo;s importer does not
   map every OOXML storage prefix (<code>_xlfn.</code>, <code>_xlfn._xlws.</code>,
@@ -2074,9 +2120,14 @@ run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
 <p class="search-hint">{{ quirks|length }} quirks found across {{ quirk_fn_count }} functions
 ({{ quirks_by_engine['libreoffice'] }} in LibreOffice, {{ quirks_by_engine['google_sheets'] }} in Google Sheets).
-{% if inconclusive_total %}A further {{ inconclusive_total }} Google Sheets case{{ 's' if inconclusive_total != 1 else '' }}
-{{ 'are' if inconclusive_total != 1 else 'is' }} excluded as <a href="{{ rel }}methodology.html">inconclusive</a> &mdash;
-explained by the .xlsx import/export round trip, not by Sheets.{% endif %}</p>
+{% if roundtrip_total %}A further {{ roundtrip_total }} Google Sheets case{{ 's' if roundtrip_total != 1 else '' }}
+{{ 'are' if roundtrip_total != 1 else 'is' }} excluded as <a href="{{ rel }}methodology.html">inconclusive</a> &mdash;
+explained by the .xlsx import/export round trip, not by Sheets.{% endif %}
+{% if no_verdict_total %}{{ no_verdict_total }} further executed case{{ 's are' if no_verdict_total != 1 else ' is' }}
+excluded because the function&rsquo;s documented behaviour needs something no test workbook can supply &mdash;
+an external data server, a live fetch, another user&rsquo;s authorization. Those results are published on their
+own pages with the reason; none of them is a quirk, because none of them is a statement about the engine.
+See <a href="{{ rel }}methodology.html#coverage">Coverage</a>.{% endif %}</p>
 
 <ul class="quirks-list">
 {% for q in quirks %}
@@ -2678,8 +2729,8 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 <h2 class="section-title" id="coverage">Coverage &mdash; and what we deliberately do not run</h2>
 <p>The catalog holds <strong>{{ n_catalog }}</strong> functions. <strong>{{ n_executed }}</strong> of them
 ({{ coverage_pct }}%) have executed test cases in at least one engine.
-{% if n_no_verdict %}<strong>{{ n_no_verdict }}</strong> of those {{ 'is' if n_no_verdict == 1 else 'are' }}
-executed but carries no verdict, {% endif %}and <strong>{{ n_skipped }}</strong>
+{% if n_no_verdict %}<strong>{{ n_no_verdict }}</strong> of those {{ 'is executed but carries' if n_no_verdict == 1 else 'are executed but carry' }}
+no verdict, {% endif %}and <strong>{{ n_skipped }}</strong>
 {{ 'is' if n_skipped == 1 else 'are' }} not executed at all. The last two groups are not a backlog:
 each one is a decision that this harness cannot produce an honest verdict for that name, and the reason
 is published here rather than left as a blank. Every number and every row below is derived from the same
@@ -2716,7 +2767,7 @@ than absorbed into the percentages above.</p>
 
 <h2 class="section-title">What the verdicts mean</h2>
 <ul>
-<li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result (probe cases for volatile functions like NOW/RAND assert error-free execution and deterministic invariants instead of exact values).</li>
+<li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result. Some functions have no result anyone can be held to: a volatile one (NOW, RAND), or one whose answer comes from a live service (GOOGLEFINANCE quotes are documented as &ldquo;delayed by up to 20 minutes&rdquo;; GOOGLETRANSLATE&rsquo;s output is a translation service&rsquo;s choice). Their cases are <em>probes</em>, which assert error-free execution and whatever invariant the vendor&rsquo;s own documentation fixes &mdash; never an exact value. A probe-backed &ldquo;Supported&rdquo; therefore means <em>this engine evaluated the call and returned a value of the documented kind</em>, and the value itself is published without being asserted.</li>
 <li><strong>Quirk found</strong> &mdash; the function exists but at least one case returned a different value or error than Excel produces; the failing case is shown on the function&rsquo;s page.</li>
 <li><strong>Unsupported</strong> &mdash; the engine returns <code>#NAME?</code> (unrecognized function) with the storage prefix correctly applied.</li>
 <li><strong>Inconclusive</strong> &mdash; the run tells us nothing about the engine, so no claim is made in either direction. Two things cause it: for Google Sheets, the <code>.xlsx</code> round trip described in the <a href="#sheets-caveats">caveats</a>; for either engine, a function whose documented behaviour needs something no test workbook can supply (an external data server). Those are listed under <a href="#coverage">Coverage</a> with the values the engine actually returned still on the page.</li>
@@ -3516,6 +3567,8 @@ def main():
     for _q in quirks:
         quirks_by_engine[_q["engine_key"]] = quirks_by_engine.get(_q["engine_key"], 0) + 1
     inconclusive_total = sum(r["inconclusive_count"] for r in records)
+    no_verdict_total = sum(r["no_verdict_count"] for r in records)
+    roundtrip_total = inconclusive_total - no_verdict_total
 
     if OUT_DIR.exists():
         shutil.rmtree(OUT_DIR)
@@ -3583,6 +3636,8 @@ def main():
         quirk_fn_count=quirk_fn_count,
         quirks_by_engine=quirks_by_engine,
         inconclusive_total=inconclusive_total,
+        no_verdict_total=no_verdict_total,
+        roundtrip_total=roundtrip_total,
         seo_guides=load_seo_pages(),
     )
     (OUT_DIR / "quirks.html").write_text(env.get_template("quirks.html").render(**ctx))

@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPARKLINE is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for SPARKLINE in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for SPARKLINE in all 1 executed test case. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/sparkline.html">
 <meta property="og:title" content="SPARKLINE is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for SPARKLINE in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for SPARKLINE in all 1 executed test case. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/sparkline.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Google &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>SPARKLINE</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document SPARKLINE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>SPARKLINE</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document SPARKLINE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-unknown">Inconclusive (no verdict published)</span>
     
   </td>
 </tr>
@@ -437,6 +437,12 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+<div class="not-live-tested">
+  <strong>Google Sheets: executed, but no verdict published.</strong>
+  Google executed the call and the exported cell came back <strong>empty</strong>, with the reader warning that a Sparkline Group extension it does not support was present in the file. That is exactly what this function&rsquo;s test file predicted <em>before</em> the run: SPARKLINE &ldquo;Creates a miniature chart contained within a single cell&rdquo;, a drawing has no cached scalar for an <code>.xlsx</code> export to carry, and a blank here means <em>this cell holds a picture</em> &mdash; not <em>the function returned nothing</em>. Publishing a verdict from it and publishing an empty result from it would be wrong in opposite directions, so the readback is shown as it came and no verdict is drawn.
+  Every executed case is shown below with exactly what Google returned.
+</div>
+
 
 
 
@@ -447,6 +453,25 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SPARKLINE(A1:A5)</td>
+  <td>Existence probe only: SPARKLINE draws a miniature chart inside the cell rather than returning a value, so there is no value to assert</td>
+  <td class="result mono"></td>
+  <td class="result mono"><br><span class="category-tag">NOT ASSERTABLE BY DESIGN, and deliberately recorded as a probe (expected: null) rather than a support claim -- the treatment batch B gave the CUBE* family and COPILOT, batch C gave DETECTLANGUAGE, and batch G gave RTD, STOCKHISTORY and TRANSLATE. SPARKLINE IS NOT A VALUE FUNCTION AT ALL. Google&#39;s description is one sentence and it settles the matter: &#34;Creates a miniature chart contained within a single cell.&#34; What the cell holds after evaluation is a DRAWING, not a number or a string, so &#39;what does it return&#39; has no answer of the kind the rest of this corpus asserts -- the published syntax is `SPARKLINE(data, [options])` and the first Sample Usage is `SPARKLINE(A1:F1)`, of which this case is the column-shaped equivalent over five set cells. A WARNING ABOUT THE READBACK, WRITTEN BEFORE THE FACT SO IT CANNOT BE FORGOTTEN AFTERWARDS. This harness reads results back out of an .xlsx export with openpyxl, which surfaces a cell&#39;s cached VALUE. A chart-in-cell has no cached scalar, so a successful evaluation may well read back as an empty cell (None). That blank would mean &#39;this cell holds a picture&#39;, and it must never be published as &#39;SPARKLINE returned an empty result&#39; or scored as a value at all. This case is expected: null so that no comparison can be made from it in either direction, and any future ingest that records a blank here should carry this sentence with it. LIBREOFFICE, MEASURED BEFORE THIS FILE WAS AUTHORED. All four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) were probed with NINE storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE., ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT. and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS. -- and every one of those 36 combinations returned #NAME?. LibreOffice&#39;s own parser additionally wrote the name back into the converted file LOWER-CASED (&#39;=sparkline(A1:A3)&#39;), which is what it does with an identifier it does not recognise as a function at all rather than with a function it knows under a different storage token. A #NAME? under all nine storage forms on all four builds is therefore a genuine absence and not a storage-form artifact of this harness, which is why &#39;unsupported in LibreOffice&#39; IS a verdict this file publishes even though the returned VALUE is not assertable in any engine. BATCH PROVENANCE (batch J, group B of sheets-lo-only-plan.md -- Google-documented, service- or context-bound; the final batch of the completeness push). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes no claim about Excel, nothing here is measured against Microsoft&#39;s documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is Google&#39;s own function help, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for Sheets, so a bare URL dates nothing. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record what the service returns for this call. Until that ingest lands the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose -- scripts/check_honesty.py bans the blanket negative shape of that sentence, and the guard is worth keeping blunt.) Google&#39;s SPARKLINE help page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093289.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

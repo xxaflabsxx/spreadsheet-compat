@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GOOGLETRANSLATE is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for GOOGLETRANSLATE in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<title>GOOGLETRANSLATE is not supported in LibreOffice Calc (works in Sheets)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for GOOGLETRANSLATE in all 1 executed test case; all… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/googletranslate.html">
-<meta property="og:title" content="GOOGLETRANSLATE is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for GOOGLETRANSLATE in all 1 executed test case. Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta property="og:title" content="GOOGLETRANSLATE is not supported in LibreOffice Calc (works in Sheets)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for GOOGLETRANSLATE in all 1 executed test case; all… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/googletranslate.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Google &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>GOOGLETRANSLATE</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document GOOGLETRANSLATE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>GOOGLETRANSLATE</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document GOOGLETRANSLATE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -447,6 +447,25 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=GOOGLETRANSLATE(&#34;Hello World&#34;,&#34;en&#34;,&#34;es&#34;)</td>
+  <td>Existence probe only: the value is produced by a translation service, so this records what each engine returns for Google&#39;s own sample call</td>
+  <td class="result mono">Hola Mundo</td>
+  <td class="result mono"><br><span class="category-tag">NOT ASSERTABLE BY DESIGN, and deliberately recorded as a probe (expected: null) rather than a support claim -- the treatment batch B gave the CUBE* family and COPILOT, batch C gave DETECTLANGUAGE, and batch G gave RTD, STOCKHISTORY and TRANSLATE. The formula is Google&#39;s own Sample Usage, `GOOGLETRANSLATE(&#34;Hello World&#34;,&#34;en&#34;,&#34;es&#34;)`, reproduced character for character, and the page describes the function as &#34;Translates text from one language into another.&#34; WHY NO VALUE IS ASSERTED. A translation is produced by a service, not by a rule this corpus could derive: nothing in the documentation fixes which of several correct Spanish renderings comes back, and a corpus that asserted one would publish a divergence the day the service&#39;s model changed its mind. The page&#39;s own source_language bullet -- &#34;The two-letter language code of the source language, e.g. \&#34;en\&#34; for English or \&#34;ko\&#34; for Korean, or \&#34;auto\&#34; to auto-detect the language.&#34; -- shows the same thing from another side: &#34;auto&#34; makes even the INPUT language a service decision. WHAT GOOGLE DOES NOT SAY, SAID PLAINLY: this page carries no sentence describing the function as a network call or naming a translation service, so none is attributed to it; the unassertability is inferred from the nature of the output and is labelled as inference. LIBREOFFICE, MEASURED BEFORE THIS FILE WAS AUTHORED. All four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) were probed with NINE storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE., ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT. and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS. -- and every one of those 36 combinations returned #NAME?. LibreOffice&#39;s own parser additionally wrote the name back into the converted file LOWER-CASED (&#39;=googletranslate(&#34;hello&#34;,&#34;en&#34;,&#34;es&#34;)&#39;), which is what it does with an identifier it does not recognise as a function at all rather than with a function it knows under a different storage token. A #NAME? under all nine storage forms on all four builds is therefore a genuine absence and not a storage-form artifact of this harness, which is why &#39;unsupported in LibreOffice&#39; IS a verdict this file publishes even though the returned VALUE is not assertable in any engine. BATCH PROVENANCE (batch J, group B of sheets-lo-only-plan.md -- Google-documented, service- or context-bound; the final batch of the completeness push). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes no claim about Excel, nothing here is measured against Microsoft&#39;s documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is Google&#39;s own function help, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for Sheets, so a bare URL dates nothing. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record what the service returns for this call. Until that ingest lands the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose -- scripts/check_honesty.py bans the blanket negative shape of that sentence, and the guard is worth keeping blunt.) Google&#39;s GOOGLETRANSLATE help page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093331.</span></td>
+  <td><span class="verdict-ok">Ran OK</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
