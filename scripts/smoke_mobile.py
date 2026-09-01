@@ -14,9 +14,15 @@ import argparse, http.server, json, random, socketserver, threading
 from pathlib import Path
 
 def collect_urls(base, docs, fn_sample, all_functions):
-    urls = [f"{base}/", f"{base}/guides/", f"{base}/audit.html"]
+    urls = [f"{base}/", f"{base}/guides/", f"{base}/audit.html", f"{base}/how-to/", f"{base}/methodology.html"]
     guides = sorted(p.name for p in (docs / "guides").glob("*.html") if p.name != "index.html")
     urls += [f"{base}/guides/{g}" for g in guides]
+    howtos = sorted(p.name for p in (docs / "how-to").glob("*.html") if p.name != "index.html")
+    ht_sample = sorted(random.Random(20260901).sample(howtos, min(20, len(howtos))))
+    special = "reference-a-cell-on-another-sheet.html"  # carries the not-comparable exclusion box
+    if special in howtos and special not in ht_sample:
+        ht_sample.append(special)
+    urls += [f"{base}/how-to/{h}" for h in ht_sample]
     fns = sorted(p.name for p in (docs / "functions").glob("*.html"))
     if not all_functions and len(fns) > fn_sample:
         fns = sorted(random.Random(20260831).sample(fns, fn_sample))
