@@ -492,21 +492,34 @@ argument &mdash; <code>=SORT(A2:A4,ROW(A2:A4),FALSE)</code> &mdash; because Goog
 <code>cherry, banana, apple</code>. So Sheets can sort by an arbitrary key; it just spells it
 <code>SORT</code>, and the direction flag is still the boolean.</p>
 <p>Google also ships <code>SORTN</code>, a top-<em>n</em> sorter that Excel and LibreOffice do not
-have at all. Our inventory records it as documented in Google Sheets only, and we have authored no
-test cases for it &mdash; it is mentioned here as documentation, with no executed result behind
-it.</p>
+have at all. It has since been executed in both engines, on 2026-09-01: in Google Sheets
+<code>=SORTN(A2:C6)</code> returned the single top row of the sample table, and in LibreOffice it is
+<code>#NAME?</code> on all four pinned builds, after a five-spelling storage-token probe &mdash; so
+&ldquo;absent from Calc&rdquo; is now an executed verdict rather than an inventory claim. The
+<a href="../guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only
+functions guide</a> covers it alongside the rest of that set.</p>
 
 <h2 class="section-title">The blank-cell case, and one LibreOffice release that disagreed with itself</h2>
 <p>The fourth corpus case, <code>=SORT(A1:A1)</code> over a single empty cell, is not about the
 third argument, but it is the other thing our <code>SORT</code> runs turned up and it is worth
 recording honestly.</p>
-<p>In LibreOffice it is the only cross-release instability in the whole executed corpus. Our
+<p>In LibreOffice it is one of a very small number of cross-release instabilities in the whole
+executed corpus, and the only one that regressed and then came back. Our
 <a href="../libreoffice-version-support.html">LibreOffice version support page</a> reports that of
-791 non-volatile cases across 250 functions that ran in all four tested builds, exactly one did not
-return the identical value in every build after the first that supported it &mdash; and it is this
-one: <code>#NAME?</code> in 24.2.0.3, <code>0</code> in 24.8.7.2, <code>#VALUE!</code> in 25.2.0.3,
-and <code>0</code> again in 25.8.7.3. A degenerate input regressed for one release and came back.
+2,011 non-volatile cases across 488 functions that ran in all four tested builds, six did not return
+the identical value in every build after the first that supported it. This is one of them:
+<code>#NAME?</code> in 24.2.0.3, <code>0</code> in 24.8.7.2, <code>#VALUE!</code> in 25.2.0.3, and
+<code>0</code> again in 25.8.7.3. A degenerate input regressed for one release and came back.
 &ldquo;Supported&rdquo; is per case, not per function.</p>
+<p>The other five are different in kind, and worth naming so that this one is not oversold. Two are
+<code>RAND.NV</code> and <code>RANDBETWEEN.NV</code>, which are random by design and are simply not on
+the volatile-function exclusion list that page uses. Two more are
+<code>FORECAST.ETS.CONFINT</code>, whose two cases return four different numbers across the four
+builds &mdash; a forecasting routine moving under us, not a defect in a fixed answer. The last is
+<code>IMSQRT("-1")</code>, which returns the string <code>1i</code> on 24.2.0.3 and 24.8.7.2 and
+<code>i</code> on 25.2.0.3 and 25.8.7.3: a change in how a unit imaginary part is formatted, in the
+direction of Microsoft&rsquo;s documented form. <code>SORT</code> is the only one of the six where a
+supported, deterministic case changed its answer and changed it back.</p>
 <p>In Google Sheets the same case came back as an empty cell: our readback recorded no value and no
 error code for it, against a documented <code>0</code>. Be careful how much weight that carries. Our
 Sheets measurement is an export-and-readback &mdash; the workbook goes to Drive, Google recalculates

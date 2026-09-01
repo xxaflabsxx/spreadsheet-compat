@@ -389,19 +389,56 @@ calculation.</p>
 <h2 class="section-title">This is a rare kind of divergence</h2>
 <p>Most of the ways LibreOffice diverges from Microsoft&rsquo;s documentation are error-code
 substitutions: the formula still fails, and only the label on the failure changes. We have executed
-41 such cases; they are collected in
+272 such cases, in 135 functions; they are collected in
 <a href="../guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">every error
 code LibreOffice reports as #VALUE!</a>. Those are a real migration problem, but they are a
 <em>visible</em> one.</p>
 <p>Cases where LibreOffice returns an ordinary value where Microsoft documents an error are much
-rarer. Across our whole corpus &mdash; 954 executed cases over 299 functions &mdash; 108 cases have a
-documented result that is an error, and in LibreOffice Calc 25.8.7.3 exactly <strong>five</strong> of
-them come back as a value instead of any error at all:</p>
+rarer. Across our whole corpus &mdash; 2,334 executed cases over 586 functions, as of 2026-09-01
+&mdash; 531 cases have a documented result that is an error, and in LibreOffice Calc 25.8.7.3
+<strong>38</strong> of them come back as a value instead of any error at all. That is about 7% of the
+error-expected set, against 51% for the error-code substitutions.</p>
+<p>Most of the 38 are one recognisable shape, and it is not the shape this page is about: a
+statistical distribution evaluated outside its documented domain returning a boundary value rather
+than <code>#NUM!</code> (<code>LOGNORM.DIST</code>, <code>LOGNORMDIST</code>,
+<code>EXPON.DIST</code>, <code>EXPONDIST</code>, <code>GAMMADIST</code>, <code>CHIDIST</code>,
+<code>BETADIST</code>, <code>BETA.INV</code>, <code>BETAINV</code>, <code>BINOM.INV</code>,
+<code>CRITBINOM</code>, <code>NEGBINOMDIST</code>, <code>PERMUT</code>, <code>PERMUTATIONA</code>), or
+a trigonometric function accepting an argument past the documented magnitude ceiling
+(<code>COT</code>, <code>COTH</code>, <code>CSC</code>, <code>CSCH</code>, <code>SEC</code>,
+<code>SECH</code>). Those are inputs a working model rarely reaches, and when it does the answer is
+usually 0 or 1 and looks like what it is.</p>
+<p><strong>Four of the 38 return money.</strong> That is the group this page belongs to, and it has
+grown since this page was first written:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th><th>What the silent value is</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=FVSCHEDULE(1,A1:A2) with A2 = "x"</td><td>#VALUE!</td><td class="result">#VALUE!</td><td class="result"><strong>1.09</strong></td><td>a future value with one compounding period missing</td></tr>
+    <tr><td class="formula">=AMORDEGRC(A2,A3,A4,A5,A6,0.22,A8)</td><td>#NUM!</td><td class="result">#NAME?</td><td class="result"><strong>696</strong></td><td>a depreciation amount for a documented-invalid life</td></tr>
+    <tr><td class="formula">=AMORDEGRC(A2,A3,A4,A5,A6,0.4,A8)</td><td>#NUM!</td><td class="result">#NAME?</td><td class="result"><strong>820</strong></td><td>the same, at a different rate</td></tr>
+    <tr><td class="formula">=TBILLPRICE(A2,A2+400,A4)</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result"><strong>90.1</strong></td><td>a price for a bill maturing more than a year out</td></tr>
+  </tbody>
+</table>
+</div>
+<p>All four of those returned the same value on 24.2.0.3, 24.8.7.2 and 25.2.0.3 as well. Across the
+full set of 38, all four builds return a value rather than the documented error every time, and on 37
+of the 38 that value is identical across the builds; the one exception is
+<code>=FORECAST.ETS.CONFINT(21,C1:C20,E1:E20)</code> over a duplicate timeline, where the four builds
+return four different numbers (3.94384389, 3.80076060, 4.08717124 and 3.66439998) in place of the
+documented <code>#VALUE!</code>.</p>
+<p>The <code>AMORDEGRC</code> and <code>TBILLPRICE</code> rows are written up with the rest of the
+fixed-income family in
+<a href="../guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">bond
+and treasury functions after a migration</a>; <code>TBILLPRICE</code> in particular is worse than it
+looks, because the price it invents does not follow the documented formula on any day count. Google
+has no <code>AMORDEGRC</code>, so those two rows say nothing about Sheets either way.</p>
+<p>The four cases with their own write-ups on this site are the ones where the silent value is
+<em>not</em> money, and they are the useful contrast:</p>
 <div class="table-scroll">
 <table class="cases">
   <thead><tr><th>Formula</th><th>Excel (documented)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th><th>Written up in</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=FVSCHEDULE(1,A1:A2) with A2 = "x"</td><td>#VALUE!</td><td class="result">1.09</td><td>this page</td></tr>
     <tr><td class="formula">=MROUND(5,-2)</td><td>#NUM!</td><td class="result">6</td><td><a href="../guides/mround-negative-multiple-excel-vs-libreoffice.html">MROUND with a negative multiple</a></td></tr>
     <tr><td class="formula">=POWER(-8,1/3)</td><td>#NUM!</td><td class="result">-2</td><td><a href="../guides/power-negative-base-fractional-exponent-excel-vs-google-sheets-libreoffice.html">POWER with a negative base</a></td></tr>
     <tr><td class="formula">=CHAR(0)</td><td>#VALUE!</td><td class="result">the escape string _x0000_</td><td><a href="../guides/char-unichar-zero-excel-vs-libreoffice.html">CHAR and UNICHAR of zero</a></td></tr>
@@ -409,11 +446,12 @@ them come back as a value instead of any error at all:</p>
   </tbody>
 </table>
 </div>
-<p><code>FVSCHEDULE</code> is the only finance function in that list, and it is the only one of the
-five whose silent result is a plain, believable amount of money. <code>MROUND(5,-2) = 6</code> and
-<code>POWER(-8,1/3) = -2</code> are at least arguable answers to a question the documentation calls
-invalid; <code>_x0000_</code> is visibly wrong the moment you look at the cell. A future value that
-is 9% too low after one dropped period is none of those things.</p>
+<p><code>MROUND(5,-2) = 6</code> and <code>POWER(-8,1/3) = -2</code> are at least arguable answers to
+a question the documentation calls invalid &mdash; and Google Sheets returns <code>-2</code> for the
+<code>POWER</code> row too, so LibreOffice is not alone on that one. <code>_x0000_</code> is visibly
+wrong the moment you look at the cell. A future value that is 9% too low after one dropped period is
+none of those things: it is the right shape, the right magnitude and the wrong number, which is the
+only combination that survives a review.</p>
 
 <h2 class="section-title">A migration checklist for rate schedules</h2>
 <p><strong>1. Find every <code>FVSCHEDULE</code> and look at the range, not the formula.</strong> The

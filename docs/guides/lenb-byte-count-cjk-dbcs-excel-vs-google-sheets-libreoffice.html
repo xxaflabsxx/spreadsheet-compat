@@ -446,9 +446,18 @@ under a non-DBCS default it returns 4 where the documented rule says 1 byte per 
 Sheets the document and account locale are Google&rsquo;s to decide and we did not control them, so
 treat the Sheets 4 as &ldquo;what the Drive-import run returned&rdquo; and not as a locale-controlled
 experiment.</p>
-<p>Scope. This is one probe, on one two-character string, in one function. <code>LENB</code> is the
-only B-suffix function in our corpus, and our <code>LEN</code> cases are all ASCII, so we have no
-executed value for <code>=LEN("日本")</code> to sit beside the <code>LENB</code> one. Mixed
+<p>Since this page was written the rest of the B-suffix family has been executed too, on 2026-08-31
+in both engines: <code>LEFTB</code>, <code>RIGHTB</code>, <code>MIDB</code>, <code>FINDB</code>,
+<code>SEARCHB</code> and <code>REPLACEB</code>. Each carries a full-width-character probe, and they
+corroborate the finding above rather than complicating it &mdash;
+<code>=LEFTB("ＥＸＣＥＬ",2)</code> returned <code>Ｅ</code> and
+<code>=RIGHTB("ＡＢＣ",2)</code> returned <code>Ｃ</code> in both engines, which is
+two bytes spent on one full-width character, exactly the 2-bytes-per-character rule that makes
+<code>LENB("日本")</code> come out as 4. Those probes carry no asserted expected value in our
+corpus &mdash; they are published as observations, not as matches or mismatches.</p>
+<p>Scope. The headline finding is still one probe, on one two-character string, in one function. Our
+<code>LEN</code> cases are all ASCII, so we have no executed value for
+<code>=LEN("日本")</code> to sit beside the <code>LENB</code> one. Mixed
 ASCII-and-CJK strings, emoji and other astral-plane characters, combining marks, and non-CJK
 non-ASCII text are all untested here.</p>
 <p>The Google Sheets column is executed output from a dated run, because Sheets has no version number
