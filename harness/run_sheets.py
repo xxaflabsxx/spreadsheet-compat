@@ -98,6 +98,55 @@ USAGE
     # writing to a scratch results file (never results/google-sheets.json):
     python3 harness/run_sheets.py selftest --only COUNT SUM MROUND
 
+    # ---- a SECOND executed engine: EXCEL FOR THE WEB ----
+    # The chunk workbooks `build` emits are engine-NEUTRAL -- formula-only
+    # .xlsx with zero cached values -- so anything that recalculates on open
+    # can execute them. Excel for the web does, via a different round trip:
+    #
+    #   upload chunk-NN.xlsx to OneDrive -> open it in Excel for the web
+    #   (which recalculates on open) -> File > Create a Copy > Download a
+    #   Copy -> the downloaded .xlsx carries Excel's computed cached values.
+    #
+    # VERIFIED: this path needs the DEFAULT xlfn-translated serialization,
+    # NOT --plain-names. Excel for the web resolves the `_xlfn.` storage
+    # prefix natively (`_xlfn.PERCENTRANK.INC(...)` came back computed, not
+    # #NAME?) -- which is unsurprising, since that prefix is Excel's own
+    # storage convention.
+    #
+    # The engine is declared at INGEST time, because that is where the
+    # results IDENTITY is chosen:
+    python3 harness/run_sheets.py ingest \
+        --export ~/Downloads/chunk-01.xlsx \
+        --chunkdir harness/excel_probe_chunk \
+        --out results/excel-web.json \
+        --engine excel_web
+    #
+    # --engine selects the results identity, the error vocabulary (Google's
+    # #ERROR! parse-failure token does NOT apply here), the canary prose, and
+    # the default --out/--chunkdir/--engine-label. Merging results from one
+    # engine into another engine's file is refused outright --
+    # --allow-label-change covers a DATE change on ONE engine and nothing
+    # more.
+    #
+    # WHAT THIS IS NOT: Excel for the web is not desktop Excel. It is a
+    # different implementation of the calculation engine, and this corpus's
+    # Excel column remains DOCUMENTED behaviour for the DESKTOP product. An
+    # executed Excel-web result is its own evidence and must never be
+    # rendered as though desktop Excel produced it. results/excel-web.json is
+    # deliberately NOT published by the site yet for exactly that reason --
+    # see excel-web-site-plan.md.
+    #
+    # What the export does to values on the way out was MEASURED from the
+    # probe download rather than assumed, and is recorded verbatim in the
+    # results file under "readback_artifacts" (see
+    # EXCEL_WEB_READBACK_ARTIFACTS below). Headline: unlike Sheets' export,
+    # which rounds to 10 significant digits and is LOSSY, Excel-web writes
+    # full IEEE-754 round-trip decimal, so no normalization is applied.
+
+    # dry run of the excel_web path: builds its own fixture, synthesizes the
+    # export, and asserts the identity + merge discipline. Executes NOTHING.
+    python3 harness/run_sheets.py selftest-excel-web
+
     # ---- the how-to RECIPE corpus (data/recipes/*.json) ----
     # Same three-step loop, one worksheet per recipe check, writing
     # results/recipes-verified-sheets.json alongside the LibreOffice-executed
@@ -248,6 +297,214 @@ MANIFEST_NAME = "manifest.json"
 ENGINE_ID = "google_sheets"
 RECALC_METHOD = "Drive import + xlsx export readback"
 
+# --------------------------------------------------------------------------
+# INGEST ENGINE REGISTRY
+# --------------------------------------------------------------------------
+# `build` emits engine-neutral chunk workbooks: formula-only .xlsx with no
+# cached values anywhere. That same artifact is executable by ANY hosted
+# spreadsheet that recalculates on import, so `ingest` -- not `build` -- is
+# where the engine identity is chosen, via `--engine`.
+#
+# NOTE the pre-existing `--engine` flag on build-recipes/-multisheet is a
+# DIFFERENT axis: it selects which engine's checks to INCLUDE (recipe checks
+# may carry an "engines" scope). It never sets a results-file identity. The
+# flag added here to `ingest` sets the identity of the results file being
+# written, so the two do not overlap and are deliberately not merged.
+EXCEL_WEB_ENGINE_ID = "excel_web"
+EXCEL_WEB_RESULTS_PATH = os.path.join(RESULTS_DIR, "excel-web.json")
+EXCEL_WEB_RECALC_METHOD = (
+    "OneDrive upload + Excel for the web recalculation on open + "
+    "File > Create a Copy > Download a Copy readback")
+
+# Excel for the web's .xlsx export writes the ordinary OOXML error vocabulary
+# in typed (t="e") cells. It has no counterpart to Google's #ERROR! parse
+# failure, so the Sheets-specific extra token is NOT widened to this engine:
+# if "#ERROR!" ever appeared in an Excel-web export it would be a string
+# result, not an error cell, and must not be silently reclassified.
+EXCEL_WEB_EXTRA_ERROR_STRINGS = frozenset()
+
+_SHEETS_CANARY_METHOD = (
+    "openpyxl writes formulas with NO cached <v> value, so the uploaded "
+    "chunk workbooks contain zero cached results. Google Drive's "
+    "auto-conversion to a Google Sheet recalculates every formula with "
+    "Google's engine; exporting that Sheet back to .xlsx carries those "
+    "computed values out. The deterministic canary =1111+2222 in "
+    f"{CANARY_ANCHOR} of EVERY sheet reading back exactly "
+    f"{CANARY_ARITH_EXPECTED} therefore proves genuine computation -- "
+    "without recalculation the cell would read back blank (None), since "
+    "nothing was ever cached. The volatile =NOW() canary is recorded per "
+    "chunk as corroboration, but UNLIKE the LibreOffice runner (which "
+    "converts the same file twice and shows =NOW() differing) a single "
+    "Drive import yields one timestamp, so no cross-run volatile "
+    "comparison is possible: now_differs_across_runs is null by design, "
+    "and the deterministic canary is the load-bearing proof here.")
+
+_EXCEL_WEB_CANARY_METHOD = (
+    "openpyxl writes formulas with NO cached <v> value, so the uploaded "
+    "chunk workbooks contain zero cached results. Opening the workbook in "
+    "Excel for the web from OneDrive recalculates every formula with "
+    "Microsoft's own web calculation engine; File > Create a Copy > "
+    "Download a Copy writes those computed values back out as .xlsx. The "
+    f"deterministic canary =1111+2222 in {CANARY_ANCHOR} of EVERY sheet "
+    f"reading back exactly {CANARY_ARITH_EXPECTED} therefore proves genuine "
+    "computation -- without recalculation the cell would read back blank "
+    "(None), since nothing was ever cached. The volatile =NOW() canary is "
+    "recorded per chunk as corroboration; like the Drive path (and unlike "
+    "the LibreOffice runner, which converts the same file twice and shows "
+    "=NOW() differing) a single open yields one timestamp, so "
+    "now_differs_across_runs is null by design and the deterministic canary "
+    "is the load-bearing proof. Corroborating this engine specifically: the "
+    "downloaded package's docProps/app.xml names the application that wrote "
+    "it, and is recorded verbatim per chunk under app_provenance_per_chunk.")
+
+# WHAT THE EXPORT DOES TO VALUES ON THE WAY OUT -- MEASURED, NOT ASSUMED.
+# Every statement below was measured from the validated probe download
+# (6 functions / 34 cases, harness/excel_probe_chunk/) by reading the raw
+# worksheet XML, NOT by trusting openpyxl's parse. Anything the probe did not
+# exercise is recorded as unmeasured rather than guessed at.
+EXCEL_WEB_READBACK_ARTIFACTS = {
+    "measured_from": "harness/excel_probe_chunk/ (6 functions, 34 cases)",
+    "measured_on": "2026-09-01",
+    "method": ("raw xl/worksheets/*.xml <v> strings inspected directly, then "
+               "compared against Python's float() parse of the same strings"),
+    "float_precision": (
+        "LOSSLESS -- no normalization applied or needed. Excel for the web "
+        "writes full IEEE-754 round-trip decimal, up to 17 significant "
+        "digits, and uses scientific notation for small magnitudes: "
+        "ROUND(MIRR(...),4) came back as the literal string "
+        "'0.12609999999999999' and ROUND(MIRR(...),4) = -0.048 as "
+        "'-4.8000000000000001E-2'. Every such string was verified to parse to "
+        "the IDENTICAL double as its short form, so float() recovers the "
+        "exact value and Python's repr renders it back as 0.1261 / -0.048. "
+        "This is the OPPOSITE of Google Sheets' export, which is LOSSY: it "
+        "rounds to 10 significant digits (PI() comes back as 3.141592654), "
+        "genuinely destroying precision. Excel-web values therefore need no "
+        "rounding fix-up, and none is applied -- the raw parsed double is "
+        "recorded."),
+    "errors": (
+        "Standard OOXML typed error cells: t=\"e\" with the error token as "
+        "the cached value (#DIV/0!, #VALUE!, #NUM!, #N/A all observed "
+        "verbatim). Recorded as-is, exactly like the LibreOffice and Sheets "
+        "runners. No Google-style #ERROR! parse-failure token exists here."),
+    "date_formatting_of_numerics": (
+        "UNMEASURED. Sheets applies a date/time NUMBER FORMAT to DATE()/"
+        "TIME()-style results, which makes openpyxl surface a datetime "
+        "instead of the serial (normalize_readback_value converts it back). "
+        "The probe carried NO date or time function -- every one of its 34 "
+        "result cells came back with number format 'General' and the "
+        "workbook declares no custom numFmts at all -- so this run cannot "
+        "say whether Excel-web does the same. normalize_readback_value is "
+        "still applied on the same terms as every other engine, so a "
+        "datetime WOULD be handled correctly if one appears; it simply was "
+        "not exercised here."),
+    "empty_string_results": (
+        "UNMEASURED. No probe case returns the empty string, so whether a "
+        "formula yielding \"\" round-trips as a blank cell (None) is "
+        "untested for this engine. values_roughly_equal() already treats an "
+        "expected \"\" as satisfied by a read-back None for every engine, so "
+        "the existing handling applies unchanged."),
+    "booleans": (
+        "UNMEASURED AS A RESULT. The probe contains no boolean-returning "
+        "formula. A boolean INPUT literal did survive as a real typed "
+        "t=\"b\" cell rather than the text 'TRUE' -- weak evidence that "
+        "Excel-web would not stringify a boolean the way Sheets' export "
+        "sometimes does -- but an input is not a computed result and no "
+        "claim is drawn from it. The _boolean_text_artifact note still fires "
+        "for this engine if it ever happens."),
+    "formula_prefix": (
+        "The _xlfn. storage prefix survives the round trip verbatim: "
+        "'_xlfn.PERCENTRANK.INC(A2:A11,2)' came back written exactly that "
+        "way and COMPUTED (0.333), confirming Excel for the web resolves the "
+        "storage form. This is why the probe chunk uses the DEFAULT "
+        "xlfn-translated serialization and NOT --plain-names."),
+    "volatile_now": (
+        "=NOW() comes back as a RAW FLOAT SERIAL under 'General' format "
+        "(46266.42749652778), not as a datetime the way Sheets' export "
+        "renders it, and it carries the ca=\"1\" volatile flag. It is "
+        "evaluated in the VIEWER'S LOCAL TIME ZONE, not UTC: the probe's "
+        "serial decodes to 2026-09-01 10:15:35, which is UTC-7 (America/"
+        "Phoenix), and the package's own docProps/core.xml records "
+        "dcterms:created 17:13:37Z and dcterms:modified 17:16:41Z -- so "
+        "10:15:35 local == 17:15:35Z falls exactly inside the recalculation "
+        "window. Anything comparing this timestamp to a UTC clock must "
+        "account for the offset or it will look ~7 hours stale."),
+}
+
+# Per-engine `ingest` behaviour. Everything that legitimately differs between
+# a Drive import and an Excel-for-the-web open lives here, so ingest_exports()
+# itself stays one code path shared by both.
+INGEST_ENGINES = {
+    ENGINE_ID: {
+        "engine_id": ENGINE_ID,
+        "display": "Google Sheets",
+        "label_template": "Google Sheets (Drive import, {date})",
+        "default_out": DEFAULT_RESULTS_PATH,
+        "default_chunkdir": DEFAULT_CHUNK_DIR,
+        "recalc_method": RECALC_METHOD,
+        "extra_error_strings": SHEETS_EXTRA_ERROR_STRINGS,
+        "canary_method": _SHEETS_CANARY_METHOD,
+        "readback_artifacts": None,
+        "expect_app": None,
+    },
+    EXCEL_WEB_ENGINE_ID: {
+        "engine_id": EXCEL_WEB_ENGINE_ID,
+        "display": "Excel for the web",
+        "label_template": "Excel for the web (recalc, {date})",
+        "default_out": EXCEL_WEB_RESULTS_PATH,
+        "default_chunkdir": os.path.join(REPO_ROOT, "harness", "excel_probe_chunk"),
+        "recalc_method": EXCEL_WEB_RECALC_METHOD,
+        "extra_error_strings": EXCEL_WEB_EXTRA_ERROR_STRINGS,
+        "canary_method": _EXCEL_WEB_CANARY_METHOD,
+        "readback_artifacts": EXCEL_WEB_READBACK_ARTIFACTS,
+        # docProps/app.xml <Application> must look like this or the ingest
+        # says so loudly -- see _read_app_provenance().
+        "expect_app": "excel online",
+    },
+}
+
+
+def _engine_spec(name):
+    spec = INGEST_ENGINES.get(name)
+    if spec is None:
+        sys.exit(f"Unknown ingest engine {name!r}. "
+                 f"Known: {', '.join(sorted(INGEST_ENGINES))}.")
+    return spec
+
+
+def _read_app_provenance(path):
+    """The application that WROTE this .xlsx, per its docProps/app.xml.
+
+    Excel for the web stamps '<Application>Microsoft Excel Online</Application>'
+    plus an AppVersion into every package it produces. That is independent,
+    in-band evidence of which engine actually recalculated the workbook --
+    something the Google Drive path never offered -- so it is recorded
+    verbatim per chunk and checked against the engine being claimed. It is
+    NOT proof on its own (a string in a file is forgeable), which is why the
+    deterministic canary remains the load-bearing check; this corroborates it
+    and, more usefully, catches an honest mistake: ingesting a
+    LibreOffice-converted or openpyxl-written file under an Excel-web label.
+    """
+    import xml.etree.ElementTree as ET
+    import zipfile
+    try:
+        with zipfile.ZipFile(path) as z:
+            raw = z.read("docProps/app.xml")
+    except (KeyError, zipfile.BadZipFile, OSError):
+        return {"application": None, "app_version": None}
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError:
+        return {"application": None, "app_version": None}
+
+    def _text(tag):
+        for el in root.iter():
+            if el.tag.rsplit("}", 1)[-1] == tag:
+                return (el.text or "").strip() or None
+        return None
+
+    return {"application": _text("Application"),
+            "app_version": _text("AppVersion")}
+
 # `selftest` produces LibreOffice values through the Sheets plumbing. The site
 # generator discovers engines by globbing results/*.json and matching on the
 # "engine" string ("google" anywhere in it means Google Sheets), so selftest
@@ -257,6 +514,26 @@ RECALC_METHOD = "Drive import + xlsx export readback"
 SELFTEST_ENGINE_ID = "SELFTEST_libreoffice_via_sheets_pipeline"
 SELFTEST_RECALC_METHOD = ("selftest plumbing check: soffice --convert-to xlsx "
                           "standing in for the Drive import -- NOT Google Sheets")
+
+# Same rule for the Excel-for-the-web selftest: its values are the corpus's
+# own expecteds written back into the builder's workbook, so the id must not
+# contain a string any consumer maps to a real engine, and the file must not
+# land in results/. Both are enforced in cmd_selftest_excel_web().
+EXCEL_WEB_SELFTEST_ENGINE_ID = "SELFTEST_synthesized_via_excel_web_pipeline"
+EXCEL_WEB_SELFTEST_RECALC_METHOD = (
+    "selftest plumbing check: expected values written into the builder's own "
+    "workbook standing in for the Excel-for-the-web round trip -- NOTHING was "
+    "executed, and this says nothing about Excel for the web")
+EXCEL_WEB_SELFTEST_RESULTS_PATH = os.path.join(
+    REPO_ROOT, "harness", "excel_web_selftest", "plumbing-check.json")
+EXCEL_WEB_SELFTEST_CHUNK_DIR = os.path.join(
+    REPO_ROOT, "harness", "excel_web_selftest", "chunks")
+# The six functions the real Excel-web probe covered. Reusing them keeps the
+# fixture aligned with results/excel-web.json, so the selftest exercises the
+# same shapes (a range argument, an empty-range error, a CJK string, an
+# _xlfn.-prefixed name) the real run met.
+EXCEL_WEB_SELFTEST_FUNCTIONS = (
+    "ABS", "FVSCHEDULE", "LENB", "MIRR", "PERCENTRANK.INC", "VAR.P")
 
 # Advisory ceiling per chunk workbook. The bytes travel as base64 through the
 # orchestrator's context (~4/3 inflation), so this is about transportability,
@@ -442,8 +719,29 @@ def _boolean_text_artifact(expected, actual):
             and actual.upper() in ("TRUE", "FALSE"))
 
 
-def ingest_exports(export_paths, manifest, engine_label):
+def _decode_volatile_serial(v):
+    """Excel serial -> ISO timestamp string, for reading the =NOW() canary.
+
+    Excel for the web exports =NOW() as a bare float under 'General' format
+    rather than as a date-formatted cell, so openpyxl hands back the serial
+    itself. This renders it human-readable. Note it is the engine's LOCAL
+    time, not UTC -- see EXCEL_WEB_READBACK_ARTIFACTS['volatile_now'].
+    """
+    from datetime import timedelta
+    try:
+        return (datetime(1899, 12, 30) + timedelta(days=float(v))).isoformat()
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def ingest_exports(export_paths, manifest, engine_label, engine=ENGINE_ID):
     """Read exported workbooks -> (function_results, canary, trusted, stats).
+
+    `engine` selects an INGEST_ENGINES spec. The chunk workbooks themselves
+    are engine-neutral (formula-only, zero cached values), so the same
+    manifest and the same cell map serve every engine that recalculates on
+    open; only the error vocabulary, the canary prose, the provenance check
+    and the results identity differ. See the INGEST ENGINE REGISTRY above.
 
     Provenance: `manifest["plain_names"]` (set by `build --plain-names`)
     records whether these chunk workbooks had formulas written EXACTLY as
@@ -457,6 +755,8 @@ def ingest_exports(export_paths, manifest, engine_label):
     plain-names result for those functions supersedes an earlier
     xlfn-serialized one rather than merely re-confirming it.
     """
+    spec = _engine_spec(engine)
+    extra_errors = spec["extra_error_strings"]
     plain_names = bool(manifest.get("plain_names", False))
     serialization = "plain" if plain_names else "xlfn"
     manifest_note = manifest.get("manifest_note")
@@ -466,12 +766,14 @@ def ingest_exports(export_paths, manifest, engine_label):
     n_sheet_canaries = 0
     volatile_values = {}
     meta_arith = {}
+    app_provenance = {}
 
     cases_by_chunk = {c["chunk"]: c for c in manifest["chunks"]}
 
     for path in export_paths:
         chunk_id = _chunk_id_from_path(path, manifest)
         chunk = cases_by_chunk[chunk_id]
+        app_provenance[chunk_id] = _read_app_provenance(path)
         wb = openpyxl.load_workbook(path, data_only=True)
 
         expected_sheets = set(chunk["sheets"])
@@ -513,7 +815,7 @@ def ingest_exports(export_paths, manifest, engine_label):
             # Google's export writes errors as cached error strings, exactly
             # like LibreOffice's does; the raw string is kept verbatim.
             error = anchor_val if is_error_value(
-                anchor_val, SHEETS_EXTRA_ERROR_STRINGS) else None
+                anchor_val, extra_errors) else None
             matched, mismatch_detail = compare_expected(
                 case["expected"], anchor_val, range_flat)
 
@@ -529,7 +831,7 @@ def ingest_exports(export_paths, manifest, engine_label):
                              "than a boolean cell -- likely an .xlsx export "
                              "serialization artifact, verify before reporting it "
                              "as an engine difference")
-            if error == "#ERROR!":
+            if error == "#ERROR!" and "#ERROR!" in extra_errors:
                 notes.append("NOTE: #ERROR! is Google Sheets' parse-failure error "
                              "(no Excel equivalent); it means Sheets could not "
                              "parse the formula, which is not the same as #NAME?")
@@ -559,6 +861,17 @@ def ingest_exports(export_paths, manifest, engine_label):
                 and n_sheet_canaries > 0
                 and all(v == CANARY_ARITH_EXPECTED for v in meta_arith.values()))
 
+    # Does the package say it was written by the engine we are claiming? A
+    # mismatch never blocks the ingest (the canary decides trust) but it is
+    # recorded and shouted about, because the failure it guards against is
+    # ingesting some other tool's output under this engine's label.
+    expect_app = spec["expect_app"]
+    app_ok = None
+    if expect_app:
+        app_ok = bool(app_provenance) and all(
+            expect_app in (p.get("application") or "").lower()
+            for p in app_provenance.values())
+
     canary = {
         "arithmetic_formula": CANARY_ARITH_FORMULA,
         "arithmetic_expected": CANARY_ARITH_EXPECTED,
@@ -570,24 +883,22 @@ def ingest_exports(export_paths, manifest, engine_label):
         "arithmetic_sheet_failures": sheet_canary_failures[:20],
         "meta_arithmetic_per_chunk": meta_arith,
         "volatile_formula": "=NOW()",
+        # Raw, verbatim, whatever the export gave us. Sheets renders =NOW() as
+        # a datetime; Excel for the web returns a bare float serial. Both are
+        # stringified here without interpretation.
         "volatile_per_chunk": {k: str(v) for k, v in volatile_values.items()},
+        # Decoded ONLY where the raw value is a numeric serial, so a human can
+        # read the timestamp without doing Excel-epoch arithmetic. Presentation
+        # of the same number, not a second measurement.
+        "volatile_decoded_per_chunk": {
+            k: _decode_volatile_serial(v) for k, v in volatile_values.items()
+            if isinstance(v, (int, float)) and not isinstance(v, bool)
+        } or None,
         "now_differs_across_runs": None,
-        "method": (
-            "openpyxl writes formulas with NO cached <v> value, so the uploaded "
-            "chunk workbooks contain zero cached results. Google Drive's "
-            "auto-conversion to a Google Sheet recalculates every formula with "
-            "Google's engine; exporting that Sheet back to .xlsx carries those "
-            "computed values out. The deterministic canary =1111+2222 in "
-            f"{CANARY_ANCHOR} of EVERY sheet reading back exactly "
-            f"{CANARY_ARITH_EXPECTED} therefore proves genuine computation -- "
-            "without recalculation the cell would read back blank (None), since "
-            "nothing was ever cached. The volatile =NOW() canary is recorded per "
-            "chunk as corroboration, but UNLIKE the LibreOffice runner (which "
-            "converts the same file twice and shows =NOW() differing) a single "
-            "Drive import yields one timestamp, so no cross-run volatile "
-            "comparison is possible: now_differs_across_runs is null by design, "
-            "and the deterministic canary is the load-bearing proof here."
-        ),
+        "app_provenance_per_chunk": app_provenance,
+        "app_provenance_expected": expect_app,
+        "app_provenance_ok": app_ok,
+        "method": spec["canary_method"],
         "engine_label": engine_label,
     }
 
@@ -596,14 +907,17 @@ def ingest_exports(export_paths, manifest, engine_label):
              "n_cases": sum(len(function_cases(v)) for v in function_results.values()),
              "plain_names": plain_names,
              "serialization": serialization,
-             "manifest_note": manifest_note}
+             "manifest_note": manifest_note,
+             "engine": spec["engine_id"],
+             "app_provenance_ok": app_ok,
+             "app_provenance": app_provenance}
     return function_results, canary, arith_ok, stats
 
 
 def write_results(out_path, function_results, canary, trusted, engine_label,
                   allow_label_change=False, engine=ENGINE_ID,
                   recalc_method=RECALC_METHOD, serialization=None,
-                  manifest_note=None):
+                  manifest_note=None, readback_artifacts=None):
     """Write (or incrementally merge into) a results file in the same schema
     results/libreoffice-*.json uses. See the module docstring."""
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -620,21 +934,41 @@ def write_results(out_path, function_results, canary, trusted, engine_label,
         "canary": canary,
         "function_results": function_results,
     }
+    if readback_artifacts:
+        # What this engine's export does to values on the way out, measured
+        # rather than assumed. Sits next to the results it qualifies so it
+        # cannot drift away from them.
+        output["readback_artifacts"] = readback_artifacts
 
     if os.path.exists(out_path):
         with open(out_path) as f:
             prev = json.load(f)
         prev_label = prev.get("engine_version")
+        prev_engine = prev.get("engine")
+        # An engine-IDENTITY change is never mergeable, with or without
+        # --allow-label-change: that flag exists to blend two DATES of the
+        # same rolling product, not to pour one engine's results into
+        # another's file. Silently allowing it is exactly how Excel-for-the-web
+        # values would end up in a file the site reads as desktop Excel.
+        if prev_engine and prev_engine != engine:
+            sys.exit(
+                f"Refusing to merge: {out_path} records engine {prev_engine!r} "
+                f"but this ingest is engine {engine!r}. Different engines get "
+                f"different results files -- --allow-label-change does NOT "
+                f"cover this and never will."
+            )
         if prev_label != engine_label and not allow_label_change:
             sys.exit(
                 f"Refusing to merge: {out_path} records engine_version "
                 f"{prev_label!r} but this ingest is labelled {engine_label!r}. "
-                f"Google Sheets is a continuously-updated hosted product, so "
-                f"results executed on different dates should not be blended "
-                f"without a deliberate decision. Re-run with the same "
-                f"--engine-label, or pass --allow-label-change to record both."
+                f"These are continuously-updated hosted products, so results "
+                f"executed on different dates should not be blended without a "
+                f"deliberate decision. Re-run with the same --engine-label, or "
+                f"pass --allow-label-change to record both."
             )
         merged = dict(prev)
+        if readback_artifacts:
+            merged["readback_artifacts"] = readback_artifacts
         merged_fr = dict(prev.get("function_results") or {})
         for fn, cases in function_results.items():
             merged_fr[fn] = cases  # whole function re-executed, so replace wholesale
@@ -702,20 +1036,37 @@ def _load_manifest(args):
 
 
 def cmd_ingest(args):
+    engine = getattr(args, "engine", None) or ENGINE_ID
+    spec = _engine_spec(engine)
+    # argparse defaults are fixed before --engine is known, so the
+    # engine-dependent ones resolve here instead.
+    if getattr(args, "engine_label", None) is None:
+        args.engine_label = spec["label_template"].format(
+            date=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    if getattr(args, "out", None) is None:
+        args.out = spec["default_out"]
+    if getattr(args, "chunkdir", None) is None:
+        args.chunkdir = spec["default_chunkdir"]
+
     manifest = _load_manifest(args)
     for p in args.export:
         if not os.path.exists(p):
             sys.exit(f"Export not found: {p}")
 
     function_results, canary, trusted, stats = ingest_exports(
-        args.export, manifest, args.engine_label)
+        args.export, manifest, args.engine_label, engine=engine)
 
     write_results(args.out, function_results, canary, trusted,
                   args.engine_label, args.allow_label_change,
+                  engine=spec["engine_id"],
+                  recalc_method=spec["recalc_method"],
                   serialization=stats["serialization"],
-                  manifest_note=stats["manifest_note"])
+                  manifest_note=stats["manifest_note"],
+                  readback_artifacts=spec["readback_artifacts"])
 
     n_ok, n_name, n_other = summarize(function_results)
+    print(f"Engine: {spec['display']}  [{spec['engine_id']}]")
+    print(f"Label:  {args.engine_label}")
     print(f"Ingested {len(stats['chunks'])} chunk(s): "
           f"{stats['n_functions']} function(s), {stats['n_cases']} case(s). "
           f"[serialization={stats['serialization']}]")
@@ -726,6 +1077,19 @@ def cmd_ingest(args):
     if canary["arithmetic_sheet_failures"]:
         print(f"  CANARY FAILURES: {canary['arithmetic_sheet_failures']}")
     print(f"Volatile =NOW() per chunk: {canary['volatile_per_chunk']}")
+    if canary.get("volatile_decoded_per_chunk"):
+        print(f"  decoded (engine-local time): "
+              f"{canary['volatile_decoded_per_chunk']}")
+    if spec["expect_app"]:
+        apps = {k: v.get("application") for k, v in
+                (canary.get("app_provenance_per_chunk") or {}).items()}
+        print(f"Package provenance (docProps/app.xml): {apps}")
+        if stats["app_provenance_ok"] is False:
+            print(f"  *** WARNING: expected an application naming "
+                  f"{spec['expect_app']!r}. These bytes were not written by "
+                  f"{spec['display']}. The values are being recorded, but do "
+                  f"NOT publish them as {spec['display']} results without "
+                  f"explaining this. ***")
     print(f"Trusted recalculation: {trusted}")
     print(f"Cases with a value (no error): {n_ok}")
     print(f"Cases returning #NAME? (unsupported function): {n_name}")
@@ -2952,6 +3316,340 @@ def cmd_selftest_recipes_multisheet(args):
 
 
 # --------------------------------------------------------------------------
+# selftest-excel-web: prove the excel_web ingest identity + merge discipline
+# --------------------------------------------------------------------------
+
+def _simulate_chunk_export(src_path, chunk, dest_path,
+                           value_for=None,
+                           canary_value=CANARY_ARITH_EXPECTED,
+                           meta_arith_value=CANARY_ARITH_EXPECTED,
+                           meta_volatile=None):
+    """Write the workbook an engine WOULD hand back for a `build` chunk.
+
+    Every case's formula cell becomes its expected value, the per-sheet canary
+    becomes its computed constant, and `_meta` gets a volatile timestamp. This
+    executes NOTHING -- no LibreOffice, no OneDrive, no Drive -- so it makes no
+    claim about any engine's behaviour; it exists to exercise the cell map, the
+    canary logic and the merge, which are this harness's code and not an
+    engine's.
+
+    `value_for(case) -> value` overrides the value written for a given case
+    (used to inject an engine-specific token); default is case["expected"].
+    """
+    wb = openpyxl.load_workbook(src_path)
+    for case in chunk["cases"]:
+        ws = wb[case["sheet"]]
+        value = case["expected"] if value_for is None else value_for(case)
+        if case["check_range"]:
+            grid = cell_addrs_in_range(case["check_range"])
+            flat = [addr for row in grid for addr in row]
+            vals = list(value) if isinstance(value, (list, tuple)) else [value]
+            for addr in flat:
+                ws[addr] = None
+            for addr, v in zip(flat, vals):
+                ws[addr] = v
+        else:
+            ws[case["anchor"]] = value
+        ws[CANARY_ANCHOR] = canary_value
+    meta = wb[META_SHEET]
+    # Excel for the web returns =NOW() as a bare float serial, so the
+    # simulation writes a serial too -- otherwise the decode path this engine
+    # actually uses would never be exercised.
+    if meta_volatile is None:
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        meta_volatile = (now - datetime(1899, 12, 30)).total_seconds() / 86400.0
+    meta[META_VOLATILE_CELL] = meta_volatile
+    meta[META_ARITH_CELL] = meta_arith_value
+    wb.save(dest_path)
+    return dest_path
+
+
+def cmd_selftest_excel_web(args):
+    """Fixture-based proof of the excel_web ingest path. Executes no engine.
+
+    What this DOES prove: the engine registry writes an Excel-for-the-web
+    identity (never Google's) into its own results file, the Sheets-only
+    #ERROR! token is not applied to this engine, a synthesized export is
+    correctly flagged as NOT written by Excel, the canary marks a bad run
+    untrusted, and -- the main event -- the keyed incremental merge preserves
+    every untouched function byte-identically, refuses a date-label change
+    without --allow-label-change, and refuses an engine-IDENTITY change
+    outright.
+
+    What this does NOT prove, and must never be read as proving: anything
+    whatsoever about how Excel for the web computes. The values here are the
+    corpus's own documented expecteds written back into the builder's
+    workbook. Real Excel-web behaviour lives in results/excel-web.json, and
+    only a real OneDrive round-trip can put it there.
+    """
+    failures = []
+
+    def _check(label, cond, detail=""):
+        print(f"  {'PASS' if cond else 'FAIL'}  {label}"
+              + (f"   {detail}" if detail else ""))
+        if not cond:
+            failures.append(f"{label}{(' -- ' + detail) if detail else ''}")
+
+    # Build the fixture from data/tests/ rather than depending on a committed
+    # workbook, exactly like every other chunk dir in this harness: the .xlsx
+    # is reproducible at any time and only ingested RESULTS are committed.
+    chunkdir = os.path.abspath(args.chunkdir)
+    print(f"=== selftest-excel-web: build fixture ({len(args.only)} function(s)) ===")
+    manifest = cmd_build(argparse.Namespace(
+        chunk_size=args.chunk_size, only=list(args.only), outdir=chunkdir,
+        plain_names=False, manifest_note=args.manifest_note))
+    chunk = manifest["chunks"][0]
+    src = os.path.join(chunkdir, chunk.get("file") or f"{chunk['chunk']}.xlsx")
+    if not os.path.exists(src):
+        sys.exit(f"Chunk workbook not found: {src}")
+
+    out = os.path.abspath(args.out)
+    if os.path.commonpath([out, os.path.abspath(RESULTS_DIR)]) == \
+            os.path.abspath(RESULTS_DIR):
+        sys.exit(f"selftest-excel-web refuses to write inside results/ ({out}). "
+                 f"These are synthesized values, not engine output.")
+
+    label = args.engine_label
+    spec = _engine_spec(EXCEL_WEB_ENGINE_ID)
+    print(f"=== selftest-excel-web: synthesized export from {chunk['chunk']} "
+          f"({chunk['n_functions']} fn / {chunk['n_cases']} cases) ===")
+    print("    executes NO engine -- values are the corpus's own expecteds")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        export = _simulate_chunk_export(
+            src, chunk, os.path.join(tmp, f"{chunk['chunk']}-export.xlsx"))
+
+        # ---- 1. identity: this must never come back as Google Sheets ------
+        print("\n=== selftest-excel-web: engine identity ===")
+        fr, canary, trusted, stats = ingest_exports(
+            [export], manifest, label, engine=EXCEL_WEB_ENGINE_ID)
+        _check("every function ingested",
+               len(fr) == chunk["n_functions"],
+               f"{len(fr)} / {chunk['n_functions']}")
+        _check("every case ingested",
+               stats["n_cases"] == chunk["n_cases"],
+               f"{stats['n_cases']} / {chunk['n_cases']}")
+        _check("stats report the excel_web engine",
+               stats["engine"] == EXCEL_WEB_ENGINE_ID, stats["engine"])
+        _check("canary OK on every sheet", canary["arithmetic_ok"],
+               f"{canary['arithmetic_sheets_checked']} sheet(s)")
+        _check("run marked trusted", trusted is True)
+        _check("canary prose describes Excel for the web, not Drive",
+               "Excel for the web" in canary["method"]
+               and "Google Drive" not in canary["method"])
+        # The mapping proof: each case must carry back the formula the
+        # manifest says lives at that cell.
+        wrong = [c["test_id"] for c in chunk["cases"]
+                 if fr.get(c["function"], {}).get(c["test_id"], {})
+                 .get("formula_display") != c["formula_display"]]
+        _check("every case landed under its own id with its own formula",
+               not wrong, str(wrong[:5]))
+        _check("volatile =NOW() decoded from a float serial",
+               bool(canary.get("volatile_decoded_per_chunk")),
+               str(canary.get("volatile_decoded_per_chunk")))
+
+        # ---- 2. a synthesized export is NOT passed off as Excel's ---------
+        print("\n=== selftest-excel-web: package provenance ===")
+        _check("openpyxl-written export is flagged as not-Excel-written",
+               stats["app_provenance_ok"] is False,
+               str(stats["app_provenance"]))
+        _check("the writing application is recorded verbatim anyway",
+               "chunk-01" in (canary.get("app_provenance_per_chunk") or {}))
+
+        # ---- 3. the Sheets-only #ERROR! token is not applied here ---------
+        print("\n=== selftest-excel-web: error vocabulary ===")
+        target = chunk["cases"][0]
+        err_export = _simulate_chunk_export(
+            src, chunk, os.path.join(tmp, "chunk-01-export-err.xlsx"),
+            value_for=lambda c: ("#ERROR!" if c["test_id"] == target["test_id"]
+                                 else c["expected"]))
+        xw_fr, _c, _t, _s = ingest_exports(
+            [err_export], manifest, label, engine=EXCEL_WEB_ENGINE_ID)
+        gs_fr, _c, _t, _s = ingest_exports(
+            [err_export], manifest, label, engine=ENGINE_ID)
+        xw_case = xw_fr[target["function"]][target["test_id"]]
+        gs_case = gs_fr[target["function"]][target["test_id"]]
+        _check("#ERROR! is NOT an error token for excel_web",
+               xw_case["error"] is None, repr(xw_case["error"]))
+        _check("#ERROR! IS still an error token for google_sheets",
+               gs_case["error"] == "#ERROR!", repr(gs_case["error"]))
+        _check("the Google-specific #ERROR! note is not attached to excel_web",
+               "parse-failure" not in (xw_case["notes"] or ""))
+
+        # ---- 4. the merge preserves every function it did not touch -------
+        print("\n=== selftest-excel-web: merge preservation ===")
+        # A subset ingest: only these functions are re-executed; every other
+        # function in the target file must survive byte-identical, including
+        # the executed_at date of the run that produced it.
+        subset_fns = sorted({c["function"] for c in chunk["cases"]})[:2]
+        sub_manifest = json.loads(json.dumps(manifest))
+        sub_chunk = sub_manifest["chunks"][0]
+        sub_chunk["cases"] = [c for c in sub_chunk["cases"]
+                              if c["function"] in subset_fns]
+        sub_fr, sub_canary, sub_trusted, sub_stats = ingest_exports(
+            [export], sub_manifest, label, engine=EXCEL_WEB_ENGINE_ID)
+        _check(f"subset ingest carries only {subset_fns}",
+               sorted(sub_fr) == subset_fns, str(sorted(sub_fr)))
+
+        merge_target = os.path.join(tmp, "merge-into.json")
+        # Seed the target with the FULL run, stamped with an older date, so
+        # "preserved unchanged" is a claim with teeth.
+        write_results(merge_target, json.loads(json.dumps(fr)), canary, True,
+                      label, engine=EXCEL_WEB_ENGINE_ID,
+                      recalc_method=spec["recalc_method"],
+                      readback_artifacts=spec["readback_artifacts"])
+        with open(merge_target) as f:
+            before = json.load(f)
+        prev_json = {k: json.dumps(v, sort_keys=True, default=str)
+                     for k, v in before["function_results"].items()}
+
+        # (a) a DATE-label change is refused without --allow-label-change
+        try:
+            write_results(merge_target, sub_fr, sub_canary, sub_trusted,
+                          "Excel for the web (recalc, 1999-01-01)",
+                          allow_label_change=False,
+                          engine=EXCEL_WEB_ENGINE_ID,
+                          recalc_method=spec["recalc_method"])
+            guarded = False
+        except SystemExit:
+            guarded = True
+        _check("date-label change refused without --allow-label-change", guarded)
+        with open(merge_target) as f:
+            after_guard = json.load(f)
+        _check("refused merge left the target file untouched",
+               json.dumps(after_guard, sort_keys=True, default=str)
+               == json.dumps(before, sort_keys=True, default=str))
+
+        # (b) an engine-IDENTITY change is refused EVEN WITH the flag. This is
+        #     the guard that keeps Excel-web values out of Google's file (and
+        #     vice versa) -- a label flag must never be able to authorise it.
+        try:
+            write_results(merge_target, sub_fr, sub_canary, sub_trusted,
+                          "Google Sheets (Drive import, 2026-09-01)",
+                          allow_label_change=True,
+                          engine=ENGINE_ID, recalc_method=RECALC_METHOD)
+            id_guarded = False
+        except SystemExit:
+            id_guarded = True
+        _check("engine-IDENTITY change refused even with --allow-label-change",
+               id_guarded)
+        with open(merge_target) as f:
+            after_id = json.load(f)
+        _check("refused identity merge left the target file untouched",
+               json.dumps(after_id, sort_keys=True, default=str)
+               == json.dumps(before, sort_keys=True, default=str))
+
+        # (c) the real subset merge, under the file's own label
+        write_results(merge_target, sub_fr, sub_canary, sub_trusted, label,
+                      allow_label_change=False, engine=EXCEL_WEB_ENGINE_ID,
+                      recalc_method=spec["recalc_method"],
+                      serialization=sub_stats["serialization"],
+                      manifest_note=sub_stats["manifest_note"],
+                      readback_artifacts=spec["readback_artifacts"])
+        with open(merge_target) as f:
+            after = json.load(f)
+        after_fr = after["function_results"]
+        untouched = {k: b for k, b in prev_json.items() if k not in sub_fr}
+        changed = [k for k, b in untouched.items()
+                   if json.dumps(after_fr.get(k), sort_keys=True,
+                                 default=str) != b]
+        _check(f"all {len(untouched)} untouched function(s) preserved "
+               f"byte-identical", not changed, str(changed[:5]))
+        _check("merged file holds every prior function plus the ingested ones",
+               set(after_fr) == set(prev_json) | set(sub_fr))
+        _check("re-ingested functions were actually replaced",
+               all(json.dumps(after_fr[k], sort_keys=True, default=str)
+                   == json.dumps(sub_fr[k], sort_keys=True, default=str)
+                   for k in sub_fr))
+        _check("every untouched function kept its own executed_at",
+               all(after_fr[k].get("executed_at")
+                   == before["function_results"][k].get("executed_at")
+                   for k in untouched))
+        _check("the merged file still records the excel_web engine",
+               after["engine"] == EXCEL_WEB_ENGINE_ID, after["engine"])
+        _check("the merged file still records the Excel-web recalc method",
+               after["recalc_method"] == spec["recalc_method"])
+        _check("readback_artifacts survive the merge",
+               "readback_artifacts" in after)
+        _check("the subset run is recorded for audit",
+               after["subset_runs"][-1]["functions"] == subset_fns,
+               str(after.get("subset_runs", [])[-1:]))
+
+        # (d) trust can only ever go down
+        bad_export = _simulate_chunk_export(
+            src, chunk, os.path.join(tmp, "chunk-01-export-bad.xlsx"),
+            canary_value=None)
+        bad_fr, bad_canary, bad_trusted, _bs = ingest_exports(
+            [bad_export], manifest, label, engine=EXCEL_WEB_ENGINE_ID)
+        print("\n=== selftest-excel-web: canary failure detection ===")
+        _check("blank canary marks the run untrusted", bad_trusted is False)
+        _check("the failing sheets are named",
+               len(bad_canary["arithmetic_sheet_failures"]) > 0)
+        note = (bad_fr[target["function"]][target["test_id"]]["notes"] or "")
+        _check("the affected case carries UNTRUSTED_RECALC",
+               "UNTRUSTED_RECALC" in note, note[:80])
+        write_results(merge_target, bad_fr, bad_canary, bad_trusted, label,
+                      allow_label_change=False, engine=EXCEL_WEB_ENGINE_ID,
+                      recalc_method=spec["recalc_method"])
+        with open(merge_target) as f:
+            after_bad = json.load(f)
+        _check("an untrusted merge downgrades the file's trust",
+               after_bad["trusted"] is False)
+
+        # ---- 5. the site must not file this under desktop Excel -----------
+        print("\n=== selftest-excel-web: site engine classification ===")
+        try:
+            site_src = os.path.join(REPO_ROOT, "site", "build_site.py")
+            ns = {}
+            with open(site_src) as f:
+                text = f.read()
+            start = text.index("def engine_key_from_engine_name")
+            exec(text[start:text.index("def iso_date")], ns)  # noqa: S102
+            keyfn = ns["engine_key_from_engine_name"]
+            _check("engine id 'excel_web' is NOT classified as desktop 'excel'",
+                   keyfn(EXCEL_WEB_ENGINE_ID) != "excel",
+                   f"got {keyfn(EXCEL_WEB_ENGINE_ID)!r}")
+            _check("the dated Excel-web label is NOT classified as 'excel'",
+                   keyfn(spec["label_template"].format(date="2026-09-01"))
+                   != "excel")
+            _check("desktop Excel still classifies as 'excel'",
+                   keyfn("excel") == "excel")
+            _check("Google Sheets still classifies as 'google_sheets'",
+                   keyfn("google_sheets") == "google_sheets")
+        except (OSError, ValueError, KeyError) as exc:
+            _check("site engine classification checked", False, repr(exc))
+
+        # Write the scratch results file so the run leaves an inspectable
+        # artifact, exactly like the other selftests.
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        if os.path.exists(out):
+            os.remove(out)
+        write_results(out, fr, canary, trusted, label,
+                      engine=EXCEL_WEB_SELFTEST_ENGINE_ID,
+                      recalc_method=EXCEL_WEB_SELFTEST_RECALC_METHOD,
+                      readback_artifacts=spec["readback_artifacts"])
+
+    print(f"\nWrote scratch results -> {out} "
+          f"(synthesized values; plumbing proof only)")
+    if failures:
+        print(f"\nselftest-excel-web: {len(failures)} FAILURE(S)")
+        for f_ in failures:
+            print(f"  - {f_}")
+        sys.exit(1)
+    print("\nselftest-excel-web: all checks passed. Proven: the excel_web "
+          "ingest writes an Excel-for-the-web identity into its own results "
+          "file and never Google's, the Sheets-only #ERROR! token is not "
+          "applied to it, a synthesized export is flagged as not written by "
+          "Excel, a blank canary marks the run untrusted and downgrades the "
+          "merged file, the keyed merge preserves every untouched function "
+          "byte-identical with its own executed_at, a date-label change is "
+          "refused without --allow-label-change, an engine-identity change is "
+          "refused even with it, and the site generator does not file this "
+          "engine under desktop Excel. NOTHING here claims anything about how "
+          "Excel for the web computes.")
+
+
+# --------------------------------------------------------------------------
 
 def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -2991,17 +3689,34 @@ def main():
     i = sub.add_parser("ingest", help="read exported .xlsx back into results JSON")
     i.add_argument("--export", nargs="+", required=True, metavar="XLSX",
                    help="exported workbook(s), named <chunk-id>-export.xlsx")
-    i.add_argument("--chunkdir", default=DEFAULT_CHUNK_DIR,
-                   help="directory holding manifest.json (default %(default)s)")
+    i.add_argument("--engine", default=ENGINE_ID, choices=sorted(INGEST_ENGINES),
+                   help="which engine executed these exports. The chunk "
+                        "workbooks are engine-neutral (formula-only, zero "
+                        "cached values), so the engine is declared at INGEST "
+                        "time and it selects the results identity, the error "
+                        "vocabulary, the canary prose and the default "
+                        "--out/--chunkdir/--engine-label (default %(default)s)")
+    i.add_argument("--chunkdir", default=None,
+                   help="directory holding manifest.json (default: the "
+                        "selected engine's chunk dir)")
     i.add_argument("--manifest", help="explicit path to manifest.json")
-    i.add_argument("--out", default=DEFAULT_RESULTS_PATH,
-                   help=f"results file (default {DEFAULT_RESULTS_PATH})")
-    i.add_argument("--engine-label", default=default_label,
-                   help="honest engine_version label; Sheets has no version, so "
-                        "this records the import DATE (default %(default)r)")
+    i.add_argument("--out", default=None,
+                   help=f"results file (default: the selected engine's, e.g. "
+                        f"{DEFAULT_RESULTS_PATH} or {EXCEL_WEB_RESULTS_PATH})")
+    i.add_argument("--engine-label", default=None,
+                   help="honest engine_version label. Neither hosted engine "
+                        "exposes a version, so this records the execution "
+                        "DATE (default: the selected engine's dated template, "
+                        "e.g. %r or %r)"
+                        % (INGEST_ENGINES[ENGINE_ID]["label_template"]
+                           .format(date=today),
+                           INGEST_ENGINES[EXCEL_WEB_ENGINE_ID]["label_template"]
+                           .format(date=today)))
     i.add_argument("--allow-label-change", action="store_true",
                    help="permit merging into a file recorded under a different "
-                        "engine label (records both in engine_version_history)")
+                        "engine label (records both in engine_version_history). "
+                        "Covers a DATE change on one engine only -- an engine "
+                        "IDENTITY change is refused regardless")
     i.set_defaults(func=cmd_ingest)
 
     s = sub.add_parser("selftest",
@@ -3162,6 +3877,42 @@ def main():
     sm.add_argument("--manifest-note", default=None, metavar="TEXT",
                     help=argparse.SUPPRESS)
     sm.set_defaults(func=cmd_selftest_recipes_multisheet, engine=GOOGLE_SHEETS)
+
+    sxw = sub.add_parser(
+        "selftest-excel-web",
+        help="dry run of the excel_web ingest identity + merge discipline "
+             "(fixture-based; executes no engine)",
+        description="Synthesizes an export by writing the corpus's own "
+                    "expected values into the builder's chunk workbook, then "
+                    "pushes it through the real ingest path under --engine "
+                    "excel_web. Proves the Excel-for-the-web results identity "
+                    "(never Google's), that the Sheets-only #ERROR! token is "
+                    "not applied to this engine, that an openpyxl-written "
+                    "package is flagged as not written by Excel, canary "
+                    "failure detection, and the keyed incremental merge: "
+                    "untouched functions byte-identical with their own "
+                    "executed_at, a date-label change refused without "
+                    "--allow-label-change, and an engine-IDENTITY change "
+                    "refused even with it. Executes NO engine -- no "
+                    "LibreOffice, no OneDrive, no Drive -- and therefore "
+                    "claims nothing about how Excel for the web computes.")
+    sxw.add_argument("--chunkdir", default=EXCEL_WEB_SELFTEST_CHUNK_DIR,
+                     help="scratch dir the fixture chunk is built into "
+                          "(default %(default)s)")
+    sxw.add_argument("--only", nargs="+", metavar="FN",
+                     default=list(EXCEL_WEB_SELFTEST_FUNCTIONS),
+                     help="functions to build the fixture from (default: the "
+                          "same six the Excel-web probe covered)")
+    sxw.add_argument("--chunk-size", type=int, default=40)
+    sxw.add_argument("--manifest-note", default=None, metavar="TEXT",
+                     help=argparse.SUPPRESS)
+    sxw.add_argument("--out", default=EXCEL_WEB_SELFTEST_RESULTS_PATH,
+                     help="scratch results path (never inside results/ -- these "
+                          "are synthesized values, not engine output)")
+    sxw.add_argument("--engine-label",
+                     default="SELFTEST (synthesized values via simulated export "
+                             "- NOT Excel for the web)")
+    sxw.set_defaults(func=cmd_selftest_excel_web)
 
     sr = sub.add_parser("selftest-recipes",
                         help="dry run of the recipe pipeline: build + "

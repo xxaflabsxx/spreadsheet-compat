@@ -1,0 +1,229 @@
+# Adding Excel for the web as a third EXECUTED engine — integration plan
+
+Status: **plan only.** `results/excel-web.json` exists (6 functions / 34 cases,
+canary-proven, trusted) and `build_site.py` deliberately **does not publish
+it**. Nothing in `docs/` changes until this plan is executed.
+
+## 0. The one risk that governs everything else
+
+**Excel for the web is not desktop Excel.** It is a separate implementation of
+the calculation engine. This corpus's `x` flag and every `expected` value in
+`data/tests/` come from Microsoft's *documentation*, which describes the
+desktop product. So:
+
+- An executed Excel-web result is **its own evidence**. It is never evidence
+  about desktop Excel, and must never be rendered as though it were.
+- The doc column stays authoritative for **desktop** Excel. Web execution sits
+  beside it, never on top of it.
+- **A web-vs-documented mismatch is ambiguous** and we cannot resolve it. When
+  `PERCENTRANK.INC(D20:D25,2)` on an empty range returned `#N/A` where
+  Microsoft documents `#NUM!`, that is *either* web-diverges-from-desktop *or*
+  a documentation defect affecting both. We have no desktop run to tell them
+  apart. Copy must say so; a "quirk" badge alone would imply the first reading.
+  (Sheets returned `#N/A` too, which is suggestive of a doc defect — but
+  suggestive is not measured.)
+
+The single highest-risk mechanical failure is already fixed and guarded:
+`engine_key_from_engine_name()` matched `"excel"` as a substring, so
+`results/excel-web.json` would have silently landed in the **desktop Excel
+column**, flipped "Engines executed 2/3" to "3/3", and re-dated the quirks
+page. Web is now recognised first and returns its own key;
+`PUBLISHED_ENGINE_KEYS` then declines to publish it. `selftest-excel-web`
+asserts both.
+
+## 1. Coverage gate (do this before any rendering work)
+
+**6 of 600 functions.** A third engine column that is 99% empty is worse than
+no column: every function page would grow an "Excel for the web: not yet
+live-tested" row that is noise on 594 pages. Options, in preference order:
+
+1. **Run the corpus first.** ~15 chunks at 40 fn each through the OneDrive
+   round trip, then publish. Rendering work waits. *Preferred.*
+2. Publish only on the 6 pages that have data, with the row absent elsewhere.
+   Cheaper, but an inconsistent matrix invites "why is this missing?".
+
+Everything below assumes a corpus-scale run exists.
+
+## 2. `compat.json` keys
+
+Existing 9: `cat, x, g, l, gv, gver, lv, lver, lnew`. Convention is
+`<initial>` = documented, `<initial>v` = executed verdict, `<initial>ver` =
+version/dated label.
+
+**Add `xwv` + `xwver`** (prefix `xw` = Excel web).
+
+- **Do NOT use `xv`/`xver`.** That attaches a *web* verdict to the `x`
+  namespace, which means desktop-documented. Any consumer reading `x` and
+  `xv` as one engine — and they will — reproduces exactly the conflation this
+  plan exists to prevent.
+- `ev`/`ever` was considered and rejected: `ever` reads as the English adverb
+  in JS call sites, and `e` collides with nothing but suggests "Excel"
+  generally, which is the ambiguity we are trying to kill.
+- No `xw` (documented) key. Microsoft publishes **one** function reference; we
+  have no separate web-documented flag and must not invent one. The web row's
+  Documented cell reuses `x` **only if** we decide that is honest — see §3.
+
+Consumers to update: `docs/data.html` schema table (`build_site.py:2549`),
+CSV header (`:3996`, add `excel_web_verdict` + `excel_web_executed`),
+`DATASET_CARD.md` columns table, `audit-verdicts.js:9-24` dataset contract.
+
+## 3. The Excel matrix row — split it
+
+`ENGINE_ORDER = ["excel", "excel_web", "google_sheets", "libreoffice"]`, with
+`ENGINE_LABELS["excel"] = "Excel (desktop)"` and
+`ENGINE_LABELS["excel_web"] = "Excel for the web"`.
+
+| Engine | Documented | Live-tested | Verdict |
+|---|---|---|---|
+| Excel (desktop) | Yes (link) | **No — documented only** | n/a |
+| Excel for the web | *see §3 note* | Yes (recalc, 2026-09-01) | supported |
+
+**Good news:** `FUNCTION_TMPL:1918` already branches `{% if e.tested %}` first,
+so the web row renders like any executed engine with no logic change. The
+`ek == 'excel'` "documented only" copy stays correct for the desktop row and
+self-retires nowhere — desktop is never executed.
+
+**§3 note — open decision, do not guess.** Does the web row's Documented cell
+show `x`? Microsoft's function pages carry per-application availability, and
+some functions are desktop-only. Reusing `x` asserts "documented for the web"
+on evidence we have not collected. Recommendation: render the web row's
+Documented cell as **`—` with the doc link on the desktop row only**, until
+someone extracts per-platform availability into `functions.json`. Cheaper and
+strictly honest.
+
+`engine_tested_cell()` (`:549`) needs an `excel_web` branch: like Sheets it has
+no version, so it must render `Yes (recalc, <date>)` and never
+`Yes (Excel for the web (recalc, 2026-09-01), 2026-09-01)`. Keeping the label
+non-numeric also keeps it clear of `check_honesty`'s `LO_CELL` regex, which
+matches a numeric version.
+
+An Excel-web analogue of `sheets_case_inconclusive()` (`:619`) is needed: the
+OneDrive→recalc→download trip has its own round-trip artifacts. The probe
+found **none** (see §4), so this can start empty — but it must exist as a hook,
+because "no artifacts observed in 34 cases" is not "no artifacts".
+
+## 4. Readback artifacts — measured, and they are *better* than Sheets'
+
+Recorded verbatim in `results/excel-web.json` under `readback_artifacts`:
+
+- **Floats: LOSSLESS. No normalization applied.** Excel-web writes full
+  IEEE-754 round-trip decimal (17 sig digits, scientific notation for small
+  magnitudes: `0.12609999999999999`, `-4.8000000000000001E-2`). Every such
+  string parses to the *identical* double as its short form, so `float()`
+  recovers the exact value and `repr` renders `0.1261` / `-0.048`. **Sheets'
+  export is the lossy one** — it rounds to 10 significant digits (`PI()` comes
+  back `3.141592654`). Excel-web values are therefore directly comparable to
+  Sheets values with no fix-up.
+- **Errors:** standard OOXML typed `t="e"` cells, verbatim. No Google-style
+  `#ERROR!` token exists here, and the Sheets-only token is deliberately not
+  widened to this engine.
+- **Provenance:** the package self-identifies —
+  `docProps/app.xml` → `Microsoft Excel Online`, AppVersion `16.0300`. Now
+  recorded per chunk and checked against the claimed engine. This is in-band
+  evidence Sheets never offered.
+- **`=NOW()`:** returned as a bare float serial under `General` (not a
+  datetime like Sheets), **in the viewer's local time zone**. The probe's
+  serial decodes to `2026-09-01 10:15:35`; the package's own `dcterms:created`
+  / `modified` are `17:13:37Z` / `17:16:41Z`, i.e. UTC-7. Anything comparing
+  this to a UTC clock will look ~7h stale.
+- **Unmeasured, and labelled so:** date-formatting of numerics (the probe had
+  no date/time function; all 34 cells came back `General`), empty-string
+  results, and boolean *results*.
+
+## 5. `check_honesty.py` extensions
+
+Its stated ground truth (`:3-10`) — "Microsoft Excel — NOT EXECUTED" — becomes
+half-wrong and must be rewritten to distinguish desktop from web.
+
+1. **Rule 1 must narrow.** It matches `executed|tested|verified in Excel` as
+   *always* false. That stays right for desktop and becomes wrong for the web.
+   Add "Excel for the web" / "Excel Online" to the negative lookahead so the
+   web phrasing is not caught, and keep bare-"Excel" execution claims fatal.
+   Also **add the inverse guard**: a page may not say "Excel for the web" and
+   "we do not run Excel" without qualification — that is now self-contradictory.
+2. **Rule 1b gains an `xw` slot** (this is what the task asks for). In
+   `executed_engines()` (`:283-305`), add `elif "excel_web" in engine: slot =
+   "xw"` **before** any `excel` match, and add
+   `("xw", "Excel for the web", XW_CELL, XW_EXEC_PROSE)` to the loop at
+   `:392`. Effect: an Excel-web execution claim on a function page is only
+   legal if `results/excel-web.json` actually has an entry for that function —
+   backed by the file, not by wording. `XW_CELL = r"Yes \(recalc, (\d{4}-\d{2}-\d{2})\)"`.
+3. **Rule 5 (`expected_dates()`, `:217-240`) must gain the slot too.** Today
+   its filter admits only lo/sheets blobs, so `excel-web.json` is silently
+   dropped — safe now, wrong once published, because the page's "Last tested"
+   line must become the newest date across *three* engines.
+4. **New rule 7 — desktop/web conflation.** Fail any page that renders an
+   Excel-web *value* under a heading naming Excel without "for the web". This
+   is the guard that makes §0 enforceable rather than aspirational.
+
+`STALE_ALLOW:149` currently whitelists `we do not run excel` — that whitelist
+must become conditional, or it blinds the stale-copy detector to the very copy
+§6 is replacing.
+
+## 6. Guide-copy blast radius, with replacement wording
+
+Measured inventory:
+
+| Surface | Affected | Note |
+|---|---|---|
+| `site/seo-pages/*.json` | **32 of 32** | 14 files say `we do not run Excel` (24×); 13 say `we did not run Excel`; 29 files carry `<th>Excel (documented)</th>` (50×) |
+| `site/build_site.py` | ~24 rendered strings | + ~16 comments |
+| `data/comparisons/*.json` | **25 of 48** | `compat_note` boilerplate, 2 variants |
+| `data/recipes/*.json` | 1 of 282 | `sum-with-multiple-criteria.json` |
+| `README.md` / `DATASET_CARD.md` | ~8 / ~6 sites | incl. README's Phase-2 Excel plan (`:1133-1146`), which this supersedes |
+| `site/audit-page/` | 5 files | copy + verdict branch + tests |
+| `docs/` | 856 HTML | **fully generated — no manual edits** |
+
+**Replacement wording.** The current sentence is not merely stale, it is about
+to become false:
+
+> The Excel column throughout is Microsoft's documented behaviour as recorded
+> in our test corpus. We do not run Excel, and no value in that column is a
+> measurement.
+
+becomes:
+
+> The Excel column is Microsoft's documented behaviour for **desktop** Excel,
+> as recorded in our test corpus — we do not run desktop Excel, and no value
+> in that column is a measurement. **Excel for the web is executed
+> separately** (recalculated in Excel Online on `<date>`) and reported in its
+> own column; a web result is evidence about the web engine only.
+
+Note two guides need individual attention rather than the boilerplate swap:
+
+- `xlfn-storage-tokens-…json` — its claim is about *what token Excel writes to
+  a file*. A web run does not establish that, so its "we do not run Excel"
+  caveat **survives intact**.
+- `lenb-byte-count-cjk-dbcs-…json` — says we cannot know what a real Excel
+  returns for `=LENB("日本")` under any locale. We now know what *the web*
+  returns (2). Rewrite, do not delete: the locale caveat still stands.
+
+## 7. Audit page
+
+`audit-verdicts.js`: add `xwv` to the dataset contract, add an `excel_web`
+target branch returning `basis: 'executed'` when `xwv` is set (mirroring the
+Sheets branch at `:271`), and update `sourcePresence()` (`:126`). The
+**HONESTY CONTRACT block (`:26-45`) is the important edit** — its first bullet
+("Excel verdicts are documentation-based; we never execute Excel") must split
+into a desktop clause and a web clause.
+
+`DIRECTIONS` (`:117`) grows from 5: a migration *to* Excel for the web is a
+genuinely different question from one to desktop Excel, and users asking
+"will my sheet work in Excel Online?" are the natural audience for this
+engine. Recommend adding `g2xw` and `l2xw`. `README-INTEGRATION.md:128` is
+*already* stale about Sheets — fix in passing.
+
+## 8. Effort
+
+| Phase | Effort | Blocking? |
+|---|---|---|
+| Corpus-scale Excel-web run (~15 round trips) | **~4–6 h**, mostly manual GUI | Yes — §1 |
+| `build_site.py` engine plumbing + matrix split | ~3 h | |
+| `check_honesty` rules 1/1b/5 + new rule 7 | ~2 h | Do **before** copy edits |
+| Copy rewrite (32 guides + 25 comparisons + core) | ~4 h | Largest, most mechanical |
+| Audit page + tests | ~2 h | |
+| README / DATASET_CARD | ~1 h | |
+
+**~16–18 h total**, of which the corpus run dominates wall-clock and the copy
+rewrite dominates edit count. Sequence: run the corpus → land the guards →
+then the copy, so `check_honesty` catches a bad rewrite instead of blessing it.

@@ -244,10 +244,26 @@ VERDICT_SHORT = {
 ERROR_VALUES = {"#NAME?", "#REF!", "#VALUE!", "#NUM!", "#N/A", "#DIV/0!", "#NULL!", "#ERROR!"}
 
 
+# Engines this site PUBLISHES. "excel" here means DESKTOP Excel, and it is
+# the documented-only yardstick -- no results file has ever backed it.
+PUBLISHED_ENGINE_KEYS = frozenset({"libreoffice", "google_sheets", "excel"})
+
+
 def engine_key_from_engine_name(name: str):
+    """Map a results file's `engine` string to a site engine key.
+
+    ORDER MATTERS. "excel_web" contains "excel", so Excel for the web must be
+    recognised BEFORE desktop Excel or it silently inherits the "excel" key --
+    which is the documented-only column. That would publish web-executed
+    values as if desktop Excel had produced them: the exact conflation the
+    whole doc-vs-executed distinction exists to prevent. It gets its own key,
+    which load_results() then declines to publish (see excel-web-site-plan.md).
+    """
     n = (name or "").lower()
     if "libreoffice" in n:
         return "libreoffice"
+    if "excel_web" in n or "excel for the web" in n or "excel online" in n:
+        return "excel_web"
     if "excel" in n:
         return "excel"
     if "google" in n or "sheets" in n:
@@ -293,6 +309,16 @@ def load_results():
         d = json.loads(p.read_text())
         key = engine_key_from_engine_name(d.get("engine", ""))
         if not key:
+            continue
+        if key not in PUBLISHED_ENGINE_KEYS:
+            # results/excel-web.json is real, canary-proven execution, but the
+            # site has no honest place to SHOW it yet: the Excel column means
+            # desktop Excel, and admitting a third engine here would silently
+            # move "Engines executed 2/3" to 3/3 and let the quirks page date
+            # itself from a run no page describes. Deliberately not published
+            # until the matrix distinguishes desktop from web -- the plan is
+            # excel-web-site-plan.md. Dropping it here (not upstream) keeps
+            # the file discoverable and correctly classified meanwhile.
             continue
         prev = out.get(key)
         if prev is None or _version_tuple(d.get("engine_version")) >= _version_tuple(
