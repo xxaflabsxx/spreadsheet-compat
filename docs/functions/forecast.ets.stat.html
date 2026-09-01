@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>FORECAST.ETS.STAT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>FORECAST.ETS.STAT</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-unknown">Inconclusive (no verdict published)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -447,10 +456,46 @@ Sheets equivalent &mdash; see the
 
 
 
+<div class="not-live-tested">
+  <strong>Excel for the web: executed, but no verdict published.</strong>
+  Excel for the web returned <code>#N/A</code> for <strong>every</strong> case of the <code>FORECAST.ETS</code> family &mdash; the existence probes, the value assertions and the cases that expected <code>#NUM!</code> or <code>#VALUE!</code> alike, all from the same 20-point timeline that <code>FORECAST</code> and <code>FORECAST.LINEAR</code> compute correctly on in this very run. A single error returned uniformly across arguments, dataset and error class is not a family of calculation defects; it is the exponential-smoothing feature being absent from this application. The name resolves (an unrecognised name is <code>#NAME?</code> here), and the expected values come from Microsoft&rsquo;s documentation of the <strong>desktop</strong> product, so the disagreement is between what the two applications ship. The executed values are published exactly as they came back and no verdict is drawn from them.
+  Every executed case is shown below with exactly what Excel for the web returned.
+</div>
+
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -609,6 +654,116 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(B1:B20,A1:A20,8)</td>
+  <td>Statistic type 8, the step size detected in the historical timeline</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">1<br><span class="category-tag">Statistic type 8 is documented as &#34;Step size detected -- Returns the step size detected in the historical timeline&#34;, and it is the ONE of the eight statistics that is a property of the INPUT rather than of the fitted model: it owes nothing to the AAA algorithm&#39;s smoothing parameters, its optimizer or its error metrics. A1:A20 is 1, 2, 3 ... 20, so the detected step is 1 and any other answer is wrong regardless of implementation. Microsoft&#39;s page publishes no worked example, so this is asserted from the definition, not from a figure. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(B1:B20,D1:D20,8)</td>
+  <td>Statistic type 8 on a timeline whose constant step is 2</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">2<br><span class="category-tag">The companion to the step-1 case: D1:D20 is 2, 4, 6 ... 40. Asserting only the step-1 case would be passed by an implementation that returns a hard-coded 1, so both are asserted. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,1)</td>
+  <td>Statistic type 1, the fitted alpha (base) smoothing parameter, recorded as a probe</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono"><br><span class="category-tag">NOT ASSERTED. Statistic type 1 is documented as &#34;Alpha parameter of ETS algorithm -- Returns the base value parameter: a higher value gives more weight to recent data points&#34;. Its value is the OUTPUT OF AN OPTIMIZER, and the documentation fixes neither the objective it minimizes, the search it uses, nor its starting point or stopping rule, so two conforming implementations can legitimately report different alphas for the same series. The page publishes no figure either. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 0.03125, which is exactly 1/32 -- a value on a power-of-two grid, i.e. the signature of a bisection/grid search rather than a continuous optimum, and an implementation detail no specification pins down. Recorded, not claimed. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=AND(FORECAST.ETS.STAT(C1:C20,A1:A20,1)&gt;=0,FORECAST.ETS.STAT(C1:C20,A1:A20,1)&lt;=1)</td>
+  <td>Structural assertion: the alpha smoothing parameter must lie in [0,1]</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">True<br><span class="category-tag">What CAN be asserted about alpha. A smoothing parameter in exponential smoothing is a weight on the most recent observation, and the documentation describes it in exactly those terms (&#34;a higher value gives more weight to recent data points&#34;); a weight outside [0,1] is not a weight. This bounds the optimizer&#39;s output without pretending to know which value inside the interval it will pick. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,7)</td>
+  <td>Statistic type 7, the root mean squared error of the fit, recorded as a probe</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono"><br><span class="category-tag">NOT ASSERTED, for the same reason as alpha: RMSE is computed from the residuals of a model whose parameters the optimizer chose, so it inherits that implementation freedom, and no figure is published. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 1.63757980666069 -- and, unlike CONFINT on the identical data, this figure is perfectly stable: identical across repeated cells, repeated runs and all four builds. That stability is itself the useful datum, because it is what proves the CONFINT non-determinism recorded on this batch&#39;s FORECAST.ETS.CONFINT cases is real and localized rather than an artifact of the harness. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,7)&gt;=0</td>
+  <td>Structural assertion: a root mean squared error cannot be negative</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">True<br><span class="category-tag">Documented as &#34;RMSE metric -- Returns the root mean squared error metric, a measure of the differences between predicted and observed values&#34;. A root of a mean of squares is non-negative by construction, for every implementation. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,6)&lt;=FORECAST.ETS.STAT(C1:C20,A1:A20,7)</td>
+  <td>Structural assertion: MAE &lt;= RMSE always, whatever model was fitted</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">True<br><span class="category-tag">The strongest thing assertable about the two error metrics without knowing the fitted model. Statistic types 6 and 7 are documented as the MAE and RMSE of the SAME set of residuals, and the mean of |e| never exceeds the root mean of e^2 -- that is Jensen&#39;s inequality applied to the convex square, an identity that holds for any residual vector whatsoever. So this passes for every conforming implementation and fails only if the two statistics are not computed from one set of residuals. NOTE ON THE PAGE: Microsoft&#39;s own text for type 6 is copy-pasted from type 5 -- it reads &#34;MAE metric: Returns the symmetric mean absolute percentage error metric, an accuracy measure based on percentage errors&#34;, which is the definition of SMAPE, not of MAE. The label (MAE), not the pasted sentence, is what is relied on here. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,5)&gt;=0</td>
+  <td>Structural assertion: the SMAPE metric cannot be negative</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">True<br><span class="category-tag">Documented as &#34;SMAPE metric -- Returns the symmetric mean absolute percentage error metric, an accuracy measure based on percentage errors&#34;. A mean of absolute percentage errors is non-negative by construction. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A20,9)</td>
+  <td>Statistic type 9, one past the documented range, recorded as a probe</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono"><br><span class="category-tag">NOT ASSERTED. Microsoft documents statistic_type as &#34;A numeric value between 1 and 8, indicating which statistic will be returned for the calculated forecast&#34;, and then lists exactly eight statistics -- but the page never states what happens outside that range, so there is no documented error value to assert and this corpus does not invent one. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 4 for statistic_type 9 rather than any error -- a plausible-looking number for an argument the documentation does not define. (For contrast, statistic_type 0 returns #VALUE! on all four builds, so the range is guarded on one side only.) Recorded as an observation, not as a compatibility claim. HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,A1:A10,8)</td>
+  <td>Values and timeline of different lengths</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Excel documents: &#34;If the ranges of the timeline and values aren&#39;t of same size, FORECAST.ETS.STAT will return the #N/A error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #N/A. All three FORECAST.ETS.* functions in this batch make the identical substitution on the identical input, so it is one behaviour in a shared argument-checking path rather than three separate slips.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,E1:E20,8)</td>
+  <td>A timeline containing a duplicate value</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If timeline contains duplicate values, FORECAST.ETS.STAT will return the #VALUE! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT, AND THE MOST SERIOUS FINDING IN THIS BATCH: no LibreOffice build errors here at all. Instead of the documented #VALUE!, every build reports a detected step size of 1 -- a confident, specific answer about a timeline that has no well-defined step at all, since two of its entries are the same instant. A duplicate timestamp is not a cosmetic input flaw -- it means one of the observations is being silently dropped, aggregated away or double-counted, and Excel refuses the whole computation for exactly that reason. LibreOffice answers anyway, with no indication that the timeline it modelled is not the timeline it was given. All three FORECAST.ETS.* functions in this batch behave the same way on the same input.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FORECAST.ETS.STAT(C1:C20,H1:H20,8)</td>
+  <td>A timeline with no identifiable constant step</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If a constant step can&#39;t be identified in the provided timeline, FORECAST.ETS.STAT will return the #NUM! error.&#34; HARNESS DATA (identical on every FORECAST.ETS.* case in this batch, and deliberately synthetic so the seasonal structure is a fact about the data rather than a guess): A1:A20 is the timeline 1..20, a constant step of 1. B1:B20 is a textbook-clean series of period 4 -- 10, 20, 30, 20 repeated five times -- so the only repetitive pattern present has length 4. C1:C20 is that same period-4 pattern plus a fixed, hard-coded residual sequence (0, 1, -1, 2, 0, -2, 1, 0, ... ), giving a series with real forecast error but an unambiguous season; nothing here is random, so the input is byte-identical on every run and every build. D1:D20 is the timeline 2, 4, ... 40, a constant step of 2. E1:E20 is the 1..20 timeline with its first two entries both set to 1, i.e. a DUPLICATE timeline value. G1:G20 is strictly linear (7, 9, ... 45) with no seasonal component. H1:H20 is 1, 2, 4, 8, 16, 32, 33, ... -- a timeline with no constant step at all. Column F is left empty throughout because this harness writes the formula under test into cell F1. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -837,7 +992,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

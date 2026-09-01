@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>PERCENTOF</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>PERCENTOF</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -450,10 +459,24 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -548,6 +571,52 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5),12)</td>
+  <td>The share the first two values make up of all four</td>
+  <td class="result mono">0.3</td>
+  <td class="result mono">0.3<br><span class="category-tag">Microsoft&#39;s page states the definition outright: &#34;PERCENTOF is logically equivalent to =SUM(data_subset)/SUM(data_all)&#34; and &#34;The PERCENTOF function sums the values in the subset and divides it by all the values.&#34; DERIVATION in exact arithmetic: (1 + 2)/(1 + 2 + 3 + 4) = 3/10 = 0.3 exactly. The data is chosen so the answer is a terminating decimal, so no rounding question arises; the ROUND wrapper only pins the comparison. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentof-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all FOUR spellings probed before the run -- the plain name PERCENTOF, the storage form _xlfn.PERCENTOF, the add-in form COM.MICROSOFT.PERCENTOF and ORG.OPENOFFICE.PERCENTOF. No LibreOffice release tested here has this function under any name, so the gap is real and not a prefix artefact of the kind that batch E&#39;s ISO.CEILING episode was.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2:A3,A2:A5)-SUM(A2:A3)/SUM(A2:A5),12)</td>
+  <td>The documented equivalence to SUM/SUM, checked inside the engine</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft&#39;s own equivalence claim made checkable: the difference between PERCENTOF and the SUM(subset)/SUM(all) it is &#34;logically equivalent to&#34; must be exactly zero. This needs no derived constant, and it catches an implementation that, say, averages instead of summing, or that divides by the count.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2:A5,A2:A5),12)</td>
+  <td>A subset equal to the whole set</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">When the subset IS the set, the documented definition gives SUM(x)/SUM(x) = 1 exactly, for any data. Structural rather than derived, and it pins the argument order: an engine that divided all-by-subset would also return 1 here, which is why the 0.3 case above is asserted as well.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PERCENTOF(A2,A2:A5),12)</td>
+  <td>A single-cell subset</td>
+  <td class="result mono">0.1</td>
+  <td class="result mono">0.1<br><span class="category-tag">1/10 = 0.1 exactly. A single cell is a legitimate data_subset -- Microsoft&#39;s argument table asks only for &#34;The values that in the data subset&#34; (the page&#39;s own wording, printed with that grammatical slip) -- so this case checks that a scalar reference is accepted where a range is expected.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -648,7 +717,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

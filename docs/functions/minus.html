@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Operator &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>MINUS</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document MINUS, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>MINUS</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document MINUS, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,56 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=MINUS(3,4)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">-1</span>.
+        Google&#39;s Sample Usage prints MINUS(3,4) with no result; -1 is DERIVED from the page&#39;s definition, &#34;Returns the difference of two numbers. Equivalent to the `-` operator&#34;, together with its argument descriptions (&#34;value1 - The minuend, or number to be subtracted from&#34;, &#34;value2 - The subtrahend&#34;), which fix the direction of the subtraction. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.; MISMATCH vs expected: expected -1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=MINUS(A2,A3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">7.5</span>.
+        Derived from the same definition; the page publishes no results. Its Examples section is an embedded live spreadsheet whose cells are not part of the article text. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977.; MISMATCH vs expected: expected 7.5, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=MINUS(A2,A3)-(A2-A3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        A structural assertion with no derived constant, from the `-` operator equivalence. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=MINUS(3,4)+MINUS(4,3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        A structural consequence of the minuend/subtrahend argument descriptions: if the order of the two arguments decides the sign, the two orderings must sum to zero. No constant is derived. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -505,6 +560,52 @@ we re-run every test on each new release, so it will flip to Supported here as s
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=MINUS(3,4)</td>
+  <td>The page&#39;s own Sample Usage line, whose result is negative</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">-1<br><span class="category-tag">Google&#39;s Sample Usage prints MINUS(3,4) with no result; -1 is DERIVED from the page&#39;s definition, &#34;Returns the difference of two numbers. Equivalent to the `-` operator&#34;, together with its argument descriptions (&#34;value1 - The minuend, or number to be subtracted from&#34;, &#34;value2 - The subtrahend&#34;), which fix the direction of the subtraction. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MINUS(A2,A3)</td>
+  <td>The second Sample Usage line, over two populated cells</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">7.5<br><span class="category-tag">Derived from the same definition; the page publishes no results. Its Examples section is an embedded live spreadsheet whose cells are not part of the article text. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MINUS(A2,A3)-(A2-A3)</td>
+  <td>The documented operator equivalence, asserted structurally</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">A structural assertion with no derived constant, from the `-` operator equivalence. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MINUS(3,4)+MINUS(4,3)</td>
+  <td>Swapping minuend and subtrahend must negate the result</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">A structural consequence of the minuend/subtrahend argument descriptions: if the order of the two arguments decides the sign, the two orderings must sum to zero. No constant is derived. Google&#39;s MINUS page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093977.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -603,6 +704,9 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

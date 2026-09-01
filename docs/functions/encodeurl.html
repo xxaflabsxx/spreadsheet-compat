@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Web &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Web &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ENCODEURL</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ENCODEURL</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-unknown">Inconclusive (no verdict published)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,30 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+<div class="not-live-tested">
+  <strong>Excel for the web: executed, but no verdict published.</strong>
+  Excel for the web returned <code>#VALUE!</code> for <strong>all four</strong> cases, including <code>=ENCODEURL(&quot;abcXYZ123&quot;)</code>, whose argument needs no encoding at all and has no failure mode. An argument-independent error on every case, from a name the engine clearly recognises (an unknown name returns <code>#NAME?</code> here, as <code>AI</code> does), is the web application declining to provide a function rather than computing it wrongly. Our expected values come from Microsoft&rsquo;s documentation of the <strong>desktop</strong> product, so the disagreement is between two applications&rsquo; feature sets, not evidence of a defect in either. The values are published as they came back and no verdict is drawn.
+  Every executed case is shown below with exactly what Excel for the web returned.
+</div>
+
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -478,6 +507,52 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ENCODEURL(&#34;http://contoso.sharepoint.com/Finance/Profit and Loss Statement.xlsx&#34;)</td>
+  <td>Microsoft&#39;s documented worked example: a SharePoint URL containing spaces</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">http%3A%2F%2Fcontoso.sharepoint.com%2FFinance%2FProfit%20and%20Loss%20Statement.xlsx<br><span class="category-tag">Microsoft&#39;s page publishes this example verbatim, argument and result. Re-derived character by character from the documented rule (&#34;returns a URL-encoded string, replacing certain non-alphanumeric characters with the percentage symbol (%) and a hexadecimal number&#34;): the colon becomes %3A, each forward slash %2F and each space %20, while the letters, digits and -- decisively for this case -- the PERIODS are left literal. The published result keeps &#34;contoso.sharepoint.com&#34; and &#34;.xlsx&#34; unencoded, so the period is one of the non-alphanumeric characters Excel deliberately does not escape. EXECUTED RESULT -- SILENT WRONG VALUE. All four LibreOffice builds return &#39;http%3A%2F%2Fcontoso%2Esharepoint%2Ecom%2FFinance%2FProfit%20and%20Loss%20Statement%2Exlsx&#39;: identical to the documented result except that every PERIOD has been percent-encoded as %2E, which Microsoft&#39;s published example leaves literal. No error is raised and the string is still a decodable URL, so the difference survives into any downstream comparison, cache key or signature that expects Excel&#39;s output byte for byte. The period is an unreserved character in RFC 3986, so encoding it is legal but not what Excel does.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ENCODEURL(&#34;a b&#34;)</td>
+  <td>The single documented transformation, isolated</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">a%20b<br><span class="category-tag">Derived from the documented rule and from the published example, in which every space became %20. Isolating one space separates a space-encoding difference from any other character&#39;s. EXECUTED RESULT: all four LibreOffice builds return the documented a%20b, so the space handling itself is not the difference seen in ENCODEURL_doc_example.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ENCODEURL(&#34;abcXYZ123&#34;)</td>
+  <td>Alphanumeric text has nothing to encode</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">abcXYZ123<br><span class="category-tag">Excel documents the function as &#34;replacing certain non-alphanumeric characters&#34;, so a purely alphanumeric argument must come back unchanged. This case is the control for the others: an engine that fails here is not encoding, it is mangling.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ENCODEURL(&#34;x=1&amp;y=2&#34;)</td>
+  <td>The reserved query-string delimiters = and &amp;</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">x%3D1%26y%3D2<br><span class="category-tag">Derived from the documented rule together with the percent-encodings the published example fixes: = is ASCII 0x3D and &amp; is ASCII 0x26, so the encoded form is x%3D1%26y%3D2. These two characters matter because the documented companion use of ENCODEURL is building a WEBSERVICE query string, where an unescaped &amp; would split the parameter. EXECUTED RESULT: all four LibreOffice builds return the derived x%3D1%26y%3D2, so the reserved query delimiters are handled as documented; the divergence recorded for this function is confined to the period.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -578,7 +653,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

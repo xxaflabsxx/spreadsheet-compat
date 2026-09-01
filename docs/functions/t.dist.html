@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>T.DIST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>T.DIST</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-quirk">Quirk found</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -446,9 +455,75 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(T.DIST(60,1,TRUE),8)</td>
+  <td>Microsoft&#39;s first documented example: the cumulative distribution at 60 with one degree of freedom</td>
+  <td class="result mono">0.99469533</td>
+  <td class="result mono">0.99469533<br><span class="category-tag">Microsoft publishes =T.DIST(60,1,TRUE) = 0.99469533 (&#34;Student&#39;s left-tailed t-distribution for 60, returned as the cumulative distribution function, using 1 degree of freedom&#34;). DERIVATION -- and this batch derived the whole t family TWICE, along two paths that share no code: (1) the Student t CDF as the regularized incomplete beta 1 - I_{v/(v+x^2)}(v/2, 1/2)/2, and (2) NUMERICAL QUADRATURE of the t density gamma((v+1)/2)/(sqrt(v*pi)*gamma(v/2)) * (1+x^2/v)^(-(v+1)/2), integrated as a TAIL from x to infinity so the heavy tail carries the error rather than the answer. The two agree to 25 significant digits on every point asserted in this batch, and scipy.stats.t reproduces each of them to double precision as a third check. Inverses are ROOT-FOUND on that cross-checked CDF, never taken from a statistics library&#39;s own inverse. The value is 0.9946953263673767294563 at 50 digits, i.e. 0.99469533 at the published precision. With v = 1 the t distribution is Cauchy and the CDF has the closed form 1/2 + arctan(x)/pi, which gives the same digits -- a fourth, exact check available only at this one degree of freedom. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-dist-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.DIST(8,3,FALSE),8)</td>
+  <td>Microsoft&#39;s second documented example: the probability density at 8 with three degrees of freedom</td>
+  <td class="result mono">0.00073691</td>
+  <td class="result mono">0.00073691<br><span class="category-tag">Microsoft publishes =T.DIST(8,3,FALSE) = 0.00073691 (&#34;...returned as the probability density function, using 3 degrees of freedom&#34;). Derived from the density formula above at 50 digits: 0.0007369065209469263303782, i.e. 0.00073691 at the published precision. This is the case that pins the cumulative flag down: an engine ignoring FALSE and returning the CDF would give 0.99796, three orders of magnitude away.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.DIST(60,1,TRUE),12)</td>
+  <td>The cumulative example carried to twelve decimals</td>
+  <td class="result mono">0.994695326367</td>
+  <td class="result mono">0.994695326367<br><span class="category-tag">Asserted at twelve places from the derivation: 0.994695326367. Eight published decimals are not enough to separate a correct heavy-tail integration from an approximation that is good to 1e-9.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.DIST(1.5,7,TRUE)+T.DIST(-1.5,7,TRUE),12)</td>
+  <td>The t distribution is symmetric, so the two tails must sum to exactly one</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">F(x) + F(-x) = 1 for any symmetric distribution. A structural assertion with no derived constant, and a sharp one for the CDF: it fails for an engine whose incomplete-beta branch is wrong on one side of zero, which is exactly the failure mode a single positive-x example cannot see.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.DIST(2.5,9,FALSE)-T.DIST(-2.5,9,FALSE),15)</td>
+  <td>The density is an even function, so a sign flip must change nothing</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">The t density depends on x only through x^2, so it is exactly even. A structural assertion with no derived constant.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=T.DIST(1,0,TRUE)</td>
+  <td>Zero degrees of freedom, which the page excludes but does NOT assign a code to</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono"><br><span class="category-tag">DELIBERATELY ASSERTS NOTHING, AND THE REASON IS A GAP IN THE PAGE. The T.DIST Remarks publish &#34;If deg_freedom &lt; 1, T.DIST returns an error value. Deg_freedom needs to be at least 1&#34; -- an ERROR VALUE, unnamed. Every sibling page in this family (T.DIST.2T, T.DIST.RT, T.INV, T.INV.2T) names #NUM! for the same condition, so #NUM! is the obvious guess, but it IS a guess and this corpus does not assert guesses about which of Excel&#39;s eight error codes appears. The case records what each engine returns without scoring it.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -581,7 +656,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

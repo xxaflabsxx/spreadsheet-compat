@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>YIELD</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>YIELD</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060119.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060119.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,30 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -514,6 +543,76 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(YIELD(A2,A3,A4,A5,A6,A7,A8),6)</td>
+  <td>Microsoft&#39;s documented worked example, at six decimals</td>
+  <td class="result mono">0.065</td>
+  <td class="result mono">0.065<br><span class="category-tag">Microsoft publishes =YIELD(A2,A3,A4,A5,A6,A7,A8) with the description &#34;The yield, for the bond with the terms above (0.065 or 6.5%)&#34; and a Result cell formatted as &#34;6.5%&#34;. Settlement 2008-02-15 (serial 39493), maturity 2016-11-15 (serial 42689), 5.75% coupon, price 95.04287, redemption 100, semiannual, 30/360 basis. DERIVATION: the page documents the &gt;1-period case as &#34;calculated through a hundred iterations... the Newton method, based on the formula used for the function PRICE&#34;, so the yield was obtained by ROOT-FINDING the batch-F clean-room PRICE implementation -- price = redemption/(1+y/f)^(N-1+DSC/E) + sum over k of 100*(rate/f)/(1+y/f)^(k-1+DSC/E) - 100*(rate/f)*(A/E), evaluated cash flow by cash flow, with N = 18 semiannual coupons, A = DSC = 90 and E = 180 on basis 0. Day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 (Procedure A for US 30/360, Procedure B for actual days, Procedure C for European 30/360, D/E/F for days-in-year) written for this batch and used by no engine; the bond arithmetic is evaluated over exact rational day-count ratios at 50 digits with mpmath. The root is 0.06500000688075461063326 -- NOT exactly 0.065, because the published price 95.04287 is itself a five-decimal rounding of the true 95.04287439939201656339.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(YIELD(A2,A3,A4,A5,A6,A7,A8),8)</td>
+  <td>The same example at eight decimals, where the price rounding becomes visible</td>
+  <td class="result mono">0.06500001</td>
+  <td class="result mono">0.06500001<br><span class="category-tag">THE POINT OF THIS CASE IS THAT THE ANSWER IS NOT 0.065. Microsoft&#39;s published price is rounded to five decimals, so the yield that reproduces it is 0.0650000068807546, which is 0.06500001 at eight places. An engine asserted against a naive 0.06500000 would be recorded as diverging when it is in fact correct; the derivation is what establishes which of the two is right. Carried no further than eight places because YIELD is documented as an ITERATIVE Newton solve with a hundred-iteration cap, so its last few digits are a property of the solver&#39;s tolerance rather than of the mathematics -- see the round-trip case below, which tests the solver against the engine&#39;s own PRICE instead.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(YIELD(A2,A3,A4,PRICE(A2,A3,A4,0.065,A6,A7,A8),A6,A7,A8),8)</td>
+  <td>A structural round trip: price a bond at a known yield, then recover the yield</td>
+  <td class="result mono">0.065</td>
+  <td class="result mono">0.065<br><span class="category-tag">YIELD and PRICE are documented inverses -- the YIELD page says its solver is &#34;based on the formula used for the function PRICE&#34;. Feeding the engine&#39;s OWN unrounded price back into YIELD must return the yield it started from, exactly 0.065, with no five-decimal rounding in the way. A structural assertion with no derived constant, and the sharpest test available of an iterative function: it is independent of the solver&#39;s absolute accuracy and tests only that the two functions agree with each other. The clean-room derivation confirms the composition is well posed -- PRICE at yield 0.065 is 95.04287439939201656339 and root-finding that price returns 0.065 to 50 digits.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YIELD(A3,A2,A4,A5,A6,A7,A8)</td>
+  <td>The dates reversed, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If settlement &gt;= maturity, YIELD returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YIELD(A2,A3,A4,A5,A6,3,A8)</td>
+  <td>A frequency of 3, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If frequency is any number other than 1, 2, or 4, YIELD returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YIELD(A2,A3,A4,A5,A6,A7,5)</td>
+  <td>A basis of 5, which is outside the documented table</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If basis &lt; 0 or if basis &gt; 4, YIELD returns the #NUM! error value.&#34; The basis table runs 0 = US (NASD) 30/360, 1 = Actual/actual, 2 = Actual/360, 3 = Actual/365, 4 = European 30/360.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=YIELD(A2,A3,A4,0,A6,A7,A8)</td>
+  <td>A price of zero, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If pr &lt;= 0 or if redemption &lt;= 0, YIELD returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -662,7 +761,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

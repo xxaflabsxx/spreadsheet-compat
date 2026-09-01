@@ -2,23 +2,83 @@
   "slug": "max-vs-large",
   "title": "MAX vs LARGE: the biggest, or the nth biggest",
   "meta_desc": "MAX vs LARGE (and MIN vs SMALL): top-n values, how ties behave, and the patterns for podium rankings and trimmed statistics.",
-  "funcs": ["MAX", "LARGE", "MIN", "SMALL"],
+  "funcs": [
+    "MAX",
+    "LARGE",
+    "MIN",
+    "SMALL"
+  ],
   "intro": "MAX answers one question; LARGE answers a family of them: LARGE(range,1) IS the max, LARGE(range,2) the runner-up, and so on down. The subtlety worth knowing is how ties count — duplicates occupy their own ranks.",
   "table": [
-    {"aspect": "Returns", "cols": ["The single largest value", "The k-th largest", "The single smallest", "The k-th smallest"]},
-    {"aspect": "With ties (10,20,20,30)", "cols": ["30", "LARGE(...,2)=20 and LARGE(...,3)=20 — duplicates each take a rank", "10", "same behavior mirrored"]},
-    {"aspect": "Top-3 sum idiom", "cols": ["—", "SUMPRODUCT(LARGE(rng,{1,2,3}))", "—", "SMALL for bottom-3"]},
-    {"aspect": "Conditional versions", "cols": ["MAXIFS", "FILTER + LARGE (or TAKE(SORT(...)))", "MINIFS", "FILTER + SMALL"]},
-    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal", "Universal — all verified by execution"]}
+    {
+      "aspect": "Returns",
+      "cols": [
+        "The single largest value",
+        "The k-th largest",
+        "The single smallest",
+        "The k-th smallest"
+      ]
+    },
+    {
+      "aspect": "With ties (10,20,20,30)",
+      "cols": [
+        "30",
+        "LARGE(...,2)=20 and LARGE(...,3)=20 — duplicates each take a rank",
+        "10",
+        "same behavior mirrored"
+      ]
+    },
+    {
+      "aspect": "Top-3 sum idiom",
+      "cols": [
+        "—",
+        "SUMPRODUCT(LARGE(rng,{1,2,3}))",
+        "—",
+        "SMALL for bottom-3"
+      ]
+    },
+    {
+      "aspect": "Conditional versions",
+      "cols": [
+        "MAXIFS",
+        "FILTER + LARGE (or TAKE(SORT(...)))",
+        "MINIFS",
+        "FILTER + SMALL"
+      ]
+    },
+    {
+      "aspect": "Compatibility",
+      "cols": [
+        "Universal",
+        "Universal",
+        "Universal",
+        "Universal — all verified by execution"
+      ]
+    }
   ],
   "when": [
-    {"func": "MAX / MIN", "use_when": "Single extremes — latest date, record high, cheapest option — and their conditional MAXIFS/MINIFS forms."},
-    {"func": "LARGE / SMALL", "use_when": "Podiums and leaderboards (k = 1,2,3), 'sum of best N scores' grading, trimmed statistics that drop the extremes (average between SMALL(...,2) and LARGE(...,2)), percentile-ish cutoffs on small data."}
+    {
+      "func": "MAX / MIN",
+      "use_when": "Single extremes — latest date, record high, cheapest option — and their conditional MAXIFS/MINIFS forms."
+    },
+    {
+      "func": "LARGE / SMALL",
+      "use_when": "Podiums and leaderboards (k = 1,2,3), 'sum of best N scores' grading, trimmed statistics that drop the extremes (average between SMALL(...,2) and LARGE(...,2)), percentile-ish cutoffs on small data."
+    }
   ],
-  "compat_note": "All four execute identically in every LibreOffice version we test (Excel behavior per docs — we do not run Excel; Google Sheets is executed separately, see each function page), including tie handling and array-k forms like LARGE(range,{1,2,3}). On modern versions TAKE(SORT(range,-1),3) spills the actual top-3 values as a list — LARGE remains the portable classic.",
+  "compat_note": "All four execute identically in every LibreOffice version we test (Excel behavior per docs — we do not run desktop Excel; Google Sheets is executed separately, see each function page), including tie handling and array-k forms like LARGE(range,{1,2,3}). On modern versions TAKE(SORT(range,-1),3) spills the actual top-3 values as a list — LARGE remains the portable classic. Excel for the web is a separate application and we do execute it (recalculated on OneDrive, 2026-09-01); those measurements are on the individual function pages.",
   "examples": [
-    {"label": "Runner-up", "formula": "=LARGE(A2:A100,2)"},
-    {"label": "Sum of best 3 scores", "formula": "=SUMPRODUCT(LARGE(A2:A100,{1,2,3}))"},
-    {"label": "Record high (conditional)", "formula": "=MAXIFS(A:A,B:B,\"East\")"}
+    {
+      "label": "Runner-up",
+      "formula": "=LARGE(A2:A100,2)"
+    },
+    {
+      "label": "Sum of best 3 scores",
+      "formula": "=SUMPRODUCT(LARGE(A2:A100,{1,2,3}))"
+    },
+    {
+      "label": "Record high (conditional)",
+      "formula": "=MAXIFS(A:A,B:B,\"East\")"
+    }
   ]
 }

@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Date &amp; Time &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>EASTERSUNDAY</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document EASTERSUNDAY, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>EASTERSUNDAY</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document EASTERSUNDAY, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,56 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=EASTERSUNDAY(2000)+49</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">36688</span>.
+        LIBREOFFICE&#39;S OWN PUBLISHED RESULT, and the only figure on the page given as a number rather than as a date: &#34;=EASTERSUNDAY(2000)+49 returns the internal serial number 36688. The result is 2000-06-11.&#34; It is quoted here in the exact form the page prints it -- with the +49 -- rather than back-solved to the Easter serial itself, so the assertion is the published one. Derived independently: Easter Sunday 2000 falls on 23 April by the Gregorian computus (Meeus/Jones/Butcher algorithm, computed here rather than looked up), which is serial 36639 in the 1899-12-30-origin system, and 36639 + 49 = 36688, matching the printed figure exactly. 49 days is the offset the page itself gives for Pentecost Sunday. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 36688, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EASTERSUNDAY(2000)-DATE(2000,4,23)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;=EASTERSUNDAY(2000) returns 2000-04-23.&#34; Asserted as a difference against DATE(2000,4,23) so the case depends on neither the locale&#39;s date format nor on whether the engine hands the harness a date object or a serial number -- the two published examples above and here therefore check the same underlying value through two independent routes. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EASTERSUNDAY(2026)-DATE(2026,4,5)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        DERIVED, not published: the page publishes only the year 2000. Easter Sunday 2026 falls on 5 April by the Gregorian computus, computed independently here with the Meeus/Jones/Butcher algorithm. This is the case that tests the function rather than one memorised answer. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EASTERSUNDAY(2026)-2-DATE(2026,4,3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        A structural assertion with no derived constant beyond the Easter date above, from the page&#39;s own list: &#34;Good Friday = EASTERSUNDAY(Year) - 2&#34;. Good Friday 2026 is therefore 3 April. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -505,6 +560,52 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=EASTERSUNDAY(2000)+49</td>
+  <td>LibreOffice&#39;s own published serial number, quoted exactly as printed</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">36688<br><span class="category-tag">LIBREOFFICE&#39;S OWN PUBLISHED RESULT, and the only figure on the page given as a number rather than as a date: &#34;=EASTERSUNDAY(2000)+49 returns the internal serial number 36688. The result is 2000-06-11.&#34; It is quoted here in the exact form the page prints it -- with the +49 -- rather than back-solved to the Easter serial itself, so the assertion is the published one. Derived independently: Easter Sunday 2000 falls on 23 April by the Gregorian computus (Meeus/Jones/Butcher algorithm, computed here rather than looked up), which is serial 36639 in the 1899-12-30-origin system, and 36639 + 49 = 36688, matching the printed figure exactly. 49 days is the offset the page itself gives for Pentecost Sunday. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EASTERSUNDAY(2000)-DATE(2000,4,23)</td>
+  <td>The page&#39;s other published example, asserted as a date rather than a serial</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;=EASTERSUNDAY(2000) returns 2000-04-23.&#34; Asserted as a difference against DATE(2000,4,23) so the case depends on neither the locale&#39;s date format nor on whether the engine hands the harness a date object or a serial number -- the two published examples above and here therefore check the same underlying value through two independent routes. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EASTERSUNDAY(2026)-DATE(2026,4,5)</td>
+  <td>A year the page does not mention, computed independently</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">DERIVED, not published: the page publishes only the year 2000. Easter Sunday 2026 falls on 5 April by the Gregorian computus, computed independently here with the Meeus/Jones/Butcher algorithm. This is the case that tests the function rather than one memorised answer. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EASTERSUNDAY(2026)-2-DATE(2026,4,3)</td>
+  <td>One of the derived holidays the page tells the reader to compute this way</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">A structural assertion with no derived constant beyond the Easter date above, from the page&#39;s own list: &#34;Good Friday = EASTERSUNDAY(Year) - 2&#34;. Good Friday 2026 is therefore 3 April. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -603,6 +704,9 @@ Sheets equivalent &mdash; see the
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

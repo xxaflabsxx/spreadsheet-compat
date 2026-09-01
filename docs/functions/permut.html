@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>PERMUT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>PERMUT</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-quirk">Quirk found</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -444,10 +453,38 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=PERMUT(0,0)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">1</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If number &lt;= 0 or if number_chosen &lt; 0, PERMUT returns the #NUM! error value.&#34; Zero is the boundary the &lt;= includes, so PERMUT(0,0) is an error even though the empty arrangement of an empty set is mathematically 1 -- and note that PERMUTATIONA, the sibling function, documents the opposite treatment of the same input. That disagreement between two Microsoft pages is itself worth pinning. EXECUTED RESULT -- A SILENT WRONG ANSWER: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents #NUM!. Mathematically 1 is defensible -- there is exactly one arrangement of nothing -- but it is not what Microsoft&#39;s page specifies, and the disagreement is invisible: no error, no warning, just a number where Excel gives an error. Note that LibreOffice is here MORE permissive than Excel, the opposite direction from most of this batch&#39;s divergences.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 1
+      </li>
+      
+    
+      
     
   
     
@@ -514,6 +551,76 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=PERMUT(A2,A3)</td>
+  <td>Microsoft&#39;s documented worked example</td>
+  <td class="result mono">970200</td>
+  <td class="result mono">970200<br><span class="category-tag">Microsoft publishes =PERMUT(A2,A3) = 970200 for 100 objects taken 3 at a time. DERIVATION in exact integer arithmetic from the documented equation n!/(n-k)!: 100 x 99 x 98 = 970200 exactly. No factorial of 100 is ever formed -- the ratio telescopes to the product of the top k terms, which is both the honest reading of the formula and the only way to evaluate it without overflow. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/permut-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERMUT(3,2)</td>
+  <td>Microsoft&#39;s second documented row</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6<br><span class="category-tag">Microsoft publishes =PERMUT(3,2) = 6, &#34;Permutations possible for a group of 3 objects where 2 are chosen&#34;. 3!/1! = 3 x 2 = 6, and the six orderings can be written out by hand, so this case is verifiable without arithmetic at all.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERMUT(5,0)</td>
+  <td>Choosing zero objects, which the documented equation forces to 1</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">n!/(n-0)! = 1 for every n: there is exactly one arrangement of nothing. Microsoft does not print this row, but the value is forced by the equation the page does print, and the page&#39;s error list explicitly permits number_chosen = 0 (it errors only &#34;If number &lt;= 0 or if number_chosen &lt; 0&#34;). The empty permutation is the classic off-by-one in a hand-rolled implementation.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERMUT(3.9,2.9)</td>
+  <td>Fractional arguments, which the page says are truncated</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6<br><span class="category-tag">Microsoft documents: &#34;Both arguments are truncated to integers.&#34; Truncation (not rounding) of 3.9 and 2.9 gives 3 and 2, so this must return PERMUT(3,2) = 6. An engine that ROUNDED instead would compute PERMUT(4,3) = 24 -- a four-fold difference, which makes this a decisive one-value test of the documented rule.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERMUT(2,3)</td>
+  <td>Choosing more objects than exist, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If number &lt; number_chosen, PERMUT returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERMUT(0,0)</td>
+  <td>Zero objects, which the page excludes even when nothing is chosen</td>
+  <td class="result mono">1</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If number &lt;= 0 or if number_chosen &lt; 0, PERMUT returns the #NUM! error value.&#34; Zero is the boundary the &lt;= includes, so PERMUT(0,0) is an error even though the empty arrangement of an empty set is mathematically 1 -- and note that PERMUTATIONA, the sibling function, documents the opposite treatment of the same input. That disagreement between two Microsoft pages is itself worth pinning. EXECUTED RESULT -- A SILENT WRONG ANSWER: LibreOffice returns 1 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, where Excel documents #NUM!. Mathematically 1 is defensible -- there is exactly one arrangement of nothing -- but it is not what Microsoft&#39;s page specifies, and the disagreement is invisible: no error, no warning, just a number where Excel gives an error. Note that LibreOffice is here MORE permissive than Excel, the opposite direction from most of this batch&#39;s divergences.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERMUT(&#34;x&#34;,2)</td>
+  <td>A non-numeric argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If number or number_chosen is nonnumeric, PERMUT returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -662,7 +769,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

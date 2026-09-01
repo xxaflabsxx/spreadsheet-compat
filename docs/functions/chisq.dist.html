@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CHISQ.DIST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CHISQ.DIST</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060181.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060181.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,28 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -494,6 +521,68 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQ.DIST(0.5,1,TRUE),8)</td>
+  <td>Microsoft&#39;s first documented worked example: the cumulative chi-squared distribution at x=0.5 with 1 degree of freedom</td>
+  <td class="result mono">0.52049988</td>
+  <td class="result mono">0.52049988<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.52049988. Independently derived from the documented cumulative form: scipy.stats.chi2.cdf(0.5, 1) = 0.5204998778130466 -&gt; 0.52049988 at 8 dp. Equivalently 2*Phi(sqrt(0.5)) - 1, since a chi-squared variate with 1 degree of freedom is the square of a standard normal</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQ.DIST(2,3,FALSE),8)</td>
+  <td>Microsoft&#39;s second documented worked example: the chi-squared probability density at x=2 with 3 degrees of freedom</td>
+  <td class="result mono">0.20755375</td>
+  <td class="result mono">0.20755375<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.20755375. Independently derived from the documented density form: scipy.stats.chi2.pdf(2, 3) = 0.2075537487102974 -&gt; 0.20755375 at 8 dp. Equivalently x^(df/2-1)*e^(-x/2) / (2^(df/2)*Gamma(df/2)) = sqrt(2)*e^(-1)/(2^1.5*Gamma(1.5))</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQ.DIST(2,3.7,FALSE),8)</td>
+  <td>A non-integer degrees-of-freedom argument, which the documentation says is truncated</td>
+  <td class="result mono">0.20755375</td>
+  <td class="result mono">0.20755375<br><span class="category-tag">Excel documents &#34;If deg_freedom is not an integer, it is truncated&#34;, so 3.7 must behave exactly as 3 and return the documented 0.20755375. Independently checked that this discriminates: a genuine 3.7 degrees of freedom would give chi2.pdf(2, 3.7) = 0.194519</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHISQ.DIST(-1,3,TRUE)</td>
+  <td>A negative x value</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If x is negative, CHISQ.DIST returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHISQ.DIST(0.5,0,TRUE)</td>
+  <td>Zero degrees of freedom</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If deg_freedom &lt; 1 or deg_freedom &gt; 10^10, CHISQ.DIST returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHISQ.DIST(&#34;abc&#34;,3,TRUE)</td>
+  <td>A non-numeric x argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If any argument is nonnumeric, CHISQ.DIST returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -626,7 +715,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

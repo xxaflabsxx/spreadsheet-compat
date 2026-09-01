@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ODDFYIELD</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ODDFYIELD</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -447,10 +456,28 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -589,6 +616,68 @@ Sheets equivalent &mdash; see the
 
 
 
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),4)</td>
+  <td>Microsoft&#39;s documented worked example, at the precision Microsoft publishes</td>
+  <td class="result mono">0.0772</td>
+  <td class="result mono">0.0772<br><span class="category-tag">Microsoft publishes =ODDFYIELD(A2, A3, A4, A5, A6, A7, A8, A9, A10) = 7.72% for a bond settled 2008-11-11, maturing 2021-03-01, issued 2008-10-15, first coupon 2009-03-01, 5.75% coupon, price 84.50, redemption 100, semiannual, 30/360 basis, and the page&#39;s own description spells the same figure as &#34;(0.0772, or 7.72%)&#34;. DERIVATION: Microsoft publishes no closed form -- &#34;Excel uses an iterative technique to calculate ODDFYIELD. This function uses the Newton method based on the formula used for the function ODDFPRICE&#34; -- so the value here is obtained by root-finding on this batch&#39;s own clean-room ODDFPRICE implementation (see data/tests/ODDFPRICE.json for its derivation), solving price(yield) = 84.5 with mpmath at 50 digits. The root is 0.07724554159781..., which is 0.0772 at four places -- Microsoft&#39;s published figure. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddfyield-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- NOT IMPLEMENTED, AND NOT SIGNALLED AS SUCH: LibreOffice returns #VALUE! on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case -- for this case, for every other case in this file, and for every argument combination probed while preparing the batch (five bases, three frequencies, settlement before and after the first coupon, dates as serials, as DATE() calls and as text, and a bond whose first period is deliberately regular). Not one input produced a number. The name is RECOGNISED -- the plain spelling parses, while _xlfn.ODDFPRICE, COM.MICROSOFT.ODDFPRICE and ORG.OPENOFFICE.ODDFPRICE are all #NAME? -- so this is not a storage-form artefact, and it is not an .xlsx import artefact either: the same #VALUE! comes back when the formula is parsed natively by LibreOffice&#39;s own parser rather than read from OOXML, on a run where ODDLPRICE and PRICE in the same file computed correctly. LibreOffice&#39;s source says why, in as many words: scaddins/source/analysis/analysishelper.cxx defines GetOddfyield() and GetOddfprice() as bodies that do nothing but `throw uno::RuntimeException()`, and financial.cxx wraps both call sites in SAL_WNOUNREACHABLE_CODE_PUSH under the comment &#34;Encapsulation violation: We *know* that GetOddfprice() always throws.&#34; The argument validation in front of them is real (rate &lt; 0, frequency, date ordering are all checked) but every path that survives it ends in the same exception, which is why the error cases in this file also come back #VALUE! instead of the documented #NUM!. So: the function is listed, documented in LibreOffice&#39;s own help, and computes nothing. Its ODDL* siblings, by contrast, compute the documented values exactly.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,A10),8)</td>
+  <td>The same example carried to eight decimal places</td>
+  <td class="result mono">0.07724554</td>
+  <td class="result mono">0.07724554<br><span class="category-tag">Four published decimals leave the iteration untested, so the root is asserted at eight places: 0.07724554. Microsoft states the convergence rule loosely -- &#34;The yield is changed through 100 iterations until the estimated price with the given yield is close to the price&#34; -- without defining &#34;close&#34;, so this is exactly the kind of case where two conforming implementations can legitimately differ in the last digit or two; eight places is deliberately short of the fifteen a double carries.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDFYIELD(A2,A3,A4,A5,0.0785,ODDFPRICE(A2,A3,A4,A5,0.0785,0.0625,100,2,1),100,2,1),8)</td>
+  <td>ODDFYIELD fed the price ODDFPRICE computes for a known yield must return that yield</td>
+  <td class="result mono">0.0625</td>
+  <td class="result mono">0.0625<br><span class="category-tag">Microsoft&#39;s page says outright that ODDFYIELD inverts ODDFPRICE (&#34;See ODDFPRICE for the formula that ODDFYIELD uses&#34;), so composing the two on one bond must return the yield it started from. This assertion contains NO derived constant -- 0.0625 is an input -- which makes it immune to any disagreement about day counts or quasi-coupon schedules: an engine with an unusual but self-consistent odd-period model still passes, and one whose yield solver does not invert its own price function fails. The bond is ODDFPRICE&#39;s documented example (7.85% coupon, basis 1), evaluated entirely inside the engine.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDFYIELD(A2,A3,A4,A5,A6,0,A8,A9,A10)</td>
+  <td>A price of zero, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If rate &lt; 0 or if pr &lt;= 0, ODDFYIELD returns the #NUM! error value.&#34; Note the asymmetry with ODDFPRICE, whose corresponding clause reads &#34;rate &lt; 0 or yld &lt; 0&#34;: the price argument is excluded AT zero, the yield argument only BELOW it. Zero is the boundary the &lt;= includes.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDFYIELD(A2,A3,A4,A5,A6,A7,A8,A9,5)</td>
+  <td>A basis of 5, one past the documented range</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDFYIELD returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDFYIELD(A5,A3,A4,A2,A6,A7,A8,A9,A10)</td>
+  <td>Settlement and first_coupon swapped</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDFYIELD returns the #NUM! error value: maturity &gt; first_coupon &gt; settlement &gt; issue.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
@@ -717,7 +806,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

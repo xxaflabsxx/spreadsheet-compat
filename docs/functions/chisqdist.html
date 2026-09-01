@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Statistical Part One &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CHISQDIST</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document CHISQDIST, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CHISQDIST</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document CHISQDIST, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060181.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060181.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,58 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(CHISQDIST(3,2,1),12)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.776869839852</span>.
+        NOTHING ON THIS PAGE IS A PUBLISHED RESULT. CHISQDIST&#39;s entry in Statistical Functions Part One carries a description and a Syntax block and NO Example section at all -- unlike its neighbours CHISQ.DIST.RT and CHISQ.INV.RT on the same page, which do publish worked examples. Every value in this file is therefore DERIVED from the page&#39;s stated semantics: &#34;Returns the value of the probability density function or the cumulative distribution function for the chi-square distribution&#34;, with &#34;Cumulative (optional): 0 or False calculates the probability density function. Other values or True or omitted calculates the cumulative distribution function.&#34; Derived independently at 40 decimal digits with mpmath as the regularised lower incomplete gamma function P(k/2, x/2) = P(1, 1.5) = 1 - exp(-1.5) = 0.7768698398515701710667195292359874786578, then rounded to the 12 places asserted here. The ROUND() wrapper keeps the assertion clear of last-bit formatting differences. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0.776869839852, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(CHISQDIST(3,2,0),12)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.111565080074</span>.
+        DERIVED from the same sentence, taking the other branch: with two degrees of freedom the chi-square density is exp(-x/2)/2, so at x = 3 it is 0.1115650800742149144666402353820062606711 (mpmath, 40 digits). This case and the one above are what make the Cumulative argument&#39;s two branches separately visible; an implementation that ignored the flag would pass one and fail the other. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0.111565080074, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(CHISQDIST(3,2)-CHISQDIST(3,2,1),12)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        A structural assertion with no derived constant, from the Cumulative parameter&#39;s own sentence. Asserted as a difference so that the case tests only the default, and would still be meaningful if the corpus&#39;s derived constant above were ever revised. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(CHISQDIST(3,2,FALSE())-CHISQDIST(3,2,0),12)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        A structural assertion with no derived constant, from the same sentence. The page lists 0 and False as equivalent, and this is the case that says so. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
     
   
     
@@ -509,6 +566,60 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQDIST(3,2,1),12)</td>
+  <td>The cumulative distribution function at 3 with 2 degrees of freedom</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.776869839852<br><span class="category-tag">NOTHING ON THIS PAGE IS A PUBLISHED RESULT. CHISQDIST&#39;s entry in Statistical Functions Part One carries a description and a Syntax block and NO Example section at all -- unlike its neighbours CHISQ.DIST.RT and CHISQ.INV.RT on the same page, which do publish worked examples. Every value in this file is therefore DERIVED from the page&#39;s stated semantics: &#34;Returns the value of the probability density function or the cumulative distribution function for the chi-square distribution&#34;, with &#34;Cumulative (optional): 0 or False calculates the probability density function. Other values or True or omitted calculates the cumulative distribution function.&#34; Derived independently at 40 decimal digits with mpmath as the regularised lower incomplete gamma function P(k/2, x/2) = P(1, 1.5) = 1 - exp(-1.5) = 0.7768698398515701710667195292359874786578, then rounded to the 12 places asserted here. The ROUND() wrapper keeps the assertion clear of last-bit formatting differences. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQDIST(3,2,0),12)</td>
+  <td>The probability density function at the same point, selected by Cumulative = 0</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.111565080074<br><span class="category-tag">DERIVED from the same sentence, taking the other branch: with two degrees of freedom the chi-square density is exp(-x/2)/2, so at x = 3 it is 0.1115650800742149144666402353820062606711 (mpmath, 40 digits). This case and the one above are what make the Cumulative argument&#39;s two branches separately visible; an implementation that ignored the flag would pass one and fail the other. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQDIST(3,2)-CHISQDIST(3,2,1),12)</td>
+  <td>&#39;or omitted calculates the cumulative distribution function&#39;, asserted structurally</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">A structural assertion with no derived constant, from the Cumulative parameter&#39;s own sentence. Asserted as a difference so that the case tests only the default, and would still be meaningful if the corpus&#39;s derived constant above were ever revised. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQDIST(3,2,FALSE())-CHISQDIST(3,2,0),12)</td>
+  <td>&#39;0 or False calculates the probability density function&#39;, asserted structurally</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">A structural assertion with no derived constant, from the same sentence. The page lists 0 and False as equivalent, and this is the case that says so. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQDIST(5.5,3.25,1),12)</td>
+  <td>A non-integer degrees-of-freedom argument: recorded, not asserted, because the page does not settle it</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">PROBE, expected: null -- NOTHING IS ASSERTED HERE, AND THE REASON IS THE FINDING. This case was first authored as an assertion of 0.838278268742, the value the chi-square distribution takes at 5.5 with 3.25 degrees of freedom (derived independently as the regularised lower incomplete gamma P(1.625, 2.75) = 0.8382782687422965964062699923085839418156, mpmath at 40 digits). All four builds returned 0.861361382618 instead. That number is not noise and not a near miss: it is EXACTLY the distribution at 5.5 with THREE degrees of freedom (0.861361382617584897381003303954, which rounds to 0.861361382618 at the 12 places asserted), so LibreOffice TRUNCATES the Degrees Of Freedom argument to an integer. Identical on 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. THE ASSERTION WAS WITHDRAWN RATHER THAN PUBLISHED AS A DIVERGENCE, because a divergence badge would be a claim this documentation cannot support: the page says only &#34;Degrees Of Freedom is the degrees of freedom for the chi-square function&#34; and never says whether a non-integer value is accepted, rounded, truncated or rejected. Where the page settles nothing, this corpus asserts nothing -- so the measured behaviour is recorded here in words and the case is scored as a probe, exactly as the corpus&#39;s service-bound probes are. The four cases above, all on integer degrees of freedom, are where CHISQDIST&#39;s documented behaviour is actually tested. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -623,6 +734,9 @@ Sheets equivalent &mdash; see the
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Date &amp; Time &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ISLEAPYEAR</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document ISLEAPYEAR, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ISLEAPYEAR</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document ISLEAPYEAR, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,56 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ISLEAPYEAR(DATE(1968,2,29))</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">1</span>.
+        LIBREOFFICE&#39;S OWN PUBLISHED RESULT, and the page publishes the exact formula used here: after &#34;=ISLEAPYEAR(A1) returns 1, if A1 contains 1968-02-29&#34; it goes on to say &#34;You may also use =ISLEAPYEAR(DATE(1968;2;29))&#34;, which is this case with the corpus&#39;s comma argument separator. The page is unusually explicit about why the form matters: &#34;Never use =ISLEAPYEAR(2/29/68), because this would first evaluate 2 divided by 29 divided by 68, and then calculate the ISLEAPYEAR function from this small number as a serial date number.&#34; The return type is published too: &#34;Determines whether a year is a leap year. If yes, the function will return the value 1 (TRUE); if not, it will return 0 (FALSE).&#34; STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ISLEAPYEAR(DATE(2026,6,1))</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        DERIVED from the published return-value sentence above. 2026 is not divisible by 4. The page publishes only the true case, so this is the case that checks the function returns the documented 0 rather than FALSE, an error, or nothing. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ISLEAPYEAR(DATE(2000,1,1))</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">1</span>.
+        DERIVED from the Gregorian rule the function implements: 2000 is divisible by 400 and so IS a leap year. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ISLEAPYEAR(DATE(2100,1,1))</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        DERIVED from the Gregorian rule: 2100 is divisible by 100 but not by 400, so it is not a leap year. Together with the case above this pins the century rules in both directions -- the only place a naive &#39;divisible by 4&#39; implementation goes wrong. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -505,6 +560,52 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ISLEAPYEAR(DATE(1968,2,29))</td>
+  <td>LibreOffice&#39;s own published example, in the form the page itself recommends</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">1<br><span class="category-tag">LIBREOFFICE&#39;S OWN PUBLISHED RESULT, and the page publishes the exact formula used here: after &#34;=ISLEAPYEAR(A1) returns 1, if A1 contains 1968-02-29&#34; it goes on to say &#34;You may also use =ISLEAPYEAR(DATE(1968;2;29))&#34;, which is this case with the corpus&#39;s comma argument separator. The page is unusually explicit about why the form matters: &#34;Never use =ISLEAPYEAR(2/29/68), because this would first evaluate 2 divided by 29 divided by 68, and then calculate the ISLEAPYEAR function from this small number as a serial date number.&#34; The return type is published too: &#34;Determines whether a year is a leap year. If yes, the function will return the value 1 (TRUE); if not, it will return 0 (FALSE).&#34; STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISLEAPYEAR(DATE(2026,6,1))</td>
+  <td>The documented 0 return for a year that is not a leap year</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">DERIVED from the published return-value sentence above. 2026 is not divisible by 4. The page publishes only the true case, so this is the case that checks the function returns the documented 0 rather than FALSE, an error, or nothing. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISLEAPYEAR(DATE(2000,1,1))</td>
+  <td>The 400-year rule</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">1<br><span class="category-tag">DERIVED from the Gregorian rule the function implements: 2000 is divisible by 400 and so IS a leap year. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISLEAPYEAR(DATE(2100,1,1))</td>
+  <td>The 100-year rule</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">DERIVED from the Gregorian rule: 2100 is divisible by 100 but not by 400, so it is not a leap year. Together with the case above this pins the century rules in both directions -- the only place a naive &#39;divisible by 4&#39; implementation goes wrong. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -603,6 +704,9 @@ Sheets equivalent &mdash; see the
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

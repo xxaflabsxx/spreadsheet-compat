@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>PERCENTRANK.EXC</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>PERCENTRANK.EXC</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-quirk">Quirk found</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060184.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060184.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -444,10 +453,36 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+      <li>
+        <span class="formula">=PERCENTRANK.EXC(D20:D25,7)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#N/A</span>, but the documented/expected
+        result is <span class="formula">#NUM!</span>.
+        Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#N/A&#39;
+      </li>
+      
     
   
     
@@ -534,6 +569,68 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7)</td>
+  <td>Microsoft&#39;s documented worked example: a value present in the array</td>
+  <td class="result mono">0.7</td>
+  <td class="result mono">0.7<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the &#34;exclusive&#34; in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43)</td>
+  <td>Microsoft&#39;s documented interpolation case</td>
+  <td class="result mono">0.381</td>
+  <td class="result mono">0.381<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: &#34;If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.&#34; DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43,1)</td>
+  <td>The same interpolation with the optional significance argument set to 1</td>
+  <td class="result mono">0.3</td>
+  <td class="result mono">0.3<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTRANK.EXC(A2:A10,1)</td>
+  <td>The smallest member of the array, which the exclusive definition keeps above zero</td>
+  <td class="result mono">0.1</td>
+  <td class="result mono">0.1<br><span class="category-tag">The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7,0)</td>
+  <td>A significance of zero, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PERCENTRANK.EXC(D20:D25,7)</td>
+  <td>An empty array, which the page excludes -- D20:D25 is deliberately left blank</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -666,7 +763,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

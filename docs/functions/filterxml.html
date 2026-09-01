@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Web &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Web &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>FILTERXML</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>FILTERXML</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-unknown">Inconclusive (no verdict published)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -439,10 +448,30 @@ Sheets equivalent &mdash; see the
 
 
 
+<div class="not-live-tested">
+  <strong>Excel for the web: executed, but no verdict published.</strong>
+  Excel for the web returned <code>#VALUE!</code> for <strong>every</strong> case &mdash; both the two that expected a parsed value and the two that expected <code>#VALUE!</code>. That the latter two &ldquo;matched&rdquo; is a coincidence of a uniform error, not a demonstration that the function works, so they cannot carry a verdict either. As with <code>ENCODEURL</code>, the name resolves (an unknown name is <code>#NAME?</code> here) and the error does not vary with the arguments, which points at a feature the web application does not ship rather than at a calculation defect. Our expected values describe the <strong>desktop</strong> product. The values are published verbatim and no verdict is drawn.
+  Every executed case is shown below with exactly what Excel for the web returned.
+</div>
+
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -505,6 +534,52 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=FILTERXML(A1,&#34;//t[2]&#34;)</td>
+  <td>Selecting the second matching element with a standard XPath predicate</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">beta<br><span class="category-tag">Microsoft&#39;s page gives no self-contained worked example -- its only example pipes live output of WEBSERVICE into FILTERXML, which no offline harness can reproduce -- so this case supplies literal XML and asserts what the documented contract requires: &#34;returns specific data from XML content by using the specified xpath&#34;, with xpath documented as &#34;A string in standard XPath format&#34;. Against &lt;r&gt;&lt;t&gt;alpha&lt;/t&gt;&lt;t&gt;beta&lt;/t&gt;&lt;/r&gt; the standard XPath //t[2] selects the second t element, whose string value is &#34;beta&#34;; re-derived with Python&#39;s ElementTree, which is an independent XPath implementation from either spreadsheet engine&#39;s.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FILTERXML(A2,&#34;//rc/@title&#34;)</td>
+  <td>Selecting an attribute value, the form Microsoft&#39;s own example uses</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">Excel<br><span class="category-tag">Microsoft&#39;s page documents its live example as &#34;Cells B3:B5 contain the formula =FILTERXML(B3,&#34;//rc/@title&#34;)&#34;, i.e. an attribute selection on rc elements. This case keeps that exact XPath and supplies a literal &lt;rc title=&#34;Excel&#34; .../&gt; element in place of the unreachable Wikipedia feed, so the documented attribute form is exercised deterministically. Re-derived with ElementTree.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FILTERXML(A3,&#34;//t&#34;)</td>
+  <td>Malformed XML (an unclosed root element)</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If xml is not valid, FILTERXML returns the #VALUE! error value.&#34; A3 holds &lt;r&gt;&lt;t&gt;alpha&lt;/t&gt; with no closing &lt;/r&gt;, which is not well-formed XML; ElementTree rejects it with a ParseError, confirming the input really is invalid rather than merely unusual.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=FILTERXML(A4,&#34;//x:t&#34;)</td>
+  <td>An element using a namespace prefix that was never declared</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents this as a separate failure mode from malformed XML: &#34;If xml contains a namespace with a prefix that is not valid, FILTERXML returns the #VALUE! error value.&#34; A4 holds &lt;r&gt;&lt;x:t&gt;alpha&lt;/x:t&gt;&lt;/r&gt;, where the prefix x is bound to no namespace; ElementTree rejects it with &#34;unbound prefix&#34;, confirming the condition the documentation describes.</span></td>
+  <td><span class="badge badge-unknown">Inconclusive</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -605,7 +680,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

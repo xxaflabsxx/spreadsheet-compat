@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Engineering &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Engineering &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>GESTEP</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>GESTEP</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060115.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060115.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,75 @@ GESTEP&rsquo;s support changed &mdash; not documentation claims, real results.</
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=GESTEP(5,4)</td>
+  <td>Microsoft&#39;s first worked example: 5 is greater than or equal to the step 4</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft publishes &#39;=GESTEP(5, 4)&#39; with the result 1. Derived from the documented rule: &#34;Returns 1 if number &gt;= step; returns 0 (zero) otherwise.&#34; 5 &gt;= 4.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GESTEP(5,5)</td>
+  <td>Microsoft&#39;s second worked example: the boundary, where number equals step</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft publishes &#39;=GESTEP(5, 5)&#39; with the result 1. This is the case that makes the comparison &gt;= rather than &gt;, and it is the one an implementation is most likely to get wrong; the page&#39;s own description of this example says &#34;Checks whether 5 is greater than or equal to the step value, 5.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GESTEP(-4,-5)</td>
+  <td>Microsoft&#39;s third worked example: both arguments negative</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft publishes &#39;=GESTEP(-4, -5)&#39; with the result 1. -4 &gt;= -5, so the answer is 1 -- a case an engine comparing magnitudes rather than signed values would get wrong, since |-4| &lt; |-5|.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GESTEP(-1)</td>
+  <td>Microsoft&#39;s fourth worked example: step omitted, so it defaults to zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft publishes &#39;=GESTEP(-1)&#39; with the result 0, and documents &#34;Step Optional. The threshold value. If you omit a value for step, GESTEP uses zero.&#34; -1 &gt;= 0 is false. (The page&#39;s description of this example reads &#34;Checks whether -1 is greater than the default step value, 0&#34;, dropping the &#34;or equal to&#34;; the syntax section&#39;s &#34;Returns 1 if number &gt;= step&#34; is the rule relied on here, and both readings agree on this input.)</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GESTEP(0)</td>
+  <td>Zero against the default step of zero, where the &gt;= boundary and the default meet</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Not published; derived from the two documented clauses together -- &#34;Returns 1 if number &gt;= step&#34; and &#34;If you omit a value for step, GESTEP uses zero&#34; -- which give 0 &gt;= 0, hence 1. Included because it is the single input that fails if EITHER the default is wrong OR the comparison is strict, and the published examples exercise those two rules only separately.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GESTEP(&#34;x&#34;,4)</td>
+  <td>A non-numeric argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If any argument is nonnumeric, GESTEP returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -565,7 +640,10 @@ GESTEP&rsquo;s support changed &mdash; not documentation claims, real results.</
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

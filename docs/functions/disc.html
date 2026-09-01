@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>DISC</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>DISC</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060103.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060103.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -444,10 +453,26 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -514,6 +539,60 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(DISC(DATE(2018,7,1),DATE(2048,1,1),97.975,100,1),12)</td>
+  <td>Microsoft&#39;s documented worked example: the discount rate of a bond priced at 97.975 per 100 face value, actual/actual basis</td>
+  <td class="result mono">0.000686384169</td>
+  <td class="result mono">0.000686384169<br><span class="category-tag">MICROSOFT-PUBLISHED RESULT CORRECTED. The page&#39;s example data is settlement 07/01/2018, maturity 01/01/2048, price 97.975, redemption 100, basis 1 (actual/actual), and it publishes the result 0.001038. That figure does not belong to those inputs. Derived independently from the formula the page itself states, DISC = ((redemption - pr)/redemption) * (B/DSM): (100 - 97.975)/100 = 0.02025, DSM = 10776 actual days from 2018-07-01 to 2048-01-01, and B under the documented actual/actual basis is the average length of the calendar years spanned, giving a year fraction of 29.50242868497748 and a discount rate of 0.0006863841691213483. The published 0.001038 is reproducible only by moving the maturity back ten years: with maturity 01/01/2038 the same arithmetic gives 0.0010381908237747707, which rounds to exactly the printed 0.001038. The published number is therefore a stale figure left behind when the example&#39;s dates were rolled forward, not a rounding of the correct answer, so the correct value is asserted here and the discrepancy recorded rather than buried. Asserted at 12 decimal places (0.000686384169), which is roughly 9 significant digits of the independently derived value and well inside double precision; the ROUND() wrapper keeps the assertion free of last-bit formatting differences. EXECUTED RESULT: all four LibreOffice builds return 0.000686384169121348, matching the independently derived value to full double precision -- so LibreOffice agrees with the derivation and with the page&#39;s stated inputs, and it is Microsoft&#39;s printed 0.001038 that stands alone.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DISC(DATE(2018,7,1),DATE(2048,1,1),0,100,1)</td>
+  <td>A price of zero, which the documentation excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If pr &lt;= 0 or if redemption &lt;= 0, DISC returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DISC(DATE(2018,7,1),DATE(2048,1,1),97.975,100,5)</td>
+  <td>A day-count basis above the documented range</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents five bases (0-4) and: &#34;If basis &lt; 0 or if basis &gt; 4, DISC returns the #NUM! error value.&#34; 5 is the first excluded value. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DISC(DATE(2048,1,1),DATE(2018,7,1),97.975,100,1)</td>
+  <td>Settlement later than maturity, which the documentation excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If settlement &gt;= maturity, DISC returns the #NUM! error value.&#34; The example&#39;s two dates are simply swapped here. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #VALUE! here instead of the documented #NUM! -- the same systemic #VALUE!-substitution pattern already recorded across this corpus, an error-code difference rather than a computation one.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DISC(&#34;abc&#34;,DATE(2048,1,1),97.975,100,1)</td>
+  <td>A settlement date that is not a valid serial date number</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If settlement or maturity is not a valid serial date number, DISC returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -630,7 +709,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

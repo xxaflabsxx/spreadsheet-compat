@@ -3,18 +3,47 @@
 
 Ground truth (see site/build_site.py and results/*.json):
 
-  * LibreOffice Calc  -- EXECUTED (four pinned builds, results/libreoffice-*.json)
-  * Google Sheets     -- EXECUTED (one dated Drive-import run,
-                         results/google-sheets.json, 2026-08-29)
-  * Microsoft Excel   -- NOT EXECUTED. Documentation only, and it is the
-                         yardstick the two executed engines are measured against.
+  * LibreOffice Calc     -- EXECUTED (four pinned builds, results/libreoffice-*.json)
+  * Google Sheets        -- EXECUTED (one dated Drive-import run,
+                            results/google-sheets.json, 2026-08-29)
+  * Excel for the web    -- EXECUTED (one dated OneDrive-recalculation run,
+                            results/excel-web.json, 2026-09-01). A SEPARATE
+                            IMPLEMENTATION from the desktop product.
+  * Microsoft Excel      -- NOT EXECUTED, and never will be by this harness.
+    (DESKTOP)               Documentation only, and it is the yardstick every
+                            executed engine is measured against.
 
-So this script fails (exit 1) on six kinds of dishonesty:
+THE DISTINCTION THIS FILE NOW EXISTS TO PROTECT: "Excel" alone means the
+DESKTOP product, which we do not run. "Excel for the web" is a different
+application with its own calculation engine, which we DO run. An executed
+Excel-web value is evidence about the web engine and about nothing else; it is
+never evidence about desktop Excel, and rendering it as though it were is the
+single failure mode this integration could introduce. Because we have no
+desktop run, a web-vs-documented mismatch is genuinely ambiguous -- it could be
+the web engine diverging or the documentation being wrong about both -- and no
+page may resolve it in either direction.
 
-  1. FALSE EXECUTION CLAIMS -- any page claiming Excel was verified, tested or
-     executed, or claiming all three engines were. Truthful claims about
-     executing Google Sheets and/or LibreOffice are allowed, because they are
-     true. Negations ("we do not run Excel") are allowed.
+So this script fails (exit 1) on eight kinds of dishonesty:
+
+  1. FALSE EXECUTION CLAIMS -- any page claiming DESKTOP Excel was verified,
+     tested or executed. Truthful claims about executing Google Sheets,
+     LibreOffice and/or Excel for the web are allowed, because they are true.
+     Negations ("we do not run desktop Excel") are allowed.
+
+     NARROWED for Excel for the web: "executed in Excel for the web" is now a
+     TRUE sentence and must not be caught, while a bare "executed in Excel"
+     stays fatal. The distinction is carried by negative lookaheads on the word
+     "Excel" -- deliberately, so that adding the web engine could not be done
+     by weakening the guard into "any sentence mentioning Excel and execution
+     is fine".
+
+     1c. STALE "WE DO NOT RUN EXCEL" COPY -- the inverse guard, and the reason
+     it exists is that this sentence has just changed truth value. Until
+     2026-09-01 "we do not run Excel" was the honest disclaimer on 32 guides.
+     It is now ambiguous at best: we still do not run desktop Excel, but we DO
+     run Excel for the web, and a page that says both without qualification
+     contradicts itself. An unqualified "we do not run Excel" is therefore
+     failed; "we do not run DESKTOP Excel" is the required form.
 
      1b. FABRICATED LIBREOFFICE / SHEETS EXECUTION -- the same lie about an
      engine we DO execute, on a function that engine never ran. Excel is
@@ -23,7 +52,11 @@ So this script fails (exit 1) on six kinds of dishonesty:
      the way rule 5 is: a function page whose results carry no LibreOffice
      entry must not contain LibreOffice execution copy (a "Yes (<version>,
      <date>)" live-tested cell, or prose like "pass in LibreOffice"), and
-     symmetrically for Google Sheets. Until batch G every executed function
+     symmetrically for Google Sheets, and for Excel for the web (the "xw"
+     slot: a page may claim an Excel-web live-tested cell only if
+     results/excel-web.json actually has an entry for that function -- which
+     is what keeps the seven LAMBDA-family transport skips from silently
+     acquiring a web verdict). Until batch G every executed function
      had run in BOTH engines, so nothing exercised the single-engine paths in
      build_site.py -- and one of them fabricated "All 0 executed test cases
      pass in LibreOffice" for a Sheets-only function, with the version
@@ -58,6 +91,15 @@ So this script fails (exit 1) on six kinds of dishonesty:
      multi-sheet recipes are skipped and stay LibreOffice-only), so the two
      wordings coexist ACROSS the site by design -- but never on one page.
 
+  7. DESKTOP/WEB CONFLATION -- an Excel-for-the-web VALUE rendered under a
+     heading that names Excel without saying "for the web". This is the guard
+     that makes the distinction above enforceable rather than aspirational: it
+     does not care what a page promises in prose, only whether web-executed
+     data ever appears beneath a heading a reader would take to mean desktop
+     Excel. The markers it keys on ("Yes (recalc, <date>)" and "OneDrive
+     recalculation") are emitted by build_site.py for the excel_web engine and
+     by nothing else.
+
   6. UNDECLARED EXCLUSIONS FROM A SHEETS VERDICT -- a recipe whose stored
      Google Sheets result carries `n_not_comparable > 0` has checks its
      Sheets badge does NOT cover: Google executed them against a workbook the
@@ -77,11 +119,15 @@ ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file
 FALSE_EXECUTION = re.compile(
     r"(verified (?:in|across|on) all three|tested (?:in|across|on) all three|"
     r"executed (?:in|across|on) all three|"
-    r"(?:verified|tested|executed|confirmed) (?:in|on) excel(?! *\(documented)|"
+    # NOT_WEB: the web build of Excel IS executed, so "executed in Excel for
+    # the web" / "Excel Online" must survive while a bare "executed in Excel"
+    # stays fatal. Attached to every pattern that names Excel as the object of
+    # an execution verb.
+    r"(?:verified|tested|executed|confirmed) (?:in|on) excel(?! *\(documented| for the web| online)|"
     r"verified formula for excel|"
     r"execution-verified compatibility data(?! *\((?:libreoffice|google sheets))|"
     r"every result (?:is )?verified(?! in (?:libreoffice|google sheets))|"
-    r"machine-verified excel|"
+    r"machine-verified excel(?! for the web| online)|"
     # "in every version of Excel, Google Sheets and LibreOffice we test" — the
     # sneakiest form: it never uses the word "executed", but "we test" applied
     # to a list containing Excel claims exactly that. (Caught a real regression
@@ -90,7 +136,7 @@ FALSE_EXECUTION = re.compile(
     # NB: a bare "works in all Excel versions" is a documented-AVAILABILITY
     # claim, not a testing claim, so it is deliberately not matched here.
     r"we (?:tested|executed) (?:it )?in all excel versions|"
-    r"we (?:test|execute|ran|run)[^.]{0,40}?\bin excel\b|"
+    r"we (?:test|execute|ran|run)[^.]{0,40}?\bin excel\b(?! for the web| online)|"
     # "executed in LibreOffice Calc, Google Sheets and Excel" -- the form the
     # two-engine recipe wording opens up. Once a sentence can honestly list
     # TWO executed engines, appending a third is a one-word regression none
@@ -109,6 +155,56 @@ NEGATION = re.compile(
     r"instead of|without|do not|don't)\W+(?:\w+\W+){0,4}$",
     re.I,
 )
+
+# (1c) "we do not run Excel" -- true about the desktop product, false as
+# written now that Excel for the web is executed, and flatly self-contradictory
+# on a page that also reports an Excel-web result. The required form names the
+# product: "we do not run DESKTOP Excel". The lookahead lets the qualified
+# forms through and nothing else, so this fires on exactly the copy the
+# integration has to replace and stops firing when it has been.
+STALE_EXCEL_DISCLAIMER = re.compile(
+    r"\bwe (?:do|did|does)(?:n't| not) (?:run|execute)\s+"
+    r"(?!desktop\b)(?:microsoft\s+)?excel\b(?! for the web| online)",
+    re.I,
+)
+
+# (7) Desktop/web conflation. These two markers are emitted by
+# site/build_site.py for the excel_web engine ONLY -- engine_tested_cell()
+# renders "Yes (recalc, <date>)" and engine_exec_header() renders "... via
+# OneDrive recalculation" -- so their presence in a section is proof that
+# section carries web-executed data. A heading that says "Excel" without
+# "for the web" (or "Online") above such data is the conflation.
+XW_VALUE_MARKERS = re.compile(
+    r"Yes \(recalc, \d{4}-\d{2}-\d{2}\)|OneDrive recalculation", re.I)
+HEADING_RX = re.compile(r"<h[1-6][^>]*>(.*?)</h[1-6]>", re.S | re.I)
+EXCEL_HEADING = re.compile(r"\bexcel\b", re.I)
+WEB_QUALIFIER = re.compile(r"for the web|online", re.I)
+
+
+def conflating_sections(raw):
+    """Headings that name Excel without qualifying it, over Excel-web data.
+
+    Splits the raw HTML at every heading and pairs each heading with the body
+    that follows it, up to the next heading. Deliberately operates on the RAW
+    html rather than stripped text, because the heading structure is the whole
+    point of the check."""
+    parts = list(HEADING_RX.finditer(raw))
+    out = []
+    for i, m in enumerate(parts):
+        head = strip_tags(m.group(1)).strip()
+        body = raw[m.end():parts[i + 1].start() if i + 1 < len(parts) else len(raw)]
+        if not EXCEL_HEADING.search(head) or WEB_QUALIFIER.search(head):
+            continue
+        # The heading itself is searched too, not just the body. The most
+        # likely way this rule ever fires is someone editing
+        # engine_exec_header() so the Excel-web case table is titled "Excel
+        # (executed ... via OneDrive recalculation)" -- there the giveaway
+        # marker is IN the heading, and a body-only search sails past it.
+        hit = XW_VALUE_MARKERS.search(m.group(0) + body)
+        if hit:
+            out.append((re.sub(r"\s+", " ", head)[:90], hit.group(0)))
+    return out
+
 
 # (2) Blanket "Google Sheets has not been executed" copy that is now stale.
 # Matches "Google Sheets ... not (yet) executed/run/tested" within a short
@@ -146,7 +242,9 @@ STALE_SHEETS = [
 # Per-CASE honesty that is still true and must NOT trip the stale check.
 STALE_ALLOW = re.compile(
     r"(inconclusive|no corpus case|not in our (?:executed )?(?:test )?set|"
-    r"we do not run excel|excel (?:is )?not (?:live-)?executed|"
+    # Narrowed with the copy rewrite: the bare form is now caught by rule 1c,
+    # so whitelisting it here would let a stale page hide behind it.
+    r"we do not run desktop excel|desktop excel (?:is )?not (?:live-)?executed|"
     # A recipe page saying its own worked EXAMPLE was not run in Sheets is
     # true and must stay: recipes-verified.json is LibreOffice-only. Only the
     # blanket "Sheets has never been executed" claim is stale.
@@ -197,6 +295,9 @@ LAST_TESTED = re.compile(r"Last tested (\d{4}-\d{2}-\d{2})")
 # engine_tested_cell): "Yes (25.8.7.3, 2026-07-29)" / "Yes (Drive import, …)".
 LO_CELL = re.compile(r"Yes \((\d+(?:\.\d+)+), (\d{4}-\d{2}-\d{2})\)")
 GS_CELL = re.compile(r"Yes \(Drive import, (\d{4}-\d{2}-\d{2})\)")
+# Excel for the web has no version either, so its cell is dated prose too.
+# Keeping it non-numeric is what keeps it out of LO_CELL's jaws above.
+XW_CELL = re.compile(r"Yes \(recalc, (\d{4}-\d{2}-\d{2})\)")
 
 
 def _version_tuple(v):
@@ -224,17 +325,28 @@ def expected_dates():
             if newest_lo is None or _version_tuple(d.get("engine_version")) >= \
                     _version_tuple(newest_lo.get("engine_version")):
                 newest_lo = d
+        # ORDER MATTERS, exactly as in build_site.engine_key_from_engine_name:
+        # "excel_web" must be recognised before any bare "excel" test, or the
+        # web run lands in the desktop slot. It was silently DROPPED here until
+        # the web engine was published, which was safe only while nothing
+        # rendered it -- the moment it reaches a page, a page's "Last tested"
+        # line has to be the newest date across THREE engines, not two.
+        elif "excel_web" in engine or "excel for the web" in engine:
+            blobs.append(d)
         elif "sheet" in engine or "google" in engine:
             blobs.append(d)
     if newest_lo is not None:
         blobs.append(newest_lo)
     out = {}
     for d in blobs:
-        slot = "lo" if "libreoffice" in str(d.get("engine", "")).lower() else "gs"
+        _eng = str(d.get("engine", "")).lower()
+        slot = ("lo" if "libreoffice" in _eng
+                else "xw" if ("excel_web" in _eng or "excel for the web" in _eng)
+                else "gs")
         fallback = (d.get("generated_at") or "")[:10]
         for fn, block in (d.get("function_results") or {}).items():
             date = (block.get("executed_at") if isinstance(block, dict) else None) or fallback
-            e = out.setdefault(fn, {"lo": None, "gs": None, "page": ""})
+            e = out.setdefault(fn, {"lo": None, "gs": None, "xw": None, "page": ""})
             e[slot] = date
             if date and date > e["page"]:
                 e["page"] = date
@@ -253,6 +365,14 @@ GS_EXEC_PROSE = re.compile(
     r"\b(?:executed|execution|ran|run|tested)\b[^.]{0,60}?\bin (?:google )?sheets\b"
     r"|\bpass(?:es|ed)?\b[^.]{0,40}?\bin (?:google )?sheets\b"
     r"|\b(?:google )?sheets\b[^.]{0,60}?\bexecuted (?:test )?cases?\b",
+    re.I,
+)
+
+
+XW_EXEC_PROSE = re.compile(
+    r"\b(?:executed|execution|ran|run|tested)\b[^.]{0,60}?\bin excel for the web\b"
+    r"|\bpass(?:es|ed)?\b[^.]{0,40}?\bin excel for the web\b"
+    r"|\bexcel for the web\b[^.]{0,60}?\bexecuted (?:test )?cases?\b",
     re.I,
 )
 
@@ -296,6 +416,9 @@ def executed_engines():
         engine = str(d.get("engine", "")).lower()
         if "libreoffice" in engine:
             slot = "lo"
+        # Before any "excel" test, for the same reason as everywhere else.
+        elif "excel_web" in engine or "excel for the web" in engine:
+            slot = "xw"
         elif "sheet" in engine or "google" in engine:
             slot = "gs"
         else:
@@ -334,6 +457,8 @@ def recipes_with_exclusions():
 RECIPE_EXCLUSIONS = recipes_with_exclusions()
 undeclared = []
 
+stale_excel = []
+conflated = []
 bad = []
 fabricated = []
 stale = []
@@ -342,8 +467,21 @@ contradictory = []
 misattributed = []
 files = glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True)
 for f in files:
-    text = strip_tags(open(f, encoding="utf-8", errors="replace").read())
+    _raw_page = open(f, encoding="utf-8", errors="replace").read()
+    text = strip_tags(_raw_page)
     rel = os.path.relpath(f, ROOT)
+    # (1c) the disclaimer that changed truth value on 2026-09-01.
+    for m in STALE_EXCEL_DISCLAIMER.finditer(text):
+        stale_excel.append(
+            (rel, re.sub(r"\s+", " ",
+                         text[max(0, m.start() - 70):m.end() + 70])))
+    # (7) web values under a desktop-sounding heading. Runs on the RAW html
+    # because it is the heading STRUCTURE that is being checked.
+    for _head, _marker in conflating_sections(_raw_page):
+        conflated.append(
+            (rel, f"heading {_head!r} names Excel without saying \"for the web\", "
+                  f"and the section under it renders Excel-for-the-web executed "
+                  f"data ({_marker!r})"))
     slug = os.path.basename(f)[:-5]
     if rel.replace(os.sep, "/").startswith("how-to/") and slug in RECIPE_EXCLUSIONS:
         n_ok, n_all, n_excl = RECIPE_EXCLUSIONS[slug]
@@ -397,6 +535,11 @@ for _page in sorted(glob.glob(os.path.join(ROOT, "functions", "*.html"))):
     for _slot, _label, _cell_rx, _prose_rx in (
         ("lo", "LibreOffice", LO_CELL, LO_EXEC_PROSE),
         ("gs", "Google Sheets", GS_CELL, GS_EXEC_PROSE),
+        # The seven LAMBDA-family functions Excel for the web could not open
+        # are exactly what this slot protects: they have LibreOffice and Sheets
+        # entries but no excel-web entry, so any web live-tested cell or web
+        # execution prose on their pages is fabricated by definition.
+        ("xw", "Excel for the web", XW_CELL, XW_EXEC_PROSE),
     ):
         if _slot in _slots:
             continue                      # that engine really did run it
@@ -429,6 +572,7 @@ for fn, want in sorted(_expected.items()):
     for label, got, exp in (
         ("LibreOffice", [d for _v, d in LO_CELL.findall(raw)], want["lo"]),
         ("Google Sheets", GS_CELL.findall(raw), want["gs"]),
+        ("Excel for the web", XW_CELL.findall(raw), want.get("xw")),
     ):
         if exp and got and got[0] != exp:
             misdated.append((rel_page,
@@ -451,6 +595,12 @@ for f, ctx in misattributed[:40]:
 print(f"  recipe pages both showing and denying a Sheets result: {len(contradictory)}")
 for f, ctx in contradictory[:40]:
     print(f"    {f}: …{ctx}…")
+print(f"  stale unqualified 'we do not run Excel' copy: {len(stale_excel)}")
+for f, ctx in stale_excel[:40]:
+    print(f"    {f}: \u2026{ctx}\u2026")
+print(f"  Excel-web values under a desktop-Excel heading: {len(conflated)}")
+for f, ctx in conflated[:40]:
+    print(f"    {f}: {ctx}")
 print(f"  recipe pages hiding checks their Sheets verdict excludes: {len(undeclared)}")
 for f, ctx in undeclared[:10]:
     print(f"    {f}: {ctx}")
@@ -459,4 +609,4 @@ print(f"  function pages dated from the file instead of the function: {len(misda
 for f, ctx in misdated[:40]:
     print(f"    {f}: {ctx}")
 sys.exit(1 if (bad or fabricated or stale or contradictory or misattributed
-               or misdated or undeclared) else 0)
+               or misdated or undeclared or stale_excel or conflated) else 0)

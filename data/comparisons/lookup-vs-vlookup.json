@@ -2,23 +2,71 @@
   "slug": "lookup-vs-vlookup",
   "title": "LOOKUP vs VLOOKUP: why the old one still shows up",
   "meta_desc": "The bare LOOKUP function vs VLOOKUP: vector form, always-approximate matching, the last-non-blank trick, and when either is the wrong choice today.",
-  "funcs": ["LOOKUP", "VLOOKUP"],
+  "funcs": [
+    "LOOKUP",
+    "VLOOKUP"
+  ],
   "intro": "Bare LOOKUP predates VLOOKUP and survives for two reasons: its vector form is pleasantly direct (lookup range and result range as separate arguments — like a primitive XLOOKUP), and its always-approximate matching powers classic tricks like finding the last non-blank cell. As a general lookup, though, it's a trap.",
   "table": [
-    {"aspect": "Match mode", "cols": ["ALWAYS approximate — assumes sorted data, no exact option", "Approximate by default, exact with FALSE"]},
-    {"aspect": "Unsorted data", "cols": ["Silently wrong answers", "Correct with FALSE"]},
-    {"aspect": "Separate lookup/result ranges", "cols": ["Yes (vector form) — can look left", "No — index into one table, rightward only"]},
-    {"aspect": "Famous trick", "cols": ["=LOOKUP(2,1/(rng<>\"\"),rng) → last non-blank", "—"]},
-    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both verified in every version we test)"]}
+    {
+      "aspect": "Match mode",
+      "cols": [
+        "ALWAYS approximate — assumes sorted data, no exact option",
+        "Approximate by default, exact with FALSE"
+      ]
+    },
+    {
+      "aspect": "Unsorted data",
+      "cols": [
+        "Silently wrong answers",
+        "Correct with FALSE"
+      ]
+    },
+    {
+      "aspect": "Separate lookup/result ranges",
+      "cols": [
+        "Yes (vector form) — can look left",
+        "No — index into one table, rightward only"
+      ]
+    },
+    {
+      "aspect": "Famous trick",
+      "cols": [
+        "=LOOKUP(2,1/(rng<>\"\"),rng) → last non-blank",
+        "—"
+      ]
+    },
+    {
+      "aspect": "Compatibility",
+      "cols": [
+        "Universal",
+        "Universal (both verified in every version we test)"
+      ]
+    }
   ],
   "when": [
-    {"func": "LOOKUP", "use_when": "Two situations only: genuinely sorted threshold data where you'd use approximate matching anyway, and the last-non-blank/last-match idioms built on its scan-to-the-end behavior."},
-    {"func": "VLOOKUP", "use_when": "Ordinary exact lookups in older-version-compatible sheets (always passing FALSE). On modern versions, XLOOKUP supersedes both — it has LOOKUP's separate-ranges design plus an exact-match default."}
+    {
+      "func": "LOOKUP",
+      "use_when": "Two situations only: genuinely sorted threshold data where you'd use approximate matching anyway, and the last-non-blank/last-match idioms built on its scan-to-the-end behavior."
+    },
+    {
+      "func": "VLOOKUP",
+      "use_when": "Ordinary exact lookups in older-version-compatible sheets (always passing FALSE). On modern versions, XLOOKUP supersedes both — it has LOOKUP's separate-ranges design plus an exact-match default."
+    }
   ],
-  "compat_note": "Both execute identically in every LibreOffice build and in the Google Sheets run we execute (Excel per Microsoft's docs — we do not run Excel) — LOOKUP's dangers are semantic (silent approximate matching), not compatibility. XLOOKUP, the modern replacement for both, needs Excel 2021+/365, current Sheets, or LibreOffice 24.8+ per our executed results.",
+  "compat_note": "Both execute identically in every LibreOffice build and in the Google Sheets run we execute (Excel per Microsoft's docs — we do not run desktop Excel) — LOOKUP's dangers are semantic (silent approximate matching), not compatibility. XLOOKUP, the modern replacement for both, needs Excel 2021+/365, current Sheets, or LibreOffice 24.8+ per our executed results. Excel for the web is a separate application and we do execute it (recalculated on OneDrive, 2026-09-01); those measurements are on the individual function pages.",
   "examples": [
-    {"label": "LOOKUP vector form (sorted thresholds)", "formula": "=LOOKUP(D2,A2:A10,B2:B10)"},
-    {"label": "Last non-blank cell (the LOOKUP idiom)", "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)"},
-    {"label": "VLOOKUP exact (the safe everyday form)", "formula": "=VLOOKUP(D2,A2:B10,2,FALSE)"}
+    {
+      "label": "LOOKUP vector form (sorted thresholds)",
+      "formula": "=LOOKUP(D2,A2:A10,B2:B10)"
+    },
+    {
+      "label": "Last non-blank cell (the LOOKUP idiom)",
+      "formula": "=LOOKUP(2,1/(A2:A100<>\"\"),A2:A100)"
+    },
+    {
+      "label": "VLOOKUP exact (the safe everyday form)",
+      "formula": "=VLOOKUP(D2,A2:B10,2,FALSE)"
+    }
   ]
 }

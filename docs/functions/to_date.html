@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Parser &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>TO_DATE</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document TO_DATE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>TO_DATE</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document TO_DATE, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,66 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=TO_DATE(25405)-DATE(1969,7,21)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0</span>.
+        DERIVED, not published: the page prints TO_DATE(25405) as a Sample Usage formula with NO result beside it. The rule it is derived from is the page&#39;s own sentence &#34;If value is a number or a reference to a cell containing a numeric value, TO_DATE returns value converted to a date, interpreting value as number of days since December 30, 1899.&#34; Derived independently: 1899-12-30 + 25405 days = 1969-07-21 (computed with Python&#39;s proleptic Gregorian calendar, which agrees with the 1899-12-30-origin serial system for every date after 1900-03-01). Asserted as a DIFFERENCE against DATE(1969,7,21) rather than as a serial or a formatted string, so the case is independent of the locale&#39;s date format and of whether the engine hands the harness a date object or a number. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format &gt; Number command from the menu bar. What changes is the cell&#39;s number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=N(TO_DATE(25405))</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">25405</span>.
+        DERIVED from the Notes bullet &#34;TO_DATE is the inverse of N as applied to a date&#34;. If TO_DATE only re-formats the number it is given, then N -- which reads a date back as its serial -- must return the original argument. No constant was taken from the page; 25405 is the page&#39;s own sample argument coming back out. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 25405, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(TO_DATE(10/10/2000)+0,10)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.0005</span>.
+        DERIVED from the Notes bullet, which states the arithmetic outright: &#34;TO_DATE does not autoconvert number formats in the same way as direct entry into cells. Therefore, TO_DATE(10/10/2000) is interpreted as TO_DATE(0.0005), the quotient of 10 divided by 10 divided by 2000.&#34; Derived independently: 10/10 = 1 and 1/2000 = 0.0005 exactly. The bullet names the intermediate value 0.0005 but prints no result for the call, so the assertion is that the VALUE survives -- +0 strips the date formatting the function applies, and ROUND(...,10) keeps the case free of last-bit formatting differences. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 0.0005, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=TO_DATE(&#34;not a number&#34;)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">not a number</span>.
+        DERIVED from the sentence &#34;If value is not a number or a reference to a cell containing a numeric value, TO_DATE returns value without modification.&#34; The page gives no example of this, so the argument here is a plain string chosen to be unambiguously non-numeric. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected &#39;not a number&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(TO_DATE(40826.4375)-DATE(2011,10,10),10)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.4375</span>.
+        DERIVED from &#34;fractional values indicate time of day past midnight&#34;, applied to the page&#39;s own Sample Usage formula TO_DATE(40826.4375) (again printed with no result). Derived independently: 1899-12-30 + 40826 days = 2011-10-10, and the remaining 0.4375 of a day is 10h30m past midnight. Asserted as the difference from DATE(2011,10,10) so both halves of the claim -- the date and the fraction -- are checked in one value without depending on a locale&#39;s time format. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.; MISMATCH vs expected: expected 0.4375, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -517,6 +582,60 @@ we re-run every test on each new release, so it will flip to Supported here as s
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=TO_DATE(25405)-DATE(1969,7,21)</td>
+  <td>The page&#39;s own Sample Usage input, asserted against the date its own rule requires</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0<br><span class="category-tag">DERIVED, not published: the page prints TO_DATE(25405) as a Sample Usage formula with NO result beside it. The rule it is derived from is the page&#39;s own sentence &#34;If value is a number or a reference to a cell containing a numeric value, TO_DATE returns value converted to a date, interpreting value as number of days since December 30, 1899.&#34; Derived independently: 1899-12-30 + 25405 days = 1969-07-21 (computed with Python&#39;s proleptic Gregorian calendar, which agrees with the 1899-12-30-origin serial system for every date after 1900-03-01). Asserted as a DIFFERENCE against DATE(1969,7,21) rather than as a serial or a formatted string, so the case is independent of the locale&#39;s date format and of whether the engine hands the harness a date object or a number. WHAT THIS HARNESS CAN AND CANNOT SEE FOR A TO_* FUNCTION. The TO_* parsers are FORMATTING functions: the page itself describes the operation as equivalent to applying a Format &gt; Number command from the menu bar. What changes is the cell&#39;s number format, not the number. This harness records the computed VALUE read back from a recalculated .xlsx, so the format half of the documented behaviour is invisible to it and is NOT asserted anywhere in this file. What is asserted is the value half, which the page states outright: the underlying number survives the conversion unchanged, and a non-numeric argument is returned unmodified. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=N(TO_DATE(25405))</td>
+  <td>The documented inverse relationship with N, asserted structurally</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">25405<br><span class="category-tag">DERIVED from the Notes bullet &#34;TO_DATE is the inverse of N as applied to a date&#34;. If TO_DATE only re-formats the number it is given, then N -- which reads a date back as its serial -- must return the original argument. No constant was taken from the page; 25405 is the page&#39;s own sample argument coming back out. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TO_DATE(10/10/2000)+0,10)</td>
+  <td>The page&#39;s explicit warning that TO_DATE does not parse a slash-separated date</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.0005<br><span class="category-tag">DERIVED from the Notes bullet, which states the arithmetic outright: &#34;TO_DATE does not autoconvert number formats in the same way as direct entry into cells. Therefore, TO_DATE(10/10/2000) is interpreted as TO_DATE(0.0005), the quotient of 10 divided by 10 divided by 2000.&#34; Derived independently: 10/10 = 1 and 1/2000 = 0.0005 exactly. The bullet names the intermediate value 0.0005 but prints no result for the call, so the assertion is that the VALUE survives -- +0 strips the date formatting the function applies, and ROUND(...,10) keeps the case free of last-bit formatting differences. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TO_DATE(&#34;not a number&#34;)</td>
+  <td>The documented pass-through for a non-numeric argument</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">not a number<br><span class="category-tag">DERIVED from the sentence &#34;If value is not a number or a reference to a cell containing a numeric value, TO_DATE returns value without modification.&#34; The page gives no example of this, so the argument here is a plain string chosen to be unambiguously non-numeric. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TO_DATE(40826.4375)-DATE(2011,10,10),10)</td>
+  <td>The page&#39;s second Sample Usage input, whose fractional part is a time of day</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.4375<br><span class="category-tag">DERIVED from &#34;fractional values indicate time of day past midnight&#34;, applied to the page&#39;s own Sample Usage formula TO_DATE(40826.4375) (again printed with no result). Derived independently: 1899-12-30 + 40826 days = 2011-10-10, and the remaining 0.4375 of a day is 10h30m past midnight. Asserted as the difference from DATE(2011,10,10) so both halves of the claim -- the date and the fraction -- are checked in one value without depending on a locale&#39;s time format. Google&#39;s TO_DATE page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094239.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -631,6 +750,9 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

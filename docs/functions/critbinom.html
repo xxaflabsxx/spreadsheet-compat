@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CRITBINOM</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CRITBINOM</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060183.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060183.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,28 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -502,6 +529,68 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=CRITBINOM(A2,A3,A4)</td>
+  <td>Microsoft&#39;s documented worked example: smallest k whose cumulative binomial probability over 6 fair trials reaches 0.75</td>
+  <td class="result mono">4</td>
+  <td class="result mono">4<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 4. Independently derived by summing the binomial probabilities explicitly: with trials 6 and probability 0.5 the cumulative sums are 0.015625, 0.109375, 0.34375, 0.65625, 0.890625, 0.984375, 1.0 for k = 0..6. The first sum that is &gt;= the criterion 0.75 is 0.890625 at k = 4, which is the documented answer</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CRITBINOM(A2,A3,0.9)</td>
+  <td>The same trials and probability at a stricter criterion of 0.9</td>
+  <td class="result mono">5</td>
+  <td class="result mono">5<br><span class="category-tag">From the same explicit cumulative sums, the first value &gt;= 0.9 is 0.984375 at k = 5 (the cumulative sum at k = 4 is 0.890625, just short). This case discriminates the alpha argument and pins the &gt;= comparison direction</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CRITBINOM(6.9,A3,0.6)</td>
+  <td>A non-integer number of trials, which the documentation says is truncated</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3<br><span class="category-tag">Excel documents &#34;If trials is not an integer, it is truncated&#34;, so 6.9 must behave exactly as 6. With 6 trials the cumulative sums are 0.015625, 0.109375, 0.34375, 0.65625, ...; the first one &gt;= the criterion 0.6 is 0.65625 at k = 3. The criterion 0.6 was chosen precisely because it discriminates: with 7 trials the sums are 0.0078125, 0.0625, 0.2265625, 0.5, 0.7734375, ... and the first &gt;= 0.6 is at k = 4, so an engine that rounded 6.9 up to 7 instead of truncating would return 4 here. (At the page&#39;s own criterion of 0.75 both 6 and 7 trials give 4, which is why this case does not reuse it)</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CRITBINOM(A2,0,A4)</td>
+  <td>A success probability of exactly 0</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If probability_s is &lt;= 0 or probability_s =&gt; 1, CRITBINOM returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds return 0 rather than the documented error -- a plausible-looking answer for an input the documentation excludes. The same silent substitution was already recorded for CRITBINOM&#39;s modern replacement BINOM.INV elsewhere in this corpus, so it is the function family&#39;s behaviour and not a one-off</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CRITBINOM(A2,A3,1)</td>
+  <td>A criterion value of exactly 1</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If alpha &lt;= 0 or alpha =&gt; 1, CRITBINOM returns the #NUM! error value.&#34; EXECUTED RESULT: all four LibreOffice builds return 6 -- the trial count itself, since no cumulative probability strictly exceeds a criterion of exactly 1 until the last one -- rather than the documented error. As with the probability_s case, the modern BINOM.INV shows the same behaviour elsewhere in this corpus</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CRITBINOM(-1,A3,A4)</td>
+  <td>A negative number of trials</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If trials &lt; 0, CRITBINOM returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -634,7 +723,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

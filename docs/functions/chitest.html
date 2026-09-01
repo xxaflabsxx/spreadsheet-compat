@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CHITEST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CHITEST</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060181.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060181.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -444,10 +453,24 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -502,6 +525,52 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(CHITEST(A2:B4,A6:B8),7)</td>
+  <td>Microsoft&#39;s documented worked example: chi-squared test of independence on a 3x2 agree/neutral/disagree by men/women table</td>
+  <td class="result mono">0.0003082</td>
+  <td class="result mono">0.0003082<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.0003082 and states the underlying statistic is 16.16957 with 2 degrees of freedom. Both figures were re-derived independently: sum over cells of (A-E)^2/E for the documented 3x2 tables gives 16.16957507479688, and with df = (r-1)*(c-1) = (3-1)*(2-1) = 2 the right-tail probability is scipy.stats.chi2.sf(16.16957507479688, 2) = 0.0003081920170083095 -&gt; 0.0003082 at 7 dp</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHITEST(A2:B4,A2:B4),9)</td>
+  <td>Actual and expected ranges identical, so the chi-squared statistic is exactly 0</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1.0<br><span class="category-tag">Excel documents that the statistic &#34;is 0 only if Aij = Eij for every i,j&#34;. With a statistic of 0 on 2 degrees of freedom the right-tail probability is exactly 1: scipy.stats.chi2.sf(0, 2) = 1.0. This case checks the documented statistic definition at its degenerate point without depending on any published figure</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHITEST(A2:B4,A6:B7)</td>
+  <td>Actual and expected ranges with different numbers of data points</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Excel documents: &#34;If actual_range and expected_range have a different number of data points, CHITEST returns the #N/A error value.&#34; Here the actual range holds 6 values and the expected range 4</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CHITEST(A2,A6)</td>
+  <td>Single-cell actual and expected ranges, i.e. r = c = 1</td>
+  <td class="result mono">#N/A</td>
+  <td class="result mono">#N/A<br><span class="category-tag">Excel documents: &#34;r = c= 1 is not allowed and #N/A is returned.&#34; With one row and one column there are no degrees of freedom left after conditioning on the margins, so CHITEST has no distribution to evaluate</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -602,7 +671,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

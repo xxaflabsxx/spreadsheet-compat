@@ -345,7 +345,7 @@ The criterion is <code>West</code> (one matching row) in the first row of the ta
 distinct numbers.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=DGET(A1:B4,"Sales",D1:D2) &mdash; criterion East, two matches</td><td>#NUM!</td><td>#NUM!</td><td class="result">#VALUE!</td></tr>
     <tr><td class="formula">=MODE.SNGL(1,2,3)</td><td>#N/A</td><td>#N/A</td><td class="result">#VALUE!</td></tr>
@@ -359,7 +359,7 @@ distinct numbers.</p>
 <p>The Google Sheets column is executed output from a Drive import on 2026-08-29, and it confirms what
 was previously only documented: Sheets returns <code>#NUM!</code> for the two-match
 <code>DGET</code> and <code>#N/A</code> for <code>MODE.SNGL</code> with no repeats, matching Excel on
-every row of both tables. The Excel column is documented behaviour &mdash; we do not run Excel. The LibreOffice column is what our harness
+every row of both tables. The Excel column is documented behaviour &mdash; we do not run desktop Excel. The LibreOffice column is what our harness
 computed in LibreOffice Calc 25.8.7.3. Success cases agree in every engine we have data for: a
 single-match <code>DGET</code> returns <code>200</code>, and <code>MODE.SNGL</code> picks the right
 value including the first-of-ties case.</p>
@@ -395,7 +395,7 @@ LibreOffice 25.8.7.3. For <code>MODE.SNGL</code>, decide what a no-mode column s
 with <code>IFERROR</code> rather than letting an error class carry the meaning.</p>
 
 <h2 class="section-title">Honest limits</h2>
-<p>We did not execute Excel; its column is Microsoft&rsquo;s documentation. Google Sheets and
+<p>We did not execute desktop Excel; its column is Microsoft&rsquo;s documentation. Google Sheets and
 LibreOffice were both executed. These two cases used to be stored with LibreOffice&rsquo;s
 <code>#VALUE!</code> as the expected value and the real Excel/Sheets behaviour written only into the
 case description, which kept them out of our automated mismatch counts; that has been corrected, so
@@ -423,7 +423,7 @@ import.</p>
   </div>
   <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
 </aside>
-
+<p><strong>A note on which Excel this is.</strong> The Excel column in the tables above is Microsoft&rsquo;s documented behaviour for <strong>desktop</strong> Excel, as recorded in our test corpus &mdash; we do not run desktop Excel, and no value in that column is a measurement. <strong>Excel for the web is a different application with its own calculation engine, and that one we do run</strong> (recalculated on OneDrive, 2026-09-01). Its measured results are published on each function&rsquo;s own page rather than in these guide tables. Because we have no desktop run to compare against, a disagreement between an Excel-web measurement and the documented column is genuinely ambiguous: it may mean the web engine diverges from the desktop one, or that the documentation is wrong about both. We do not claim to know which.</p>
 
 <aside class="promo-card">
   <div>

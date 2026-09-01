@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>INTRATE</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>INTRATE</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,30 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -522,6 +551,76 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(INTRATE(A2,A3,A4,A5,A6),10)</td>
+  <td>Microsoft&#39;s documented worked example: $1,000,000 invested 2008-02-15, redeemed at $1,014,420 on 2008-05-15, actual/360 basis</td>
+  <td class="result mono">0.05768</td>
+  <td class="result mono">0.05768<br><span class="category-tag">Microsoft publishes this example&#39;s result as 5.77% and spells the underlying figure out in the Description column: &#34;Discount rate, for the terms of the bond (0.05768 or 5.77%)&#34;. Derived independently and exactly, in rational arithmetic rather than floating point. The page states the formula in full: INTRATE = ((redemption - investment) / investment) x (B / DIM), where &#34;B = number of days in a year, depending on the year basis&#34; and &#34;DIM = number of days from settlement to maturity&#34;. Serial 39493 = 2008-02-15 and 39583 = 2008-05-15, so on basis 2 (actual/360) DIM is the actual day count 39583-39493 = 90 and B = 360. The rate is therefore (1014420-1000000)/1000000 x 360/90 = 0.01442 x 4 = 721/12500 = 0.05768 EXACTLY -- a terminating decimal, no rounding of any kind involved. Wrapped in ROUND(...,10) so the comparison is against a decimal figure rather than against one engine&#39;s last floating-point bit.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(INTRATE(A2,A3,A4,A5,0),10)</td>
+  <td>The same security on the DEFAULT basis 0 (US 30/360), where the day count is also 90</td>
+  <td class="result mono">0.05768</td>
+  <td class="result mono">0.05768<br><span class="category-tag">The basis table documents 0 as &#34;US (NASD) 30/360&#34;, and this is the basis a user gets by omitting the argument. Derived exactly: under 30/360 the days from 2008-02-15 to 2008-05-15 are (5-2) x 30 + (15-15) = 90 -- the same 90 as the actual count, because the two dates share a day-of-month and neither is the 31st -- and B = 360. So the rate is again 0.01442 x 360/90 = 0.05768, identical to Microsoft&#39;s published basis-2 figure. The case exists precisely because the answer is forced to agree with the published one: an engine that gets basis 2 right and basis 0 wrong has a day-count bug and nothing else can explain it. LibreOffice&#39;s own DAYS360 agrees, returning 90 for these two dates on all four builds, and its YEARFRAC(...,0) returns 0.25. EXECUTED RESULT -- A SILENT WRONG ANSWER, no error: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return 0.0583280899 here, against Microsoft&#39;s own 0.05768 for the identical security one basis over. The gap is 1.1% of the rate, and nothing in the result says so. Working backwards through the documented formula, 0.01442 x 360/DIM = 0.0583280899 puts LibreOffice&#39;s DIM at 89 rather than 90 -- it is losing one day somewhere in its 30/360 count, even though its own DAYS360 on the same two dates returns 90 on every build and its YEARFRAC(...,0) returns 0.25. The same engine returns Microsoft&#39;s 0.05768 exactly on bases 2 and 4, so this is not a rounding artefact: one day-count path out of three is wrong, and it is the DEFAULT one.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(INTRATE(A2,A3,A4,A5),10)</td>
+  <td>The optional basis argument left out entirely, which the page documents as defaulting to 0</td>
+  <td class="result mono">0.05768</td>
+  <td class="result mono">0.05768<br><span class="category-tag">The basis table&#39;s first row reads &#34;0 or omitted | US (NASD) 30/360&#34;, so omitting the argument must give exactly the same answer as passing 0 -- and, as derived in the basis-0 case above, that answer is 0.05768, the same figure Microsoft publishes for basis 2. This is the form most real formulas take, since basis is the argument users leave off. EXECUTED RESULT: 0.0583280899 on all four builds -- identical to the explicit basis-0 case above, which confirms the default really is basis 0 and that the defect is in the 30/360 day count rather than in argument defaulting. It also means the wrong answer is the one a user gets by writing the shortest correct formula.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INTRATE(A2,A3,0,A5,A6)</td>
+  <td>An investment of zero, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If investment &lt;= 0 or if redemption &lt;= 0, INTRATE returns the #NUM! error value.&#34; Zero investment is also the denominator of the documented formula, so the exclusion is not arbitrary.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INTRATE(A2,A3,A4,A5,5)</td>
+  <td>A basis of 5, one past the documented range</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If basis &lt; 0 or if basis &gt; 4, INTRATE returns the #NUM! error value.&#34; The basis table stops at 4 (European 30/360), so 5 is the first invalid value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INTRATE(A3,A3,A4,A5,A6)</td>
+  <td>Settlement equal to maturity, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If settlement &gt;= maturity, INTRATE returns the #NUM! error value.&#34; Equality is the boundary the &gt;= sign includes, and it is also the case that would make DIM zero in the documented formula.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INTRATE(&#34;not a date&#34;,A3,A4,A5,A6)</td>
+  <td>A settlement date that is not a date at all</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If settlement or maturity is not a valid date, INTRATE returns the #VALUE! error value.&#34; Note this branch is documented as #VALUE! while every other exclusion on the same page is #NUM! -- the page distinguishes a malformed argument from an out-of-range one, so both codes are asserted separately.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -670,7 +769,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

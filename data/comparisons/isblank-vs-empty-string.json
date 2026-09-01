@@ -2,23 +2,77 @@
   "slug": "isblank-vs-empty-string",
   "title": "ISBLANK vs =\"\": the two kinds of empty",
   "meta_desc": "ISBLANK vs comparing to an empty string: why a formula returning \"\" isn't blank, COUNTBLANK's split personality, and reliable emptiness tests.",
-  "funcs": ["ISBLANK", "COUNTBLANK", "COUNTA"],
+  "funcs": [
+    "ISBLANK",
+    "COUNTBLANK",
+    "COUNTA"
+  ],
   "intro": "A cell can LOOK empty two ways: truly empty (nothing in it) or holding a formula that returns \"\". ISBLANK only believes the first; A2=\"\" accepts both. Half of all 'my IF is wrong on empty cells' bugs are this distinction.",
   "table": [
-    {"aspect": "Truly empty cell", "cols": ["TRUE", "Counted", "Not counted"]},
-    {"aspect": "Formula returning \"\"", "cols": ["FALSE — there IS content (a formula)", "Counted (!) — COUNTBLANK accepts both kinds", "Counted — it's content"]},
-    {"aspect": "A space character \" \"", "cols": ["FALSE", "Not counted", "Counted"]},
-    {"aspect": "Zero", "cols": ["FALSE", "Not counted", "Counted"]},
-    {"aspect": "Compatibility", "cols": ["Universal", "Universal", "Universal — all verified in every version we test"]}
+    {
+      "aspect": "Truly empty cell",
+      "cols": [
+        "TRUE",
+        "Counted",
+        "Not counted"
+      ]
+    },
+    {
+      "aspect": "Formula returning \"\"",
+      "cols": [
+        "FALSE — there IS content (a formula)",
+        "Counted (!) — COUNTBLANK accepts both kinds",
+        "Counted — it's content"
+      ]
+    },
+    {
+      "aspect": "A space character \" \"",
+      "cols": [
+        "FALSE",
+        "Not counted",
+        "Counted"
+      ]
+    },
+    {
+      "aspect": "Zero",
+      "cols": [
+        "FALSE",
+        "Not counted",
+        "Counted"
+      ]
+    },
+    {
+      "aspect": "Compatibility",
+      "cols": [
+        "Universal",
+        "Universal",
+        "Universal — all verified in every version we test"
+      ]
+    }
   ],
   "when": [
-    {"func": "ISBLANK", "use_when": "You specifically need 'was anything ever entered here' — data-entry completeness checks where an IFERROR(\"\") placeholder should count as filled."},
-    {"func": "A2=\"\" (or LEN(A2)=0)", "use_when": "The everyday 'looks empty' test — treats true blanks and \"\"-returning formulas the same, which is usually what the logic wants. TRIM(A2)=\"\" additionally catches stray spaces."}
+    {
+      "func": "ISBLANK",
+      "use_when": "You specifically need 'was anything ever entered here' — data-entry completeness checks where an IFERROR(\"\") placeholder should count as filled."
+    },
+    {
+      "func": "A2=\"\" (or LEN(A2)=0)",
+      "use_when": "The everyday 'looks empty' test — treats true blanks and \"\"-returning formulas the same, which is usually what the logic wants. TRIM(A2)=\"\" additionally catches stray spaces."
+    }
   ],
-  "compat_note": "All three behave identically across every LibreOffice build and in the Google Sheets run we execute (Excel per Microsoft's docs — we do not run Excel) — including COUNTBLANK's quirk of counting BOTH kinds of empty while ISBLANK accepts only one. The trio COUNTA/COUNT/COUNTBLANK don't partition a range cleanly for exactly this reason.",
+  "compat_note": "All three behave identically across every LibreOffice build and in the Google Sheets run we execute (Excel per Microsoft's docs — we do not run desktop Excel) — including COUNTBLANK's quirk of counting BOTH kinds of empty while ISBLANK accepts only one. The trio COUNTA/COUNT/COUNTBLANK don't partition a range cleanly for exactly this reason. Excel for the web is a separate application and we do execute it (recalculated on OneDrive, 2026-09-01); those measurements are on the individual function pages.",
   "examples": [
-    {"label": "Looks-empty test (usual choice)", "formula": "=IF(A2=\"\",\"missing\",\"ok\")"},
-    {"label": "Never-entered test", "formula": "=ISBLANK(A2)"},
-    {"label": "Empty-ish incl. whitespace", "formula": "=LEN(TRIM(A2))=0"}
+    {
+      "label": "Looks-empty test (usual choice)",
+      "formula": "=IF(A2=\"\",\"missing\",\"ok\")"
+    },
+    {
+      "label": "Never-entered test",
+      "formula": "=ISBLANK(A2)"
+    },
+    {
+      "label": "Empty-ish incl. whitespace",
+      "formula": "=LEN(TRIM(A2))=0"
+    }
   ]
 }

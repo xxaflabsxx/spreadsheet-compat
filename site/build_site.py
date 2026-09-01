@@ -68,9 +68,23 @@ RESULTS_DIR = ROOT / "results"
 OUT_DIR = ROOT / "docs"
 SEO_PAGES_DIR = ROOT / "site" / "seo-pages"
 
-ENGINE_ORDER = ["excel", "google_sheets", "libreoffice"]
+# The matrix row order. "excel" is DESKTOP Excel and is documentation-only;
+# "excel_web" is Excel for the web, which IS executed. They are two rows, never
+# one, because a web-executed value is evidence about the web engine and about
+# nothing else -- see excel-web-site-plan.md sec. 0.
+ENGINE_ORDER = ["excel", "excel_web", "google_sheets", "libreoffice"]
+
+# Engines that have a DOCUMENTED column. Microsoft publishes ONE function
+# reference; we have not extracted per-application availability from it, so
+# there is no "documented for the web" flag to render and we must not invent
+# one. Everything that iterates documentation -- title/meta copy, the
+# "documented in X, not in Y" lines -- uses this list, not ENGINE_ORDER, or
+# every such sentence would gain a false "not in Excel for the web".
+DOC_ENGINE_ORDER = ["excel", "google_sheets", "libreoffice"]
+
 ENGINE_LABELS = {
-    "excel": "Excel",
+    "excel": "Excel (desktop)",
+    "excel_web": "Excel for the web",
     "google_sheets": "Google Sheets",
     "libreoffice": "LibreOffice Calc",
 }
@@ -164,7 +178,69 @@ NO_VERDICT_CASES = {
         "drawn from them &mdash; the same judgement batch G made about WEBSERVICE&rsquo;s "
         "network <code>#N/A</code>."
     ),
+    # ----------------------------------------------------------------
+    # EXCEL FOR THE WEB: FEATURES THE WEB APPLICATION DOES NOT SHIP
+    # ----------------------------------------------------------------
+    # A different animal from both the transport skips above (which never ran)
+    # and from a quirk (which asserts the engine computed something wrong).
+    # Here the name RESOLVES -- an unrecognised name returns #NAME? in this
+    # engine, as AI and COPILOT both do -- and then every single case comes
+    # back with the SAME error regardless of its arguments. That pattern says
+    # the web application declines to provide the feature, not that it
+    # miscalculates it.
+    #
+    # None of our three verdict words fits. "Quirk found" would assert a
+    # calculation defect we did not observe; "Unsupported (not recognized)"
+    # would assert a #NAME? that did not happen; "Supported" is plainly false.
+    # And the `expected` values these are measured against come from
+    # Microsoft's documentation of the DESKTOP product, so a mismatch here is
+    # a difference in what the two applications ship rather than a defect in
+    # either. So the executed values are published verbatim and the verdict is
+    # declined, exactly as for WEBSERVICE, DDE and the batch-J IMPORT* family.
+    ("excel_web", "ENCODEURL"): (
+        "Excel for the web returned <code>#VALUE!</code> for <strong>all four</strong> "
+        "cases, including <code>=ENCODEURL(&quot;abcXYZ123&quot;)</code>, whose argument "
+        "needs no encoding at all and has no failure mode. An argument-independent error "
+        "on every case, from a name the engine clearly recognises (an unknown name returns "
+        "<code>#NAME?</code> here, as <code>AI</code> does), is the web application "
+        "declining to provide a function rather than computing it wrongly. Our expected "
+        "values come from Microsoft&rsquo;s documentation of the <strong>desktop</strong> "
+        "product, so the disagreement is between two applications&rsquo; feature sets, not "
+        "evidence of a defect in either. The values are published as they came back and no "
+        "verdict is drawn."
+    ),
+    ("excel_web", "FILTERXML"): (
+        "Excel for the web returned <code>#VALUE!</code> for <strong>every</strong> case "
+        "&mdash; both the two that expected a parsed value and the two that expected "
+        "<code>#VALUE!</code>. That the latter two &ldquo;matched&rdquo; is a coincidence "
+        "of a uniform error, not a demonstration that the function works, so they cannot "
+        "carry a verdict either. As with <code>ENCODEURL</code>, the name resolves (an "
+        "unknown name is <code>#NAME?</code> here) and the error does not vary with the "
+        "arguments, which points at a feature the web application does not ship rather "
+        "than at a calculation defect. Our expected values describe the "
+        "<strong>desktop</strong> product. The values are published verbatim and no "
+        "verdict is drawn."
+    ),
 }
+_ETS_WEB_ABSENT = (
+    "Excel for the web returned <code>#N/A</code> for <strong>every</strong> case of the "
+    "<code>FORECAST.ETS</code> family &mdash; the existence probes, the value assertions "
+    "and the cases that expected <code>#NUM!</code> or <code>#VALUE!</code> alike, all "
+    "from the same 20-point timeline that <code>FORECAST</code> and "
+    "<code>FORECAST.LINEAR</code> compute correctly on in this very run. A single error "
+    "returned uniformly across arguments, dataset and error class is not a family of "
+    "calculation defects; it is the exponential-smoothing feature being absent from this "
+    "application. The name resolves (an unrecognised name is <code>#NAME?</code> here), "
+    "and the expected values come from Microsoft&rsquo;s documentation of the "
+    "<strong>desktop</strong> product, so the disagreement is between what the two "
+    "applications ship. The executed values are published exactly as they came back and "
+    "no verdict is drawn from them."
+)
+NO_VERDICT_CASES.update({
+    ("excel_web", name): _ETS_WEB_ABSENT
+    for name in ("FORECAST.ETS", "FORECAST.ETS.CONFINT",
+                 "FORECAST.ETS.SEASONALITY", "FORECAST.ETS.STAT")
+})
 
 # --------------------------------------------------------------------------
 # DOCUMENTED SKIPS -- the functions this corpus deliberately does not execute
@@ -217,6 +293,185 @@ DOCUMENTED_SKIPS.update({
     )
 })
 
+# --------------------------------------------------------------------------
+# EXCEL FOR THE WEB: FUNCTIONS THE TRANSPORT CANNOT CARRY IN
+# --------------------------------------------------------------------------
+# These are NOT "unsupported in Excel". Desktop Excel implements every one of
+# them -- LAMBDA and LET are Microsoft's own flagship additions. What failed is
+# the ROUND TRIP: this harness reaches Excel for the web by uploading an .xlsx
+# to OneDrive and opening it, and Excel for the web's file-open REFUSES any
+# workbook whose stored formulas carry the _xlpm./LAMBDA storage serialization,
+# with "Couldn't Open the Workbook" and no cell-level diagnostic.
+#
+# The irony is worth stating plainly, because it is the finding: EXCEL FOR THE
+# WEB CANNOT OPEN A FILE CONTAINING EXCEL'S OWN LAMBDA-FAMILY STORAGE
+# SERIALIZATION. The token `_xlpm.` exists precisely because Excel needed a way
+# to write LAMBDA parameters into OOXML; the web build of Excel rejects the
+# file rather than reading them.
+#
+# Bisect-proven, not guessed (2026-09-01):
+#     chunk-08 (40 fns)                     -> refused
+#     the 36-fn remainder without the trio  -> opened
+#     LAMBDA + LET + ISOMITTED alone        -> refused
+#     MAP/MAKEARRAY/REDUCE/SCAN class probe -> refused
+#     LINEST alone (the other suspect)      -> opened, ingested normally
+#
+# This mirrors the batch-I alias-collapse precedent exactly: there, LibreOffice's
+# own .xlsx export collapsed eleven names onto another function's token, so no OOXML token
+# reached the engine and the verdict was declined rather than published as
+# "unsupported". Same shape here, different layer -- there the WRITER could not
+# express the name, here the READER will not accept it. In both cases the
+# engine's actual capability is untouched and unmeasured, so no verdict is
+# drawn and the reason is printed instead.
+EXCEL_WEB_TRANSPORT_SKIPS = {
+    name: (
+        "<strong>Not reachable through this harness&rsquo;s transport &mdash; not a "
+        "statement about Excel.</strong> Excel for the web is reached by uploading an "
+        "<code>.xlsx</code> to OneDrive and opening it, and its file-open refuses any "
+        "workbook whose stored formulas carry the <code>_xlpm.</code>/<code>LAMBDA</code> "
+        "storage serialization (&ldquo;Couldn&rsquo;t Open the Workbook&rdquo;, no "
+        "cell-level diagnostic). " + why + " Desktop Excel implements <code>" + name +
+        "</code> &mdash; it is Microsoft&rsquo;s own function &mdash; and LibreOffice&rsquo;s "
+        "executed verdict for it is published below. What we cannot do is carry it into "
+        "the web engine to measure, so no Excel-for-the-web verdict is drawn. The "
+        "irony is the finding: <em>Excel for the web will not open a file containing "
+        "Excel&rsquo;s own LAMBDA-family storage serialization.</em>"
+    )
+    for name, why in (
+        ("LAMBDA",
+         "Proven by bisect: the 40-function chunk carrying it was refused, the same "
+         "chunk minus <code>LAMBDA</code>/<code>LET</code>/<code>ISOMITTED</code> opened, "
+         "and those three alone were refused again."),
+        ("LET",
+         "Proven by bisect: the 40-function chunk carrying it was refused, the same "
+         "chunk minus <code>LAMBDA</code>/<code>LET</code>/<code>ISOMITTED</code> opened, "
+         "and those three alone were refused again."),
+        ("ISOMITTED",
+         "Proven by bisect: the 40-function chunk carrying it was refused, the same "
+         "chunk minus <code>LAMBDA</code>/<code>LET</code>/<code>ISOMITTED</code> opened, "
+         "and those three alone were refused again."),
+        ("MAP",
+         "Proven by bisect: a probe workbook containing only "
+         "<code>MAP</code>/<code>MAKEARRAY</code>/<code>REDUCE</code>/<code>SCAN</code> "
+         "was refused on its own."),
+        ("MAKEARRAY",
+         "Proven by bisect: a probe workbook containing only "
+         "<code>MAP</code>/<code>MAKEARRAY</code>/<code>REDUCE</code>/<code>SCAN</code> "
+         "was refused on its own."),
+        ("REDUCE",
+         "Proven by bisect: a probe workbook containing only "
+         "<code>MAP</code>/<code>MAKEARRAY</code>/<code>REDUCE</code>/<code>SCAN</code> "
+         "was refused on its own."),
+        ("SCAN",
+         "Proven by bisect: a probe workbook containing only "
+         "<code>MAP</code>/<code>MAKEARRAY</code>/<code>REDUCE</code>/<code>SCAN</code> "
+         "was refused on its own."),
+    )
+}
+
+# --------------------------------------------------------------------------
+# CASE-LEVEL ROUND-TRIP ARTIFACTS FOR EXCEL FOR THE WEB
+# --------------------------------------------------------------------------
+# The Excel-web analogue of sheets_case_inconclusive(): a case whose recorded
+# value is an artifact of the OneDrive round trip rather than a computation
+# Excel for the web performed. Each entry is measured from the readback
+# package, never assumed. Keyed by CASE id (globally unique -- every case id is
+# prefixed with its function name), so one bad case does not cost a function
+# its whole verdict.
+EXCEL_WEB_CASE_SKIPS = {
+    # --- LAMBDA-family formulas that survived file-open and were then DELETED.
+    # BYROW/BYCOL are the only two corpus formulas that embed a LAMBDA without
+    # an _xlpm.-prefixed parameter (they serialize as
+    # `_xlfn.BYROW(A1:B2,_xlfn.LAMBDA(r,SUM(r)))`), so their chunk opened where
+    # chunk-08's did not. It opened, but the formula did not survive: the
+    # uploaded workbook carries an ArrayFormula in A30 of each sheet and the
+    # downloaded package HAS NO A30 AT ALL -- the cell is gone, while the
+    # per-sheet arithmetic canary in Z1 is intact, so the sheet did recalculate.
+    # The recorded blank is a DELETED FORMULA, not a computed empty result, and
+    # publishing it as a quirk would assert that Excel for the web computes
+    # BYROW wrongly when in fact it never computed it at all. Same transport
+    # class as EXCEL_WEB_TRANSPORT_SKIPS above -- silent variant.
+    "BYROW_rowsums": "lambda_formula_dropped",
+    "BYCOL_colsums": "lambda_formula_dropped",
+
+    # --- INDIRECT to a sheet that does not exist became an EXTERNAL WORKBOOK
+    # reference. Measured in the readback package, not inferred: the uploaded
+    # chunk-07 workbook contains NO externalLinks part; the downloaded one
+    # contains TWO, and their targets are `Nope` and `NotACell` -- the literal
+    # text arguments of these INDIRECT calls. Excel for the web parsed
+    # "'Nope'!B2" as a reference into a workbook named Nope, registered it as an
+    # external link, and could not resolve it. That is why the cell reads 0
+    # rather than #REF!, why ISERROR says False, and why ISREF says True: it IS
+    # a reference, just an unresolved external one. The cell is therefore
+    # measuring an unresolvable external link, not "what INDIRECT does with a
+    # missing sheet". Which of the two candidate causes produced the blank --
+    # the declined "trust externally linked workbooks" compatibility prompt, or
+    # an unresolvable external simply evaluating empty in this engine -- this
+    # run cannot separate, and both are about the link rather than about
+    # INDIRECT. Same judgement as the batch-J IMPORT* declarations: the value is
+    # published exactly as it came back and no verdict is drawn from it.
+    "INDIRECT_missing_sheet_ref_error": "external_link",
+    "IFERROR_indirect_missing_sheet": "external_link",
+    "IFNA_indirect_missing_sheet": "external_link",
+    "ISERROR_indirect_missing_sheet": "external_link",
+    "ISREF_indirect_missing_sheet": "external_link",
+}
+
+EXCEL_WEB_CASE_SKIP_REASONS = {
+    "lambda_formula_dropped": (
+        "Excel for the web <strong>deleted this formula</strong> instead of computing it. "
+        "The uploaded workbook carries the array formula in cell A30; the downloaded "
+        "package has no A30 at all, while the sheet&rsquo;s arithmetic canary in Z1 came "
+        "back correct &mdash; so the sheet did recalculate and the formula simply did not "
+        "survive the round trip. It embeds a <code>LAMBDA</code>, the same construct whose "
+        "storage form makes Excel for the web refuse a workbook outright. A blank left by a "
+        "removed formula is not a computed result, so no verdict is drawn from it."
+    ),
+    "external_link": (
+        "The readback proves this cell became an <strong>unresolved external-workbook "
+        "reference</strong>. The uploaded workbook contains no <code>externalLinks</code> "
+        "part; the downloaded one contains two, targeting <code>Nope</code> and "
+        "<code>NotACell</code> &mdash; the literal text arguments of the "
+        "<code>INDIRECT</code> calls. Excel for the web read <code>&#39;Nope&#39;!B2</code> "
+        "as a reference into a workbook named <em>Nope</em> and could not resolve it, which "
+        "is why the cell holds <code>0</code> rather than <code>#REF!</code>, why "
+        "<code>ISERROR</code> is <code>FALSE</code> and why <code>ISREF</code> is "
+        "<code>TRUE</code>. Whether the blank comes from the declined &ldquo;trust "
+        "externally linked workbooks&rdquo; prompt or from an unresolvable external "
+        "evaluating empty in this engine, this run cannot tell &mdash; and both are facts "
+        "about the link, not about the function. The value is published as it came back and "
+        "no verdict is drawn from it."
+    ),
+    "corpus_case_suspect": (
+        "<strong>This case&rsquo;s expected value is under review and no engine is judged "
+        "on it.</strong> The formula passes <code>&quot;none&quot;</code> as the THIRD "
+        "argument, but the third argument of <code>TEXTBEFORE</code>/<code>TEXTAFTER</code> "
+        "is <code>instance_num</code>, not <code>if_not_found</code> &mdash; "
+        "<code>if_not_found</code> is the sixth. The corpus&rsquo;s own neighbouring case "
+        "<code>=TEXTBEFORE(&quot;a-b-c&quot;,&quot;-&quot;,2)</code> expects "
+        "<code>a-b</code> and is matched by every engine, which settles the argument order "
+        "from inside our own data. Text where a number is required is a "
+        "<code>#VALUE!</code>, and that is exactly what LibreOffice and Excel for the web "
+        "both return, so the divergence is in the authored expectation rather than in "
+        "either engine. Flagged for re-derivation from Microsoft&rsquo;s documentation; "
+        "until then the executed values are shown and no verdict rests on them."
+    ),
+}
+
+# --------------------------------------------------------------------------
+# CORPUS CASES WHOSE EXPECTED VALUE IS DOUBTFUL -- ENGINE-NEUTRAL
+# --------------------------------------------------------------------------
+# Deliberately NOT engine-scoped. If we believe a case's expected value is
+# mis-authored, then no engine may be marked down for disagreeing with it --
+# suppressing it for the engine we happen to be adding while leaving another
+# engine wearing a quirk for the same case would be picking which result to
+# believe. Suppressing a case here therefore corrects LibreOffice's published
+# verdict too, and that is the point.
+CORPUS_SUSPECT_CASES = {
+    "TEXTBEFORE_not_found_custom": "corpus_case_suspect",
+    "TEXTAFTER_not_found_custom": "corpus_case_suspect",
+}
+
 VERDICT_LABELS = {
     "supported": "Supported, behaves as documented",
     "quirky": "Quirk found",
@@ -246,7 +501,7 @@ ERROR_VALUES = {"#NAME?", "#REF!", "#VALUE!", "#NUM!", "#N/A", "#DIV/0!", "#NULL
 
 # Engines this site PUBLISHES. "excel" here means DESKTOP Excel, and it is
 # the documented-only yardstick -- no results file has ever backed it.
-PUBLISHED_ENGINE_KEYS = frozenset({"libreoffice", "google_sheets", "excel"})
+PUBLISHED_ENGINE_KEYS = frozenset({"libreoffice", "google_sheets", "excel", "excel_web"})
 
 
 def engine_key_from_engine_name(name: str):
@@ -514,10 +769,19 @@ def coverage_ctx(records):
     for r in executed:
         for ek in ENGINE_ORDER:
             e = r["engines"][ek]
-            if e.get("no_verdict_reason") and e["verdict"] == "inconclusive":
+            if e["verdict"] != "inconclusive":
+                continue
+            # Two ways a function can end up with no verdict in an engine: a
+            # DECLARED external dependency (no_verdict_reason), or every one of
+            # its cases being set aside as a round-trip artifact
+            # (case_skip_notes). Both belong in this table -- listing only the
+            # first would leave the reader of a bare "Inconclusive" badge with
+            # nowhere on the site that says why.
+            reason = e.get("no_verdict_reason") or " ".join(e.get("case_skip_notes") or [])
+            if reason:
                 no_verdict_rows.append({
                     "name": r["name"], "slug": r["name_lower"],
-                    "engine": ENGINE_FULL[ek], "reason": e["no_verdict_reason"],
+                    "engine": ENGINE_FULL[ek], "reason": reason,
                 })
     skip_rows = [
         {"name": r["name"], "slug": r["name_lower"], "reason": DOCUMENTED_SKIPS[r["name"]]}
@@ -527,7 +791,36 @@ def coverage_ctx(records):
     if unclassified:
         print(f"  WARNING: {len(unclassified)} untested function(s) have no entry in "
               f"DOCUMENTED_SKIPS: {', '.join(unclassified)}")
+
+    # PER-ENGINE COVERAGE, currently only meaningful for Excel for the web.
+    # LibreOffice and Google Sheets have executed every function the corpus has
+    # a test file for; Excel for the web has a gap, and a gap in an executed
+    # engine has to be itemised for the same reason the corpus-level one does:
+    # a reader comparing three columns will otherwise read a missing row as
+    # "unsupported". Guarded exactly like `unclassified` above -- a function
+    # some engine executed but Excel-web did not, with no declaration saying
+    # why, is reported rather than quietly dropped.
+    xw_skip_rows, xw_unclassified = [], []
+    for r in executed:
+        if r["engines"]["excel_web"]["tested"]:
+            continue
+        if r["name"] in EXCEL_WEB_TRANSPORT_SKIPS:
+            xw_skip_rows.append({
+                "name": r["name"], "slug": r["name_lower"],
+                "reason": EXCEL_WEB_TRANSPORT_SKIPS[r["name"]],
+            })
+        else:
+            xw_unclassified.append(r["name"])
+    xw_unclassified.sort()
+    if xw_unclassified:
+        print(f"  WARNING: {len(xw_unclassified)} function(s) executed elsewhere but not "
+              f"in Excel for the web have no entry in EXCEL_WEB_TRANSPORT_SKIPS: "
+              f"{', '.join(xw_unclassified)}")
     return {
+        "xw_n_executed": sum(1 for r in records if r["engines"]["excel_web"]["tested"]),
+        "xw_skip_rows": sorted(xw_skip_rows, key=lambda x: x["name"]),
+        "xw_n_skipped": len(xw_skip_rows),
+        "xw_unclassified": xw_unclassified,
         "n_catalog": len(records),
         "n_executed": len(executed),
         "coverage_pct": round(100.0 * len(executed) / len(records), 1) if records else 0,
@@ -553,6 +846,13 @@ def engine_exec_header(engine_key, res_blob, date):
     ver = res_blob.get("engine_version") or ""
     if engine_key == "google_sheets":
         return f"Google Sheets (executed {date} via Drive import)"
+    # Excel for the web, like Sheets, is a rolling service with no version to
+    # pin -- its results label is a DATE ("Excel for the web (recalc,
+    # 2026-09-01)"). Interpolating that label where a version belongs would
+    # render "Excel for the web Excel for the web (recalc, 2026-09-01) (tested
+    # 2026-09-01)", so it gets its own sentence.
+    if engine_key == "excel_web":
+        return f"Excel for the web (executed {date} via OneDrive recalculation)"
     return f"{ENGINE_LABELS[engine_key]} {ver} (tested {date})"
 
 
@@ -571,10 +871,32 @@ def sheets_run_label(entry):
     return re.sub(r"\d{4}-\d{2}-\d{2}", date, label)
 
 
+def excel_web_run_label(entry):
+    """The dated Excel-for-the-web run label for ONE function.
+
+    Same rule as sheets_run_label: results/excel-web.json carries a file-level
+    label naming the most recent run, but each function was executed by
+    whichever run last covered it, so the published label carries that
+    function's own executed_at. The corpus arrived in fifteen chunks over one
+    session plus four bisect re-runs; without this a re-run of forty functions
+    would re-date the other five hundred."""
+    label = entry.get("version") or ""
+    date = entry.get("executed_at")
+    if not entry.get("tested") or not label or not date:
+        return entry.get("version")
+    return re.sub(r"\d{4}-\d{2}-\d{2}", date, label)
+
+
 def engine_tested_cell(engine_key, res_blob, date):
     """Support-matrix "Live-tested" cell for one engine (this function's date)."""
     if engine_key == "google_sheets":
         return f"Yes (Drive import, {date})"
+    # Deliberately NOT the engine_version label (which is itself dated prose).
+    # Keeping this cell non-numeric also keeps it clear of check_honesty's
+    # LO_CELL regex, which matches a numeric version -- and gives rule 1b its
+    # own XW_CELL pattern to key on.
+    if engine_key == "excel_web":
+        return f"Yes (recalc, {date})"
     return f"Yes ({res_blob.get('engine_version')}, {date})"
 
 
@@ -612,11 +934,20 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "cases": [],
                 "inconclusive_count": 0,
                 "no_verdict_count": 0,
+                "corpus_suspect_count": 0,
+                "case_skip_notes": [],
                 "exec_header": None,
                 "tested_cell": None,
                 # Set when this engine's cases for this function are declared
                 # unverdictable (NO_VERDICT_CASES); the template prints it.
                 "no_verdict_reason": NO_VERDICT_CASES.get((ek, name)),
+                # Excel-for-the-web only, and only when the function has no
+                # results: the workbook carrying it could not be opened by the
+                # web engine at all. Not a verdict, not an absence of support --
+                # a transport limit, stated as one.
+                "transport_skip": (
+                    EXCEL_WEB_TRANSPORT_SKIPS.get(name) if ek == "excel_web" else None
+                ),
             }
 
             # Declared, engine-scoped: an external dependency this harness
@@ -650,6 +981,22 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                         reason = sheets_case_inconclusive(cres, entry["documented"])
                         if reason:
                             inconclusive_by_id[cid] = reason
+                # Excel for the web's own round-trip artifacts. The plan asked
+                # for this hook whether or not it had entries on day one,
+                # because "no artifacts observed in 34 probe cases" is not "no
+                # artifacts" -- and the corpus-scale run duly found two classes
+                # the probe never touched (see EXCEL_WEB_CASE_SKIPS).
+                if ek == "excel_web":
+                    for cid in fn_cases:
+                        reason = EXCEL_WEB_CASE_SKIPS.get(cid)
+                        if reason:
+                            inconclusive_by_id[cid] = reason
+                # ENGINE-NEUTRAL, and applied last so it wins: a case whose
+                # authored expectation we do not trust may not be used to mark
+                # down ANY engine.
+                for cid in fn_cases:
+                    if cid in CORPUS_SUSPECT_CASES:
+                        inconclusive_by_id[cid] = CORPUS_SUSPECT_CASES[cid]
 
                 merged_cases = []
                 for c in authored_cases or []:
@@ -672,6 +1019,20 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     trusted=res_blob.get("trusted"),
                     cases=merged_cases,
                     inconclusive_count=len(inconclusive_by_id),
+                    # Distinct explanations for this engine's skipped cases, in
+                    # a stable order, so the page can state WHY beside the
+                    # values instead of showing a bare "Inconclusive" badge.
+                    # ENGINE-SPECIFIC round-trip artifacts only. The
+                    # engine-neutral corpus flag is deliberately excluded: it
+                    # is not an artifact of this engine's transport, and
+                    # rendering it under a per-engine heading both mislabels it
+                    # and prints it once per engine that skipped the case.
+                    case_skip_notes=[
+                        EXCEL_WEB_CASE_SKIP_REASONS[k]
+                        for k in dict.fromkeys(inconclusive_by_id.values())
+                        if k in EXCEL_WEB_CASE_SKIP_REASONS
+                        and k not in set(CORPUS_SUSPECT_CASES.values())
+                    ],
                     # Split out from the total: the two causes of an
                     # inconclusive case need different sentences, and the
                     # quirks page used to attribute all of them to the .xlsx
@@ -680,6 +1041,14 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     no_verdict_count=sum(
                         1 for v in inconclusive_by_id.values()
                         if v == "external_dependency"
+                    ),
+                    # Split out for the same reason no_verdict_count is: a case
+                    # withheld because OUR corpus is under review is not an
+                    # artifact of this engine's import path, and the Sheets
+                    # box below would otherwise blame Google's importer for it.
+                    corpus_suspect_count=sum(
+                        1 for v in inconclusive_by_id.values()
+                        if v in set(CORPUS_SUSPECT_CASES.values())
                     ),
                     exec_header=engine_exec_header(ek, res_blob, executed_at),
                     tested_cell=engine_tested_cell(ek, res_blob, executed_at),
@@ -725,7 +1094,13 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     # above it -- the exact false defect claim the declaration
                     # exists to prevent, published in the louder of the two
                     # places.
-                    vskip = set(vcases) if declared_no_verdict else None
+                    vskip = set(vcases) if declared_no_verdict else set()
+                    # Same reason the declared exclusions are honoured here: a
+                    # case we have withdrawn from the headline verdict must not
+                    # reappear as "Quirk found" four times in the version table
+                    # directly above it.
+                    vskip = vskip | {c for c in vcases if c in CORPUS_SUSPECT_CASES}
+                    vskip = vskip or None
                     history.append(
                         {
                             "version": vstr,
@@ -766,6 +1141,19 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
             engines[ek] = entry
 
         any_tested = any(e["tested"] for e in engines.values())
+        # Engine-neutral: a case whose authored expectation is under review.
+        # Collected once per FUNCTION rather than once per engine -- every
+        # engine that ran the case skipped it, so a per-engine render would
+        # print the same paragraph two or three times under headings that each
+        # blame a different engine for a defect in our own corpus.
+        corpus_suspect_notes = [
+            EXCEL_WEB_CASE_SKIP_REASONS[k]
+            for k in dict.fromkeys(
+                CORPUS_SUSPECT_CASES[c["id"]]
+                for e in engines.values() for c in e["cases"]
+                if c["id"] in CORPUS_SUSPECT_CASES
+            )
+        ]
         quirk_count = sum(
             1
             for e in engines.values()
@@ -811,6 +1199,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "engines": engines,
                 "has_tests": has_tests,
                 "any_tested": any_tested,
+                "corpus_suspect_notes": corpus_suspect_notes,
                 "quirk_count": quirk_count,
                 "inconclusive_count": inconclusive_count,
                 "no_verdict_count": no_verdict_count,
@@ -845,8 +1234,15 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
 # sheets_case_inconclusive() are never published as Sheets verdicts.
 # --------------------------------------------------------------------------
 
-ENGINE_SHORT = {"excel": "Excel", "google_sheets": "Sheets", "libreoffice": "LibreOffice"}
-ENGINE_FULL = {"excel": "Excel", "google_sheets": "Google Sheets", "libreoffice": "LibreOffice"}
+# NB: ENGINE_SHORT["excel"] stays the bare word "Excel" on purpose. It is used
+# only in DOCUMENTATION copy ("documented in Excel, Sheets & LibreOffice"),
+# where "Excel" means Microsoft's published reference and the desktop product
+# it describes; the disambiguated "Excel (desktop)" label belongs to the
+# support matrix, where it sits directly above the executed web row.
+ENGINE_SHORT = {"excel": "Excel", "excel_web": "Excel for the web",
+                "google_sheets": "Sheets", "libreoffice": "LibreOffice"}
+ENGINE_FULL = {"excel": "Excel", "excel_web": "Excel for the web",
+               "google_sheets": "Google Sheets", "libreoffice": "LibreOffice"}
 
 
 def _join_and(labels):
@@ -1225,8 +1621,8 @@ def build_function_title_desc(r):
                 f"run produced no publishable verdict."
             )
     else:
-        documented = [ek for ek in ENGINE_ORDER if engines[ek]["documented"]]
-        missing = [ek for ek in ENGINE_ORDER if not engines[ek]["documented"]]
+        documented = [ek for ek in DOC_ENGINE_ORDER if engines[ek]["documented"]]
+        missing = [ek for ek in DOC_ENGINE_ORDER if not engines[ek]["documented"]]
         if documented and missing:
             missing_or = _join_or([ENGINE_SHORT[ek] for ek in missing])
             if len(documented) == 1:
@@ -1257,7 +1653,7 @@ def build_function_title_desc(r):
         if ge["tested"]:
             ran.append(f"Google Sheets {ge['executed_at']}")
         doc_only = [
-            ENGINE_SHORT[ek] for ek in ENGINE_ORDER
+            ENGINE_SHORT[ek] for ek in DOC_ENGINE_ORDER
             if engines[ek]["documented"] and not engines[ek]["tested"]
         ]
         suffix = " Executed: " + " + ".join(ran) if len(ran) > 1 else f" Executed in {ran[0]}"
@@ -1331,8 +1727,9 @@ def build_function_lede(r):
 
     if engines["excel"]["documented"]:
         authority = (
-            "with Excel behavior from Microsoft&rsquo;s official documentation "
-            "(we do not run Excel)"
+            "with desktop Excel behavior from Microsoft&rsquo;s official "
+            "documentation (we do not run desktop Excel &mdash; Excel for the "
+            "web is a different application and is executed separately)"
         )
     else:
         vendor = {
@@ -1340,7 +1737,7 @@ def build_function_lede(r):
             "google_sheets": "Google&rsquo;s",
             "libreoffice": "LibreOffice&rsquo;s",
         }
-        documented = [ek for ek in ENGINE_ORDER if engines[ek]["documented"]]
+        documented = [ek for ek in DOC_ENGINE_ORDER if engines[ek]["documented"]]
         authority = (
             "measured against " + _join_and([vendor[ek] for ek in documented])
             + " published documentation"
@@ -1903,6 +2300,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 
 {% set le = r.engines['libreoffice'] %}
 {% set ge = r.engines['google_sheets'] %}
+{% set xwe = r.engines['excel_web'] %}
 {% set since = le.lo_change.since_version if le.lo_change else None %}
 {% if le.lo_change and le.lo_change.newly_supported and since %}
 <div class="newin-box">
@@ -1933,7 +2331,13 @@ FUNCTION_TMPL = """{% extends "base.html" %}
 {% set e = r.engines[ek] %}
 <tr>
   <td>{{ e.label }}</td>
-  <td>{% if e.doc_url %}<a href="{{ e.doc_url }}">Yes</a>{% elif e.documented %}Yes{% else %}No{% endif %}</td>{# Excel is never executed, so its Live-tested cell can never say
+{#- The Documented cell for Excel for the web is an em dash, NOT "No" and NOT
+     a copy of the desktop row's "Yes". Microsoft publishes ONE function
+     reference; we have not extracted its per-application availability, so we
+     can neither assert the function is documented for the web nor assert it
+     is not. The doc link lives on the desktop row, which is what that
+     reference describes. -#}
+  <td>{% if ek == 'excel_web' %}<span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span>{% elif e.doc_url %}<a href="{{ e.doc_url }}">Yes</a>{% elif e.documented %}Yes{% else %}No{% endif %}</td>{# Excel is never executed, so its Live-tested cell can never say
      "Not yet": that would promise a run this project will never make. "No —
      documented only" is the honest form WHEN EXCEL DOCUMENTS THE FUNCTION.
      For a function Excel does not document at all it was not honest -- the row
@@ -1941,7 +2345,7 @@ FUNCTION_TMPL = """{% extends "base.html" %}
      a documentation basis that does not exist. Sheets and LibreOffice keep
      "Not yet" because both ARE executed engines and those functions are queued
      (see sheets-lo-only-plan.md). #}
-  <td>{% if e.tested %}{{ e.tested_cell }}{% elif ek == 'excel' %}{% if e.documented %}No — documented only{% else %}n/a (not an Excel function){% endif %}{% else %}Not yet{% endif %}</td>
+  <td>{% if e.tested %}{{ e.tested_cell }}{% elif ek == 'excel' %}{% if e.documented %}No — documented only{% else %}n/a (not an Excel function){% endif %}{% elif ek == 'excel_web' %}{% if e.transport_skip %}No — file could not be opened{% else %}Not yet{% endif %}{% else %}Not yet{% endif %}</td>
   <td>
     {% if e.verdict %}
       <span class="badge {{ verdict_class[e.verdict] }}">{{ verdict_label[e.verdict] }}</span>
@@ -2029,9 +2433,9 @@ against those cases before assuming your data is wrong.</p>
 {% endif %}{# The two boxes are mutually exclusive by construction: the block #}
 {#- below explains an IMPORTER artifact and must never render for a case #}
 {#- excluded because of a declared external dependency, which is not an #}
-{#- artifact of anything. #}{% if ge.tested and ge.inconclusive_count > ge.no_verdict_count %}
+{#- artifact of anything. #}{% set gs_importer = ge.inconclusive_count - ge.no_verdict_count - ge.corpus_suspect_count %}{% if ge.tested and gs_importer > 0 %}
 <div class="not-live-tested">
-  <strong>Google Sheets: {{ ge.inconclusive_count - ge.no_verdict_count }} case{{ 's' if (ge.inconclusive_count - ge.no_verdict_count) != 1 else '' }} inconclusive.</strong>
+  <strong>Google Sheets: {{ gs_importer }} case{{ 's' if gs_importer != 1 else '' }} inconclusive.</strong>
   {% if ge.verdict == 'inconclusive' %}Every Sheets case for {{ r.name }} came back inconclusive, so we publish no Sheets verdict for it.{% endif %}
   Our corpus is an Excel-authored .xlsx, and Google&rsquo;s importer does not
   map every OOXML storage prefix (<code>_xlfn.</code>, <code>_xlfn._xlws.</code>,
@@ -2051,6 +2455,31 @@ against those cases before assuming your data is wrong.</p>
   Every executed case is shown below with the value LibreOffice actually returned.
 </div>
 {% endif %}
+{% if xwe.transport_skip %}
+<div class="not-live-tested">
+  <strong>Excel for the web: not testable through our transport.</strong>
+  {{ xwe.transport_skip|safe }}
+</div>
+{% endif %}
+{% if xwe.tested and xwe.verdict == 'inconclusive' and xwe.no_verdict_reason %}
+<div class="not-live-tested">
+  <strong>Excel for the web: executed, but no verdict published.</strong>
+  {{ xwe.no_verdict_reason|safe }}
+  Every executed case is shown below with exactly what Excel for the web returned.
+</div>
+{% endif %}
+{% for note in xwe.case_skip_notes %}
+<div class="not-live-tested">
+  <strong>Excel for the web: one case set aside as a round-trip artifact.</strong>
+  {{ note|safe }}
+</div>
+{% endfor %}
+{% for note in r.corpus_suspect_notes %}
+<div class="not-live-tested">
+  <strong>One test case is under review and carries no verdict in any engine.</strong>
+  {{ note|safe }}
+</div>
+{% endfor %}
 
 {% if r.quirk_count > 0 %}
 <div class="quirk-box">
@@ -2079,7 +2508,7 @@ against those cases before assuming your data is wrong.</p>
 {% set e = r.engines[ek] %}
 {% if e.tested %}
 <h3>{{ e.exec_header }}</h3>
-{% if ek == 'google_sheets' %}<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>{% endif %}
+{% if ek == 'google_sheets' %}<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>{% endif %}{% if ek == 'excel_web' %}<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>{% endif %}
 <div class="table-scroll">
 <table class="cases">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
@@ -2425,7 +2854,7 @@ RECIPE_TMPL = """{% extends "base.html" %}
 
 {% if r.verified %}
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %}{% if r.sheets_has %} We then ran the same formulas in <strong>Google Sheets</strong>, executed {{ r.sheets_date }}: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed.{% if r.sheets_differs %} For the worked example Google Sheets returned <code>{{ r.sheets_actual }}</code>, which is <strong>not</strong> what LibreOffice returned (<code>{{ r.example_actual }}</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding.{% else %} It returned <code>{{ r.sheets_actual }}</code> for the worked example, the same value LibreOffice produced.{% endif %}{% if r.sheets_check_count %} The {{ r.sheets_check_count }} further formulas above were run through Sheets the same way and have their own column;{% if r.sheets_diff_count %} {{ r.sheets_diff_count }} of them came back with a value different from LibreOffice&rsquo;s, flagged in that column.{% else %} every one of them matched LibreOffice.{% endif %}{% endif %}{% if r.sheets_not_comparable %} {{ r.sheets_not_comparable }} of the checks on this page {% if r.sheets_not_comparable == 1 %}is{% else %}are{% endif %} left out of the Google Sheets verdict entirely, because Google executed {% if r.sheets_not_comparable == 1 %}it{% else %}them{% endif %} against a workbook the LibreOffice run never saw &mdash; the value is still shown as it came back, marked not comparable, with the reason under the title.{% endif %}{% if r.sheets_alt_count %} A further {{ r.sheets_alt_count }} {% if r.sheets_alt_count == 1 %}row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only{% else %}rows are Google Sheets alternatives: Sheets-specific syntax, executed in Google Sheets only{% endif %}, so the LibreOffice column reads n/a for {% if r.sheets_alt_count == 1 %}it{% else %}them{% endif %}.{% endif %} Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.{% else %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.{% endif %}</p>
+<p>We ran <code>{{ r.example_formula }}</code> in LibreOffice {{ r.engine_version }} (headless, with forced recalculation) and it returned <code>{{ r.example_actual }}</code> &mdash; exactly the expected result.{% if r.variant_check_count %} The {{ r.variant_check_count }} further formulas in the sections above were executed the same way, and the number shown beside each one is what LibreOffice actually returned &mdash; nothing on this page is a hand-typed result.{% endif %}{% if r.sheets_has %} We then ran the same formulas in <strong>Google Sheets</strong>, executed {{ r.sheets_date }}: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed.{% if r.sheets_differs %} For the worked example Google Sheets returned <code>{{ r.sheets_actual }}</code>, which is <strong>not</strong> what LibreOffice returned (<code>{{ r.example_actual }}</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding.{% else %} It returned <code>{{ r.sheets_actual }}</code> for the worked example, the same value LibreOffice produced.{% endif %}{% if r.sheets_check_count %} The {{ r.sheets_check_count }} further formulas above were run through Sheets the same way and have their own column;{% if r.sheets_diff_count %} {{ r.sheets_diff_count }} of them came back with a value different from LibreOffice&rsquo;s, flagged in that column.{% else %} every one of them matched LibreOffice.{% endif %}{% endif %}{% if r.sheets_not_comparable %} {{ r.sheets_not_comparable }} of the checks on this page {% if r.sheets_not_comparable == 1 %}is{% else %}are{% endif %} left out of the Google Sheets verdict entirely, because Google executed {% if r.sheets_not_comparable == 1 %}it{% else %}them{% endif %} against a workbook the LibreOffice run never saw &mdash; the value is still shown as it came back, marked not comparable, with the reason under the title.{% endif %}{% if r.sheets_alt_count %} A further {{ r.sheets_alt_count }} {% if r.sheets_alt_count == 1 %}row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only{% else %}rows are Google Sheets alternatives: Sheets-specific syntax, executed in Google Sheets only{% endif %}, so the LibreOffice column reads n/a for {% if r.sheets_alt_count == 1 %}it{% else %}them{% endif %}.{% endif %} Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run desktop Excel.{% else %} The LibreOffice formula above is confirmed by actually executing it; the Excel and Google Sheets formulas follow each vendor&rsquo;s official documented syntax. To be exact about scope: the site&rsquo;s per-function verdicts (linked below) are executed in <strong>both</strong> Google Sheets and LibreOffice, but this recipe&rsquo;s worked example was run in LibreOffice only &mdash; the recipe corpus has not been through Sheets.{% endif %}</p>
 {% endif %}
 {% if functions_used %}
 <h2 class="section-title">Functions used</h2>
@@ -2564,11 +2993,11 @@ ERRORS_TMPL = """{% extends "base.html" %}
 DATASET_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Open spreadsheet compatibility dataset</h1>
-<p class="lede">The machine-verified data behind this site is free to use. It records, for {{ n_funcs }} spreadsheet functions, whether each works in Microsoft Excel (from official documentation &mdash; we do not run Excel) and what actually happened when we <a href="{{ rel }}methodology.html">executed the formula</a> in <strong>Google Sheets</strong> (Drive import, {{ sheets_exec_date }}) and in <strong>LibreOffice Calc</strong> (four pinned builds, with per-version history). As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
+<p class="lede">The machine-verified data behind this site is free to use. It records, for {{ n_funcs }} spreadsheet functions, whether each works in <strong>desktop Microsoft Excel</strong> (from official documentation &mdash; we do not run desktop Excel) and what actually happened when we <a href="{{ rel }}methodology.html">executed the formula</a> in <strong>Excel for the web</strong> (OneDrive recalculation, {{ excel_web_exec_date }}), <strong>Google Sheets</strong> (Drive import, {{ sheets_exec_date }}) and <strong>LibreOffice Calc</strong> (four pinned builds, with per-version history). Excel for the web is a separate implementation from the desktop product, so its results are reported in their own column and are evidence about the web engine only. As far as we know it&rsquo;s the only openly available <em>executed</em> cross-application compatibility dataset.</p>
 
 <h2 class="section-title">Download</h2>
 <p><a href="{{ rel }}data/compat.json"><code>data/compat.json</code></a> &mdash; one JSON object, keyed by uppercase function name ({{ n_funcs }} entries, {{ kb }} KB).<br>
-<a href="{{ rel }}data/compat.csv"><code>data/compat.csv</code></a> &mdash; the same data as a CSV (one row per function, headered columns) for spreadsheets and data tools. Its columns are <code>function, category, in_excel, in_google_sheets, in_libreoffice, google_sheets_verdict, google_sheets_executed, libreoffice_verdict, libreoffice_version_tested, libreoffice_newly_supported_in</code> &mdash; <code>google_sheets_verdict</code> mirrors <code>gv</code> and <code>google_sheets_executed</code> mirrors <code>gver</code> (the dated run label).</p>
+<a href="{{ rel }}data/compat.csv"><code>data/compat.csv</code></a> &mdash; the same data as a CSV (one row per function, headered columns) for spreadsheets and data tools. Its columns are <code>function, category, in_excel, in_google_sheets, in_libreoffice, excel_web_verdict, excel_web_executed, google_sheets_verdict, google_sheets_executed, libreoffice_verdict, libreoffice_version_tested, libreoffice_newly_supported_in</code> &mdash; each <code>*_verdict</code>/<code>*_executed</code> pair mirrors the matching JSON keys (<code>xwv</code>/<code>xwver</code>, <code>gv</code>/<code>gver</code>). Note that <code>in_excel</code> is a DOCUMENTATION flag for the desktop product while <code>excel_web_verdict</code> is an EXECUTED measurement of a different application; there is deliberately no <code>in_excel_web</code> column.</p>
 <p>The full test harness, authored test cases, and raw per-LibreOffice-version results are in the <a href="{{ github_url }}">GitHub repository</a>.</p>
 
 <h2 class="section-title">Schema</h2>
@@ -2577,7 +3006,7 @@ DATASET_TMPL = """{% extends "base.html" %}
 <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
 <tbody>
 <tr><td><code>cat</code></td><td>string</td><td>Function category (e.g. &ldquo;Lookup and reference&rdquo;).</td></tr>
-<tr><td><code>x</code></td><td>boolean</td><td>Documented in Microsoft Excel.</td></tr>
+<tr><td><code>x</code></td><td>boolean</td><td>Documented in Microsoft Excel. This is <strong>desktop</strong> Excel: Microsoft publishes one function reference and it describes the desktop product. It is a documentation flag, never a measurement.</td></tr>
 <tr><td><code>g</code></td><td>boolean</td><td>Documented in Google Sheets.</td></tr>
 <tr><td><code>l</code></td><td>boolean</td><td>Documented in LibreOffice Calc.</td></tr>
 <tr><td><code>gv</code></td><td>string / null</td><td>Google Sheets <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, <code>inconclusive</code>, or null when not yet live-tested. <code>inconclusive</code> means the .xlsx round trip &mdash; not Sheets &mdash; explains the result (see <a href="{{ rel }}methodology.html#sheets-caveats">Sheets execution caveats</a>); treat it as &ldquo;no verdict&rdquo; and fall back to <code>g</code>.</td></tr>
@@ -2585,6 +3014,9 @@ DATASET_TMPL = """{% extends "base.html" %}
 <tr><td><code>lv</code></td><td>string / null</td><td>LibreOffice <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, <code>inconclusive</code>, or null when not yet live-tested. <code>inconclusive</code> means the function was executed but its documented behaviour needs something no test workbook can supply (an external data server), so no verdict is drawn &mdash; treat it as &ldquo;no verdict&rdquo; and fall back to <code>l</code>.</td></tr>
 <tr><td><code>lver</code></td><td>string</td><td>LibreOffice version the verdict was produced on (e.g. <code>25.8.7.3</code>).</td></tr>
 <tr><td><code>lnew</code></td><td>string / null</td><td>The LibreOffice version the function first became supported in, when known (else null).</td></tr>
+<tr><td><code>xwv</code></td><td>string / null</td><td>Excel for the web <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, <code>inconclusive</code>, or null when we have no Excel-web run for the function. <strong>Read this as a fact about Excel for the web and about nothing else.</strong> It is a different implementation from desktop Excel, and because we do not execute desktop Excel we cannot tell you whether a disagreement between <code>xwv</code> and <code>x</code> means the web engine diverges or the documentation is wrong about both. Null includes seven functions (the LAMBDA family) whose workbook Excel for the web refuses to open at all &mdash; that is a transport limit, not missing support.</td></tr>
+<tr><td><code>xwver</code></td><td>string / null</td><td>Label for the Excel-for-the-web run, e.g. <code>Excel for the web (recalc, {{ excel_web_exec_date }})</code>. Like <code>gver</code> this is a <strong>date, not a version</strong> &mdash; Excel for the web is a rolling service &mdash; so never parse or compare it as one.</td></tr>
+<tr><td colspan="3" style="color:var(--text-muted,#6b7280)">There is no <code>xw</code> documented flag to pair with <code>xwv</code>. Microsoft publishes a single function reference and we have not extracted its per-application availability, so we would have to invent the flag to publish it. Use <code>x</code> for &ldquo;Microsoft documents this function&rdquo; and do not read it as &ldquo;documented for the web&rdquo;.</td></tr>
 </tbody>
 </table>
 </div>
@@ -2596,10 +3028,20 @@ const db = await (await fetch("https://canispreadsheet.com/data/compat.json")).j
 
 db["XLOOKUP"]
 // {"cat":"Lookup and reference","x":true,"g":true,"l":true,
+//  "xwv":"supported","xwver":"Excel for the web (recalc, {{ excel_web_exec_date }})",
 //  "gv":"supported","gver":"Google Sheets (Drive import, {{ sheets_exec_date }})",
 //  "lv":"supported","lver":"25.8.7.3","lnew":"24.8.7.2"}
-//  -> documented in all three; executed as supported in BOTH Google Sheets
-//     (on the dated run) and LibreOffice, first working in LibreOffice 24.8.
+//  -> documented in all three; executed as supported in Excel for the web,
+//     Google Sheets and LibreOffice, first working in LibreOffice 24.8.
+//     x:true is Microsoft's DOCUMENTATION of the desktop product; xwv is a
+//     MEASUREMENT of the web app. They are different engines, not one.
+
+// A null xwv that does NOT mean "unsupported":
+db["LAMBDA"].xwv  // null
+//  -> Excel for the web refuses to OPEN a workbook whose stored formulas carry
+//     the _xlpm./LAMBDA serialization, so we could not carry LAMBDA into the
+//     engine to measure it. Desktop Excel implements LAMBDA; this is our
+//     transport failing, not Excel.
 
 // A Sheets verdict you must NOT read as "unsupported":
 db["FILTER"].gv   // "inconclusive"
@@ -2610,7 +3052,7 @@ db["FILTER"].gv   // "inconclusive"
 
 <h2 class="section-title">License</h2>
 <p>The compatibility dataset is released under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 (CC&nbsp;BY&nbsp;4.0)</a>. Use it freely, including commercially &mdash; just credit <strong>canispreadsheet.com</strong> with a link. If you build something with it, we&rsquo;d love to hear about it.</p>
-<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted, dated Google Sheets runs (most recently {{ sheets_exec_date }}; each function&rsquo;s own run date is its <code>gver</code>), and Microsoft&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Google Sheets ships changes continuously, so a Sheets verdict is a dated observation rather than a release guarantee. Corrections welcome via the <a href="{{ github_url }}">repository</a>.</p>
+<p style="font-size:.9em;color:var(--text-muted,#6b7280)">The data reflects executed tests on the LibreOffice versions noted, dated Google Sheets runs (most recently {{ sheets_exec_date }}; each function&rsquo;s own run date is its <code>gver</code>), dated Excel-for-the-web runs (most recently {{ excel_web_exec_date }}; each function&rsquo;s own run date is its <code>xwver</code>), and Microsoft&rsquo;s published function documentation at the time of testing; it is provided as-is, without warranty. Google Sheets and Excel for the web both ship changes continuously, so their verdicts are dated observations rather than release guarantees. Corrections welcome via the <a href="{{ github_url }}">repository</a>.</p>
 {% endblock %}
 """
 
@@ -2730,7 +3172,7 @@ EXCLUSIVE_TMPL = """{% extends "base.html" %}
 METHODOLOGY_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>How we verify spreadsheet compatibility</h1>
-<p class="lede">Every Google Sheets and LibreOffice verdict on this site comes from <strong>actually executing the formula</strong> in a real engine and checking what came back &mdash; not from reading documentation. Microsoft Excel is the one engine we do <em>not</em> execute: its column is Microsoft&rsquo;s documented behavior, and it is the yardstick the executed engines are measured against. This page explains the machinery, what &ldquo;verified&rdquo; means here, and the limits of the approach.</p>
+<p class="lede">Every Excel-for-the-web, Google Sheets and LibreOffice verdict on this site comes from <strong>actually executing the formula</strong> in a real engine and checking what came back &mdash; not from reading documentation. <strong>Desktop</strong> Microsoft Excel is the one engine we do <em>not</em> execute: its column is Microsoft&rsquo;s documented behavior, and it is the yardstick the executed engines are measured against. Excel for the web is a separate implementation of the calculation engine, so running it tells you about the web app and not about the desktop one. This page explains the machinery, what &ldquo;verified&rdquo; means here, and the limits of the approach.</p>
 
 <h2 class="section-title">The execution harness</h2>
 <p>For each function we author test cases: a formula, any setup cells it needs, and the result Excel documents or produces for that input. The harness writes each case into a real <code>.xlsx</code> workbook with openpyxl, then runs <strong>headless LibreOffice Calc</strong> over it (<code>soffice --convert-to xlsx</code>), which forces a full recalculation. We reload the output and compare every result against the expected value.</p>
@@ -2791,6 +3233,37 @@ nor a recorded reason: {{ unclassified|join(', ') }}. That is a gap in this page
 than absorbed into the percentages above.</p>
 {% endif %}
 
+<h3 id="coverage-excel-web">Per-engine coverage: Excel for the web ({{ xw_n_executed }} executed)</h3>
+<p>LibreOffice Calc and Google Sheets have executed every function this corpus has a test file for.
+Excel for the web has not, and the shortfall is <strong>not</strong> a shortfall in Excel &mdash; it is a
+limit of how we reach the web engine. We upload an <code>.xlsx</code> to OneDrive and let Excel for the
+web recalculate it on open; for {{ xw_n_skipped }} function{{ 's' if xw_n_skipped != 1 else '' }} that
+upload could not be opened at all.</p>
+{% if xw_skip_rows %}
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Why Excel for the web has no verdict</th></tr></thead>
+<tbody>
+{% for row in xw_skip_rows %}
+<tr><td><a href="{{ rel }}functions/{{ row.slug }}.html"><code>{{ row.name }}</code></a></td><td>{{ row.reason|safe }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p>Read the table above carefully, because the obvious misreading is the opposite of the truth:
+<strong>every one of these functions works in Excel.</strong> LAMBDA and LET are Microsoft&rsquo;s own
+headline additions to the formula language. What we are reporting is that Excel for the web refuses to
+<em>open a file</em> whose stored formulas carry the <code>_xlpm.</code>/<code>LAMBDA</code>
+serialization &mdash; the serialization Excel itself invented to write those functions into
+<code>.xlsx</code>. So the honest summary is an awkward one for the product rather than for the
+function: Excel for the web will not open a workbook containing Excel&rsquo;s own LAMBDA-family
+storage form, and that, not any missing capability, is why these seven rows are blank.</p>
+{% endif %}
+{% if xw_unclassified %}
+<p><strong>Unclassified for Excel for the web ({{ xw_unclassified|length }}).</strong> Executed by another
+engine, absent from the Excel-web run, with no recorded reason: {{ xw_unclassified|join(', ') }}.</p>
+{% endif %}
+
 <h2 class="section-title">What the verdicts mean</h2>
 <ul>
 <li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result. Some functions have no result anyone can be held to: a volatile one (NOW, RAND), or one whose answer comes from a live service (GOOGLEFINANCE quotes are documented as &ldquo;delayed by up to 20 minutes&rdquo;; GOOGLETRANSLATE&rsquo;s output is a translation service&rsquo;s choice). Their cases are <em>probes</em>, which assert error-free execution and whatever invariant the vendor&rsquo;s own documentation fixes &mdash; never an exact value. A probe-backed &ldquo;Supported&rdquo; therefore means <em>this engine evaluated the call and returned a value of the documented kind</em>, and the value itself is published without being asserted.</li>
@@ -2804,7 +3277,8 @@ than absorbed into the percentages above.</p>
 
 <h2 class="section-title">Honest limitations</h2>
 <ul>
-<li><strong>Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run Excel (yet); where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
+<li><strong>Desktop Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run desktop Excel; where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
+<li><strong>Excel for the web IS live-executed &mdash; and it is not desktop Excel.</strong> We upload the corpus to OneDrive, let Excel for the web recalculate it on open, and download the workbook again to read the values back. That is a real measurement, but of a <em>different application</em>: Microsoft ships two implementations of the calculation engine and we have run only the web one. So when an Excel-web value disagrees with the documented column, we cannot tell you which of the two explanations holds &mdash; the web engine diverging from the desktop one, or the documentation being wrong about both &mdash; and no page on this site claims to know. Seven functions (the LAMBDA family) could not be measured at all, because Excel for the web refuses to open a workbook whose stored formulas carry Excel&rsquo;s own <code>_xlpm.</code>/<code>LAMBDA</code> serialization.</li>
 <li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: each verdict describes Sheets as it behaved on the date that function was executed (the most recent run was {{ sheets_exec_date }}). Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
 <li><strong>Some Sheets results are inconclusive.</strong> See the <a href="#sheets-caveats">Sheets execution caveats</a> above; those cases are excluded from verdicts and quirk counts rather than guessed at.</li>
 <li><strong>Coverage is partial, and the remainder is itemised.</strong> {{ n_executed }} of the {{ n_catalog }} catalog functions have executed tests; the {{ n_skipped }} that do not are listed under <a href="#coverage">Coverage</a> with the reason for each, and an untested function&rsquo;s page says so explicitly rather than borrowing a verdict.</li>
@@ -2989,7 +3463,7 @@ async function check(){
     rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }
   const say=ok=>ok?'<span style="color:#0a7a2f">works</span>':'<span style="color:#c02020">has an unsupported function</span>';
   let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
-  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel (documented)</th><th>Google Sheets (executed)</th><th>LibreOffice (executed)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed)</th><th>LibreOffice (executed)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
   const tg=target(); if(tg) html+=migrate(fs,db,tg,gdb);
   html+='<p style="font-size:.9em;color:#888">Shareable link: <a href="'+permalink()+'" style="word-break:break-all">'+permalink()+'</a></p>';
@@ -3015,7 +3489,7 @@ syncLovRow();
 GUIDES_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Formula behavior guides</h1>
-<p class="lede">Executed-data writeups of specific cases where Excel, Google Sheets, and LibreOffice Calc give different results for the exact same formula &mdash; found by actually running the formula, not by comparing documentation pages. Google Sheets and LibreOffice values shown are <strong>executed</strong> output from our test harness (Sheets via Drive import on {{ sheets_exec_date }}; LibreOffice from the pinned builds named in each table); Excel values are Microsoft&rsquo;s <strong>documented</strong> behavior &mdash; we do not run Excel. For the shorter, catalog-style version of these findings across every tested function, see the <a href="{{ rel }}quirks.html">quirks list</a>.</p>
+<p class="lede">Executed-data writeups of specific cases where Excel, Google Sheets, and LibreOffice Calc give different results for the exact same formula &mdash; found by actually running the formula, not by comparing documentation pages. Google Sheets and LibreOffice values shown are <strong>executed</strong> output from our test harness (Sheets via Drive import on {{ sheets_exec_date }}; LibreOffice from the pinned builds named in each table); Excel values in these guides are Microsoft&rsquo;s <strong>documented</strong> behavior for the <strong>desktop</strong> product &mdash; we do not run desktop Excel. Excel for the web is a separate application which we <em>do</em> execute (most recently {{ excel_web_exec_date }}); its measured results are on the individual function pages rather than in these guide tables. For the shorter, catalog-style version of these findings across every tested function, see the <a href="{{ rel }}quirks.html">quirks list</a>.</p>
 <ul class="quirks-list">
 {% for g in guides %}
 <li class="quirk-entry">
@@ -3495,7 +3969,9 @@ def build_env():
 # Filled in by main() once the results files are loaded, so every template can
 # state the executed provenance without re-deriving it. Google Sheets has no
 # version — only a run DATE.
-EXEC_PROVENANCE = {"sheets_exec_date": "", "lo_version": "", "sheets_executed": False}
+EXEC_PROVENANCE = {"sheets_exec_date": "", "lo_version": "", "sheets_executed": False,
+                   # Excel for the web, like Sheets, has only a run DATE.
+                   "excel_web_exec_date": "", "excel_web_executed": False}
 
 
 def common_ctx(rel):
@@ -3536,10 +4012,13 @@ def main():
 
     _gs = results_by_engine.get("google_sheets")
     _lo = results_by_engine.get("libreoffice")
+    _xw = results_by_engine.get("excel_web")
     EXEC_PROVENANCE.update(
         sheets_exec_date=iso_date((_gs or {}).get("generated_at")),
         lo_version=(_lo or {}).get("engine_version", ""),
         sheets_executed=bool(_gs),
+        excel_web_exec_date=iso_date((_xw or {}).get("generated_at")),
+        excel_web_executed=bool(_xw),
     )
 
     tested_functions = [r for r in records if r["any_tested"]]
@@ -3997,6 +4476,16 @@ def main():
             # pinnable version.
             "gv": e["google_sheets"]["verdict"],
             "gver": sheets_run_label(e["google_sheets"]),
+            # EXECUTED Excel-for-the-web verdict. DELIBERATELY NOT "xv"/"xver":
+            # those would hang a WEB measurement off the "x" namespace, which
+            # means desktop-documented, and any consumer reading x and xv as
+            # one engine -- they will -- would republish a web result as a
+            # desktop Excel fact. "xw" is its own engine prefix. There is no
+            # "xw" documented flag to go with it: Microsoft publishes one
+            # function reference and we have not extracted per-application
+            # availability from it, so no such flag can be filled in honestly.
+            "xwv": e["excel_web"]["verdict"],
+            "xwver": excel_web_run_label(e["excel_web"]),
             "lv": e["libreoffice"]["verdict"],
             "lver": e["libreoffice"]["version"],
             # newly supported: the exact release it started working in (else null)
@@ -4026,6 +4515,11 @@ def main():
     _w = _csv.writer(_buf)
     _w.writerow([
         "function", "category", "in_excel", "in_google_sheets", "in_libreoffice",
+        # in_excel is a DOCUMENTATION flag for the DESKTOP product; the two
+        # excel_web_* columns are an EXECUTED measurement of a different
+        # application. There is deliberately no in_excel_web column -- see the
+        # xwv note on compat_export above.
+        "excel_web_verdict", "excel_web_executed",
         "google_sheets_verdict", "google_sheets_executed",
         "libreoffice_verdict", "libreoffice_version_tested",
         "libreoffice_newly_supported_in",
@@ -4034,6 +4528,7 @@ def main():
         _v = compat_export[_name]
         _w.writerow([
             _name, _v["cat"], _v["x"], _v["g"], _v["l"],
+            _v["xwv"] or "", _v["xwver"] or "",
             _v["gv"] or "", _v["gver"] or "",
             _v["lv"], _v["lver"], _v["lnew"] if _v["lnew"] is not None else "",
         ])

@@ -331,7 +331,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <thead><tr><th>App</th><th>Formula</th><th>Notes</th></tr></thead>
 <tbody>
 
-<tr><td>Excel</td><td><code>=LOOKUP(2,1/(A2:A100&lt;&gt;&#34;&#34;),A2:A100)</code></td><td>Excel 365 alternative: =TAKE(FILTER(A2:A100,A2:A100&lt;&gt;&#34;&#34;),-1).</td></tr>
+<tr><td>Excel (desktop)</td><td><code>=LOOKUP(2,1/(A2:A100&lt;&gt;&#34;&#34;),A2:A100)</code></td><td>Excel 365 alternative: =TAKE(FILTER(A2:A100,A2:A100&lt;&gt;&#34;&#34;),-1).</td></tr>
 
 <tr><td>Google Sheets</td><td><code>=ARRAYFORMULA(LOOKUP(2,1/(A2:A100&lt;&gt;&#34;&#34;),A2:A100))</code></td><td>Executed 2026-08-30: the unwrapped =LOOKUP(2,1/(A2:A100&lt;&gt;&#34;&#34;),A2:A100) returned #N/A in Google Sheets against cherry in LibreOffice. Google Sheets does no implicit array evaluation inside a scalar function’s arguments, so 1/(A2:A100&lt;&gt;&#34;&#34;) reduces to a single value before LOOKUP sees it; ARRAYFORMULA around the whole formula is the documented fix, and =INDEX(A2:A100,COUNTA(A2:A100)) is simpler for a gap-free column. Both are documented Sheets syntax, carrying no executed result of their own.</td></tr>
 
@@ -360,7 +360,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </table>
 </div>
 <h2 class="section-title">Verified, not just documented</h2>
-<p>We ran <code>=LOOKUP(2,1/(A2:A100&lt;&gt;&#34;&#34;),A2:A100)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>cherry</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>#N/A</code>, which is <strong>not</strong> what LibreOffice returned (<code>cherry</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. A further 1 row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only, so the LibreOffice column reads n/a for it. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run Excel.</p>
+<p>We ran <code>=LOOKUP(2,1/(A2:A100&lt;&gt;&#34;&#34;),A2:A100)</code> in LibreOffice 25.8.7.3 (headless, with forced recalculation) and it returned <code>cherry</code> &mdash; exactly the expected result. We then ran the same formulas in <strong>Google Sheets</strong>, executed 2026-08-30: a formula-only workbook goes into Google Drive, which converts it to a Sheet and recalculates every formula with Google&rsquo;s own engine, and comes back out as .xlsx carrying the values Google computed. For the worked example Google Sheets returned <code>#N/A</code>, which is <strong>not</strong> what LibreOffice returned (<code>cherry</code>) &mdash; both values are shown as each engine produced them, and the disagreement itself is the finding. A further 1 row is a Google Sheets alternative: Sheets-specific syntax, executed in Google Sheets only, so the LibreOffice column reads n/a for it. Both engines&rsquo; numbers on this page are executed results. The Excel formula follows Microsoft&rsquo;s official documented syntax &mdash; we do not run desktop Excel.</p>
 
 
 <h2 class="section-title">Functions used</h2>

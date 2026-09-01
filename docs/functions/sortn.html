@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Filter &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>SORTN</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document SORTN, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>SORTN</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document SORTN, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,86 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=SORTN(A2:C6)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Alice, 100, 90}}</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: =SORTN(A2:C6) -&gt; Alice 100 90. Two defaults are doing the work and the page states both: n is &#34;[OPTIONAL - 1 by default]&#34;, and the Notes say &#34;If sort_column1 and is_ascending1 aren&#39;t included, the sort is performed on the lowest-index column in range&#34; -- column A, the names, ascending, where Alice sorts first. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. SORTN&#39;s page carries a real Examples block in the article body: a source table (&#34;The following table is used for the examples below&#34;) of five students with two scores each, and seven Formula/Result rows over it. This file executes all seven, on that exact data. EVERY EXPECTED VALUE HERE IS GOOGLE&#39;S OWN PUBLISHED OUTPUT, and each was additionally re-derived by hand from the display_ties_mode definitions before being written down; all seven reproduce. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.; MISMATCH vs expected: value mismatch: expected &#39;Alice&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SORTN(A2:C6, 2)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Alice, 100, 90}, {Bob, 75, 85}}</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Bob 75 85. Still sorted by the name column, so the two lowest names come back regardless of score. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.; MISMATCH vs expected: value mismatch: expected &#39;Alice&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SORTN(A2:C6, 3, 0, B2:B6, FALSE)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Alice, 100, 90}, {Devon, 100, 95}, {Carol, 80, 85}}</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Devon 100 95 / Carol 80 85. Mode 0 is &#34;Show at most the first n rows in the sorted range&#34;, so the tie between Alice and Devon at 100 is simply truncated at three rows and Eloise, also on 80, is cut off. The relative order within a tie follows the source, which the Notes support: &#34;range is sorted only by the specified columns. Other columns are returned in the order they originally appear.&#34; ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.; MISMATCH vs expected: value mismatch: expected &#39;Alice&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SORTN(A2:C6, 3, 1, B2:B6, FALSE)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Alice, 100, 90}, {Devon, 100, 95}, {Carol, 80, 85}, {Eloise, 80, 90}}</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Devon 100 95 / Carol 80 85 / Eloise 80 90. Mode 1 is &#34;Show at most the first n rows, plus any additional rows that are identical to the nth row&#34;. The nth row is Carol; Eloise is NOT identical to Carol as a row (85 against 90 on Test 2) but ties her on the sort column, and the published output includes her. A NOTE THE PAGE NEEDS AND DOES NOT HAVE: its display_ties_mode wording talks about &#34;rows that are identical to the nth row&#34; and &#34;removing duplicate rows&#34;, but no two rows in its own example data are identical -- Alice and Devon share only their Test 1 score, as do Carol and Eloise. The published outputs are only consistent with &#34;identical&#34; and &#34;duplicate&#34; meaning EQUAL IN THE SORT COLUMN OR COLUMNS, not equal as whole rows. That reading is recorded here because it is derived from Google&#39;s results rather than stated in Google&#39;s prose. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.; MISMATCH vs expected: value mismatch: expected &#39;Alice&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SORTN(A2:C6, 3, 2, B2:B6, FALSE)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Alice, 100, 90}, {Carol, 80, 85}, {Bob, 75, 85}}</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Carol 80 85 / Bob 75 85. Mode 2 is &#34;Show at most the first n rows after removing duplicate rows&#34;, and this is the row that proves &#34;duplicate&#34; cannot mean what it says: no two rows in the data are identical, yet Devon and Eloise are both removed. They are the second row at each of the tied scores 100 and 80. A NOTE THE PAGE NEEDS AND DOES NOT HAVE: its display_ties_mode wording talks about &#34;rows that are identical to the nth row&#34; and &#34;removing duplicate rows&#34;, but no two rows in its own example data are identical -- Alice and Devon share only their Test 1 score, as do Carol and Eloise. The published outputs are only consistent with &#34;identical&#34; and &#34;duplicate&#34; meaning EQUAL IN THE SORT COLUMN OR COLUMNS, not equal as whole rows. That reading is recorded here because it is derived from Google&#39;s results rather than stated in Google&#39;s prose. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.; MISMATCH vs expected: value mismatch: expected &#39;Alice&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SORTN(A2:C6, 3, 3, B2:B6, FALSE)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Alice, 100, 90}, {Devon, 100, 95}, {Carol, 80, 85}, {Eloise, 80, 90}, {Bob, 75, 85}}</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: all five students come back. Mode 3 is &#34;Show at most the first n unique rows, but show every duplicate of these rows&#34;: the three distinct Test 1 scores are 100, 80 and 75, and every row carrying one of them is returned. It is the clearest demonstration that n counts DISTINCT SORT KEYS in this mode, not output rows. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.; MISMATCH vs expected: value mismatch: expected &#39;Alice&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=SORTN(A2:C6, 3, 3, 2, FALSE, 3, FALSE)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">{{Devon, 100, 95}, {Alice, 100, 90}, {Eloise, 80, 90}}</span>.
+        GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Devon 100 95 / Alice 100 90 / Eloise 80 90. This row looks malformed beside the others and is not: sort_column1 is documented as &#34;the INDEX of the column in range or a range outside of range&#34;, so the bare 2 and 3 are column indices, each followed by its own is_ascending flag. Sorting descending by Test 1 then by Test 2 orders Devon (100,95) ahead of Alice (100,90) -- reversing them relative to every other row in the table, which is what makes this the one case that proves the second sort key is honoured. Mode 3 then counts DISTINCT COMBINED SORT KEYS, not distinct Test 1 scores: the pairs (100,95), (100,90) and (80,90) are the first three, none of them duplicated, so exactly three rows come back -- where the single-column mode-3 row above returned all five. That refinement is derived from this published output; the page never says uniqueness is measured over the whole set of sort columns. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.; MISMATCH vs expected: value mismatch: expected &#39;Devon&#39;, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -541,6 +626,76 @@ we re-run every test on each new release, so it will flip to Supported here as s
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=SORTN(A2:C6)</td>
+  <td>Published row 1: every optional argument defaulted</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Alice, 100, 90}}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: =SORTN(A2:C6) -&gt; Alice 100 90. Two defaults are doing the work and the page states both: n is &#34;[OPTIONAL - 1 by default]&#34;, and the Notes say &#34;If sort_column1 and is_ascending1 aren&#39;t included, the sort is performed on the lowest-index column in range&#34; -- column A, the names, ascending, where Alice sorts first. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. SORTN&#39;s page carries a real Examples block in the article body: a source table (&#34;The following table is used for the examples below&#34;) of five students with two scores each, and seven Formula/Result rows over it. This file executes all seven, on that exact data. EVERY EXPECTED VALUE HERE IS GOOGLE&#39;S OWN PUBLISHED OUTPUT, and each was additionally re-derived by hand from the display_ties_mode definitions before being written down; all seven reproduce. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SORTN(A2:C6, 2)</td>
+  <td>Published row 2: n given, sort still defaulted</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Alice, 100, 90}, {Bob, 75, 85}}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Bob 75 85. Still sorted by the name column, so the two lowest names come back regardless of score. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SORTN(A2:C6, 3, 0, B2:B6, FALSE)</td>
+  <td>Published row 3: ties mode 0, sorted by Test 1 score descending</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Alice, 100, 90}, {Devon, 100, 95}, {Carol, 80, 85}}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Devon 100 95 / Carol 80 85. Mode 0 is &#34;Show at most the first n rows in the sorted range&#34;, so the tie between Alice and Devon at 100 is simply truncated at three rows and Eloise, also on 80, is cut off. The relative order within a tie follows the source, which the Notes support: &#34;range is sorted only by the specified columns. Other columns are returned in the order they originally appear.&#34; ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SORTN(A2:C6, 3, 1, B2:B6, FALSE)</td>
+  <td>Published row 4: ties mode 1 pulls in a fourth row</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Alice, 100, 90}, {Devon, 100, 95}, {Carol, 80, 85}, {Eloise, 80, 90}}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Devon 100 95 / Carol 80 85 / Eloise 80 90. Mode 1 is &#34;Show at most the first n rows, plus any additional rows that are identical to the nth row&#34;. The nth row is Carol; Eloise is NOT identical to Carol as a row (85 against 90 on Test 2) but ties her on the sort column, and the published output includes her. A NOTE THE PAGE NEEDS AND DOES NOT HAVE: its display_ties_mode wording talks about &#34;rows that are identical to the nth row&#34; and &#34;removing duplicate rows&#34;, but no two rows in its own example data are identical -- Alice and Devon share only their Test 1 score, as do Carol and Eloise. The published outputs are only consistent with &#34;identical&#34; and &#34;duplicate&#34; meaning EQUAL IN THE SORT COLUMN OR COLUMNS, not equal as whole rows. That reading is recorded here because it is derived from Google&#39;s results rather than stated in Google&#39;s prose. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SORTN(A2:C6, 3, 2, B2:B6, FALSE)</td>
+  <td>Published row 5: ties mode 2 drops rows the other modes keep</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Alice, 100, 90}, {Carol, 80, 85}, {Bob, 75, 85}}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Alice 100 90 / Carol 80 85 / Bob 75 85. Mode 2 is &#34;Show at most the first n rows after removing duplicate rows&#34;, and this is the row that proves &#34;duplicate&#34; cannot mean what it says: no two rows in the data are identical, yet Devon and Eloise are both removed. They are the second row at each of the tied scores 100 and 80. A NOTE THE PAGE NEEDS AND DOES NOT HAVE: its display_ties_mode wording talks about &#34;rows that are identical to the nth row&#34; and &#34;removing duplicate rows&#34;, but no two rows in its own example data are identical -- Alice and Devon share only their Test 1 score, as do Carol and Eloise. The published outputs are only consistent with &#34;identical&#34; and &#34;duplicate&#34; meaning EQUAL IN THE SORT COLUMN OR COLUMNS, not equal as whole rows. That reading is recorded here because it is derived from Google&#39;s results rather than stated in Google&#39;s prose. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SORTN(A2:C6, 3, 3, B2:B6, FALSE)</td>
+  <td>Published row 6: ties mode 3 returns five rows for n = 3</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Alice, 100, 90}, {Devon, 100, 95}, {Carol, 80, 85}, {Eloise, 80, 90}, {Bob, 75, 85}}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: all five students come back. Mode 3 is &#34;Show at most the first n unique rows, but show every duplicate of these rows&#34;: the three distinct Test 1 scores are 100, 80 and 75, and every row carrying one of them is returned. It is the clearest demonstration that n counts DISTINCT SORT KEYS in this mode, not output rows. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=SORTN(A2:C6, 3, 3, 2, FALSE, 3, FALSE)</td>
+  <td>Published row 7: two sort columns given as indices rather than ranges</td>
+  <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?, #NAME?}</td>
+  <td class="result mono">{{Devon, 100, 95}, {Alice, 100, 90}, {Eloise, 80, 90}}<br><span class="category-tag">GOOGLE&#39;S OWN PUBLISHED RESULT: -&gt; Devon 100 95 / Alice 100 90 / Eloise 80 90. This row looks malformed beside the others and is not: sort_column1 is documented as &#34;the INDEX of the column in range or a range outside of range&#34;, so the bare 2 and 3 are column indices, each followed by its own is_ascending flag. Sorting descending by Test 1 then by Test 2 orders Devon (100,95) ahead of Alice (100,90) -- reversing them relative to every other row in the table, which is what makes this the one case that proves the second sort key is honoured. Mode 3 then counts DISTINCT COMBINED SORT KEYS, not distinct Test 1 scores: the pairs (100,95), (100,90) and (80,90) are the first three, none of them duplicated, so exactly three rows come back -- where the single-column mode-3 row above returned all five. That refinement is derived from this published output; the page never says uniqueness is measured over the whole set of sort columns. ARRAY RESULT: this case spills more than one cell, so it is written as a real array formula over an explicit check_range and compared cell by cell in row-major order, the same convention SORT, UNIQUE, SEQUENCE and TEXTSPLIT already use in this corpus. Google&#39;s SORTN page, read live on 2026-08-31 at https://support.google.com/docs/answer/7354624.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -687,6 +842,9 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

@@ -7,8 +7,22 @@
  *   - the parse result of XlsxAudit.auditXlsx() (see audit.js, from the E1
  *     prototype — unchanged copy);
  *   - the site's verdict dataset docs/data/compat.json:
- *       { FUNC: { cat, x:bool, g:bool, l:bool, gv, gver, lv, lver, lnew } }
- *     where x/g/l = documented in Excel / Google Sheets / LibreOffice Calc,
+ *       { FUNC: { cat, x:bool, g:bool, l:bool, xwv, xwver, gv, gver,
+ *                 lv, lver, lnew } }
+ *     where x/g/l = documented in DESKTOP Excel / Google Sheets / LibreOffice,
+ *           xwv   = EXECUTED Excel-for-the-web verdict: "supported" | "quirky" |
+ *                   "unsupported" | "inconclusive" | null. THIS IS A DIFFERENT
+ *                   APPLICATION FROM DESKTOP EXCEL, not a second opinion about
+ *                   it: never read x and xwv as two facts about one engine.
+ *                   null includes seven LAMBDA-family functions whose workbook
+ *                   Excel for the web refuses to OPEN -- a transport limit,
+ *                   never evidence of missing support.
+ *           xwver = the Excel-for-the-web run LABEL. Like gver this is a DATE,
+ *                   never a version: do not pass it to compareVersions().
+ *     There is deliberately NO xw documented flag: Microsoft publishes one
+ *     function reference, it describes the desktop product, and we have not
+ *     extracted per-application availability from it.
+ *     Also:
  *           gv    = EXECUTED Google Sheets verdict: "supported" | "quirky" |
  *                   "unsupported" | "inconclusive" | null (null = not in our
  *                   executed set; "inconclusive" = the .xlsx round trip, not
@@ -24,9 +38,17 @@
  *                   or it has no executed data at all).
  *
  * HONESTY CONTRACT (do not weaken when editing copy):
- *   - Excel verdicts are documentation-based; we never execute Excel. Google
- *     Sheets verdicts with gv set and LibreOffice verdicts with lv set are
- *     execution-based. The `basis` field says which, and the UI must surface it.
+ *   - DESKTOP Excel verdicts are documentation-based; we never execute
+ *     desktop Excel. Its column is Microsoft's published reference.
+ *   - EXCEL FOR THE WEB is a separate application and we DO execute it: a
+ *     verdict with xwv set is execution-based. It is evidence about the web
+ *     engine only. Because there is no desktop run to compare against, a
+ *     disagreement between an Excel-web result and Microsoft's documentation
+ *     is ambiguous -- the web engine may diverge, or the documentation may be
+ *     wrong about both -- and no note here may resolve it in either direction.
+ *   - Google Sheets verdicts with gv set and LibreOffice verdicts with lv set
+ *     are execution-based. The `basis` field says which, and the UI must
+ *     surface it.
  *   - Google Sheets has NO version targeting: there is one dated run and
  *     nothing to pick between, so targetVersion is ignored for Sheets targets
  *     and the notes say "executed on <date>" rather than naming a release.
@@ -47,7 +69,11 @@
 (function () {
   'use strict';
 
-  var APP_NAMES = { x: 'Excel', g: 'Google Sheets', l: 'LibreOffice Calc' };
+  var APP_NAMES = {
+    // "Excel" unqualified means the DESKTOP product everywhere in this file.
+    x: 'Excel (desktop)', xw: 'Excel for the web',
+    g: 'Google Sheets', l: 'LibreOffice Calc'
+  };
 
   /* ===================== LibreOffice target releases ===================== */
 
@@ -118,7 +144,12 @@
     { id: 'x2l', source: 'x', target: 'l' },
     { id: 'g2x', source: 'g', target: 'x' },
     { id: 'g2l', source: 'g', target: 'l' },
-    { id: 'l2x', source: 'l', target: 'x' }
+    { id: 'l2x', source: 'l', target: 'x' },
+    // "Will my sheet work in Excel Online?" is a different question from
+    // "will it work in Excel?", and it is the one this engine can answer with
+    // an EXECUTED verdict rather than a documentation flag.
+    { id: 'g2xw', source: 'g', target: 'xw' },
+    { id: 'l2xw', source: 'l', target: 'xw' }
   ];
 
   // How we know the function exists in the SOURCE app (for MISSING messages).
@@ -129,6 +160,13 @@
       if (entry.lv === 'supported') return 'verified working in LibreOffice ' + entry.lver;
       if (entry.lv === 'quirky') return 'recognized (with quirks) in LibreOffice ' + entry.lver;
       if (entry.l) return 'documented for LibreOffice Calc';
+      return null;
+    }
+    if (source === 'xw') {
+      if (entry.xwv === 'supported') return 'executed and verified in Excel for the web on ' + entry.xwver;
+      if (entry.xwv === 'quirky') return 'recognized (with quirks) in Excel for the web, executed ' + entry.xwver;
+      // No xw documentation flag exists to fall back on, so we stop here
+      // rather than borrowing the DESKTOP flag and calling it web presence.
       return null;
     }
     if (source === 'g') {
@@ -323,12 +361,69 @@
       };
     }
 
-    // Excel target: documentation-based only. We never execute Excel.
+    // Excel-for-the-web target: EXECUTED verdict (xwv), exactly like Sheets.
+    // Kept ABOVE the desktop-Excel branch so a future edit cannot let 'xw'
+    // fall through into it -- that fall-through would answer "will this work
+    // in Excel Online?" with Microsoft's desktop documentation, which is the
+    // one mistake this whole engine split exists to prevent. Like Sheets,
+    // there is no version to target: one dated run, so targetVersion is
+    // ignored and every note names the run DATE.
+    if (target === 'xw') {
+      if (entry.xwv === 'unsupported') {
+        return {
+          verdict: 'missing', basis: 'executed',
+          note: 'Executed in Excel for the web on ' + entry.xwver + ' and not recognized — it ' +
+            'returns #NAME?. Excel for the web is a rolling service with no version to pin, so ' +
+            'this is what it did on that date. Note this is the WEB app, not desktop Excel.' + srcNote
+        };
+      }
+      if (entry.xwv === 'supported') {
+        return {
+          verdict: 'ok', basis: 'executed',
+          note: 'Executed and verified in Excel for the web on ' + entry.xwver +
+            ' (uploaded to OneDrive, recalculated on open, read back). This is a measurement of ' +
+            'the web app; we do not run desktop Excel.'
+        };
+      }
+      if (entry.xwv === 'quirky') {
+        return {
+          verdict: 'quirk', basis: 'executed',
+          note: 'Recognized by Excel for the web (executed ' + entry.xwver + '), but at least one ' +
+            'of our executed test cases returned a different value or error than Microsoft’s ' +
+            'documentation describes. That documentation describes DESKTOP Excel, and we do not ' +
+            'run desktop Excel — so we cannot tell you whether the web engine diverges from the ' +
+            'desktop one or the documentation is wrong about both. Review the affected cells.'
+        };
+      }
+      if (entry.xwv === 'inconclusive') {
+        return {
+          verdict: 'unknown', basis: 'documented',
+          note: 'Our Excel-for-the-web run (' + entry.xwver + ') drew no verdict for this ' +
+            'function: every case came back with the same error regardless of its arguments, ' +
+            'which describes a feature the web app does not ship rather than a calculation ' +
+            'result. We have no web-specific documentation flag to fall back on, so verify it ' +
+            'manually.'
+        };
+      }
+      // xwv null: no executed data, and NO documentation flag to fall back on
+      // — Microsoft's reference describes the desktop product, so using `x`
+      // here would assert web availability we never measured or read.
+      return {
+        verdict: 'unknown', basis: 'documented',
+        note: 'Not in our executed Excel-for-the-web set, and Microsoft publishes no ' +
+          'per-application availability flag we have extracted — its function reference ' +
+          'describes the desktop product. We will not guess: verify this one in Excel for the ' +
+          'web yourself.' + (entry.x ? ' (Microsoft does document it for Excel generally.)' : '')
+      };
+    }
+
+    // Excel target: documentation-based only. We never execute desktop Excel.
     if (entry.x) {
       return {
         verdict: 'ok', basis: 'documented',
         note: 'In ' + APP_NAMES.x + '’s official function reference. ' +
-          '(Excel verdicts are documentation-based; we execution-verify Google Sheets and LibreOffice.)'
+          '(Desktop Excel verdicts are documentation-based; we execution-verify Excel for the ' +
+          'web, Google Sheets and LibreOffice.)'
       };
     }
     return {

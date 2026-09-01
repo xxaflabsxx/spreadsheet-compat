@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Engineering &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Engineering &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>IMPRODUCT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>IMPRODUCT</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,59 @@ IMPRODUCT&rsquo;s support changed &mdash; not documentation claims, real results
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMPRODUCT(&#34;3+4i&#34;,&#34;5-3i&#34;)</td>
+  <td>Microsoft&#39;s first documented worked example: the product of two complex numbers</td>
+  <td class="result mono">27+11i</td>
+  <td class="result mono">27+11i<br><span class="category-tag">Microsoft publishes &#39;=IMPRODUCT(&#34;3+4i&#34;,&#34;5-3i&#34;)&#39; with the result 27+11i. Derived independently from the identity the page renders as an image, (a+bi)(c+di) = (ac-bd) + (ad+bc)i: ac-bd = 15 - (-12) = 27 and ad+bc = -9 + 20 = 11. Exact integer arithmetic -- no rounding is involved at any step, so this case tests the multiplication and the string format and nothing else. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMPRODUCT(&#34;1+2i&#34;,30)</td>
+  <td>Microsoft&#39;s second documented worked example: a complex number multiplied by a plain number</td>
+  <td class="result mono">30+60i</td>
+  <td class="result mono">30+60i<br><span class="category-tag">Microsoft publishes &#39;=IMPRODUCT(&#34;1+2i&#34;,30)&#39; with the result 30+60i. Exact: (1+2i)*30 = 30+60i, with d = 0 in the documented product identity. Worth its own case because the second argument is a NUMBER, not a complex-number string -- the page&#39;s syntax says &#34;1 to 255 complex numbers&#34;, and this example is Microsoft&#39;s own demonstration that a bare real is accepted as one of them. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMPRODUCT(&#34;i&#34;,&#34;i&#34;)</td>
+  <td>i squared, the defining identity of the imaginary unit</td>
+  <td class="result mono">-1</td>
+  <td class="result mono">-1<br><span class="category-tag">Exact and definitional: i*i = -1. Both the argument form (&#34;i&#34;, a coefficient of 1 written with no digit) and the result form (a bare real with the imaginary term dropped) exercise the two special cases of the complex-string format in one case -- the argument must be PARSED as 0+1i and the answer must be PRINTED as &#34;-1&#34; rather than &#34;-1+0i&#34;. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMPRODUCT(&#34;3+4j&#34;,&#34;5-3j&#34;)</td>
+  <td>The same product written in the x+yj form the page also documents</td>
+  <td class="result mono">27+11j</td>
+  <td class="result mono">27+11j<br><span class="category-tag">The page&#39;s description says &#34;in x + yi or x + yj text format&#34;, so the j suffix is documented, not a guess. The arithmetic is identical to the first documented example -- 27+11 -- and the answer must come back with the SAME suffix it was given, which is the property under test. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was written as a formatter in Python by batch D and validated against seven independently published Microsoft strings (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP, IMLN); batch E re-ran that validation and then extended it, reproducing THIRTEEN MORE published Microsoft strings byte for byte (IMLOG10, IMLOG2, IMPOWER, both IMPRODUCT examples, IMSEC, IMSECH, IMSIN, IMSINH, IMSQRT, IMSUB, IMSUM, IMTAN) before predicting anything -- twenty published strings in all. ONE REFINEMENT BATCH E HAD TO MAKE: batch D fed the formatter the EXACT value computed at 40 digits, which happened to render identically to the IEEE double for all seven of its strings. That is not true here. A spreadsheet engine holds a double, not the exact value, and two of this batch&#39;s published strings only come out right if the derivation rounds to the nearest double BEFORE formatting: IMPOWER(&#34;2+3i&#34;,3) is exactly -46+9i in exact arithmetic but Microsoft publishes -46+9.00000000000001i, which is what exp(3*ln(2+3i)) gives in double precision; and IMSEC(&#34;4+3i&#34;) has an exact real part of -0.06529402785794704644..., whose 15-digit rounding ends ...47, while the correctly-rounded double -0.065294027857947051 rounds to ...471, which is what Microsoft publishes. So every value in this batch is derived exactly with mpmath at 40 digits, THEN rounded to the double an engine actually holds, THEN formatted. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -533,7 +592,10 @@ IMPRODUCT&rsquo;s support changed &mdash; not documentation claims, real results
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

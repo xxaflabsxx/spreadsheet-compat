@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Information &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Information &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CELL</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CELL</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060104.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060104.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,83 @@ CELL&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=CELL(&#34;row&#34;,B7)</td>
+  <td>The documented &#34;row&#34; info_type returns the row number of the referenced cell</td>
+  <td class="result mono">7</td>
+  <td class="result mono">7<br><span class="category-tag">Excel documents info_type &#34;row&#34; as returning the &#34;Row number of the cell in reference&#34;. B7 is in row 7. This is one of the four info_types this corpus tests, because it depends only on the reference itself -- see the exclusions listed on the &#34;type&#34; cases below</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CELL(&#34;col&#34;,D2)</td>
+  <td>The documented &#34;col&#34; info_type returns the column number of the referenced cell</td>
+  <td class="result mono">4</td>
+  <td class="result mono">4<br><span class="category-tag">Excel documents info_type &#34;col&#34; as returning the &#34;Column number of the cell in reference&#34;. Column D is the 4th column</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CELL(&#34;col&#34;,C3:F9)</td>
+  <td>A multi-cell reference, where the documentation says the upper-left cell is used</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3<br><span class="category-tag">Excel documents that &#34;address&#34; returns the &#34;Reference of the first cell in reference&#34; and that &#34;contents&#34; returns the &#34;Value of the upper-left cell in reference&#34;, so a range argument resolves to its upper-left cell. C3 is in column C, the 3rd column</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CELL(&#34;contents&#34;,A1)</td>
+  <td>The documented &#34;contents&#34; info_type returns the value of the referenced cell</td>
+  <td class="result mono">42</td>
+  <td class="result mono">42<br><span class="category-tag">Excel documents info_type &#34;contents&#34; as returning the &#34;Value of the upper-left cell in reference; not a formula&#34;. A1 holds the number 42</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CELL(&#34;type&#34;,A1)</td>
+  <td>The documented &#34;type&#34; info_type returns &#34;v&#34; for a cell holding a value</td>
+  <td class="result mono">v</td>
+  <td class="result mono">v<br><span class="category-tag">Excel documents info_type &#34;type&#34; as returning &#34;&#39;v&#39; for value if the cell contains anything else&#34; (that is, anything other than blank or a text constant). A1 holds the number 42</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CELL(&#34;type&#34;,A2)</td>
+  <td>The documented &#34;type&#34; info_type returns &#34;l&#34; for a cell holding a text constant</td>
+  <td class="result mono">l</td>
+  <td class="result mono">l<br><span class="category-tag">Excel documents &#34;type&#34; as returning &#34;&#39;l&#39; for label if the cell contains a text constant&#34;. A2 holds the text &#34;hello&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CELL(&#34;type&#34;,A3)</td>
+  <td>The documented &#34;type&#34; info_type returns &#34;b&#34; for an empty cell</td>
+  <td class="result mono">b</td>
+  <td class="result mono">b<br><span class="category-tag">Excel documents &#34;type&#34; as returning &#34;&#39;b&#39; for blank if the cell is empty&#34;. A3 is deliberately left unset. EXCLUSIONS: this corpus tests only the four deterministic info_types &#34;row&#34;, &#34;col&#34;, &#34;contents&#34; and &#34;type&#34;. The others are deliberately omitted because their results are not a property of the formula: &#34;address&#34; and &#34;filename&#34; depend on the workbook&#39;s path and quoting (and &#34;filename&#34; is documented to return empty text for an unsaved sheet); &#34;format&#34;, &#34;color&#34;, &#34;parentheses&#34;, &#34;prefix&#34;, &#34;protect&#34; and &#34;width&#34; depend on cell formatting, column width and sheet protection that survive an .xlsx round-trip inconsistently, and Microsoft documents all six as unsupported in Excel for the web, Excel Mobile and Excel Starter; and the reference-omitted form CELL(info_type) is excluded because Microsoft&#39;s own page warns it reports &#34;your active cell&#34; at calculation time and &#34;does not reliably produce information about a specific cell&#34; -- it is volatile by design and could not be asserted against any fixed value</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -581,7 +664,10 @@ CELL&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>MDETERM</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>MDETERM</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060107.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060107.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,75 @@ MDETERM&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=MDETERM(A2:D5)</td>
+  <td>Microsoft&#39;s first documented worked example: the determinant of a 4x4 range</td>
+  <td class="result mono">87.99999999999997</td>
+  <td class="result mono">88<br><span class="category-tag">Microsoft publishes &#39;=MDETERM(A2:D5)&#39; with the result 88 for the 4x4 block {1,3,8,5; 1,3,6,1; 1,1,1,0; 7,3,10,2}. Derived independently by cofactor expansion in EXACT INTEGER arithmetic -- Python ints, no floating point anywhere, no numpy or other linear-algebra library -- which gives exactly 88. Integer arithmetic matters here: the page itself warns that &#34;MDETERM is calculated with an accuracy of approximately 16 digits, which may lead to a small numeric error when the calculation is not complete&#34;, so an exact reference value is the only way to tell a correct answer from a nearly correct one.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDETERM({3,6,1;1,1,0;3,10,2})</td>
+  <td>Microsoft&#39;s second documented worked example: the same function given an array constant</td>
+  <td class="result mono">0.9999999999999998</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft publishes &#39;=MDETERM({3,6,1;1,1,0;3,10,2})&#39; with the result 1. Verified by exact cofactor expansion: 3(1*2 - 0*10) - 6(1*2 - 0*3) + 1(1*10 - 1*3) = 6 - 12 + 7 = 1. The case is carried separately from the range form because the page documents both input forms explicitly (&#34;Array can be given as a cell range, for example, A1:C3; as an array constant, such as {1,2,3;4,5,6;7,8,9}; or as a name to either of these&#34;) and an engine can support one and not the other.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDETERM({3,6;1,1})</td>
+  <td>Microsoft&#39;s third documented worked example: a 2x2 array constant</td>
+  <td class="result mono">-3</td>
+  <td class="result mono">-3<br><span class="category-tag">Microsoft publishes &#39;=MDETERM({3,6;1,1})&#39; with the result -3. Exact: 3*1 - 6*1 = -3. The smallest non-trivial determinant, and a negative one, so a sign error cannot hide.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDETERM({1,3,8,5;1,3,6,1})</td>
+  <td>Microsoft&#39;s fourth documented worked example: a 2x4 array, which is not square</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft publishes &#39;=MDETERM({1,3,8,5;1,3,6,1})&#39; with the result #VALUE! and the description &#34;Returns an error because the array does not have an equal number of rows and columns&#34;. The page states the rule twice, listing &#34;Array does not have an equal number of rows and columns&#34; among the conditions under which &#34;MDETERM returns the #VALUE! error&#34;. One of the few places where Microsoft publishes an ERROR as a worked example&#39;s result.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDETERM(A2:B3)</td>
+  <td>A square range in which one cell holds text, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;MDETERM returns the #VALUE! error when: Any cells in array are empty or contain text.&#34; A2 holds the text &#34;a&#34; while the other three cells are numbers, so the array is square and the only defect is the text cell.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MDETERM({1,2;2,4})</td>
+  <td>A singular matrix, whose determinant is exactly zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Exact: 1*4 - 2*2 = 0, since the second row is twice the first. Asserted because the page singles this case out as the one where its 16-digit accuracy shows: &#34;the determinant of a singular matrix may differ from zero by 1E-16&#34;. The corpus compares numbers with a 1e-9 tolerance, so a result of 1E-16 still counts as zero here -- what this case would catch is an engine whose singular determinant is wrong by more than that.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -565,7 +640,10 @@ MDETERM&rsquo;s support changed &mdash; not documentation claims, real results.<
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

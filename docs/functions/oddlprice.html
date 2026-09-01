@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ODDLPRICE</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ODDLPRICE</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -447,10 +456,30 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -573,6 +602,76 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,A9),2)</td>
+  <td>Microsoft&#39;s documented worked example, at the two decimals Microsoft publishes</td>
+  <td class="result mono">99.88</td>
+  <td class="result mono">99.88<br><span class="category-tag">Microsoft publishes =ODDLPRICE(A2, A3, A4, A5, A6, A7, A8, A9) = $99.88 for a bond settled 2008-02-07, maturing 2008-06-15, last interest 2007-10-15, 3.75% coupon, 4.05% yield, redemption 100, semiannual, 30/360 basis. DERIVATION, clean-room. Microsoft publishes NO formula for ODDLPRICE -- the page has no &#39;calculated as follows&#39; section and no equation image at all, which is the single biggest documentation gap in this batch -- and OpenFormula 1.3 section 6.12.33 gives only a parameter glossary. So the price here is obtained by ALGEBRAICALLY INVERTING the closed form Microsoft DOES publish, on the ODDLYIELD page, solving that equation for the price: pr = (redemption + (sum DCi/NLi)*100*rate/f) / (1 + (sum DSCi/NLi)*yld/f) - (sum Ai/NLi)*100*rate/f. For this bond the odd last period runs from the last interest date 2007-10-15 to maturity 2008-06-15 and spans two quasi-coupon periods on the semiannual grid, so on basis 0 the ratios are sum DCi/NLi = 240/180, sum Ai/NLi = 112/180 (2007-10-15 to settlement 2008-02-07) and sum DSCi/NLi = 128/180 (settlement to maturity). With a coupon of 100*0.0375/2 = 1.875 that gives (100 + 2.5)/(1 + (128/180)*0.02025) - 1.1666... = 99.87828601472134... The day counts come from a clean-room implementation of OpenFormula 1.3 section 4.11.7 -- Procedure A for US (NASD) 30/360 with its four order-dependent endpoint adjustments, Procedure B for actual days, Procedure C for European 30/360, and Procedures D/E/F for days-in-year -- written for this batch and used by no engine; the arithmetic is mpmath at 50 digits over exact rational day-count ratios. At two decimals that is 99.88 -- the published figure, reproduced from an inverted formula rather than copied. (Microsoft&#39;s own prose on this page says the arguments come from &#34;cells A2:A10&#34; while the formula it prints takes eight arguments from A2:A9; the same off-by-one appears on the ODDLYIELD page. It is a typo in the prose, not in the figure.) Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/oddlprice-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,A9),10)</td>
+  <td>The same example carried to ten decimal places</td>
+  <td class="result mono">99.8782860147</td>
+  <td class="result mono">99.8782860147<br><span class="category-tag">Two published decimals cannot see a day-count error of a day or two, so the inverted-formula value is asserted at ten places: 99.8782860147.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,A9),5)</td>
+  <td>LibreOffice&#39;s own documented example for the same function, nine years earlier</td>
+  <td class="result mono">99.87829</td>
+  <td class="result mono">99.87829<br><span class="category-tag">A SECOND VENDOR&#39;S PUBLISHED FIGURE, on a second set of dates. LibreOffice&#39;s help (help.libreoffice.org/latest/en-US/text/scalc/01/04060118.html) prints &#39;=ODDLPRICE(&#34;1999-02-07&#34;;&#34;1999-06-15&#34;;&#34;1998-10-15&#34;; 0.0375; 0.0405;100;2;0) returns 99.87829&#39; -- Microsoft&#39;s example shifted back exactly nine years, same month-and-day, same rates. Running the clean-room derivation on the 1999 dates gives 99.87828601472134..., identical to the 2008 answer, because every 30/360 day count in the calculation depends only on the month-and-day differences: 99.87829 at five places. Two independent vendors&#39; documentation and one independent derivation agreeing on the same number is stronger evidence than any of the three alone, and this case is here to make that agreement executable.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDLPRICE(A2,A3,A4,A5,-0.0405,A7,A8,A9)</td>
+  <td>A negative yield, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If rate &lt; 0 or if yld &lt; 0, ODDLPRICE returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDLPRICE(A2,A3,A4,A5,A6,A7,A8,5)</td>
+  <td>A basis of 5, one past the documented range</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If basis &lt; 0 or if basis &gt; 4, ODDLPRICE returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDLPRICE(A4,A3,A2,A5,A6,A7,A8,A9)</td>
+  <td>Settlement and last_interest swapped</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;The following date condition must be satisfied; otherwise, ODDLPRICE returns the #NUM! error value: maturity &gt; settlement &gt; last_interest.&#34; Swapping the two puts settlement (2007-10-15) before the last interest date (2008-02-07).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ODDLPRICE(&#34;not a date&#34;,A3,A4,A5,A6,A7,A8,A9)</td>
+  <td>A settlement date that is not a date</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If settlement, maturity, or last_interest is not a valid date, ODDLPRICE returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -721,7 +820,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

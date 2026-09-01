@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>TRANSLATE</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>TRANSLATE</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -452,9 +461,35 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=TRANSLATE(&#34;Hello, World!&#34;,&#34;en&#34;,&#34;es&#34;)</td>
+  <td>Existence probe only: TRANSLATE calls Microsoft Translation Services over the network, so the documented result is not reproducible offline</td>
+  <td class="result mono">¡Hola, Mundo!</td>
+  <td class="result mono"><br><span class="category-tag">NOT DETERMINISTICALLY ASSERTABLE, and deliberately recorded as a probe rather than a support claim -- the same treatment batch D gave DETECTLANGUAGE, which is the same service behind the same disclaimer. Microsoft&#39;s page carries the Note box &#34;This function is a service backed function. The supported languages and results may vary as languages are added or removed&#34;, and describes the function as translating &#34;by using Microsoft Translation Services&#34;. THE PAGE PUBLISHES NO FORMULA/RESULT TABLE at all: its only example is prose, stating that =TRANSLATE(A1, &#34;en&#34;, &#34;es&#34;) on &#34;Hello, World!&#34; displays &#34;Hola mundo!&#34;. Its four listed failure modes are properties of that service rather than of a spreadsheet engine, and NONE of them is given an error code -- &#34;Text Too Long&#34; (&#34;You have too many characters in a cell&#34;), &#34;Error in Value&#34; (&#34;You have a non-text value in your cell&#34;), &#34;Invalid Language&#34; (&#34;You have entered an invalid language code or one we don&#39;t support&#34;) and &#34;Request Throttled&#34; (&#34;You have exceeded your daily quota of the translation function&#34;). No offline engine can reproduce &#34;Hola mundo!&#34;, and an engine that DID return it from a local phrase table would not thereby be compatible with the documented service. What the run does establish is recorded separately: probing all four pinned LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) with the plain name, the _xlfn. storage form, the COM.MICROSOFT. add-in form, the ORG.OPENOFFICE. form and the _xlfn.ORG.OPENOFFICE. form returned #NAME? for ALL FIVE spellings on every build, which is the signature of a name the engine does not implement at all. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/translate-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Ran OK</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -507,7 +542,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

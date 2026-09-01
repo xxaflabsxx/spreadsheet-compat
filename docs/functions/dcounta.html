@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Database &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Database &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>DCOUNTA</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>DCOUNTA</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060101.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060101.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,24 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -478,6 +501,52 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DCOUNTA(A6:E12,&#34;Profit&#34;,A3:F4)</td>
+  <td>Microsoft&#39;s documented worked example: non-blank Profit cells among the apple trees between 10 and 16 feet tall</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft publishes this example as &#39;=DCOUNTA(A6:E12, &#34;Profit&#34;, A3:F4)&#39; with the result 1 and the explanation &#34;Counts the rows (1) containing &#39;Apple&#39; in column A with a height &gt;10 and &lt;16. Only row 8 satisfies these three conditions.&#34; Criteria A3:F4 is the header row plus the single condition row (Apple, Height &gt;10, Height &lt;16), which selects only the Apple/14ft record; its Profit cell is non-blank, so the count is 1. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DCOUNTA(A6:E12,,A3:F4)</td>
+  <td>The optional field argument omitted, so every matching record is counted</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft documents: &#34;The field argument is optional. If field is omitted, DCOUNTA counts all records in the database that match the criteria.&#34; The same criteria as the documented example match exactly one record, so the count is 1 with or without the field. This case exists because an engine that treats the middle argument as required fails here while passing the documented example. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DCOUNTA(A6:E12,&#34;Tree&#34;,A3:A5)</td>
+  <td>Counting non-blank cells in a TEXT field, which is what separates DCOUNTA from DCOUNT</td>
+  <td class="result mono">5</td>
+  <td class="result mono">5<br><span class="category-tag">Derived from the documented description, &#34;Counts the nonblank cells in a field (column) of records&#34; -- unlike DCOUNT, which the sibling page defines as counting cells &#34;that contain numbers&#34;. Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry. All five have a non-blank Tree cell, so DCOUNTA returns 5 where DCOUNT on the same field would return 0. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DCOUNTA(A6:E12,4,A3:A5)</td>
+  <td>The field named by its 1-based column position instead of its label</td>
+  <td class="result mono">5</td>
+  <td class="result mono">5<br><span class="category-tag">Microsoft documents the field argument as accepting &#34;a number (without quotation marks) that represents the position of the column within the list: 1 for the first column, 2 for the second column, and so on&#34;. Column 4 of A6:E12 is Yield. Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry. Each has a non-blank Yield, so the count is 5 -- the same answer as the label form, which is the point of the case. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -578,7 +647,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

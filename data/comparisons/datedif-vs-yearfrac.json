@@ -2,23 +2,71 @@
   "slug": "datedif-vs-yearfrac",
   "title": "DATEDIF vs YEARFRAC: whole units or a fraction",
   "meta_desc": "DATEDIF vs YEARFRAC: completed years/months/days versus decimal years with day-count conventions. Which one for ages, tenure, and accruals.",
-  "funcs": ["DATEDIF", "YEARFRAC"],
+  "funcs": [
+    "DATEDIF",
+    "YEARFRAC"
+  ],
   "intro": "Both measure the distance between two dates in year-terms, but they answer different questions: DATEDIF counts COMPLETED calendar units (a person is 34 until their birthday), YEARFRAC returns a DECIMAL (34.53 years) under a chosen day-count convention. Ages want the first; accruals and prorating want the second.",
   "table": [
-    {"aspect": "Returns", "cols": ["Whole completed years / months / days (by unit code)", "Decimal years"]},
-    {"aspect": "Unit codes / basis", "cols": ["\"Y\", \"M\", \"D\", plus remainders \"YM\", \"MD\", \"YD\"", "Basis 0 = US 30/360 (default!), 1 = actual/actual, 3 = actual/365..."]},
-    {"aspect": "Birthday semantics", "cols": ["Correct — increments ON the anniversary", "34.9972 the day before; needs INT() and care"]},
-    {"aspect": "Documentation", "cols": ["Undocumented in Excel's wizard (Lotus legacy) but fully working", "Documented everywhere"]},
-    {"aspect": "Compatibility", "cols": ["Universal — verified despite the missing docs", "Universal (verified incl. basis differences)"]}
+    {
+      "aspect": "Returns",
+      "cols": [
+        "Whole completed years / months / days (by unit code)",
+        "Decimal years"
+      ]
+    },
+    {
+      "aspect": "Unit codes / basis",
+      "cols": [
+        "\"Y\", \"M\", \"D\", plus remainders \"YM\", \"MD\", \"YD\"",
+        "Basis 0 = US 30/360 (default!), 1 = actual/actual, 3 = actual/365..."
+      ]
+    },
+    {
+      "aspect": "Birthday semantics",
+      "cols": [
+        "Correct — increments ON the anniversary",
+        "34.9972 the day before; needs INT() and care"
+      ]
+    },
+    {
+      "aspect": "Documentation",
+      "cols": [
+        "Undocumented in Excel's wizard (Lotus legacy) but fully working",
+        "Documented everywhere"
+      ]
+    },
+    {
+      "aspect": "Compatibility",
+      "cols": [
+        "Universal — verified despite the missing docs",
+        "Universal (verified incl. basis differences)"
+      ]
+    }
   ],
   "when": [
-    {"func": "DATEDIF", "use_when": "Human-calendar answers: ages, tenure as '34 years, 5 months' (Y + YM), countdown displays. Avoid the \"MD\" unit for month-end edge cases — it has documented quirks in Excel itself."},
-    {"func": "YEARFRAC", "use_when": "Money math over time: interest accruals, prorated fees, service-fraction calculations — choosing the basis deliberately (1 for real calendars, 0/30-360 only when a contract says so)."}
+    {
+      "func": "DATEDIF",
+      "use_when": "Human-calendar answers: ages, tenure as '34 years, 5 months' (Y + YM), countdown displays. Avoid the \"MD\" unit for month-end edge cases — it has documented quirks in Excel itself."
+    },
+    {
+      "func": "YEARFRAC",
+      "use_when": "Money math over time: interest accruals, prorated fees, service-fraction calculations — choosing the basis deliberately (1 for real calendars, 0/30-360 only when a contract says so)."
+    }
   ],
-  "compat_note": "Both execute identically in every LibreOffice version we test (Excel behavior per docs — we do not run Excel; Google Sheets is executed separately, see each function page) — DATEDIF works fine everywhere despite Excel never listing it in the function wizard, and YEARFRAC's basis codes agree cross-app (verified: basis 0 gives exactly 0.5 for Jan 1 → Jul 1; basis 1 gives 0.4959).",
+  "compat_note": "Both execute identically in every LibreOffice version we test (Excel behavior per docs — we do not run desktop Excel; Google Sheets is executed separately, see each function page) — DATEDIF works fine everywhere despite Excel never listing it in the function wizard, and YEARFRAC's basis codes agree cross-app (verified: basis 0 gives exactly 0.5 for Jan 1 → Jul 1; basis 1 gives 0.4959). Excel for the web is a separate application and we do execute it (recalculated on OneDrive, 2026-09-01); those measurements are on the individual function pages.",
   "examples": [
-    {"label": "Exact age in years", "formula": "=DATEDIF(A2,TODAY(),\"Y\")"},
-    {"label": "Years and months", "formula": "=DATEDIF(A2,B2,\"Y\")&\"y \"&DATEDIF(A2,B2,\"YM\")&\"m\""},
-    {"label": "Accrued fraction of a year (real calendar)", "formula": "=YEARFRAC(A2,B2,1)"}
+    {
+      "label": "Exact age in years",
+      "formula": "=DATEDIF(A2,TODAY(),\"Y\")"
+    },
+    {
+      "label": "Years and months",
+      "formula": "=DATEDIF(A2,B2,\"Y\")&\"y \"&DATEDIF(A2,B2,\"YM\")&\"m\""
+    },
+    {
+      "label": "Accrued fraction of a year (real calendar)",
+      "formula": "=YEARFRAC(A2,B2,1)"
+    }
   ]
 }

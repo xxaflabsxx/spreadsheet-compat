@@ -105,8 +105,10 @@ form-encoded body works cross-origin. So:
   documentation flag — `supported`→OK, `quirky`→QUIRK ("recognized, but ≥1 executed
   case returned a different value/error than Excel"), `unsupported`→MISSING (#NAME?),
   `lv:null` falls back to the documented flag and the UI *labels the basis*
-  ("execution-verified" vs "documentation-based") on every row. Excel/Sheets targets
-  are documentation-based and say so.
+  ("execution-verified" vs "documentation-based") on every row. Desktop-Excel targets
+  are documentation-based and say so; Google Sheets and Excel-for-the-web targets are
+  execution-verified from `gv`/`xwv` (this line was already stale about Sheets before
+  the web engine landed).
 - **At-risk ordering / free top-3**: severity class first (MISSING before QUIRK), then
   usage count, then name. Rationale: in LibreOffice targets, ubiquitous quirk-flagged
   functions (SUM, VLOOKUP are genuine executed quirks) would out-count every hard
@@ -121,12 +123,20 @@ form-encoded body works cross-origin. So:
 ## Honest limitations (also reflected in the page copy)
 
 - **Function-level triage, not recalculation.** We match functions against a
-  pre-computed dataset (executed LibreOffice results; vendor docs for Excel/Sheets).
+  pre-computed dataset (executed LibreOffice, Google Sheets and Excel-for-the-web
+  results; vendor docs for desktop Excel).
   We cannot promise specific numbers survive: argument-level differences within a
   supported function, cross-formula interactions, locale/separator issues, data types
   are out of scope.
-- **Excel and Google Sheets verdicts are documentation-based** — only LibreOffice is
-  execution-verified. The UI labels the basis per row; don't remove that.
+- **Desktop Excel verdicts are documentation-based.** LibreOffice, Google Sheets and
+  Excel for the web are all execution-verified, from `lv`, `gv` and `xwv` respectively.
+  The UI labels the basis per row; don't remove that.
+- **Excel for the web is not desktop Excel.** It is a separate application with its own
+  calculation engine, and `xwv` measures only that one. There is no `xw` documentation
+  flag, so a function with `xwv: null` returns UNKNOWN — it must never inherit `x`.
+  Seven LAMBDA-family functions are null for a transport reason (Excel for the web
+  refuses to open a workbook carrying their stored serialization), not for lack of
+  support.
 - **Per-release verdicts only cover the four builds we execute** (24.2.0.3, 24.8.7.2,
   25.2.0.3, 25.8.7.3). Picking "24.8" means "the 24.8.7.2 build we tested", not every
   24.8.x point release, and functions with no executed data (`lv: null`) do not vary by
@@ -151,4 +161,4 @@ form-encoded body works cross-origin. So:
 
 ## Sitewide honesty guard
 
-`python3 scripts/check_honesty.py` — scans every built page in `docs/` and fails if any copy claims Excel or Google Sheets results were verified/tested/executed (only LibreOffice is executed; Excel/Sheets are documented). Run after every rebuild; negations and "documented in all three" are allowed.
+`python3 scripts/check_honesty.py` — scans every built page in `docs/` and fails if any copy claims **desktop** Excel results were verified/tested/executed. LibreOffice, Google Sheets and Excel for the web are all executed, so claims about those are allowed when the results files back them (rule 1b checks that per function). It also fails an unqualified "we do not run Excel" (rule 1c — say "desktop Excel", since we DO run the web app) and any Excel-for-the-web value rendered under a heading naming Excel without "for the web" (rule 7). Run after every rebuild; negations and "documented in all three" are allowed.

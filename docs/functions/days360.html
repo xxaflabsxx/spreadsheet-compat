@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Date and time &middot; Last tested 2026-08-29</p>
+<p class="category-tag">Category: Date and time &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>DAYS360</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>DAYS360</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060102.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-07-29)</td>
   <td>
     
@@ -430,9 +439,59 @@ DAYS360&rsquo;s support changed &mdash; not documentation claims, real results.<
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2011,1,30),DATE(2011,2,1))</td>
+  <td>Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2011,1,1),DATE(2011,12,31))</td>
+  <td>A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
+  <td class="result mono">360</td>
+  <td class="result mono">360</td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31))</td>
+  <td>US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
+  <td class="result mono">30</td>
+  <td class="result mono">30<br><span class="category-tag">Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31),TRUE)</td>
+  <td>Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
+  <td class="result mono">29</td>
+  <td class="result mono">29<br><span class="category-tag">Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -533,7 +592,10 @@ DAYS360&rsquo;s support changed &mdash; not documentation claims, real results.<
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

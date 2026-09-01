@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Logical &middot; Last tested 2026-08-29</p>
 
 
-<p class="lede">Real compatibility results for the <strong>LET</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>LET</strong> function: executed in Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -353,8 +354,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -365,8 +365,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>No — file could not be opened</td>
+  <td>
+    
+      <span class="badge badge-unknown">n/a</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-29)</td>
   <td>
     
@@ -377,8 +387,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/func_let.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/func_let.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-07-29)</td>
   <td>
     
@@ -453,10 +462,21 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+<div class="not-live-tested">
+  <strong>Excel for the web: not testable through our transport.</strong>
+  <strong>Not reachable through this harness&rsquo;s transport &mdash; not a statement about Excel.</strong> Excel for the web is reached by uploading an <code>.xlsx</code> to OneDrive and opening it, and its file-open refuses any workbook whose stored formulas carry the <code>_xlpm.</code>/<code>LAMBDA</code> storage serialization (&ldquo;Couldn&rsquo;t Open the Workbook&rdquo;, no cell-level diagnostic). Proven by bisect: the 40-function chunk carrying it was refused, the same chunk minus <code>LAMBDA</code>/<code>LET</code>/<code>ISOMITTED</code> opened, and those three alone were refused again. Desktop Excel implements <code>LET</code> &mdash; it is Microsoft&rsquo;s own function &mdash; and LibreOffice&rsquo;s executed verdict for it is published below. What we cannot do is carry it into the web engine to measure, so no Excel-for-the-web verdict is drawn. The irony is the finding: <em>Excel for the web will not open a file containing Excel&rsquo;s own LAMBDA-family storage serialization.</em>
+</div>
+
+
+
+
+
 
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
+  
+    
   
     
   
@@ -494,6 +514,9 @@ against those cases before assuming your data is wrong.</p>
 
 
 <h2 class="section-title">Executed test cases</h2>
+
+
+
 
 
 
@@ -596,7 +619,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

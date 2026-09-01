@@ -321,13 +321,14 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>DBCS</h1>
   
-    <span class="badge badge-bad">Unsupported (not recognized)</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>DBCS</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>DBCS</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-quirk">Quirk found</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -450,10 +459,32 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=DBCS(&#34;EXCEL&#34;)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">EXCEL</span>, but the documented/expected
+        result is <span class="formula">ＥＸＣＥＬ</span>.
+        Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. PUBLISHED EXAMPLE CONTRADICTS THE PUBLISHED RULE: the page&#39;s first worked example reads &#39;=DBCS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39;, i.e. it shows the argument coming back unchanged -- which is the documented behaviour of the INVERSE function ASC, whose page carries the identical line, and is impossible under DBCS&#39;s own stated rule because &#34;EXCEL&#34; is five half-width English letters. The value asserted here is derived from the rule instead: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), exactly the inverse of the mapping batch A&#39;s ASC cases assert in the other direction. The page&#39;s second example, which does show a conversion, is rendered as inline GIF images (media/fe337.gif ...) so no literal argument can be copied from it. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? -- and a name-form probe confirms this is a genuine gap rather than a storage-prefix artefact: the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form all return #NAME? on every build. LibreOffice nevertheless PERFORMS this conversion under a different name: on all four builds &#39;=JIS(&#34;EXCEL&#34;)&#39; returns exactly the full-width string asserted here, which independently confirms both the derived expected value and that the gap is a missing alias, not a missing capability.; MISMATCH vs expected: expected &#39;ＥＸＣＥＬ&#39;, got &#39;EXCEL&#39;
+      </li>
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -548,6 +579,52 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DBCS(&#34;EXCEL&#34;)</td>
+  <td>Half-width (single-byte) Latin letters converted to full-width</td>
+  <td class="result mono">EXCEL</td>
+  <td class="result mono">ＥＸＣＥＬ<br><span class="category-tag">Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. PUBLISHED EXAMPLE CONTRADICTS THE PUBLISHED RULE: the page&#39;s first worked example reads &#39;=DBCS(&#34;EXCEL&#34;) equals &#34;EXCEL&#34;&#39;, i.e. it shows the argument coming back unchanged -- which is the documented behaviour of the INVERSE function ASC, whose page carries the identical line, and is impossible under DBCS&#39;s own stated rule because &#34;EXCEL&#34; is five half-width English letters. The value asserted here is derived from the rule instead: E X C E L map to U+FF25 U+FF38 U+FF23 U+FF25 U+FF2C (FULLWIDTH LATIN CAPITAL E X C E L), exactly the inverse of the mapping batch A&#39;s ASC cases assert in the other direction. The page&#39;s second example, which does show a conversion, is rendered as inline GIF images (media/fe337.gif ...) so no literal argument can be copied from it. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? -- and a name-form probe confirms this is a genuine gap rather than a storage-prefix artefact: the plain name, the _xlfn. storage form and the COM.MICROSOFT. add-in form all return #NAME? on every build. LibreOffice nevertheless PERFORMS this conversion under a different name: on all four builds &#39;=JIS(&#34;EXCEL&#34;)&#39; returns exactly the full-width string asserted here, which independently confirms both the derived expected value and that the gap is a missing alias, not a missing capability.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DBCS(&#34;ＥＸＣＥＬ&#34;)</td>
+  <td>Text that is already full-width is returned unchanged</td>
+  <td class="result mono">ＥＸＣＥＬ</td>
+  <td class="result mono">ＥＸＣＥＬ<br><span class="category-tag">Microsoft&#39;s DBCS page documents the rule as: &#34;converts half-width (single-byte) letters within a character string to full-width (double-byte) characters&#34;, and adds &#34;If text does not contain any half-width English letters or katakana, text is not changed&#34;. The page also warns that &#34;The name of the function (and the characters that it converts) depends upon your language settings&#34;; this harness runs under LC_ALL=en_US.UTF-8, a non-DBCS default language, which is stated here rather than assumed away. This case is unambiguous under either reading of the page: the argument contains no half-width English letters or katakana, so the documented no-change clause applies and the result is the argument itself. EXECUTED RESULT: #NAME? on all four LibreOffice builds; see DBCS_halfwidth_latin_to_fullwidth for the three-spelling probe and for LibreOffice&#39;s JIS equivalent.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ASC(DBCS(&#34;EXCEL&#34;))</td>
+  <td>Round trip: converting to full-width and back to half-width</td>
+  <td class="result mono">EXCEL</td>
+  <td class="result mono">EXCEL<br><span class="category-tag">Deliberately locale-independent, and the reason this case exists. If DBCS converts (the documented rule), ASC converts back and the result is &#34;EXCEL&#34;; if DBCS is a no-op under a non-DBCS default language, ASC leaves the already-half-width text alone and the result is still &#34;EXCEL&#34;. Both readings of Microsoft&#39;s page agree here, so a failure of this case cannot be blamed on the harness locale -- it can only mean the engine lacks one of the two functions or mangles the text. EXECUTED RESULT: #NAME? on all four LibreOffice builds. Because ASC itself is supported there (batch A executed it), the failure is entirely DBCS&#39;s, which is what this locale-independent case was built to establish.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(DBCS(&#34;EXCEL&#34;))</td>
+  <td>The conversion is character-for-character, so the length is unchanged</td>
+  <td class="result mono">5</td>
+  <td class="result mono">5<br><span class="category-tag">Microsoft documents DBCS as changing half-width characters to full-width characters -- a one-for-one character mapping, not an encoding change -- so a five-character input yields a five-character result whether or not the mapping fires. This is the mirror of batch A&#39;s ASC_length_preserved case and separates a genuine width conversion from a byte-level reinterpretation. EXECUTED RESULT: #NAME? on all four LibreOffice builds -- LEN is supported, so the unrecognized name is DBCS.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -648,7 +725,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

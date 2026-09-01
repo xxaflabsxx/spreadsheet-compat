@@ -321,13 +321,14 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>VALUETOTEXT</h1>
   
-    <span class="badge badge-bad">Unsupported (not recognized)</span>
+    <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>VALUETOTEXT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>VALUETOTEXT</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-quirk">Quirk found</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -450,10 +459,30 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -592,6 +621,76 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=VALUETOTEXT(A2,0)</td>
+  <td>Microsoft&#39;s first documented row: a logical value in concise format</td>
+  <td class="result mono">TRUE</td>
+  <td class="result mono">TRUE<br><span class="category-tag">Microsoft publishes =VALUETOTEXT(A2, 0) = TRUE for A2 = TRUE. Format 0 is documented as &#34;Concise format that is easy to read. The text returned will be the same as the text rendered in a cell that has general formatting applied.&#34; Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/valuetotext-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=VALUETOTEXT(A3,0)</td>
+  <td>Microsoft&#39;s second documented row: a number in concise format</td>
+  <td class="result mono">1234.01234</td>
+  <td class="result mono">1234.01234<br><span class="category-tag">Microsoft publishes =VALUETOTEXT(A3, 0) = 1234.01234. The published Strict row for the same cell is ALSO 1234.01234, because the page documents strict format as encapsulating &#34;returned strings in quotes except for Booleans, Numbers and Errors&#34; -- numbers are one of the three exceptions.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=VALUETOTEXT(A4,0)</td>
+  <td>Microsoft&#39;s third documented row: text in concise format, which is NOT quoted</td>
+  <td class="result mono">Hello</td>
+  <td class="result mono">Hello<br><span class="category-tag">Microsoft publishes =VALUETOTEXT(A4, 0) = Hello, with no quotation marks. This is the concise half of the pair that defines the format argument.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=VALUETOTEXT(A4,1)</td>
+  <td>Microsoft&#39;s third documented row in strict format, where the same text IS quoted</td>
+  <td class="result mono">&#34;Hello&#34;</td>
+  <td class="result mono">&#34;Hello&#34;<br><span class="category-tag">Microsoft publishes =VALUETOTEXT(A4, 1) = &#34;Hello&#34; WITH the quotation marks, against the unquoted Hello from format 0 on the identical cell. THIS PAIR IS THE ONLY THING IN THE PUBLISHED TABLE THAT DISTINGUISHES THE TWO FORMATS: rows A2, A3, A5 and A7 (a Boolean, two numbers and an error) print identically under both formats, so an engine that ignored the format argument entirely would pass four of the six documented rows. The expected value here contains literal double-quote characters as part of the string.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=VALUETOTEXT(A6,1)</td>
+  <td>Microsoft&#39;s fifth documented row in strict format, a second quoted string</td>
+  <td class="result mono">&#34;Seattle&#34;</td>
+  <td class="result mono">&#34;Seattle&#34;<br><span class="category-tag">Microsoft publishes =VALUETOTEXT(A6, 1) = &#34;Seattle&#34;. Asserted alongside the Hello pair so the quoting behaviour rests on two independent strings rather than one.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=VALUETOTEXT(A4,2)</td>
+  <td>A format argument of 2, which the page excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The Remarks publish: &#34;If format is anything other than 0 or 1, VALUETOTEXT returns the #VALUE! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=VALUETOTEXT(A5,0)</td>
+  <td>Microsoft&#39;s error-value row, deliberately recorded without an assertion because the harness cannot distinguish the two possible outcomes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono"><br><span class="category-tag">DELIBERATELY ASSERTS NOTHING, FOR A READ-BACK REASON RATHER THAN A DOCUMENTATION ONE. Microsoft publishes =VALUETOTEXT(A5, 0) = #VALUE! for a cell A5 holding the ERROR VALUE #VALUE!, i.e. the function is documented to return the error&#39;s TEXT, &#34;#VALUE!&#34;, as a string. Two problems make that unassertable here. First, setup_cells can only place a literal, so A5 in this workbook holds the six-character STRING &#34;#VALUE!&#34; rather than a genuine error value, and a string round-trips through the concise format unchanged -- the right answer for the wrong reason. Second, and decisively, harness/corpus.py classifies a read-back value of &#34;#VALUE!&#34; as an ERROR (it is in KNOWN_ERROR_STRINGS), so a correct engine returning the text &#34;#VALUE!&#34; and a broken engine actually erroring are INDISTINGUISHABLE in the results file. Rather than assert a value the harness cannot verify, the case records what each engine returns and says why it is not scored.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -740,7 +839,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

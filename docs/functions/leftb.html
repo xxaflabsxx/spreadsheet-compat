@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>LEFTB</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>LEFTB</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,75 @@ LEFTB&rsquo;s support changed &mdash; not documentation claims, real results.</p
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=LEFTB(A2,4)</td>
+  <td>Microsoft&#39;s first worked example on the LEFT page, run through the byte-counting spelling</td>
+  <td class="result mono">Sale</td>
+  <td class="result mono">Sale<br><span class="category-tag">The LEFT page publishes =LEFT(A2,4) = Sale for A2 = &#34;Sale Price&#34;. &#34;Sale Price&#34; is pure ASCII, so its first four BYTES are its first four CHARACTERS and LEFTB must return the same string. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft&#39;s LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading &#34;The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2&#34;, and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEFTB(A3)</td>
+  <td>The count argument omitted, which the page documents as defaulting to 1</td>
+  <td class="result mono">S</td>
+  <td class="result mono">S<br><span class="category-tag">The LEFT page documents &#34;If num_chars is omitted, it is assumed to be 1&#34; and publishes =LEFT(A3) = S for A3 = &#34;Sweden&#34;. One byte of ASCII is one character. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft&#39;s LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading &#34;The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2&#34;, and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEFTB(A3,99)</td>
+  <td>A count larger than the string, which the page says returns all of it</td>
+  <td class="result mono">Sweden</td>
+  <td class="result mono">Sweden<br><span class="category-tag">The LEFT page documents &#34;If num_chars is greater than the length of text, LEFT returns all of text&#34; -- no padding, no error. &#34;Sweden&#34; is six ASCII bytes, so 99 bytes returns the whole string. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft&#39;s LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading &#34;The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2&#34;, and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEFTB(A3,0)</td>
+  <td>A count of zero, the lower end of the documented range</td>
+  <td class="result mono"></td>
+  <td class="result mono"><br><span class="category-tag">The LEFT page documents &#34;Num_chars must be greater than or equal to zero&#34;, so zero is inside the valid range and must produce a result rather than an error: zero bytes of text is the empty string. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft&#39;s LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading &#34;The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2&#34;, and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEFTB(A3,-1)</td>
+  <td>A negative count, which the documented range excludes</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">The LEFT page documents &#34;Num_chars must be greater than or equal to zero&#34;. A negative count is outside that range; #VALUE! is Excel&#39;s error for an argument of the wrong kind, and is what the sibling MID/MIDB page states explicitly for its own negative-count case (&#34;If num_chars is negative, MID returns the #VALUE! error value&#34;), so the same code is asserted for the same condition here. LEFTB HAS NO PAGE OF ITS OWN ANY MORE. Microsoft&#39;s LEFT page -- the page that historically documented LEFT and LEFTB together -- now carries only an Important box reading &#34;The LEFTB function is deprecated. LEFT now supports Unicode surrogates via the Compatibility Version, Version 2&#34;, and every worked example and argument rule on it is written for LEFT. LEFTB is still listed as an Excel function, so it is in scope for this corpus, but the only documented behaviour available to assert is the behaviour it shares with LEFT: for text in which every character occupies one byte, a byte count and a character count are the same number, so LEFTB must return what LEFT returns. Those are the cases asserted here, each traced to a specific sentence on the LEFT page. The genuinely byte-specific behaviour -- what happens to double-byte characters, which historically depended on whether the default language was a DBCS language -- is carried as a probe below rather than asserted, because Microsoft no longer publishes a rule for it.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEFTB(&#34;ＥＸＣＥＬ&#34;,2)</td>
+  <td>PROBE: two BYTES of a string made of double-byte characters, where no current rule is published</td>
+  <td class="result mono">ＥＸ</td>
+  <td class="result mono"><br><span class="category-tag">This is the one thing LEFTB does that LEFT does not, and it is also the one thing Microsoft no longer documents: the LEFT page&#39;s only mention of LEFTB is that it is deprecated. Historically LEFTB counted bytes only when the default language was a DBCS language (Japanese, Chinese, Korean) and behaved exactly like LEFT otherwise -- so under this harness&#39;s en_US.UTF-8 environment the two readings give DIFFERENT answers (&#34;Ｅ&#34; if bytes are counted, &#34;ＥＸ&#34; if characters are), and the documentation does not say which is correct. No expected value is invented. FOR THE RECORD, all four LibreOffice builds return &#34;Ｅ&#34;, i.e. they count the full-width characters as two bytes each regardless of locale; LENB(&#34;ＥＸＣＥＬ&#34;) is 10 on all four builds against LEN 5, which is consistent.</span></td>
+  <td><span class="verdict-ok">Ran OK</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -565,7 +640,10 @@ LEFTB&rsquo;s support changed &mdash; not documentation claims, real results.</p
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

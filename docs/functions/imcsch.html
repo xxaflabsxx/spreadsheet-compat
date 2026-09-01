@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Engineering &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Engineering &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>IMCSCH</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>IMCSCH</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -446,10 +455,22 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
     
   
     
@@ -508,6 +529,44 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMCSCH(&#34;4+3i&#34;)</td>
+  <td>Microsoft&#39;s documented worked example: the hyperbolic cosecant of 4+3i</td>
+  <td class="result mono">-0.036275889628626-0.0051744731840194i</td>
+  <td class="result mono">-0.036275889628626-0.0051744731840194i<br><span class="category-tag">Microsoft publishes &#39;=IMCSCH(&#34;4+3i&#34;)&#39; with the result -0.036275889628626-0.0051744731840194i. Derived independently with mpmath at 40 digits from csch(z) = 1/sinh(z): -0.036275889628626011594 - 0.0051744731840193976541i, then rendered through this corpus&#39;s own implementation of Excel&#39;s complex-string format, which reproduces the published string byte for byte. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMCSCH(TRUE)</td>
+  <td>A logical argument, which the page rejects outright</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If inumber is a logical value, IMCSCH returns the #VALUE! error value.&#34; A deliberate refusal to coerce -- TRUE becomes 1 in nearly every other numeric context. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMCSCH(&#34;abc&#34;)</td>
+  <td>A string that is not in the documented complex-number format</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If inumber is a value that is not in the x+yi or x+yj text format, IMCSCH returns the #NUM! error value.&#34; Note this is #NUM!, not the #VALUE! that the logical-value clause on the same page specifies -- the two malformed-input branches are documented as returning DIFFERENT errors, which is why both are asserted. STORAGE-FORM GAP, and NOT a missing capability -- the distinction is the whole point of this case. IMCSCH is an Excel 2013 addition, so real Excel does not store it in a .xlsx under its plain name: Microsoft&#39;s XLSX-extensions future-function list (the reference this harness has used since batch A, mirrored in XlsxWriter&#39;s &#34;Formulas added in Excel 2010 and later&#34; table) gives the storage token as _xlfn.IMCSCH, alongside _xlfn.IMCOSH, _xlfn.IMCOT, _xlfn.IMCSC, _xlfn.IMCSCH, _xlfn.IMSEC, _xlfn.IMSECH, _xlfn.IMSINH and _xlfn.IMTAN. harness/xlfn_map.py therefore writes _xlfn.IMCSCH here, exactly as Excel would. EXECUTED RESULT: all four LibreOffice builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) return #NAME? for that token. A five-spelling probe pins down what this is: _xlfn.IMCSCH, COM.MICROSOFT.IMCSCH, ORG.OPENOFFICE.IMCSCH and _xlfn.ORG.OPENOFFICE.IMCSCH are all #NAME? on every build, while the UNPREFIXED IMCSCH(...) evaluates on every build and returns exactly the string asserted here, byte for byte. So LibreOffice implements IMCSCH correctly, and its OOXML import simply has no mapping for the _xlfn.IMCSCH token Excel writes -- meaning a workbook saved by Excel that uses IMCSCH arrives in LibreOffice as #NAME? even though LibreOffice could compute it. This is the exact mirror image of batch B&#39;s COT/COTH/CSC/CSCH finding, where the _xlfn. token was the ONLY spelling LibreOffice accepted, and it is recorded here as its own divergence class rather than as an ordinary unsupported-function result.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -592,7 +651,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

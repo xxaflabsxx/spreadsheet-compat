@@ -104,6 +104,42 @@ console.log('unit: classifyFunction branches');
   eq([r.verdict, r.basis], ['missing', 'executed'], 'gv unsupported -> missing/executed even with g:true');
   ok(/#NAME\?/.test(r.note), 'executed Sheets missing note names the error it returned');
 
+  // ---- Excel for the web: an EXECUTED target, and never desktop Excel ----
+  const XWVER = 'Excel for the web (recalc, 2026-09-01)';
+  r = c('F', { x: true, g: true, l: true, xwv: 'supported', xwver: XWVER }, 'xw', 'l');
+  eq([r.verdict, r.basis], ['ok', 'executed'], 'xwv supported -> ok/executed');
+  ok(r.note.includes(XWVER), 'executed Excel-web ok note names the dated run');
+  ok(/do not run desktop Excel/i.test(r.note),
+     'Excel-web ok note still disclaims the desktop product');
+
+  r = c('F', { x: true, g: true, l: true, xwv: 'unsupported', xwver: XWVER }, 'xw', 'l');
+  eq([r.verdict, r.basis], ['missing', 'executed'],
+     'xwv unsupported -> missing/executed even with x:true');
+  ok(/WEB app, not desktop Excel/i.test(r.note),
+     'Excel-web missing note refuses to be read as a desktop verdict');
+
+  r = c('F', { x: true, g: true, l: true, xwv: 'quirky', xwver: XWVER }, 'xw', 'l');
+  eq([r.verdict, r.basis], ['quirk', 'executed'], 'xwv quirky -> quirk/executed');
+  ok(/cannot tell you whether the web engine diverges/i.test(r.note),
+     'Excel-web quirk note states the desktop-vs-docs ambiguity instead of resolving it');
+
+  // THE LOAD-BEARING ONE. LAMBDA has x:true and xwv:null because Excel for the
+  // web refused to OPEN the workbook. Falling back to the x flag here would
+  // answer "does this work in Excel Online?" with desktop documentation --
+  // the exact conflation the split engine exists to prevent.
+  r = c('LAMBDA', { x: true, g: true, l: false, xwv: null, xwver: null }, 'xw', 'l');
+  eq([r.verdict, r.basis], ['unknown', 'documented'],
+     'xwv null does NOT inherit the desktop x flag as a web verdict');
+  ok(/describes the desktop product/i.test(r.note),
+     'null Excel-web note explains why the desktop flag is not reused');
+
+  r = c('F', { x: true, g: true, l: true, xwv: 'inconclusive', xwver: XWVER }, 'xw', 'l');
+  eq([r.verdict, r.basis], ['unknown', 'documented'], 'xwv inconclusive -> unknown, no web verdict');
+
+  // The two new directions the web engine makes answerable.
+  ok(V.DIRECTIONS.some(function (d) { return d.id === 'g2xw'; }), 'g2xw direction exists');
+  ok(V.DIRECTIONS.some(function (d) { return d.id === 'l2xw'; }), 'l2xw direction exists');
+
   // "inconclusive" is not a verdict: the .xlsx round trip, not Sheets, explains
   // the result, so we fall back to documentation and say so.
   r = c('F', { x: true, g: true, l: false, gv: 'inconclusive', gver: GVER }, 'g', 'x');
@@ -404,7 +440,10 @@ console.log('unit: compareVersions / resolveTargetVersion / targetLabel');
   eq(V.targetLabel('l', '24.8'), 'LibreOffice Calc 24.8.7.2', 'LO target label carries the build');
   eq(V.targetLabel('l'), 'LibreOffice Calc 25.8.7.3', 'LO target label defaults to latest');
   eq(V.targetLabel('g', '24.2'), 'Google Sheets', 'non-LO target label ignores the version');
-  eq(V.targetLabel('x', '24.2'), 'Excel', 'Excel target label ignores the version');
+  // "Excel (desktop)", not "Excel": the label is disambiguated now that Excel
+  // for the web is a separate, EXECUTED target in the same picker.
+  eq(V.targetLabel('x', '24.2'), 'Excel (desktop)', 'desktop Excel target label ignores the version');
+  eq(V.targetLabel('xw', '24.2'), 'Excel for the web', 'Excel-web target label ignores the version');
 }
 
 console.log('unit: classifyFunction per target LibreOffice version');

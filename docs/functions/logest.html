@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>LOGEST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>LOGEST</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060107.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060107.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,75 @@ LOGEST&rsquo;s support changed &mdash; not documentation claims, real results.</
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=LOGEST(B2:B5,A2:A5)</td>
+  <td>The full returned array {m,b} for an exactly exponential data set</td>
+  <td class="result mono">{2, 0.9999999999999998}</td>
+  <td class="result mono">{{2.0, 1.0}}<br><span class="category-tag">The array form of the assertion: LOGEST returns a 1x2 array {m, b} = {2, 1}. WHY THIS DATA SET. Microsoft&#39;s LOGEST page publishes its worked example as an IMAGE (&#34;Example 1 -- LOGEST function&#34;) with no readable figures, so there is no published result to reproduce and none is invented. Instead the assertions are made on a data set whose answer is forced and exact: y = 2, 4, 8, 16 at x = 1, 2, 3, 4 is exactly y = 1 x 2^x, so ln(y) = x ln(2) is an EXACT straight line through the origin. LOGEST fits y = b*m^x by least squares on ln(y), and a least-squares fit to points that already lie exactly on a line returns that line, so m = 2 and b = 1 with zero residual -- integers, not rounded decimals, and true of every conforming implementation rather than of one engine&#39;s optimiser. The page&#39;s own statement that &#34;The array that LOGEST returns is {mn,mn-1,...,m1,b}&#34; fixes the order of the two values. ENTERED AS AN ARRAY FORMULA. The page is explicit -- &#34;the formula must be entered as a legacy array formula by first selecting the output range, entering the formula in the top-left-cell of the output range, and then pressing CTRL+SHIFT+ENTER&#34; -- so the harness writes it as a legacy CSE array formula covering the whole result range, not as a plain scalar formula. Writing it as a scalar string makes even a fully supported matrix function return a single cell or #VALUE!, which would be a harness artefact rather than a finding.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDEX(LOGEST(B2:B5,A2:A5),1,1)</td>
+  <td>The base m of the fitted curve, extracted with INDEX</td>
+  <td class="result mono">2</td>
+  <td class="result mono">2<br><span class="category-tag">The first element of the returned array is m, the base of y = b*m^x. On this data set it is exactly 2. Asserted as a scalar as well as inside the array so the value is checked even by a consumer that cannot spill an array. WHY THIS DATA SET. Microsoft&#39;s LOGEST page publishes its worked example as an IMAGE (&#34;Example 1 -- LOGEST function&#34;) with no readable figures, so there is no published result to reproduce and none is invented. Instead the assertions are made on a data set whose answer is forced and exact: y = 2, 4, 8, 16 at x = 1, 2, 3, 4 is exactly y = 1 x 2^x, so ln(y) = x ln(2) is an EXACT straight line through the origin. LOGEST fits y = b*m^x by least squares on ln(y), and a least-squares fit to points that already lie exactly on a line returns that line, so m = 2 and b = 1 with zero residual -- integers, not rounded decimals, and true of every conforming implementation rather than of one engine&#39;s optimiser. The page&#39;s own statement that &#34;The array that LOGEST returns is {mn,mn-1,...,m1,b}&#34; fixes the order of the two values.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDEX(LOGEST(B2:B5,A2:A5),1,2)</td>
+  <td>The constant b, extracted the way the page&#39;s own Remarks recommend</td>
+  <td class="result mono">0.9999999999999998</td>
+  <td class="result mono">1<br><span class="category-tag">The page&#39;s Remarks give this exact formula: &#34;When you have only one independent x-variable, you can obtain y-intercept (b) values directly by using the following formula: INDEX(LOGEST(known_y&#39;s,known_x&#39;s),2)&#34;. So the extraction is documented, not improvised; the two-index form INDEX(...,1,2) used here addresses the same element of the 1x2 result and is written out explicitly so the case tests LOGEST rather than INDEX&#39;s one-argument overload. On this data set b is exactly 1. WHY THIS DATA SET. Microsoft&#39;s LOGEST page publishes its worked example as an IMAGE (&#34;Example 1 -- LOGEST function&#34;) with no readable figures, so there is no published result to reproduce and none is invented. Instead the assertions are made on a data set whose answer is forced and exact: y = 2, 4, 8, 16 at x = 1, 2, 3, 4 is exactly y = 1 x 2^x, so ln(y) = x ln(2) is an EXACT straight line through the origin. LOGEST fits y = b*m^x by least squares on ln(y), and a least-squares fit to points that already lie exactly on a line returns that line, so m = 2 and b = 1 with zero residual -- integers, not rounded decimals, and true of every conforming implementation rather than of one engine&#39;s optimiser. The page&#39;s own statement that &#34;The array that LOGEST returns is {mn,mn-1,...,m1,b}&#34; fixes the order of the two values.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDEX(LOGEST(B2:B5),1,1)</td>
+  <td>known_x&#39;s omitted, which the page says defaults to {1,2,3,...}</td>
+  <td class="result mono">2</td>
+  <td class="result mono">2<br><span class="category-tag">Excel documents: &#34;If known_x&#39;s is omitted, it is assumed to be the array {1,2,3,...} that is the same size as known_y&#39;s.&#34; The x values supplied explicitly in the other cases ARE 1,2,3,4, so omitting them must give the identical answer, m = 2. That equality is the assertion: it cannot hold by coincidence. WHY THIS DATA SET. Microsoft&#39;s LOGEST page publishes its worked example as an IMAGE (&#34;Example 1 -- LOGEST function&#34;) with no readable figures, so there is no published result to reproduce and none is invented. Instead the assertions are made on a data set whose answer is forced and exact: y = 2, 4, 8, 16 at x = 1, 2, 3, 4 is exactly y = 1 x 2^x, so ln(y) = x ln(2) is an EXACT straight line through the origin. LOGEST fits y = b*m^x by least squares on ln(y), and a least-squares fit to points that already lie exactly on a line returns that line, so m = 2 and b = 1 with zero residual -- integers, not rounded decimals, and true of every conforming implementation rather than of one engine&#39;s optimiser. The page&#39;s own statement that &#34;The array that LOGEST returns is {mn,mn-1,...,m1,b}&#34; fixes the order of the two values.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDEX(LOGEST(B2:B5,A2:A5,FALSE),1,1)</td>
+  <td>const set to FALSE, which the page says forces b to 1</td>
+  <td class="result mono">2</td>
+  <td class="result mono">2<br><span class="category-tag">Excel documents: &#34;If const is FALSE, b is set equal to 1, and the m-values are fitted to y = m^x.&#34; On this data set b is 1 already, so constraining it changes nothing and m must remain exactly 2. Choosing data where the constraint is non-binding is deliberate: it turns a hard-to-verify optimiser result into an exact equality that any conforming engine must satisfy. WHY THIS DATA SET. Microsoft&#39;s LOGEST page publishes its worked example as an IMAGE (&#34;Example 1 -- LOGEST function&#34;) with no readable figures, so there is no published result to reproduce and none is invented. Instead the assertions are made on a data set whose answer is forced and exact: y = 2, 4, 8, 16 at x = 1, 2, 3, 4 is exactly y = 1 x 2^x, so ln(y) = x ln(2) is an EXACT straight line through the origin. LOGEST fits y = b*m^x by least squares on ln(y), and a least-squares fit to points that already lie exactly on a line returns that line, so m = 2 and b = 1 with zero residual -- integers, not rounded decimals, and true of every conforming implementation rather than of one engine&#39;s optimiser. The page&#39;s own statement that &#34;The array that LOGEST returns is {mn,mn-1,...,m1,b}&#34; fixes the order of the two values.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=INDEX(LOGEST(B2:B5,A2:A5,TRUE,TRUE),3,1)</td>
+  <td>stats set to TRUE, reading the coefficient of determination for a perfect fit</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Excel documents: &#34;If stats is TRUE, LOGEST returns the additional regression statistics, so the returned array is {mn,mn-1,...,m1,b; sen,sen-1,...,se1,seb; r2,sey; F,df; ssreg,ssresid}&#34;, and refers the reader to LINEST for their meaning. Row 3 column 1 of that array is r^2. The data lie EXACTLY on the fitted curve, so the residual sum of squares is zero and r^2 is exactly 1 -- the one statistic in that block that is forced by the data rather than by an optimiser&#39;s choices, which is why it is the one asserted. WHY THIS DATA SET. Microsoft&#39;s LOGEST page publishes its worked example as an IMAGE (&#34;Example 1 -- LOGEST function&#34;) with no readable figures, so there is no published result to reproduce and none is invented. Instead the assertions are made on a data set whose answer is forced and exact: y = 2, 4, 8, 16 at x = 1, 2, 3, 4 is exactly y = 1 x 2^x, so ln(y) = x ln(2) is an EXACT straight line through the origin. LOGEST fits y = b*m^x by least squares on ln(y), and a least-squares fit to points that already lie exactly on a line returns that line, so m = 2 and b = 1 with zero residual -- integers, not rounded decimals, and true of every conforming implementation rather than of one engine&#39;s optimiser. The page&#39;s own statement that &#34;The array that LOGEST returns is {mn,mn-1,...,m1,b}&#34; fixes the order of the two values.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -565,7 +640,10 @@ LOGEST&rsquo;s support changed &mdash; not documentation claims, real results.</
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

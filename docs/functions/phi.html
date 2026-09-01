@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>PHI</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>PHI</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060184.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060184.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,75 @@ PHI&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(PHI(0.75),9)</td>
+  <td>Microsoft&#39;s documented worked example</td>
+  <td class="result mono">0.301137432</td>
+  <td class="result mono">0.301137432<br><span class="category-tag">Microsoft publishes =PHI(0.75) = 0.301137432, &#34;The value of the density function for a standard normal distribution&#34;. DERIVATION from the density itself, with mpmath at 50 digits and no statistics library: exp(-0.75^2/2)/sqrt(2*pi) = exp(-0.28125)/2.5066282746310002... = 0.30113743215480421..., which is 0.301137432 at nine places -- the published figure, reproduced exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/phi-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PHI(0.75),12)</td>
+  <td>The same value carried to twelve decimal places</td>
+  <td class="result mono">0.301137432155</td>
+  <td class="result mono">0.301137432155<br><span class="category-tag">Nine published decimals are asserted again at twelve: 0.301137432155, from the same exp/sqrt derivation.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PHI(0),12)</td>
+  <td>The density at its mode</td>
+  <td class="result mono">0.398942280401</td>
+  <td class="result mono">0.398942280402<br><span class="category-tag">At x = 0 the exponential is 1 and the density is exactly 1/sqrt(2*pi) = 0.3989422804014327..., a constant that depends on nothing but pi. Asserted at twelve places: 0.398942280402. This is the case that catches a normalising constant computed as 1/2.5066 or similar.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PHI(0.75)-NORM.S.DIST(0.75,FALSE),12)</td>
+  <td>The documented equivalence to NORM.S.DIST with cumulative FALSE</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">OpenFormula 1.3 section 6.18.61 defines PHI outright as a synonym: &#34;PHI(N) is a synonym for NORMDIST(N,0,1,FALSE()).&#34; This case checks that identity inside the engine -- the difference of the two calls must be exactly zero -- rather than against a constant, so an engine whose two density paths disagree is caught even if each rounds to a published figure on its own. NORM.S.DIST was executed by an earlier batch of this corpus and is supported on all four LibreOffice builds, so a failure here is PHI&#39;s.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(PHI(1.25)-PHI(-1.25),12)</td>
+  <td>The standard normal density is even</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">The density depends on x only through x^2, so PHI(x) = PHI(-x) exactly, for every x. No derived constant is involved, and an engine that accidentally implemented the CUMULATIVE distribution instead of the density fails immediately (the CDF is not even).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=PHI(&#34;x&#34;)</td>
+  <td>A non-numeric argument</td>
+  <td class="result mono">#VALUE!</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Microsoft documents: &#34;If x is using a data type that is not valid, such as a nonnumeric value, PHI returns the #VALUE! error value&#34;, separately from &#34;If x is a numeric value that is not valid, PHI returns the #NUM! error value&#34;.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -565,7 +640,10 @@ PHI&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

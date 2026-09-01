@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Add-in and Automation &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Add-in and Automation &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>EUROCONVERT</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>EUROCONVERT</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -439,10 +448,66 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=EUROCONVERT(1.2,&#34;DEM&#34;,&#34;EUR&#34;)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.61</span>.
+        Microsoft publishes &#39;=EUROCONVERT(A2,B2,C2)&#39; over the data 1.20 / DEM / EUR with the result 0.61 and the note &#34;by using a calculation and display precision of 2 decimal places&#34;. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1.20 / 1.95583 = 0.6135502574354622, and with full_precision omitted the documented default is FALSE, which applies the currency-specific rounding from the page&#39;s own table -- EUR display precision 2 -- giving 0.61.; MISMATCH vs expected: expected 0.61, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EUROCONVERT(1,&#34;FRF&#34;,&#34;EUR&#34;,TRUE,3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.152</span>.
+        Microsoft publishes &#39;=EUROCONVERT(A3,B3,C3,TRUE,3)&#39; with the result 0.152. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, and the documented triangulation_precision of 3 rounds the intermediate euro value to 3 significant digits, giving 0.152; full_precision TRUE then displays all significant digits of that value rather than re-rounding to the EUR display precision.; MISMATCH vs expected: expected 0.152, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EUROCONVERT(1,&#34;FRF&#34;,&#34;EUR&#34;,FALSE,3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.15</span>.
+        Microsoft publishes &#39;=EUROCONVERT(A4,B4,C4,FALSE,3)&#39; with the result 0.15 and the note &#34;by using a calculation and display precision of 2 decimal places&#34;. Derived: the same 0.152 intermediate as the previous case, then rounded to the EUR display precision of 2 from the page&#39;s rounding table, giving 0.15. This case and the previous one differ only in the full_precision flag, which is the whole point -- an engine that ignores that argument returns the same number for both.; MISMATCH vs expected: expected 0.15, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EUROCONVERT(1,&#34;FRF&#34;,&#34;DEM&#34;,TRUE,3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.29728616</span>.
+        Microsoft publishes &#39;=EUROCONVERT(A5,B5,C5,TRUE,3)&#39; with the result 0.29728616 and the note &#34;by using an intermediate calculation precision of 3 and displaying all significant digits&#34;. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, rounded to the documented 3 significant digits of triangulation precision = 0.152, then multiplied by the DEM rate 1.95583 = 0.29728616 exactly. This is the case that proves the intermediate rounding really happens: without it the answer would be 0.1524490172374104 * 1.95583 = 0.2981650... , nowhere near the published figure.; MISMATCH vs expected: expected 0.29728616, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EUROCONVERT(1,&#34;XYZ&#34;,&#34;EUR&#34;)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">#VALUE!</span>.
+        Excel documents fourteen accepted ISO codes (BEF, LUF, DEM, ESP, FRF, IEP, ITL, NLG, ATS, PTE, FIM, GRD, SIT, EUR) and the blanket remark &#34;Invalid parameters return #VALUE.&#34; XYZ is not among them.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -517,6 +582,60 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=EUROCONVERT(1.2,&#34;DEM&#34;,&#34;EUR&#34;)</td>
+  <td>Microsoft&#39;s documented worked example: 1.20 deutsche marks in euros, with full_precision omitted</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.61<br><span class="category-tag">Microsoft publishes &#39;=EUROCONVERT(A2,B2,C2)&#39; over the data 1.20 / DEM / EUR with the result 0.61 and the note &#34;by using a calculation and display precision of 2 decimal places&#34;. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1.20 / 1.95583 = 0.6135502574354622, and with full_precision omitted the documented default is FALSE, which applies the currency-specific rounding from the page&#39;s own table -- EUR display precision 2 -- giving 0.61.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EUROCONVERT(1,&#34;FRF&#34;,&#34;EUR&#34;,TRUE,3)</td>
+  <td>Microsoft&#39;s documented worked example: 1 franc in euros at triangulation precision 3</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.152<br><span class="category-tag">Microsoft publishes &#39;=EUROCONVERT(A3,B3,C3,TRUE,3)&#39; with the result 0.152. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, and the documented triangulation_precision of 3 rounds the intermediate euro value to 3 significant digits, giving 0.152; full_precision TRUE then displays all significant digits of that value rather than re-rounding to the EUR display precision.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EUROCONVERT(1,&#34;FRF&#34;,&#34;EUR&#34;,FALSE,3)</td>
+  <td>Microsoft&#39;s documented worked example: the same conversion with full_precision FALSE</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.15<br><span class="category-tag">Microsoft publishes &#39;=EUROCONVERT(A4,B4,C4,FALSE,3)&#39; with the result 0.15 and the note &#34;by using a calculation and display precision of 2 decimal places&#34;. Derived: the same 0.152 intermediate as the previous case, then rounded to the EUR display precision of 2 from the page&#39;s rounding table, giving 0.15. This case and the previous one differ only in the full_precision flag, which is the whole point -- an engine that ignores that argument returns the same number for both.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EUROCONVERT(1,&#34;FRF&#34;,&#34;DEM&#34;,TRUE,3)</td>
+  <td>Microsoft&#39;s documented worked example: franc to deutsche mark through the euro (triangulation)</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.29728616<br><span class="category-tag">Microsoft publishes &#39;=EUROCONVERT(A5,B5,C5,TRUE,3)&#39; with the result 0.29728616 and the note &#34;by using an intermediate calculation precision of 3 and displaying all significant digits&#34;. Microsoft&#39;s page states the rates its examples assume: &#34;1 euro = 6.55957 French francs and 1.95583 deutsche marks&#34; (the irrevocable EU fixing rates), and every figure below was recomputed from them. Derived: 1 / 6.55957 = 0.1524490172374104, rounded to the documented 3 significant digits of triangulation precision = 0.152, then multiplied by the DEM rate 1.95583 = 0.29728616 exactly. This is the case that proves the intermediate rounding really happens: without it the answer would be 0.1524490172374104 * 1.95583 = 0.2981650... , nowhere near the published figure.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EUROCONVERT(1,&#34;XYZ&#34;,&#34;EUR&#34;)</td>
+  <td>A source currency that is not one of the documented ISO codes</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents fourteen accepted ISO codes (BEF, LUF, DEM, ESP, FRF, IEP, ITL, NLG, ATS, PTE, FIM, GRD, SIT, EUR) and the blanket remark &#34;Invalid parameters return #VALUE.&#34; XYZ is not among them.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -633,7 +752,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

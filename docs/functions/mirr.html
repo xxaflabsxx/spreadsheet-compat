@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Financial &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Financial &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>MIRR</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>MIRR</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060119.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060119.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,26 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -482,6 +507,60 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(MIRR(A1:A6,0.1,0.12),4)</td>
+  <td>Microsoft&#39;s documented worked example: 5 years of cash flows, 10% finance rate, 12% reinvestment rate</td>
+  <td class="result mono">0.1261</td>
+  <td class="result mono">0.1261<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 12.61% (the live page displays it rounded to 13%). Independently derived from the documented formula MIRR = (-NPV(reinvest, positives)*(1+reinvest)^n / (NPV(finance, negatives)*(1+finance)))^(1/(n-1)) - 1 with n = 6 values: the reinvested inflows are carried forward at 12% and the single -120000 outflow discounted at 10%; the 5th root of the ratio gives 0.12609413 -&gt; 0.1261 at 4 dp</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(MIRR(A1:A4,0.1,0.12),4)</td>
+  <td>Same doc example truncated to the first three years of inflows, which is still a net loss</td>
+  <td class="result mono">-0.048</td>
+  <td class="result mono">-0.048<br><span class="category-tag">Microsoft publishes this example&#39;s result as -4.80% (displayed rounded to -5%). Same formula with n = 4 values (-120000, 39000, 30000, 21000): the reinvested inflows do not recover the outflow, so the cube root of the ratio is below 1 -&gt; -0.04804466 -&gt; -0.048 at 4 dp</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(MIRR(A1:A6,0.1,0.14),4)</td>
+  <td>Same cash flows with the reinvestment rate raised from 12% to 14%</td>
+  <td class="result mono">0.1348</td>
+  <td class="result mono">0.1348<br><span class="category-tag">Microsoft publishes this example&#39;s result as 13.48% (displayed rounded to 13%). Raising only the reinvestment rate raises the future value of the positive flows; recomputing the documented formula gives 0.13475911 -&gt; 0.1348 at 4 dp</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(MIRR(A1:A4,0.1,0.1),4)</td>
+  <td>A zero cash flow is neither an inflow nor an outflow, so it only contributes to the period count</td>
+  <td class="result mono">0.1079</td>
+  <td class="result mono">0.1079<br><span class="category-tag">Excel documents that MIRR ignores text, logical values and empty cells in a reference but INCLUDES cells with the value zero. Zero belongs to neither the positive nor the negative NPV; with finance = reinvest = 0.1, the future value of the inflows is 600*1.1 + 700 = 1360 and the compounded present value of the outflow is -1000, with n = 4 values, so (1360/1000)^(1/3) - 1 = 0.10793165 -&gt; 0.1079</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=MIRR(A1:A3,0.1,0.12)</td>
+  <td>Excel documents #DIV/0! when values contains no negative (or no positive) number</td>
+  <td class="result mono">#DIV/0!</td>
+  <td class="result mono">#DIV/0!<br><span class="category-tag">With no negative cash flow the denominator NPV of the outflows is zero, and Excel documents that MIRR requires at least one positive and one negative value or it returns #DIV/0!</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -598,7 +677,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

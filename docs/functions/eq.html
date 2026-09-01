@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Operator &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>EQ</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document EQ, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>EQ</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document EQ, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,56 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=EQ(2,3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">False</span>.
+        Google&#39;s Sample Usage prints EQ(2,3) with no result; FALSE is DERIVED from the page&#39;s one-line definition and its &#34;Equivalent to the `=` operator&#34; clause. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence. THE PAGE SAYS NOTHING ABOUT TEXT. None of the six comparison-operator pages (EQ, NE, GT, GTE, LT, LTE) makes any statement about comparing text to text, text to numbers, mixed types, or case sensitivity, and none of them prints a single result value; their Examples sections are embedded live spreadsheets whose cells are not part of the article text. So this file asserts text behaviour only STRUCTURALLY -- the function must agree with the operator it is documented to be equivalent to, whatever that operator does -- and never asserts what the comparison itself yields on text.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EQ(A2,A3)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">False</span>.
+        The same comparison through cell references. The page names A2 and A3 without populating them, so this corpus chose 2 and 3 to match the literal sample. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EQ(5,5)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        Derived from the exact wording of the definition and the `=` equivalence. This is the case that separates EQ from its neighbours, and Google publishes no example of it. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=EQ(&#34;a&#34;,&#34;A&#34;)=(&#34;a&#34;=&#34;A&#34;)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">True</span>.
+        A STRUCTURAL assertion with no derived constant, and deliberately so: the page never says how text compares, or whether the comparison is case sensitive, so the only thing it licenses is that the function and the operator must return the SAME answer. This case asserts that agreement and nothing about the answer itself. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593.; MISMATCH vs expected: expected True, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -505,6 +560,52 @@ we re-run every test on each new release, so it will flip to Supported here as s
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=EQ(2,3)</td>
+  <td>The page&#39;s own Sample Usage line, EQ(2,3)</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">False<br><span class="category-tag">Google&#39;s Sample Usage prints EQ(2,3) with no result; FALSE is DERIVED from the page&#39;s one-line definition and its &#34;Equivalent to the `=` operator&#34; clause. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593. BATCH PROVENANCE (batch H, the first Sheets/LibreOffice-only batch). Every function in this batch has x == false in docs/data/compat.json: it is a Google Sheets function that Microsoft does not document at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE ACTUALLY PRINTS, WHICH IS LESS THAN IT LOOKS: most of these pages carry a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS. Where a value below is Google&#39;s own published output the note says so; where it is derived from the page&#39;s stated semantics the note says that instead, and says from which sentence. No value in this batch was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them, so the expected values below describe Google Sheets and the LibreOffice column records absence. THE PAGE SAYS NOTHING ABOUT TEXT. None of the six comparison-operator pages (EQ, NE, GT, GTE, LT, LTE) makes any statement about comparing text to text, text to numbers, mixed types, or case sensitivity, and none of them prints a single result value; their Examples sections are embedded live spreadsheets whose cells are not part of the article text. So this file asserts text behaviour only STRUCTURALLY -- the function must agree with the operator it is documented to be equivalent to, whatever that operator does -- and never asserts what the comparison itself yields on text.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EQ(A2,A3)</td>
+  <td>The page&#39;s cell-reference Sample Usage line</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">False<br><span class="category-tag">The same comparison through cell references. The page names A2 and A3 without populating them, so this corpus chose 2 and 3 to match the literal sample. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EQ(5,5)</td>
+  <td>The boundary the page&#39;s wording turns on: two equal values</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">True<br><span class="category-tag">Derived from the exact wording of the definition and the `=` equivalence. This is the case that separates EQ from its neighbours, and Google publishes no example of it. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=EQ(&#34;a&#34;,&#34;A&#34;)=(&#34;a&#34;=&#34;A&#34;)</td>
+  <td>EQ against the `=` operator on text arguments</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">True<br><span class="category-tag">A STRUCTURAL assertion with no derived constant, and deliberately so: the page never says how text compares, or whether the comparison is case sensitive, so the only thing it licenses is that the function and the operator must return the SAME answer. This case asserts that agreement and nothing about the answer itself. Google&#39;s EQ page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093593.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -603,6 +704,9 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

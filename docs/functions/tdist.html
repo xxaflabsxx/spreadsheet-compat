@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Compatibility &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Compatibility &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>TDIST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>TDIST</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,30 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -506,6 +535,76 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(TDIST(A2,A3,2),9)</td>
+  <td>Microsoft&#39;s first documented row: the two-tailed distribution, at the nine decimals its description publishes</td>
+  <td class="result mono">0.05464493</td>
+  <td class="result mono">0.05464493<br><span class="category-tag">Microsoft publishes =TDIST(A2,A3,2) with the description &#34;Two-tailed distribution (0.054644930, or 5.46 percent)&#34; and a Result cell formatted as &#34;5.46%&#34;. The assertable figure is the number, 0.054644930; the percent string is cell formatting. DERIVED on the doubly-cross-checked t CDF (incomplete beta AND numerical quadrature of the density, agreeing to 25 digits, with scipy as a third check): 2*(1 - F(1.959999998)) at 60 degrees of freedom = 0.05464492997592087239699, which is 0.054644930 at the published precision -- 0.05464493 as a number, the trailing zero being Microsoft&#39;s formatting. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/tdist-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TDIST(A2,A3,1),9)</td>
+  <td>Microsoft&#39;s second documented row: the one-tailed distribution</td>
+  <td class="result mono">0.027322465</td>
+  <td class="result mono">0.027322465<br><span class="category-tag">Microsoft publishes =TDIST(A2,A3,1) with the description &#34;One-tailed distribution (0.027322465 or 2.73 percent)&#34;. Derived as 1 - F(1.959999998) at 60 degrees of freedom = 0.02732246498796043619849, i.e. 0.027322465 at the published precision -- exactly half the two-tailed row above, which the page&#39;s own definitions require.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TDIST(1.5,25,2)-T.DIST.2T(1.5,25),15)</td>
+  <td>The legacy two-tailed form against its modern replacement</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">The TDIST page&#39;s Important box directs readers to &#34;T.DIST.2T function and T.DIST.RT function&#34;, and its Remarks define TDIST with tails = 2 as P(|X| &gt; x) -- exactly what T.DIST.2T computes. A structural assertion with no derived constant, checking the engine&#39;s legacy and modern spellings against each other. THIS IS THE CASE THAT WOULD CATCH A COMPATIBILITY-FUNCTION ALIAS THAT DRIFTED, which is the whole reason the legacy names are still in this corpus.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TDIST(1.5,25,1)-T.DIST.RT(1.5,25),15)</td>
+  <td>The legacy one-tailed form against its modern replacement</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">TDIST with tails = 1 is defined on the page as P(X &gt; x), which is T.DIST.RT. A structural assertion with no derived constant.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TDIST(-1,60,2)</td>
+  <td>A negative x, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If x &lt; 0, then TDIST returns the #NUM! error value.&#34; The same page ALSO publishes, two bullets later, the identities &#34;TDIST(-x,df,1) = 1 - TDIST(x,df,1) = P(X &gt; -x)&#34; and &#34;TDIST(-x,df,2) = TDIST(x,df,2) = P(|X| &gt; x)&#34; -- i.e. it defines the function at negative arguments in the same breath as forbidding them. Recorded as published; the #NUM! rule is the one asserted, because it is the one stated as a return value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TDIST(1.96,60,3)</td>
+  <td>A tails argument of 3, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If tails is any value other than 1 or 2, TDIST returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TDIST(1.96,0,2)</td>
+  <td>Zero degrees of freedom, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If deg_freedom &lt; 1, TDIST returns the #NUM! error value.&#34; Note this legacy page NAMES the code where its modern sibling T.DIST does not.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -654,7 +753,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

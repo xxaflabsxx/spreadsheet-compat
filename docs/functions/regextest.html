@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>REGEXTEST</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>REGEXTEST</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -450,10 +459,30 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -612,6 +641,76 @@ Sheets equivalent &mdash; see the
 
 
 
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;a&#34;)</td>
+  <td>Microsoft&#39;s documented example: does &#39;alfalfa&#39; contain the letter a?</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft&#39;s Example 1 checks &#34;various aspects of the string &#39;alfalfa&#39;&#34;, and its first row is =REGEXTEST(A2,&#34;a&#34;) with the question &#34;Does it contain the letter &#39;a&#39;?&#34;. The documented return is &#34;TRUE if there is a match and FALSE if there is not&#34;, and &#34;alfalfa&#34; plainly contains an &#39;a&#39;, so the answer is TRUE. (The page shows the result column only as a screenshot, so the TRUE/FALSE values in this file are read off the questions Microsoft prints in text, each of which has one and only one correct answer for the string &#39;alfalfa&#39;.) REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regextest-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;[a-z]&#34;)</td>
+  <td>Microsoft&#39;s row: does it contain any lower case letters?</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft&#39;s second documented row, question &#34;Does it contain any lower case letters?&#34;. Every character of &#34;alfalfa&#34; is lower case, so TRUE.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;[A-Z]&#34;)</td>
+  <td>Microsoft&#39;s row: does it contain any upper case letters?</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">Microsoft&#39;s third documented row, question &#34;Does it contain any upper case letters?&#34;. It does not, so FALSE -- and this is the row that proves matching is case-SENSITIVE by default, since a case-insensitive engine would answer TRUE here and every subsequent case-sensitivity assertion in this batch would be meaningless.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;[0-9]&#34;)</td>
+  <td>Microsoft&#39;s row: does it contain any number digits?</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">Microsoft&#39;s fifth documented row, question &#34;Does it contain any number digits?&#34;. No digits, so FALSE. Asserted alongside the TRUE rows so that an engine that always returns TRUE (or that returns a truthy string) is caught.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</td>
+  <td>Microsoft&#39;s Example 2 pattern against a number in the required format</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft&#39;s Example 2 checks &#34;whether phone numbers have the specific format &#39;(###) ###-####&#39;&#34; using the pattern ^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$, and notes: &#34;Backslash &#39;\&#39; is used to &#39;escape&#39; parentheses &#39;()&#39; and some other characters. In this pattern, &#39;\(&#39; is interpreted as &#39;(&#39; and &#39;\)&#39; is interpreted as &#39;)&#39;.&#34; The string &#34;(378) 555-4195&#34; is Microsoft&#39;s own first data row and matches the pattern end to end -- three digits in literal parentheses, a space, three digits, a hyphen, four digits -- so TRUE. This case also exercises the anchors and the escaping, which are the parts of a pattern most likely to be mangled on the way into a stored .xlsx.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(A2,&#34;^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$&#34;)</td>
+  <td>The same pattern against Microsoft&#39;s second data row, which has a country code</td>
+  <td class="result mono">False</td>
+  <td class="result mono">False<br><span class="category-tag">Microsoft&#39;s second data row for the same example is &#34;+1(878) 555-8622&#34;. The pattern is anchored at both ends with ^ and $, so the leading &#34;+1&#34; makes the whole string fail to match: FALSE. The pair of phone cases is the sharpest test in this file -- an engine that ignored the anchors would return TRUE for both.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXTEST(&#34;ALFALFA&#34;,&#34;alfalfa&#34;,1)</td>
+  <td>The documented case_sensitivity argument set to case-insensitive</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the lower-case literal pattern matches the upper-case string, so TRUE; with the default it would be FALSE.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+
+
+
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
@@ -756,7 +855,10 @@ Sheets equivalent &mdash; see the
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 

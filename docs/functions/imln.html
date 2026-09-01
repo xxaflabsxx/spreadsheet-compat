@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Engineering &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Engineering &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>IMLN</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>IMLN</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060116.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,51 @@ IMLN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMLN(&#34;3+4i&#34;)</td>
+  <td>Microsoft&#39;s documented worked example: the natural logarithm of 3+4i</td>
+  <td class="result mono">1.6094379124341+0.927295218001612i</td>
+  <td class="result mono">1.6094379124341+0.927295218001612i<br><span class="category-tag">Microsoft publishes &#39;=IMLN(&#34;3+4i&#34;)&#39; with the result 1.6094379124341+0.927295218001612i. Derived independently with mpmath at 40 digits from ln(z) = ln|z| + i*arg(z), the identity the page renders as an image: |3+4i| = 5, so the real part is ln(5) = 1.6094379124341003746, and the imaginary part is atan2(4,3) = 0.92729521800161223243. Note the real part prints as 1.6094379124341 -- fourteen significant digits, not fifteen -- because the fifteenth digit is a zero that Excel&#39;s format strips; reproducing that trailing-zero rule is precisely what this corpus&#39;s formatter had to get right, and it is confirmed by Microsoft&#39;s own published string. Cross-check: the imaginary part is the same constant Microsoft&#39;s IMARGUMENT page publishes for the identical number. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMLN(&#34;1&#34;)</td>
+  <td>ln(1) = 0, printed as a bare zero</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Exact: |1| = 1 so ln|1| = 0, and arg(1) = 0. Both parts vanish, and the documented format collapses the result to &#34;0&#34; rather than &#34;0+0i&#34;. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=IMLN(&#34;-1&#34;)</td>
+  <td>ln(-1) = pi*i, a result with no real part at all</td>
+  <td class="result mono">3.14159265358979i</td>
+  <td class="result mono">3.14159265358979i<br><span class="category-tag">Derived from the same documented identity: |-1| = 1 so ln|-1| = 0, and arg(-1) = pi, giving 0 + pi*i. The real part is exactly zero, so Excel&#39;s format omits it entirely and prints only the imaginary term -- the complement of the IMEXP(&#34;0&#34;) and IMLN(&#34;1&#34;) cases, which drop the imaginary term instead. pi to 15 significant digits is 3.14159265358979, which is the coefficient asserted. This value is also why IMLN is worth testing on the negative real axis at all: it exists only by analytic continuation, and the real-valued LN(-1) is an error in every engine. EXCEL&#39;S COMPLEX-STRING FORMAT, which this corpus derives rather than assumes: a result is rendered as the real part, then the sign, then the imaginary coefficient followed by the suffix, with each part printed to at most 15 significant digits and trailing zeros stripped; a zero real part is omitted entirely, a zero imaginary part reduces the result to a bare real number, and an imaginary coefficient of exactly 1 or -1 prints as &#34;i&#34; / &#34;-i&#34; with no digit. That rule was not taken on faith -- it was written as a formatter in Python and validated against SEVEN independently published Microsoft strings in this batch alone (IMCOS, IMCOSH, IMCOT, IMCSC, IMCSCH, IMEXP and IMLN), which it reproduces byte for byte, before being used to predict any value this corpus asserts. String results are compared exactly, so a formatting-only difference (a trailing zero, &#34;1i&#34; for &#34;i&#34;, a different digit count) fails the case and is recorded as its own divergence class, separate from a wrong numeric value.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -517,7 +568,10 @@ IMLN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

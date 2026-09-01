@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Add-in &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>ROT13</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document ROT13, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>ROT13</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document ROT13, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td>No</td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td>No</td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060111.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060111.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -439,10 +448,46 @@ Sheets equivalent &mdash; see the
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROT13(&#34;Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.&#34;)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">The Document Foundation was founded in September 2010.</span>.
+        LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=ROT13(&#34;Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.&#34;) returns the string &#34;The Document Foundation was founded in September 2010.&#34;. Notice how spaces, digits, and full stops are unaffected by ROT13.&#34; The example is unusually well chosen: it carries the alphabetic rotation, the case preservation, and the pass-through of spaces, digits and punctuation in a single string, and the page&#39;s own closing sentence says so. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected &#39;The Document Foundation was founded in September 2010.&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROT13(ROT13(&#34;Hello, World! 123&#34;))</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">Hello, World! 123</span>.
+        A structural assertion with no constant taken from the page, from the Text parameter&#39;s own sentence: &#34;ROT13(ROT13(Text)) decrypts the code.&#34; The argument mixes upper case, lower case, punctuation, a space and digits so that the round trip covers every character class the published example mentions. LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected &#39;Hello, World! 123&#39;, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROT13(&#34;abcXYZ&#34;)</span> on
+        <strong>Excel for the web</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">nopKLM</span>.
+        DERIVED from the description: &#34;Encrypts a character string by moving the characters 13 positions in the alphabet. After the letter Z, the alphabet begins again (Rotation).&#34; a b c move forward to n o p, while X Y Z pass the end and wrap to K L M. The published example above contains no letter beyond m in the second half of the alphabet in a position that shows the wrap unambiguously, so this case is what actually tests the sentence about beginning again. LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected &#39;nopKLM&#39;, got &#39;#NAME?&#39;
+      </li>
+      
     
   
     
@@ -493,6 +538,44 @@ Sheets equivalent &mdash; see the
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROT13(&#34;Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.&#34;)</td>
+  <td>LibreOffice&#39;s own published example, quoted verbatim in both directions</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">The Document Foundation was founded in September 2010.<br><span class="category-tag">LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=ROT13(&#34;Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.&#34;) returns the string &#34;The Document Foundation was founded in September 2010.&#34;. Notice how spaces, digits, and full stops are unaffected by ROT13.&#34; The example is unusually well chosen: it carries the alphabetic rotation, the case preservation, and the pass-through of spaces, digits and punctuation in a single string, and the page&#39;s own closing sentence says so. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROT13(ROT13(&#34;Hello, World! 123&#34;))</td>
+  <td>The documented involution</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">Hello, World! 123<br><span class="category-tag">A structural assertion with no constant taken from the page, from the Text parameter&#39;s own sentence: &#34;ROT13(ROT13(Text)) decrypts the code.&#34; The argument mixes upper case, lower case, punctuation, a space and digits so that the round trip covers every character class the published example mentions. LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROT13(&#34;abcXYZ&#34;)</td>
+  <td>The documented wrap at the end of the alphabet, in both cases</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">nopKLM<br><span class="category-tag">DERIVED from the description: &#34;Encrypts a character string by moving the characters 13 positions in the alphabet. After the letter Z, the alphabet begins again (Rotation).&#34; a b c move forward to n o p, while X Y Z pass the end and wrap to K L M. The published example above contains no letter beyond m in the second half of the alphabet in a position that shows the wrap unambiguously, so this case is what actually tests the sentence about beginning again. LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -575,6 +658,9 @@ Sheets equivalent &mdash; see the
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

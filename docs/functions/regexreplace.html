@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>REGEXREPLACE</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>REGEXREPLACE</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -447,10 +456,26 @@ against those cases before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -541,6 +566,60 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(A2,&#34;[0-9]+-&#34;,&#34;***-&#34;)</td>
+  <td>Microsoft&#39;s documented example: masking the middle block of a phone number</td>
+  <td class="result mono">(378) ***-4195</td>
+  <td class="result mono">(378) ***-4195<br><span class="category-tag">Microsoft&#39;s Example 1 uses exactly this pattern -- &#34;Use REGEXREPLACE to anonymize phone numbers by replacing their first 3 digits with ***, using pattern [0-9]+-&#34; -- over a block of names and numbers. DERIVATION on one line of that data: &#34;[0-9]+-&#34; matches a run of digits followed by a hyphen. In &#34;(378) 555-4195&#34; the only such run is &#34;555-&#34; (the &#34;378&#34; is followed by &#34;)&#34;, and &#34;4195&#34; ends the string), so it alone is replaced by &#34;***-&#34;, giving &#34;(378) ***-4195&#34;. REGEX FLAVOUR, AS DOCUMENTED: &#34;All regular expressions for this function, as well as REGEXTEST and REGEXREPLACE use the PCRE2 &#39;flavor&#39; of regex&#34; -- Microsoft&#39;s own sentence, printed on all three REGEX pages. This corpus&#39;s patterns are deliberately confined to character classes, quantifiers and anchors, which mean the same thing in PCRE2, in RE2 and in the ICU flavour LibreOffice&#39;s own REGEX function documents, so a difference between engines here is a difference about the FUNCTION, not about dialect corners. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/regexreplace-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path serves an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB). EXECUTED RESULT -- GENUINELY ABSENT: LibreOffice returns #NAME? on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, under all four spellings probed before the run (plain, _xlfn., COM.MICROSOFT. and ORG.OPENOFFICE.). None of the three Excel REGEX functions exists in any LibreOffice release tested here. LibreOffice is not without regular expressions -- its own REGEX(Text; Expression [; [Replacement] [; Flags|Occurrence]]) is documented and works -- but it is a different function with a different name, a different argument shape and a different flavour (ICU, against the PCRE2 Microsoft&#39;s pages name), so a workbook using REGEXTEST or REGEXEXTRACT does not open and run; it has to be rewritten.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;)</td>
+  <td>The documented default occurrence of 0, which replaces all instances</td>
+  <td class="result mono">a#b#c#</td>
+  <td class="result mono">a#b#c#<br><span class="category-tag">Microsoft documents: &#34;By default, occurrence is 0, which replaces all instances.&#34; All three digits in &#34;a1b2c3&#34; are replaced, giving &#34;a#b#c#&#34; -- an engine that replaced only the first would return &#34;a#b2c3&#34;, which is the single most likely difference between two implementations of this function and is why the default is asserted explicitly.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;a1b2c3&#34;,&#34;[0-9]&#34;,&#34;#&#34;,-1)</td>
+  <td>The documented negative-occurrence rule</td>
+  <td class="result mono">a1b2c#</td>
+  <td class="result mono">a1b2c#<br><span class="category-tag">Microsoft documents: &#34;A negative number replaces that instance, searching from the end.&#34; So -1 is the LAST digit, the 3, and only it is replaced: &#34;a1b2c#&#34;. This is an unusual convention -- most regex APIs have no notion of it at all -- which makes it a good probe of whether an engine implemented Excel&#39;s documented argument or borrowed a host language&#39;s replace-all/replace-first semantics.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;Apple apple&#34;,&#34;apple&#34;,&#34;X&#34;,0,1)</td>
+  <td>The documented case_sensitivity argument set to case-insensitive</td>
+  <td class="result mono">X X</td>
+  <td class="result mono">X X<br><span class="category-tag">Microsoft documents case_sensitivity as &#34;0: Case sensitive&#34; (default) and &#34;1: Case insensitive&#34;. With 1, the literal pattern &#34;apple&#34; matches both &#34;Apple&#34; and &#34;apple&#34;, so both are replaced and the answer is &#34;X X&#34;; with the default it would be &#34;Apple X&#34;. Note the fifth argument requires the fourth, so occurrence is passed explicitly as its documented default of 0.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=REGEXREPLACE(&#34;abc&#34;,&#34;[0-9]&#34;,&#34;#&#34;)</td>
+  <td>A pattern that matches nothing</td>
+  <td class="result mono">abc</td>
+  <td class="result mono">abc<br><span class="category-tag">Nothing matches, so there is nothing to replace and the text comes back unchanged. This is the one place where the REGEX family does NOT return #N/A on a failed match -- REGEXEXTRACT does, because it has nothing to return, while a replacement over zero matches is simply the identity -- and asserting it here pins that difference. LibreOffice&#39;s own REGEX function documents the same behaviour (&#34;if a replacement is given and no match occurs, the original text is returned unchanged&#34;).</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -657,7 +736,10 @@ against those cases before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

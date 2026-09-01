@@ -358,12 +358,12 @@ measuring the thing you think it is measuring in <em>any</em> of the three engin
 
 <h2 class="section-title">Executed: the LENB corpus</h2>
 <p>All six <code>LENB</code> cases, run as written. The Excel column is Microsoft&rsquo;s documented
-behaviour as recorded in our test corpus &mdash; we do not run Excel. The Google Sheets column is
+behaviour as recorded in our test corpus &mdash; we do not run desktop Excel. The Google Sheets column is
 executed output from the dated Drive-import run of 2026-08-31. The LibreOffice column is Calc
 25.8.7.3, with 24.2.0.3, 24.8.7.2 and 25.2.0.3 returning the identical value on every row.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented, non-DBCS default language)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented, non-DBCS default language)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=LENB("Phoenix, AZ")</td><td>11</td><td class="result">11</td><td class="result">11</td></tr>
     <tr><td class="formula">=LENB("")</td><td>0</td><td class="result">0</td><td class="result">0</td></tr>
@@ -435,9 +435,10 @@ though we had; the point is only that <code>LENB</code> is not it.</p>
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus, and for
 the CJK row that documentation is the archived LEN/LENB page &mdash; the current page has removed the
-DBCS rule and marks the function deprecated. We do not run Excel, and no value in that column is a
-measurement. In particular we cannot tell you what a real Excel returns for <code>=LENB("日本")</code>
-under any locale; we can only tell you what its documentation said it would.</p>
+DBCS rule and marks the function deprecated. We do not run desktop Excel, and no value in that column is a
+measurement.</p>
+<p><strong>Updated 2026-09-01 &mdash; we can now tell you what one real Excel returns, and it is not the desktop one.</strong> This page used to say we could not know what a real Excel gives for <code>=LENB("日本")</code> under any locale. We now execute <strong>Excel for the web</strong> (OneDrive upload, recalculated on open, downloaded for readback), and it returned <code>2</code> &mdash; the non-DBCS reading, one byte per character, matching the documented expectation and disagreeing with the <code>4</code> that both LibreOffice and Google Sheets returned. All six <code>LENB</code> cases matched in Excel for the web.</p>
+<p><strong>The locale caveat survives this intact, and so does the desktop caveat.</strong> Excel for the web is a different application from desktop Excel and we still do not run the desktop one, so this measures the web engine only. And the account we ran it under has its own language settings, which we did not vary &mdash; exactly the uncontrolled variable this section is about. So the honest statement is narrow: <em>under our account&rsquo;s locale, Excel for the web returned 2.</em> Whether desktop Excel agrees, and whether either changes under a DBCS default language, remains unmeasured.</p>
 <p>The locale question cuts into our own results too, and this is the biggest caveat on the page. Our
 LibreOffice runs happen on a VM whose default language is <code>en_US.UTF-8</code>, which is what makes
 the documented answer 2 rather than 4 for that row. We did not re-run the corpus under a DBCS default
@@ -488,7 +489,7 @@ support matrices.</p>
   </div>
   <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
 </aside>
-
+<p><strong>A note on which Excel this is.</strong> The Excel column in the tables above is Microsoft&rsquo;s documented behaviour for <strong>desktop</strong> Excel, as recorded in our test corpus &mdash; we do not run desktop Excel, and no value in that column is a measurement. <strong>Excel for the web is a different application with its own calculation engine, and that one we do run</strong> (recalculated on OneDrive, 2026-09-01). Its measured results are published on each function&rsquo;s own page rather than in these guide tables. Because we have no desktop run to compare against, a disagreement between an Excel-web measurement and the documented column is genuinely ambiguous: it may mean the web engine diverges from the desktop one, or that the documentation is wrong about both. We do not claim to know which.</p>
 
 <aside class="promo-card">
   <div>

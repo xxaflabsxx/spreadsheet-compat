@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>SIN</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>SIN</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,67 @@ SIN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(SIN(PI()),10)</td>
+  <td>Microsoft&#39;s first documented row, which publishes 0 but says &#39;approximately&#39;</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">Microsoft publishes =SIN(PI()) = 0.0 with the description &#34;Sine of pi radians (0, approximately)&#34;. THE WORD &#39;approximately&#39; IS LOAD-BEARING AND THE CASE IS WRITTEN AROUND IT: sin(pi) is zero only for the exact pi, and PI() is a binary double, so a correct engine returns sin of a number that is not quite pi -- in IEEE-754 double precision that is 1.2246467991473532e-16, not 0. Asserting a bare = 0 would therefore fail on every conforming engine and would have been published as a divergence that is ours. The formula is ROUND(...,10)-wrapped like the rest of this corpus, which is exactly enough to absorb the 1.2e-16 residue and still fail on anything genuinely wrong. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/sin-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SIN(PI()/2),10)</td>
+  <td>Microsoft&#39;s second documented row</td>
+  <td class="result mono">1</td>
+  <td class="result mono">1<br><span class="category-tag">Microsoft publishes =SIN(PI()/2) = 1.0. sin(pi/2) = 1 exactly in real arithmetic, and unlike sin(pi) the value is at a smooth maximum where a small argument error costs only O(eps^2), so a double-precision engine returns exactly 1.0.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SIN(30*PI()/180),10)</td>
+  <td>Microsoft&#39;s third documented row: degrees converted by hand</td>
+  <td class="result mono">0.5</td>
+  <td class="result mono">0.5<br><span class="category-tag">Microsoft publishes =SIN(30*PI()/180) = 0.5. sin(pi/6) = 1/2 exactly -- a structural assertion with no derived constant.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SIN(RADIANS(30)),10)</td>
+  <td>Microsoft&#39;s fourth documented row: the same angle via RADIANS()</td>
+  <td class="result mono">0.5</td>
+  <td class="result mono">0.5<br><span class="category-tag">Microsoft publishes =SIN(RADIANS(30)) = 0.5, the same value as the hand-converted row. Kept as a separate case because it asserts that RADIANS() and *PI()/180 agree bit for bit in the engine, which is a different claim from SIN itself being right.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(SIN(1)+SIN(-1),15)</td>
+  <td>sine is an odd function, so the two signs must cancel exactly</td>
+  <td class="result mono">0</td>
+  <td class="result mono">0<br><span class="category-tag">sin is odd, so sin(1) + sin(-1) = 0 exactly. A structural assertion with no derived constant and no published figure behind it. The SIN page publishes no error-condition remarks at all -- only the degrees-to-radians note -- so no error case is asserted for this function.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -549,7 +616,10 @@ SIN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

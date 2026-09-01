@@ -130,7 +130,15 @@ engine runners (what actually happens) → results (raw truth) → site
 
 ## Status (Phase 1 + Phase-2 corpus expansion)
 
-- **Two engines are EXECUTED over the whole corpus.** Each of
+- **Three engines are EXECUTED. Desktop Excel is not, and that boundary is
+  load-bearing.** LibreOffice Calc, Google Sheets and **Excel for the web**
+  are all run for real; desktop Excel remains documentation-only. Excel for
+  the web is a separate implementation of the calculation engine, so it never
+  stands in for the desktop product — it is its own matrix row and its own
+  dataset key (`xwv`/`xwver`, never `x`).
+  `results/excel-web.json` holds 579 functions / ~2,200 cases (2026-09-01,
+  `trusted: true`); the 7 it lacks are transport-unreachable, not unsupported.
+  Each of
   `results/google-sheets.json` and the four `results/libreoffice-*.json` files
   holds **586 functions / 2334 cases**, all five `trusted: true`, with the
   deterministic arithmetic canary reading back 3333 on 2334/2334 sheets. That
@@ -145,8 +153,11 @@ engine runners (what actually happens) → results (raw truth) → site
   and 2026-09-01 (67) — and each function block records its own
   `executed_at`. *(History: the first full Sheets sweep, on 2026-08-29,
   covered the corpus as it then stood, 278 functions / 841 cases.)*
-  **Microsoft Excel is still not executed** and its column remains
-  documentation-only everywhere on the site.
+  **Desktop Microsoft Excel is still not executed** and its column remains
+  documentation-only everywhere on the site. **Excel for the web, which is a
+  different application, IS executed** as of 2026-09-01 — see "Excel for the
+  web" below. The two are separate rows in every support matrix and separate
+  keys (`x` vs `xwv`) in the dataset, on purpose.
   No function's Sheets verdict is `inconclusive` because of Google's importer
   any more: the five that were (BYCOL, BYROW, FILTER, MAKEARRAY, SORT) were
   resolved by the 2026-08-29 plain-name re-run. Eight functions carry
@@ -396,16 +407,40 @@ file has since been re-executed on the pinned 24.2.0.3 build against the whole
 Derived from `results/*.json` (and mirrored in `docs/data/compat.json`), over
 the 600-function catalog:
 
-| Verdict | LibreOffice 25.8.7.3 | Google Sheets (dated runs) |
-|---|---|---|
-| Supported, behaves as documented | 321 | 455 |
-| Quirk found | 177 | 56 |
-| Unsupported (not recognized) | 87 | 68 |
-| Inconclusive — executed, no verdict drawn | 1 (DDE) | 7 (AI, five IMPORT*, SPARKLINE) |
-| Not executed (documented skips) | 14 | 14 |
+| Verdict | LibreOffice 25.8.7.3 | Google Sheets (dated runs) | Excel for the web (2026-09-01) |
+|---|---|---|---|
+| Supported, behaves as documented | 323 | 455 | 459 |
+| Quirk found | 175 | 56 | 32 |
+| Unsupported (not recognized) | 87 | 68 | 80 |
+| Inconclusive — executed, no verdict drawn | 1 (DDE) | 7 (AI, five IMPORT*, SPARKLINE) | 8 (BYCOL, BYROW, ENCODEURL, FILTERXML, four FORECAST.ETS*) |
+| Not executed | 14 (documented skips) | 14 (documented skips) | 21 = 14 documented skips + **7 transport-unreachable** (LAMBDA family) |
 
-At case level, 908 divergences are published as quirks across 278 functions
-(618 LibreOffice on 25.8.7.3, 290 Google Sheets); 9 further Sheets cases are
+Two LibreOffice numbers moved in this pass and it was not the web engine that
+moved them. `TEXTBEFORE_not_found_custom` and `TEXTAFTER_not_found_custom`
+pass `"none"` as the **third** argument, but the third argument of
+`TEXTBEFORE`/`TEXTAFTER` is `instance_num`, not `if_not_found` (that is the
+sixth). The corpus's own neighbouring case
+`=TEXTBEFORE("a-b-c","-",2)` expects `a-b` and is matched by every engine,
+which settles the argument order from inside our own data; text where a number
+is required is a `#VALUE!`, and `#VALUE!` is exactly what both LibreOffice and
+Excel for the web return. The authored expectation is wrong, not the engines,
+so both cases are flagged in `CORPUS_SUSPECT_CASES` and withdrawn from **every**
+engine's verdict pending re-derivation — suppressing them only for the engine
+being added while leaving LibreOffice wearing a quirk for the same case would
+be choosing which result to believe. LibreOffice's `TEXTBEFORE`/`TEXTAFTER`
+verdicts therefore move from *quirky* to *supported* (175 quirky, 323
+supported, from 177/321).
+
+Reading the Excel-web column: it is a measurement of **Excel for the web**, a
+different application from desktop Excel, which we do not execute. Its 80
+"unsupported" are overwhelmingly Google-only and LibreOffice-only names
+(`ADD`, `DIVIDE`, `QUERY`, `SPLIT`, `ROT13`, `EASTERSUNDAY`, the `TO_*`
+family…) returning `#NAME?` in an Excel engine, which is the expected result
+rather than a finding. The 7 not-executed are a transport limit, not missing
+support — see `DATASET_CARD.md`.
+
+At case level, 1,191 divergences are published as quirks across 280 functions
+(616 LibreOffice on 25.8.7.3, 288 Google Sheets, 287 Excel for the web); 9 further Sheets cases are
 held `inconclusive` because the `.xlsx` export readback, not Sheets, explains
 them. Twenty functions carry a `libreoffice_newly_supported_in` version from
 running all four builds: 8 first worked in 24.8.7.2 (LET, RANDARRAY, SEQUENCE,
@@ -1059,7 +1094,7 @@ python3 harness/run_sheets.py selftest-recipes   # exits 1 on any value that
                                                  # results/recipes-verified.json
 ```
 
-Since we cannot run Excel, the "Excel-saved" side of each fixture is
+Since we cannot run desktop Excel, the "Excel-saved" side of each fixture is
 simulated honestly: build the workbook with openpyxl, then **inject** a
 cached `<v>` at the XML level exactly where Excel would have written its own
 result, using the value Microsoft documents. Covered: a matching value, a
@@ -1130,20 +1165,36 @@ preserves every non-formula cell and every non-sheet zip part byte-for-byte.
   re-run that resolved the five importer-`inconclusive` verdicts also ran on
   2026-08-29. ✅ The corpus has since grown to 586 functions, all of them
   executed in Sheets (last batch 2026-09-01).
-- **Excel engine.** No good headless Linux path exists (no real Excel
-  calculation engine on Linux). Two options, in order of preference:
-  1. **Windows + Office Scripts / VBA automation**: a small Windows runner
-     (real Windows VM, or Office Scripts via Excel Online/Power Automate)
-     that opens the generated .xlsx, forces
-     `Application.CalculateFullRebuild`, and reads back values — this is
-     the only way to get *real, executed* Excel ground truth. This should
-     be the priority for Phase 2 rather than substituting documentation.
-  2. Until (1) exists, Excel's column in the compat matrix should be
-     populated **only** from `data/functions.json`'s documented-existence
-     data and Microsoft's published documented behavior (clearly labeled
-     "per Microsoft documentation, not independently executed" — never
-     presented with the same confidence as an executed LibreOffice/Sheets
-     result).
+- **Excel engine.** ✅ **Partly done, and the distinction matters.** As of
+  2026-09-01 we execute **Excel for the web** (`results/excel-web.json`, 579
+  functions / ~2,200 cases): the corpus workbook is uploaded to OneDrive,
+  Excel for the web recalculates it on open, and the workbook is downloaded
+  again for readback. A per-sheet arithmetic canary proves recalculation and
+  each package self-identifies as `Microsoft Excel Online` in
+  `docProps/app.xml`. Readback is lossless to full IEEE-754 (17 significant
+  digits), which is *better* than the Google Sheets export.
+
+  **This is not desktop Excel ground truth and must never be presented as
+  such.** Microsoft ships two implementations of the calculation engine; we
+  run the web one. Because there is no desktop run to compare against, a
+  disagreement between an Excel-web result and Microsoft's documentation is
+  ambiguous — the web engine may diverge, or the documentation may be wrong
+  about both — and no page or dataset field resolves it. Desktop Excel's
+  column stays populated **only** from `data/functions.json`'s
+  documented-existence data and Microsoft's published documented behavior.
+
+  Seven functions could not be measured at all: Excel for the web's file-open
+  refuses any workbook carrying the `_xlpm.`/`LAMBDA` storage serialization,
+  so `LAMBDA`, `LET`, `ISOMITTED`, `MAP`, `MAKEARRAY`, `REDUCE` and `SCAN` are
+  declared transport-unreachable skips for that engine (bisect-proven; see
+  `DATASET_CARD.md`). Excel for the web will not open a file containing
+  Excel's own LAMBDA-family storage form — that is a fact about the product,
+  not about the functions.
+
+  Still open for *desktop* ground truth: a **Windows + Office Scripts / VBA**
+  runner (real Windows VM, or Office Scripts via Power Automate) that opens
+  the generated .xlsx, forces `Application.CalculateFullRebuild`, and reads
+  back values. That remains the only way to measure the desktop engine.
 - **Static site.** ✅ Built — `site/build_site.py` reads
   `data/functions.json` + all `results/*.json` and emits `docs/`, deployed to
   GitHub Pages at <https://canispreadsheet.com/>: one page per function (600)

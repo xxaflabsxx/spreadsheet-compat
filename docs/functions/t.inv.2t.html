@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Statistical &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Statistical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>T.INV.2T</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>T.INV.2T</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060185.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -436,10 +445,30 @@ against the failing cases above before assuming your data is wrong.</p>
 
 
 
+
+
+
+
 <div class="quirk-box">
   <h3>Discovered quirks</h3>
   <ul>
   
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
   
     
@@ -498,6 +527,76 @@ against the failing cases above before assuming your data is wrong.</p>
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV.2T(A2,A3),6)</td>
+  <td>Microsoft&#39;s documented worked example, at the six decimals its Result column publishes</td>
+  <td class="result mono">0.606533</td>
+  <td class="result mono">0.606533<br><span class="category-tag">Microsoft publishes =T.INV.2T(A2,A3) with Result 0.606533 for A2 = 0.546449 and A3 = 60, and its Description column gives the same value to nine places as 0.606533076. DERIVATION: the two-tailed inverse solves 2*(1 - F(t)) = p, root-found on the incomplete-beta CDF and independently on a numerically integrated t density, giving 0.6065330758257550412791 at 50 digits -- 0.606533 at six places and 0.606533076 at nine, matching both of Microsoft&#39;s printings. Microsoft&#39;s page was read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/t-inv-2t-function. FETCH NOTE FOR THIS BATCH: batch F recorded every /en-us/office/&lt;name&gt;-function-&lt;guid&gt; URL returning Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body; today BOTH paths serve the article again -- the GUID form redirects to /en-us/excel/functions/&lt;slug&gt;-function -- and every page cited in this batch came back complete (217-223 KB) in one or two attempts, with no 87 KB stub responses. Nothing here is sourced from a search snippet or a mirror.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV.2T(A2,A3),12)</td>
+  <td>The same example carried to twelve decimals</td>
+  <td class="result mono">0.606533075826</td>
+  <td class="result mono">0.606533075826<br><span class="category-tag">Asserted at twelve places from the derivation: 0.606533075826.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV.2T(0.05,10),9)</td>
+  <td>The figure Microsoft&#39;s Remarks publish for a probability of 0.05 at 10 degrees of freedom, which is a typo</td>
+  <td class="result mono">2.228138852</td>
+  <td class="result mono">2.228138852<br><span class="category-tag">BOTH FIGURES IN MICROSOFT&#39;S REMARK ARE WRONG, AND THE SECOND ONE WAS CAUGHT BY THE ENGINE RATHER THAN BY THE DERIVATION. The paragraph -- identical on the T.INV.2T page and the TINV page -- publishes: &#34;For a probability of 0.05 and degrees of freedom of 10, the two-tailed value is calculated with TINV(0.05,10), which returns 2.28139. The one-tailed value ... TINV(2*0.05,10), which returns 1.812462.&#34; FIGURE ONE, 2.28139, IS A TRANSPOSITION: the true value is 2.228138851986274748395, i.e. 2.228139 -- the digits are right and their order is not. FIGURE TWO, 1.812462, IS A LAST-DIGIT ROUNDING ERROR: the true value is 1.812461122811676413626, which correctly rounded to six places is 1.812461, not 1.812462. This corpus originally asserted Microsoft&#39;s 1.812462 -- the derivation had been done but the six-place rounding was copied from the page instead of taken from the derived digits -- and ALL FOUR LibreOffice builds returned 1.812461. The engine was right and the citation was wrong; the case now asserts the derived value and this note records why it changed. Every figure here was checked three independent ways: a root find on the regularized-incomplete-beta t CDF, a root find on a NUMERICALLY INTEGRATED t density sharing no code with the first, and scipy.stats.t.ppf -- all agreeing to double precision. The sanity check settles figure one from the other direction too: T.DIST.2T(2.28139, 10) is 0.045678, not 0.05, while T.DIST.2T(2.228139, 10) is 0.0500000 to six places. This case asserts the DERIVED 2.228138852 at nine places, not the published 2.28139. Had the published figure been copied, every engine on earth would have been recorded as diverging from Excel here, and the divergence would have been ours.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.INV.2T(2*0.05,10),6)</td>
+  <td>The second figure in the same Remark, which is also wrong -- by a last-digit rounding error rather than a transposition</td>
+  <td class="result mono">1.812461</td>
+  <td class="result mono">1.812461<br><span class="category-tag">BOTH FIGURES IN MICROSOFT&#39;S REMARK ARE WRONG, AND THE SECOND ONE WAS CAUGHT BY THE ENGINE RATHER THAN BY THE DERIVATION. The paragraph -- identical on the T.INV.2T page and the TINV page -- publishes: &#34;For a probability of 0.05 and degrees of freedom of 10, the two-tailed value is calculated with TINV(0.05,10), which returns 2.28139. The one-tailed value ... TINV(2*0.05,10), which returns 1.812462.&#34; FIGURE ONE, 2.28139, IS A TRANSPOSITION: the true value is 2.228138851986274748395, i.e. 2.228139 -- the digits are right and their order is not. FIGURE TWO, 1.812462, IS A LAST-DIGIT ROUNDING ERROR: the true value is 1.812461122811676413626, which correctly rounded to six places is 1.812461, not 1.812462. This corpus originally asserted Microsoft&#39;s 1.812462 -- the derivation had been done but the six-place rounding was copied from the page instead of taken from the derived digits -- and ALL FOUR LibreOffice builds returned 1.812461. The engine was right and the citation was wrong; the case now asserts the derived value and this note records why it changed. Every figure here was checked three independent ways: a root find on the regularized-incomplete-beta t CDF, a root find on a NUMERICALLY INTEGRATED t density sharing no code with the first, and scipy.stats.t.ppf -- all agreeing to double precision. The sanity check settles figure one from the other direction too: T.DIST.2T(2.28139, 10) is 0.045678, not 0.05, while T.DIST.2T(2.228139, 10) is 0.0500000 to six places. This case asserts the DERIVED 1.812461 at six places. It is the pair with the 2.228139 case above that shows the paragraph to be unreliable as a whole rather than carrying one isolated typo.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(T.DIST.2T(T.INV.2T(0.2,15),15),12)</td>
+  <td>The two-tailed inverse fed back through the two-tailed distribution</td>
+  <td class="result mono">0.2</td>
+  <td class="result mono">0.2<br><span class="category-tag">T.DIST.2T(T.INV.2T(p, v), v) = p by definition. A structural round trip with no derived constant, checking the engine&#39;s own pair against each other. NOTE ON MICROSOFT&#39;S OWN WORDING: the T.INV.2T page states this relationship as &#34;T.DIST.2T(x, deg_freedom, 2) = probability&#34; -- a THREE-argument call, when the T.DIST.2T page&#39;s syntax line publishes exactly two arguments, T.DIST.2T(x,deg_freedom). The stray third argument is left over from the legacy TDIST(x,deg_freedom,tails) form. Recorded as published; the formula under test uses the two-argument syntax the T.DIST.2T page actually documents.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=T.INV.2T(0,60)</td>
+  <td>A probability of zero, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If probability &lt;= 0 or if probability &gt; 1, T.INV.2T returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=T.INV.2T(0.5,0)</td>
+  <td>Zero degrees of freedom, which the page excludes</td>
+  <td class="result mono">#NUM!</td>
+  <td class="result mono">#NUM!<br><span class="category-tag">The Remarks publish: &#34;If deg_freedom &lt; 1, T.INV.2T returns the #NUM! error value.&#34;</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -646,7 +745,10 @@ against the failing cases above before assuming your data is wrong.</p>
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>

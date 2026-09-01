@@ -327,7 +327,8 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Web &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>IMPORTDATA</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document IMPORTDATA, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>IMPORTDATA</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document IMPORTDATA, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td>No</td>
+  <td>Excel (desktop)</td><td>No</td>
   <td>n/a (not an Excel function)</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td>No</td>
+  <td>LibreOffice Calc</td><td>No</td>
   <td>Yes (25.8.7.3, 2026-09-01)</td>
   <td>
     
@@ -447,9 +456,35 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=IMPORTDATA(&#34;https://example.com/data.csv&#34;)</td>
+  <td>Existence probe only: the documented behaviour IS a network fetch, which no flat workbook can reproduce</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono"><br><span class="category-tag">NOT ASSERTABLE BY DESIGN, and deliberately recorded as a probe (expected: null) rather than a support claim -- the treatment batch B gave the CUBE* family and COPILOT, batch C gave DETECTLANGUAGE, and batch G gave RTD, STOCKHISTORY and TRANSLATE. GOOGLE DOCUMENTS THIS FUNCTION AS A FETCH: &#34;Imports data at a given url in .csv (comma-separated value) or .tsv (tab-separated value) format.&#34;, with the single argument described as &#34;The url from which to fetch the .csv or .tsv-formatted data, including protocol (e.g. `http://`).&#34; The value is therefore whatever some other server serves at the moment of evaluation -- outside this corpus&#39;s control, and outside the engine&#39;s. Google&#39;s shared Import-functions page adds that &#34;All three functions automatically check for updates every hour while the document is open, even if the formula and sheet don&#39;t change.&#34; (the three being IMPORTDATA, IMPORTHTML and IMPORTXML), so the value is not even stable within one open document. SYNTAX NOTE, CHECKED TWICE ON THE DAY: the live page publishes a ONE-argument `IMPORTDATA(url)`. Widely-copied secondary sources carry a three-argument `IMPORTDATA(url, delimiter, locale)`; that form is not on Google&#39;s page and is not used here. WHY THE URL IS example.com AND NOT GOOGLE&#39;S OWN SAMPLE URL. Google&#39;s Sample Usage points at a live third-party document. Two harness facts rule that out: (a) an import that succeeds returns an ARRAY, and this corpus writes each case&#39;s formula at F1 with the per-sheet recalculation canary at Z1, so an unbounded spill would overwrite the canary and mark the whole run untrusted for a reason that has nothing to do with the engine; (b) a corpus that is re-executed on four builds per batch should not repeatedly fetch someone else&#39;s server. The call here is well formed and shaped exactly like Google&#39;s documented syntax; only the host is inert. Since no value is asserted either way, nothing is lost by it. LIBREOFFICE, MEASURED BEFORE THIS FILE WAS AUTHORED. All four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) were probed with NINE storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE., ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT. and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS. -- and every one of those 36 combinations returned #NAME?. LibreOffice&#39;s own parser additionally wrote the name back into the converted file LOWER-CASED (&#39;=importdata(&#34;https://example.com/data.csv&#34;)&#39;), which is what it does with an identifier it does not recognise as a function at all rather than with a function it knows under a different storage token. A #NAME? under all nine storage forms on all four builds is therefore a genuine absence and not a storage-form artifact of this harness, which is why &#39;unsupported in LibreOffice&#39; IS a verdict this file publishes even though the returned VALUE is not assertable in any engine. BATCH PROVENANCE (batch J, group B of sheets-lo-only-plan.md -- Google-documented, service- or context-bound; the final batch of the completeness push). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes no claim about Excel, nothing here is measured against Microsoft&#39;s documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is Google&#39;s own function help, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for Sheets, so a bare URL dates nothing. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record what the service returns for this call. Until that ingest lands the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose -- scripts/check_honesty.py bans the blanket negative shape of that sentence, and the guard is worth keeping blunt.) Google&#39;s IMPORTDATA help page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093335, and the Import-functions page at https://support.google.com/docs/answer/12188454, read the same day.</span></td>
+  <td><span class="verdict-bad">Error</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -500,6 +535,9 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 <h2 class="section-title">Docs &amp; syntax</h2>
 <ul>
+
+
+
 
 
 

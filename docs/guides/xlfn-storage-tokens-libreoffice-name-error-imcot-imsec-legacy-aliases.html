@@ -371,7 +371,7 @@ complex-number additions as <code>_xlfn.IMCOSH</code>, <code>_xlfn.IMCOT</code>,
 Excel writes, so that is what our harness writes.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula (as typed)</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed, <code>_xlfn.</code> token)</th></tr></thead>
+  <thead><tr><th>Formula (as typed)</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed, <code>_xlfn.</code> token)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=IMCOT("4+3i")</td><td>0.00490118239430447-0.999266927805902i</td><td class="result">0.00490118239430447-0.999266927805902i</td><td class="result"><strong>#NAME?</strong></td></tr>
     <tr><td class="formula">=IMSEC("4+3i")</td><td>-0.065294027857947-0.0752249603027732i</td><td class="result">-0.065294027857947-0.0752249603027732i</td><td class="result"><strong>#NAME?</strong></td></tr>
@@ -402,7 +402,7 @@ trigonometric siblings of the functions above, added to Excel in the same releas
 mapping exists and it is the <em>only</em> spelling that works:</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula (as typed)</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed, <code>_xlfn.</code> token)</th></tr></thead>
+  <thead><tr><th>Formula (as typed)</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed, <code>_xlfn.</code> token)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=ROUND(COT(30),9)</td><td>-0.156119952</td><td class="result">-0.156119952</td><td class="result">-0.156119952</td></tr>
     <tr><td class="formula">=ROUND(CSC(15),9)</td><td>1.537780562</td><td class="result">1.537780562</td><td class="result">1.537780562</td></tr>
@@ -548,9 +548,11 @@ costs nothing and survives every round trip, because it is what the file was goi
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel column throughout is Microsoft&rsquo;s documented behaviour and Microsoft&rsquo;s
-published storage-token list, as recorded in our test corpus. We do not run Excel, and no value in that
+published storage-token list, as recorded in our test corpus. We do not run desktop Excel, and no value in that
 column is a measurement &mdash; including the claim that Excel writes a given token, which comes from
 the published extensions list rather than from a file we saved from Excel.</p>
+<p><strong>Excel for the web does not settle this page&rsquo;s question, and it is worth saying why.</strong> We now execute Excel for the web (OneDrive recalculation, 2026-09-01), and it does confirm one thing directly: the <code>_xlfn.</code> storage form <em>round-trips</em> through it verbatim and computes &mdash; <code>_xlfn.PERCENTRANK.INC(A2:A11,2)</code> came back written exactly that way and evaluated. But this page&rsquo;s claim is about <strong>what token Excel writes when it saves a file</strong>, and every workbook in our corpus was written by our own harness, not by Excel. Reading our token back out of a round trip shows the reader accepts it; it cannot show what the writer would have chosen. So the caveat above stands unchanged: the storage-token claims here come from Microsoft&rsquo;s published extensions list, not from a file Excel saved.</p>
+<p>There is one new, first-hand storage finding, and it runs the other way. Excel for the web <strong>refuses to open</strong> any workbook whose stored formulas carry the <code>_xlpm.</code>/<code>LAMBDA</code> serialization &mdash; &ldquo;Couldn&rsquo;t Open the Workbook&rdquo;, no cell-level diagnostic &mdash; which cost us executed verdicts for <code>LAMBDA</code>, <code>LET</code>, <code>ISOMITTED</code>, <code>MAP</code>, <code>MAKEARRAY</code>, <code>REDUCE</code> and <code>SCAN</code>. That is the same class of problem this page is about, one layer over: <code>_xlpm.</code> exists precisely because Excel needed a way to write LAMBDA parameters into OOXML, and the web build of Excel will not read the file back. A storage token the vendor&rsquo;s own product declines to open is a stronger version of the mapping gap described above.</p>
 <p>The Google Sheets column is executed output from dated runs, because Sheets has no version number to
 pin: a formula-only <code>.xlsx</code> carrying no cached results goes to Google Drive, is recalculated
 by Google&rsquo;s engine, and comes back as <code>.xlsx</code> for readback, with a deterministic
@@ -598,7 +600,7 @@ rather than assumed, and the function pages for
   </div>
   <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
 </aside>
-
+<p><strong>A note on which Excel this is.</strong> The Excel column in the tables above is Microsoft&rsquo;s documented behaviour for <strong>desktop</strong> Excel, as recorded in our test corpus &mdash; we do not run desktop Excel, and no value in that column is a measurement. <strong>Excel for the web is a different application with its own calculation engine, and that one we do run</strong> (recalculated on OneDrive, 2026-09-01). Its measured results are published on each function&rsquo;s own page rather than in these guide tables. Because we have no desktop run to compare against, a disagreement between an Excel-web measurement and the documented column is genuinely ambiguous: it may mean the web engine diverges from the desktop one, or that the documentation is wrong about both. We do not claim to know which.</p>
 
 <aside class="promo-card">
   <div>

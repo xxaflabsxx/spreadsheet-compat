@@ -2,23 +2,71 @@
   "slug": "edate-vs-eomonth",
   "title": "EDATE vs EOMONTH: same-day or month-end",
   "meta_desc": "EDATE vs EOMONTH: shifting dates by months while keeping the day, versus snapping to month boundaries. The building blocks of billing and reporting date math.",
-  "funcs": ["EDATE", "EOMONTH"],
+  "funcs": [
+    "EDATE",
+    "EOMONTH"
+  ],
   "intro": "Both jump a date by whole months; they differ in where they land. EDATE keeps the day-of-month (the 15th stays the 15th); EOMONTH always lands on the month's LAST day. Between them they express nearly every recurring-date rule.",
   "table": [
-    {"aspect": "Jan 15 + 1 month", "cols": ["Feb 15", "Feb 28 (end of the target month)"]},
-    {"aspect": "Jan 31 + 1 month", "cols": ["Feb 28 (clamps to a valid day)", "Feb 28"]},
-    {"aspect": "Preserves", "cols": ["Day of month (when possible)", "Nothing — always month-end"]},
-    {"aspect": "First-of-month trick", "cols": ["—", "EOMONTH(date,-1)+1 = first day of date's month"]},
-    {"aspect": "Compatibility", "cols": ["Universal", "Universal (both executed in every LibreOffice version we test, and in our dated Google Sheets run; Excel per docs)"]}
+    {
+      "aspect": "Jan 15 + 1 month",
+      "cols": [
+        "Feb 15",
+        "Feb 28 (end of the target month)"
+      ]
+    },
+    {
+      "aspect": "Jan 31 + 1 month",
+      "cols": [
+        "Feb 28 (clamps to a valid day)",
+        "Feb 28"
+      ]
+    },
+    {
+      "aspect": "Preserves",
+      "cols": [
+        "Day of month (when possible)",
+        "Nothing — always month-end"
+      ]
+    },
+    {
+      "aspect": "First-of-month trick",
+      "cols": [
+        "—",
+        "EOMONTH(date,-1)+1 = first day of date's month"
+      ]
+    },
+    {
+      "aspect": "Compatibility",
+      "cols": [
+        "Universal",
+        "Universal (both executed in every LibreOffice version we test, and in our dated Google Sheets run; Excel per docs)"
+      ]
+    }
   ],
   "when": [
-    {"func": "EDATE", "use_when": "Anniversary-style recurrence: subscription renewals, monthly due dates, 'same day next quarter' (offset 3), birthdays-by-month."},
-    {"func": "EOMONTH", "use_when": "Period boundaries: statement cutoffs, accrual dates, days-in-month (DAY(EOMONTH(d,0))), and — via the -1/+1 idiom — the first of any month."}
+    {
+      "func": "EDATE",
+      "use_when": "Anniversary-style recurrence: subscription renewals, monthly due dates, 'same day next quarter' (offset 3), birthdays-by-month."
+    },
+    {
+      "func": "EOMONTH",
+      "use_when": "Period boundaries: statement cutoffs, accrual dates, days-in-month (DAY(EOMONTH(d,0))), and — via the -1/+1 idiom — the first of any month."
+    }
   ],
-  "compat_note": "Both execute identically in every LibreOffice build and in the Google Sheets run we execute (Excel per Microsoft's docs — we do not run Excel), including the Jan-31-plus-a-month clamping behavior. Remember both return date serials — format the cell as a date or the result looks like 46234.",
+  "compat_note": "Both execute identically in every LibreOffice build and in the Google Sheets run we execute (Excel per Microsoft's docs — we do not run desktop Excel), including the Jan-31-plus-a-month clamping behavior. Remember both return date serials — format the cell as a date or the result looks like 46234. Excel for the web is a separate application and we do execute it (recalculated on OneDrive, 2026-09-01); those measurements are on the individual function pages.",
   "examples": [
-    {"label": "Renewal same day next month", "formula": "=EDATE(A2,1)"},
-    {"label": "Last day of this month", "formula": "=EOMONTH(A2,0)"},
-    {"label": "First day of this month", "formula": "=EOMONTH(A2,-1)+1"}
+    {
+      "label": "Renewal same day next month",
+      "formula": "=EDATE(A2,1)"
+    },
+    {
+      "label": "Last day of this month",
+      "formula": "=EOMONTH(A2,0)"
+    },
+    {
+      "label": "First day of this month",
+      "formula": "=EOMONTH(A2,-1)+1"
+    }
   ]
 }

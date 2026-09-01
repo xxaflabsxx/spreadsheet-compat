@@ -346,12 +346,12 @@ answers, and nothing errors, warns, or flags the difference.</p>
 <h2 class="section-title">Executed: the three rows that separate truncation from rounding</h2>
 <p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus &mdash; in
 these three rows it is a figure Microsoft prints in its own worked-example table. It is the yardstick,
-and we do not run Excel. The Google Sheets column is executed output from the dated Drive-import run of
+and we do not run desktop Excel. The Google Sheets column is executed output from the dated Drive-import run of
 2026-08-31; the LibreOffice column is Calc 25.8.7.3, with the same result on the other three pinned
 builds.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Exact rank</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Exact rank</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=PERCENTRANK.INC(A2:A11,4)</td><td>5/9 = 0.5555&hellip;</td><td>0.555</td><td class="result"><strong>0.556</strong></td><td class="result"><strong>0.556</strong></td></tr>
     <tr><td class="formula">=PERCENTRANK.INC(A2:A11,8)</td><td>6/9 = 0.6666&hellip;</td><td>0.666</td><td class="result"><strong>0.667</strong></td><td class="result"><strong>0.667</strong></td></tr>
@@ -394,7 +394,7 @@ rank terminates at the requested precision passed in both engines, including the
 definition of &ldquo;percent rank&rdquo; each engine implements:</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>What it pins down</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>What it pins down</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2)</td><td>Microsoft&rsquo;s headline example, 3/9</td><td>0.333</td><td class="result">0.333</td><td class="result">0.333</td></tr>
     <tr><td class="formula">=PERCENTRANK.INC(A2:A11,5)</td><td>interpolation between two data points</td><td>0.583</td><td class="result">0.583</td><td class="result">0.583</td></tr>
@@ -416,7 +416,7 @@ nowhere except on repeating decimals.</p>
 most old workbooks use. Our corpus executes four cases for it, and all four match in both engines:</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=PERCENTRANK(A1:A4,10)</td><td>0</td><td class="result">0</td><td class="result">0</td></tr>
     <tr><td class="formula">=PERCENTRANK(A1:A4,25)</td><td>0.5</td><td class="result">0.5</td><td class="result">0.5</td></tr>
@@ -443,7 +443,7 @@ returns the #NUM! error value&rdquo; &mdash; and neither engine reproduces that,
 directions:</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
     <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2,0)</td><td>#NUM!</td><td class="result"><strong>0.333</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
     <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,7,0)</td><td>#NUM!</td><td class="result"><strong>0.7</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
@@ -490,7 +490,7 @@ of the other two.</p>
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel column throughout is Microsoft&rsquo;s documented behaviour as recorded in our test
 corpus, and in the sharp rows it is a figure Microsoft prints on its own <code>PERCENTRANK.INC</code>
-and <code>PERCENTRANK.EXC</code> pages. We do not run Excel, and no value in that column is a
+and <code>PERCENTRANK.EXC</code> pages. We do not run desktop Excel, and no value in that column is a
 measurement. What we can say is narrow and factual: the published figures and the executed figures
 differ, and the published figures are the ones consistent with the truncation rule the same pages
 describe.</p>
@@ -537,7 +537,7 @@ than assumed, and the function pages for
   </div>
   <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
 </aside>
-
+<p><strong>A note on which Excel this is.</strong> The Excel column in the tables above is Microsoft&rsquo;s documented behaviour for <strong>desktop</strong> Excel, as recorded in our test corpus &mdash; we do not run desktop Excel, and no value in that column is a measurement. <strong>Excel for the web is a different application with its own calculation engine, and that one we do run</strong> (recalculated on OneDrive, 2026-09-01). Its measured results are published on each function&rsquo;s own page rather than in these guide tables. Because we have no desktop run to compare against, a disagreement between an Excel-web measurement and the documented column is genuinely ambiguous: it may mean the web engine diverges from the desktop one, or that the documentation is wrong about both. We do not claim to know which.</p>
 
 <aside class="promo-card">
   <div>

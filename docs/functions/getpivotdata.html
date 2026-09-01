@@ -324,10 +324,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-good">Supported, behaves as documented</span>
   
 </div>
-<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-08-31</p>
+<p class="category-tag">Category: Lookup and reference &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>GETPIVOTDATA</strong> function: executed in Google Sheets and LibreOffice Calc, with Excel behavior from Microsoft&rsquo;s official documentation (we do not run Excel). Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>GETPIVOTDATA</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
+
 
 
 
@@ -345,8 +346,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Excel</td>
-  <td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
+  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
   <td>No — documented only</td>
   <td>
     
@@ -357,8 +357,18 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>Google Sheets</td>
-  <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
+  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
+  <td>Yes (recalc, 2026-09-01)</td>
+  <td>
+    
+      <span class="badge badge-good">Supported, behaves as documented</span>
+    
+  </td>
+</tr>
+
+
+<tr>
+  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
   <td>Yes (Drive import, 2026-08-31)</td>
   <td>
     
@@ -369,8 +379,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 
 <tr>
-  <td>LibreOffice Calc</td>
-  <td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060109.html">Yes</a></td>
+  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060109.html">Yes</a></td>
   <td>Yes (25.8.7.3, 2026-08-31)</td>
   <td>
     
@@ -430,9 +439,51 @@ GETPIVOTDATA&rsquo;s support changed &mdash; not documentation claims, real resu
 
 
 
+
+
+
+
 <h2 class="section-title">Executed test cases</h2>
 
 
+
+
+
+
+<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=GETPIVOTDATA(&#34;Sales&#34;,A1)</td>
+  <td>The pivot_table argument points at an ordinary range, not a PivotTable</td>
+  <td class="result mono">#REF!</td>
+  <td class="result mono">#REF!<br><span class="category-tag">Excel documents: &#34;If the pivot_table argument is not a range in which a PivotTable is found, GETPIVOTDATA returns #REF!.&#34; A1 is the top-left of a plain data range that happens to have a &#34;Sales&#34; header -- a deliberately tempting target, because an engine that treats GETPIVOTDATA as a glorified lookup would find the column and return 100 or 600 instead of erroring. HARNESS LIMITATION, stated rather than worked around: Microsoft&#39;s GETPIVOTDATA examples all read from a PivotTable, and a PivotTable is a workbook feature that openpyxl cannot author -- it can neither build a pivot cache nor lay out a pivot range -- so none of the page&#39;s four value-returning examples ($5,534 / $5,534 / $2,876 / $309) can be reproduced by this harness at all. What CAN be executed faithfully is the branch the page documents for exactly this situation, and it is the one that matters for a compatibility corpus: what an engine does when GETPIVOTDATA is pointed somewhere that is not a PivotTable. A3:B4 here holds a plain two-column range of ordinary values -- headers Region / Sales and three data rows -- which is emphatically NOT a PivotTable. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GETPIVOTDATA(&#34;Sales&#34;,J20)</td>
+  <td>The pivot_table argument points at an empty cell</td>
+  <td class="result mono">#REF!</td>
+  <td class="result mono">#REF!<br><span class="category-tag">The same documented clause -- &#34;If the pivot_table argument is not a range in which a PivotTable is found, GETPIVOTDATA returns #REF!&#34; -- exercised against a blank cell rather than against populated data. Asserted separately because an engine can special-case emptiness (returning 0, or #N/A, or a blank) on the way to deciding there is no PivotTable. HARNESS LIMITATION, stated rather than worked around: Microsoft&#39;s GETPIVOTDATA examples all read from a PivotTable, and a PivotTable is a workbook feature that openpyxl cannot author -- it can neither build a pivot cache nor lay out a pivot range -- so none of the page&#39;s four value-returning examples ($5,534 / $5,534 / $2,876 / $309) can be reproduced by this harness at all. What CAN be executed faithfully is the branch the page documents for exactly this situation, and it is the one that matters for a compatibility corpus: what an engine does when GETPIVOTDATA is pointed somewhere that is not a PivotTable. A3:B4 here holds a plain two-column range of ordinary values -- headers Region / Sales and three data rows -- which is emphatically NOT a PivotTable. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=GETPIVOTDATA(&#34;Sales&#34;,A1,&#34;Region&#34;,&#34;North&#34;)</td>
+  <td>The full field/item form, still pointed at an ordinary range</td>
+  <td class="result mono">#REF!</td>
+  <td class="result mono">#REF!<br><span class="category-tag">The same documented clause, exercised through the optional field1/item1 arguments that the page describes as &#34;1 to 126 pairs of field names and item names&#34;. This is the shape closest to a lookup -- &#34;give me Sales where Region is North&#34;, which the plain range below can answer, and the answer would be 100 -- so it is the strongest test that an engine really requires a PivotTable rather than merely preferring one. HARNESS LIMITATION, stated rather than worked around: Microsoft&#39;s GETPIVOTDATA examples all read from a PivotTable, and a PivotTable is a workbook feature that openpyxl cannot author -- it can neither build a pivot cache nor lay out a pivot range -- so none of the page&#39;s four value-returning examples ($5,534 / $5,534 / $2,876 / $309) can be reproduced by this harness at all. What CAN be executed faithfully is the branch the page documents for exactly this situation, and it is the one that matters for a compatibility corpus: what an engine does when GETPIVOTDATA is pointed somewhere that is not a PivotTable. A3:B4 here holds a plain two-column range of ordinary values -- headers Region / Sales and three data rows -- which is emphatically NOT a PivotTable. Column F is untouched because this harness writes the formula under test into cell F1.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 
@@ -517,7 +568,10 @@ GETPIVOTDATA&rsquo;s support changed &mdash; not documentation claims, real resu
 <ul>
 
 
-<li>Excel: <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
+
+
+
 
 
 <li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
