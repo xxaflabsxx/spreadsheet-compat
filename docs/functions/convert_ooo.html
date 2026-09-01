@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CONVERT_OOO works in LibreOffice (tested)</title>
-<meta name="description" content="All 4 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<title>CONVERT_OOO is not supported in Google Sheets (#NAME?, executed)</title>
+<meta name="description" content="#NAME? in Google Sheets for all 4 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/convert_ooo.html">
-<meta property="og:title" content="CONVERT_OOO works in LibreOffice (tested)">
-<meta property="og:description" content="All 4 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<meta property="og:title" content="CONVERT_OOO is not supported in Google Sheets (#NAME?, executed)">
+<meta property="og:description" content="#NAME? in Google Sheets for all 4 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/convert_ooo.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>CONVERT_OOO</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Mathematical &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CONVERT_OOO</strong> function: executed in LibreOffice Calc (2026-09-01), measured against LibreOffice&rsquo;s published documentation. Excel does not document CONVERT_OOO, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CONVERT_OOO</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document CONVERT_OOO, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -424,9 +424,65 @@ CONVERT_OOO&rsquo;s support changed &mdash; not documentation claims, real resul
 
 
 
+<h2 class="section-title">Why isn&rsquo;t CONVERT_OOO working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>CONVERT_OOO</code>: we imported the formula into
+Sheets on 2026-09-01 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
 
 
 
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(CONVERT_OOO(1,&#34;EUR&#34;,&#34;DEM&#34;),10)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">1.95583</span>.
+        THE PAGE PUBLISHES THE RULE BUT NOT THE RATES, SO THIS CASE CITES A SECOND AUTHORITY FOR THE NUMBER. LibreOffice&#39;s page states the semantics -- &#34;Converts to euros a currency value expressed in one of the legacy currencies of 19 member states of the Eurozone, and vice versa. The conversion uses the fixed exchange rates at which the legacy currencies entered the euro&#34; -- and prints two examples, =CONVERT_OOO(100;&#34;ATS&#34;;&#34;EUR&#34;) and =CONVERT_OOO(100;&#34;EUR&#34;;&#34;DEM&#34;), BOTH OF WHICH ARE DESCRIBED IN WORDS RATHER THAN GIVEN A RESULT (&#34;returns the euro value of 100 Austrian schillings&#34;). The rates themselves are not on the page. The rate used here is the irrevocably fixed conversion rate adopted by the Council of the European Union, Council Regulation (EC) No 2866/98 of 31 December 1998 on the conversion rates between the euro and the currencies of the Member States adopting the euro: 1 EUR = 1.95583 DEM. That is a legal constant, not a market quotation, which is exactly why the page can call it fixed. The case is written EUR -&gt; DEM so that the asserted number IS the published rate rather than its reciprocal. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.; MISMATCH vs expected: expected 1.95583, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(CONVERT_OOO(CONVERT_OOO(100,&#34;ATS&#34;,&#34;EUR&#34;),&#34;EUR&#34;,&#34;ATS&#34;),8)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">100</span>.
+        A structural assertion with no constant from any source: whatever fixed rate the implementation holds for the Austrian schilling, converting to euros and back must return the original amount. This is the strongest claim that can be made from LibreOffice&#39;s page alone, since it prints the example but not its value. LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.; MISMATCH vs expected: expected 100, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+    
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -436,6 +492,49 @@ CONVERT_OOO&rsquo;s support changed &mdash; not documentation claims, real resul
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(CONVERT_OOO(1,&#34;EUR&#34;,&#34;DEM&#34;),10)</td>
+  <td>The euro-to-mark conversion at the fixed entry rate</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">1.95583<br><span class="category-tag">THE PAGE PUBLISHES THE RULE BUT NOT THE RATES, SO THIS CASE CITES A SECOND AUTHORITY FOR THE NUMBER. LibreOffice&#39;s page states the semantics -- &#34;Converts to euros a currency value expressed in one of the legacy currencies of 19 member states of the Eurozone, and vice versa. The conversion uses the fixed exchange rates at which the legacy currencies entered the euro&#34; -- and prints two examples, =CONVERT_OOO(100;&#34;ATS&#34;;&#34;EUR&#34;) and =CONVERT_OOO(100;&#34;EUR&#34;;&#34;DEM&#34;), BOTH OF WHICH ARE DESCRIBED IN WORDS RATHER THAN GIVEN A RESULT (&#34;returns the euro value of 100 Austrian schillings&#34;). The rates themselves are not on the page. The rate used here is the irrevocably fixed conversion rate adopted by the Council of the European Union, Council Regulation (EC) No 2866/98 of 31 December 1998 on the conversion rates between the euro and the currencies of the Member States adopting the euro: 1 EUR = 1.95583 DEM. That is a legal constant, not a market quotation, which is exactly why the page can call it fixed. The case is written EUR -&gt; DEM so that the asserted number IS the published rate rather than its reciprocal. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CONVERT_OOO(CONVERT_OOO(100,&#34;ATS&#34;,&#34;EUR&#34;),&#34;EUR&#34;,&#34;ATS&#34;),8)</td>
+  <td>The page&#39;s own first example, composed with its inverse so no rate is needed</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">100<br><span class="category-tag">A structural assertion with no constant from any source: whatever fixed rate the implementation holds for the Austrian schilling, converting to euros and back must return the original amount. This is the strongest claim that can be made from LibreOffice&#39;s page alone, since it prints the example but not its value. LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISERROR(CONVERT_OOO(100,&#34;ATS&#34;,&#34;DEM&#34;))</td>
+  <td>The documented constraint that exactly one side must be EUR</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">DERIVED from the page&#39;s sentence &#34;One, and only one, of Text1 or Text2 must be equal to &#39;EUR&#39;.&#34; NO ERROR CODE IS ASSERTED, because the page names none -- it states the requirement and stops -- so this case asserts only that the requirement is enforced. Both currencies here are on the page&#39;s own list of accepted values, so the only thing wrong with the call is the missing euro. LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISERROR(CONVERT_OOO(100,&#34;XXX&#34;,&#34;EUR&#34;))</td>
+  <td>The documented closed list of currency codes</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">DERIVED from &#34;Text1 and Text2 must each take one of the following values: &#39;ATS&#39;, &#39;BEF&#39;, &#39;CYP&#39;, &#39;DEM&#39;, &#39;EEK&#39;, &#39;ESP&#39;, &#39;EUR&#39;, &#39;FIM&#39;, &#39;FRF&#39;, &#39;GRD&#39;, &#39;IEP&#39;, &#39;ITL&#39;, &#39;LTL&#39;, &#39;LUF&#39;, &#39;LVL&#39;, &#39;MTL&#39;, &#39;NLG&#39;, &#39;PTE&#39;, &#39;SIT&#39;, and &#39;SKK&#39;.&#34; XXX is the ISO 4217 code reserved for &#39;no currency&#39;, so it is guaranteed never to join that list. Again no error code is asserted, only that the constraint is enforced. LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

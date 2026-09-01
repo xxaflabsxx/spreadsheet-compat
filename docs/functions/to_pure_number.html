@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TO_PURE_NUMBER is not supported in LibreOffice Calc (Sheets only)</title>
-<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for TO_PURE_NUMBER in 3 of its 4 executed test case… Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<title>TO_PURE_NUMBER is not supported in LibreOffice Calc (works in Sheets)</title>
+<meta name="description" content="LibreOffice returns #NAME? (unrecognized) for TO_PURE_NUMBER in 3 of its 4 executed test cases;… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/to_pure_number.html">
-<meta property="og:title" content="TO_PURE_NUMBER is not supported in LibreOffice Calc (Sheets only)">
-<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for TO_PURE_NUMBER in 3 of its 4 executed test case… Executed in LibreOffice 25.8.7.3; Sheets from official docs.">
+<meta property="og:title" content="TO_PURE_NUMBER is not supported in LibreOffice Calc (works in Sheets)">
+<meta property="og:description" content="LibreOffice returns #NAME? (unrecognized) for TO_PURE_NUMBER in 3 of its 4 executed test cases;… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/to_pure_number.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -327,7 +327,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p class="category-tag">Category: Parser &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>TO_PURE_NUMBER</strong> function: executed in LibreOffice Calc (2026-09-01), measured against Google&rsquo;s published documentation. Excel does not document TO_PURE_NUMBER, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>TO_PURE_NUMBER</strong> function: executed in Google Sheets and LibreOffice Calc, measured against Google&rsquo;s published documentation. Excel does not document TO_PURE_NUMBER, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-good">Supported, behaves as documented</span>
     
   </td>
 </tr>
@@ -446,6 +446,14 @@ we re-run every test on each new release, so it will flip to Supported here as s
     
   
     
+      
+    
+      
+    
+      
+    
+      
+    
   
     
       
@@ -500,6 +508,49 @@ we re-run every test on each new release, so it will flip to Supported here as s
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(TO_PURE_NUMBER(50%),10)</td>
+  <td>The page&#39;s own Sample Usage input</td>
+  <td class="result mono">0.5</td>
+  <td class="result mono">0.5<br><span class="category-tag">DERIVED, not published: TO_PURE_NUMBER(50%) is printed in Sample Usage with no result. The rule is the page&#39;s own &#34;If value is a number or a reference to a cell containing a numeric value, TO_PURE_NUMBER returns value with all formatting and interpretation removed&#34;, and 50% is the literal the page itself chose. Derived independently: a percent literal is one hundredth of its face value, so 50% is 0.5. BATCH PROVENANCE (batch I, group 1 -- the last eight Google-documented functions in the corpus, closing the group A set sheets-lo-only-plan.md opened). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes NO claim about it in that engine and nothing here is measured against that vendor&#39;s documentation. The authority is Google&#39;s own support.google.com function page, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for these pages, so a bare URL dates nothing. WHAT GOOGLE PRINTS ON THESE EIGHT PAGES IS LESS THAN IT LOOKS, AND EVERY NOTE SAYS SO. Each page carries a &#39;Sample Usage&#39; block of FORMULAS WITH NO RESULTS and an &#39;Examples&#39; section that is a live embedded spreadsheet rather than article text, so ACROSS ALL EIGHT PAGES THERE IS NOT ONE PUBLISHED FORMULA/RESULT PAIR IN THE BODY. Every expected value in this group is therefore DERIVED from the page&#39;s own stated semantics and names the sentence it came from; the one exception is UNARY_PERCENT, whose one-line description states its result inline. No value was taken from a search snippet, a blog or a mirror. LIBREOFFICE: probed before execution on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) in five storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE. and _xlfn.ORG.OPENOFFICE. -- and #NAME? under every one of them on every build, so the expected values below describe Google Sheets and the LibreOffice column records absence. (A separate check confirms the absence is real rather than a name-mapping artefact: round-tripping these eight names through LibreOffice&#39;s own formula parser and its .xlsx export writes them back lower-cased -- &#39;to_date&#39;, &#39;uminus&#39; -- which is what LibreOffice does with an identifier it does not recognise as a function at all.) Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(TO_PURE_NUMBER(TO_DOLLARS(12.5)),10)</td>
+  <td>The documented removal of a currency format, using this page&#39;s own list of inputs</td>
+  <td class="result mono">12.5</td>
+  <td class="result mono">12.5<br><span class="category-tag">DERIVED from the page&#39;s opening sentence, which names its accepted inputs: &#34;Converts a provided date/time, percentage, currency or other formatted numeric value to a pure number without formatting.&#34; The currency value is produced by TO_DOLLARS, the function the page&#39;s own See Also list points at for that format. Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=TO_PURE_NUMBER(&#34;abc&#34;)</td>
+  <td>The documented pass-through, from the sentence that names the wrong function</td>
+  <td class="result mono">abc</td>
+  <td class="result mono">abc<br><span class="category-tag">DERIVED, AND THE SENTENCE IT IS DERIVED FROM CONTAINS A PUBLISHED ERROR WORTH RECORDING. The rule paragraph on TO_PURE_NUMBER&#39;s page reads, verbatim: &#34;If value is not a number or a reference to a cell containing a numeric value, TO_PERCENT returns value without modification.&#34; It names TO_PERCENT -- a different function, which has its own page carrying the same sentence correctly -- in the middle of TO_PURE_NUMBER&#39;s own rule block. The intended subject is unambiguous from position and from the parallel Notes bullet below it (&#34;TO_PURE_NUMBER returns the value passed without modification for all non-numeric types&#34;), so the behaviour asserted here is not in doubt; the copy-paste slip is recorded rather than silently read past. Re-fetched on a second request the same day to rule out a transcription error on this end: it says TO_PERCENT both times. Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243.</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ISTEXT(TO_PURE_NUMBER(&#34;abc&#34;))</td>
+  <td>The documented contrast with N, asserted on the TO_PURE_NUMBER side only</td>
+  <td class="result mono">True</td>
+  <td class="result mono">True<br><span class="category-tag">DERIVED from the Notes bullet &#34;TO_PURE_NUMBER is similar to N, except that N returns 0 for non-numeric values except for TRUE which returns 1, whereas TO_PURE_NUMBER returns the value passed without modification for all non-numeric types.&#34; Only the TO_PURE_NUMBER half is asserted: N is a separate function with its own page and its own cases in this corpus. NOTHING IS ASSERTED ABOUT A BOOLEAN ARGUMENT -- the bullet says what N does with TRUE but never says whether TO_PURE_NUMBER counts a boolean as a non-numeric type, so the page settles nothing there and this file asserts nothing there. Google&#39;s TO_PURE_NUMBER page, read live on 2026-08-31 at https://support.google.com/docs/answer/3094243. WHAT THIS CASE LOOKS LIKE IN AN ENGINE THAT LACKS THE FUNCTION, SAID HERE SO THE ROW IS NOT MISREAD. The assertion is wrapped in an IS* predicate, and a predicate does not propagate #NAME? -- it answers it. On all four LibreOffice builds, where this function does not exist, the case therefore returns a plain FALSE rather than the #NAME? its unwrapped siblings return. That FALSE is a correct answer to the question the predicate asks and a misleading one about the engine, so it is recorded as a mismatch and the function&#39;s LibreOffice verdict is carried by the unwrapped cases in the same file, which do return #NAME?. (Batch H hit the same masking trap from the other side, where COUNTA(QUERY(...)) counted an error cell as one value and returned a plausible 1.)</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

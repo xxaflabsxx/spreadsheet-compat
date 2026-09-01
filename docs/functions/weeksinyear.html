@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WEEKSINYEAR works in LibreOffice (tested)</title>
-<meta name="description" content="All 3 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<title>WEEKSINYEAR is not supported in Google Sheets (#NAME?, executed)</title>
+<meta name="description" content="#NAME? in Google Sheets for all 3 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/weeksinyear.html">
-<meta property="og:title" content="WEEKSINYEAR works in LibreOffice (tested)">
-<meta property="og:description" content="All 3 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<meta property="og:title" content="WEEKSINYEAR is not supported in Google Sheets (#NAME?, executed)">
+<meta property="og:description" content="#NAME? in Google Sheets for all 3 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/weeksinyear.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>WEEKSINYEAR</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Date &amp; Time &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>WEEKSINYEAR</strong> function: executed in LibreOffice Calc (2026-09-01), measured against LibreOffice&rsquo;s published documentation. Excel does not document WEEKSINYEAR, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>WEEKSINYEAR</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document WEEKSINYEAR, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -424,9 +424,69 @@ WEEKSINYEAR&rsquo;s support changed &mdash; not documentation claims, real resul
 
 
 
+<h2 class="section-title">Why isn&rsquo;t WEEKSINYEAR working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>WEEKSINYEAR</code>: we imported the formula into
+Sheets on 2026-09-01 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
 
 
 
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=WEEKSINYEAR(DATE(1970,2,17))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">53</span>.
+        LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;WEEKSINYEAR(A1) returns 53 if A1 contains 1970-02-17, a valid date for the year 1970.&#34; (The page prints the example without a leading &#39;=&#39;, unlike its neighbours; the formula is otherwise as published, with DATE() substituted for the cell reference for the reason the sibling ISLEAPYEAR entry gives.) Derived independently as well: 1 January 1970 was a Thursday, and under the ISO rule the page states -- &#34;Following ISO 8601, this function considers Monday to be the first day of the week, and the first week of a year is the one with most days in this year&#34; -- a common year beginning on a Thursday has 53 ISO weeks. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 53, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=WEEKSINYEAR(DATE(2025,6,1))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">52</span>.
+        DERIVED from the ISO rule the page states. 1 January 2025 was a Wednesday and 2025 is not a leap year, so it has 52 ISO weeks. The page publishes only a 53-week year, so this is the case that shows the function is computing rather than returning a constant. LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 52, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=WEEKSINYEAR(DATE(2026,6,1))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">53</span>.
+        DERIVED from the same ISO rule. A year has 53 ISO weeks when it begins on a Thursday, or when it is a leap year beginning on a Wednesday; 1 January 2026 is a Thursday. Computed independently here from the ISO week-date calendar rather than looked up. LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 53, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -436,6 +496,41 @@ WEEKSINYEAR&rsquo;s support changed &mdash; not documentation claims, real resul
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=WEEKSINYEAR(DATE(1970,2,17))</td>
+  <td>LibreOffice&#39;s own published example: a 53-week year</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">53<br><span class="category-tag">LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;WEEKSINYEAR(A1) returns 53 if A1 contains 1970-02-17, a valid date for the year 1970.&#34; (The page prints the example without a leading &#39;=&#39;, unlike its neighbours; the formula is otherwise as published, with DATE() substituted for the cell reference for the reason the sibling ISLEAPYEAR entry gives.) Derived independently as well: 1 January 1970 was a Thursday, and under the ISO rule the page states -- &#34;Following ISO 8601, this function considers Monday to be the first day of the week, and the first week of a year is the one with most days in this year&#34; -- a common year beginning on a Thursday has 53 ISO weeks. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEEKSINYEAR(DATE(2025,6,1))</td>
+  <td>A 52-week year, the ordinary case the page does not publish</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">52<br><span class="category-tag">DERIVED from the ISO rule the page states. 1 January 2025 was a Wednesday and 2025 is not a leap year, so it has 52 ISO weeks. The page publishes only a 53-week year, so this is the case that shows the function is computing rather than returning a constant. LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=WEEKSINYEAR(DATE(2026,6,1))</td>
+  <td>A second 53-week year, on the other of the two ISO rules that produce one</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">53<br><span class="category-tag">DERIVED from the same ISO rule. A year has 53 ISO weeks when it begins on a Thursday, or when it is a leap year beginning on a Wednesday; 1 January 2026 is a Thursday. Computed independently here from the ISO week-date calendar rather than looked up. LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

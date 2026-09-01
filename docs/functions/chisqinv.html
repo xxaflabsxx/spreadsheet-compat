@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHISQINV works in LibreOffice (tested)</title>
-<meta name="description" content="All 3 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<title>CHISQINV is not supported in Google Sheets (#NAME?, executed)</title>
+<meta name="description" content="#NAME? in Google Sheets for all 3 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/chisqinv.html">
-<meta property="og:title" content="CHISQINV works in LibreOffice (tested)">
-<meta property="og:description" content="All 3 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<meta property="og:title" content="CHISQINV is not supported in Google Sheets (#NAME?, executed)">
+<meta property="og:description" content="#NAME? in Google Sheets for all 3 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/chisqinv.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>CHISQINV</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Statistical Part One &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>CHISQINV</strong> function: executed in LibreOffice Calc (2026-09-01), measured against LibreOffice&rsquo;s published documentation. Excel does not document CHISQINV, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>CHISQINV</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document CHISQINV, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -424,9 +424,69 @@ CHISQINV&rsquo;s support changed &mdash; not documentation claims, real results.
 
 
 
+<h2 class="section-title">Why isn&rsquo;t CHISQINV working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>CHISQINV</code>: we imported the formula into
+Sheets on 2026-09-01 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
 
 
 
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=ROUND(CHISQINV(0.5,2),12)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">1.38629436112</span>.
+        NOTHING ON THIS PAGE IS A PUBLISHED RESULT: like CHISQDIST above, CHISQINV&#39;s entry carries a description and a Syntax block and no Example section, while the COM.MICROSOFT-namespaced CHISQ.INV immediately above it on the same page does publish one. DERIVED from the page&#39;s whole description, which is one sentence: &#34;Returns the inverse of CHISQDIST.&#34; Read together with CHISQDIST&#39;s own page that makes this the inverse of the CUMULATIVE branch (the default branch), i.e. the left-tailed quantile -- and the two cases below check that reading rather than assuming it. Derived independently: with two degrees of freedom the cumulative function is 1 - exp(-x/2), so its inverse at 0.5 is 2*ln(2) = 1.386294361119890618834464242916353136151 (mpmath, 40 digits). STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 1.38629436112, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(CHISQDIST(CHISQINV(0.7,4),4,1),10)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">0.7</span>.
+        A structural assertion with no derived constant, and the case that carries the page&#39;s entire documented claim: feeding CHISQINV&#39;s output back into CHISQDIST must return the probability it started from. This is also what pins the inverse to the cumulative branch -- the density is not monotonic, so no such round trip exists for it. Asserted at 10 places rather than 12 to leave room for the root-finder&#39;s own convergence tolerance, which the page does not specify. LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0.7, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=ROUND(CHISQINV(0.95,1),12)</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">3.841458820694</span>.
+        DERIVED independently as the solution of P(0.5, x/2) = 0.95, which is 3.841458820694124469101699415925084172617 (mpmath, 40 digits). Chosen because a left-tailed and a right-tailed reading of &#34;the inverse&#34; give wildly different answers here (3.8414588 versus 0.0039321), so the case would catch a tail-convention error that the symmetric-looking median case above could not. LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 3.841458820694, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -436,6 +496,41 @@ CHISQINV&rsquo;s support changed &mdash; not documentation claims, real results.
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQINV(0.5,2),12)</td>
+  <td>The inverse at probability 0.5 with 2 degrees of freedom</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">1.38629436112<br><span class="category-tag">NOTHING ON THIS PAGE IS A PUBLISHED RESULT: like CHISQDIST above, CHISQINV&#39;s entry carries a description and a Syntax block and no Example section, while the COM.MICROSOFT-namespaced CHISQ.INV immediately above it on the same page does publish one. DERIVED from the page&#39;s whole description, which is one sentence: &#34;Returns the inverse of CHISQDIST.&#34; Read together with CHISQDIST&#39;s own page that makes this the inverse of the CUMULATIVE branch (the default branch), i.e. the left-tailed quantile -- and the two cases below check that reading rather than assuming it. Derived independently: with two degrees of freedom the cumulative function is 1 - exp(-x/2), so its inverse at 0.5 is 2*ln(2) = 1.386294361119890618834464242916353136151 (mpmath, 40 digits). STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQDIST(CHISQINV(0.7,4),4,1),10)</td>
+  <td>&#39;the inverse of CHISQDIST&#39; asserted as an actual round trip</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">0.7<br><span class="category-tag">A structural assertion with no derived constant, and the case that carries the page&#39;s entire documented claim: feeding CHISQINV&#39;s output back into CHISQDIST must return the probability it started from. This is also what pins the inverse to the cumulative branch -- the density is not monotonic, so no such round trip exists for it. Asserted at 10 places rather than 12 to leave room for the root-finder&#39;s own convergence tolerance, which the page does not specify. LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(CHISQINV(0.95,1),12)</td>
+  <td>A second point, at one degree of freedom, well away from the median</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">3.841458820694<br><span class="category-tag">DERIVED independently as the solution of P(0.5, x/2) = 0.95, which is 3.841458820694124469101699415925084172617 (mpmath, 40 digits). Chosen because a left-tailed and a right-tailed reading of &#34;the inverse&#34; give wildly different answers here (3.8414588 versus 0.0039321), so the case would catch a tail-convention error that the symmetric-looking median case above could not. LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

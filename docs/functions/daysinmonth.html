@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAYSINMONTH works in LibreOffice (tested)</title>
-<meta name="description" content="All 4 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<title>DAYSINMONTH is not supported in Google Sheets (#NAME?, executed)</title>
+<meta name="description" content="#NAME? in Google Sheets for all 4 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 
 <link rel="canonical" href="https://canispreadsheet.com/functions/daysinmonth.html">
-<meta property="og:title" content="DAYSINMONTH works in LibreOffice (tested)">
-<meta property="og:description" content="All 4 executed test cases pass in LibreOffice; documented in LibreOffice only. Executed in LibreOffice 25.8.7.3.">
+<meta property="og:title" content="DAYSINMONTH is not supported in Google Sheets (#NAME?, executed)">
+<meta property="og:description" content="#NAME? in Google Sheets for all 4 executed cases; works in LibreOffice 25.8. Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-09-01.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/functions/daysinmonth.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -321,13 +321,13 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <div class="func-header">
   <h1>DAYSINMONTH</h1>
   
-    <span class="badge badge-good">Supported, behaves as documented</span>
+    <span class="badge badge-bad">Unsupported (not recognized)</span>
   
 </div>
 <p class="category-tag">Category: Date &amp; Time &middot; Last tested 2026-09-01</p>
 
 
-<p class="lede">Real compatibility results for the <strong>DAYSINMONTH</strong> function: executed in LibreOffice Calc (2026-09-01), measured against LibreOffice&rsquo;s published documentation. Excel does not document DAYSINMONTH, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
+<p class="lede">Real compatibility results for the <strong>DAYSINMONTH</strong> function: executed in Google Sheets and LibreOffice Calc, measured against LibreOffice&rsquo;s published documentation. Excel does not document DAYSINMONTH, so this page makes no claim about Excel. Syntax and links to that documentation are below.</p>
 
 
 
@@ -359,10 +359,10 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <tr>
   <td>Google Sheets</td>
   <td>No</td>
-  <td>Not yet</td>
+  <td>Yes (Drive import, 2026-09-01)</td>
   <td>
     
-      <span class="badge badge-unknown">n/a</span>
+      <span class="badge badge-bad">Unsupported (not recognized)</span>
     
   </td>
 </tr>
@@ -424,9 +424,81 @@ DAYSINMONTH&rsquo;s support changed &mdash; not documentation claims, real resul
 
 
 
+<h2 class="section-title">Why isn&rsquo;t DAYSINMONTH working in Google Sheets?</h2>
+
+<p>Google Sheets does not implement <code>DAYSINMONTH</code>: we imported the formula into
+Sheets on 2026-09-01 and every case came back <code>#NAME?</code>
+(unrecognized function). Sheets is a rolling service with no version to pin, so this is a
+statement about the service on that date, and Google&rsquo;s own
+function list does not document it either. Rewrite the formula with a documented
+Sheets equivalent &mdash; see the
+<a href="../excel-google-sheets-equivalents.html">Excel &harr; Sheets equivalents table</a>.</p>
 
 
 
+
+
+
+<div class="quirk-box">
+  <h3>Discovered quirks</h3>
+  <ul>
+  
+    
+  
+    
+      
+      <li>
+        <span class="formula">=DAYSINMONTH(DATE(1968,2,17))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">29</span>.
+        LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;=DAYSINMONTH(A1) returns 29 days if A1 contains 1968-02-17, a valid date for February 1968.&#34; The published example passes the date through a cell reference; it is written here as DATE(1968,2,17) instead, because the page&#39;s own sibling entry ISLEAPYEAR warns in the same words that a date typed with slashes is evaluated as arithmetic (&#34;Never use =ISLEAPYEAR(2/29/68), because this would first evaluate 2 divided by 29 divided by 68&#34;), and DATE() is the locale-independent form that page recommends. Derived independently as well: 1968 is divisible by 4 and not by 100, so February has 29 days. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 29, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=DAYSINMONTH(DATE(2026,2,1))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">28</span>.
+        DERIVED from &#34;Calculates the number of days of the month in which the date entered occurs.&#34; 2026 is not divisible by 4, so February has 28 days. Paired with the published leap-year case above, this is what shows the function reads the YEAR of its argument and not just the month. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 28, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=DAYSINMONTH(DATE(2026,4,30))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">30</span>.
+        DERIVED from the same sentence. April has 30 days. The argument is the last day of the month, which is the boundary an off-by-one implementation would get wrong. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 30, got &#39;#NAME?&#39;
+      </li>
+      
+    
+      
+      <li>
+        <span class="formula">=DAYSINMONTH(DATE(2026,8,1))</span> on
+        <strong>Google Sheets</strong> returned
+        <span class="formula">#NAME?</span>, but the documented/expected
+        result is <span class="formula">31</span>.
+        DERIVED from the same sentence. August has 31 days; the argument is the first day of the month, the other boundary. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 31, got &#39;#NAME?&#39;
+      </li>
+      
+    
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+  </ul>
+</div>
 
 
 
@@ -436,6 +508,49 @@ DAYSINMONTH&rsquo;s support changed &mdash; not documentation claims, real resul
 
 
 
+
+<h3>Google Sheets (executed 2026-09-01 via Drive import)</h3>
+<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
+<div class="table-scroll">
+<table class="cases">
+<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
+<tbody>
+
+<tr>
+  <td class="formula mono">=DAYSINMONTH(DATE(1968,2,17))</td>
+  <td>LibreOffice&#39;s own published example: February of a leap year</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">29<br><span class="category-tag">LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;=DAYSINMONTH(A1) returns 29 days if A1 contains 1968-02-17, a valid date for February 1968.&#34; The published example passes the date through a cell reference; it is written here as DATE(1968,2,17) instead, because the page&#39;s own sibling entry ISLEAPYEAR warns in the same words that a date typed with slashes is evaluated as arithmetic (&#34;Never use =ISLEAPYEAR(2/29/68), because this would first evaluate 2 divided by 29 divided by 68&#34;), and DATE() is the locale-independent form that page recommends. Derived independently as well: 1968 is divisible by 4 and not by 100, so February has 29 days. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYSINMONTH(DATE(2026,2,1))</td>
+  <td>The same month in a non-leap year</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">28<br><span class="category-tag">DERIVED from &#34;Calculates the number of days of the month in which the date entered occurs.&#34; 2026 is not divisible by 4, so February has 28 days. Paired with the published leap-year case above, this is what shows the function reads the YEAR of its argument and not just the month. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYSINMONTH(DATE(2026,4,30))</td>
+  <td>A 30-day month, from a date on the last day of it</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">30<br><span class="category-tag">DERIVED from the same sentence. April has 30 days. The argument is the last day of the month, which is the boundary an off-by-one implementation would get wrong. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=DAYSINMONTH(DATE(2026,8,1))</td>
+  <td>A 31-day month, from a date on the first day of it</td>
+  <td class="result mono">#NAME?</td>
+  <td class="result mono">31<br><span class="category-tag">DERIVED from the same sentence. August has 31 days; the argument is the first day of the month, the other boundary. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
 
 
 

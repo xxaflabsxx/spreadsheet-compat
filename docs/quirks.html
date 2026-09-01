@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>851 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
-<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 851 divergences, every one executed — not copied from docs.">
+<title>908 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)</title>
+<meta name="description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 908 divergences, every one executed — not copied from docs.">
 
 <link rel="canonical" href="https://canispreadsheet.com/quirks.html">
-<meta property="og:title" content="851 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
-<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 851 divergences, every one executed — not copied from docs.">
+<meta property="og:title" content="908 spreadsheet formulas that give different results in Google Sheets or LibreOffice vs Excel (executed)">
+<meta property="og:description" content="MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(&#34;a&#34;,&#34;b&#34;,&#34;c&#34;) is #N/A in Google Sheets. 908 divergences, every one executed — not copied from docs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/quirks.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -324,8 +324,8 @@ Can I Spreadsheet?: cross-engine divergence that only shows up when you actually
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 25.8.7.3 and Google Sheets (Drive import, 2026-09-01) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
-<p class="search-hint">851 quirks found across 262 functions
-(618 in LibreOffice, 233 in Google Sheets).
+<p class="search-hint">908 quirks found across 278 functions
+(618 in LibreOffice, 290 in Google Sheets).
 A further 9 Google Sheets cases
 are excluded as <a href="methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.</p>
@@ -1802,6 +1802,97 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisqdist.html">CHISQDIST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CHISQDIST(3,2,FALSE())-CHISQDIST(3,2,0),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical Part One</dd>
+  </dl>
+  <p>A structural assertion with no derived constant, from the same sentence. The page lists 0 and False as equivalent, and this is the case that says so. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisqdist.html">CHISQDIST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CHISQDIST(3,2,1),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.776869839852</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical Part One</dd>
+  </dl>
+  <p>NOTHING ON THIS PAGE IS A PUBLISHED RESULT. CHISQDIST&#39;s entry in Statistical Functions Part One carries a description and a Syntax block and NO Example section at all -- unlike its neighbours CHISQ.DIST.RT and CHISQ.INV.RT on the same page, which do publish worked examples. Every value in this file is therefore DERIVED from the page&#39;s stated semantics: &#34;Returns the value of the probability density function or the cumulative distribution function for the chi-square distribution&#34;, with &#34;Cumulative (optional): 0 or False calculates the probability density function. Other values or True or omitted calculates the cumulative distribution function.&#34; Derived independently at 40 decimal digits with mpmath as the regularised lower incomplete gamma function P(k/2, x/2) = P(1, 1.5) = 1 - exp(-1.5) = 0.7768698398515701710667195292359874786578, then rounded to the 12 places asserted here. The ROUND() wrapper keeps the assertion clear of last-bit formatting differences. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0.776869839852, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisqdist.html">CHISQDIST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CHISQDIST(3,2)-CHISQDIST(3,2,1),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical Part One</dd>
+  </dl>
+  <p>A structural assertion with no derived constant, from the Cumulative parameter&#39;s own sentence. Asserted as a difference so that the case tests only the default, and would still be meaningful if the corpus&#39;s derived constant above were ever revised. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisqdist.html">CHISQDIST</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CHISQDIST(3,2,0),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.111565080074</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical Part One</dd>
+  </dl>
+  <p>DERIVED from the same sentence, taking the other branch: with two degrees of freedom the chi-square density is exp(-x/2)/2, so at x = 3 it is 0.1115650800742149144666402353820062606711 (mpmath, 40 digits). This case and the one above are what make the Cumulative argument&#39;s two branches separately visible; an implementation that ignored the flag would pass one and fail the other. LibreOffice&#39;s CHISQDIST help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0.111565080074, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisqinv.html">CHISQINV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CHISQINV(0.5,2),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1.38629436112</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical Part One</dd>
+  </dl>
+  <p>NOTHING ON THIS PAGE IS A PUBLISHED RESULT: like CHISQDIST above, CHISQINV&#39;s entry carries a description and a Syntax block and no Example section, while the COM.MICROSOFT-namespaced CHISQ.INV immediately above it on the same page does publish one. DERIVED from the page&#39;s whole description, which is one sentence: &#34;Returns the inverse of CHISQDIST.&#34; Read together with CHISQDIST&#39;s own page that makes this the inverse of the CUMULATIVE branch (the default branch), i.e. the left-tailed quantile -- and the two cases below check that reading rather than assuming it. Derived independently: with two degrees of freedom the cumulative function is 1 - exp(-x/2), so its inverse at 0.5 is 2*ln(2) = 1.386294361119890618834464242916353136151 (mpmath, 40 digits). STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 1.38629436112, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisqinv.html">CHISQINV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CHISQDIST(CHISQINV(0.7,4),4,1),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0.7</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical Part One</dd>
+  </dl>
+  <p>A structural assertion with no derived constant, and the case that carries the page&#39;s entire documented claim: feeding CHISQINV&#39;s output back into CHISQDIST must return the probability it started from. This is also what pins the inverse to the cumulative branch -- the density is not monotonic, so no such round trip exists for it. Asserted at 10 places rather than 12 to leave room for the root-finder&#39;s own convergence tolerance, which the page does not specify. LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 0.7, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/chisqinv.html">CHISQINV</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CHISQINV(0.95,1),12)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">3.841458820694</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Statistical Part One</dd>
+  </dl>
+  <p>DERIVED independently as the solution of P(0.5, x/2) = 0.95, which is 3.841458820694124469101699415925084172617 (mpmath, 40 digits). Chosen because a left-tailed and a right-tailed reading of &#34;the inverse&#34; give wildly different answers here (3.8414588 versus 0.0039321), so the case would catch a tail-convention error that the symmetric-looking median case above could not. LibreOffice&#39;s CHISQINV help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060181.html.; MISMATCH vs expected: expected 3.841458820694, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/chitest.html">CHITEST</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=CHITEST(A2:B4,A6:B7)</div>
@@ -2059,6 +2150,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Statistical</dd>
   </dl>
   <p>Excel documents: &#34;If standard_dev &lt;= 0, CONFIDENCE.T returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/convert_ooo.html">CONVERT_OOO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CONVERT_OOO(1,&#34;EUR&#34;,&#34;DEM&#34;),10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1.95583</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Mathematical</dd>
+  </dl>
+  <p>THE PAGE PUBLISHES THE RULE BUT NOT THE RATES, SO THIS CASE CITES A SECOND AUTHORITY FOR THE NUMBER. LibreOffice&#39;s page states the semantics -- &#34;Converts to euros a currency value expressed in one of the legacy currencies of 19 member states of the Eurozone, and vice versa. The conversion uses the fixed exchange rates at which the legacy currencies entered the euro&#34; -- and prints two examples, =CONVERT_OOO(100;&#34;ATS&#34;;&#34;EUR&#34;) and =CONVERT_OOO(100;&#34;EUR&#34;;&#34;DEM&#34;), BOTH OF WHICH ARE DESCRIBED IN WORDS RATHER THAN GIVEN A RESULT (&#34;returns the euro value of 100 Austrian schillings&#34;). The rates themselves are not on the page. The rate used here is the irrevocably fixed conversion rate adopted by the Council of the European Union, Council Regulation (EC) No 2866/98 of 31 December 1998 on the conversion rates between the euro and the currencies of the Member States adopting the euro: 1 EUR = 1.95583 DEM. That is a legal constant, not a market quotation, which is exactly why the page can call it fixed. The case is written EUR -&gt; DEM so that the asserted number IS the published rate rather than its reciprocal. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.; MISMATCH vs expected: expected 1.95583, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/convert_ooo.html">CONVERT_OOO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(CONVERT_OOO(CONVERT_OOO(100,&#34;ATS&#34;,&#34;EUR&#34;),&#34;EUR&#34;,&#34;ATS&#34;),8)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">100</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Mathematical</dd>
+  </dl>
+  <p>A structural assertion with no constant from any source: whatever fixed rate the implementation holds for the Austrian schilling, converting to euros and back must return the original amount. This is the strongest claim that can be made from LibreOffice&#39;s page alone, since it prints the example but not its value. LibreOffice&#39;s CONVERT_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060106.html.; MISMATCH vs expected: expected 100, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -2517,6 +2634,110 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinmonth.html">DAYSINMONTH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINMONTH(DATE(2026,2,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">28</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from &#34;Calculates the number of days of the month in which the date entered occurs.&#34; 2026 is not divisible by 4, so February has 28 days. Paired with the published leap-year case above, this is what shows the function reads the YEAR of its argument and not just the month. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 28, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinmonth.html">DAYSINMONTH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINMONTH(DATE(1968,2,17))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">29</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;=DAYSINMONTH(A1) returns 29 days if A1 contains 1968-02-17, a valid date for February 1968.&#34; The published example passes the date through a cell reference; it is written here as DATE(1968,2,17) instead, because the page&#39;s own sibling entry ISLEAPYEAR warns in the same words that a date typed with slashes is evaluated as arithmetic (&#34;Never use =ISLEAPYEAR(2/29/68), because this would first evaluate 2 divided by 29 divided by 68&#34;), and DATE() is the locale-independent form that page recommends. Derived independently as well: 1968 is divisible by 4 and not by 100, so February has 29 days. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 29, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinmonth.html">DAYSINMONTH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINMONTH(DATE(2026,4,30))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">30</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the same sentence. April has 30 days. The argument is the last day of the month, which is the boundary an off-by-one implementation would get wrong. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 30, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinmonth.html">DAYSINMONTH</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINMONTH(DATE(2026,8,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">31</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the same sentence. August has 31 days; the argument is the first day of the month, the other boundary. LibreOffice&#39;s DAYSINMONTH help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 31, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinyear.html">DAYSINYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINYEAR(DATE(2100,7,4))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">365</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the same sentence plus the Gregorian rule. 2100 is divisible by 100 but not by 400, so it is NOT a leap year -- the complement of the case above, and the one that catches an implementation testing divisibility by 4 alone. LibreOffice&#39;s DAYSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 365, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinyear.html">DAYSINYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINYEAR(DATE(2000,7,4))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">366</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the same sentence plus the Gregorian rule. 2000 is divisible by 400, so it IS a leap year -- the case that separates a correct implementation from one that only checks divisibility by 4 and 100. LibreOffice&#39;s DAYSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 366, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinyear.html">DAYSINYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINYEAR(DATE(2026,1,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">365</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from &#34;Calculates the number of days of the year in which the date entered occurs.&#34; 2026 is not a leap year. LibreOffice&#39;s DAYSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 365, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/daysinyear.html">DAYSINYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=DAYSINYEAR(DATE(1968,2,29))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">366</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;=DAYSINYEAR(A1) returns 366 days if A1 contains 1968-02-29, a valid date for the year 1968.&#34; Written with DATE() rather than a cell reference for the reason the sibling ISLEAPYEAR entry gives on the same page. Derived independently: 1968 is a leap year, so it has 366 days. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s DAYSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 366, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/dbcs.html">DBCS</a>
   <span class="badge badge-quirk">Google Sheets</span></h2>
   <div class="formula mono">=DBCS(&#34;ＥＸＣＥＬ&#34;)</div>
@@ -2920,6 +3141,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/eastersunday.html">EASTERSUNDAY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EASTERSUNDAY(2026)-DATE(2026,4,5)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED, not published: the page publishes only the year 2000. Easter Sunday 2026 falls on 5 April by the Gregorian computus, computed independently here with the Meeus/Jones/Butcher algorithm. This is the case that tests the function rather than one memorised answer. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/eastersunday.html">EASTERSUNDAY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EASTERSUNDAY(2026)-2-DATE(2026,4,3)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>A structural assertion with no derived constant beyond the Easter date above, from the page&#39;s own list: &#34;Good Friday = EASTERSUNDAY(Year) - 2&#34;. Good Friday 2026 is therefore 3 April. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/eastersunday.html">EASTERSUNDAY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EASTERSUNDAY(2000)-DATE(2000,4,23)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;=EASTERSUNDAY(2000) returns 2000-04-23.&#34; Asserted as a difference against DATE(2000,4,23) so the case depends on neither the locale&#39;s date format nor on whether the engine hands the harness a date object or a serial number -- the two published examples above and here therefore check the same underlying value through two independent routes. LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/eastersunday.html">EASTERSUNDAY</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=EASTERSUNDAY(2000)+49</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">36688</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, and the only figure on the page given as a number rather than as a date: &#34;=EASTERSUNDAY(2000)+49 returns the internal serial number 36688. The result is 2000-06-11.&#34; It is quoted here in the exact form the page prints it -- with the +49 -- rather than back-solved to the Easter serial itself, so the assertion is the published one. Derived independently: Easter Sunday 2000 falls on 23 April by the Gregorian computus (Meeus/Jones/Butcher algorithm, computed here rather than looked up), which is serial 36639 in the 1899-12-30-origin system, and 36639 + 49 = 36688, matching the printed figure exactly. 49 days is the offset the page itself gives for Pentecost Sunday. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s EASTERSUNDAY help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_eastersunday.html.; MISMATCH vs expected: expected 36688, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/encodeurl.html">ENCODEURL</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ENCODEURL(&#34;http://contoso.sharepoint.com/Finance/Profit and Loss Statement.xlsx&#34;)</div>
@@ -3099,6 +3372,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Information</dd>
   </dl>
   <p>MISMATCH vs expected: expected 4, got &#39;#N/A&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/errortype.html">ERRORTYPE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ERRORTYPE(A1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">532</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Spreadsheet</dd>
+  </dl>
+  <p>DERIVED FROM TWO LIBREOFFICE PAGES THAT HAVE TO BE READ TOGETHER, because neither is sufficient alone. ERRORTYPE&#39;s own entry in Spreadsheet Functions states the behaviour -- &#34;Returns the number corresponding to an error value occurring in a different cell&#34;, &#34;The Status Bar displays the predefined error code from LibreOffice if you click the cell containing the error&#34; -- and gives exactly one example, &#34;If cell A1 displays Err:518, the function =ERRORTYPE(A1) returns the number 518&#34;, which is not reproducible from a worksheet formula (518 is an internal &#39;variable is not available&#39; condition). The CODES are published separately, in LibreOffice&#39;s Error Codes in LibreOffice Calc table, which lists 532 against &#39;#DIV/0! Division by zero -- Division operator / if the denominator is 0&#39;. This case and the three below assert that table&#39;s codes for the four error conditions a worksheet formula can raise deliberately. Error-code table read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/05/02140000.html. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s ERRORTYPE help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060109.html.; MISMATCH vs expected: expected 532, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/errortype.html">ERRORTYPE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ERRORTYPE(A1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">502</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Spreadsheet</dd>
+  </dl>
+  <p>DERIVED from the published error-code table, whose entry for 502 is &#39;Invalid argument -- Function argument is not valid. For example, a negative number for the SQRT() function, for this please use IMSQRT().&#39; The formula in this case is the table&#39;s own worked example, so the expected code is as directly published as this function&#39;s codes get. Error-code table read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/05/02140000.html. LibreOffice&#39;s ERRORTYPE help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060109.html.; MISMATCH vs expected: expected 502, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/errortype.html">ERRORTYPE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ERRORTYPE(A1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">525</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Spreadsheet</dd>
+  </dl>
+  <p>DERIVED from the published error-code table: 525 is &#39;#NAME? Invalid names -- An identifier could not be evaluated, for example, no valid reference, no valid function name, no column/row label, no macro, add-in not found.&#39; A call to a function that does not exist is the &#39;no valid function name&#39; arm of that list. This case is also the one that ties ERRORTYPE to the rest of this corpus: 525 is the numeric form of the same #NAME? that every unsupported-function verdict in the dataset is built on. Error-code table read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/05/02140000.html. LibreOffice&#39;s ERRORTYPE help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060109.html.; MISMATCH vs expected: expected 525, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/errortype.html">ERRORTYPE</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ERRORTYPE(A1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">519</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Spreadsheet</dd>
+  </dl>
+  <p>DERIVED from the published error-code table, which lists 519 against &#39;#VALUE! No value (instead of Err:519 cell displays #VALUE!)&#39; with the explanation &#39;The formula yields a value that does not correspond to the definition; or a cell that is referenced in the formula contains text instead of a number.&#39; Adding 1 to the string &#34;a&#34; is exactly that second condition. Error-code table read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/05/02140000.html. LibreOffice&#39;s ERRORTYPE help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060109.html.; MISMATCH vs expected: expected 519, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -5728,6 +6053,58 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/isleapyear.html">ISLEAPYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISLEAPYEAR(DATE(2100,1,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the Gregorian rule: 2100 is divisible by 100 but not by 400, so it is not a leap year. Together with the case above this pins the century rules in both directions -- the only place a naive &#39;divisible by 4&#39; implementation goes wrong. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/isleapyear.html">ISLEAPYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISLEAPYEAR(DATE(2000,1,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the Gregorian rule the function implements: 2000 is divisible by 400 and so IS a leap year. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/isleapyear.html">ISLEAPYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISLEAPYEAR(DATE(2026,6,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the published return-value sentence above. 2026 is not divisible by 4. The page publishes only the true case, so this is the case that checks the function returns the documented 0 rather than FALSE, an error, or nothing. LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/isleapyear.html">ISLEAPYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISLEAPYEAR(DATE(1968,2,29))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, and the page publishes the exact formula used here: after &#34;=ISLEAPYEAR(A1) returns 1, if A1 contains 1968-02-29&#34; it goes on to say &#34;You may also use =ISLEAPYEAR(DATE(1968;2;29))&#34;, which is this case with the corpus&#39;s comma argument separator. The page is unusually explicit about why the form matters: &#34;Never use =ISLEAPYEAR(2/29/68), because this would first evaluate 2 divided by 29 divided by 68, and then calculate the ISLEAPYEAR function from this small number as a serial date number.&#34; The return type is published too: &#34;Determines whether a year is a leap year. If yes, the function will return the value 1 (TRUE); if not, it will return 0 (FALSE).&#34; STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s ISLEAPYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/isnumber.html">ISNUMBER</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=ISNUMBER(TRUE)</div>
@@ -6869,6 +7246,45 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Date and time</dd>
   </dl>
   <p>Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 12</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/months.html">MONTHS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=MONTHS(DATE(2020,1,31),DATE(2020,3,1),1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">2</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>THIS PAGE PUBLISHES NO EXAMPLES AND ALMOST NO SEMANTICS, AND THIS FILE SAYS SO RATHER THAN INVENTING THEM. MONTHS&#39;s entire entry is: &#34;Calculates the difference in months between two dates&#34;, a Syntax block, &#34;StartDate is the first date&#34;, &#34;EndDate is the second date&#34;, and &#34;Type calculates the type of difference. Possible values include 0 (interval) and 1 (in calendar months).&#34; There is no Example section, no statement of sign convention for reversed dates, and no statement of what happens for any Type other than 0 or 1 -- note the page&#39;s own hedge, &#39;possible values INCLUDE&#39;. Nothing is asserted about any of those. What IS asserted is the two parenthetical glosses, on a date pair chosen so that the two readings give DIFFERENT answers and the case can therefore tell them apart. Under &#39;in calendar months&#39; the difference is between the months themselves, January to March = 2, regardless of the day-of-month. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s MONTHS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 2, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/months.html">MONTHS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=MONTHS(DATE(2020,1,31),DATE(2020,3,1),0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the other gloss, &#39;interval&#39;, on the identical arguments: an interval counts whole elapsed months, and from 31 January only one whole month has elapsed by 1 March (the second would complete on 31 March). This is the case that separates the two Types; if both returned 2 the Type argument would be doing nothing. LibreOffice&#39;s MONTHS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/months.html">MONTHS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=MONTHS(DATE(2020,1,15),DATE(2021,1,15),0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">12</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from either gloss: a full year from the 15th to the 15th is twelve whole elapsed months and also twelve calendar months. A case where the two readings coincide is the control for the pair above -- it fixes the SCALE of the answer (months, not days or years) independently of the Type semantics. LibreOffice&#39;s MONTHS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 12, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -8783,6 +9199,32 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/rawsubtract.html">RAWSUBTRACT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(RAWSUBTRACT(0.3,0.1,0.1,0.1)*1E17,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">-2.7755575616</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Mathematical</dd>
+  </dl>
+  <p>DERIVED, and this is the case the function exists for. The page&#39;s first sentence is &#34;Subtracts a set of numbers and gives the result without eliminating small roundoff errors&#34;, and its argument-order note says &#34;RAWSUBTRACT() processes arguments from left to right. For example, RAWSUBTRACT(1;2;3;4) calculates 1-2-3-4 or ((1-2)-3)-4 in &#39;natural&#39; order.&#34; Applying that stated order to 0.3, 0.1, 0.1, 0.1 in binary64: 0.3 - 0.1 = 0.19999999999999998, minus 0.1 = 0.09999999999999998, minus 0.1 = -2.7755575615628914E-17, which is one negative unit in the last place of 0.1. Derived independently by evaluating that sequence in IEEE-754 double precision. Scaled by 1E17 for the same reason as the case above. LibreOffice&#39;s RAWSUBTRACT help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_rawsubtract.html.; MISMATCH vs expected: expected -2.7755575616, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/rawsubtract.html">RAWSUBTRACT</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROUND(RAWSUBTRACT(0.987654321098765,0.9876543210987)*1E14,10)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">6.5059069243</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Mathematical</dd>
+  </dl>
+  <p>LIBREOFFICE-PUBLISHED RESULT CORRECTED -- THE HELP PAGE&#39;S ONLY NUMERIC EXAMPLE IS WRONG. The page prints: &#34;=RAWSUBTRACT(0.987654321098765, 0.9876543210987) returns 6.53921361504217E-14&#34;. That figure does not belong to those inputs. RAWSUBTRACT&#39;s whole purpose, in the page&#39;s own words, is to subtract &#34;without eliminating small roundoff errors&#34;, so its result is exactly the IEEE-754 double-precision difference of the two arguments, and that difference is determined entirely by the two literals -- there is nothing left for an implementation to choose. Derived independently by taking the exact decimal value of each argument as stored in a binary64 double (0.98765432109876505339940422345534898340702056884765625 and 0.98765432109869999433016118928208015859127044677734375) and subtracting them exactly: 6.50590692430341732688248157501220703125E-14. The published figure differs in the THIRD significant digit (6.539 vs 6.506), far too large to be a rounding or display artefact of the same computation, so it is a stale or mistyped constant rather than a variant of the right answer. The correct value is asserted here and the discrepancy recorded rather than buried, following this corpus&#39;s existing treatment of wrong published figures. Asserted after scaling by 1E14, because the result is of order 1E-14 and a bare ROUND() to any ordinary number of places would collapse it to zero and assert nothing at all. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s RAWSUBTRACT help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_rawsubtract.html.; MISMATCH vs expected: expected 6.5059069243, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/received.html">RECEIVED</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=RECEIVED(A2,A3,A4,A5,5)</div>
@@ -8845,6 +9287,84 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Logical</dd>
   </dl>
   <p>MISMATCH vs expected: expected 6, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regex.html">REGEX</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ISNA(REGEX(&#34;abc&#34;,&#34;z&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">False</dd>
+    <dt>Documented / expected</dt><dd class="mono">True</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>DERIVED, and the one case in this file that is not published: the Expression parameter&#39;s description states &#34;If there is no match and Replacement is not given, #N/A is returned&#34;, and the Occurrence description repeats it. This is the only place in the batch where a LibreOffice page names a specific error value, so it is the only place an error value is asserted. LibreOffice&#39;s REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html.; MISMATCH vs expected: expected True, got False</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regex.html">REGEX</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEX(&#34;axbxcxd&#34;,&#34;(.)x&#34;,&#34;$1y&#34;,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">axbycxd</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=REGEX(&#34;axbxcxd&#34;;&#34;(.)x&#34;;&#34;$1y&#34;;2) returns &#34;axbycxd&#34;, the second match of &#34;(.)x&#34; (i.e. &#34;bx&#34;) replaced with the captured group of one character (i.e. &#34;b&#34;) followed by &#34;y&#34;.&#34; This is the case that exercises the documented &#34;references to capture groups&#34; in the Replacement parameter, and the $1 syntax is ICU&#39;s. LibreOffice&#39;s REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html.; MISMATCH vs expected: expected &#39;axbycxd&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regex.html">REGEX</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEX(&#34;123456ABCDEF&#34;,&#34;[126]&#34;,&#34;&#34;,&#34;g&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">345ABCDEF</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=REGEX(&#34;123456ABCDEF&#34;;&#34;[126]&#34;;&#34;&#34;;&#34;g&#34;) returns &#34;345ABCDEF&#34;, where any occurrence of &#34;1&#34;, &#34;2&#34; or &#34;6&#34; is replaced by the empty string, thus deleted.&#34; LibreOffice&#39;s REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html.; MISMATCH vs expected: expected &#39;345ABCDEF&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regex.html">REGEX</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEX(&#34;axbxcxd&#34;,&#34;.x&#34;,,2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">bx</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=REGEX(&#34;axbxcxd&#34;;&#34;.x&#34;;;2) returns &#34;bx&#34;, the second match of &#34;.x&#34;.&#34; The empty third argument is the page&#39;s own -- Replacement omitted turns the call from a replace into an extract, per &#34;Occurrence: ... Number to indicate which match of Expression in Text is to be extracted or replaced.&#34; It is written here exactly as published, empty argument included. LibreOffice&#39;s REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html.; MISMATCH vs expected: expected &#39;bx&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regex.html">REGEX</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEX(&#34;123456ABCDEF&#34;,&#34;[:digit:]&#34;,&#34;Z&#34;,&#34;g&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">ZZZZZZABCDEF</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=REGEX(&#34;123456ABCDEF&#34;;&#34;[:digit:]&#34;;&#34;Z&#34;;&#34;g&#34;) returns &#34;ZZZZZZABCDEF&#34;, where all digits were replaced by &#34;Z&#34;.&#34; Matches the documented Flags parameter: &#34;&#39;g&#39; replaces all matches of Expression in Text, not extracted.&#34; LibreOffice&#39;s REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html.; MISMATCH vs expected: expected &#39;ZZZZZZABCDEF&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/regex.html">REGEX</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=REGEX(&#34;123456ABCDEF&#34;,&#34;[:digit:]&#34;,&#34;Z&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">Z23456ABCDEF</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Text</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=REGEX(&#34;123456ABCDEF&#34;;&#34;[:digit:]&#34;;&#34;Z&#34;) returns &#34;Z23456ABCDEF&#34;, where the first match of a digit is replaced by &#34;Z&#34;.&#34; This page is the best-documented in the whole batch -- five worked examples with printed results -- so five of the six cases here are published rather than derived. THE REGEX FLAVOUR IS PART OF THE FINDING AND THE PAGE STATES IT: &#34;Expression: A text representing the regular expression, using ICU regular expressions.&#34; That is a different flavour from the PCRE2 that Microsoft&#39;s REGEXEXTRACT/REGEXREPLACE/REGEXTEST pages specify, which is why this corpus keeps LibreOffice&#39;s REGEX and Microsoft&#39;s REGEX* trio as separate functions rather than treating either as the other&#39;s alias. Note also that the bracket expression published here is &#34;[:digit:]&#34; -- a bracketed set of the six characters : d g i t, not the POSIX class [[:digit:]] -- which happens to match the digits in this input anyway; the value asserted is the one the page publishes for the expression the page publishes. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s REGEX help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_regex.html.; MISMATCH vs expected: expected &#39;Z23456ABCDEF&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -9287,6 +9807,45 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Text</dd>
   </dl>
   <p>Microsoft&#39;s third documented row, question &#34;Does it contain any upper case letters?&#34;. It does not, so FALSE -- and this is the row that proves matching is case-SENSITIVE by default, since a case-insensitive engine would answer TRUE here and every subsequent case-sensitivity assertion in this batch would be meaningless.; MISMATCH vs expected: expected False, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/rot13.html">ROT13</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROT13(ROT13(&#34;Hello, World! 123&#34;))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">Hello, World! 123</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in</dd>
+  </dl>
+  <p>A structural assertion with no constant taken from the page, from the Text parameter&#39;s own sentence: &#34;ROT13(ROT13(Text)) decrypts the code.&#34; The argument mixes upper case, lower case, punctuation, a space and digits so that the round trip covers every character class the published example mentions. LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected &#39;Hello, World! 123&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/rot13.html">ROT13</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROT13(&#34;Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">The Document Foundation was founded in September 2010.</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=ROT13(&#34;Gur Qbphzrag Sbhaqngvba jnf sbhaqrq va Frcgrzore 2010.&#34;) returns the string &#34;The Document Foundation was founded in September 2010.&#34;. Notice how spaces, digits, and full stops are unaffected by ROT13.&#34; The example is unusually well chosen: it carries the alphabetic rotation, the case preservation, and the pass-through of spaces, digits and punctuation in a single string, and the page&#39;s own closing sentence says so. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected &#39;The Document Foundation was founded in September 2010.&#39;, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/rot13.html">ROT13</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=ROT13(&#34;abcXYZ&#34;)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">nopKLM</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Add-in</dd>
+  </dl>
+  <p>DERIVED from the description: &#34;Encrypts a character string by moving the characters 13 positions in the alphabet. After the letter Z, the alphabet begins again (Rotation).&#34; a b c move forward to n o p, while X Y Z pass the end and wrap to K L M. The published example above contains no letter beyond m in the second half of the alphabet in a position that shows the wrap unambiguously, so this case is what actually tests the sentence about beginning again. LibreOffice&#39;s ROT13 help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected &#39;nopKLM&#39;, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
@@ -11136,6 +11695,149 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
 </li>
 
 <li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeknum_ooo.html">WEEKNUM_OOO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKNUM_OOO(DATE(1995,1,1),5)-WEEKNUM_OOO(DATE(1995,1,1),2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>A structural assertion with no derived constant, from the Mode parameter&#39;s own list: &#34;1 = Sunday / 2 = Monday (ISO 8601) / any other value = Monday (ISO 8601)&#34;. Mode 5 is &#39;any other value&#39;, so it must agree with mode 2 exactly. LibreOffice&#39;s WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeknum_ooo.html">WEEKNUM_OOO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKNUM_OOO(DATE(1995,1,1),1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=WEEKNUM_OOO(DATE(1995;1;1);1) returns 1&#34;. Mode 1 is documented as Sunday-start, and 1995-01-01 was a Sunday, so it opens week 1. THIS FUNCTION EXISTS ONLY AS A COMPATIBILITY SHIM AND THE PAGE SAYS SO: &#34;This function exists for interoperability with LibreOffice releases older than 5.1.0 and OpenOffice.org. It calculates week numbers for a week numbering system in that week number 1 is the week that contains the January 4th. This function does not provide interoperability with other spreadsheet applications. For new documents use the WEEKNUM or ISOWEEKNUM function instead.&#34; STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeknum_ooo.html">WEEKNUM_OOO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKNUM_OOO(DATE(1995,1,1),2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">52</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim including its explanation: &#34;=WEEKNUM_OOO(DATE(1995;1;1);2) returns 52. Week 1 starts on Monday, 1995-01-02.&#34; This pair of published examples is the sharpest thing in the batch: the SAME DATE returns 1 or 52 depending only on the Mode argument, so the case cannot be passed by an implementation that ignores it. LibreOffice&#39;s WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html.; MISMATCH vs expected: expected 52, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeknum_ooo.html">WEEKNUM_OOO</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKNUM_OOO(DATE(2021,1,4),2)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the page&#39;s own definition of the numbering system it implements: &#34;week number 1 is the week that contains the January 4th&#34;. 4 January 2021 must therefore be in week 1 whatever weekday it falls on -- it was a Monday. This is the defining property, asserted directly rather than through a published example. LibreOffice&#39;s WEEKNUM_OOO help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/func_weeknum_ooo.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeks.html">WEEKS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-17&#34;,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-17&#34;,0) returns 0 because Type was set to 0 and there are only 5 days in the interval.&#34; All four of this file&#39;s published cases keep the page&#39;s own ISO-8601 date STRINGS rather than converting them to DATE() calls, because the page introduces them deliberately -- &#34;In the following examples, dates are passed as strings. However, they can also be stored in separate cells and be passed as references&#34; -- and the string form is therefore part of what is published. Type 0 is documented as &#34;the function will assume that 7 days is equivalent to one week without considering any specific day to mark the beginning of a week.&#34; STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeks.html">WEEKS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-19&#34;,0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-19&#34;,0) returns 1 because Type was set to 0 and there are 7 days in the interval.&#34; With the case above this brackets the Type 0 boundary exactly: five days gives 0, seven days gives 1. LibreOffice&#39;s WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeks.html">WEEKS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-17&#34;,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-17&#34;,1) returns 1 because Type was set to 1 and the interval contains a Monday, since 2022-01-12 is a Wednesday and 2022-01-17 is a Monday.&#34; THE SAME DATE PAIR AS THE FIRST CASE, with only the Type changed, and the answer changes from 0 to 1 -- so this pair is what makes the Type argument observable. Type 1 is documented as &#34;the function will consider Monday to be the first day of the week. Therefore, except for the start date, each occurrence of a Monday in the interval is counted as an additional week&#34;, and the page adds that it does so &#34;regardless of the current locale settings.&#34; LibreOffice&#39;s WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeks.html">WEEKS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-15&#34;,1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT, quoted verbatim: &#34;=WEEKS(&#34;2022-01-12&#34;,&#34;2022-01-15&#34;,1) returns 0 because Type was set to 1 and the interval does not contain any Mondays, except for the start date.&#34; LibreOffice&#39;s WEEKS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeksinyear.html">WEEKSINYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKSINYEAR(DATE(2026,6,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">53</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the same ISO rule. A year has 53 ISO weeks when it begins on a Thursday, or when it is a leap year beginning on a Wednesday; 1 January 2026 is a Thursday. Computed independently here from the ISO week-date calendar rather than looked up. LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 53, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeksinyear.html">WEEKSINYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKSINYEAR(DATE(2025,6,1))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">52</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the ISO rule the page states. 1 January 2025 was a Wednesday and 2025 is not a leap year, so it has 52 ISO weeks. The page publishes only a 53-week year, so this is the case that shows the function is computing rather than returning a constant. LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 52, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/weeksinyear.html">WEEKSINYEAR</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=WEEKSINYEAR(DATE(1970,2,17))</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">53</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>LIBREOFFICE&#39;S OWN PUBLISHED RESULT: &#34;WEEKSINYEAR(A1) returns 53 if A1 contains 1970-02-17, a valid date for the year 1970.&#34; (The page prints the example without a leading &#39;=&#39;, unlike its neighbours; the formula is otherwise as published, with DATE() substituted for the cell reference for the reason the sibling ISLEAPYEAR entry gives.) Derived independently as well: 1 January 1970 was a Thursday, and under the ISO rule the page states -- &#34;Following ISO 8601, this function considers Monday to be the first day of the week, and the first week of a year is the one with most days in this year&#34; -- a common year beginning on a Thursday has 53 ISO weeks. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s WEEKSINYEAR help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 53, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
   <h2 class="quirk-h"><a href="functions/weibull.html">WEIBULL</a>
   <span class="badge badge-quirk">LibreOffice Calc</span></h2>
   <div class="formula mono">=WEIBULL(105,0,100,TRUE)</div>
@@ -11224,6 +11926,45 @@ explained by the .xlsx import/export round trip, not by Sheets.</p>
     <dt>Category</dt><dd>Date and time</dd>
   </dl>
   <p>Microsoft docs: &#39;invalid basis values (&lt; 0 or &gt; 4) return a #NUM! error.&#39;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/years.html">YEARS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=YEARS(DATE(2020,3,10),DATE(2021,3,9),1)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">1</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>THIS PAGE PUBLISHES NO EXAMPLES, EXACTLY AS ITS SIBLING MONTHS DOES NOT, AND THIS FILE SAYS SO RATHER THAN INVENTING SEMANTICS. YEARS&#39;s entire entry is: &#34;Calculates the difference in years between two dates&#34;, a Syntax block, &#34;StartDate is the first date&#34;, &#34;EndDate is the second date&#34;, and &#34;Type calculates the type of difference. Possible values are 0 (interval) and 1 (in calendar years).&#34; No Example section, no sign convention for reversed dates, no statement about other Type values; none of those is asserted anywhere in this file. What IS asserted is the two parenthetical glosses, on a date pair chosen so the two readings DIFFER. Under &#39;in calendar years&#39; the difference is between the years themselves, 2021 - 2020 = 1, whatever the days. STORAGE FORM, ESTABLISHED EMPIRICALLY IN BOTH DIRECTIONS BEFORE THIS FILE WAS RUN. A LibreOffice-only function has no OOXML name of its own -- the .xlsx format was frozen on Excel&#39;s function set -- so LibreOffice invents one, and this harness must write exactly the token LibreOffice&#39;s own .xlsx filter reads. Both directions were measured rather than assumed. IMPORT: every candidate spelling was written into a workbook by openpyxl (which caches no value, so the engine must evaluate from scratch) and round-tripped through `soffice --headless --convert-to xlsx` on all four pinned builds. EXPORT: the same formulas were fed to each build through its own formula parser and written back out to .xlsx, and the stored token was read out of the raw sheet XML. The token recorded for this function in harness/xlfn_map.py is the one both directions agree on across all four builds; the per-function note above says which it is. BATCH PROVENANCE (batch I, group C -- LibreOffice-only functions). This function has x == false AND g == false in docs/data/compat.json: NEITHER Microsoft NOR Google documents it, so this corpus makes no claim about either of those engines, nothing here is measured against their documentation, and the Excel column on the published page reads &#39;n/a (not an Excel function)&#39; rather than a verdict. The authority is LibreOffice&#39;s own help, cited by full URL, by the date it was read (2026-08-31), and by the help version the page serves -- the URLs in this file are pinned to /25.8/ rather than /latest/ so the citation still means this text after the help site rolls forward, and /25.8/ is the help for the newest of the four engine builds the corpus executes. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record presence or absence in that engine. Until that ingest lands, the Sheets column on the published page reads &#39;Not yet&#39; and nothing in this file claims anything about it. (Stated positively on purpose. scripts/check_honesty.py bans the blanket negative shape of this sentence outright -- it was once a true site-wide claim and is now false for more than 500 functions -- and that guard is worth keeping blunt, so this note carries the same per-function fact in a form the guard does not have to make an exception for.) LibreOffice&#39;s YEARS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 1, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/years.html">YEARS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=YEARS(DATE(2020,3,10),DATE(2021,3,9),0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">0</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the other gloss on identical arguments: an interval counts whole elapsed years, and one day short of the anniversary no whole year has elapsed. This is the case that separates the two Types. LibreOffice&#39;s YEARS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 0, got &#39;#NAME?&#39;</p>
+</li>
+
+<li class="quirk-entry">
+  <h2 class="quirk-h"><a href="functions/years.html">YEARS</a>
+  <span class="badge badge-quirk">Google Sheets</span></h2>
+  <div class="formula mono">=YEARS(DATE(2020,3,10),DATE(2023,3,10),0)</div>
+  <dl class="quirk-grid">
+    <dt>Actual result</dt><dd class="mono">#NAME?</dd>
+    <dt>Documented / expected</dt><dd class="mono">3</dd>
+    <dt>Engine</dt><dd>Google Sheets, executed 2026-09-01 (Drive import)</dd>
+    <dt>Category</dt><dd>Date &amp; Time</dd>
+  </dl>
+  <p>DERIVED from the &#39;interval&#39; gloss: from 10 March 2020 to 10 March 2023 is exactly three whole elapsed years. Fixes the scale of the answer, and lands exactly on the anniversary boundary the case above lands one day before. LibreOffice&#39;s YEARS help page, read live on 2026-08-31 at https://help.libreoffice.org/25.8/en-US/text/scalc/01/04060111.html.; MISMATCH vs expected: expected 3, got &#39;#NAME?&#39;</p>
 </li>
 
 <li class="quirk-entry">
