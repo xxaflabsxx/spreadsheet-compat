@@ -1,0 +1,19 @@
+{
+  "function": "SPARKLINE",
+  "cases": [
+    {
+      "id": "SPARKLINE_chart_in_cell_probe",
+      "formula": "=SPARKLINE(A1:A5)",
+      "description": "Existence probe only: SPARKLINE draws a miniature chart inside the cell rather than returning a value, so there is no value to assert",
+      "setup_cells": {
+        "A1": 3,
+        "A2": 1,
+        "A3": 4,
+        "A4": 1,
+        "A5": 5
+      },
+      "expected": null,
+      "expected_note": "NOT ASSERTABLE BY DESIGN, and deliberately recorded as a probe (expected: null) rather than a support claim -- the treatment batch B gave the CUBE* family and COPILOT, batch C gave DETECTLANGUAGE, and batch G gave RTD, STOCKHISTORY and TRANSLATE. SPARKLINE IS NOT A VALUE FUNCTION AT ALL. Google's description is one sentence and it settles the matter: \"Creates a miniature chart contained within a single cell.\" What the cell holds after evaluation is a DRAWING, not a number or a string, so 'what does it return' has no answer of the kind the rest of this corpus asserts -- the published syntax is `SPARKLINE(data, [options])` and the first Sample Usage is `SPARKLINE(A1:F1)`, of which this case is the column-shaped equivalent over five set cells. A WARNING ABOUT THE READBACK, WRITTEN BEFORE THE FACT SO IT CANNOT BE FORGOTTEN AFTERWARDS. This harness reads results back out of an .xlsx export with openpyxl, which surfaces a cell's cached VALUE. A chart-in-cell has no cached scalar, so a successful evaluation may well read back as an empty cell (None). That blank would mean 'this cell holds a picture', and it must never be published as 'SPARKLINE returned an empty result' or scored as a value at all. This case is expected: null so that no comparison can be made from it in either direction, and any future ingest that records a blank here should carry this sentence with it. LIBREOFFICE, MEASURED BEFORE THIS FILE WAS AUTHORED. All four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) were probed with NINE storage spellings -- plain, _xlfn., COM.MICROSOFT., ORG.OPENOFFICE., _xlfn.ORG.OPENOFFICE., ORG.LIBREOFFICE., _xlfn.ORG.LIBREOFFICE., _xlfn.COM.MICROSOFT. and COM.SUN.STAR.SHEET.ADDIN.ANALYSIS. -- and every one of those 36 combinations returned #NAME?. LibreOffice's own parser additionally wrote the name back into the converted file LOWER-CASED ('=sparkline(A1:A3)'), which is what it does with an identifier it does not recognise as a function at all rather than with a function it knows under a different storage token. A #NAME? under all nine storage forms on all four builds is therefore a genuine absence and not a storage-form artifact of this harness, which is why 'unsupported in LibreOffice' IS a verdict this file publishes even though the returned VALUE is not assertable in any engine. BATCH PROVENANCE (batch J, group B of sheets-lo-only-plan.md -- Google-documented, service- or context-bound; the final batch of the completeness push). This function has x == false in docs/data/compat.json: Microsoft does not document it at all, so this corpus makes no claim about Excel, nothing here is measured against Microsoft's documentation, and the Excel column on the published page reads 'n/a (not an Excel function)' rather than a verdict. The authority is Google's own function help, cited by full URL and by the date it was read (2026-08-31) -- Google publishes no version number for Sheets, so a bare URL dates nothing. GOOGLE SHEETS: this batch builds the Sheets chunk whose ingest will record what the service returns for this call. Until that ingest lands the Sheets column on the published page reads 'Not yet' and nothing in this file claims anything about it. (Stated positively on purpose -- scripts/check_honesty.py bans the blanket negative shape of that sentence, and the guard is worth keeping blunt.) Google's SPARKLINE help page, read live on 2026-08-31 at https://support.google.com/docs/answer/3093289."
+    }
+  ]
+}

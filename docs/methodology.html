@@ -330,7 +330,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </ul>
 
 <h2 class="section-title">Version matrix</h2>
-<p>The same corpus runs against multiple LibreOffice releases &mdash; currently 24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3 &mdash; which is how function pages can state a precise &ldquo;supported since&rdquo; release rather than a guess. Current corpus: <strong>573 functions live-tested</strong> across <strong>2318 executed cases</strong> per release.</p>
+<p>The same corpus runs against multiple LibreOffice releases &mdash; currently 24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3 &mdash; which is how function pages can state a precise &ldquo;supported since&rdquo; release rather than a guess. Current corpus: <strong>586 functions live-tested</strong> across <strong>2334 executed cases</strong> per release.</p>
 
 <h2 class="section-title" id="sheets-caveats">Google Sheets execution caveats</h2>
 <p>The Sheets run reuses the Excel-authored workbooks, and that round trip has one remaining artifact which is <em>not</em> Google Sheets behavior. Where a result is explained by it, we publish <strong>Inconclusive</strong> instead of a verdict &mdash; never a red &ldquo;unsupported&rdquo; badge:</p>
@@ -340,12 +340,73 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </ul>
 <p>A <code>#NAME?</code> from Sheets on a formula with <em>no</em> storage prefix, or on a function Google does not document (TEXTSPLIT, TAKE, DROP, AGGREGATE&hellip;), is a real unsupported verdict and is published as one.</p>
 
+<h2 class="section-title" id="coverage">Coverage &mdash; and what we deliberately do not run</h2>
+<p>The catalog holds <strong>600</strong> functions. <strong>586</strong> of them
+(97.7%) have executed test cases in at least one engine.
+<strong>1</strong> of those is
+executed but carries no verdict, and <strong>14</strong>
+are not executed at all. The last two groups are not a backlog:
+each one is a decision that this harness cannot produce an honest verdict for that name, and the reason
+is published here rather than left as a blank. Every number and every row below is derived from the same
+results files the function pages are built from.</p>
+
+<h3>Executed, but no verdict drawn (1)</h3>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Engine</th><th>Why no verdict</th></tr></thead>
+<tbody>
+
+<tr><td><a href="functions/dde.html"><code>DDE</code></a></td><td>LibreOffice</td><td>DDE resolves a link into another running application &mdash; LibreOffice&rsquo;s own help describes the first argument as &ldquo;the name of a server application&rdquo;, and its worked example edits a linked Writer document to change the value. A flat .xlsx carries no such server and a headless conversion has nothing on the other end of the link, so the <code>#N/A</code> recorded below describes the <strong>absent server</strong>, not LibreOffice. Publishing it as a quirk would assert a defect this run never demonstrated, which is why the executed values are shown and no verdict is drawn from them &mdash; the same judgement batch G made about WEBSERVICE&rsquo;s network <code>#N/A</code>.</td></tr>
+
+</tbody>
+</table>
+</div>
+
+<h3>Not executed (14)</h3>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Why not</th></tr></thead>
+<tbody>
+
+<tr><td><a href="functions/call.html"><code>CALL</code></a></td><td>Calls a procedure in a DLL or code resource. The first argument names external code to load and run, so no test case is authored for it in any engine.</td></tr>
+
+<tr><td><a href="functions/cumipmt_add.html"><code>CUMIPMT_ADD</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>CUMIPMT</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>CUMIPMT</code> would test CUMIPMT, not CUMIPMT_ADD, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/cumprinc_add.html"><code>CUMPRINC_ADD</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>CUMPRINC</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>CUMPRINC</code> would test CUMPRINC, not CUMPRINC_ADD, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/effect_add.html"><code>EFFECT_ADD</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>EFFECT</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>EFFECT</code> would test EFFECT, not EFFECT_ADD, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/formula.html"><code>FORMULA</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>FORMULATEXT</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>FORMULATEXT</code> would test FORMULATEXT, not FORMULA, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/gcd_excel2003.html"><code>GCD_EXCEL2003</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>GCD</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>GCD</code> would test GCD, not GCD_EXCEL2003, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/iseven_add.html"><code>ISEVEN_ADD</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>ISEVEN</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>ISEVEN</code> would test ISEVEN, not ISEVEN_ADD, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/isodd_add.html"><code>ISODD_ADD</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>ISODD</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>ISODD</code> would test ISODD, not ISODD_ADD, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/lcm_excel2003.html"><code>LCM_EXCEL2003</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>LCM</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>LCM</code> would test LCM, not LCM_EXCEL2003, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/nominal_add.html"><code>NOMINAL_ADD</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>NOMINAL</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>NOMINAL</code> would test NOMINAL, not NOMINAL_ADD, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/register.id.html"><code>REGISTER.ID</code></a></td><td>Returns the register ID of a DLL procedure that has already been registered. Same external-code reason as CALL.</td></tr>
+
+<tr><td><a href="functions/skewp.html"><code>SKEWP</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>SKEW.P</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>SKEW.P</code> would test SKEW.P, not SKEWP, so the finding is recorded and the verdict declined.</td></tr>
+
+<tr><td><a href="functions/webservice.html"><code>WEBSERVICE</code></a></td><td>Its documented behaviour IS the network round trip. LibreOffice does implement it (as _xlfn.WEBSERVICE), but the #N/A this harness sees describes the sandbox&rsquo;s DNS rather than the engine, and publishing that as a quirk would assert a defect we never observed.</td></tr>
+
+<tr><td><a href="functions/weeknum_excel2003.html"><code>WEEKNUM_EXCEL2003</code></a></td><td>LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>WEEKNUM</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are <code>#NAME?</code> on all four builds. Writing <code>WEEKNUM</code> would test WEEKNUM, not WEEKNUM_EXCEL2003, so the finding is recorded and the verdict declined.</td></tr>
+
+</tbody>
+</table>
+</div>
+
+
 <h2 class="section-title">What the verdicts mean</h2>
 <ul>
 <li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result (probe cases for volatile functions like NOW/RAND assert error-free execution and deterministic invariants instead of exact values).</li>
 <li><strong>Quirk found</strong> &mdash; the function exists but at least one case returned a different value or error than Excel produces; the failing case is shown on the function&rsquo;s page.</li>
 <li><strong>Unsupported</strong> &mdash; the engine returns <code>#NAME?</code> (unrecognized function) with the storage prefix correctly applied.</li>
-<li><strong>Inconclusive</strong> (Google Sheets only) &mdash; the round trip described above explains the result, so we make no claim about the engine. See the <a href="#sheets-caveats">caveats</a>.</li>
+<li><strong>Inconclusive</strong> &mdash; the run tells us nothing about the engine, so no claim is made in either direction. Two things cause it: for Google Sheets, the <code>.xlsx</code> round trip described in the <a href="#sheets-caveats">caveats</a>; for either engine, a function whose documented behaviour needs something no test workbook can supply (an external data server). Those are listed under <a href="#coverage">Coverage</a> with the values the engine actually returned still on the page.</li>
 </ul>
 
 <h2 class="section-title">How-to recipes are verified too</h2>
@@ -356,7 +417,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <li><strong>Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run Excel (yet); where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
 <li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: each verdict describes Sheets as it behaved on the date that function was executed (the most recent run was 2026-09-01). Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
 <li><strong>Some Sheets results are inconclusive.</strong> See the <a href="#sheets-caveats">Sheets execution caveats</a> above; those cases are excluded from verdicts and quirk counts rather than guessed at.</li>
-<li><strong>Coverage is partial.</strong> 573 of ~600 catalog functions have executed tests; untested functions say so explicitly rather than borrowing a verdict.</li>
+<li><strong>Coverage is partial, and the remainder is itemised.</strong> 586 of the 600 catalog functions have executed tests; the 14 that do not are listed under <a href="#coverage">Coverage</a> with the reason for each, and an untested function&rsquo;s page says so explicitly rather than borrowing a verdict.</li>
 <li><strong>A passing case is evidence, not proof.</strong> A function can match on our cases and still differ on inputs we haven&rsquo;t authored. When you find such an edge, please report it.</li>
 </ul>
 

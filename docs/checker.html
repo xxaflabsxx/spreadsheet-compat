@@ -395,7 +395,7 @@ function gs(d){ if(d.gv==='supported') return '<span style="color:#0a7a2f">&#100
   if(d.gv==='unsupported') return '<span style="color:#c02020">&#10007; not in Sheets (executed '+d.gver+')</span>';
   if(d.gv==='inconclusive') return d.g?'<span style="color:#888">documented (our run was inconclusive)</span>':'<span style="color:#888">inconclusive</span>';
   return d.g?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
-function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='inconclusive') return d.l?'<span style="color:#888">documented (our run drew no verdict)</span>':'<span style="color:#888">inconclusive</span>'; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};
 // Curated, verified portable alternatives (from the comparison pages) for
 // functions with a genuine cross-app gap. cmp = comparison slug to link, if any.
@@ -455,7 +455,7 @@ function migrate(fs,db,tg,gdb){
   const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
   // Executed verdicts win over documentation flags for both executed engines.
   // A Sheets "inconclusive" tells us nothing, so it falls back to the doc flag.
-  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:(d.lv?(d.lv!=='unsupported'):d.l))
+  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:((d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l))
     : (tg==='x' ? d.x
       : ((d.gv && d.gv!=='inconclusive') ? (d.gv!=='unsupported') : d.g));
   const tname=tg==='l'?TGT_NAME[tg]+' '+tv:TGT_NAME[tg];
@@ -481,7 +481,7 @@ async function check(){
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
   let rows='', xAll=true,gAll=true,lAll=true, unknown=[];
   for(const fn of fs){ const d=db[fn]; if(!d){ unknown.push(fn); continue; }
-    const lok=d.lv?(d.lv!=='unsupported'):d.l;
+    const lok=(d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l;
     const gok=(d.gv&&d.gv!=='inconclusive')?(d.gv!=='unsupported'):d.g;
     xAll=xAll&&d.x; gAll=gAll&&gok; lAll=lAll&&lok;
     rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }

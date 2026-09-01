@@ -394,6 +394,30 @@ _XLFN_FUNCTIONS = {
 # published "unsupported in LibreOffice" for eleven functions LibreOffice
 # genuinely implements, which would be false. This follows batch G's WEBSERVICE
 # precedent -- record the finding, decline the verdict.
+#
+# 4. THE TWO .NV FUNCTIONS ARE REACHABLE UNDER EXACTLY ONE SPELLING EACH.
+#    _xlfn.ORG.LIBREOFFICE.RAND.NV and _xlfn.ORG.LIBREOFFICE.RANDBETWEEN.NV
+#    evaluate on all four builds; the other EIGHT candidate spellings -- the
+#    BARE NAME INCLUDED -- are #NAME? on all four. A workbook written with a
+#    literal "=RAND.NV()" would therefore have published a false "unsupported
+#    in LibreOffice" verdict for a function LibreOffice has implemented since
+#    7.0. Both builds' export direction writes the same token back, and the
+#    help's Technical information block gives the matching ODF namespace
+#    (ORG.LIBREOFFICE.RAND.NV / ORG.LIBREOFFICE.RANDBETWEEN.NV).
+#
+# 5. CURRENT AND DDE ARE THE TWO NAMES THAT ANSWER TO THEIR BARE SPELLING.
+#    CURRENT is accepted on import as BOTH the bare name and
+#    _xlfn.ORG.OPENOFFICE.CURRENT on all four builds (the other seven are
+#    #NAME?), and every build writes _xlfn.ORG.OPENOFFICE.CURRENT back out
+#    even when the bare name went in -- so the export direction picks the
+#    entry, exactly as it did for the eight ORG.OPENOFFICE. functions in
+#    finding (1). DDE goes the other way: the bare name is the only spelling
+#    that resolves, every prefixed form is #NAME?, and LibreOffice writes the
+#    bare name back unchanged, so DDE gets no entry in this table at all. The
+#    vintage rule from finding (2) holds across both: CURRENT is
+#    OpenOffice.org-era (ORG.OPENOFFICE.), the two .NV functions are
+#    LibreOffice-era (ORG.LIBREOFFICE.), and DDE predates the split entirely
+#    and has no Technical information block in the help.
 _LO_STORAGE_NAMES = {
     # OOo-era, bare ORG.OPENOFFICE. token (see finding 1 above).
     "DAYSINMONTH": "ORG.OPENOFFICE.DAYSINMONTH",
@@ -413,6 +437,15 @@ _LO_STORAGE_NAMES = {
     "RAWSUBTRACT": "_xlfn.ORG.LIBREOFFICE.RAWSUBTRACT",
     "REGEX": "_xlfn.ORG.LIBREOFFICE.REGEX",
     "WEEKNUM_OOO": "_xlfn.ORG.LIBREOFFICE.WEEKNUM_OOO",
+    # Batch J, group C3 (nondeterministic / context-bound). Measured the same
+    # two ways as everything above, on the same four builds -- see finding (4).
+    "RAND.NV": "_xlfn.ORG.LIBREOFFICE.RAND.NV",
+    "RANDBETWEEN.NV": "_xlfn.ORG.LIBREOFFICE.RANDBETWEEN.NV",
+    # OOo-era, and one of only two entries in this table whose BARE name is
+    # also accepted on import -- see finding (5).
+    "CURRENT": "_xlfn.ORG.OPENOFFICE.CURRENT",
+    # DDE is deliberately ABSENT: its readable and written token is the BARE
+    # name on all four builds, so it needs no translation -- see finding (5).
     # CHISQDIST and CHISQINV are deliberately ABSENT: both are read and written
     # by all four builds under their bare names, so they need no translation.
     # Verified the same two ways as every entry above.

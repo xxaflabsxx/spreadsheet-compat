@@ -98,11 +98,108 @@ LO_STORAGE_FORM_GAP = {
                  "IMSEC", "IMSECH", "IMSINH", "IMTAN")
 }
 
+# --------------------------------------------------------------------------
+# EXECUTED, BUT NOT VERDICT-BEARING -- declared per engine, per function
+# --------------------------------------------------------------------------
+# A function whose DOCUMENTED behaviour depends on something no flat workbook
+# can supply -- an external data server, a network fetch, another user's
+# authorization -- can still be EXECUTED: the name resolves, the engine
+# evaluates the call, and the call returns an error because the dependency is
+# absent. That error is a fact about the missing dependency, not about the
+# engine, and classify_verdict() cannot tell the difference: any non-#NAME?
+# error makes it return "quirky", i.e. it publishes an engine DEFECT the run
+# never demonstrated. Batch G avoided exactly that for WEBSERVICE by declining
+# to execute it at all. Declaring the cases here is the same judgement made
+# visible instead of hidden: the executed values stay on the page, the cases
+# are excluded from the verdict (so the engine's verdict is "inconclusive" --
+# no claim in either direction), and the reason is printed beside them.
+#
+# THE NEXT BATCH WILL PROBABLY NEED MORE ENTRIES HERE, AND THIS IS THE WARNING.
+# harness/sheets_chunks_batch12 carries batch J's nine Google service functions
+# (AI, GOOGLEFINANCE, GOOGLETRANSLATE, the five IMPORT*, SPARKLINE). When that
+# chunk is ingested, Sheets will return a real value for some of them and an
+# error for others -- #REF! for IMPORTRANGE until a human clicks Allow Access,
+# #N/A or #ERROR! for a fetch that finds nothing, a blank cell for SPARKLINE's
+# chart-in-cell. classify_verdict() reads any non-#NAME? error as "quirky", so
+# whichever of the nine come back that way need a ("google_sheets", NAME) entry
+# here BEFORE the site is rebuilt, or the page publishes a Google defect that
+# the absent dependency, not Google, caused. The ones that return real data can
+# and should keep their ordinary "supported" verdict -- decide per function
+# from what the run actually returns, which is exactly why nothing is
+# pre-declared for Sheets now.
+NO_VERDICT_CASES = {
+    ("libreoffice", "DDE"): (
+        "DDE resolves a link into another running application &mdash; LibreOffice&rsquo;s own "
+        "help describes the first argument as &ldquo;the name of a server application&rdquo;, "
+        "and its worked example edits a linked Writer document to change the value. A flat "
+        ".xlsx carries no such server and a headless conversion has nothing on the other end "
+        "of the link, so the <code>#N/A</code> recorded below describes the <strong>absent "
+        "server</strong>, not LibreOffice. Publishing it as a quirk would assert a defect this "
+        "run never demonstrated, which is why the executed values are shown and no verdict is "
+        "drawn from them &mdash; the same judgement batch G made about WEBSERVICE&rsquo;s "
+        "network <code>#N/A</code>."
+    ),
+}
+
+# --------------------------------------------------------------------------
+# DOCUMENTED SKIPS -- the functions this corpus deliberately does not execute
+# --------------------------------------------------------------------------
+# Every function in the catalog either has executed test cases or appears here
+# with the reason it does not. The methodology page renders this table beside
+# the executed count, so the site's completeness claim is derived from the same
+# data the pages are: a name that falls out of the corpus without landing here
+# shows up on that page as UNCLASSIFIED rather than quietly vanishing from the
+# arithmetic. Three groups, and none of them is "not got to yet":
+#
+#   * External code (CALL, REGISTER.ID) -- the argument NAMES A DLL to load.
+#   * External dependency the harness cannot supply (WEBSERVICE) -- executing
+#     it measures the sandbox, not the engine (batch G). Note the neighbouring
+#     case, DDE, is NOT here: it IS executed, and its result is published with
+#     no verdict drawn from it (NO_VERDICT_CASES above). The methodology page
+#     counts and lists those separately, because "we ran it and will not draw a
+#     conclusion" and "we did not run it" are different admissions.
+#   * No reachable OOXML token (the eleven aliases) -- LibreOffice's own .xlsx
+#     export COLLAPSES the name onto another function's token, so nothing this
+#     harness can write into a file addresses them. Running them anyway would
+#     publish "unsupported in LibreOffice" for eleven functions LibreOffice
+#     genuinely implements (batch I; see harness/xlfn_map.py for the
+#     measurement in both directions).
+DOCUMENTED_SKIPS = {
+    "CALL": "Calls a procedure in a DLL or code resource. The first argument names external "
+            "code to load and run, so no test case is authored for it in any engine.",
+    "REGISTER.ID": "Returns the register ID of a DLL procedure that has already been "
+                   "registered. Same external-code reason as CALL.",
+    "WEBSERVICE": "Its documented behaviour IS the network round trip. LibreOffice does "
+                  "implement it (as _xlfn.WEBSERVICE), but the #N/A this harness sees "
+                  "describes the sandbox&rsquo;s DNS rather than the engine, and publishing "
+                  "that as a quirk would assert a defect we never observed.",
+}
+DOCUMENTED_SKIPS.update({
+    name: (
+        "LibreOffice&rsquo;s own .xlsx export collapses this name onto <code>" + onto +
+        "</code>, so no OOXML token reaches it &mdash; all nine candidate spellings are "
+        "<code>#NAME?</code> on all four builds. Writing <code>" + onto + "</code> would "
+        "test " + onto + ", not " + name + ", so the finding is recorded and the verdict "
+        "declined."
+    )
+    for name, onto in (
+        ("CUMIPMT_ADD", "CUMIPMT"), ("CUMPRINC_ADD", "CUMPRINC"),
+        ("EFFECT_ADD", "EFFECT"), ("NOMINAL_ADD", "NOMINAL"),
+        ("GCD_EXCEL2003", "GCD"), ("LCM_EXCEL2003", "LCM"),
+        ("ISEVEN_ADD", "ISEVEN"), ("ISODD_ADD", "ISODD"),
+        ("WEEKNUM_EXCEL2003", "WEEKNUM"),
+        ("FORMULA", "FORMULATEXT"), ("SKEWP", "SKEW.P"),
+    )
+})
+
 VERDICT_LABELS = {
     "supported": "Supported, behaves as documented",
     "quirky": "Quirk found",
     "unsupported": "Unsupported (not recognized)",
-    "inconclusive": "Inconclusive (import serialization)",
+    # Engine-neutral on purpose: an inconclusive verdict has two causes now --
+    # Google's importer (see sheets_case_inconclusive) and a declared external
+    # dependency (see NO_VERDICT_CASES) -- and each page states its own.
+    "inconclusive": "Inconclusive (no verdict published)",
 }
 VERDICT_BADGE_CLASS = {
     "supported": "badge-good",
@@ -349,6 +446,48 @@ def classify_verdict(case_results, skip_ids=None):
     return "quirky"
 
 
+def coverage_ctx(records):
+    """The site's completeness statement, derived from the records themselves.
+
+    Three groups, counted rather than asserted: functions with executed cases,
+    those executed but whose cases are declared unverdictable
+    (NO_VERDICT_CASES), and those never executed (DOCUMENTED_SKIPS). A name
+    that leaves the corpus without landing in either table is reported as
+    UNCLASSIFIED on the page instead of being dropped from the arithmetic --
+    the whole point of the section is that the leftovers are itemised, so a
+    silent leftover would defeat it.
+    """
+    executed = [r for r in records if r["any_tested"]]
+    untested = [r for r in records if not r["any_tested"]]
+    no_verdict_rows = []
+    for r in executed:
+        for ek in ENGINE_ORDER:
+            e = r["engines"][ek]
+            if e.get("no_verdict_reason") and e["verdict"] == "inconclusive":
+                no_verdict_rows.append({
+                    "name": r["name"], "slug": r["name_lower"],
+                    "engine": ENGINE_FULL[ek], "reason": e["no_verdict_reason"],
+                })
+    skip_rows = [
+        {"name": r["name"], "slug": r["name_lower"], "reason": DOCUMENTED_SKIPS[r["name"]]}
+        for r in untested if r["name"] in DOCUMENTED_SKIPS
+    ]
+    unclassified = sorted(r["name"] for r in untested if r["name"] not in DOCUMENTED_SKIPS)
+    if unclassified:
+        print(f"  WARNING: {len(unclassified)} untested function(s) have no entry in "
+              f"DOCUMENTED_SKIPS: {', '.join(unclassified)}")
+    return {
+        "n_catalog": len(records),
+        "n_executed": len(executed),
+        "coverage_pct": round(100.0 * len(executed) / len(records), 1) if records else 0,
+        "n_no_verdict": len(no_verdict_rows),
+        "no_verdict_rows": sorted(no_verdict_rows, key=lambda x: x["name"]),
+        "n_skipped": len(untested),
+        "skip_rows": sorted(skip_rows, key=lambda x: x["name"]),
+        "unclassified": unclassified,
+    }
+
+
 def engine_exec_header(engine_key, res_blob, date):
     """Heading for one engine's executed test-case table.
 
@@ -423,7 +562,18 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 "inconclusive_count": 0,
                 "exec_header": None,
                 "tested_cell": None,
+                # Set when this engine's cases for this function are declared
+                # unverdictable (NO_VERDICT_CASES); the template prints it.
+                "no_verdict_reason": NO_VERDICT_CASES.get((ek, name)),
             }
+
+            # Declared, engine-scoped: an external dependency this harness
+            # cannot supply, so this engine's cases for this function carry no
+            # verdict. Bound OUTSIDE the `if fn_results` block on purpose --
+            # the LibreOffice version-history loop below reads it too, and a
+            # name bound only inside the branch would leak the PREVIOUS
+            # function's value into a function that has no results.
+            declared_no_verdict = NO_VERDICT_CASES.get((ek, name))
 
             if fn_results:
                 # Cases only -- executed_at and any future per-function
@@ -440,6 +590,9 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                 # keep them out of the verdict, the quirk counts and the quirks
                 # page. See sheets_case_inconclusive() above.
                 inconclusive_by_id = {}
+                if declared_no_verdict:
+                    for cid in fn_cases:
+                        inconclusive_by_id[cid] = "external_dependency"
                 if ek == "google_sheets":
                     for cid, cres in fn_cases.items():
                         reason = sheets_case_inconclusive(cres, entry["documented"])
@@ -502,11 +655,22 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     vres = blob.get("function_results", {}).get(name)
                     if not vres:
                         continue
+                    vcases = function_cases(vres)
+                    # The per-version row must honour the SAME declared
+                    # exclusions as the headline verdict. Without this, a
+                    # function whose cases are unverdictable (NO_VERDICT_CASES)
+                    # shows "Inconclusive" in the support matrix and "Quirk
+                    # found" four times in the version-history table directly
+                    # above it -- the exact false defect claim the declaration
+                    # exists to prevent, published in the louder of the two
+                    # places.
+                    vskip = set(vcases) if declared_no_verdict else None
                     history.append(
                         {
                             "version": vstr,
                             "verdict": classify_verdict(
-                                list(function_cases(vres).values())
+                                [{**v, "id": k} for k, v in vcases.items()],
+                                skip_ids=vskip,
                             ),
                             "generated_at": blob.get("generated_at"),
                             "executed_at": function_executed_at(
@@ -761,8 +925,12 @@ def build_function_title_desc(r):
 
     if r["any_tested"] and le["tested"]:
         verdict = le["verdict"]
-        total = len(le["cases"])
-        mismatches = [c for c in le["cases"] if c.get("matched_expected") is False]
+        # Cases excluded from the LibreOffice verdict (a declared external
+        # dependency) must not be counted in copy that describes the verdict
+        # either, or a page reads "3/4 match" about a case no verdict covers.
+        lo_cases = [c for c in le["cases"] if not c.get("inconclusive_reason")]
+        total = len(lo_cases)
+        mismatches = [c for c in lo_cases if c.get("matched_expected") is False]
         passed = total - len(mismatches)
 
         # Sheets leads the title when Sheets has the newsworthy result: a
@@ -820,7 +988,7 @@ def build_function_title_desc(r):
                 title = f"{name} is not supported in LibreOffice Calc"
             desc = (
                 f"LibreOffice returns #NAME? (unrecognized) for {name} "
-                + _name_error_phrase(le["cases"], total)
+                + _name_error_phrase(lo_cases, total)
             )
             if sheets_verdict == "supported":
                 n_s = len(sheets_cases)
@@ -861,6 +1029,17 @@ def build_function_title_desc(r):
                     desc = f"{passed}/{total} match {ref_poss} docs; {mismatch_phrase}{punct}"
                 else:
                     desc = f"{passed}/{total} executed cases match {ref_poss} documented behavior."
+        elif verdict == "inconclusive":
+            # Executed in LibreOffice, but every case is declared unverdictable
+            # (NO_VERDICT_CASES). Never fall through to the "supported" branch:
+            # that would claim a pass this run cannot support.
+            n_all = len(le["cases"])
+            title = f"{name}: no LibreOffice verdict published (executed)"
+            desc = (
+                f"{name} was executed in LibreOffice ({n_all} "
+                f"case{'s' if n_all != 1 else ''}), but its documented behaviour needs "
+                f"something no test workbook can supply, so no verdict is drawn."
+            )
         else:  # supported
             lo_change = le.get("lo_change")
             since = (
@@ -956,10 +1135,19 @@ def build_function_title_desc(r):
                     f"documented behavior."
                 )
         elif verdict == "inconclusive":
-            title = f"{name}: {run_full} result inconclusive (executed)"
+            # `cases` above excludes the inconclusive ones, so count them all
+            # here -- "All 0 executed cases" would be nonsense.
+            n_all = len(ran_entry["cases"])
+            all_word = "case" if n_all == 1 else "cases"
+            reason = (
+                "its documented behaviour needs something no test workbook can supply"
+                if ran_entry.get("no_verdict_reason")
+                else "the .xlsx round trip, not the engine, explains the result"
+            )
+            title = f"{name}: no {run_full} verdict published (executed)"
             desc = (
-                f"All {total} executed {run_full} {case_word} for {name} were "
-                f"inconclusive (import serialization), so no verdict is published."
+                f"{name} was executed in {run_full} ({n_all} {all_word}), but "
+                f"{reason}, so no verdict is drawn."
             )
         elif verdict == "supported":
             title = f"{name} works in {run_full} (executed)"
@@ -1782,6 +1970,14 @@ against those cases before assuming your data is wrong.</p>
   missing support. See the <a href="{{ rel }}methodology.html">methodology page</a>
   for the full caveat and the planned re-run with plain function names.
 </div>
+{% endif %}{# The next tag is deliberately flush with this one: a newline here #}
+{#- would emit two blank lines into EVERY function page and rewrite 600 files #}
+{#- with a whitespace-only diff. #}{% if le.tested and le.verdict == 'inconclusive' and le.no_verdict_reason %}
+<div class="not-live-tested">
+  <strong>LibreOffice: executed, but no verdict published.</strong>
+  {{ le.no_verdict_reason|safe }}
+  Every executed case is shown below with the value LibreOffice actually returned.
+</div>
 {% endif %}
 
 {% if r.quirk_count > 0 %}
@@ -2309,7 +2505,7 @@ DATASET_TMPL = """{% extends "base.html" %}
 <tr><td><code>l</code></td><td>boolean</td><td>Documented in LibreOffice Calc.</td></tr>
 <tr><td><code>gv</code></td><td>string / null</td><td>Google Sheets <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, <code>inconclusive</code>, or null when not yet live-tested. <code>inconclusive</code> means the .xlsx round trip &mdash; not Sheets &mdash; explains the result (see <a href="{{ rel }}methodology.html#sheets-caveats">Sheets execution caveats</a>); treat it as &ldquo;no verdict&rdquo; and fall back to <code>g</code>.</td></tr>
 <tr><td><code>gver</code></td><td>string / null</td><td>Label for the Google Sheets run, e.g. <code>Google Sheets (Drive import, {{ sheets_exec_date }})</code>. This is a <strong>date, not a version</strong> &mdash; Sheets is a rolling service with nothing to pin &mdash; so never parse or compare it as one.</td></tr>
-<tr><td><code>lv</code></td><td>string / null</td><td>LibreOffice <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, or null when not yet live-tested.</td></tr>
+<tr><td><code>lv</code></td><td>string / null</td><td>LibreOffice <strong>executed</strong> verdict: <code>supported</code>, <code>quirky</code>, <code>unsupported</code>, <code>inconclusive</code>, or null when not yet live-tested. <code>inconclusive</code> means the function was executed but its documented behaviour needs something no test workbook can supply (an external data server), so no verdict is drawn &mdash; treat it as &ldquo;no verdict&rdquo; and fall back to <code>l</code>.</td></tr>
 <tr><td><code>lver</code></td><td>string</td><td>LibreOffice version the verdict was produced on (e.g. <code>25.8.7.3</code>).</td></tr>
 <tr><td><code>lnew</code></td><td>string / null</td><td>The LibreOffice version the function first became supported in, when known (else null).</td></tr>
 </tbody>
@@ -2479,12 +2675,51 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 </ul>
 <p>A <code>#NAME?</code> from Sheets on a formula with <em>no</em> storage prefix, or on a function Google does not document (TEXTSPLIT, TAKE, DROP, AGGREGATE&hellip;), is a real unsupported verdict and is published as one.</p>
 
+<h2 class="section-title" id="coverage">Coverage &mdash; and what we deliberately do not run</h2>
+<p>The catalog holds <strong>{{ n_catalog }}</strong> functions. <strong>{{ n_executed }}</strong> of them
+({{ coverage_pct }}%) have executed test cases in at least one engine.
+{% if n_no_verdict %}<strong>{{ n_no_verdict }}</strong> of those {{ 'is' if n_no_verdict == 1 else 'are' }}
+executed but carries no verdict, {% endif %}and <strong>{{ n_skipped }}</strong>
+{{ 'is' if n_skipped == 1 else 'are' }} not executed at all. The last two groups are not a backlog:
+each one is a decision that this harness cannot produce an honest verdict for that name, and the reason
+is published here rather than left as a blank. Every number and every row below is derived from the same
+results files the function pages are built from.</p>
+{% if no_verdict_rows %}
+<h3>Executed, but no verdict drawn ({{ n_no_verdict }})</h3>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Engine</th><th>Why no verdict</th></tr></thead>
+<tbody>
+{% for row in no_verdict_rows %}
+<tr><td><a href="{{ rel }}functions/{{ row.slug }}.html"><code>{{ row.name }}</code></a></td><td>{{ row.engine }}</td><td>{{ row.reason|safe }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+<h3>Not executed ({{ n_skipped }})</h3>
+<div class="table-scroll">
+<table class="matrix">
+<thead><tr><th>Function</th><th>Why not</th></tr></thead>
+<tbody>
+{% for row in skip_rows %}
+<tr><td><a href="{{ rel }}functions/{{ row.slug }}.html"><code>{{ row.name }}</code></a></td><td>{{ row.reason|safe }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% if unclassified %}
+<p><strong>Unclassified ({{ unclassified|length }}).</strong> These functions have neither executed cases
+nor a recorded reason: {{ unclassified|join(', ') }}. That is a gap in this page, and it is shown rather
+than absorbed into the percentages above.</p>
+{% endif %}
+
 <h2 class="section-title">What the verdicts mean</h2>
 <ul>
 <li><strong>Supported</strong> &mdash; every executed case matched the Excel-canonical expected result (probe cases for volatile functions like NOW/RAND assert error-free execution and deterministic invariants instead of exact values).</li>
 <li><strong>Quirk found</strong> &mdash; the function exists but at least one case returned a different value or error than Excel produces; the failing case is shown on the function&rsquo;s page.</li>
 <li><strong>Unsupported</strong> &mdash; the engine returns <code>#NAME?</code> (unrecognized function) with the storage prefix correctly applied.</li>
-<li><strong>Inconclusive</strong> (Google Sheets only) &mdash; the round trip described above explains the result, so we make no claim about the engine. See the <a href="#sheets-caveats">caveats</a>.</li>
+<li><strong>Inconclusive</strong> &mdash; the run tells us nothing about the engine, so no claim is made in either direction. Two things cause it: for Google Sheets, the <code>.xlsx</code> round trip described in the <a href="#sheets-caveats">caveats</a>; for either engine, a function whose documented behaviour needs something no test workbook can supply (an external data server). Those are listed under <a href="#coverage">Coverage</a> with the values the engine actually returned still on the page.</li>
 </ul>
 
 <h2 class="section-title">How-to recipes are verified too</h2>
@@ -2495,7 +2730,7 @@ METHODOLOGY_TMPL = """{% extends "base.html" %}
 <li><strong>Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run Excel (yet); where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
 <li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: each verdict describes Sheets as it behaved on the date that function was executed (the most recent run was {{ sheets_exec_date }}). Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
 <li><strong>Some Sheets results are inconclusive.</strong> See the <a href="#sheets-caveats">Sheets execution caveats</a> above; those cases are excluded from verdicts and quirk counts rather than guessed at.</li>
-<li><strong>Coverage is partial.</strong> {{ n_funcs }} of ~600 catalog functions have executed tests; untested functions say so explicitly rather than borrowing a verdict.</li>
+<li><strong>Coverage is partial, and the remainder is itemised.</strong> {{ n_executed }} of the {{ n_catalog }} catalog functions have executed tests; the {{ n_skipped }} that do not are listed under <a href="#coverage">Coverage</a> with the reason for each, and an untested function&rsquo;s page says so explicitly rather than borrowing a verdict.</li>
 <li><strong>A passing case is evidence, not proof.</strong> A function can match on our cases and still differ on inputs we haven&rsquo;t authored. When you find such an edge, please report it.</li>
 </ul>
 
@@ -2585,7 +2820,7 @@ function gs(d){ if(d.gv==='supported') return '<span style="color:#0a7a2f">&#100
   if(d.gv==='unsupported') return '<span style="color:#c02020">&#10007; not in Sheets (executed '+d.gver+')</span>';
   if(d.gv==='inconclusive') return d.g?'<span style="color:#888">documented (our run was inconclusive)</span>':'<span style="color:#888">inconclusive</span>';
   return d.g?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
-function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='inconclusive') return d.l?'<span style="color:#888">documented (our run drew no verdict)</span>':'<span style="color:#888">inconclusive</span>'; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};
 // Curated, verified portable alternatives (from the comparison pages) for
 // functions with a genuine cross-app gap. cmp = comparison slug to link, if any.
@@ -2645,7 +2880,7 @@ function migrate(fs,db,tg,gdb){
   const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
   // Executed verdicts win over documentation flags for both executed engines.
   // A Sheets "inconclusive" tells us nothing, so it falls back to the doc flag.
-  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:(d.lv?(d.lv!=='unsupported'):d.l))
+  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:((d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l))
     : (tg==='x' ? d.x
       : ((d.gv && d.gv!=='inconclusive') ? (d.gv!=='unsupported') : d.g));
   const tname=tg==='l'?TGT_NAME[tg]+' '+tv:TGT_NAME[tg];
@@ -2671,7 +2906,7 @@ async function check(){
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
   let rows='', xAll=true,gAll=true,lAll=true, unknown=[];
   for(const fn of fs){ const d=db[fn]; if(!d){ unknown.push(fn); continue; }
-    const lok=d.lv?(d.lv!=='unsupported'):d.l;
+    const lok=(d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l;
     const gok=(d.gv&&d.gv!=='inconclusive')?(d.gv!=='unsupported'):d.g;
     xAll=xAll&&d.x; gAll=gAll&&gok; lAll=lAll&&lok;
     rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }
@@ -3941,6 +4176,7 @@ def main():
             recipe_multisheet_count=recipe_multisheet_count,
             recipe_sheets_same_count=recipe_sheets_same_count,
             recipe_sheets_diff_count=recipe_sheets_diff_count,
+            **coverage_ctx(records),
         )
         (OUT_DIR / "methodology.html").write_text(
             env.get_template("methodology.html").render(**mctx)

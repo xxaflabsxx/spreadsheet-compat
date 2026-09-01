@@ -45,8 +45,12 @@ snapshot 2026-08-23):
                      one thing to re-check when this slot moves again.
   TEXTSPLIT          g:false; LibreOffice lv=supported, lnew=25.8.7.3
   FILTER             x&g documented; LibreOffice lv=quirky
-  GOOGLEFINANCE      Sheets-only (x:false); l:false, lv=null
-  ARRAYFORMULA       Sheets-only (x:false); l:false, lv=null
+  GOOGLEFINANCE      Sheets-only (x:false); l:false, lv=unsupported since batch J
+                     executed it on all four LibreOffice builds (#NAME? on every
+                     spelling). It is therefore the EXECUTED 'missing' example here,
+                     and WEBSERVICE -- still deliberately unexecuted -- is the only
+                     documentation-based one left, which is what test.mjs asserts.
+  ARRAYFORMULA       Sheets-only (x:false); l:false, lv=null (never executed in LO)
   NOTAREALFUNCTION   absent from the dataset -> UNKNOWN
 
 The formulas are never executed by any test — only their stored text is

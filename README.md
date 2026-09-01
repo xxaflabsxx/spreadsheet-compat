@@ -134,7 +134,7 @@ engine runners (what actually happens) → results (raw truth) → site
   anti-bot wall and is recorded honestly as `fetched: false` — LibreOffice
   coverage instead comes from `help.libreoffice.org`'s category pages (18
   pages fetched), which gave full, real coverage anyway.
-- `data/tests/`: 573 functions, 2318 hand-authored test cases. Phase 1
+- `data/tests/`: 586 functions, 2334 hand-authored test cases. Phase 1
   covered 31 functions (125 cases); the Phase-2 batch added 117 more
   workhorse/compat-interesting functions (479 cases) spanning math
   (CEILING/FLOOR + .MATH variants, MROUND, INT-vs-TRUNC...), statistics
@@ -160,6 +160,31 @@ engine runners (what actually happens) → results (raw truth) → site
   cannot be addressed through this harness's `.xlsx` transport at all. See
   the `_LO_STORAGE_NAMES` block in `harness/xlfn_map.py` for the measured
   evidence in both directions.
+  Batch J (the final batch of the completeness push) added the last 13, all as
+  probes with `expected: null`: the nine **Google service-bound** functions
+  (`AI`, `GOOGLEFINANCE`, `GOOGLETRANSLATE`, `IMPORTDATA`, `IMPORTFEED`,
+  `IMPORTHTML`, `IMPORTRANGE`, `IMPORTXML`, `SPARKLINE`) — each `#NAME?` on all
+  four LibreOffice builds under all nine storage spellings, which IS a
+  publishable "unsupported in LibreOffice" verdict even though the *value* is
+  unassertable in any engine — and the four **nondeterministic or
+  context-bound LibreOffice-only** functions (`CURRENT`, `DDE`, `RAND.NV`,
+  `RANDBETWEEN.NV`). `CURRENT` reproduces both of LibreOffice's published
+  examples exactly (`=1+2+CURRENT()` → 6, `="choo"&CURRENT()` → `choochoo`) on
+  all four builds; the two `.NV` functions evaluate on all four and satisfy the
+  only property their documentation fixes (a draw in `[0,1]`, an integer within
+  inclusive bounds); `DDE` returns `#N/A` on all four because no flat workbook
+  has a DDE server behind it, and is therefore **executed with no verdict
+  drawn** (`NO_VERDICT_CASES` in `site/build_site.py`) rather than published as
+  a LibreOffice quirk.
+
+  **Coverage is now complete except for documented skips.** 586 of the 600
+  catalog functions have executed cases; the other 14 are the eleven aliases
+  above plus `CALL`, `REGISTER.ID` (both name external code to load) and
+  `WEBSERVICE` (its documented behaviour is the network round trip, and the
+  `#N/A` we see is the sandbox's DNS, not the engine). The methodology page
+  renders that list with a reason per function, derived from the same data the
+  function pages are, and prints any unclassified leftover rather than
+  absorbing it into the percentage.
 - `harness/run_lo.py` executed against LibreOffice 24.2.7.2, results
   committed at `results/libreoffice-24.2.json`. **Recalculation is proven
   genuine** — see "How the LO runner forces recalculation" below. Of the

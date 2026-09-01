@@ -330,7 +330,11 @@ console.log('e2e: Excel -> LibreOffice');
   eq(basis.AGGREGATE, 'executed', 'AGGREGATE ok is execution-verified');
   eq(basis.WEBSERVICE, 'documented', 'WEBSERVICE ok is only documentation-based');
   eq(basis.GROUPBY, 'executed', 'GROUPBY missing is execution-verified');
-  eq(basis.GOOGLEFINANCE, 'documented', 'GOOGLEFINANCE missing is documentation-based');
+  // Batch J executed GOOGLEFINANCE on all four LibreOffice builds (#NAME? under
+  // every storage spelling), so its 'missing' verdict is now execution-backed.
+  // WEBSERVICE above is the remaining documentation-based case, so both bases
+  // are still covered by this block.
+  eq(basis.GOOGLEFINANCE, 'executed', 'GOOGLEFINANCE missing is execution-verified');
   eq(formulaVerdict(rep, 'Calc', 'C1'), 'quirk', 'SUM formula flagged quirk for LO target');
   eq(formulaVerdict(rep, 'Calc', 'C3'), 'ok', 'AGGREGATE formula ok for LO target');
   ok(/works since 25\.8\.7\.3/.test(rep.functionRows.find(r => r.fn === 'TEXTSPLIT').note),
