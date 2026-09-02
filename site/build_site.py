@@ -3284,7 +3284,7 @@ engine, absent from the Excel-web run, with no recorded reason: {{ xw_unclassifi
 CHECKER_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Spreadsheet formula compatibility checker</h1>
-<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real tests executed in Google Sheets and LibreOffice, plus Microsoft&rsquo;s official documentation for Excel. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests documented alternatives.</p>
+<p class="lede">Paste a formula and see whether every function works in Microsoft Excel, Google Sheets, and current LibreOffice Calc &mdash; based on real tests executed in Google Sheets, Excel for the web, and LibreOffice, plus Microsoft&rsquo;s official documentation for desktop Excel. Pick a target app for a <strong>migration report</strong> that flags what breaks and suggests documented alternatives.</p>
 <textarea id="f" rows="3" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:1rem;padding:.6rem" placeholder='=XLOOKUP("North", B2:B6, A2:A6)'></textarea>
 <p><button id="btn" class="promo-btn" style="border:0;cursor:pointer">Check compatibility</button></p>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Try:
@@ -3361,6 +3361,20 @@ function gs(d){ if(d.gv==='supported') return '<span style="color:#0a7a2f">&#100
   if(d.gv==='unsupported') return '<span style="color:#c02020">&#10007; not in Sheets (executed '+d.gver+')</span>';
   if(d.gv==='inconclusive') return d.g?'<span style="color:#888">documented (our run was inconclusive)</span>':'<span style="color:#888">inconclusive</span>';
   return d.g?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
+// Excel for the web column. A SEPARATE executed engine from desktop Excel
+// (never conflated): the desktop column is documentation, this one is a
+// measured OneDrive recalculation. xwv is the executed verdict; a null xwv is
+// a function we did not run in the web engine (transport-unreadable
+// serialization, or otherwise unmeasured), shown as "not run" rather than
+// guessed. The date/method live in xwver ("Excel for the web (recalc, DATE)");
+// the column header already names the engine, so strip that prefix in the cell.
+function xw(d){ if(!d.xwv) return '<span style="color:#888">not run</span>';
+  const w=d.xwver?d.xwver.replace('Excel for the web ',''):'executed';
+  if(d.xwv==='supported') return '<span style="color:#0a7a2f">&#10003; executed '+w+'</span>';
+  if(d.xwv==='quirky') return '<span style="color:#b8860b">&#9888; quirk (executed '+w+')</span>';
+  if(d.xwv==='unsupported') return '<span style="color:#c02020">&#10007; not in Excel for the web (executed '+w+')</span>';
+  if(d.xwv==='inconclusive') return '<span style="color:#888">inconclusive</span>';
+  return '<span style="color:#888">not run</span>'; }
 function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='inconclusive') return d.l?'<span style="color:#888">documented (our run drew no verdict)</span>':'<span style="color:#888">inconclusive</span>'; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
 const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};
 // Curated, verified portable alternatives (from the comparison pages) for
@@ -3450,10 +3464,10 @@ async function check(){
     const lok=(d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l;
     const gok=(d.gv&&d.gv!=='inconclusive')?(d.gv!=='unsupported'):d.g;
     xAll=xAll&&d.x; gAll=gAll&&gok; lAll=lAll&&lok;
-    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }
+    rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+xw(d)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }
   const say=ok=>ok?'<span style="color:#0a7a2f">works</span>':'<span style="color:#c02020">has an unsupported function</span>';
   let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
-  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed)</th><th>LibreOffice (executed)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel, desktop (documented)</th><th>Excel for the web (executed)</th><th>Google Sheets (executed)</th><th>LibreOffice (executed)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
   const tg=target(); if(tg) html+=migrate(fs,db,tg,gdb);
   html+='<p style="font-size:.9em;color:#888">Shareable link: <a href="'+permalink()+'" style="word-break:break-all">'+permalink()+'</a></p>';
