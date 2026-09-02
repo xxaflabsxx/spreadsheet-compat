@@ -2173,8 +2173,8 @@ INDEX_TMPL = """{% extends "base.html" %}
 <section class="hero">
   <h1>{{ site_name }}</h1>
   <p class="tagline">{{ site_tagline }}. Search any function to see whether it's
-  documented, tested, and how Excel, Google Sheets, and LibreOffice Calc actually
-  behave.</p>
+  documented, tested, and how Excel, Google Sheets, LibreOffice Calc, and Excel for
+  the web actually behave.</p>
 
   <div class="search-box">
     <input type="search" id="fn-search" placeholder="Search a function, e.g. VLOOKUP, XLOOKUP, DATEDIF..." aria-label="Search functions">
@@ -2188,7 +2188,7 @@ INDEX_TMPL = """{% extends "base.html" %}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.5rem 0">
   <a href="{{ rel }}checker.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#128269; Formula compatibility checker</strong>
-    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Paste any formula &mdash; instantly see if every function works in Excel, Google Sheets &amp; current LibreOffice.</span>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Paste any formula &mdash; instantly see if every function works in Excel, Google Sheets, current LibreOffice &amp; Excel for the web.</span>
   </a>
   <a href="{{ rel }}how-to/" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#128221; How-to recipes</strong>
@@ -4111,10 +4111,10 @@ def main():
     ctx.update(
         page_title=f"{SITE_NAME} — Excel vs Google Sheets vs LibreOffice function compatibility",
         meta_description=(
-            f"{stats['total_functions']} spreadsheet functions checked across Excel, "
-            f"Google Sheets, and LibreOffice Calc — {stats['tested_case_count']} "
-            f"executed test cases in Google Sheets and LibreOffice; Excel per "
-            f"official docs. {stats['quirk_count']} quirks found."
+            f"{stats['total_functions']} functions across Excel, Google Sheets, "
+            f"LibreOffice & Excel for the web — {stats['tested_case_count']} test "
+            f"cases executed in Sheets and LibreOffice, plus a dated Excel-for-the-web "
+            f"run; desktop Excel from official docs. {stats['quirk_count']} quirks found."
         ),
         canonical=BASE_URL,
         functions=records,
