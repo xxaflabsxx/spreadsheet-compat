@@ -3439,10 +3439,19 @@ function migrate(fs,db,tg,gdb){
     : (tg==='x' ? d.x
       : ((d.gv && d.gv!=='inconclusive') ? (d.gv!=='unsupported') : d.g));
   const tname=tg==='l'?TGT_NAME[tg]+' '+tv:TGT_NAME[tg];
-  let blockers=[];
-  for(const fn of fs){ const d=db[fn]; if(!d) continue; if(!okIn(d)) blockers.push(fn); }
+  let blockers=[], quirks=[];
+  for(const fn of fs){ const d=db[fn]; if(!d) continue;
+    if(!okIn(d)){ blockers.push(fn); continue; }
+    // Runs in the target but returns a value that diverges from Excel's
+    // documentation. Only Google Sheets and LibreOffice are executed, so a
+    // quirk is claimed only for those targets -- never for desktop Excel
+    // (tg==='x'), whose column is documentation, not a measured run.
+    const qv = tg==='l' ? d.lv : (tg==='g' ? d.gv : null);
+    if(qv==='quirky') quirks.push(fn);
+  }
   let h='<h2 class="section-title" style="margin-top:1.4rem">Migration to '+tname+'</h2>';
-  if(!blockers.length){ h+='<p style="color:#0a7a2f;font-weight:600">All recognized functions work in '+tname+'. This formula should port cleanly.</p>'; return h; }
+  if(!blockers.length && !quirks.length){ h+='<p style="color:#0a7a2f;font-weight:600">All recognized functions work in '+tname+' and match documented behaviour. This formula should port cleanly.</p>'; return h; }
+  if(blockers.length){
   h+='<p style="font-weight:600;color:#c02020">'+blockers.length+' function'+(blockers.length>1?'s':'')+' need attention:</p><ul>';
   for(const fn of blockers){ const m=MIG[fn]; const d=db[fn];
     const why=tooNew(d)
@@ -3454,6 +3463,16 @@ function migrate(fs,db,tg,gdb){
     h+='</li>';
   }
   h+='</ul><p style="font-size:.9em;color:#888">Alternatives are hand-verified from our comparison pages. This report flags what breaks; it does not auto-rewrite your formula.</p>';
+  }
+  if(quirks.length){
+    h+='<p style="font-weight:600;color:#b8860b;margin-top:1rem">'+quirks.length+' function'+(quirks.length>1?'s':'')+' run'+(quirks.length===1?'s':'')+' in '+tname+' but can return a <strong>different value</strong> than Excel documents &mdash; these port without erroring, so verify the result:</p><ul>';
+    for(const fn of quirks){
+      h+='<li style="margin-bottom:.4rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> &mdash; executed quirk in '+TGT_NAME[tg]+'; the function page shows the exact input and the value it returns.';
+      h+=guideLine(fn,gdb);
+      h+='</li>';
+    }
+    h+='</ul>';
+  }
   return h;
 }
 async function check(){
