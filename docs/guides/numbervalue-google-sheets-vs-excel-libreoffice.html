@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VALUE works in Excel (docs), Sheets &amp; LibreOffice (executed)</title>
-<meta name="description" content="All 4 LibreOffice and 4 Google Sheets executed cases for VALUE match Excel&#39;s do… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
+<title>NUMBERVALUE works in Excel &amp; LibreOffice but is missing from Google Sheets</title>
+<meta name="description" content="NUMBERVALUE (text-to-number with explicit decimal and group separators) is in Excel and executes in LibreOffice, but Google Sheets returns #NAME? — it has no NUMBERVALUE. The Sheets workaround with SUBSTITUTE + VALUE for locale-formatted numbers.">
 
-<link rel="canonical" href="https://canispreadsheet.com/functions/value.html">
-<meta property="og:title" content="VALUE works in Excel (docs), Sheets &amp; LibreOffice (executed)">
-<meta property="og:description" content="All 4 LibreOffice and 4 Google Sheets executed cases for VALUE match Excel&#39;s do… Executed: LibreOffice 25.8.7.3 + Google Sheets 2026-08-29; Excel per docs.">
+<link rel="canonical" href="https://canispreadsheet.com/guides/numbervalue-google-sheets-vs-excel-libreoffice.html">
+<meta property="og:title" content="NUMBERVALUE works in Excel &amp; LibreOffice but is missing from Google Sheets">
+<meta property="og:description" content="NUMBERVALUE (text-to-number with explicit decimal and group separators) is in Excel and executes in LibreOffice, but Google Sheets returns #NAME? — it has no NUMBERVALUE. The Sheets workaround with SUBSTITUTE + VALUE for locale-formatted numbers.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://canispreadsheet.com/functions/value.html">
+<meta property="og:url" content="https://canispreadsheet.com/guides/numbervalue-google-sheets-vs-excel-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
 <meta property="og:site_name" content="Can I Spreadsheet?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"VALUE function","item":"https://canispreadsheet.com/functions/value.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"NUMBERVALUE works in Excel & LibreOffice but is missing from Google Sheets","item":"https://canispreadsheet.com/guides/numbervalue-google-sheets-vs-excel-libreoffice.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -317,311 +317,81 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </header>
 <main class="container">
 
-<a class="back-link" href="../index.html">&larr; All functions</a>
-<div class="func-header">
-  <h1>VALUE</h1>
-  
-    <span class="badge badge-good">Supported, behaves as documented</span>
-  
-</div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>NUMBERVALUE is in Excel and LibreOffice (executed), but Google Sheets returns #NAME?</h1>
 
+<p><code>NUMBERVALUE</code> turns text into a number while letting you state, explicitly, which
+character is the decimal separator and which is the thousands (group) separator. That is what makes it
+the reliable way to parse <strong>locale-formatted</strong> text &mdash; a European string like
+<code>"2.500,27"</code> becomes <code>2500.27</code> no matter what locale the spreadsheet itself is set
+to. Excel has it and LibreOffice Calc has it. <strong>Google Sheets does not</strong> &mdash; the name is
+unrecognised, so the formula returns <code>#NAME?</code>.</p>
 
-<p class="lede">Real compatibility results for the <strong>VALUE</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
-
-
-
-
-
-
-
-
-
-
-<h2 class="section-title">Support matrix</h2>
-<div class="table-scroll">
-<table class="matrix">
-<thead><tr><th>Engine</th><th>Documented</th><th>Live-tested</th><th>Verdict</th></tr></thead>
-<tbody>
-
-
-<tr>
-  <td>Excel (desktop)</td><td><a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">Yes</a></td>
-  <td>No — documented only</td>
-  <td>
-    
-      <span class="badge badge-unknown">n/a</span>
-    
-  </td>
-</tr>
-
-
-<tr>
-  <td>Excel for the web</td><td><span title="Microsoft publishes one function reference, which describes the desktop product; we have not extracted per-application availability, so this cell makes no claim.">&mdash;</span></td>
-  <td>Yes (recalc, 2026-09-01)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
-
-
-<tr>
-  <td>Google Sheets</td><td><a href="https://support.google.com/docs/table/25273">Yes</a></td>
-  <td>Yes (Drive import, 2026-08-29)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
-
-
-<tr>
-  <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-29)</td>
-  <td>
-    
-      <span class="badge badge-good">Supported, behaves as documented</span>
-    
-  </td>
-</tr>
-
-</tbody>
-</table>
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>This is a missing function, not a behavioural quirk. A workbook that uses <code>NUMBERVALUE</code> to
+  clean imported text keeps working in Excel and LibreOffice and turns every such cell into
+  <code>#NAME?</code> the moment it is opened in Google Sheets.</p>
 </div>
 
-
-<h2 class="section-title">LibreOffice version history</h2>
-<p>We executed the same test cases under each LibreOffice release to show exactly when
-VALUE&rsquo;s support changed &mdash; not documentation claims, real results.</p>
-<div class="table-scroll">
-<table class="verhist">
-<thead><tr><th>LibreOffice version</th><th>Verdict</th><th>Tested</th></tr></thead>
-<tbody>
-
-<tr class="">
-  <td>24.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-29</td>
-</tr>
-
-<tr class="">
-  <td>24.8.7.2</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-29</td>
-</tr>
-
-<tr class="">
-  <td>25.2.0.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-29</td>
-</tr>
-
-<tr class="">
-  <td>25.8.7.3</td>
-  <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-07-29</td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h2 class="section-title">Executed test cases</h2>
-
-
-
-
-
-
-<h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
-<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
+<h2 class="section-title">A minimal example</h2>
+<p>Parse the European-formatted string <code>"2.500,27"</code> (dot as thousands, comma as decimal) into
+the number <code>2500.27</code>, passing the separators explicitly so the result does not depend on the
+engine&rsquo;s own locale:</p>
 <div class="table-scroll">
 <table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;123&#34;)</td>
-  <td>Basic numeric-looking text string converts to a number</td>
-  <td class="result mono">123</td>
-  <td class="result mono">123</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;50%&#34;)</td>
-  <td>A percentage-formatted text string converts to its underlying decimal, since Excel stores percentages internally as decimals (50% == 0.5)</td>
-  <td class="result mono">0.5</td>
-  <td class="result mono">0.5</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;$1,000&#34;)</td>
-  <td>Currency formatting (symbol + thousands separator) is stripped during conversion; matches Microsoft&#39;s own VALUE documentation example</td>
-  <td class="result mono">1000</td>
-  <td class="result mono">1000</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;abc&#34;)</td>
-  <td>A string that isn&#39;t a recognized number/date/time format -&gt; #VALUE!</td>
-  <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=NUMBERVALUE("2.500,27",",",".")</td><td>2500.27</td><td>#NAME?</td><td class="result">2500.27</td></tr>
+    <tr><td class="formula">=NUMBERVALUE("1234.56",".",",")</td><td>1234.56</td><td>#NAME?</td><td class="result">1234.56</td></tr>
+  </tbody>
 </table>
 </div>
+<p><code>2500.27</code> is Microsoft&rsquo;s own documented example and the value our harness got by
+recalculating in LibreOffice Calc 25.8.7.3 &mdash; identical in all four LibreOffice releases we test
+(24.2, 24.8, 25.2 and 25.8), so this is not a version gap. Google Sheets, executed the same way (Drive
+import, 2026-08-29), returned <code>#NAME?</code>: it has no <code>NUMBERVALUE</code> function.</p>
 
+<h2 class="section-title">Why it happens</h2>
+<p>Excel added <code>NUMBERVALUE</code> in Excel 2013 and LibreOffice implemented a compatible version;
+Google Sheets never added it. Sheets has <code>VALUE</code>, but <code>VALUE</code> reads separators from
+the spreadsheet&rsquo;s locale rather than from arguments, so it cannot be told &ldquo;treat the comma as
+the decimal point&rdquo; the way <code>NUMBERVALUE</code> can.</p>
 
+<h2 class="section-title">How to migrate to Google Sheets</h2>
+<p>If the text already matches your sheet&rsquo;s locale, plain <code>=VALUE(A1)</code> is enough. When the
+text uses <em>different</em> separators than the sheet &mdash; the case <code>NUMBERVALUE</code> exists for
+&mdash; normalise the string first with <code>SUBSTITUTE</code>, then call <code>VALUE</code>:</p>
+<p><code>=VALUE(SUBSTITUTE(SUBSTITUTE(A1,".",""),",","."))</code> converts <code>"2.500,27"</code> to
+<code>2500.27</code> in Google Sheets: the inner <code>SUBSTITUTE</code> strips the <code>.</code>
+thousands separators, the outer one swaps the <code>,</code> decimal for a <code>.</code>, and
+<code>VALUE</code> parses the now-US-formatted string. Reverse the two separators for the opposite locale.</p>
+<p>Google Sheets also has <code>TO_PURE_NUMBER</code>, which strips currency and percentage
+<em>formatting</em> from a value, but it does not reinterpret separators, so it is not a substitute for the
+locale-parsing job above. Going the other way &mdash; a Sheets workbook into Excel or LibreOffice &mdash;
+needs nothing; both read <code>VALUE</code> and <code>SUBSTITUTE</code>, and you can switch back to
+<code>NUMBERVALUE</code> there if you want the single-call version.</p>
 
-
-<h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
-<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;123&#34;)</td>
-  <td>Basic numeric-looking text string converts to a number</td>
-  <td class="result mono">123</td>
-  <td class="result mono">123</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;50%&#34;)</td>
-  <td>A percentage-formatted text string converts to its underlying decimal, since Excel stores percentages internally as decimals (50% == 0.5)</td>
-  <td class="result mono">0.5</td>
-  <td class="result mono">0.5</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;$1,000&#34;)</td>
-  <td>Currency formatting (symbol + thousands separator) is stripped during conversion; matches Microsoft&#39;s own VALUE documentation example</td>
-  <td class="result mono">1000</td>
-  <td class="result mono">1000</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;abc&#34;)</td>
-  <td>A string that isn&#39;t a recognized number/date/time format -&gt; #VALUE!</td>
-  <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
-
-<div class="table-scroll">
-<table class="cases">
-<thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
-<tbody>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;123&#34;)</td>
-  <td>Basic numeric-looking text string converts to a number</td>
-  <td class="result mono">123</td>
-  <td class="result mono">123</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;50%&#34;)</td>
-  <td>A percentage-formatted text string converts to its underlying decimal, since Excel stores percentages internally as decimals (50% == 0.5)</td>
-  <td class="result mono">0.5</td>
-  <td class="result mono">0.5</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;$1,000&#34;)</td>
-  <td>Currency formatting (symbol + thousands separator) is stripped during conversion; matches Microsoft&#39;s own VALUE documentation example</td>
-  <td class="result mono">1000</td>
-  <td class="result mono">1000</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-<tr>
-  <td class="formula mono">=VALUE(&#34;abc&#34;)</td>
-  <td>A string that isn&#39;t a recognized number/date/time format -&gt; #VALUE!</td>
-  <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!</td>
-  <td><span class="verdict-ok">Matched</span></td>
-</tr>
-
-</tbody>
-</table>
-</div>
-
-
-
-
-<h2 class="section-title">Docs &amp; syntax</h2>
-<ul>
-
-
-<li>Excel (desktop): <a href="https://support.microsoft.com/en-us/office/excel-functions-alphabetical-b3944572-255d-4efb-bb96-c6d90033e188">official documentation</a></li>
-
-
-
-
-
-<li>Google Sheets: <a href="https://support.google.com/docs/table/25273">official documentation</a></li>
-
-
-<li>LibreOffice Calc: <a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">official documentation</a></li>
-
-</ul>
-
-
-<h2 class="section-title">Related how-to recipes</h2>
-<ul>
-<li><a href="../how-to/convert-currency-text-to-a-number.html">How to convert currency text like &#34;$1,234.50&#34; to a number</a></li><li><a href="../how-to/convert-text-to-number.html">How to convert text that looks like a number into a real number</a></li>
-</ul>
-
-<h2 class="section-title">Where VALUE behaves differently</h2>
-<ul>
-<li><a href="../guides/numbervalue-google-sheets-vs-excel-libreoffice.html">NUMBERVALUE works in Excel &amp; LibreOffice but is missing from Google Sheets</a><br><span class="category-tag">NUMBERVALUE (text-to-number with explicit decimal and group separators) is in Excel and executes in LibreOffice, but Google Sheets returns #NAME? — it has no NUMBERVALUE. The Sheets workaround with SUBSTITUTE + VALUE for locale-formatted numbers.</span></li><li><a href="../guides/sum-text-numbers-excel-vs-google-sheets-libreoffice.html">SUM(1,&#34;2&#34;,3) returns 6 in Excel but #VALUE! in LibreOffice</a><br><span class="category-tag">Excel adds a number typed as text inside SUM&#39;s arguments and executed Google Sheets returns 6 too; LibreOffice returns #VALUE! for the identical formula. Why they differ and how to migrate.</span></li>
-</ul>
-
-
-
-<h2 class="section-title">Compared against other functions</h2>
-<ul>
-<li><a href="../compare/text-function-vs-cell-formatting.html">TEXT() vs cell formatting: same codes, different consequences</a></li><li><a href="../compare/value-vs-numbervalue.html">VALUE vs NUMBERVALUE: parsing text to numbers, and locales</a></li>
-</ul>
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it works in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app &mdash; <code>NUMBERVALUE</code>
+    included. It runs entirely in your browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<p><strong>A note on which Excel this is.</strong> The Excel column in the tables above is Microsoft&rsquo;s documented behaviour for <strong>desktop</strong> Excel, as recorded in our test corpus &mdash; we do not run desktop Excel, and no value in that column is a measurement. <strong>Excel for the web is a different application with its own calculation engine, and that one we do run</strong> (recalculated on OneDrive, 2026-09-01); it computes <code>NUMBERVALUE("2.500,27",",",".")</code> as <code>2500.27</code>, the same as LibreOffice. Its measured results are published on each function&rsquo;s own page rather than in these guide tables. Because we have no desktop run to compare against, a disagreement between an Excel-web measurement and the documented column is genuinely ambiguous: it may mean the web engine diverges from the desktop one, or that the documentation is wrong about both. We do not claim to know which.</p>
 
 
 <aside class="promo-card">
