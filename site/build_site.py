@@ -25,10 +25,13 @@ rendered as documentation-only inventory with an explicit "not yet
 live-tested" badge — never implied to be tested.
 """
 
+import html as _html
 import json
+import math
 import re
 import shutil
 import sys
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -606,6 +609,160 @@ def load_lo_versions():
             blobs.append((d.get("engine_version", ""), d))
     blobs.sort(key=lambda t: _version_tuple(t[0]))
     return blobs
+
+
+# --------------------------------------------------------------------------
+# Silent divergences -- EXECUTED vs EXECUTED.
+#
+# A different question from the quirks page. A quirk is one executed engine
+# measured against Microsoft's DOCUMENTED behaviour for the desktop product.
+# A silent divergence consults no documentation at all: all three engines this
+# harness runs (Google Sheets, LibreOffice 25.8, Excel for the web) returned a
+# non-error value for the same formula, and the values disagree. Nothing on
+# screen warns the user, which is what makes these the expensive ones.
+#
+# This is the single implementation. scripts/find_silent_divergences.py
+# imports it rather than keeping a second copy, so the CLI count and the
+# published page can never drift apart.
+# --------------------------------------------------------------------------
+
+# Volatile functions are excluded: they are DESIGNED to return a different
+# answer every recalculation, so a difference between two runs on two days is
+# not evidence about the engines.
+SILENT_VOLATILE = {"RAND", "RANDBETWEEN", "RANDARRAY", "NOW", "TODAY", "INFO", "CELL"}
+
+# LibreOffice builds compared against the newest one, to say whether a
+# divergence is settled behaviour or a version difference.
+SILENT_LO_OTHER_VERSIONS = ("24.2", "24.8", "25.2")
+
+SILENT_KIND_LABEL = {
+    "all-differ": "All three differ",
+    "Sheets-only": "Google Sheets differs",
+    "LO-only": "LibreOffice differs",
+    "Excel-web-only": "Excel for the web differs",
+}
+SILENT_KIND_ORDER = ["all-differ", "Sheets-only", "LO-only", "Excel-web-only"]
+
+
+def _silent_norm(v):
+    if isinstance(v, bool):
+        return ("b", v)
+    if isinstance(v, (int, float)):
+        return ("n", v)
+    # Deliberately NOT .strip()ed. A leading tab that one engine keeps and
+    # another removes is the most silent divergence there is -- nothing is
+    # visible on screen at all -- and stripping before comparing would drop
+    # exactly that case (TRIM_tab_not_removed: Sheets returns "Hello", the
+    # other two return "\tHello"). Whitespace-only differences are rendered
+    # as code points on the page, so the reader can see what differs.
+    return ("s", str(v))
+
+
+def _silent_same(a, b):
+    """Numbers within 1e-9; everything else compared exactly, whitespace
+    included."""
+    a, b = _silent_norm(a), _silent_norm(b)
+    if a[0] == "n" and b[0] == "n":
+        return math.isclose(a[1], b[1], rel_tol=1e-9, abs_tol=1e-9)
+    return a == b
+
+
+def silent_divergences(results_dir=None):
+    """List every silent value divergence in the executed corpus.
+
+    Returns a list of row dicts sorted by kind, then function, then case id.
+    Each row carries the three executed values, each engine's own executed_at
+    date for that function, whether all four pinned LibreOffice builds agree
+    on the case, and the numeric spread when all three values are numbers.
+    """
+    rd = Path(results_dir) if results_dir else RESULTS_DIR
+    sheets = json.loads((rd / "google-sheets.json").read_text())["function_results"]
+    lo = json.loads((rd / "libreoffice-25.8.json").read_text())["function_results"]
+    xw = json.loads((rd / "excel-web.json").read_text())["function_results"]
+    lo_others = []
+    for ver in SILENT_LO_OTHER_VERSIONS:
+        path = rd / f"libreoffice-{ver}.json"
+        if path.exists():
+            blob = json.loads(path.read_text())
+            lo_others.append(
+                (blob.get("engine_version") or ver, blob.get("function_results") or {})
+            )
+
+    rows = []
+    for fn, s_tests in sheets.items():
+        if fn not in lo or fn not in xw or fn in SILENT_VOLATILE:
+            continue
+        for tid, t in s_tests.items():
+            if tid == "executed_at" or not isinstance(t, dict):
+                continue
+            l, x = lo[fn].get(tid), xw[fn].get(tid)
+            if not l or not x:
+                continue
+            if t.get("error") or l.get("error") or x.get("error"):
+                continue          # not silent: something told the user
+            vs, vl, vx = t.get("value"), l.get("value"), x.get("value")
+            if vs is None or vl is None or vx is None:
+                continue
+            if any(isinstance(v, (list, dict)) for v in (vs, vl, vx)):
+                continue          # spilled ranges compare elsewhere
+            sl = _silent_same(vs, vl)
+            sx = _silent_same(vs, vx)
+            lx = _silent_same(vl, vx)
+            if sl and sx:
+                continue          # all three agree
+            kind = ("LO-only" if sx and not sl
+                    else "Sheets-only" if lx and not sl
+                    else "Excel-web-only" if sl and not sx
+                    else "all-differ")
+
+            builds, agree = [], True
+            for ver, fr in lo_others:
+                other = (fr.get(fn) or {}).get(tid)
+                if not isinstance(other, dict):
+                    builds.append({"version": ver, "value": None, "error": None,
+                                   "missing": True, "same": False})
+                    agree = False
+                    continue
+                if other.get("error"):
+                    builds.append({"version": ver, "value": None,
+                                   "error": other["error"], "missing": False,
+                                   "same": False})
+                    agree = False
+                    continue
+                ov = other.get("value")
+                same = ov is not None and _silent_same(ov, vl)
+                builds.append({"version": ver, "value": ov, "error": None,
+                               "missing": False, "same": same})
+                if not same:
+                    agree = False
+
+            nums = [v for v in (vs, vl, vx)
+                    if isinstance(v, (int, float)) and not isinstance(v, bool)]
+            delta = f"{max(nums) - min(nums):.3g}" if len(nums) == 3 else ""
+
+            rows.append({
+                "function": fn,
+                "name_lower": fn.lower(),
+                "case_id": tid,
+                "kind": kind,
+                "kind_label": SILENT_KIND_LABEL[kind],
+                "formula": t.get("formula_display") or t.get("formula") or "",
+                "description": t.get("description") or "",
+                "sheets_value": vs,
+                "lo_value": vl,
+                "xw_value": vx,
+                "sheets_date": s_tests.get("executed_at", ""),
+                "lo_date": lo[fn].get("executed_at", ""),
+                "xw_date": xw[fn].get("executed_at", ""),
+                "lo_builds": builds,
+                "lo_builds_agree": agree,
+                "lo_builds_differing": [b for b in builds if not b["same"]],
+                "lo_build_count": len(builds) + 1,
+                "delta": delta,
+            })
+    rows.sort(key=lambda r: (SILENT_KIND_ORDER.index(r["kind"]), r["function"],
+                             r["case_id"]))
+    return rows
 
 
 # --------------------------------------------------------------------------
@@ -1925,6 +2082,13 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
 
+/* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
+   U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
+   rendered as their code point instead of as nothing at all. */
+.cp { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78em; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 3px; padding: 0 0.2em; color: var(--text-muted); white-space: nowrap; }
+.sd-meta { display: block; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.78rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+table.cases td.sd-val { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
+
 .func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
 .func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
 .category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
@@ -2201,6 +2365,10 @@ INDEX_TMPL = """{% extends "base.html" %}
   <a href="{{ rel }}quirks.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#9888;&#65039; Quirks &amp; gotchas</strong>
     <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Where the three apps disagree on the same formula &mdash; surprising differences caught by running them.</span>
+  </a>
+  <a href="{{ rel }}silent-divergences.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
+    <strong style="display:block;margin-bottom:.35rem">&#129323; Silent divergences</strong>
+    <span style="color:var(--text-muted,#6b7280);font-size:.95rem">Formulas where all three executed engines return a value and the values disagree &mdash; no error, just a different number.</span>
   </a>
   <a href="{{ rel }}libreoffice-version-support.html" style="display:block;padding:1rem 1.1rem;border:1px solid var(--border,#e5e7eb);border-radius:10px;text-decoration:none;color:inherit">
     <strong style="display:block;margin-bottom:.35rem">&#128200; LibreOffice by version</strong>
@@ -2567,6 +2735,9 @@ not match Excel&rsquo;s documented/expected behavior. This is the flagship conte
 run the formula. Both executed engines are represented &mdash; LibreOffice Calc
 {{ lo_version }} and Google Sheets (Drive import, {{ sheets_exec_date }}) &mdash;
 measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
+<p>For the other question &mdash; where the three engines we execute disagree with
+<em>each other</em>, with no documentation involved and no error to warn anyone &mdash; see
+<a href="{{ rel }}silent-divergences.html">silent divergences</a>.</p>
 <p class="search-hint">{{ quirks|length }} quirks found across {{ quirk_fn_count }} functions
 ({{ quirks_by_engine['libreoffice'] }} in LibreOffice, {{ quirks_by_engine['google_sheets'] }} in Google Sheets).
 {% if roundtrip_total %}A further {{ roundtrip_total }} Google Sheets case{{ 's' if roundtrip_total != 1 else '' }}
@@ -2603,6 +2774,113 @@ See <a href="{{ rel }}methodology.html#coverage">Coverage</a>.{% endif %}</p>
 {% endblock %}
 """
 
+SILENT_TMPL = """{% extends "base.html" %}
+{% block content %}
+<h1>Silent divergences: formulas that return different values in Excel for the
+web, Google Sheets and LibreOffice &mdash; no error, just a different number</h1>
+
+<p class="lede">A <strong>silent</strong> divergence is the expensive kind. All three of the
+engines this harness runs &mdash; Google Sheets, LibreOffice Calc {{ lo_version }} and Excel for
+the web &mdash; returned an ordinary value for the same formula. Nobody returned
+<code>#NAME?</code>, <code>#VALUE!</code> or any other error. And the values are different. Nothing
+on screen says so: the cell just holds a different number, or a string of a different length, than
+it held in the application the workbook came from.</p>
+
+<p><strong>This is not the quirks list.</strong> The
+<a href="{{ rel }}quirks.html">quirks catalog</a> asks whether one executed engine matches
+Microsoft&rsquo;s <em>documented</em> behaviour for the desktop product &mdash; documentation on one
+side, measurement on the other. This page consults no documentation at all. Every row here is
+measurement against measurement: three executed engines, one formula, three values that do not
+agree. A formula can appear on both pages, on one, or on neither.</p>
+
+<p class="search-hint">{{ sd_rows|length }} silent divergence{{ 's' if sd_rows|length != 1 else '' }}
+across {{ sd_fn_count }} function{{ 's' if sd_fn_count != 1 else '' }}:
+{% for k in sd_kind_order %}{% if sd_counts[k] %}<strong>{{ sd_counts[k] }}</strong> &mdash;
+{{ sd_kind_label[k] }}{% if not loop.last %}; {% endif %}{% endif %}{% endfor %}.</p>
+
+<h2 class="section-title">Where each column comes from</h2>
+<ul>
+  <li><strong>Google Sheets</strong> &mdash; our Drive-import run. The small date under each value
+  is that function&rsquo;s own <code>executed_at</code>, not the results file&rsquo;s timestamp, so
+  a function re-run later carries a later date than its neighbours.</li>
+  <li><strong>LibreOffice Calc {{ lo_version }}</strong> &mdash; the pinned build, recalculated
+  headlessly. The same cases also ran on {{ sd_lo_other_builds|join(', ') }}, and the column says
+  whether all {{ sd_lo_other_builds|length + 1 }} builds returned the same value. All of them
+  agreeing means settled behaviour; builds disagreeing means you are looking at a version
+  difference, and the differing builds and their values are printed.</li>
+  <li><strong>Excel for the web</strong> &mdash; our dated run: the workbook is uploaded to
+  OneDrive with no cached results, Excel for the web recalculates it on open, and the computed
+  values are downloaded back out ({{ excel_web_exec_date }}).</li>
+  <li><strong>Desktop Excel is absent from this page, because it is executed nowhere on this
+  site.</strong> We do not run desktop Excel. Elsewhere it appears only as Microsoft&rsquo;s
+  documentation, and documentation is not a measurement, so it has no column here. Excel for the
+  web is a separate application with its own calculation engine: a value in its column is evidence
+  about the web engine and about nothing else.</li>
+</ul>
+
+<div class="quirk-box">
+  <h3>How to read this table</h3>
+  <p>Two engines landing on the same value does not make them right. Nothing on this page ranks the
+  engines &mdash; a row tells you they disagree, and which one is the odd one out, never which one
+  is correct.</p>
+  <p>The <strong>&Delta;</strong> column is the spread between the largest and smallest value on
+  the row, and it is filled in only where all three values are numbers. Many rows are a last-digit
+  difference after <code>ROUND(&hellip;,9)</code>: a real divergence, and a tiny one. The
+  &Delta; column is there so you can tell those apart at a glance from the rows where a value flips
+  sign or shifts by &pi;.</p>
+  <p>Invisible and ambiguous characters are printed as their code point &mdash;
+  <span class="cp">U+00A0</span> for a non-breaking space, <span class="cp">U+0009</span> for a tab,
+  <span class="cp">U+FFFD</span> for the Unicode replacement character. Several rows differ by
+  nothing else, and rendering them literally would show two identical-looking cells.</p>
+  <p>Volatile functions are excluded from the comparison: <code>RAND</code>,
+  <code>RANDBETWEEN</code>, <code>RANDARRAY</code>, <code>NOW</code>, <code>TODAY</code>,
+  <code>INFO</code> and <code>CELL</code> are designed to return a different answer on every
+  recalculation, so a difference between two runs on two days says nothing about the engines.
+  Errors are excluded too, by definition: if any engine returned an error the divergence was not
+  silent, and it belongs on the quirks list instead.</p>
+</div>
+
+<div class="table-scroll">
+<table class="cases">
+  <caption>{{ sd_rows|length }} executed cases, sorted by which engine is the odd one out, then by
+  function.</caption>
+  <thead><tr>
+    <th>Function</th>
+    <th>Formula</th>
+    <th>Google Sheets</th>
+    <th>LibreOffice Calc {{ lo_version }}</th>
+    <th>Excel for the web</th>
+    <th>&Delta;</th>
+    <th>Odd one out</th>
+    <th>Read more</th>
+  </tr></thead>
+  <tbody>
+{% for r in sd_rows %}
+  <tr>
+    <td><a href="{{ rel }}functions/{{ r.name_lower }}.html"><code>{{ r.function }}</code></a></td>
+    <td class="formula">{{ r.formula }}</td>
+    <td class="sd-val">{{ r.sheets_value|sdval|safe }}<span class="sd-meta">executed {{ r.sheets_date }}</span></td>
+    <td class="sd-val">{{ r.lo_value|sdval|safe }}<span class="sd-meta">executed {{ r.lo_date }}{% if r.lo_builds_agree %} &middot; all {{ r.lo_build_count }} builds agree{% endif %}</span>{% if not r.lo_builds_agree %}<span class="sd-meta">differs across builds: {% for b in r.lo_builds_differing %}{{ b.version }} &rarr; {% if b.missing %}no result{% elif b.error %}{{ b.error }}{% else %}{{ b.value|sdval|safe }}{% endif %}{% if not loop.last %}; {% endif %}{% endfor %}</span>{% endif %}</td>
+    <td class="sd-val">{{ r.xw_value|sdval|safe }}<span class="sd-meta">executed {{ r.xw_date }}</span></td>
+    <td class="sd-val">{{ r.delta or '&mdash;'|safe }}</td>
+    <td>{{ r.kind_label }}</td>
+    <td>{% for g in sd_guides.get(r.function, []) %}<a href="{{ rel }}guides/{{ g.slug }}.html">{{ g.title }}</a>{% if not loop.last %}<br>{% endif %}{% else %}&mdash;{% endfor %}</td>
+  </tr>
+{% endfor %}
+  </tbody>
+</table>
+</div>
+
+<p>Every value above was read back out of a recalculated workbook by our harness; the raw runs are
+in <a href="{{ github_url }}">the repository</a> and the method is on the
+<a href="{{ rel }}methodology.html">methodology page</a>. For the catalog of cases measured against
+Microsoft&rsquo;s documentation instead, see the <a href="{{ rel }}quirks.html">quirks list</a>; for
+long-form writeups of individual cases, see the <a href="{{ rel }}guides/">formula behavior
+guides</a>.</p>
+{% endblock %}
+"""
+
+
 SITEMAP_TMPL = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {% for u in urls %}  <url><loc>{{ u.loc }}</loc><lastmod>{{ u.lastmod }}</lastmod></url>
@@ -2622,6 +2900,50 @@ def fmtval_filter(v):
     if isinstance(v, (list, tuple)):
         return "{" + ", ".join(fmtval_filter(x) for x in v) + "}"
     return str(v)
+
+
+# Characters a browser renders as nothing, as a space, or as a box: control
+# codes, format codes (U+200B zero-width space), non-ASCII spaces (U+00A0
+# non-breaking, U+3000 ideographic) and U+FFFD, which is what LibreOffice's
+# CHAR(160) actually produced on our Linux build. Several rows of the
+# silent-divergences table differ ONLY by one of these, so printing them
+# literally would show two identical-looking cells.
+def _sd_visible_codepoint(ch):
+    cp = ord(ch)
+    if cp == 0xFFFD:
+        return True
+    cat = unicodedata.category(ch)
+    if cat in ("Cc", "Cf", "Co", "Cs", "Cn"):
+        return True
+    return cat == "Zs" and cp != 0x20
+
+
+def sdval_filter(v):
+    """Render an executed value for the silent-divergences table: strings
+    verbatim, numbers at full repr precision, and every invisible or
+    ambiguous character replaced by its code point label. Returns HTML and is
+    used with |safe, so it escapes everything it passes through itself."""
+    if isinstance(v, bool):
+        text = "TRUE" if v else "FALSE"
+    elif isinstance(v, float):
+        text = repr(v)
+    else:
+        text = str(v)
+    # A plain ASCII space is ordinary in the middle of a string and invisible
+    # at either end of a table cell -- and on some rows the ONLY difference
+    # between two engines is a trailing one (ASC pads with U+0020 in Sheets
+    # and U+3000 in LibreOffice). Leading and trailing spaces are therefore
+    # labelled too; interior ones are left alone.
+    lead = len(text) - len(text.lstrip(" "))
+    trail = len(text) - len(text.rstrip(" "))
+    out = []
+    for i, ch in enumerate(text):
+        edge_space = ch == " " and (i < lead or i >= len(text) - trail)
+        if edge_space or _sd_visible_codepoint(ch):
+            out.append(f'<span class="cp">U+{ord(ch):04X}</span>')
+        else:
+            out.append(_html.escape(ch))
+    return "".join(out) if out else '<span class="cp">empty string</span>'
 
 
 RECIPE_INDEX_TMPL = """{% extends "base.html" %}
@@ -3519,7 +3841,7 @@ syncLovRow();
 GUIDES_INDEX_TMPL = """{% extends "base.html" %}
 {% block content %}
 <h1>Formula behavior guides</h1>
-<p class="lede">Executed-data writeups of specific cases where Excel, Google Sheets, and LibreOffice Calc give different results for the exact same formula &mdash; found by actually running the formula, not by comparing documentation pages. Google Sheets and LibreOffice values shown are <strong>executed</strong> output from our test harness (Sheets via Drive import on {{ sheets_exec_date }}; LibreOffice from the pinned builds named in each table); Excel values in these guides are Microsoft&rsquo;s <strong>documented</strong> behavior for the <strong>desktop</strong> product &mdash; we do not run desktop Excel. Excel for the web is a separate application which we <em>do</em> execute (most recently {{ excel_web_exec_date }}); its measured results are on the individual function pages rather than in these guide tables. For the shorter, catalog-style version of these findings across every tested function, see the <a href="{{ rel }}quirks.html">quirks list</a>.</p>
+<p class="lede">Executed-data writeups of specific cases where Excel, Google Sheets, and LibreOffice Calc give different results for the exact same formula &mdash; found by actually running the formula, not by comparing documentation pages. Google Sheets and LibreOffice values shown are <strong>executed</strong> output from our test harness (Sheets via Drive import on {{ sheets_exec_date }}; LibreOffice from the pinned builds named in each table); Excel values in these guides are Microsoft&rsquo;s <strong>documented</strong> behavior for the <strong>desktop</strong> product &mdash; we do not run desktop Excel. Excel for the web is a separate application which we <em>do</em> execute (most recently {{ excel_web_exec_date }}); its measured results are on the individual function pages rather than in these guide tables. For the shorter, catalog-style version of these findings across every tested function, see the <a href="{{ rel }}quirks.html">quirks list</a>, and for the cases where the three engines we execute disagree with each other rather than with the documentation, the <a href="{{ rel }}silent-divergences.html">silent divergences</a> table.</p>
 <ul class="quirks-list">
 {% for g in guides %}
 <li class="quirk-entry">
@@ -3968,6 +4290,7 @@ def build_env():
                 "index.html": INDEX_TMPL,
                 "function.html": FUNCTION_TMPL,
                 "quirks.html": QUIRKS_TMPL,
+                "silent_divergences.html": SILENT_TMPL,
                 "recipe.html": RECIPE_TMPL,
                 "recipe_index.html": RECIPE_INDEX_TMPL,
                 "comparison.html": COMPARISON_TMPL,
@@ -3989,6 +4312,7 @@ def build_env():
     )
     env.filters["dateonly"] = dateonly_filter
     env.filters["fmtval"] = fmtval_filter
+    env.filters["sdval"] = sdval_filter
     return env
 
 
@@ -4211,6 +4535,45 @@ def main():
                     "meta_description": sp["meta_description"],
                 }
             )
+
+    # ---- Silent divergences (executed vs executed, all three engines) ----
+    # Rendered here rather than beside the quirks page because it reuses
+    # func_guides -- the same function -> guide index that docs/data/guides.json
+    # is emitted from, so the "Read more" column and the checker agree on which
+    # functions have a guide.
+    sd_rows = silent_divergences()
+    sd_counts = {k: 0 for k in SILENT_KIND_ORDER}
+    for _r in sd_rows:
+        sd_counts[_r["kind"]] += 1
+    sd_fn_count = len({_r["function"] for _r in sd_rows})
+    sd_meta = (
+        f"{len(sd_rows)} formulas where Google Sheets, LibreOffice and Excel for "
+        f"the web all return a value and the values disagree. No error anywhere; "
+        f"every row executed."
+    )
+    ctx = common_ctx(rel="")
+    ctx.update(
+        page_title=(
+            f"{len(sd_rows)} silent divergences: formulas returning different values "
+            f"in Excel for the web, Google Sheets and LibreOffice"
+        ),
+        meta_description=sd_meta,
+        canonical=BASE_URL + "silent-divergences.html",
+        sd_rows=sd_rows,
+        sd_counts=sd_counts,
+        sd_fn_count=sd_fn_count,
+        sd_kind_order=SILENT_KIND_ORDER,
+        sd_kind_label=SILENT_KIND_LABEL,
+        sd_guides=func_guides,
+        sd_lo_other_builds=[v for v, _ in lo_versions
+                            if v and v != EXEC_PROVENANCE["lo_version"]],
+    )
+    (OUT_DIR / "silent-divergences.html").write_text(
+        env.get_template("silent_divergences.html").render(**ctx)
+    )
+    sitemap_urls.append(
+        {"loc": BASE_URL + "silent-divergences.html", "lastmod": latest_result_date}
+    )
 
     func_tmpl = env.get_template("function.html")
     for r in records:

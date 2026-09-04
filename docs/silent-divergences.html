@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>55 silent divergences: formulas returning different values in Excel for the web, Google Sheets and LibreOffice</title>
+<meta name="description" content="55 formulas where Google Sheets, LibreOffice and Excel for the web all return a value and the values disagree. No error anywhere; every row executed.">
+
+<link rel="canonical" href="https://canispreadsheet.com/silent-divergences.html">
+<meta property="og:title" content="55 silent divergences: formulas returning different values in Excel for the web, Google Sheets and LibreOffice">
+<meta property="og:description" content="55 formulas where Google Sheets, LibreOffice and Excel for the web all return a value and the values disagree. No error anywhere; every row executed.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/silent-divergences.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.9rem; justify-content: flex-end; }
+nav.site-nav a { color: var(--text-muted); font-weight: 500; font-size: 0.95rem; white-space: nowrap; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+/* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
+   U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
+   rendered as their code point instead of as nothing at all. */
+.cp { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78em; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 3px; padding: 0 0.2em; color: var(--text-muted); white-space: nowrap; }
+.sd-meta { display: block; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.78rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+table.cases td.sd-val { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="index.html">Functions</a>
+      <a href="how-to/">How-to</a>
+      <a href="compare/">Compare</a>
+      <a href="guides/">Guides</a>
+      <a href="checker.html">Checker</a>
+      <a href="audit.html">Migration&nbsp;Audit</a>
+      <a href="excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<h1>Silent divergences: formulas that return different values in Excel for the
+web, Google Sheets and LibreOffice &mdash; no error, just a different number</h1>
+
+<p class="lede">A <strong>silent</strong> divergence is the expensive kind. All three of the
+engines this harness runs &mdash; Google Sheets, LibreOffice Calc 25.8.7.3 and Excel for
+the web &mdash; returned an ordinary value for the same formula. Nobody returned
+<code>#NAME?</code>, <code>#VALUE!</code> or any other error. And the values are different. Nothing
+on screen says so: the cell just holds a different number, or a string of a different length, than
+it held in the application the workbook came from.</p>
+
+<p><strong>This is not the quirks list.</strong> The
+<a href="quirks.html">quirks catalog</a> asks whether one executed engine matches
+Microsoft&rsquo;s <em>documented</em> behaviour for the desktop product &mdash; documentation on one
+side, measurement on the other. This page consults no documentation at all. Every row here is
+measurement against measurement: three executed engines, one formula, three values that do not
+agree. A formula can appear on both pages, on one, or on neither.</p>
+
+<p class="search-hint">55 silent divergences
+across 42 functions:
+<strong>4</strong> &mdash;
+All three differ; <strong>18</strong> &mdash;
+Google Sheets differs; <strong>14</strong> &mdash;
+LibreOffice differs; <strong>19</strong> &mdash;
+Excel for the web differs.</p>
+
+<h2 class="section-title">Where each column comes from</h2>
+<ul>
+  <li><strong>Google Sheets</strong> &mdash; our Drive-import run. The small date under each value
+  is that function&rsquo;s own <code>executed_at</code>, not the results file&rsquo;s timestamp, so
+  a function re-run later carries a later date than its neighbours.</li>
+  <li><strong>LibreOffice Calc 25.8.7.3</strong> &mdash; the pinned build, recalculated
+  headlessly. The same cases also ran on 24.2.0.3, 24.8.7.2, 25.2.0.3, and the column says
+  whether all 4 builds returned the same value. All of them
+  agreeing means settled behaviour; builds disagreeing means you are looking at a version
+  difference, and the differing builds and their values are printed.</li>
+  <li><strong>Excel for the web</strong> &mdash; our dated run: the workbook is uploaded to
+  OneDrive with no cached results, Excel for the web recalculates it on open, and the computed
+  values are downloaded back out (2026-09-01).</li>
+  <li><strong>Desktop Excel is absent from this page, because it is executed nowhere on this
+  site.</strong> We do not run desktop Excel. Elsewhere it appears only as Microsoft&rsquo;s
+  documentation, and documentation is not a measurement, so it has no column here. Excel for the
+  web is a separate application with its own calculation engine: a value in its column is evidence
+  about the web engine and about nothing else.</li>
+</ul>
+
+<div class="quirk-box">
+  <h3>How to read this table</h3>
+  <p>Two engines landing on the same value does not make them right. Nothing on this page ranks the
+  engines &mdash; a row tells you they disagree, and which one is the odd one out, never which one
+  is correct.</p>
+  <p>The <strong>&Delta;</strong> column is the spread between the largest and smallest value on
+  the row, and it is filled in only where all three values are numbers. Many rows are a last-digit
+  difference after <code>ROUND(&hellip;,9)</code>: a real divergence, and a tiny one. The
+  &Delta; column is there so you can tell those apart at a glance from the rows where a value flips
+  sign or shifts by &pi;.</p>
+  <p>Invisible and ambiguous characters are printed as their code point &mdash;
+  <span class="cp">U+00A0</span> for a non-breaking space, <span class="cp">U+0009</span> for a tab,
+  <span class="cp">U+FFFD</span> for the Unicode replacement character. Several rows differ by
+  nothing else, and rendering them literally would show two identical-looking cells.</p>
+  <p>Volatile functions are excluded from the comparison: <code>RAND</code>,
+  <code>RANDBETWEEN</code>, <code>RANDARRAY</code>, <code>NOW</code>, <code>TODAY</code>,
+  <code>INFO</code> and <code>CELL</code> are designed to return a different answer on every
+  recalculation, so a difference between two runs on two days says nothing about the engines.
+  Errors are excluded too, by definition: if any engine returned an error the divergence was not
+  silent, and it belongs on the quirks list instead.</p>
+</div>
+
+<div class="table-scroll">
+<table class="cases">
+  <caption>55 executed cases, sorted by which engine is the odd one out, then by
+  function.</caption>
+  <thead><tr>
+    <th>Function</th>
+    <th>Formula</th>
+    <th>Google Sheets</th>
+    <th>LibreOffice Calc 25.8.7.3</th>
+    <th>Excel for the web</th>
+    <th>&Delta;</th>
+    <th>Odd one out</th>
+    <th>Read more</th>
+  </tr></thead>
+  <tbody>
+
+  <tr>
+    <td><a href="functions/asc.html"><code>ASC</code></a></td>
+    <td class="formula">=ASC(&#34;Ａ１２３　&#34;)</td>
+    <td class="sd-val">A123<span class="cp">U+0020</span><span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">A123<span class="cp">U+3000</span><span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">Ａ１２３<span class="cp">U+3000</span><span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>All three differ</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/imsqrt.html"><code>IMSQRT</code></a></td>
+    <td class="formula">=IMSQRT(&#34;-4&#34;)</td>
+    <td class="sd-val">1.22464679914735E-16+2i<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">2i<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">1.22514845490862E-16+2i<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>All three differ</td>
+    <td><a href="guides/sort-function-google-sheets-vs-excel-libreoffice-sort-order.html">SORT descending in Google Sheets: is_ascending vs sort_order</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/imsqrt.html"><code>IMSQRT</code></a></td>
+    <td class="formula">=IMSQRT(&#34;-1&#34;)</td>
+    <td class="sd-val">6.12323399573677E-17+i<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">i<span class="sd-meta">executed 2026-08-31</span><span class="sd-meta">differs across builds: 24.2.0.3 &rarr; 1i; 24.8.7.2 &rarr; 1i</span></td>
+    <td class="sd-val">6.1257422745431E-17+i<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>All three differ</td>
+    <td><a href="guides/sort-function-google-sheets-vs-excel-libreoffice-sort-order.html">SORT descending in Google Sheets: is_ascending vs sort_order</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/midb.html"><code>MIDB</code></a></td>
+    <td class="formula">=MIDB(&#34;ＥＸＣＥＬ&#34;,2,2)</td>
+    <td class="sd-val">Ｘ<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val"><span class="cp">U+0020</span><span class="cp">U+0020</span><span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">ＸＣ<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>All three differ</td>
+    <td><a href="guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">LENB and CJK text: byte counts that don&#39;t match the docs</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/acot.html"><code>ACOT</code></a></td>
+    <td class="formula">=ROUND(ACOT(-2),9)</td>
+    <td class="sd-val">-0.463647609<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">2.677945045<span class="sd-meta">executed 2026-09-04 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">2.677945045<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">3.14</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/acot-negative-argument-google-sheets-vs-excel-libreoffice.html">ACOT of a negative number is off by pi in Google Sheets versus Excel and LibreOffice</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/confidence.html"><code>CONFIDENCE</code></a></td>
+    <td class="formula">=ROUND(CONFIDENCE(A2,A3,A4),9)</td>
+    <td class="sd-val">0.692951913<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/confidence.html"><code>CONFIDENCE</code></a></td>
+    <td class="formula">=ROUND(CONFIDENCE(A2,A3,50.9),9)</td>
+    <td class="sd-val">0.692951913<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/confidence.norm.html"><code>CONFIDENCE.NORM</code></a></td>
+    <td class="formula">=ROUND(CONFIDENCE.NORM(A2,A3,A4),9)</td>
+    <td class="sd-val">0.692951913<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/confidence.norm.html"><code>CONFIDENCE.NORM</code></a></td>
+    <td class="formula">=ROUND(CONFIDENCE.NORM(A2,A3,50.9),9)</td>
+    <td class="sd-val">0.692951913<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.692951912<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/disc.html"><code>DISC</code></a></td>
+    <td class="formula">=ROUND(DISC(DATE(2018,7,1),DATE(2048,1,1),97.975,100,1),12)</td>
+    <td class="sd-val">0.000686345065<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.000686384169<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.000686384169<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">3.91e-08</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">Bond and treasury functions after a migration: what actually breaks</a><br><a href="guides/vendor-documentation-defects-executed-verdicts-excel-google-sheets-libreoffice.html">When the documentation is wrong: 29 vendor doc defects found by execution</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/hypgeomdist.html"><code>HYPGEOMDIST</code></a></td>
+    <td class="formula">=ROUND(HYPGEOMDIST(1.9,4.9,8.9,20.9),12)</td>
+    <td class="sd-val">0.2724458204<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.363261093911<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.363261093911<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.0908</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/loginv.html"><code>LOGINV</code></a></td>
+    <td class="formula">=ROUND(LOGINV(A2,A3,A4),10)</td>
+    <td class="sd-val">4.00002521<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">4.0000252187<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">4.0000252187<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">8.7e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/loginv.html"><code>LOGINV</code></a></td>
+    <td class="formula">=ROUND(LOGINV(LOGNORMDIST(4,3.5,1.2),3.5,1.2),10)</td>
+    <td class="sd-val">3.999999991<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">9e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/lognorm.inv.html"><code>LOGNORM.INV</code></a></td>
+    <td class="formula">=ROUND(LOGNORM.INV(A2,A3,A4),10)</td>
+    <td class="sd-val">4.00002521<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">4.0000252187<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">4.0000252187<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">8.7e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/lognorm.inv.html"><code>LOGNORM.INV</code></a></td>
+    <td class="formula">=ROUND(LOGNORM.INV(LOGNORM.DIST(4,3.5,1.2,TRUE),3.5,1.2),10)</td>
+    <td class="sd-val">3.999999991<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">9e-09</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/normsinv.html"><code>NORMSINV</code></a></td>
+    <td class="formula">=ROUND(NORMSINV(0.9088),8)</td>
+    <td class="sd-val">1.33340174<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">1.33340175<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">1.33340175<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1e-08</td>
+    <td>Google Sheets differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/sort.html"><code>SORT</code></a></td>
+    <td class="formula">=SORT(A1:A5,1,-1)</td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">5<span class="sd-meta">executed 2026-07-29</span><span class="sd-meta">differs across builds: 24.2.0.3 &rarr; #NAME?</span></td>
+    <td class="sd-val">5<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">4</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/array-functions-vstack-hstack-textsplit-libreoffice-version.html">Which LibreOffice version for VSTACK, TEXTSPLIT, TAKE &amp; DROP?</a><br><a href="guides/sort-function-google-sheets-vs-excel-libreoffice-sort-order.html">SORT descending in Google Sheets: is_ascending vs sort_order</a><br><a href="guides/xlfn-storage-tokens-libreoffice-name-error-imcot-imsec-legacy-aliases.html">Your function exists but your file cannot say so: _xlfn storage tokens</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/to_dollars.html"><code>TO_DOLLARS</code></a></td>
+    <td class="formula">=ISNUMBER(TO_DOLLARS(5))</td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only functions: what ports to Excel and LibreOffice, and what does not</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/to_percent.html"><code>TO_PERCENT</code></a></td>
+    <td class="formula">=ISNUMBER(TO_PERCENT(0.5))</td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only functions: what ports to Excel and LibreOffice, and what does not</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/to_pure_number.html"><code>TO_PURE_NUMBER</code></a></td>
+    <td class="formula">=ISTEXT(TO_PURE_NUMBER(&#34;abc&#34;))</td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only functions: what ports to Excel and LibreOffice, and what does not</a><br><a href="guides/vendor-documentation-defects-executed-verdicts-excel-google-sheets-libreoffice.html">When the documentation is wrong: 29 vendor doc defects found by execution</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/to_text.html"><code>TO_TEXT</code></a></td>
+    <td class="formula">=ISTEXT(TO_TEXT(24))</td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only functions: what ports to Excel and LibreOffice, and what does not</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/trim.html"><code>TRIM</code></a></td>
+    <td class="formula">=TRIM(CHAR(9)&amp;&#34;Hello&#34;)</td>
+    <td class="sd-val">Hello<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val"><span class="cp">U+0009</span>Hello<span class="sd-meta">executed 2026-09-04 &middot; all 4 builds agree</span></td>
+    <td class="sd-val"><span class="cp">U+0009</span>Hello<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Google Sheets differs</td>
+    <td><a href="guides/trim-tab-newline-nonbreaking-space-google-sheets-vs-excel-libreoffice.html">TRIM strips tabs and line breaks in Google Sheets but keeps them in Excel and LibreOffice</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/count.html"><code>COUNT</code></a></td>
+    <td class="formula">=COUNT(A1:A1)</td>
+    <td class="sd-val">0<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-07-29 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/count-booleans-excel-vs-google-sheets-libreoffice.html">COUNT counts booleans differently in LibreOffice vs Excel</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/count.html"><code>COUNT</code></a></td>
+    <td class="formula">=COUNT(A1:A6)</td>
+    <td class="sd-val">2<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">3<span class="sd-meta">executed 2026-07-29 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">2<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/count-booleans-excel-vs-google-sheets-libreoffice.html">COUNT counts booleans differently in LibreOffice vs Excel</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/duration.html"><code>DURATION</code></a></td>
+    <td class="formula">=ROUND(DURATION(DATE(2018,7,1),DATE(2048,1,1),0.08,0.09,2,1),7)</td>
+    <td class="sd-val">10.9191453<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">10.921574<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">10.9191453<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.00243</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">Bond and treasury functions after a migration: what actually breaks</a><br><a href="guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">Every error code LibreOffice reports as #VALUE!</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/intrate.html"><code>INTRATE</code></a></td>
+    <td class="formula">=ROUND(INTRATE(A2,A3,A4,A5),10)</td>
+    <td class="sd-val">0.05768<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.0583280899<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.05768<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.000648</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">Bond and treasury functions after a migration: what actually breaks</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/intrate.html"><code>INTRATE</code></a></td>
+    <td class="formula">=ROUND(INTRATE(A2,A3,A4,A5,0),10)</td>
+    <td class="sd-val">0.05768<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.0583280899<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.05768<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.000648</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">Bond and treasury functions after a migration: what actually breaks</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/isnumber.html"><code>ISNUMBER</code></a></td>
+    <td class="formula">=ISNUMBER(TRUE)</td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-07-29 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/a-functions-maxa-mina-averagea-varpa-text-logical-coercion-excel-vs-libreoffice.html">MAXA, MINA, AVERAGEA, VARPA vs MAX, MIN, AVERAGE, VAR.P</a><br><a href="guides/dollarde-dollarfr-fractional-price-conversion-excel-vs-google-sheets-libreoffice.html">DOLLARDE and DOLLARFR: fractional bond prices across engines</a><br><a href="guides/fvschedule-text-in-schedule-excel-vs-google-sheets-libreoffice.html">FVSCHEDULE: LibreOffice drops text in the rate schedule</a><br><a href="guides/isnumber-boolean-excel-vs-google-sheets-libreoffice.html">ISNUMBER(TRUE) is FALSE in Excel but TRUE in LibreOffice</a><br><a href="guides/type-function-boolean-excel-vs-libreoffice.html">TYPE(TRUE): Excel 4 vs LibreOffice 1</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/mduration.html"><code>MDURATION</code></a></td>
+    <td class="formula">=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),10)</td>
+    <td class="sd-val">5.735669814<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">5.7339235771<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">5.7356698139<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.00175</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">Bond and treasury functions after a migration: what actually breaks</a><br><a href="guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">Every error code LibreOffice reports as #VALUE!</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/mduration.html"><code>MDURATION</code></a></td>
+    <td class="formula">=ROUND(MDURATION(A2,A3,A4,A5,A6,A7),3)</td>
+    <td class="sd-val">5.736<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">5.734<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">5.736<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.002</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/bond-treasury-functions-oddfprice-tbillprice-intrate-mduration-excel-vs-google-sheets-libreoffice.html">Bond and treasury functions after a migration: what actually breaks</a><br><a href="guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">Every error code LibreOffice reports as #VALUE!</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/mina.html"><code>MINA</code></a></td>
+    <td class="formula">=MINA(A1:A5)</td>
+    <td class="sd-val">0<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/a-functions-maxa-mina-averagea-varpa-text-logical-coercion-excel-vs-libreoffice.html">MAXA, MINA, AVERAGEA, VARPA vs MAX, MIN, AVERAGE, VAR.P</a><br><a href="guides/vendor-documentation-defects-executed-verdicts-excel-google-sheets-libreoffice.html">When the documentation is wrong: 29 vendor doc defects found by execution</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/mina.html"><code>MINA</code></a></td>
+    <td class="formula">=MINA(A1:A2)</td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/a-functions-maxa-mina-averagea-varpa-text-logical-coercion-excel-vs-libreoffice.html">MAXA, MINA, AVERAGEA, VARPA vs MAX, MIN, AVERAGE, VAR.P</a><br><a href="guides/vendor-documentation-defects-executed-verdicts-excel-google-sheets-libreoffice.html">When the documentation is wrong: 29 vendor doc defects found by execution</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/regex.html"><code>REGEX</code></a></td>
+    <td class="formula">=ISNA(REGEX(&#34;abc&#34;,&#34;z&#34;))</td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-09-01 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only functions: what ports to Excel and LibreOffice, and what does not</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/trim.html"><code>TRIM</code></a></td>
+    <td class="formula">=TRIM(CHAR(160)&amp;&#34;Hello&#34;&amp;CHAR(160))</td>
+    <td class="sd-val"><span class="cp">U+00A0</span>Hello<span class="cp">U+00A0</span><span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val"><span class="cp">U+FFFD</span>Hello<span class="cp">U+FFFD</span><span class="sd-meta">executed 2026-09-04 &middot; all 4 builds agree</span></td>
+    <td class="sd-val"><span class="cp">U+00A0</span>Hello<span class="cp">U+00A0</span><span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/trim-tab-newline-nonbreaking-space-google-sheets-vs-excel-libreoffice.html">TRIM strips tabs and line breaks in Google Sheets but keeps them in Excel and LibreOffice</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/type.html"><code>TYPE</code></a></td>
+    <td class="formula">=TYPE(TRUE)</td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-07-29 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">3</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/a-functions-maxa-mina-averagea-varpa-text-logical-coercion-excel-vs-libreoffice.html">MAXA, MINA, AVERAGEA, VARPA vs MAX, MIN, AVERAGE, VAR.P</a><br><a href="guides/type-function-boolean-excel-vs-libreoffice.html">TYPE(TRUE): Excel 4 vs LibreOffice 1</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/var.p.html"><code>VAR.P</code></a></td>
+    <td class="formula">=ROUND(VAR.P(A1:A3),4)</td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">8.2222<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">4.22</td>
+    <td>LibreOffice differs</td>
+    <td><a href="guides/a-functions-maxa-mina-averagea-varpa-text-logical-coercion-excel-vs-libreoffice.html">MAXA, MINA, AVERAGEA, VARPA vs MAX, MIN, AVERAGE, VAR.P</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/asc.html"><code>ASC</code></a></td>
+    <td class="formula">=ASC(&#34;ＥＸＣＥＬ&#34;)</td>
+    <td class="sd-val">EXCEL<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">EXCEL<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">ＥＸＣＥＬ<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Excel for the web differs</td>
+    <td>&mdash;</td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/day.html"><code>DAY</code></a></td>
+    <td class="formula">=DAY(1)</td>
+    <td class="sd-val">31<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">31<span class="sd-meta">executed 2026-07-29 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">30</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/date-serial-number-excel-vs-google-sheets-libreoffice.html">DAY(1), MONTH(1) and YEAR(1): Excel disagrees with Sheets and LibreOffice</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/findb.html"><code>FINDB</code></a></td>
+    <td class="formula">=FINDB(&#34;b&#34;,A3)</td>
+    <td class="sd-val">5<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">5<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">3<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">2</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">LENB and CJK text: byte counts that don&#39;t match the docs</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/imsqrt.html"><code>IMSQRT</code></a></td>
+    <td class="formula">=IMSQRT(&#34;i&#34;)</td>
+    <td class="sd-val">0.707106781186548+0.707106781186548i<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.707106781186548+0.707106781186548i<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.707106781186548+0.707106781186547i<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/sort-function-google-sheets-vs-excel-libreoffice-sort-order.html">SORT descending in Google Sheets: is_ascending vs sort_order</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/iserror.html"><code>ISERROR</code></a></td>
+    <td class="formula">=ISERROR(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;))</td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-08-28 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/dollarde-dollarfr-fractional-price-conversion-excel-vs-google-sheets-libreoffice.html">DOLLARDE and DOLLARFR: fractional bond prices across engines</a><br><a href="guides/error-type-codes-excel-vs-libreoffice.html">ERROR.TYPE: LibreOffice returns #N/A where Excel returns 4 and 6</a><br><a href="guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</a><br><a href="guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">Every error code LibreOffice reports as #VALUE!</a><br><a href="guides/num-error-vs-value-error-excel-vs-libreoffice.html">#NUM! vs #VALUE!: Excel vs LibreOffice</a><br><a href="guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">PERCENTRANK significance: Excel truncates, both other engines round</a><br><a href="guides/type-function-boolean-excel-vs-libreoffice.html">TYPE(TRUE): Excel 4 vs LibreOffice 1</a><br><a href="guides/vlookup-hlookup-out-of-range-index-excel-vs-libreoffice.html">VLOOKUP bad column index: Excel #REF! vs LibreOffice #VALUE!</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/isref.html"><code>ISREF</code></a></td>
+    <td class="formula">=ISREF(INDIRECT(&#34;&#39;Nope&#39;!B2&#34;))</td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">FALSE<span class="sd-meta">executed 2026-08-28 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">TRUE<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/iferror-indirect-missing-sheet-ref-error-excel-vs-libreoffice.html">IFERROR doesn&#39;t catch INDIRECT&#39;s #REF! in LibreOffice</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/leftb.html"><code>LEFTB</code></a></td>
+    <td class="formula">=LEFTB(&#34;ＥＸＣＥＬ&#34;,2)</td>
+    <td class="sd-val">Ｅ<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">Ｅ<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">ＥＸ<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">LENB and CJK text: byte counts that don&#39;t match the docs</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/lenb.html"><code>LENB</code></a></td>
+    <td class="formula">=LENB(&#34;日本&#34;)</td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">2<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">2</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">LENB and CJK text: byte counts that don&#39;t match the docs</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/month.html"><code>MONTH</code></a></td>
+    <td class="formula">=MONTH(1)</td>
+    <td class="sd-val">12<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">12<span class="sd-meta">executed 2026-07-29 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">11</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/date-serial-number-excel-vs-google-sheets-libreoffice.html">DAY(1), MONTH(1) and YEAR(1): Excel disagrees with Sheets and LibreOffice</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/percentrank.html"><code>PERCENTRANK</code></a></td>
+    <td class="formula">=PERCENTRANK(A1:A4,30)</td>
+    <td class="sd-val">0.667<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">0.667<span class="sd-meta">executed 2026-08-04 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.666<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.001</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">PERCENTRANK significance: Excel truncates, both other engines round</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/percentrank.exc.html"><code>PERCENTRANK.EXC</code></a></td>
+    <td class="formula">=PERCENTRANK.EXC(A2:A10,5.43,1)</td>
+    <td class="sd-val">0.4<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.4<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.3<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.1</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">Every error code LibreOffice reports as #VALUE!</a><br><a href="guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">PERCENTRANK significance: Excel truncates, both other engines round</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/percentrank.inc.html"><code>PERCENTRANK.INC</code></a></td>
+    <td class="formula">=PERCENTRANK.INC(A2:A11,4)</td>
+    <td class="sd-val">0.556<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.556<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.555<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.001</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">Every error code LibreOffice reports as #VALUE!</a><br><a href="guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">PERCENTRANK significance: Excel truncates, both other engines round</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/percentrank.inc.html"><code>PERCENTRANK.INC</code></a></td>
+    <td class="formula">=PERCENTRANK.INC(A2:A11,8)</td>
+    <td class="sd-val">0.667<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0.667<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">0.666<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">0.001</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/libreoffice-value-error-substitution-num-div0-ref-na-error-codes.html">Every error code LibreOffice reports as #VALUE!</a><br><a href="guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">PERCENTRANK significance: Excel truncates, both other engines round</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/regexextract.html"><code>REGEXEXTRACT</code></a></td>
+    <td class="formula">=COUNTA(REGEXEXTRACT(A2,&#34;[A-Z][a-z]+&#34;,1))</td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">1<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">2<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only functions: what ports to Excel and LibreOffice, and what does not</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/replaceb.html"><code>REPLACEB</code></a></td>
+    <td class="formula">=REPLACEB(&#34;ＡＢＣ&#34;,1,2,&#34;x&#34;)</td>
+    <td class="sd-val">xＢＣ<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">xＢＣ<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">xＣ<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">LENB and CJK text: byte counts that don&#39;t match the docs</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/rightb.html"><code>RIGHTB</code></a></td>
+    <td class="formula">=RIGHTB(&#34;ＡＢＣ&#34;,2)</td>
+    <td class="sd-val">Ｃ<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">Ｃ<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">ＢＣ<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">&mdash;</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">LENB and CJK text: byte counts that don&#39;t match the docs</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/searchb.html"><code>SEARCHB</code></a></td>
+    <td class="formula">=SEARCHB(&#34;Ｂ&#34;,&#34;ＡＢＣ&#34;)</td>
+    <td class="sd-val">3<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">3<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">2<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">LENB and CJK text: byte counts that don&#39;t match the docs</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/trimrange.html"><code>TRIMRANGE</code></a></td>
+    <td class="formula">=COUNT(TRIMRANGE(A1:E10))</td>
+    <td class="sd-val">0<span class="sd-meta">executed 2026-08-31</span></td>
+    <td class="sd-val">0<span class="sd-meta">executed 2026-08-31 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">4<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">4</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/vendor-documentation-defects-executed-verdicts-excel-google-sheets-libreoffice.html">When the documentation is wrong: 29 vendor doc defects found by execution</a></td>
+  </tr>
+
+  <tr>
+    <td><a href="functions/year.html"><code>YEAR</code></a></td>
+    <td class="formula">=YEAR(1)</td>
+    <td class="sd-val">1899<span class="sd-meta">executed 2026-08-29</span></td>
+    <td class="sd-val">1899<span class="sd-meta">executed 2026-07-29 &middot; all 4 builds agree</span></td>
+    <td class="sd-val">1900<span class="sd-meta">executed 2026-09-01</span></td>
+    <td class="sd-val">1</td>
+    <td>Excel for the web differs</td>
+    <td><a href="guides/date-serial-number-excel-vs-google-sheets-libreoffice.html">DAY(1), MONTH(1) and YEAR(1): Excel disagrees with Sheets and LibreOffice</a></td>
+  </tr>
+
+  </tbody>
+</table>
+</div>
+
+<p>Every value above was read back out of a recalculated workbook by our harness; the raw runs are
+in <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">the repository</a> and the method is on the
+<a href="methodology.html">methodology page</a>. For the catalog of cases measured against
+Microsoft&rsquo;s documentation instead, see the <a href="quirks.html">quirks list</a>; for
+long-form writeups of individual cases, see the <a href="guides/">formula behavior
+guides</a>.</p>
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="methodology.html">how we verify</a>. Open <a href="data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
