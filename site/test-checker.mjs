@@ -104,13 +104,13 @@ console.log('unit: Excel-for-the-web target — verdict source');
   has(h, 'recalculated on open in Excel Online', 'Target: line says how it was executed');
   has(h, 'separate implementation from desktop Excel, which we do not run', 'Target: line refuses the desktop conflation');
   has(h, 'All 1 recognized function was executed in Excel for the web', 'xwv supported -> all-clear, no blocker');
-  lacks(h, 'need attention', 'xwv supported -> no blocker list');
+  lacks(h, 'attention:', 'xwv supported -> no blocker list');
   lacks(h, 'match documented behaviour', 'the web all-clear does NOT reuse the unqualified documented-behaviour sentence');
   has(h, 'every executed case returned the value Microsoft documents', 'the web all-clear says what was actually checked');
 }
 {
   const h = migrate(['ADD'], DB, 'xw', {});
-  has(h, '1 function need attention', 'xwv unsupported -> blocker');
+  has(h, '1 function needs attention', 'xwv unsupported -> blocker');
   has(h, 'Executed in Excel for the web on 2026-09-01 and not recognized — it returns #NAME? there.', 'unsupported blocker cites the executed run');
   has(h, 'This is the web app, not desktop Excel.', 'unsupported blocker refuses the desktop conflation');
 }
@@ -120,7 +120,7 @@ console.log('unit: Excel-for-the-web target — verdict source');
   has(h, 'we do not run desktop Excel, so we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both', 'quirk copy keeps the ambiguity honest');
   has(h, 'executed quirk in Excel for the web (2026-09-01)', 'quirk line dates the web run');
   has(h, 'Behaves differently across apps — read: HYPGEOMDIST divergence', 'guide link survives on the web target');
-  lacks(h, 'need attention', 'a quirk is not a blocker');
+  lacks(h, 'attention:', 'a quirk is not a blocker');
 }
 
 console.log('unit: Excel-for-the-web target — transport skips');
@@ -128,7 +128,7 @@ console.log('unit: Excel-for-the-web target — transport skips');
   ok(XW_TRANSPORT_SKIPS.length === 7, 'seven LAMBDA-family transport skips ship in the page');
   ok(['LAMBDA','LET','ISOMITTED','MAP','MAKEARRAY','REDUCE','SCAN'].every(f => XW_TRANSPORT_SKIPS.indexOf(f) >= 0), 'the skip list is the LAMBDA family');
   const h = migrate(['LAMBDA'], DB, 'xw', {});
-  has(h, '1 function need attention', 'transport-skipped function is a blocker');
+  has(h, '1 function needs attention', 'transport-skipped function is a blocker');
   has(h, 'could not be executed in Excel for the web: its file-open rejects workbooks carrying this serialization', 'transport blocker uses the transport wording');
   has(h, 'No verdict, and not a missing function', 'transport blocker does not claim unsupported');
   lacks(h, 'and not recognized', 'transport blocker never borrows the executed-unsupported sentence');
@@ -139,7 +139,7 @@ console.log('unit: Excel-for-the-web target — transport skips');
 console.log('unit: Excel-for-the-web target — documented fallback (null xwv)');
 {
   const h = migrate(['NOTRUN'], DB, 'xw', {});
-  lacks(h, 'need attention', 'null xwv + documented desktop flag -> not a blocker');
+  lacks(h, 'attention:', 'null xwv + documented desktop flag -> not a blocker');
   has(h, '0 of 1 recognized functions ran in Excel for the web', 'the all-clear counts measured vs unmeasured');
   has(h, 'so this is not an all-clear for them', 'the all-clear refuses to cover the unmeasured ones');
   has(h, '1 function could not be checked against a run of Excel for the web', 'unmeasured block is rendered');
@@ -148,12 +148,12 @@ console.log('unit: Excel-for-the-web target — documented fallback (null xwv)')
 }
 {
   const h = migrate(['INCONC'], DB, 'xw', {});
-  lacks(h, 'need attention', 'inconclusive xwv falls back to the documented desktop flag');
+  lacks(h, 'attention:', 'inconclusive xwv falls back to the documented desktop flag');
   has(h, 'our Excel-for-the-web run drew no verdict for it', 'inconclusive row says the run drew no verdict');
 }
 {
   const h = migrate(['NODOC'], DB, 'xw', {});
-  has(h, '1 function need attention', 'null xwv and no desktop documentation -> blocker');
+  has(h, '1 function needs attention', 'null xwv and no desktop documentation -> blocker');
   has(h, 'which documents the desktop product, not the web app', 'no-doc blocker names the documentation it checked');
 }
 
@@ -204,7 +204,7 @@ console.log('unit: the other targets are unchanged');
 }
 {
   const h = migrate(['ADD'], DB, 'x', {});
-  has(h, '1 function need attention', 'desktop Excel still reports undocumented functions as blockers');
+  has(h, '1 function needs attention', 'desktop Excel still reports undocumented functions as blockers');
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
