@@ -340,9 +340,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 </p>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280);margin:.3rem 0 0">Moving this formula to another app? Pick a target for a migration report:
 <label style="margin-left:.4rem"><input type="radio" name="tgt" value="" checked> none</label>
-<label style="margin-left:.5rem"><input type="radio" name="tgt" value="x"> Excel</label>
+<label style="margin-left:.5rem"><input type="radio" name="tgt" value="x"> Excel (desktop)</label>
+<label style="margin-left:.5rem"><input type="radio" name="tgt" value="xw"> Excel for the web</label>
 <label style="margin-left:.5rem"><input type="radio" name="tgt" value="g"> Google Sheets</label>
 <label style="margin-left:.5rem"><input type="radio" name="tgt" value="l"> LibreOffice</label>
+<span style="display:block;margin-top:.2rem">Three of those targets are <strong>measured</strong>: Google Sheets, LibreOffice, and <strong>Excel for the web</strong> &mdash; a separate application from the desktop product, with its own calculation engine, which we recalculate in Excel Online (most recent run 2026-09-01). The <strong>Excel (desktop)</strong> target is <strong>documentation-based only</strong>: it reports what Microsoft&rsquo;s published function reference says about the desktop product, never a measurement of ours, so a desktop report can list a missing function but can never flag a value quirk.</span>
 </p>
 <p id="lovrow" style="display:none;font-size:.9em;color:var(--text-muted,#6b7280);margin:.3rem 0 0">Target LibreOffice version:
 <select id="lov" style="font-family:inherit;font-size:1em;padding:.2rem .35rem">
@@ -354,7 +356,14 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <span style="display:block;margin-top:.2rem">Debian/Ubuntu LTS often ship older Calc. Verdicts are per tested release &mdash; we execute every tested function in 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3.</span></p>
 <div id="out"></div>
 <p style="font-size:.9em;color:var(--text-muted,#6b7280)">Results are linkable &mdash; the URL updates with your formula, so you can share a check directly (e.g. in a forum answer).</p>
-<script>const DATA_URL="data/compat.json"; const GUIDES_URL="data/guides.json"; const FUNC_BASE="functions/"; const CMP_BASE="compare/"; const GUIDE_BASE="guides/";</script>
+<script>const DATA_URL="data/compat.json"; const GUIDES_URL="data/guides.json"; const FUNC_BASE="functions/"; const CMP_BASE="compare/"; const GUIDE_BASE="guides/";
+// Functions the Excel-for-the-web transport can never carry: the web app's
+// file-open refuses a workbook whose stored formulas use the _xlpm./LAMBDA
+// serialization, so these were never measured there. Emitted from
+// build_site.EXCEL_WEB_TRANSPORT_SKIPS so the list cannot drift from the one
+// the function pages render. XW_RUN_DATE is the FILE-level date of the most
+// recent Excel-web run, used only when no per-function date is available.
+const XW_TRANSPORT_SKIPS=["ISOMITTED", "LAMBDA", "LET", "MAKEARRAY", "MAP", "REDUCE", "SCAN"]; const XW_RUN_DATE="2026-09-01";</script>
 
 <script>
 let DB=null;
@@ -421,7 +430,25 @@ function xw(d){ if(!d.xwv) return '<span style="color:#888">not run</span>';
   if(d.xwv==='inconclusive') return '<span style="color:#888">inconclusive</span>';
   return '<span style="color:#888">not run</span>'; }
 function lo(d){ const nw=d.lnew?' <span style="color:#0a7a2f;font-size:.85em">(new in '+d.lnew+')</span>':''; if(d.lv==='inconclusive') return d.l?'<span style="color:#888">documented (our run drew no verdict)</span>':'<span style="color:#888">inconclusive</span>'; if(d.lv==='supported') return '<span style="color:#0a7a2f">&#10003; '+d.lver+'</span>'+nw; if(d.lv==='quirky') return '<span style="color:#b8860b">&#9888; quirk ('+d.lver+')</span>'; if(d.lv==='unsupported') return '<span style="color:#c02020">&#10007; not in '+d.lver+'</span>'; return d.l?'<span style="color:#888">documented</span>':'<span style="color:#c02020">&#10007; no</span>'; }
-const TGT_NAME={x:'Excel',g:'Google Sheets',l:'LibreOffice'};
+// Migration targets. 'x' is DESKTOP Excel and is documentation-only; 'xw' is
+// Excel for the web, a different application which we execute. They are never
+// the same fact and the names must keep saying so.
+const TGT_NAME={x:'Excel (desktop)',xw:'Excel for the web',g:'Google Sheets',l:'LibreOffice'};
+// The dated Excel-for-the-web run label for one function. xwver is prose
+// ("Excel for the web (recalc, 2026-09-01)") carrying that function's OWN
+// executed_at, so we pull the date out of it and only fall back to the
+// file-level run date when a function has no per-function label.
+function xwDate(d){ const m=(d&&d.xwver)?/\d{4}-\d{2}-\d{2}/.exec(d.xwver):null; return m?m[0]:XW_RUN_DATE; }
+// The date label for a whole report: one date if every measured function ran
+// in the same run, else the span, so the heading never implies a single run
+// covered functions that were executed weeks apart.
+function xwDateLabel(fs,db){ const seen={}, ds=[];
+  for(const fn of fs){ const d=db[fn]; if(!d||!d.xwv||!d.xwver) continue;
+    const m=/\d{4}-\d{2}-\d{2}/.exec(d.xwver); if(m&&!seen[m[0]]){ seen[m[0]]=1; ds.push(m[0]); } }
+  ds.sort();
+  if(!ds.length) return '';
+  if(ds.length===1) return 'executed '+ds[0];
+  return 'executed '+ds[0]+'\u2013'+ds[ds.length-1]+', each function on its own run date'; }
 // Curated, verified portable alternatives (from the comparison pages) for
 // functions with a genuine cross-app gap. cmp = comparison slug to link, if any.
 const MIG={
@@ -474,67 +501,154 @@ function cmpVer(a,b){ const pa=String(a==null?'':a).split('.'), pb=String(b==nul
   return 0; }
 function loTarget(){ const el=document.getElementById('lov');
   const v=el?el.value:LO_LATEST; return LO_RELEASES.indexOf(v)>=0?v:LO_LATEST; }
+// Blocker prose for the Excel-for-the-web target. Three distinct situations,
+// and collapsing them is the mistake this whole engine split exists to stop:
+//   * transport skip -- the workbook never opened, so NOTHING was measured;
+//   * xwv 'unsupported' -- it opened, ran, and returned #NAME?;
+//   * no verdict at all and no desktop documentation either.
+function xwWhy(fn,d,m){
+  const tail=(m?' '+m.r:'');
+  if(XW_TRANSPORT_SKIPS.indexOf(fn)>=0)
+    return 'No verdict, and not a missing function: it <strong>could not be executed in Excel for the web: its file-open rejects workbooks carrying this serialization</strong> — the <code>_xlpm.</code>/<code>LAMBDA</code> storage form Excel itself writes into <code>.xlsx</code>. The workbook was refused before any cell was calculated, so nothing about this function was measured in the web app. Microsoft documents it for desktop Excel; treat it as unverified in Excel Online and check it by hand.'+(m?' Portability elsewhere: '+m.r:'');
+  if(d&&d.xwv==='unsupported')
+    return 'Executed in Excel for the web on '+xwDate(d)+' and not recognized — it returns #NAME? there. Excel for the web is a rolling service with no version to pin, so this is what it did on that date. This is the web app, not desktop Excel.'+tail;
+  return 'Not in our executed Excel-for-the-web set, and Microsoft’s function reference — which documents the <strong>desktop</strong> product, not the web app — does not list it either. The only basis here is documentation for desktop Excel, which is not a web measurement.'+tail;
+}
+// Functions the Excel-for-the-web target passed on DOCUMENTATION rather than
+// on a measurement. Listed explicitly, because the fallback flag (d.x) is
+// Microsoft's reference for the DESKTOP product and letting it pass silently
+// would present a desktop documentation guess as a web result.
+function xwUnmeasuredBlock(fns,db,gdb){
+  let h='<p style="font-weight:600;color:#6b7280;margin-top:1rem">'+fns.length+' function'+(fns.length>1?'s':'')+' could not be checked against a run of Excel for the web. The verdict above falls back to Microsoft&rsquo;s <strong>documentation for desktop Excel</strong> — that is not a measurement of the web app — so verify these in Excel Online yourself:</p><ul>';
+  for(const fn of fns){ const d=db[fn];
+    const why=(XW_TRANSPORT_SKIPS.indexOf(fn)>=0)
+      ? 'could not be executed in Excel for the web: its file-open rejects workbooks carrying this serialization'
+      : ((d&&d.xwv==='inconclusive')?'our Excel-for-the-web run drew no verdict for it':'absent from our executed Excel-for-the-web set');
+    h+='<li style="margin-bottom:.4rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> — '+why+'; documented by Microsoft for desktop Excel, which is what this report fell back on.';
+    h+=guideLine(fn,gdb);
+    h+='</li>'; }
+  return h+'</ul>'; }
 function migrate(fs,db,tg,gdb){
   const tv=loTarget();
   // Older than lnew = executed #NAME? in that release, so it is a blocker.
   const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
-  // Executed verdicts win over documentation flags for both engines this
-  // checker can target (LibreOffice and Google Sheets). Excel for the web is
-  // executed too, but it is not a migration target here -- see the quirks page
-  // for its results.
-  // A Sheets "inconclusive" tells us nothing, so it falls back to the doc flag.
-  const okIn=(d)=> tg==='l' ? (tooNew(d)?false:((d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l))
-    : (tg==='x' ? d.x
-      : ((d.gv && d.gv!=='inconclusive') ? (d.gv!=='unsupported') : d.g));
+  const xwTransport=(fn)=> XW_TRANSPORT_SKIPS.indexOf(fn)>=0;
+  // Executed verdicts win over documentation flags for all three engines this
+  // checker EXECUTES: LibreOffice (lv), Google Sheets (gv) and Excel for the
+  // web (xwv). The web engine is measured -- an .xlsx uploaded to OneDrive,
+  // recalculated on open in Excel Online, downloaded and read back -- so an
+  // Excel-web target is an execution target, not a documentation one. Only
+  // the DESKTOP Excel target (tg==='x') is documentation-based, and its own
+  // wording says so.
+  // An 'inconclusive' verdict tells us nothing, so it falls back to a
+  // documentation flag. For Excel for the web there is no web documentation
+  // flag -- Microsoft publishes one function reference and it describes the
+  // desktop product -- so the fallback is d.x, the DESKTOP flag, and every
+  // function decided that way is listed as unmeasured below rather than
+  // quietly counted as a web result. The seven LAMBDA-family functions in
+  // XW_TRANSPORT_SKIPS get no fallback at all: the web app refused to open
+  // the workbook, so we say that instead of guessing either way.
+  const xwOk=(d,fn)=> (d.xwv && d.xwv!=='inconclusive') ? (d.xwv!=='unsupported')
+    : (xwTransport(fn) ? false : !!d.x);
+  const okIn=(d,fn)=> tg==='l' ? (tooNew(d)?false:((d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l))
+    : (tg==='xw' ? xwOk(d,fn)
+      : (tg==='x' ? d.x
+        : ((d.gv && d.gv!=='inconclusive') ? (d.gv!=='unsupported') : d.g)));
   const tname=tg==='l'?TGT_NAME[tg]+' '+tv:TGT_NAME[tg];
-  let blockers=[], quirks=[];
+  let blockers=[], quirks=[], unmeasured=[], known=0;
   for(const fn of fs){ const d=db[fn]; if(!d) continue;
-    if(!okIn(d)){ blockers.push(fn); continue; }
+    known++;
+    if(!okIn(d,fn)){ blockers.push(fn); continue; }
+    // Passed on documentation for the DESKTOP product rather than on a web run.
+    if(tg==='xw' && (!d.xwv || d.xwv==='inconclusive')) unmeasured.push(fn);
     // Runs in the target but returns a value that diverges from Excel's
-    // documentation. Only Google Sheets and LibreOffice are offered as targets
-    // here, so a quirk is claimed only for those two -- never for desktop Excel
-    // (tg==='x'), whose column is documentation, not a measured run. Excel for
-    // the web IS executed, but it has no target in this tool yet.
-    const qv = tg==='l' ? d.lv : (tg==='g' ? d.gv : null);
+    // documentation. Claimed only for the three engines we actually EXECUTE
+    // -- LibreOffice (lv), Google Sheets (gv), Excel for the web (xwv).
+    // Never for desktop Excel (tg==='x'): that column is Microsoft's
+    // documentation, so there is no measurement of ours to diverge from it.
+    const qv = tg==='l' ? d.lv : (tg==='g' ? d.gv : (tg==='xw' ? d.xwv : null));
     if(qv==='quirky') quirks.push(fn);
   }
-  let h='<h2 class="section-title" style="margin-top:1.4rem">Migration to '+tname+'</h2>';
-  if(!blockers.length && !quirks.length){ h+='<p style="color:#0a7a2f;font-weight:600">All recognized functions work in '+tname+' and match documented behaviour. This formula should port cleanly.</p>'; return h; }
+  const xwLabel = tg==='xw' ? xwDateLabel(fs,db) : '';
+  let h='<h2 class="section-title" style="margin-top:1.4rem">Migration to '+tname+((tg==='xw'&&xwLabel)?' ('+xwLabel+')':'')+'</h2>';
+  // "Target:" line -- same convention as the Migration Audit's report header,
+  // and for the web engine it carries the executed date label rather than a
+  // version, because Excel for the web is a rolling service with no version.
+  const basis = tg==='xw'
+    ? (xwLabel
+        ? 'Excel for the web, '+xwLabel+'. Those cases were uploaded to OneDrive, recalculated on open in Excel Online, downloaded and read back. This measures the <strong>web</strong> application only — it is a separate implementation from desktop Excel, which we do not run.'
+        : 'Excel for the web — but <strong>nothing in this formula was measured there</strong>. Our most recent Excel-web run was '+XW_RUN_DATE+'; every function below is reported on some other basis, named on its own line. This target measures the <strong>web</strong> application only, a separate implementation from desktop Excel, which we do not run.')
+    : (tg==='l' ? 'LibreOffice Calc '+tv+' — executed by us in that pinned build.'
+      : (tg==='g' ? 'Google Sheets — executed by us via Drive import; each verdict carries its own run date.'
+        : 'Excel for Windows/Mac (desktop) — <strong>documentation only</strong>. Verdicts come from Microsoft’s published function reference, not from a run of ours, so this report can name a missing function but never a value quirk.'));
+  h+='<p style="font-size:.9em;color:var(--text-muted,#6b7280);margin:.15rem 0 .7rem"><strong>Target:</strong> '+basis+'</p>';
+  if(!known){
+    h+='<p style="color:#888">No function in this formula is in our dataset, so there is nothing to report for this target.</p>';
+    return h; }
+  if(!blockers.length && !quirks.length){
+    let allclear;
+    if(tg==='xw'){
+      const meas=known-unmeasured.length;
+      allclear = (unmeasured.length===0)
+        ? 'All '+known+' recognized function'+(known===1?' was':'s were')+' executed in Excel for the web ('+xwLabel+'), and every executed case returned the value Microsoft documents. This formula should port cleanly.'
+        : meas+' of '+known+' recognized functions ran in Excel for the web ('+xwLabel+') with no case diverging from Microsoft&rsquo;s documented result. The other '+unmeasured.length+' were not measured there — listed below — so this is not an all-clear for them.';
+    } else if(tg==='x'){
+      allclear = 'All recognized functions are in Microsoft&rsquo;s documented function set for desktop Excel. That is a documentation check, not a run — we do not execute desktop Excel — so it cannot tell you whether a value differs.';
+    } else {
+      allclear = 'All recognized functions work in '+tname+' and match documented behaviour. This formula should port cleanly.';
+    }
+    h+='<p style="color:#0a7a2f;font-weight:600">'+allclear+'</p>';
+    if(tg==='xw' && unmeasured.length) h+=xwUnmeasuredBlock(unmeasured,db,gdb);
+    return h; }
   if(blockers.length){
-  h+='<p style="font-weight:600;color:#c02020">'+blockers.length+' function'+(blockers.length>1?'s':'')+' need attention:</p><ul>';
+  h+='<p style="font-weight:600;color:#c02020">'+blockers.length+' function'+(blockers.length>1?'s need':' needs')+' attention:</p><ul>';
   for(const fn of blockers){ const m=MIG[fn]; const d=db[fn];
     const why=tooNew(d)
       ? 'Returns #NAME? in LibreOffice '+tv+' (executed) — it works since '+d.lnew+', the earliest release we tested it working in. Upgrading LibreOffice to '+d.lnew+' or later is the fix.'+(m?' '+m.r:'')
-      : (m?m.r:'not available in '+tname+' (see its page for details).');
+      : (tg==='xw' ? xwWhy(fn,d,m)
+        : (m?m.r:'not available in '+tname+' (see its page for details).'));
     h+='<li style="margin-bottom:.5rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> — '+why;
-    if(m&&m.cmp) h+=' <a href="'+CMP_BASE+m.cmp+'.html" style="font-size:.9em">compare →</a>';
+    if(m&&m.cmp) h+=' <a href="'+CMP_BASE+m.cmp+'.html" style="font-size:.9em">compare &rarr;</a>';
     h+=guideLine(fn,gdb);
     h+='</li>';
   }
   h+='</ul><p style="font-size:.9em;color:#888">Alternatives are hand-verified from our comparison pages. This report flags what breaks; it does not auto-rewrite your formula.</p>';
   }
   if(quirks.length){
-    h+='<p style="font-weight:600;color:#b8860b;margin-top:1rem">'+quirks.length+' function'+(quirks.length>1?'s':'')+' run'+(quirks.length===1?'s':'')+' in '+tname+' but can return a <strong>different value</strong> than Excel documents &mdash; these port without erroring, so verify the result:</p><ul>';
+    const qn=quirks.length+' function'+(quirks.length>1?'s':'')+' run'+(quirks.length===1?'s':'');
+    const qhead = tg==='xw'
+      ? qn+' in Excel for the web but returned a <strong>different value</strong> than Microsoft&rsquo;s documentation describes. That documentation describes <strong>desktop</strong> Excel, and we do not run desktop Excel, so we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both. These port without erroring, so verify the result:'
+      : qn+' in '+tname+' but can return a <strong>different value</strong> than Excel documents &mdash; these port without erroring, so verify the result:';
+    h+='<p style="font-weight:600;color:#b8860b;margin-top:1rem">'+qhead+'</p><ul>';
     for(const fn of quirks){
-      h+='<li style="margin-bottom:.4rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> &mdash; executed quirk in '+TGT_NAME[tg]+'; the function page shows the exact input and the value it returns.';
+      h+='<li style="margin-bottom:.4rem"><a href="'+FUNC_BASE+fn.toLowerCase()+'.html"><strong>'+fn+'</strong></a> &mdash; executed quirk in '+TGT_NAME[tg]+(tg==='xw'?' ('+xwDate(db[fn])+')':'')+'; the function page shows the exact input and the value it returns.';
       h+=guideLine(fn,gdb);
       h+='</li>';
     }
     h+='</ul>';
   }
+  if(tg==='xw' && unmeasured.length) h+=xwUnmeasuredBlock(unmeasured,db,gdb);
   return h;
 }
 async function check(){
   const db=await load(); const gdb=await loadGuides(); const fs=funcs(document.getElementById('f').value); const out=document.getElementById('out');
   if(!fs.length){ out.innerHTML='<p>No functions found. Try a formula like <code>=SUMIF(A:A,"x",B:B)</code>.</p>'; return; }
-  let rows='', xAll=true,gAll=true,lAll=true, unknown=[];
+  let rows='', xAll=true,gAll=true,lAll=true, xwBad=false, xwGap=false, unknown=[];
   for(const fn of fs){ const d=db[fn]; if(!d){ unknown.push(fn); continue; }
     const lok=(d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l;
     const gok=(d.gv&&d.gv!=='inconclusive')?(d.gv!=='unsupported'):d.g;
+    // Excel for the web is summarised from its EXECUTED verdict only. A
+    // function with no web verdict does not borrow the desktop documentation
+    // flag here -- it is reported as a gap, so "works" in this line never
+    // covers a function the web app was never asked to calculate.
+    if(d.xwv==='unsupported') xwBad=true; else if(!d.xwv||d.xwv==='inconclusive') xwGap=true;
     xAll=xAll&&d.x; gAll=gAll&&gok; lAll=lAll&&lok;
     rows+='<tr><td><a href="'+FUNC_BASE+fn.toLowerCase()+'.html">'+fn+'</a>'+guideLine(fn,gdb)+'</td><td>'+yn(d.x)+'</td><td>'+xw(d)+'</td><td>'+gs(d)+'</td><td>'+lo(d)+'</td></tr>'; }
   const say=ok=>ok?'<span style="color:#0a7a2f">works</span>':'<span style="color:#c02020">has an unsupported function</span>';
-  let html='<p style="font-weight:600;margin:1rem 0">Excel: '+say(xAll)+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
+  const sayXw=xwBad?'<span style="color:#c02020">has an unsupported function</span>'
+    :(xwGap?'<span style="color:#0a7a2f">works</span> <span style="color:#888">where we measured it</span>'
+      :'<span style="color:#0a7a2f">works</span>');
+  let html='<p style="font-weight:600;margin:1rem 0">Excel, desktop (documented): '+say(xAll)+' &middot; Excel for the web (executed): '+sayXw+' &middot; Google Sheets: '+say(gAll)+' &middot; LibreOffice: '+say(lAll)+'</p>';
   html+='<div class="table-scroll"><table class="matrix"><thead><tr><th>Function</th><th>Excel, desktop (documented)</th><th>Excel for the web (executed)</th><th>Google Sheets (executed)</th><th>LibreOffice (executed)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   if(unknown.length) html+='<p style="color:#888">Not in our database (may be a name, cell range, or newer function): '+unknown.join(', ')+'</p>';
   const tg=target(); if(tg) html+=migrate(fs,db,tg,gdb);
