@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRIM strips tabs and line breaks in Google Sheets but keeps them in Excel and LibreOffice</title>
+<meta name="description" content="Executed evidence: =TRIM(CHAR(9)&amp;&#34;Hello&#34;) keeps the tab in Excel for the web and in all four LibreOffice builds, but Google Sheets strips it (and line feeds too). Non-breaking spaces survive TRIM everywhere. The portable fix, with dates and per-engine provenance.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/trim-tab-newline-nonbreaking-space-google-sheets-vs-excel-libreoffice.html">
+<meta property="og:title" content="TRIM strips tabs and line breaks in Google Sheets but keeps them in Excel and LibreOffice">
+<meta property="og:description" content="Executed evidence: =TRIM(CHAR(9)&amp;&#34;Hello&#34;) keeps the tab in Excel for the web and in all four LibreOffice builds, but Google Sheets strips it (and line feeds too). Non-breaking spaces survive TRIM everywhere. The portable fix, with dates and per-engine provenance.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/trim-tab-newline-nonbreaking-space-google-sheets-vs-excel-libreoffice.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"TRIM strips tabs and line breaks in Google Sheets but keeps them in Excel and LibreOffice","item":"https://canispreadsheet.com/guides/trim-tab-newline-nonbreaking-space-google-sheets-vs-excel-libreoffice.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.9rem; justify-content: flex-end; }
+nav.site-nav a { color: var(--text-muted); font-weight: 500; font-size: 0.95rem; white-space: nowrap; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>TRIM and non-space whitespace: tabs and line feeds vanish in Google Sheets, survive in Excel and LibreOffice</h1>
+
+<p><code>TRIM</code> is the function everyone reaches for after pasting data out of a web page or a
+text file. Microsoft is explicit about what it does: it &ldquo;was designed to trim the 7-bit ASCII
+space character (value 32) from text&rdquo; &mdash; the ordinary space, and nothing else. LibreOffice
+Calc follows that rule exactly. <strong>Google Sheets does not.</strong> In Sheets a leading tab
+(<code>CHAR(9)</code>) or line feed (<code>CHAR(10)</code>) is stripped by <code>TRIM</code> along
+with the spaces, so the same formula over the same text returns a string of a different length
+depending on which application opened the file.</p>
+
+<div class="quirk-box">
+  <h3>The surprise</h3>
+  <p>Nothing errors. <code>TRIM</code> returns text in every engine; only the invisible characters at
+  the front differ. A key column cleaned with <code>TRIM</code> loses its leading tab in Google Sheets
+  and keeps it in Excel and LibreOffice, so <code>LEN</code> disagrees by one,
+  <code>VLOOKUP</code> and <code>XLOOKUP</code> miss on rows that look identical on screen, and
+  <code>COUNTIF</code> totals drift &mdash; all without a single visible symptom. Web-pasted data
+  makes this common rather than exotic: HTML is full of tabs, newlines and
+  <code>&amp;nbsp;</code> non-breaking spaces, and <code>TRIM</code> alone removes none of the
+  last kind anywhere.</p>
+</div>
+
+<h2 class="section-title">A minimal example</h2>
+<p>Put a tab in front of a word and ask how long the trimmed result is. Six means the tab survived;
+five means it was stripped.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Excel for the web</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=TRIM(CHAR(9)&amp;"Hello")</td><td>tab kept</td><td>tab kept (executed 2026-09-01)</td><td>tab stripped (executed 2026-08-29)</td><td class="result">tab kept</td></tr>
+    <tr><td class="formula">=LEN(TRIM(CHAR(9)&amp;"Hello"))</td><td>6</td><td>&mdash;</td><td>5 (hand-checked 2026-09-04)</td><td class="result">6</td></tr>
+    <tr><td class="formula">=CODE(TRIM(CHAR(9)&amp;"Hello"))</td><td>9</td><td>&mdash;</td><td>72 (hand-checked 2026-09-04)</td><td class="result">9</td></tr>
+    <tr><td class="formula">=LEN(TRIM(CHAR(10)&amp;"Hello"))</td><td>6</td><td>&mdash;</td><td>5 (hand-checked 2026-09-04)</td><td class="result">6</td></tr>
+    <tr><td class="formula">=LEN(TRIM("  a  b  ")) <em>(two spaces at each gap)</em></td><td>3</td><td>&mdash;</td><td>3 (hand-checked 2026-09-04)</td><td class="result">3</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Row three is the clearest reading of the divergence: <code>CODE</code> of the first surviving
+character is <code>9</code> (the tab itself) in LibreOffice and <code>72</code> (the letter
+<code>H</code>) in Google Sheets. The last row is the control &mdash; with ordinary spaces only,
+every engine collapses a string of two spaces, <code>a</code>, two spaces, <code>b</code>, two spaces down to
+<code>a b</code>, length 3. What diverges is non-space whitespace, not <code>TRIM</code>&rsquo;s core behaviour.</p>
+<p>The <em>Excel, desktop</em> column is Microsoft&rsquo;s documented behaviour recorded in our test
+corpus, not a measurement. The <em>Excel for the web</em> column is our dated recalculation run; a
+dash means that formula is not in the corpus the web run covered, so we have no measurement to
+publish and are not guessing one. The Google Sheets figures marked &ldquo;executed&rdquo; come from
+our dated Drive-import run; the ones marked &ldquo;hand-checked&rdquo; were typed into a live Google
+sheet on 2026-09-04 and read back, which is weaker provenance than a harness run and is labelled so.
+The LibreOffice column is what our harness read back after recalculating the workbook, and
+<strong>24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3 all returned the same values</strong>, so this is
+settled behaviour rather than a version difference.</p>
+
+<h2 class="section-title">Non-breaking spaces, and the invisible characters nobody trims</h2>
+<p>The non-breaking space (U+00A0, the HTML <code>&amp;nbsp;</code>) is the character that actually
+survives everywhere. Microsoft says so outright: &ldquo;by itself, the TRIM function does not remove
+the nonbreaking space character (which has a decimal value of 160)&rdquo;. Our executed runs agree, and
+so does the zero-width space (U+200B):</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Excel for the web</th><th>Google Sheets</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">=TRIM(CHAR(160)&amp;"Hello"&amp;CHAR(160))</td><td>both kept</td><td>both kept (executed 2026-09-01)</td><td>both kept (executed 2026-08-29)</td><td class="result">both kept, but they are U+FFFD, not U+00A0 &mdash; see below</td></tr>
+    <tr><td class="formula">=LEN(TRIM(UNICHAR(160)&amp;"Hello"&amp;UNICHAR(160)))</td><td>7</td><td>&mdash;</td><td>&mdash;</td><td class="result">7</td></tr>
+    <tr><td class="formula">=UNICODE(TRIM(UNICHAR(160)&amp;"Hello"&amp;UNICHAR(160)))</td><td>160</td><td>&mdash;</td><td>160 (hand-checked 2026-09-04)</td><td class="result">160</td></tr>
+    <tr><td class="formula">=LEN(TRIM(UNICHAR(8203)&amp;"Hello"))</td><td>6</td><td>&mdash;</td><td>6 (hand-checked 2026-09-04)</td><td class="result">6</td></tr>
+    <tr><td class="formula">=UNICODE(CHAR(160))</td><td>160</td><td>&mdash;</td><td>160 (hand-checked 2026-09-04)</td><td class="result">65533</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Read the last row before the ones above it, because it changes what they mean. On our Linux build
+LibreOffice&rsquo;s <code>CHAR(160)</code> does not produce a non-breaking space at all: it produces
+U+FFFD, the Unicode replacement character. LibreOffice&rsquo;s own help defines <code>CHAR</code> as
+converting &ldquo;a number into a character according to the current code table&rdquo;, so this is a
+code-table effect and may well differ on another platform or locale &mdash; we have executed it on
+one Linux machine, across all four builds, and that is the extent of what we know. Excel&rsquo;s
+<code>CHAR</code> maps through the Windows-1252 code page, where 160 <em>is</em> the non-breaking
+space, which is why Microsoft can call <code>CHAR(160)</code> the nbsp character; Google Sheets
+matches Excel here.</p>
+<p>So the corpus row where LibreOffice appears to mangle <code>TRIM(CHAR(160)&amp;…)</code> is not a
+<code>TRIM</code> bug. Feed LibreOffice a <em>real</em> non-breaking space with
+<code>UNICHAR(160)</code> and <code>TRIM</code> leaves it alone exactly as Excel documents:
+length 7, first code point 160, identical in all four builds. <code>UNICHAR</code> is the portable
+spelling; <code>CHAR</code> is not.</p>
+
+<h2 class="section-title">The portable fix</h2>
+<p>Do not ask <code>TRIM</code> to normalise anything but spaces. Convert the non-breaking spaces to
+real spaces first, strip the control characters with <code>CLEAN</code>, then let <code>TRIM</code>
+do its one job:</p>
+<p><code>=TRIM(CLEAN(SUBSTITUTE(A1,UNICHAR(160)," ")))</code></p>
+<p>Each layer is doing something the others cannot. <code>SUBSTITUTE</code> handles the non-breaking
+space, which no engine trims. <code>CLEAN</code> removes ASCII codes 0 through 31, which covers both
+the tab and the line feed &mdash; our corpus case <code>=CLEAN(CHAR(9)&amp;"Hello")</code> returned
+<code>Hello</code> in every engine we run, including all four LibreOffice builds, so this is the part
+of the chain that behaves the same everywhere. <code>TRIM</code> then collapses the spaces, which is
+the one thing it is defined to do.</p>
+<p>Two caveats. <code>UNICHAR</code> needs Excel 2013 or later; it is available in Google Sheets and
+in every LibreOffice build we test. If you must support older Excel, write
+<code>SUBSTITUTE(A1,CHAR(160)," ")</code> instead and accept that on LibreOffice the
+<code>CHAR(160)</code> argument depends on the code table, as the table above shows. And
+<code>CLEAN</code> does not touch the zero-width space (U+200B), because U+200B is not an ASCII
+control character &mdash; add <code>SUBSTITUTE(…,UNICHAR(8203),"")</code> if your source data has
+them.</p>
+
+<h2 class="section-title">What each app documents</h2>
+<p>Microsoft&rsquo;s <a href="https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9">TRIM
+reference</a> is the precise one: the 7-bit ASCII space, value 32, and a separate paragraph warning
+that the non-breaking space is not removed. Google&rsquo;s TRIM documentation says only
+&ldquo;Removes leading, trailing, and repeated spaces in text&rdquo; &mdash; it does not mention tabs
+or line feeds anywhere, so the stripping we measured in Sheets is <strong>undocumented</strong>
+behaviour, not a documented extension. LibreOffice documents TRIM as removing spaces and matches
+Microsoft. That asymmetry is worth knowing when you decide which engine to treat as the reference:
+the behaviour you can rely on across all three is the narrow one.</p>
+<p>Function pages with the full executed matrix:
+<a href="../functions/trim.html">TRIM</a>,
+<a href="../functions/char.html">CHAR</a>,
+<a href="../functions/clean.html">CLEAN</a>,
+<a href="../functions/substitute.html">SUBSTITUTE</a>,
+<a href="../functions/unichar.html">UNICHAR</a>.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<p><strong>A note on which Excel this is.</strong> The Excel column in the tables above is Microsoft&rsquo;s documented behaviour for <strong>desktop</strong> Excel, as recorded in our test corpus &mdash; we do not run desktop Excel, and no value in that column is a measurement. <strong>Excel for the web is a different application with its own calculation engine, and that one we do run</strong> (recalculated on OneDrive, 2026-09-01); it kept the tab and both non-breaking spaces, matching documented desktop Excel and LibreOffice, and unlike Google Sheets. Only the two corpus cases were covered by that run, which is why the other rows in its column are dashes. Because we have no desktop run to compare against, a disagreement between an Excel-web measurement and the documented column is genuinely ambiguous: it may mean the web engine diverges from the desktop one, or that the documentation is wrong about both. We do not claim to know which.</p>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

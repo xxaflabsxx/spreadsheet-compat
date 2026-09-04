@@ -26,6 +26,62 @@
       "formula": "=TRIM(\"No Extra Spaces\")",
       "description": "A string with only single spaces between words passes through unchanged",
       "expected": "No Extra Spaces"
+    },
+    {
+      "id": "TRIM_tab_len",
+      "formula": "=LEN(TRIM(CHAR(9)&\"Hello\"))",
+      "description": "Length probe for the leading-tab case: if TRIM leaves the tab in place the result is 6 (tab + 5 letters); an engine that also strips tabs returns 5",
+      "expected": 6,
+      "expected_note": "Microsoft docs: \"the TRIM function was designed to trim the 7-bit ASCII space character (value 32) from text\", so a tab (CHAR(9)) survives and LEN stays 6. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_tab_code",
+      "formula": "=CODE(TRIM(CHAR(9)&\"Hello\"))",
+      "description": "Identity probe for the same case: CODE of the first surviving character is 9 (the tab) if TRIM left it alone, and 72 (the letter H) if the engine stripped it",
+      "expected": 9,
+      "expected_note": "Numeric companion to TRIM_tab_not_removed -- CODE() makes the difference comparable across engines without depending on how a reader renders a tab. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_linefeed_len",
+      "formula": "=LEN(TRIM(CHAR(10)&\"Hello\"))",
+      "description": "Same probe for a leading line feed (CHAR(10)): 6 if the line feed survives TRIM, 5 if the engine strips it",
+      "expected": 6,
+      "expected_note": "CHAR(10) is not the ASCII space (32), so documented Excel TRIM leaves it untouched. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_unichar_tab_len",
+      "formula": "=LEN(TRIM(UNICHAR(9)&\"Hello\"))",
+      "description": "The tab probe written with UNICHAR instead of CHAR, so the code point is unambiguous and does not depend on the engine's current code table",
+      "expected": 6,
+      "expected_note": "UNICHAR(9) is U+0009 on every engine; CHAR(9) depends on the active code table (LibreOffice help: CHAR \"converts a number into a character according to the current code table\"). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_unichar_nonbreaking_space_len",
+      "formula": "=LEN(TRIM(UNICHAR(160)&\"Hello\"&UNICHAR(160)))",
+      "description": "A genuine non-breaking space (U+00A0) on each side of the text: 7 if TRIM keeps both, 5 if an engine treats them as trimmable whitespace",
+      "expected": 7,
+      "expected_note": "Microsoft docs: \"by itself, the TRIM function does not remove the nonbreaking space character (which has a decimal value of 160 ...)\", so both non-breaking spaces survive and LEN stays 7. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_unichar_nonbreaking_space_unicode",
+      "formula": "=UNICODE(TRIM(UNICHAR(160)&\"Hello\"&UNICHAR(160)))",
+      "description": "Identity probe for the same string: the first surviving character must still be the non-breaking space, code point 160",
+      "expected": 160,
+      "expected_note": "Written with UNICHAR rather than CHAR so the input is a real U+00A0 regardless of the engine's code table; pairs with TRIM_nonbreaking_space_not_removed, which uses CHAR(160). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_zero_width_space_len",
+      "formula": "=LEN(TRIM(UNICHAR(8203)&\"Hello\"))",
+      "description": "A leading zero-width space (U+200B) -- invisible, but not the ASCII space -- so TRIM should leave it and LEN should stay 6",
+      "expected": 6,
+      "expected_note": "TRIM targets only the 7-bit ASCII space (32); U+200B is neither that nor a control character (so CLEAN does not remove it either). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+    },
+    {
+      "id": "TRIM_ordinary_space_collapse_len",
+      "formula": "=LEN(TRIM(\"  a  b  \"))",
+      "description": "Control case: ordinary spaces only. Leading and trailing runs are stripped and the interior run collapses to one space, leaving \"a b\" -- length 3",
+      "expected": 3,
+      "expected_note": "Baseline showing that the divergences in the other cases are about NON-space whitespace, not about TRIM's core space handling. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
     }
   ]
 }

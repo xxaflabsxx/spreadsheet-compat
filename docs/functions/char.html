@@ -328,7 +328,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-04</p>
 
 
 <p class="lede">Real compatibility results for the <strong>CHAR</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
@@ -384,7 +384,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <tr>
   <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-29)</td>
+  <td>Yes (25.8.7.3, 2026-09-04)</td>
   <td>
     
       <span class="badge badge-quirk">Quirk found</span>
@@ -408,25 +408,25 @@ CHAR&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <tr class="">
   <td>24.2.0.3</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-08-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>24.8.7.2</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-08-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>25.2.0.3</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-08-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>25.8.7.3</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 </tbody>
@@ -518,6 +518,16 @@ against those cases before assuming your data is wrong.</p>
       </li>
       
     
+      
+    
+      
+      <li>
+        <span class="formula">=UNICODE(CHAR(160))</span> on
+        <strong>LibreOffice Calc</strong> returned
+        <span class="formula">65533</span>, but the documented/expected
+        result is <span class="formula">160</span>.
+        Excel&#39;s CHAR maps its argument through the Windows-1252 (ANSI) code page, where 160 is the non-breaking space -- which is why Microsoft&#39;s TRIM page can call CHAR(160) &#34;the nonbreaking space character ... commonly used in web pages as the HTML entity &amp;nbsp;&#34; (https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9). LibreOffice&#39;s help instead defines CHAR as converting &#34;a number into a character according to the current code table&#34;, so the result is platform/locale dependent there; UNICHAR(160) is the portable spelling. Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a; MISMATCH vs expected: expected 160, got 65533
+      </li>
       
     
   
@@ -625,7 +635,7 @@ against those cases before assuming your data is wrong.</p>
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-04)</h3>
 
 <div class="table-scroll">
 <table class="cases">
@@ -664,6 +674,14 @@ against those cases before assuming your data is wrong.</p>
   <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
+<tr>
+  <td class="formula mono">=UNICODE(CHAR(160))</td>
+  <td>What character does CHAR(160) actually produce? In Excel it is the non-breaking space (U+00A0), so UNICODE of it is 160; an engine using a different code table returns something else</td>
+  <td class="result mono">65533</td>
+  <td class="result mono">160<br><span class="category-tag">Excel&#39;s CHAR maps its argument through the Windows-1252 (ANSI) code page, where 160 is the non-breaking space -- which is why Microsoft&#39;s TRIM page can call CHAR(160) &#34;the nonbreaking space character ... commonly used in web pages as the HTML entity &amp;nbsp;&#34; (https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9). LibreOffice&#39;s help instead defines CHAR as converting &#34;a number into a character according to the current code table&#34;, so the result is platform/locale dependent there; UNICHAR(160) is the portable spelling. Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a</span></td>
+  <td><span class="verdict-bad">Mismatch</span></td>
+</tr>
+
 </tbody>
 </table>
 </div>
@@ -696,7 +714,7 @@ against those cases before assuming your data is wrong.</p>
 
 <h2 class="section-title">Where CHAR behaves differently</h2>
 <ul>
-<li><a href="../guides/char-unichar-zero-excel-vs-libreoffice.html">CHAR(0) and UNICHAR(0): Excel #VALUE! vs a NUL character in LibreOffice</a><br><span class="category-tag">Excel documents CHAR(0) and UNICHAR(0) as #VALUE!. LibreOffice Calc returns a NUL control character instead — the value our harness read back as the literal text _x0000_.</span></li><li><a href="../guides/fvschedule-text-in-schedule-excel-vs-google-sheets-libreoffice.html">FVSCHEDULE: LibreOffice drops text in the rate schedule</a><br><span class="category-tag">Microsoft documents any non-numeric value in FVSCHEDULE&#39;s schedule as #VALUE!. Executed, LibreOffice 25.8.7.3 returns 1.09 for =FVSCHEDULE(1,A1:A2) with A2 = &#34;x&#34; - a compounding period silently dropped - while Google Sheets returns #VALUE! as documented.</span></li>
+<li><a href="../guides/char-unichar-zero-excel-vs-libreoffice.html">CHAR(0) and UNICHAR(0): Excel #VALUE! vs a NUL character in LibreOffice</a><br><span class="category-tag">Excel documents CHAR(0) and UNICHAR(0) as #VALUE!. LibreOffice Calc returns a NUL control character instead — the value our harness read back as the literal text _x0000_.</span></li><li><a href="../guides/fvschedule-text-in-schedule-excel-vs-google-sheets-libreoffice.html">FVSCHEDULE: LibreOffice drops text in the rate schedule</a><br><span class="category-tag">Microsoft documents any non-numeric value in FVSCHEDULE&#39;s schedule as #VALUE!. Executed, LibreOffice 25.8.7.3 returns 1.09 for =FVSCHEDULE(1,A1:A2) with A2 = &#34;x&#34; - a compounding period silently dropped - while Google Sheets returns #VALUE! as documented.</span></li><li><a href="../guides/trim-tab-newline-nonbreaking-space-google-sheets-vs-excel-libreoffice.html">TRIM strips tabs and line breaks in Google Sheets but keeps them in Excel and LibreOffice</a><br><span class="category-tag">Executed evidence: =TRIM(CHAR(9)&amp;&#34;Hello&#34;) keeps the tab in Excel for the web and in all four LibreOffice builds, but Google Sheets strips it (and line feeds too). Non-breaking spaces survive TRIM everywhere. The portable fix, with dates and per-engine provenance.</span></li>
 </ul>
 
 

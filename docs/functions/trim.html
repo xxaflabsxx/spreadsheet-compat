@@ -328,7 +328,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Text &middot; Last tested 2026-09-01</p>
+<p class="category-tag">Category: Text &middot; Last tested 2026-09-04</p>
 
 
 <p class="lede">Real compatibility results for the <strong>TRIM</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
@@ -384,7 +384,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <tr>
   <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060110.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-07-29)</td>
+  <td>Yes (25.8.7.3, 2026-09-04)</td>
   <td>
     
       <span class="badge badge-quirk">Quirk found</span>
@@ -408,25 +408,25 @@ TRIM&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <tr class="">
   <td>24.2.0.3</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-08-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>24.8.7.2</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-08-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>25.2.0.3</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-08-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>25.8.7.3</td>
   <td><span class="badge badge-quirk">Quirk found</span></td>
-  <td>2026-07-29</td>
+  <td>2026-09-04</td>
 </tr>
 
 </tbody>
@@ -508,6 +508,22 @@ against those cases before assuming your data is wrong.</p>
         result is <span class="formula"> Hello </span>.
         Microsoft docs state explicitly: &#34;by itself, the TRIM function does not remove the nonbreaking space character (which has a decimal value of 160 and is commonly used in web pages as the HTML entity  ).&#34; Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9; MISMATCH vs expected: expected &#39;\xa0Hello\xa0&#39;, got &#39;�Hello�&#39;
       </li>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
       
     
       
@@ -617,7 +633,7 @@ against those cases before assuming your data is wrong.</p>
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-04)</h3>
 
 <div class="table-scroll">
 <table class="cases">
@@ -656,6 +672,70 @@ against those cases before assuming your data is wrong.</p>
   <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
+<tr>
+  <td class="formula mono">=LEN(TRIM(CHAR(9)&amp;&#34;Hello&#34;))</td>
+  <td>Length probe for the leading-tab case: if TRIM leaves the tab in place the result is 6 (tab + 5 letters); an engine that also strips tabs returns 5</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6<br><span class="category-tag">Microsoft docs: &#34;the TRIM function was designed to trim the 7-bit ASCII space character (value 32) from text&#34;, so a tab (CHAR(9)) survives and LEN stays 6. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=CODE(TRIM(CHAR(9)&amp;&#34;Hello&#34;))</td>
+  <td>Identity probe for the same case: CODE of the first surviving character is 9 (the tab) if TRIM left it alone, and 72 (the letter H) if the engine stripped it</td>
+  <td class="result mono">9</td>
+  <td class="result mono">9<br><span class="category-tag">Numeric companion to TRIM_tab_not_removed -- CODE() makes the difference comparable across engines without depending on how a reader renders a tab. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(TRIM(CHAR(10)&amp;&#34;Hello&#34;))</td>
+  <td>Same probe for a leading line feed (CHAR(10)): 6 if the line feed survives TRIM, 5 if the engine strips it</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6<br><span class="category-tag">CHAR(10) is not the ASCII space (32), so documented Excel TRIM leaves it untouched. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(TRIM(UNICHAR(9)&amp;&#34;Hello&#34;))</td>
+  <td>The tab probe written with UNICHAR instead of CHAR, so the code point is unambiguous and does not depend on the engine&#39;s current code table</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6<br><span class="category-tag">UNICHAR(9) is U+0009 on every engine; CHAR(9) depends on the active code table (LibreOffice help: CHAR &#34;converts a number into a character according to the current code table&#34;). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(TRIM(UNICHAR(160)&amp;&#34;Hello&#34;&amp;UNICHAR(160)))</td>
+  <td>A genuine non-breaking space (U+00A0) on each side of the text: 7 if TRIM keeps both, 5 if an engine treats them as trimmable whitespace</td>
+  <td class="result mono">7</td>
+  <td class="result mono">7<br><span class="category-tag">Microsoft docs: &#34;by itself, the TRIM function does not remove the nonbreaking space character (which has a decimal value of 160 ...)&#34;, so both non-breaking spaces survive and LEN stays 7. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=UNICODE(TRIM(UNICHAR(160)&amp;&#34;Hello&#34;&amp;UNICHAR(160)))</td>
+  <td>Identity probe for the same string: the first surviving character must still be the non-breaking space, code point 160</td>
+  <td class="result mono">160</td>
+  <td class="result mono">160<br><span class="category-tag">Written with UNICHAR rather than CHAR so the input is a real U+00A0 regardless of the engine&#39;s code table; pairs with TRIM_nonbreaking_space_not_removed, which uses CHAR(160). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(TRIM(UNICHAR(8203)&amp;&#34;Hello&#34;))</td>
+  <td>A leading zero-width space (U+200B) -- invisible, but not the ASCII space -- so TRIM should leave it and LEN should stay 6</td>
+  <td class="result mono">6</td>
+  <td class="result mono">6<br><span class="category-tag">TRIM targets only the 7-bit ASCII space (32); U+200B is neither that nor a control character (so CLEAN does not remove it either). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=LEN(TRIM(&#34;  a  b  &#34;))</td>
+  <td>Control case: ordinary spaces only. Leading and trailing runs are stripped and the interior run collapses to one space, leaving &#34;a b&#34; -- length 3</td>
+  <td class="result mono">3</td>
+  <td class="result mono">3<br><span class="category-tag">Baseline showing that the divergences in the other cases are about NON-space whitespace, not about TRIM&#39;s core space handling. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
 </tbody>
 </table>
 </div>
@@ -684,6 +764,11 @@ against those cases before assuming your data is wrong.</p>
 <h2 class="section-title">Related how-to recipes</h2>
 <ul>
 <li><a href="../how-to/count-total-words-in-a-range.html">How to count the total words in a range</a></li><li><a href="../how-to/count-words-in-a-cell.html">How to count the number of words in a cell</a></li><li><a href="../how-to/extract-the-file-name-from-a-path.html">How to extract the file name from a path or URL</a></li><li><a href="../how-to/extract-the-last-word.html">How to extract the last word from a cell</a></li><li><a href="../how-to/get-the-nth-word.html">How to extract the nth word from a cell</a></li><li><a href="../how-to/remove-extra-spaces.html">How to remove extra spaces from text</a></li>
+</ul>
+
+<h2 class="section-title">Where TRIM behaves differently</h2>
+<ul>
+<li><a href="../guides/trim-tab-newline-nonbreaking-space-google-sheets-vs-excel-libreoffice.html">TRIM strips tabs and line breaks in Google Sheets but keeps them in Excel and LibreOffice</a><br><span class="category-tag">Executed evidence: =TRIM(CHAR(9)&amp;&#34;Hello&#34;) keeps the tab in Excel for the web and in all four LibreOffice builds, but Google Sheets strips it (and line feeds too). Non-breaking spaces survive TRIM everywhere. The portable fix, with dates and per-engine provenance.</span></li>
 </ul>
 
 

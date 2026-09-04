@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T01:10:20.875396+00:00",
+  "generated_at": "2026-09-04T05:25:02.814950+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "25.2.0.3",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-08-31 18:10:16.759000",
-    "now_run_2": "2026-08-31 18:10:20.315000",
+    "now_run_1": "2026-09-03 22:24:59.781000",
+    "now_run_2": "2026-09-03 22:25:02.503000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 1.45,
+    "conversion_seconds_run_1": 0.94,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -1038,7 +1038,6 @@
       }
     },
     "CHAR": {
-      "executed_at": "2026-08-29",
       "CHAR_basic_roundtrip": {
         "description": "Basic code-to-character lookup",
         "formula_display": "=CHAR(65)",
@@ -1086,7 +1085,20 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": "Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a - valid range is 1-255; values outside it are invalid"
-      }
+      },
+      "CHAR_nonbreaking_space_code_point": {
+        "description": "What character does CHAR(160) actually produce? In Excel it is the non-breaking space (U+00A0), so UNICODE of it is 160; an engine using a different code table returns something else",
+        "formula_display": "=UNICODE(CHAR(160))",
+        "formula_stored_xlsx": "=_xlfn.UNICODE(CHAR(160))",
+        "value": 65533,
+        "range_values": null,
+        "error": null,
+        "expected": 160,
+        "matched_expected": false,
+        "canary_ok_this_sheet": true,
+        "notes": "Excel's CHAR maps its argument through the Windows-1252 (ANSI) code page, where 160 is the non-breaking space -- which is why Microsoft's TRIM page can call CHAR(160) \"the nonbreaking space character ... commonly used in web pages as the HTML entity &nbsp;\" (https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9). LibreOffice's help instead defines CHAR as converting \"a number into a character according to the current code table\", so the result is platform/locale dependent there; UNICHAR(160) is the portable spelling. Source: https://support.microsoft.com/en-us/office/char-function-bbd249c8-b36e-4a91-8017-1c133f9b837a; MISMATCH vs expected: expected 160, got 65533"
+      },
+      "executed_at": "2026-09-04"
     },
     "CHOOSE": {
       "executed_at": "2026-08-29",
@@ -10053,7 +10065,6 @@
       }
     },
     "TRIM": {
-      "executed_at": "2026-08-29",
       "TRIM_collapse_and_strip": {
         "description": "Leading/trailing spaces are stripped and multiple interior spaces collapse to a single space",
         "formula_display": "=TRIM(\"  Hello   World  \")",
@@ -10101,7 +10112,104 @@
         "matched_expected": true,
         "canary_ok_this_sheet": true,
         "notes": null
-      }
+      },
+      "TRIM_tab_len": {
+        "description": "Length probe for the leading-tab case: if TRIM leaves the tab in place the result is 6 (tab + 5 letters); an engine that also strips tabs returns 5",
+        "formula_display": "=LEN(TRIM(CHAR(9)&\"Hello\"))",
+        "formula_stored_xlsx": "=LEN(TRIM(CHAR(9)&\"Hello\"))",
+        "value": 6,
+        "range_values": null,
+        "error": null,
+        "expected": 6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft docs: \"the TRIM function was designed to trim the 7-bit ASCII space character (value 32) from text\", so a tab (CHAR(9)) survives and LEN stays 6. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "TRIM_tab_code": {
+        "description": "Identity probe for the same case: CODE of the first surviving character is 9 (the tab) if TRIM left it alone, and 72 (the letter H) if the engine stripped it",
+        "formula_display": "=CODE(TRIM(CHAR(9)&\"Hello\"))",
+        "formula_stored_xlsx": "=CODE(TRIM(CHAR(9)&\"Hello\"))",
+        "value": 9,
+        "range_values": null,
+        "error": null,
+        "expected": 9,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Numeric companion to TRIM_tab_not_removed -- CODE() makes the difference comparable across engines without depending on how a reader renders a tab. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "TRIM_linefeed_len": {
+        "description": "Same probe for a leading line feed (CHAR(10)): 6 if the line feed survives TRIM, 5 if the engine strips it",
+        "formula_display": "=LEN(TRIM(CHAR(10)&\"Hello\"))",
+        "formula_stored_xlsx": "=LEN(TRIM(CHAR(10)&\"Hello\"))",
+        "value": 6,
+        "range_values": null,
+        "error": null,
+        "expected": 6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "CHAR(10) is not the ASCII space (32), so documented Excel TRIM leaves it untouched. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "TRIM_unichar_tab_len": {
+        "description": "The tab probe written with UNICHAR instead of CHAR, so the code point is unambiguous and does not depend on the engine's current code table",
+        "formula_display": "=LEN(TRIM(UNICHAR(9)&\"Hello\"))",
+        "formula_stored_xlsx": "=LEN(TRIM(_xlfn.UNICHAR(9)&\"Hello\"))",
+        "value": 6,
+        "range_values": null,
+        "error": null,
+        "expected": 6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "UNICHAR(9) is U+0009 on every engine; CHAR(9) depends on the active code table (LibreOffice help: CHAR \"converts a number into a character according to the current code table\"). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "TRIM_unichar_nonbreaking_space_len": {
+        "description": "A genuine non-breaking space (U+00A0) on each side of the text: 7 if TRIM keeps both, 5 if an engine treats them as trimmable whitespace",
+        "formula_display": "=LEN(TRIM(UNICHAR(160)&\"Hello\"&UNICHAR(160)))",
+        "formula_stored_xlsx": "=LEN(TRIM(_xlfn.UNICHAR(160)&\"Hello\"&_xlfn.UNICHAR(160)))",
+        "value": 7,
+        "range_values": null,
+        "error": null,
+        "expected": 7,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft docs: \"by itself, the TRIM function does not remove the nonbreaking space character (which has a decimal value of 160 ...)\", so both non-breaking spaces survive and LEN stays 7. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "TRIM_unichar_nonbreaking_space_unicode": {
+        "description": "Identity probe for the same string: the first surviving character must still be the non-breaking space, code point 160",
+        "formula_display": "=UNICODE(TRIM(UNICHAR(160)&\"Hello\"&UNICHAR(160)))",
+        "formula_stored_xlsx": "=_xlfn.UNICODE(TRIM(_xlfn.UNICHAR(160)&\"Hello\"&_xlfn.UNICHAR(160)))",
+        "value": 160,
+        "range_values": null,
+        "error": null,
+        "expected": 160,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Written with UNICHAR rather than CHAR so the input is a real U+00A0 regardless of the engine's code table; pairs with TRIM_nonbreaking_space_not_removed, which uses CHAR(160). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "TRIM_zero_width_space_len": {
+        "description": "A leading zero-width space (U+200B) -- invisible, but not the ASCII space -- so TRIM should leave it and LEN should stay 6",
+        "formula_display": "=LEN(TRIM(UNICHAR(8203)&\"Hello\"))",
+        "formula_stored_xlsx": "=LEN(TRIM(_xlfn.UNICHAR(8203)&\"Hello\"))",
+        "value": 6,
+        "range_values": null,
+        "error": null,
+        "expected": 6,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "TRIM targets only the 7-bit ASCII space (32); U+200B is neither that nor a control character (so CLEAN does not remove it either). Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "TRIM_ordinary_space_collapse_len": {
+        "description": "Control case: ordinary spaces only. Leading and trailing runs are stripped and the interior run collapses to one space, leaving \"a b\" -- length 3",
+        "formula_display": "=LEN(TRIM(\"  a  b  \"))",
+        "formula_stored_xlsx": "=LEN(TRIM(\"  a  b  \"))",
+        "value": 3,
+        "range_values": null,
+        "error": null,
+        "expected": 3,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Baseline showing that the divergences in the other cases are about NON-space whitespace, not about TRIM's core space handling. Source: https://support.microsoft.com/en-us/office/trim-function-410388fa-c5df-49c6-b16c-9e5630b479f9"
+      },
+      "executed_at": "2026-09-04"
     },
     "TRIMMEAN": {
       "executed_at": "2026-08-29",
@@ -31351,6 +31459,15 @@
       ],
       "trusted_this_run": true,
       "superseded_generated_at": "2026-09-01T00:48:46.192494+00:00"
+    },
+    {
+      "generated_at": "2026-09-04T05:25:02.814950+00:00",
+      "functions": [
+        "CHAR",
+        "TRIM"
+      ],
+      "trusted_this_run": true,
+      "superseded_generated_at": "2026-09-01T01:10:20.875396+00:00"
     }
   ]
 }
