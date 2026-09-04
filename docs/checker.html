@@ -478,7 +478,10 @@ function migrate(fs,db,tg,gdb){
   const tv=loTarget();
   // Older than lnew = executed #NAME? in that release, so it is a blocker.
   const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
-  // Executed verdicts win over documentation flags for both executed engines.
+  // Executed verdicts win over documentation flags for both engines this
+  // checker can target (LibreOffice and Google Sheets). Excel for the web is
+  // executed too, but it is not a migration target here -- see the quirks page
+  // for its results.
   // A Sheets "inconclusive" tells us nothing, so it falls back to the doc flag.
   const okIn=(d)=> tg==='l' ? (tooNew(d)?false:((d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l))
     : (tg==='x' ? d.x
@@ -488,9 +491,10 @@ function migrate(fs,db,tg,gdb){
   for(const fn of fs){ const d=db[fn]; if(!d) continue;
     if(!okIn(d)){ blockers.push(fn); continue; }
     // Runs in the target but returns a value that diverges from Excel's
-    // documentation. Only Google Sheets and LibreOffice are executed, so a
-    // quirk is claimed only for those targets -- never for desktop Excel
-    // (tg==='x'), whose column is documentation, not a measured run.
+    // documentation. Only Google Sheets and LibreOffice are offered as targets
+    // here, so a quirk is claimed only for those two -- never for desktop Excel
+    // (tg==='x'), whose column is documentation, not a measured run. Excel for
+    // the web IS executed, but it has no target in this tool yet.
     const qv = tg==='l' ? d.lv : (tg==='g' ? d.gv : null);
     if(qv==='quirky') quirks.push(fn);
   }

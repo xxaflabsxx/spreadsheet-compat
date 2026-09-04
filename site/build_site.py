@@ -1210,12 +1210,25 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                                 "engine_key": ek,
                                 "engine_label": ENGINE_LABELS[ek],
                                 "engine_version": res_blob.get("engine_version"),
-                                # Human-readable "which run was this" line. For
-                                # Sheets the version label already names the
-                                # engine, so don't print the name twice.
+                                # Human-readable "which run was this" line.
+                                # LibreOffice has a real build number, so label
+                                # + version reads correctly. The two rolling
+                                # services do not: their engine_version IS a
+                                # dated prose label that already names the
+                                # engine, so interpolating it after the label
+                                # printed the name twice ("Excel for the web
+                                # Excel for the web (recalc, ...)") AND carried
+                                # the FILE-level date, which a subset re-run
+                                # moves for every function at once. Both get an
+                                # explicit sentence built from THIS function's
+                                # own executed_at instead.
                                 "engine_ref": (
                                     f"Google Sheets, executed {executed_at} (Drive import)"
                                     if ek == "google_sheets"
+                                    else
+                                    f"Excel for the web, executed {executed_at} "
+                                    f"(OneDrive recalculation)"
+                                    if ek == "excel_web"
                                     else f"{ENGINE_LABELS[ek]} {res_blob.get('engine_version')}"
                                 ),
                                 "case": mc,
@@ -2732,17 +2745,36 @@ QUIRKS_TMPL = """{% extends "base.html" %}
 <p class="tagline">Every case below is a real, executed formula whose result did
 not match Excel&rsquo;s documented/expected behavior. This is the flagship content of
 {{ site_name }}: cross-engine divergence that only shows up when you actually
-run the formula. Both executed engines are represented &mdash; LibreOffice Calc
-{{ lo_version }} and Google Sheets (Drive import, {{ sheets_exec_date }}) &mdash;
-measured against Microsoft&rsquo;s documentation, which we do not execute.</p>
+run the formula. All three executed engines are represented &mdash; LibreOffice Calc
+{{ lo_version }}, Google Sheets (Drive import, {{ sheets_exec_date }}) and Excel for the
+web (recalc, {{ excel_web_exec_date }}) &mdash; each measured against Microsoft&rsquo;s
+documentation for <strong>desktop</strong> Excel. We do not run desktop Excel, so nothing in
+the &ldquo;documented / expected&rdquo; column is a measurement.</p>
+<p><strong>What an Excel-for-the-web row means, and what it does not.</strong> Excel for the web
+is a separate implementation of the calculation engine from the desktop product, and we have no
+desktop run to set beside it. So a row badged <em>Excel for the web</em> asserts exactly one
+thing: the web engine&rsquo;s executed result disagreed with Microsoft&rsquo;s documentation for
+desktop Excel. It is evidence about the web engine and about nothing else. The disagreement may be
+a genuine web-versus-desktop difference, or it may be a documentation gap that affects both
+products &mdash; this page does not decide which, and the badge should not be read as deciding
+it either.</p>
 <p>For the other question &mdash; where the three engines we execute disagree with
 <em>each other</em>, with no documentation involved and no error to warn anyone &mdash; see
 <a href="{{ rel }}silent-divergences.html">silent divergences</a>.</p>
 <p class="search-hint">{{ quirks|length }} quirks found across {{ quirk_fn_count }} functions
-({{ quirks_by_engine['libreoffice'] }} in LibreOffice, {{ quirks_by_engine['google_sheets'] }} in Google Sheets).
-{% if roundtrip_total %}A further {{ roundtrip_total }} Google Sheets case{{ 's' if roundtrip_total != 1 else '' }}
-{{ 'are' if roundtrip_total != 1 else 'is' }} excluded as <a href="{{ rel }}methodology.html">inconclusive</a> &mdash;
+({{ quirks_by_engine['libreoffice'] }} in LibreOffice, {{ quirks_by_engine['google_sheets'] }} in Google Sheets,
+{{ quirks_by_engine['excel_web'] }} in Excel for the web).
+{% if roundtrip_by_engine['google_sheets'] %}A further {{ roundtrip_by_engine['google_sheets'] }} Google Sheets case{{ 's' if roundtrip_by_engine['google_sheets'] != 1 else '' }}
+{{ 'are' if roundtrip_by_engine['google_sheets'] != 1 else 'is' }} excluded as <a href="{{ rel }}methodology.html">inconclusive</a> &mdash;
 explained by the .xlsx import/export round trip, not by Sheets.{% endif %}
+{% if roundtrip_by_engine['excel_web'] %}{{ roundtrip_by_engine['excel_web'] }} Excel-for-the-web case{{ 's are' if roundtrip_by_engine['excel_web'] != 1 else ' is' }}
+excluded for the same class of reason on its own transport &mdash; the OneDrive round trip deleted a
+<code>LAMBDA</code>-bearing formula outright, or turned an <code>INDIRECT</code> into an unresolved
+external-workbook link &mdash; so the value that came back measures the trip, not the function.{% endif %}
+{% if xw_transport_skip_fns %}A further {{ xw_transport_skip_fns }} function{{ 's' if xw_transport_skip_fns != 1 else '' }}
+never reached the web engine at all: its file-open refuses any workbook whose stored formulas carry the
+<code>LAMBDA</code>-family serialization, so those functions carry no Excel-for-the-web verdict and can
+hold no Excel-for-the-web quirk. See <a href="{{ rel }}methodology.html#coverage">Coverage</a>.{% endif %}
 {% if no_verdict_total %}{{ no_verdict_total }} further executed case{{ 's are' if no_verdict_total != 1 else ' is' }}
 excluded because the function&rsquo;s documented behaviour needs something no test workbook can supply &mdash;
 an external data server, a live fetch, another user&rsquo;s authorization. Those results are published on their
@@ -3596,7 +3628,7 @@ engine, absent from the Excel-web run, with no recorded reason: {{ xw_unclassifi
 
 <h2 class="section-title">Honest limitations</h2>
 <ul>
-<li><strong>Desktop Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run desktop Excel; where an executed Google Sheets or LibreOffice result differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand.</li>
+<li><strong>Desktop Excel is not live-executed.</strong> Its column reflects Microsoft&rsquo;s official function documentation. We can&rsquo;t headlessly run desktop Excel; where an executed result from any of the three engines we do run &mdash; Google Sheets, LibreOffice Calc, or Excel for the web &mdash; differs from documented Excel behavior, that is labeled a quirk of <em>that</em> engine, and disputed cases are re-checked by hand. (For Excel for the web that label carries the caveat in the next bullet: it is a disagreement with the <em>desktop</em> documentation, and we cannot say which side is wrong.)</li>
 <li><strong>Excel for the web IS live-executed &mdash; and it is not desktop Excel.</strong> We upload the corpus to OneDrive, let Excel for the web recalculate it on open, and download the workbook again to read the values back. That is a real measurement, but of a <em>different application</em>: Microsoft ships two implementations of the calculation engine and we have run only the web one. So when an Excel-web value disagrees with the documented column, we cannot tell you which of the two explanations holds &mdash; the web engine diverging from the desktop one, or the documentation being wrong about both &mdash; and no page on this site claims to know. Seven functions (the LAMBDA family) could not be measured at all, because Excel for the web refuses to open a workbook whose stored formulas carry Excel&rsquo;s own <code>_xlpm.</code>/<code>LAMBDA</code> serialization.</li>
 <li><strong>Google Sheets is executed but not versioned.</strong> There is nothing to pin: each verdict describes Sheets as it behaved on the date that function was executed (the most recent run was {{ sheets_exec_date }}). Google ships changes continuously, so an old Sheets verdict is a dated observation, not a release guarantee &mdash; unlike the LibreOffice builds, which are reproducible forever.</li>
 <li><strong>Some Sheets results are inconclusive.</strong> See the <a href="#sheets-caveats">Sheets execution caveats</a> above; those cases are excluded from verdicts and quirk counts rather than guessed at.</li>
@@ -3762,7 +3794,10 @@ function migrate(fs,db,tg,gdb){
   const tv=loTarget();
   // Older than lnew = executed #NAME? in that release, so it is a blocker.
   const tooNew=(d)=> tg==='l' && !!d.lnew && cmpVer(tv,d.lnew)<0;
-  // Executed verdicts win over documentation flags for both executed engines.
+  // Executed verdicts win over documentation flags for both engines this
+  // checker can target (LibreOffice and Google Sheets). Excel for the web is
+  // executed too, but it is not a migration target here -- see the quirks page
+  // for its results.
   // A Sheets "inconclusive" tells us nothing, so it falls back to the doc flag.
   const okIn=(d)=> tg==='l' ? (tooNew(d)?false:((d.lv&&d.lv!=='inconclusive')?(d.lv!=='unsupported'):d.l))
     : (tg==='x' ? d.x
@@ -3772,9 +3807,10 @@ function migrate(fs,db,tg,gdb){
   for(const fn of fs){ const d=db[fn]; if(!d) continue;
     if(!okIn(d)){ blockers.push(fn); continue; }
     // Runs in the target but returns a value that diverges from Excel's
-    // documentation. Only Google Sheets and LibreOffice are executed, so a
-    // quirk is claimed only for those targets -- never for desktop Excel
-    // (tg==='x'), whose column is documentation, not a measured run.
+    // documentation. Only Google Sheets and LibreOffice are offered as targets
+    // here, so a quirk is claimed only for those two -- never for desktop Excel
+    // (tg==='x'), whose column is documentation, not a measured run. Excel for
+    // the web IS executed, but it has no target in this tool yet.
     const qv = tg==='l' ? d.lv : (tg==='g' ? d.gv : null);
     if(qv==='quirky') quirks.push(fn);
   }
@@ -4428,6 +4464,21 @@ def main():
     inconclusive_total = sum(r["inconclusive_count"] for r in records)
     no_verdict_total = sum(r["no_verdict_count"] for r in records)
     roundtrip_total = inconclusive_total - no_verdict_total
+    # Round-trip exclusions PER ENGINE. The quirks page used to print
+    # roundtrip_total as though every one of them were a Google Sheets import
+    # artifact; that was true until Excel for the web landed its own
+    # case-level skips (EXCEL_WEB_CASE_SKIPS), after which the sentence was
+    # crediting Google's importer with seven exclusions caused by the OneDrive
+    # trip. Each engine now states its own count. "Round-trip" here means
+    # anything inconclusive that is NOT a declared external dependency -- the
+    # same subtraction roundtrip_total does, resolved by engine.
+    roundtrip_by_engine = {ek: 0 for ek in ENGINE_ORDER}
+    for _r in records:
+        for _ek in ENGINE_ORDER:
+            for _c in _r["engines"][_ek]["cases"]:
+                _reason = _c.get("inconclusive_reason")
+                if _reason and _reason != "external_dependency":
+                    roundtrip_by_engine[_ek] += 1
 
     if OUT_DIR.exists():
         shutil.rmtree(OUT_DIR)
@@ -4483,11 +4534,12 @@ def main():
     ctx.update(
         page_title=(
             f"{stats['quirk_count']} spreadsheet formulas that give different results "
-            f"in Google Sheets or LibreOffice vs Excel (executed)"
+            f"in Google Sheets, LibreOffice or Excel for the web vs Excel (executed)"
         ),
         meta_description=(
             f"MROUND(5,-2) returns 6 in LibreOffice, not #NUM!. CONCAT(\"a\",\"b\",\"c\") "
-            f"is #N/A in Google Sheets. {stats['quirk_count']} divergences, every one "
+            f"is #N/A in Google Sheets. HYPGEOMDIST(5,4,8,20) is 0 in Excel for the web, "
+            f"not #NUM!. {stats['quirk_count']} divergences, every one "
             f"executed — not copied from docs."
         ),
         canonical=BASE_URL + "quirks.html",
@@ -4497,6 +4549,10 @@ def main():
         inconclusive_total=inconclusive_total,
         no_verdict_total=no_verdict_total,
         roundtrip_total=roundtrip_total,
+        roundtrip_by_engine=roundtrip_by_engine,
+        # Function-level Excel-web exclusions: the workbooks carrying these
+        # never opened in the web engine at all, so they can hold no web quirk.
+        xw_transport_skip_fns=len(EXCEL_WEB_TRANSPORT_SKIPS),
         seo_guides=load_seo_pages(),
     )
     (OUT_DIR / "quirks.html").write_text(env.get_template("quirks.html").render(**ctx))
