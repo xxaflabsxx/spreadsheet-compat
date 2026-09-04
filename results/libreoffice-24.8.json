@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T05:24:58.743002+00:00",
+  "generated_at": "2026-09-04T08:21:47.211742+00:00",
   "engine": "LibreOffice Calc",
   "engine_version": "24.8.7.2",
   "recalc_method": "soffice --headless --convert-to xlsx (see canary proof below)",
@@ -10,10 +10,10 @@
     "arithmetic_actual": 3333,
     "arithmetic_ok": true,
     "volatile_formula": "=NOW()",
-    "now_run_1": "2026-09-03 22:24:55.760000",
-    "now_run_2": "2026-09-03 22:24:58.472000",
+    "now_run_1": "2026-09-04 01:21:44.076000",
+    "now_run_2": "2026-09-04 01:21:46.907000",
     "now_differs_across_runs": true,
-    "conversion_seconds_run_1": 0.72,
+    "conversion_seconds_run_1": 0.83,
     "method": "openpyxl writes formulas with NO cached <v> value; `soffice --headless --convert-to xlsx` must evaluate every formula from scratch to produce any output value at all. The volatile =NOW() canary changing between two runs a few seconds apart, plus the deterministic arithmetic canary matching exactly, together prove genuine recalculation."
   },
   "function_results": {
@@ -13187,6 +13187,66 @@
         "canary_ok_this_sheet": true,
         "notes": "Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -> 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give"
       },
+      "ACOT_negative_half": {
+        "description": "Arccotangent of -0.5, a negative argument between -1 and 0",
+        "formula_display": "=ROUND(ACOT(-0.5),9)",
+        "formula_stored_xlsx": "=ROUND(_xlfn.ACOT(-0.5),9)",
+        "value": 2.034443936,
+        "range_values": null,
+        "error": null,
+        "expected": 2.034443936,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents \"The returned angle is given in radians in the range 0 (zero) to pi\", so for a negative argument the result is pi + atan(1/x), not atan(1/x) alone: ACOT(-0.5) = pi + atan(1/-0.5) = pi + atan(-2) = 3.141592653589793 - 1.1071487177940904 = 2.0344439357957027 -> 2.034443936 at 9 dp. The bare atan(1/x) shortcut would give -1.107148718, which is pi lower and outside the documented 0..pi range"
+      },
+      "ACOT_negative_one": {
+        "description": "Arccotangent of -1, the mirror of the documented ACOT(1) = pi/4 example",
+        "formula_display": "=ROUND(ACOT(-1),9)",
+        "formula_stored_xlsx": "=ROUND(_xlfn.ACOT(-1),9)",
+        "value": 2.35619449,
+        "range_values": null,
+        "error": null,
+        "expected": 2.35619449,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents \"The returned angle is given in radians in the range 0 (zero) to pi\", so ACOT(-1) = pi + atan(1/-1) = pi - pi/4 = 3*pi/4 = 2.356194490192345 -> 2.35619449 at 9 dp. cot(3*pi/4) = -1, confirming the value is a genuine arccotangent and not merely a sign flip of ACOT(1); the bare atan(1/x) shortcut would give -0.785398163, exactly pi lower"
+      },
+      "ACOT_negative_ten": {
+        "description": "Arccotangent of -10, a large negative argument approaching the top of the documented range",
+        "formula_display": "=ROUND(ACOT(-10),9)",
+        "formula_stored_xlsx": "=ROUND(_xlfn.ACOT(-10),9)",
+        "value": 3.041924001,
+        "range_values": null,
+        "error": null,
+        "expected": 3.041924001,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents \"The returned angle is given in radians in the range 0 (zero) to pi\", so ACOT(-10) = pi + atan(1/-10) = 3.141592653589793 - 0.09966865249116204 = 3.0419240010986313 -> 3.041924001 at 9 dp. As x -> -infinity the documented branch approaches pi from below; the bare atan(1/x) shortcut would give -0.099668652, approaching 0 from below instead"
+      },
+      "ACOT_negative_one_degrees": {
+        "description": "The same negative-argument arccotangent converted to degrees, where the branch choice is a 180 degree difference",
+        "formula_display": "=ROUND(DEGREES(ACOT(-1)),6)",
+        "formula_stored_xlsx": "=ROUND(DEGREES(_xlfn.ACOT(-1)),6)",
+        "value": 135,
+        "range_values": null,
+        "error": null,
+        "expected": 135,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents \"The returned angle is given in radians in the range 0 (zero) to pi\" and points to DEGREES for the conversion, so DEGREES(ACOT(-1)) = DEGREES(pi + atan(1/-1)) = DEGREES(3*pi/4) = 135 exactly. An engine that returns the bare atan(1/x) instead reports -45 degrees for the same cell, i.e. the same direction rotated by 180 degrees"
+      },
+      "ACOT_positive_one": {
+        "description": "Arccotangent of 1, the positive control where every convention agrees",
+        "formula_display": "=ROUND(ACOT(1),9)",
+        "formula_stored_xlsx": "=ROUND(_xlfn.ACOT(1),9)",
+        "value": 0.785398163,
+        "range_values": null,
+        "error": null,
+        "expected": 0.785398163,
+        "matched_expected": true,
+        "canary_ok_this_sheet": true,
+        "notes": "Microsoft documents \"The returned angle is given in radians in the range 0 (zero) to pi\". For a positive argument pi + atan(1/x) would fall outside 0..pi, so the documented branch is plain atan(1/x): ACOT(1) = atan(1) = pi/4 = 0.7853981633974483 -> 0.785398163 at 9 dp. LibreOffice documents the same value for this exact formula (\"=ACOT(1) returns 0.785398163397448 (PI/4 radians)\"). This is the control case: it isolates the divergence to negative arguments"
+      },
       "ACOT_text_argument_value": {
         "description": "A non-numeric text argument",
         "formula_display": "=ACOT(\"abc\")",
@@ -13199,7 +13259,7 @@
         "canary_ok_this_sheet": true,
         "notes": "Excel documents: \"If Number is a non-numeric value, ACOT returns the #VALUE! error value.\""
       },
-      "executed_at": "2026-08-31"
+      "executed_at": "2026-09-04"
     },
     "ACOTH": {
       "ACOTH_documented_six": {
@@ -31468,6 +31528,14 @@
       ],
       "trusted_this_run": true,
       "superseded_generated_at": "2026-09-01T01:10:15.130540+00:00"
+    },
+    {
+      "generated_at": "2026-09-04T08:21:47.211742+00:00",
+      "functions": [
+        "ACOT"
+      ],
+      "trusted_this_run": true,
+      "superseded_generated_at": "2026-09-04T05:24:58.743002+00:00"
     }
   ]
 }

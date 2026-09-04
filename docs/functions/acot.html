@@ -328,7 +328,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
     <span class="badge badge-quirk">Quirk found</span>
   
 </div>
-<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-09-01</p>
+<p class="category-tag">Category: Math and trigonometry &middot; Last tested 2026-09-04</p>
 
 
 <p class="lede">Real compatibility results for the <strong>ACOT</strong> function: executed in Excel for the web, Google Sheets and LibreOffice Calc, with desktop Excel behavior from Microsoft&rsquo;s official documentation (we do not run desktop Excel &mdash; Excel for the web is a different application and is executed separately). Syntax and links to that documentation are below.</p>
@@ -384,7 +384,7 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 
 <tr>
   <td>LibreOffice Calc</td><td><a href="https://help.libreoffice.org/latest/en-US/text/scalc/01/04060106.html">Yes</a></td>
-  <td>Yes (25.8.7.3, 2026-08-31)</td>
+  <td>Yes (25.8.7.3, 2026-09-04)</td>
   <td>
     
       <span class="badge badge-good">Supported, behaves as documented</span>
@@ -408,25 +408,25 @@ ACOT&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <tr class="">
   <td>24.2.0.3</td>
   <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-31</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>24.8.7.2</td>
   <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-31</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>25.2.0.3</td>
   <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-31</td>
+  <td>2026-09-04</td>
 </tr>
 
 <tr class="">
   <td>25.8.7.3</td>
   <td><span class="badge badge-good">Supported, behaves as documented</span></td>
-  <td>2026-08-31</td>
+  <td>2026-09-04</td>
 </tr>
 
 </tbody>
@@ -487,6 +487,16 @@ against those cases before assuming your data is wrong.</p>
       
     
   
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
     
       
     
@@ -601,7 +611,7 @@ against those cases before assuming your data is wrong.</p>
 
 
 
-<h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
+<h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-04)</h3>
 
 <div class="table-scroll">
 <table class="cases">
@@ -629,6 +639,46 @@ against those cases before assuming your data is wrong.</p>
   <td>A negative argument, where the documented 0..pi range differs from atan(1/x)</td>
   <td class="result mono">2.677945045</td>
   <td class="result mono">2.677945045<br><span class="category-tag">Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ACOT(-0.5),9)</td>
+  <td>Arccotangent of -0.5, a negative argument between -1 and 0</td>
+  <td class="result mono">2.034443936</td>
+  <td class="result mono">2.034443936<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so for a negative argument the result is pi + atan(1/x), not atan(1/x) alone: ACOT(-0.5) = pi + atan(1/-0.5) = pi + atan(-2) = 3.141592653589793 - 1.1071487177940904 = 2.0344439357957027 -&gt; 2.034443936 at 9 dp. The bare atan(1/x) shortcut would give -1.107148718, which is pi lower and outside the documented 0..pi range</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ACOT(-1),9)</td>
+  <td>Arccotangent of -1, the mirror of the documented ACOT(1) = pi/4 example</td>
+  <td class="result mono">2.35619449</td>
+  <td class="result mono">2.35619449<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so ACOT(-1) = pi + atan(1/-1) = pi - pi/4 = 3*pi/4 = 2.356194490192345 -&gt; 2.35619449 at 9 dp. cot(3*pi/4) = -1, confirming the value is a genuine arccotangent and not merely a sign flip of ACOT(1); the bare atan(1/x) shortcut would give -0.785398163, exactly pi lower</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ACOT(-10),9)</td>
+  <td>Arccotangent of -10, a large negative argument approaching the top of the documented range</td>
+  <td class="result mono">3.041924001</td>
+  <td class="result mono">3.041924001<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so ACOT(-10) = pi + atan(1/-10) = 3.141592653589793 - 0.09966865249116204 = 3.0419240010986313 -&gt; 3.041924001 at 9 dp. As x -&gt; -infinity the documented branch approaches pi from below; the bare atan(1/x) shortcut would give -0.099668652, approaching 0 from below instead</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(DEGREES(ACOT(-1)),6)</td>
+  <td>The same negative-argument arccotangent converted to degrees, where the branch choice is a 180 degree difference</td>
+  <td class="result mono">135</td>
+  <td class="result mono">135<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34; and points to DEGREES for the conversion, so DEGREES(ACOT(-1)) = DEGREES(pi + atan(1/-1)) = DEGREES(3*pi/4) = 135 exactly. An engine that returns the bare atan(1/x) instead reports -45 degrees for the same cell, i.e. the same direction rotated by 180 degrees</span></td>
+  <td><span class="verdict-ok">Matched</span></td>
+</tr>
+
+<tr>
+  <td class="formula mono">=ROUND(ACOT(1),9)</td>
+  <td>Arccotangent of 1, the positive control where every convention agrees</td>
+  <td class="result mono">0.785398163</td>
+  <td class="result mono">0.785398163<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;. For a positive argument pi + atan(1/x) would fall outside 0..pi, so the documented branch is plain atan(1/x): ACOT(1) = atan(1) = pi/4 = 0.7853981633974483 -&gt; 0.785398163 at 9 dp. LibreOffice documents the same value for this exact formula (&#34;=ACOT(1) returns 0.785398163397448 (PI/4 radians)&#34;). This is the control case: it isolates the divergence to negative arguments</span></td>
   <td><span class="verdict-ok">Matched</span></td>
 </tr>
 
@@ -664,6 +714,11 @@ against those cases before assuming your data is wrong.</p>
 
 </ul>
 
+
+<h2 class="section-title">Where ACOT behaves differently</h2>
+<ul>
+<li><a href="../guides/acot-negative-argument-google-sheets-vs-excel-libreoffice.html">ACOT of a negative number is off by pi in Google Sheets versus Excel and LibreOffice</a><br><span class="category-tag">Executed evidence: =ROUND(ACOT(-2),9) is -0.463647609 in Google Sheets but 2.677945045 in Excel for the web and in all four LibreOffice builds. The two branches differ by exactly pi, 180 degrees, with no error anywhere. Dates, per-engine provenance and the portable fix.</span></li>
+</ul>
 
 
 
