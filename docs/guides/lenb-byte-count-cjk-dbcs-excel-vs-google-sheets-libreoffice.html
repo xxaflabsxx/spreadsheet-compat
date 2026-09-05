@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LENB and CJK text: byte counts that don&#39;t match the docs</title>
-<meta name="description" content="Microsoft&#39;s archived LEN/LENB page says LENB counts 2 bytes per character only under a DBCS default language, otherwise 1. Executed under a non-DBCS locale, =LENB(&#34;日本&#34;) returned 4 in both LibreOffice 25.8.7.3 and Google Sheets, not the documented 2 - and not the 6 bytes UTF-8 actually uses.">
+<title>LENB and CJK text: 4 in Sheets and LibreOffice, 2 in Excel for the web</title>
+<meta name="description" content="Microsoft&#39;s archived LEN/LENB page says LENB counts 2 bytes per character only under a DBCS default language, otherwise 1. Executed under a non-DBCS locale, =LENB(&#34;日本&#34;) returned 4 in Google Sheets and all four LibreOffice builds - but 2, the documented answer, in Excel for the web. Desktop Excel stays documentation only.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">
-<meta property="og:title" content="LENB and CJK text: byte counts that don&#39;t match the docs">
-<meta property="og:description" content="Microsoft&#39;s archived LEN/LENB page says LENB counts 2 bytes per character only under a DBCS default language, otherwise 1. Executed under a non-DBCS locale, =LENB(&#34;日本&#34;) returned 4 in both LibreOffice 25.8.7.3 and Google Sheets, not the documented 2 - and not the 6 bytes UTF-8 actually uses.">
+<meta property="og:title" content="LENB and CJK text: 4 in Sheets and LibreOffice, 2 in Excel for the web">
+<meta property="og:description" content="Microsoft&#39;s archived LEN/LENB page says LENB counts 2 bytes per character only under a DBCS default language, otherwise 1. Executed under a non-DBCS locale, =LENB(&#34;日本&#34;) returned 4 in Google Sheets and all four LibreOffice builds - but 2, the documented answer, in Excel for the web. Desktop Excel stays documentation only.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -19,7 +19,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"LENB and CJK text: byte counts that don't match the docs","item":"https://canispreadsheet.com/guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"LENB and CJK text: 4 in Sheets and LibreOffice, 2 in Excel for the web","item":"https://canispreadsheet.com/guides/lenb-byte-count-cjk-dbcs-excel-vs-google-sheets-libreoffice.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -329,74 +329,88 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <main class="container">
 
 <a class="back-link" href="../guides/">&larr; All guides</a>
-<h1>LENB counts 2 bytes per CJK character everywhere — the docs say 1 outside DBCS locales</h1>
+<h1>LENB(“日本”) is 4 in Google Sheets and LibreOffice — and 2 in Excel for the web</h1>
 
 <p><code>LENB</code> is supposed to count bytes where <code>LEN</code> counts characters. For
 <code>"Phoenix, AZ"</code> they are both 11 and nobody thinks about it. The whole point of the
 function is what happens with Japanese, Chinese or Korean text, where a character is not a byte
 &mdash; and that is exactly where the documented rule and the executed behaviour part company.</p>
 
-<p>We ran <code>=LENB("日本")</code> &mdash; two CJK characters, no spaces, nothing else. LibreOffice
-Calc 25.8.7.3 returned <strong>4</strong>. Google Sheets returned <strong>4</strong>.
-Microsoft&rsquo;s documented rule, applied to the locale our harness runs under, gives
-<strong>2</strong>.</p>
+<p>We ran <code>=LENB("日本")</code> &mdash; two CJK characters, no spaces, nothing else &mdash; in
+every engine we execute. LibreOffice Calc 25.8.7.3 returned <strong>4</strong>. Google Sheets
+returned <strong>4</strong>. <strong>Excel for the web returned 2</strong> (executed 2026-09-01),
+which is what Microsoft&rsquo;s documented rule gives for the non-DBCS default language our harness
+runs under. Desktop Excel we do not run at all, so the 2 is a measurement of the web engine, under
+our account&rsquo;s language settings, and of nothing else.</p>
 
 <div class="quirk-box">
   <h3>The surprise</h3>
-  <p>This is one of the few pages on this site where <em>both</em> of the engines in the table above diverge from the
-  documented answer, and they diverge to the same number. Microsoft&rsquo;s archived LEN/LENB page
+  <p>Two of the three engines in the table below diverge from the documented answer, and they
+  diverge to the same number; the third lands on the documented answer instead. Microsoft&rsquo;s archived LEN/LENB page
   says, verbatim: &ldquo;LENB counts 2 bytes per character <em>only when a DBCS language is set as the
   default language</em>. Otherwise LENB behaves the same as LEN, counting 1 byte per character.&rdquo;
   Our harness VM&rsquo;s default language is <code>en_US.UTF-8</code>, which is not a DBCS language, so
-  the documented answer here is 2. Both engines returned 4 &mdash; two bytes per character, as though a
-  DBCS language were always in force. All four LibreOffice builds we tested (24.2.0.3, 24.8.7.2,
-  25.2.0.3 and 25.8.7.3) returned 4.</p>
+  the documented answer here is 2. LibreOffice and Google Sheets both returned 4 &mdash; two bytes per
+  character, as though a DBCS language were always in force. All four LibreOffice builds we tested
+  (24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3) returned 4, so this is not a version artifact.
+  <strong>Excel for the web returned 2</strong> on 2026-09-01, matching the documented rule for a
+  non-DBCS default language. So the split here is between engines, not between every engine and the
+  documentation &mdash; which also means the two engines that return 4 cannot both be excused as
+  &ldquo;everyone reads the rule this way&rdquo;.</p>
 </div>
 
 <h2 class="section-title">4 is not the UTF-8 byte count</h2>
 <p>It is worth being precise about which wrong answer this is, because &ldquo;LENB counts raw
 bytes&rdquo; is the natural guess and it does not fit the measurement.</p>
 <p>The string <code>日本</code> encodes as <strong>6</strong> bytes in UTF-8 (three per character) and
-<strong>4</strong> bytes in UTF-16 (two per character). Neither engine returned 6. Both returned 4. So
-what is being counted is not the storage the file actually uses &mdash; both LibreOffice and Google
-Sheets store text as UTF-8 &mdash; but two bytes per character, which is the DBCS rule applied
-unconditionally rather than only under a DBCS default language.</p>
+<strong>4</strong> bytes in UTF-16 (two per character). No engine returned 6. LibreOffice and Google
+Sheets both returned 4. So what those two are counting is not the storage the file actually uses
+&mdash; both store text as UTF-8 &mdash; but two bytes per character, which is the DBCS rule applied
+unconditionally rather than only under a DBCS default language. Excel for the web&rsquo;s 2 is not a
+byte count of anything either: it is the plain character count, which is exactly what the documented
+rule prescribes outside a DBCS default language.</p>
 <p>That matters for a migration because it changes what the number means. A <code>LENB</code> result
 of 4 is not a promise about how many bytes anything occupies anywhere; it is a character count
 multiplied by two for the characters an engine considers wide. If you are sizing a database column, a
 fixed-width export record or an API payload against real UTF-8 bytes, <code>LENB</code> is not
-measuring the thing you think it is measuring in <em>any</em> of the three engines.</p>
+measuring the thing you think it is measuring in <em>any</em> engine we executed &mdash; not the ones
+that returned 4, and not the one that returned 2.</p>
 
 <h2 class="section-title">Executed: the LENB corpus</h2>
-<p>All six <code>LENB</code> cases, run as written. The Excel column is Microsoft&rsquo;s documented
-behaviour as recorded in our test corpus &mdash; we do not run desktop Excel. The Google Sheets column is
-executed output from the dated Drive-import run of 2026-08-31. The LibreOffice column is Calc
-25.8.7.3, with 24.2.0.3, 24.8.7.2 and 25.2.0.3 returning the identical value on every row.</p>
+<p>All six <code>LENB</code> cases, run as written. The desktop-Excel column is Microsoft&rsquo;s
+documented behaviour as recorded in our test corpus &mdash; we do not run desktop Excel, and no value
+in that column is a measurement. The <strong>Excel for the web</strong> column is executed output
+from the dated OneDrive run of 2026-09-01, recalculated on open and downloaded again for readback;
+it is a measurement of the web application, which is a different implementation from the desktop one.
+The Google Sheets column is executed output from the dated Drive-import run of 2026-08-31. The
+LibreOffice column is Calc 25.8.7.3, with 24.2.0.3, 24.8.7.2 and 25.2.0.3 returning the identical
+value on every row. The divergence row is the corpus case <code>LENB_non_ascii_characters</code>.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel, desktop (documented, non-DBCS default language)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented, non-DBCS default language)</th><th>Excel for the web (executed 2026-09-01)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed 2026-08-31)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=LENB("Phoenix, AZ")</td><td>11</td><td class="result">11</td><td class="result">11</td></tr>
-    <tr><td class="formula">=LENB("")</td><td>0</td><td class="result">0</td><td class="result">0</td></tr>
-    <tr><td class="formula">=LENB("  One   ")</td><td>8</td><td class="result">8</td><td class="result">8</td></tr>
-    <tr><td class="formula">=LENB(1234)</td><td>4</td><td class="result">4</td><td class="result">4</td></tr>
-    <tr><td class="formula">=LENB("日本")</td><td>2</td><td class="result"><strong>4</strong></td><td class="result"><strong>4</strong></td></tr>
-    <tr><td class="formula">=LENB(1/0)</td><td>#DIV/0!</td><td class="result">#DIV/0!</td><td class="result">#DIV/0!</td></tr>
+    <tr><td class="formula">=LENB("Phoenix, AZ")</td><td>11</td><td class="result">11</td><td class="result">11</td><td class="result">11</td></tr>
+    <tr><td class="formula">=LENB("")</td><td>0</td><td class="result">0</td><td class="result">0</td><td class="result">0</td></tr>
+    <tr><td class="formula">=LENB("  One   ")</td><td>8</td><td class="result">8</td><td class="result">8</td><td class="result">8</td></tr>
+    <tr><td class="formula">=LENB(1234)</td><td>4</td><td class="result">4</td><td class="result">4</td><td class="result">4</td></tr>
+    <tr><td class="formula">=LENB("日本")</td><td>2</td><td class="result"><strong>2</strong></td><td class="result"><strong>4</strong></td><td class="result"><strong>4</strong></td></tr>
+    <tr><td class="formula">=LENB(1/0)</td><td>#DIV/0!</td><td class="result">#DIV/0!</td><td class="result">#DIV/0!</td><td class="result">#DIV/0!</td></tr>
   </tbody>
 </table>
 </div>
-<p>Five of the six rows agree everywhere, and they are the rows where the DBCS rule cannot change the
-answer: every character in <code>"Phoenix, AZ"</code>, <code>"  One   "</code> and the coerced number
+<p>Five of the six rows agree everywhere &mdash; documented column and all three executed engines
+alike &mdash; and they are the rows where the DBCS rule cannot change the answer: every character in <code>"Phoenix, AZ"</code>, <code>"  One   "</code> and the coerced number
 <code>1234</code> is single-byte under either reading, an empty string has no bytes under either, and
 an error argument propagates before <code>LENB</code> ever sees a character. The single CJK row is the
 whole divergence.</p>
 <p>Two smaller things the table settles. Spaces count &mdash; leading and trailing &mdash; so
-<code>"  One   "</code> is 8 and not 3, in both engines as documented. And a numeric argument is
+<code>"  One   "</code> is 8 and not 3, in all three executed engines as documented. And a numeric argument is
 converted to its text form first, so <code>=LENB(1234)</code> is 4 rather than an error or a byte
 width of the underlying double.</p>
 <p>For context on whether this batch of text functions is broadly trustworthy: <code>T</code>, the
 other text function executed in the same 2026-08-31 run, matched the documented result on all six of
-its cases in both engines &mdash; including the two that catch a naive implementation,
+its cases in Google Sheets and LibreOffice (and on all six again in Excel for the web, executed
+2026-09-01) &mdash; including the two that catch a naive implementation,
 <code>=T(19)</code> and <code>=T(TRUE)</code>, which both correctly returned empty text rather than
 <code>"19"</code> or <code>"TRUE"</code>. The <code>LENB</code> divergence is a specific finding, not
 noise from a bad run.</p>
@@ -408,7 +422,7 @@ dropped the DBCS explanation entirely &mdash; the &ldquo;2 bytes per character o
 language is set as the default language&rdquo; wording that our test case is measured against now
 survives only in the archived version of the page.</p>
 <p>So the documented behaviour this page compares against is documentation Microsoft has retired. That
-cuts both ways honestly: it means our Excel column for the CJK row rests on an archived rule rather
+cuts both ways honestly: it means our desktop-Excel column for the CJK row rests on an archived rule rather
 than a current one, and it means a workbook whose logic depends on <code>LENB</code> is depending on a
 function its own vendor has stopped explaining. Both are reasons to migrate away from it rather than
 to reason carefully about it.</p>
@@ -422,6 +436,12 @@ workbooks migrate without a change in value. If the original ran under a non-DBC
 such as <code>en-US</code>, the documented rule gives 1 byte per character, and every
 <code>LENB</code> over CJK text <em>doubles</em> on migration. The formula is identical in both cases;
 only the machine it used to run on differs.</p>
+<p><strong>Excel for the web behaved like the non-DBCS reading for us, and that is a data point, not
+a rule.</strong> Our run returned 2, i.e. one byte per CJK character, on one account whose language
+settings we did not vary. It is a fair prediction that a workbook moving <em>to</em> Excel for the
+web under similar settings keeps the non-DBCS answer &mdash; and it is not a guarantee, because we
+did not test a DBCS-configured account, and it says nothing about desktop Excel on a
+Japanese-, Chinese- or Korean-locale machine, which we do not run.</p>
 <p><strong>The failure is silent and directional.</strong> A doubled byte count does not error. It
 overstates width, so the typical symptoms are a validation rule that starts rejecting valid input, a
 &ldquo;field too long&rdquo; flag that fires on rows that were fine yesterday, a truncation
@@ -444,12 +464,26 @@ weighting them. We have no executed case for such a construction and are not goi
 though we had; the point is only that <code>LENB</code> is not it.</p>
 
 <h2 class="section-title">Honest limits</h2>
-<p>The Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus, and for
-the CJK row that documentation is the archived LEN/LENB page &mdash; the current page has removed the
-DBCS rule and marks the function deprecated. We do not run desktop Excel, and no value in that column is a
-measurement.</p>
-<p><strong>Updated 2026-09-01 &mdash; we can now tell you what one real Excel returns, and it is not the desktop one.</strong> This page used to say we could not know what a real Excel gives for <code>=LENB("日本")</code> under any locale. We now execute <strong>Excel for the web</strong> (OneDrive upload, recalculated on open, downloaded for readback), and it returned <code>2</code> &mdash; the non-DBCS reading, one byte per character, matching the documented expectation and disagreeing with the <code>4</code> that both LibreOffice and Google Sheets returned. All six <code>LENB</code> cases matched in Excel for the web.</p>
-<p><strong>The locale caveat survives this intact, and so does the desktop caveat.</strong> Excel for the web is a different application from desktop Excel and we still do not run the desktop one, so this measures the web engine only. And the account we ran it under has its own language settings, which we did not vary &mdash; exactly the uncontrolled variable this section is about. So the honest statement is narrow: <em>under our account&rsquo;s locale, Excel for the web returned 2.</em> Whether desktop Excel agrees, and whether either changes under a DBCS default language, remains unmeasured.</p>
+<p>The desktop-Excel column is Microsoft&rsquo;s documented behaviour as recorded in our test corpus,
+and for the CJK row that documentation is the archived LEN/LENB page &mdash; the current page has
+removed the DBCS rule and marks the function deprecated. We do not run desktop Excel, and no value in
+that column is a measurement.</p>
+<p><strong>What the Excel-for-the-web number is, and what it is not.</strong> On 2026-09-01 we
+executed all six <code>LENB</code> cases in <strong>Excel for the web</strong> &mdash; uploaded to
+OneDrive, recalculated on open, downloaded again for readback &mdash; and the CJK case
+(<code>LENB_non_ascii_characters</code>) returned <code>2</code>. All six matched the documented
+expectation. That is evidence about <em>the web calculation engine</em>, and about
+<em>our account&rsquo;s language settings</em>, and about nothing else. Excel for the web is a
+separate implementation from desktop Excel; a single run on one account and one locale does not
+establish what desktop Excel returns anywhere, and in particular says nothing about what desktop
+Excel returns on a machine whose default language is Japanese, Simplified or Traditional Chinese, or
+Korean &mdash; the case where the documented rule itself changes the answer to 4.</p>
+<p><strong>So the locale caveat survives intact.</strong> Microsoft documents desktop Excel&rsquo;s
+<code>LENB</code> as depending on the default language / DBCS setting, and we have not varied that
+setting in any engine. The honest statement is narrow: <em>under our account&rsquo;s locale, Excel
+for the web returned 2; under our VM&rsquo;s non-DBCS locale, Google Sheets and all four LibreOffice
+builds returned 4.</em> Whether desktop Excel agrees with either, and whether any of the three change
+under a DBCS default language, remains unmeasured.</p>
 <p>The locale question cuts into our own results too, and this is the biggest caveat on the page. Our
 LibreOffice runs happen on a VM whose default language is <code>en_US.UTF-8</code>, which is what makes
 the documented answer 2 rather than 4 for that row. We did not re-run the corpus under a DBCS default
@@ -457,17 +491,23 @@ language, so we cannot say whether LibreOffice&rsquo;s answer would change if we
 under a non-DBCS default it returns 4 where the documented rule says 1 byte per character. For Google
 Sheets the document and account locale are Google&rsquo;s to decide and we did not control them, so
 treat the Sheets 4 as &ldquo;what the Drive-import run returned&rdquo; and not as a locale-controlled
-experiment.</p>
-<p>Since this page was written the rest of the B-suffix family has been executed too, on 2026-08-31
-in both engines: <code>LEFTB</code>, <code>RIGHTB</code>, <code>MIDB</code>, <code>FINDB</code>,
-<code>SEARCHB</code> and <code>REPLACEB</code>. Each carries a full-width-character probe, and they
-corroborate the finding above rather than complicating it &mdash;
-<code>=LEFTB("ＥＸＣＥＬ",2)</code> returned <code>Ｅ</code> and
-<code>=RIGHTB("ＡＢＣ",2)</code> returned <code>Ｃ</code> in both engines, which is
-two bytes spent on one full-width character, exactly the 2-bytes-per-character rule that makes
-<code>LENB("日本")</code> come out as 4. Those probes carry no asserted expected value in our
-corpus &mdash; they are published as observations, not as matches or mismatches.</p>
-<p>Scope. The headline finding is still one probe, on one two-character string, in one function. Our
+experiment. The same applies to the Excel-for-the-web 2: it is what the OneDrive round trip returned
+on our account, not a controlled locale experiment.</p>
+<p>Since this page was written the rest of the B-suffix family has been executed too &mdash;
+<code>LEFTB</code>, <code>RIGHTB</code>, <code>MIDB</code>, <code>FINDB</code>,
+<code>SEARCHB</code> and <code>REPLACEB</code>, on 2026-08-31 in Google Sheets and LibreOffice and on
+2026-09-01 in Excel for the web. Each carries a full-width-character probe, and they corroborate the
+split above rather than complicating it. <code>=LEFTB("ＥＸＣＥＬ",2)</code> returned
+<code>Ｅ</code> and <code>=RIGHTB("ＡＢＣ",2)</code> returned <code>Ｃ</code> in Google Sheets and
+LibreOffice &mdash; two bytes spent on one full-width character, exactly the 2-bytes-per-character
+rule that makes <code>LENB("日本")</code> come out as 4 there. The same two formulas returned
+<code>ＥＸ</code> and <code>ＢＣ</code> in Excel for the web &mdash; two full-width characters for two
+bytes, i.e. one byte each, exactly the non-DBCS reading that makes its <code>LENB("日本")</code>
+come out as 2. The two families of results are internally consistent within each engine. Those probes
+carry no asserted expected value in our corpus &mdash; they are published as observations, not as
+matches or mismatches.</p>
+<p>Scope. The headline <code>LENB</code> finding is still one probe, on one two-character string, in
+one function, run once per engine. Our
 <code>LEN</code> cases are all ASCII, so we have no executed value for
 <code>=LEN("日本")</code> to sit beside the <code>LENB</code> one. Mixed
 ASCII-and-CJK strings, emoji and other astral-plane characters, combining marks, and non-CJK
