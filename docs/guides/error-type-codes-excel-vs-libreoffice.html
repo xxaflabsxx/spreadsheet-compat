@@ -372,6 +372,12 @@ harness computed in LibreOffice Calc 25.8.7.3. Note the last row: <code>#N/A</co
 answer for a non-error argument, which is exactly why the two divergent rows are so awkward &mdash;
 in LibreOffice, &ldquo;this is a <code>#REF!</code>&rdquo; and &ldquo;this is not an error&rdquo;
 come back indistinguishable.</p>
+<p>Excel for the web is a separate application from the desktop product, and it is the third engine
+we execute. Recalculated on OneDrive on 2026-09-01 it reproduced the documented mapping on all eight
+rows &mdash; <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>, <code>5</code>,
+<code>6</code>, <code>7</code> and <code>#N/A</code> &mdash; so the two codes LibreOffice cannot
+return, and the <code>#NULL!</code> row Sheets answers with <code>#ERROR!</code>, are both measured
+facts in a Microsoft engine now rather than documentation alone.</p>
 
 <h2 class="section-title">Consistent across LibreOffice versions</h2>
 <p>Both divergent cases returned <code>#N/A</code> in 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3, and
@@ -401,7 +407,8 @@ and <a href="../guides/num-error-vs-value-error-excel-vs-libreoffice.html">#NUM!
 the subtle ones: <code>=ISERR(NA())</code> returned <code>FALSE</code> and
 <code>=IFNA(10/0,"na")</code> correctly passed the <code>#DIV/0!</code> through rather than catching
 it. A branch of the shape <code>=IF(ISNA(x),"missing",IF(ISERROR(x),"broken",x))</code> carries the
-same meaning in both engines, where <code>=IF(ERROR.TYPE(x)=4,...)</code> does not.</p>
+same meaning in every engine in the table above, where <code>=IF(ERROR.TYPE(x)=4,...)</code> does
+not.</p>
 <p>If you must keep <code>ERROR.TYPE</code>, at minimum wrap it &mdash;
 <code>=IFERROR(ERROR.TYPE(x),0)</code> &mdash; so the unmapped cases degrade to a sentinel instead of
 injecting a fresh <code>#N/A</code> into the surrounding formula. And do not read a low code count as

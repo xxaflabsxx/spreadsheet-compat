@@ -374,6 +374,11 @@ every row of both tables. The Excel column is documented behaviour &mdash; we do
 computed in LibreOffice Calc 25.8.7.3. Success cases agree in every engine we have data for: a
 single-match <code>DGET</code> returns <code>200</code>, and <code>MODE.SNGL</code> picks the right
 value including the first-of-ties case.</p>
+<p>Excel for the web is a separate application from the desktop product and it is the third engine we
+execute. Recalculated on OneDrive on 2026-09-01 it returned <code>#NUM!</code> for the two-match
+<code>DGET</code> and <code>#N/A</code> for both <code>=MODE.SNGL(1,2,3)</code> and
+<code>=MODE(A1:A4)</code> &mdash; the documented codes, and the same ones Sheets returns. LibreOffice
+remains the only engine here that collapses them to <code>#VALUE!</code>.</p>
 
 <h2 class="section-title">Version coverage</h2>
 <p>Be precise about what we have run here. <code>DGET</code> and <code>MODE.SNGL</code> entered our
@@ -397,8 +402,8 @@ catalogues a dozen more instances of the same collapse.</p>
 <p>Any <code>=ISNA(MODE.SNGL(...))</code> check silently stops matching in LibreOffice, and so does
 any test written against <code>#NUM!</code> from <code>DGET</code>. Use
 <code>=IFERROR(DGET(...),"check criteria")</code> and <code>=IFERROR(MODE.SNGL(...),"no mode")</code>,
-which behave identically in both engines &mdash; every <code>IFERROR</code> case in our corpus matched
-in LibreOffice 25.8.7.3.</p>
+which behave identically in every engine in the table above &mdash; every <code>IFERROR</code> case
+in our corpus matched in LibreOffice 25.8.7.3.</p>
 <p>For <code>DGET</code> specifically, the better fix is to stop relying on the error at all. Count
 the matches first: <code>=IF(DCOUNT(db,field,crit)&gt;1,"ambiguous",DGET(db,field,crit))</code> makes
 the ambiguity explicit and portable, and both <code>DCOUNT</code> cases in our corpus matched in

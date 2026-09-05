@@ -359,7 +359,10 @@ LibreOffice also counts <code>A4</code>, the boolean. In the second row the rang
 boolean cell: Excel counts zero numbers, LibreOffice counts one. The Excel figures are the
 documented-expected values recorded in our test corpus; the LibreOffice figures are what our
 harness actually computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. Google Sheets was executed too &mdash; Drive import, 2026-08-29 &mdash; and it agrees with Excel
-exactly: 2 and 0. LibreOffice is the only one of the three that counts the boolean.</p>
+exactly: 2 and 0. Excel for the web &mdash; a separate application from desktop Excel, and the third engine we
+execute &mdash; returned <strong>2</strong> and <strong>0</strong> too when we recalculated the
+corpus on OneDrive on 2026-09-01. LibreOffice is the only one of the four columns that counts the
+boolean, and the documented figures are now backed by a measurement in a Microsoft engine as well.</p>
 
 <h2 class="section-title">Why it happens</h2>
 <p>Microsoft's COUNT documentation draws a deliberate line between arguments you <em>type</em>
@@ -374,7 +377,7 @@ and counts it. See Microsoft's
 <h2 class="section-title">How to migrate safely</h2>
 <p>The gap is in how each engine types a boolean cell, so the durable fix is structural: keep
 TRUE/FALSE flags out of any numeric range that COUNT scans. Put flags in their own column, and
-when you genuinely want to count them use a criterion both engines agree on:</p>
+when you genuinely want to count them use a criterion every engine agrees on:</p>
 <p><code>=COUNTIF(B1:B6,TRUE)</code> to count the flags, and <code>=COUNT(A1:A6)</code> over a
 column that holds only numbers.</p>
 <p>If mixing is unavoidable, re-verify every COUNT total after moving the workbook, because the

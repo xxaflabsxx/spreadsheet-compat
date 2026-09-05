@@ -385,9 +385,9 @@ how Calc reports invalid arguments.</p>
 <p>Internally LibreOffice maps out-of-domain math and invalid arguments to a single error condition
 (err:502, &ldquo;invalid argument&rdquo;), which surfaces as <code>#VALUE!</code>. Excel instead
 distinguishes a numeric domain failure (<code>#NUM!</code>) from a type failure (<code>#VALUE!</code>).
-Both engines agree the formula is invalid; they disagree only on the label. The valid rows in these
+Every engine agrees the formula is invalid; they disagree only on the label. The valid rows in these
 same functions — <code>=LN(1)</code>, <code>=SQRT(16)</code>, <code>=LARGE(A1:A5,2)</code> — match
-exactly in both, so it is strictly the error path that diverges.</p>
+exactly everywhere, so it is strictly the error path that diverges.</p>
 
 <h2 class="section-title">How to migrate safely</h2>
 <p>A broad wrapper is portable: <code>=IFERROR(LN(x),0)</code> catches <code>#NUM!</code> and
@@ -398,13 +398,16 @@ branch silently never fires. The <code>MODE</code> case is sharper still: a guar
 <code>=ISNA(MODE(range))</code> catches Excel's <code>#N/A</code> but not LibreOffice's
 <code>#VALUE!</code>, while <code>=ISERROR(...)</code> catches both. Prefer <code>IFERROR</code> and
 <code>ISERROR</code> over <code>ERROR.TYPE</code>- or <code>ISNA</code>-specific branching whenever a
-workbook has to run in both engines.</p>
+workbook has to run in more than one engine.</p>
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel errors and the <code>ERROR.TYPE</code> codes cited here are Microsoft's documented
 behaviour, not values we executed in Excel. Google Sheets was executed on 2026-08-29 via Drive import and returned Excel&rsquo;s documented
-error on every one of the sixteen rows. That makes LibreOffice the sole outlier in this table, not
-one engine of two whose behaviour we happen to know.</p>
+error on every one of the sixteen rows. Excel for the web &mdash; a separate application from the desktop
+product, and the third engine we execute &mdash; returned the documented error on all sixteen rows
+too when we recalculated the corpus on OneDrive on 2026-09-01: fifteen <code>#NUM!</code>s and the
+<code>#N/A</code> for <code>=MODE(A1:A4)</code>. That makes LibreOffice the sole outlier in this
+table, measured against two executed engines and the documentation rather than inferred.</p>
 
 <h2 class="section-title">Check before you migrate</h2>
 <aside class="promo-card">

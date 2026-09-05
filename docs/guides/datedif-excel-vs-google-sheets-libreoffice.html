@@ -376,7 +376,7 @@ and every build produced the same output: <code>3</code>, <code>41</code>, <code
 error-code difference is a regression in one release; both are stable behaviour across every version
 we have executed.</p>
 
-<h2 class="section-title">Why the &ldquo;MD&rdquo; result is negative in both engines</h2>
+<h2 class="section-title">Why the &ldquo;MD&rdquo; result is negative in every engine</h2>
 <p><code>"MD"</code> is supposed to give the days between two dates ignoring months and years.
 Microsoft's own documentation warns against relying on it, because the day-of-month subtraction it
 performs can borrow from the wrong month. Reading the arithmetic off our case: the start day is
@@ -408,8 +408,11 @@ simply never fires in LibreOffice, because the error arriving is <code>#VALUE!</
 where two of the seven documented codes come back as <code>#N/A</code> rather than a number.</p>
 
 <h2 class="section-title">How to migrate safely</h2>
-<p><strong>Do not use <code>"MD"</code> at all.</strong> Both engines reproduce the same defect, so
-there is no target app in which the formula is correct. If you need days-within-the-month, compute it
+<p><strong>Do not use <code>"MD"</code> at all.</strong> Every engine we execute reproduces the same
+defect &mdash; Google Sheets, all four LibreOffice builds, and Excel for the web, which returned
+<code>-1</code> for <code>=DATEDIF(DATE(2024,1,31),DATE(2024,3,1),"MD")</code> when we recalculated
+the corpus on OneDrive on 2026-09-01 &mdash; so there is no target app in which the formula is
+correct. If you need days-within-the-month, compute it
 explicitly from the date parts you actually mean rather than asking <code>DATEDIF</code> to guess.</p>
 <p><strong>Prefer documented functions for the units they cover.</strong> A plain day count is
 <code>=DAYS(end,start)</code>, which our function dataset records as documented in Excel, Google

@@ -341,7 +341,7 @@ number; it is a wrong <em>error</em>, and error identity is what conditional log
   <p><code>=VLOOKUP("a",A1:B3,5,FALSE)</code> is <code>#REF!</code> per Microsoft and
   <code>#VALUE!</code> in LibreOffice; <code>=HLOOKUP("a",A1:C2,5,FALSE)</code> does the same. Every
   other case we ran &mdash; exact match, approximate match, wildcards, and the ordinary not-found
-  <code>#N/A</code> &mdash; agrees between the two engines. Only the out-of-range index forks, and it
+  <code>#N/A</code> &mdash; agrees across every engine we execute. Only the out-of-range index forks, and it
   forks in exactly the place where hand-written error handling tends to be specific.</p>
 </div>
 
@@ -377,7 +377,7 @@ is how much agrees: only <code>VLOOKUP_col_index_out_of_range</code> and
 been classifying the error throughout the versions we test.</p>
 
 <h2 class="section-title">Why it happens</h2>
-<p>The two engines disagree about what kind of mistake an oversized index is. Excel treats it as a
+<p>Excel and LibreOffice disagree about what kind of mistake an oversized index is. Excel treats it as a
 reference problem: you named a column that is not in <code>table_array</code>, so the result is
 <code>#REF!</code>. LibreOffice treats it as a bad <em>argument</em> &mdash; the third parameter is
 outside its permitted range &mdash; and reports <code>#VALUE!</code>, the same code it returns for
@@ -388,8 +388,9 @@ LibreOffice's <code>#VALUE!</code> is a broad bucket; Excel's error codes are na
 
 <h2 class="section-title">How to migrate safely</h2>
 <p>Stop branching on the specific error. <code>=IFERROR(VLOOKUP(...),"not found")</code> and
-<code>=ISERROR(...)</code> catch both codes and behave identically in both engines &mdash; every
-<code>IFERROR</code> and <code>ISERROR</code> case in our corpus matched in LibreOffice 25.8.7.3.
+<code>=ISERROR(...)</code> catch both codes and behave identically in every engine here &mdash;
+every <code>IFERROR</code> and <code>ISERROR</code> case in our corpus matched in LibreOffice
+25.8.7.3.
 Anything narrower will not survive the move: an <code>=ISNA(...)</code> guard catches neither error,
 and an <code>ERROR.TYPE(...)=4</code> test never matches in LibreOffice (see
 <a href="../guides/error-type-codes-excel-vs-libreoffice.html">ERROR.TYPE codes across engines</a>).</p>
@@ -402,13 +403,17 @@ removes the error entirely: <code>=XLOOKUP("a",A1:A3,B1:B3,"not found")</code> r
 <code>XLOOKUP</code> returned <code>#NAME?</code> in 24.2.0.3 and only started evaluating in
 24.8.7.2. If a formula must keep its numeric index, guard it:
 <code>=IF(colidx&gt;COLUMNS(table),NA(),VLOOKUP(key,table,colidx,FALSE))</code> makes the mistake
-mean the same thing in both engines.</p>
+mean the same thing everywhere.</p>
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel column is Microsoft's documented behaviour as recorded in our test corpus, not values we
 executed in Excel. The Google Sheets column is executed output from a Drive import on 2026-08-29: Sheets returns
 <code>#REF!</code> for an out-of-range index, matching Excel&rsquo;s documentation, so LibreOffice is
-the only engine that answers <code>#VALUE!</code>.
+the only engine that answers <code>#VALUE!</code>. Excel for the web &mdash; a separate application
+from the desktop product, and the third engine we execute &mdash; returned <code>#REF!</code> for
+both <code>=VLOOKUP("a",A1:B3,5,FALSE)</code> and <code>=HLOOKUP("a",A1:C2,5,FALSE)</code> when we
+recalculated the corpus on OneDrive on 2026-09-01, so the documented code is measured in a Microsoft
+engine as well.
 The LibreOffice column is executed output from LibreOffice Calc 25.8.7.3, cross-checked against our
 24.2.0.3, 24.8.7.2 and 25.2.0.3 runs.</p>
 

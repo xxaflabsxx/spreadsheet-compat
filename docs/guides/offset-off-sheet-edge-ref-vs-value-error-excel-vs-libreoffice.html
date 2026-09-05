@@ -362,7 +362,11 @@ second; <code>B2 = 5</code> for the last.</p>
 <p>The Excel column is the documented-expected value from our test corpus, sourced from Microsoft's
 <code>OFFSET</code> reference page; we did not run desktop Excel. The LibreOffice column is what our harness
 computed in LibreOffice Calc 25.8.7.3. Three of the four cases match exactly, which is the useful
-headline: <code>OFFSET</code> itself is not a porting hazard, its failure mode is.</p>
+headline: <code>OFFSET</code> itself is not a porting hazard, its failure mode is. Excel for the web
+&mdash; a separate application from the desktop product, and the third engine we execute &mdash;
+returned <code>#REF!</code> for <code>=OFFSET(A1,-1,0)</code> when we recalculated the corpus on
+OneDrive on 2026-09-01, matching the documented column and Google Sheets, so <code>#VALUE!</code> is
+LibreOffice&rsquo;s alone.</p>
 
 <h2 class="section-title">Consistent across LibreOffice versions</h2>
 <p><code>=OFFSET(A1,-1,0)</code> returned <code>#VALUE!</code> in 24.2.0.3, 24.8.7.2, 25.2.0.3 and
@@ -380,8 +384,8 @@ and out-of-domain maths such as <code>=SQRT(-16)</code>. The consequence is wort
 so error handling keyed to it quietly stops firing.</p>
 
 <h2 class="section-title">How to migrate safely</h2>
-<p>Do not test for the error code. <code>=IFERROR(OFFSET(...),0)</code> catches both engines'
-versions; a check written specifically for <code>#REF!</code> catches only Excel's. Guarding the
+<p>Do not test for the error code. <code>=IFERROR(OFFSET(...),0)</code> catches every
+engine's version; a check written specifically for <code>#REF!</code> catches only the Microsoft one. Guarding the
 bounds yourself is better still, because then neither engine errors:
 <code>=IF(ROW(anchor)+rows&lt;1,"",OFFSET(anchor,rows,cols))</code> refuses the impossible move before
 the function sees it.</p>

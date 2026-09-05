@@ -369,6 +369,11 @@ LibreOffice column is what our harness read back after recalculating the workboo
 range-check these functions &mdash; <code>=CHAR(256)</code> and <code>=UNICHAR(-1)</code> both return
 <code>#VALUE!</code>, matching Excel &mdash; and it handles ordinary code points, accents and even
 supplementary-plane emoji identically. Zero is the single value that slips through the check.</p>
+<p>Excel for the web is a separate application from the desktop product, and that one we do execute.
+Recalculated on OneDrive on 2026-09-01 it returned <code>#VALUE!</code> for <code>=CHAR(0)</code>,
+<code>=UNICHAR(0)</code> and <code>=CHAR(256)</code> &mdash; the documented values in all three, and
+in the first two not what LibreOffice returns. So the documented column here is now also a measured
+result in a Microsoft engine; it still says nothing about what the desktop product does.</p>
 
 <h2 class="section-title">A note on what <code>_x0000_</code> means</h2>
 <p><code>_x0000_</code> is not a piece of text LibreOffice invented. It is the standard OOXML escape
@@ -393,7 +398,7 @@ mistake shows itself; in LibreOffice it disappears into a column of apparently b
 
 <h2 class="section-title">How to migrate safely</h2>
 <p>Guard the argument rather than trusting the function to reject it:
-<code>=IF(n&lt;1,"",CHAR(n))</code> gives both engines the same answer and makes the intent explicit.
+<code>=IF(n&lt;1,"",CHAR(n))</code> gives every engine the same answer and makes the intent explicit.
 Where you are cleaning up data that may already contain these characters, <code>CLEAN</code> is the
 tool for the job &mdash; it strips control characters, and our executed run confirms
 <code>=CLEAN("Hello"&amp;CHAR(7)&amp;"World")</code> returns <code>HelloWorld</code> in LibreOffice

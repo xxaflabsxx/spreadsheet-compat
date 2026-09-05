@@ -397,14 +397,15 @@ generic <code>ISERROR</code> guard catches all of them, but a check for one spec
 not.</p>
 
 <h2 class="section-title">How to migrate safely</h2>
-<p>The durable fix is to rewrite the array logic as ordinary formulas that both engines evaluate:</p>
+<p>The durable fix is to rewrite the array logic as ordinary formulas that every engine evaluates:</p>
 <p><code>=MAP(A1:A3,LAMBDA(x,x*2))</code> becomes a helper column of <code>=A1*2</code> filled down.</p>
 <p><code>=BYROW(A1:B2,LAMBDA(r,SUM(r)))</code> becomes <code>=SUM(A1:B1)</code> per row.</p>
 <p><code>=REDUCE(0,A1:A3,LAMBDA(a,b,a+b))</code> becomes <code>=SUM(A1:A3)</code>.</p>
 <p><code>=SCAN(0,A1:A3,LAMBDA(a,b,a+b))</code> becomes a running total: <code>=A1</code> in the first
 cell, then <code>=B1+A2</code> filled down.</p>
-<p><code>=ARRAYTOTEXT(A1:A3)</code> becomes <code>=TEXTJOIN(", ",TRUE,A1:A3)</code>, which both
-engines support.</p>
+<p><code>=ARRAYTOTEXT(A1:A3)</code> becomes <code>=TEXTJOIN(", ",TRUE,A1:A3)</code>, which every
+engine we execute supports &mdash; including Excel for the web, where all four
+<code>TEXTJOIN</code> corpus cases returned their documented values on 2026-09-01.</p>
 <p>Helper columns recalculate identically in Excel and LibreOffice and survive round-trips through
 .xlsx. Reserve LAMBDA for workbooks that will only ever open in modern Excel or Google Sheets.</p>
 
@@ -417,6 +418,15 @@ figures needed a follow-up run on 2026-08-29 that wrote the formulas with plain 
 names — the original <code>_xlfn.</code>-prefixed pass was inconclusive because Google’s
 importer did not map that storage form, not because Sheets lacked the functions. Both runs are kept in
 our results file, with per-function provenance recorded in <code>subset_runs</code>.</p>
+<p>Excel for the web is the third engine we execute, and this is the one family it could not reach.
+<code>LAMBDA</code>, <code>MAP</code>, <code>MAKEARRAY</code>, <code>REDUCE</code> and
+<code>SCAN</code> are stored in an <code>.xlsx</code> with the <code>_xlpm.</code>/<code>LAMBDA</code>
+serialization, and the web app&rsquo;s file-open refuses any workbook that carries it &mdash; proven
+by bisecting the corpus down to a probe containing nothing else. <code>BYROW</code> and
+<code>BYCOL</code> got further: their chunk opened and recalculated, but the two array formulas were
+deleted from the downloaded package rather than computed. So there is <strong>no</strong>
+Excel-for-the-web verdict for any of the seven, and none is implied here; that is a fact about the
+transport, not about the engine.</p>
 
 <h2 class="section-title">Check before you migrate</h2>
 <aside class="promo-card">

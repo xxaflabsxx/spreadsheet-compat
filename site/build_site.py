@@ -3251,7 +3251,7 @@ COMPARISON_TMPL = """{% extends "base.html" %}
 {% endfor %}
 </ul>
 
-<h2 class="section-title">Compatibility (Sheets &amp; LibreOffice executed; Excel per docs)</h2>
+<h2 class="section-title">Compatibility (Excel for the web, Sheets &amp; LibreOffice executed; desktop Excel per docs)</h2>
 <p>{{ c.compat_note }}</p>
 
 <h2 class="section-title">Example formulas</h2>

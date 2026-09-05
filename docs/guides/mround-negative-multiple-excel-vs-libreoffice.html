@@ -356,8 +356,11 @@ error you will notice; it is a plausible-looking wrong number sitting quietly in
 </div>
 <p>The <code>#NUM!</code> is the documented-expected value in our test corpus; we did not run desktop Excel.
 The <code>6</code> is what our harness computed by recalculating the workbook in LibreOffice Calc
-25.8.7.3. The two same-sign rows agree in both engines — only the mismatched-sign case forks, and it
-forks into a number rather than an error.</p>
+25.8.7.3. The two same-sign rows agree in both of those engines — only the mismatched-sign case forks, and
+it forks into a number rather than an error. Excel for the web, a separate application from the
+desktop product and the third engine we execute, returned <code>#NUM!</code>, <code>9</code> and
+<code>-9</code> for the same three rows when we recalculated the corpus on OneDrive on 2026-09-01, so
+LibreOffice is alone on the mismatched-sign case.</p>
 
 <h2 class="section-title">Consistent across LibreOffice versions</h2>
 <p>We ran <code>=MROUND(5,-2)</code> through 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. Every build
@@ -373,7 +376,7 @@ internally consistent; it just answers a question Excel refuses to answer at all
 
 <h2 class="section-title">How to migrate safely</h2>
 <p>Because the divergence is a value and not an error, <code>IFERROR</code> will not save you here —
-there is no error to catch. Guard the sign relationship yourself so both engines produce the same
+there is no error to catch. Guard the sign relationship yourself so every engine produces the same
 result, or reject the input explicitly:</p>
 <p><code>=MROUND(number, ABS(multiple) * SIGN(number))</code> forces the multiple to share the
 number's sign before rounding.</p>

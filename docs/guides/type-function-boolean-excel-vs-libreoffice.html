@@ -360,7 +360,8 @@ that branches on those codes changes meaning after migration.</p>
 </div>
 <p>The Excel column holds the documented codes from our test corpus; we did not run desktop Excel. The
 LibreOffice column is what our harness computed in LibreOffice Calc 25.8.7.3. Numbers, text and
-errors classify identically in both engines — only the boolean and the array-reference cases diverge.</p>
+errors classify identically in every engine here — only the boolean and the array-reference cases
+diverge.</p>
 
 <h2 class="section-title">Consistent across LibreOffice versions</h2>
 <p>We ran these through 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3. <code>=TYPE(TRUE)</code> returned
@@ -384,12 +385,19 @@ and on
 not rely on <code>TYPE(range)=64</code> to detect that an argument is an array; that check is not
 portable. In general, prefer the dedicated <code>IS...</code> predicates
 (<code>ISNUMBER</code>, <code>ISTEXT</code>, <code>ISLOGICAL</code>, <code>ISERROR</code>) over
-switching on a numeric <code>TYPE</code> code when a workbook must run in both engines.</p>
+switching on a numeric <code>TYPE</code> code when a workbook must run in more than one engine.</p>
 
 <h2 class="section-title">Honest limits</h2>
 <p>The Excel codes are Microsoft's documented behaviour, not values we executed in Excel. The Google Sheets column is executed output from a Drive import on 2026-08-29, and Sheets splits the
 difference: <code>TYPE(TRUE)</code> is 4, as Excel documents, but <code>TYPE(A1:A3)</code> is 1
 rather than 64 &mdash; the same answer LibreOffice gives.</p>
+<p>Excel for the web is a separate application from the desktop product and it is the third engine we
+execute. Recalculated on OneDrive on 2026-09-01 it split the same way Sheets does:
+<code>=TYPE(TRUE)</code> returned <strong>4</strong>, and <code>=TYPE(A1:A3)</code> returned
+<strong>1</strong> against the documented <code>64</code>. The boolean row is therefore measured in a
+Microsoft engine and not merely documented; the array row is the ambiguous kind &mdash; with no
+desktop run we cannot say whether the web engine differs from the desktop one or the
+<code>64</code> in the documentation is wrong about both, and no engine we execute returns it.</p>
 
 <h2 class="section-title">Check before you migrate</h2>
 <aside class="promo-card">

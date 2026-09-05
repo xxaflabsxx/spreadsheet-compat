@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PERCENTRANK significance: Excel truncates, both other engines round</title>
-<meta name="description" content="Executed: PERCENTRANK.INC(A2:A11,4) returns 0.556 in LibreOffice 25.8.7.3 and Google Sheets where Microsoft publishes 0.555, and at significance 1 PERCENTRANK.EXC returns 0.4 against a published 0.3. The ranking arithmetic matches everywhere; only the significance step differs, and only on repeating decimals.">
+<title>PERCENTRANK significance: Excel truncates, Sheets and LibreOffice round</title>
+<meta name="description" content="Executed: PERCENTRANK.INC(A2:A11,4) returns 0.556 in LibreOffice 25.8.7.3 and Google Sheets, and 0.555 in Excel for the web, where Microsoft publishes 0.555, and at significance 1 PERCENTRANK.EXC returns 0.4 against a published 0.3. The ranking arithmetic matches everywhere; only the significance step differs, and only on repeating decimals.">
 
 <link rel="canonical" href="https://canispreadsheet.com/guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">
-<meta property="og:title" content="PERCENTRANK significance: Excel truncates, both other engines round">
-<meta property="og:description" content="Executed: PERCENTRANK.INC(A2:A11,4) returns 0.556 in LibreOffice 25.8.7.3 and Google Sheets where Microsoft publishes 0.555, and at significance 1 PERCENTRANK.EXC returns 0.4 against a published 0.3. The ranking arithmetic matches everywhere; only the significance step differs, and only on repeating decimals.">
+<meta property="og:title" content="PERCENTRANK significance: Excel truncates, Sheets and LibreOffice round">
+<meta property="og:description" content="Executed: PERCENTRANK.INC(A2:A11,4) returns 0.556 in LibreOffice 25.8.7.3 and Google Sheets, and 0.555 in Excel for the web, where Microsoft publishes 0.555, and at significance 1 PERCENTRANK.EXC returns 0.4 against a published 0.3. The ranking arithmetic matches everywhere; only the significance step differs, and only on repeating decimals.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://canispreadsheet.com/guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html">
 <meta property="og:image" content="https://canispreadsheet.com/og.png">
@@ -19,7 +19,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"PERCENTRANK significance: Excel truncates, both other engines round","item":"https://canispreadsheet.com/guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"PERCENTRANK significance: Excel truncates, Sheets and LibreOffice round","item":"https://canispreadsheet.com/guides/percentrank-significance-truncation-vs-rounding-excel-vs-google-sheets-libreoffice.html"}]}</script>
 <style>
 :root {
   --accent: #4F46E5;
@@ -334,11 +334,11 @@ noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8p
 <p>The <code>significance</code> argument of <code>PERCENTRANK</code> is the least interesting-looking
 argument in the statistics library. It does not change the ranking; it only says how many digits of the
 answer you want, and it defaults to three. It is also the argument on which Microsoft&rsquo;s
-documentation and both engines shown here part company, silently, in the third decimal place of an
-ordinary percentile rank.</p>
+documentation and two of the three engines we execute part company, silently, in the third decimal
+place of an ordinary percentile rank.</p>
 
-<p>The rule Microsoft publishes is <strong>truncation</strong>. The rule both engines shown here
-implement is <strong>rounding</strong>. On any input whose exact rank is a repeating decimal &mdash;
+<p>The rule Microsoft publishes is <strong>truncation</strong>, and Excel for the web implements it.
+The rule Google Sheets and LibreOffice implement is <strong>rounding</strong>. On any input whose exact rank is a repeating decimal &mdash;
 5/9, 6/9, and every other rank you get from a list of ten values &mdash; those two rules give different
 answers, and nothing errors, warns, or flags the difference.</p>
 
@@ -347,11 +347,15 @@ answers, and nothing errors, warns, or flags the difference.</p>
   <p>This is not a LibreOffice-versus-Google split. LibreOffice Calc 25.8.7.3 and Google Sheets return
   <em>the same</em> answer on every case in this guide, and it is the answer Microsoft&rsquo;s pages do
   not publish. <code>=PERCENTRANK.INC(A2:A11,4)</code> over Microsoft&rsquo;s own documented data is
-  <strong>0.555</strong> on Microsoft&rsquo;s page and <strong>0.556</strong> in both engines we ran.
+  <strong>0.555</strong> on Microsoft&rsquo;s page and <strong>0.556</strong> in both of them.
   At <code>significance</code> 1 the same disagreement moves the answer by a third of its own size:
-  Microsoft publishes <strong>0.3</strong>, both engines return <strong>0.4</strong>. All four
+  Microsoft publishes <strong>0.3</strong>, and both return <strong>0.4</strong>. All four
   LibreOffice builds we test (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3) agree with each other on every
-  row.</p>
+  row. <strong>Excel for the web is the third engine we execute, and it truncates:</strong> on
+  2026-09-01 it returned <strong>0.555</strong>, <strong>0.666</strong> and <strong>0.3</strong> on
+  these rows &mdash; the published figures, digit for digit. That does not tell us what desktop Excel
+  does, but it does mean the truncation rule is a measured behaviour in a Microsoft engine and not
+  only a line in the documentation.</p>
 </div>
 
 <h2 class="section-title">Executed: the three rows that separate truncation from rounding</h2>
@@ -359,14 +363,16 @@ answers, and nothing errors, warns, or flags the difference.</p>
 these three rows it is a figure Microsoft prints in its own worked-example table. It is the yardstick,
 and we do not run desktop Excel. The Google Sheets column is executed output from the dated Drive-import run of
 2026-08-31; the LibreOffice column is Calc 25.8.7.3, with the same result on the other three pinned
-builds.</p>
+builds; the Excel-for-the-web column is our dated recalculation run on OneDrive, a different
+application from the desktop product and the only Microsoft engine here that is measured rather than
+quoted.</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Exact rank</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Exact rank</th><th>Excel, desktop (documented)</th><th>Excel for the web (executed 2026-09-01)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,4)</td><td>5/9 = 0.5555&hellip;</td><td>0.555</td><td class="result"><strong>0.556</strong></td><td class="result"><strong>0.556</strong></td></tr>
-    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,8)</td><td>6/9 = 0.6666&hellip;</td><td>0.666</td><td class="result"><strong>0.667</strong></td><td class="result"><strong>0.667</strong></td></tr>
-    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,5.43,1)</td><td>0.381, cut to 1 digit</td><td>0.3</td><td class="result"><strong>0.4</strong></td><td class="result"><strong>0.4</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,4)</td><td>5/9 = 0.5555&hellip;</td><td>0.555</td><td class="result">0.555</td><td class="result"><strong>0.556</strong></td><td class="result"><strong>0.556</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,8)</td><td>6/9 = 0.6666&hellip;</td><td>0.666</td><td class="result">0.666</td><td class="result"><strong>0.667</strong></td><td class="result"><strong>0.667</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,5.43,1)</td><td>0.381, cut to 1 digit</td><td>0.3</td><td class="result">0.3</td><td class="result"><strong>0.4</strong></td><td class="result"><strong>0.4</strong></td></tr>
   </tbody>
 </table>
 </div>
@@ -386,80 +392,90 @@ the ten values are below 4, so <code>=PERCENTRANK.INC(A2:A11,4)</code> is exactl
 <ul>
 <li><strong>Truncate</strong> 0.55555&hellip; &rarr; <code>0.555</code>. This is what Microsoft
 publishes.</li>
-<li><strong>Round</strong> 0.55555&hellip; &rarr; <code>0.556</code>. This is what both engines
-returned.</li>
+<li><strong>Round</strong> 0.55555&hellip; &rarr; <code>0.556</code>. This is what Google Sheets and
+LibreOffice returned; Excel for the web returned the truncated <code>0.555</code>.</li>
 </ul>
 <p>The companion row runs the test in the other direction, which is what makes the reading
 unambiguous rather than a possible typo on one page: 6/9 = 0.6666&hellip; truncates to
 <code>0.666</code> and rounds to <code>0.667</code>, and Microsoft publishes <code>0.666</code> while
-both engines returned <code>0.667</code>. Two rows, two directions, one rule each.</p>
+Google Sheets and LibreOffice returned <code>0.667</code> and Excel for the web returned
+<code>0.666</code>. Two rows, two directions, one rule each.</p>
 <p><code>PERCENTRANK.EXC</code> shows it a third time, and much more loudly. Its interpolated example
 is exactly 0.381 (3.81/10, computed in rational arithmetic), and Microsoft&rsquo;s page passes
 <code>significance</code> = 1 to it and prints <code>0.3</code>, adding the gloss &ldquo;displaying
 only 1 significant digit in the result (the default is 3)&rdquo;. Cutting 0.381 to one significant
-digit gives 0.3; rounding it gives 0.4. Both engines returned <strong>0.4</strong>.</p>
+digit gives 0.3; rounding it gives 0.4. Google Sheets and LibreOffice returned <strong>0.4</strong>;
+Excel for the web returned <strong>0.3</strong>.</p>
 
 <h2 class="section-title">The ranking itself is right &mdash; only the last step differs</h2>
 <p>This is worth stating plainly, because it bounds the damage. Every case in our corpus whose exact
-rank terminates at the requested precision passed in both engines, including the ones that pin which
-definition of &ldquo;percent rank&rdquo; each engine implements:</p>
+rank terminates at the requested precision passed in all three executed engines, including the ones
+that pin which definition of &ldquo;percent rank&rdquo; each engine implements:</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>What it pins down</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>What it pins down</th><th>Excel, desktop (documented)</th><th>Excel for the web (executed 2026-09-01)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2)</td><td>Microsoft&rsquo;s headline example, 3/9</td><td>0.333</td><td class="result">0.333</td><td class="result">0.333</td></tr>
-    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,5)</td><td>interpolation between two data points</td><td>0.583</td><td class="result">0.583</td><td class="result">0.583</td></tr>
-    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,13)</td><td>the largest value; .INC sends it to 1</td><td>1</td><td class="result">1</td><td class="result">1</td></tr>
-    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,7)</td><td>an exact member, 7/(9+1)</td><td>0.7</td><td class="result">0.7</td><td class="result">0.7</td></tr>
-    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,5.43)</td><td>interpolation at the default 3 digits</td><td>0.381</td><td class="result">0.381</td><td class="result">0.381</td></tr>
-    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,1)</td><td>the smallest value; .EXC keeps it above 0</td><td>0.1</td><td class="result">0.1</td><td class="result">0.1</td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2)</td><td>Microsoft&rsquo;s headline example, 3/9</td><td>0.333</td><td class="result">0.333</td><td class="result">0.333</td><td class="result">0.333</td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,5)</td><td>interpolation between two data points</td><td>0.583</td><td class="result">0.583</td><td class="result">0.583</td><td class="result">0.583</td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,13)</td><td>the largest value; .INC sends it to 1</td><td>1</td><td class="result">1</td><td class="result">1</td><td class="result">1</td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,7)</td><td>an exact member, 7/(9+1)</td><td>0.7</td><td class="result">0.7</td><td class="result">0.7</td><td class="result">0.7</td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,5.43)</td><td>interpolation at the default 3 digits</td><td>0.381</td><td class="result">0.381</td><td class="result">0.381</td><td class="result">0.381</td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,1)</td><td>the smallest value; .EXC keeps it above 0</td><td>0.1</td><td class="result">0.1</td><td class="result">0.1</td><td class="result">0.1</td></tr>
   </tbody>
 </table>
 </div>
 <p>So the ordering, the interpolation, the inclusive-versus-exclusive endpoints and the arithmetic are
-all correct in both engines. The disagreement lives entirely in the step that turns a full-precision
+all correct in every executed engine. The disagreement lives entirely in the step that turns a full-precision
 rank into a significance-limited one, which is why it is so easy to miss: an engine that had the
 ranking wrong would show it everywhere, and an engine that only rounds instead of truncating shows it
 nowhere except on repeating decimals.</p>
 
 <h2 class="section-title">The legacy PERCENTRANK is not the same test</h2>
 <p><code>PERCENTRANK</code> without a suffix is still present in all three products and is the spelling
-most old workbooks use. Our corpus executes four cases for it, and all four match in both engines:</p>
+most old workbooks use. Our corpus executes four cases for it, and all four match in Google Sheets and LibreOffice:</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Excel for the web (executed 2026-09-01)</th><th>Google Sheets (executed 2026-08-29)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=PERCENTRANK(A1:A4,10)</td><td>0</td><td class="result">0</td><td class="result">0</td></tr>
-    <tr><td class="formula">=PERCENTRANK(A1:A4,25)</td><td>0.5</td><td class="result">0.5</td><td class="result">0.5</td></tr>
-    <tr><td class="formula">=PERCENTRANK(A1:A4,30)</td><td>0.667</td><td class="result">0.667</td><td class="result">0.667</td></tr>
-    <tr><td class="formula">=PERCENTRANK(A1:A4,40)</td><td>1</td><td class="result">1</td><td class="result">1</td></tr>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,10)</td><td>0</td><td class="result">0</td><td class="result">0</td><td class="result">0</td></tr>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,25)</td><td>0.5</td><td class="result">0.5</td><td class="result">0.5</td><td class="result">0.5</td></tr>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,30)</td><td>0.667</td><td class="result"><strong>0.666</strong></td><td class="result">0.667</td><td class="result">0.667</td></tr>
+    <tr><td class="formula">=PERCENTRANK(A1:A4,40)</td><td>1</td><td class="result">1</td><td class="result">1</td><td class="result">1</td></tr>
   </tbody>
 </table>
 </div>
-<p>That is a clean pass, and it is also a warning about what a clean pass is worth. Three of those four
+<p>In Google Sheets and LibreOffice that is a clean pass, and it is also a warning about what a
+clean pass is worth. Three of those four
 values are exact at three digits no matter which rule you apply, and the fourth &mdash; 2/3 over four
 data points &mdash; is asserted in our corpus as 0.667, the rounded form, so it could never have
 distinguished the two rules either. The legacy file was written before the truncation question was
 asked, and it passes for that reason and no other. Those four cases were executed in LibreOffice on
 2026-08-04 and in Google Sheets on 2026-08-29; the <code>.INC</code> and <code>.EXC</code> cases above
-ran in both engines on 2026-08-31. We have <strong>no</strong> executed case that puts the legacy
-spelling on a repeating-decimal rank, so this guide makes no claim about whether it truncates or
-rounds. If your workbook uses the unsuffixed name, treat it as untested on this point rather than as
-cleared.</p>
+ran in both of those engines on 2026-08-31.</p>
+<p>Excel for the web is where the fourth row stops being a clean pass. On 2026-09-01 it returned
+<strong>0.666</strong> for <code>=PERCENTRANK(A1:A4,30)</code> &mdash; the truncated form of 2/3,
+against the <code>0.667</code> our corpus asserts and the <code>0.667</code> Sheets and LibreOffice
+both return. So the legacy spelling is not exempt: it takes the same significance rule as
+<code>.INC</code> and <code>.EXC</code> in that engine, and the corpus&rsquo;s own expected value is
+the rounded one, which is why the row is scored as a mismatch there rather than as a divergence in
+the other three columns. We still have no measurement of the legacy spelling on a repeating-decimal
+rank in <em>desktop</em> Excel, and no page here claims one.</p>
 
 <h2 class="section-title">The two documented errors are a separate divergence</h2>
 <p>Both Microsoft pages exclude two inputs in the same words &mdash; &ldquo;If significance &lt; 1,
 PERCENTRANK.INC returns the #NUM! error value&rdquo; and &ldquo;If array is empty, PERCENTRANK.INC
-returns the #NUM! error value&rdquo; &mdash; and neither engine reproduces that, in two different
-directions:</p>
+returns the #NUM! error value&rdquo; &mdash; and neither Sheets nor LibreOffice reproduces that, in
+two different directions. Excel for the web splits the difference: it raises <code>#NUM!</code> for
+the <code>significance</code> = 0 rows exactly as documented, and returns <code>#N/A</code> for the
+empty-array rows, which is what Sheets does too:</p>
 <div class="table-scroll">
 <table class="cases">
-  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
+  <thead><tr><th>Formula</th><th>Excel, desktop (documented)</th><th>Excel for the web (executed 2026-09-01)</th><th>Google Sheets (executed 2026-08-31)</th><th>LibreOffice Calc 25.8.7.3 (executed)</th></tr></thead>
   <tbody>
-    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2,0)</td><td>#NUM!</td><td class="result"><strong>0.333</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
-    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,7,0)</td><td>#NUM!</td><td class="result"><strong>0.7</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
-    <tr><td class="formula">=PERCENTRANK.INC(D20:D25,2)</td><td>#NUM!</td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
-    <tr><td class="formula">=PERCENTRANK.EXC(D20:D25,7)</td><td>#NUM!</td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(A2:A11,2,0)</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result"><strong>0.333</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(A2:A10,7,0)</td><td>#NUM!</td><td class="result">#NUM!</td><td class="result"><strong>0.7</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.INC(D20:D25,2)</td><td>#NUM!</td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
+    <tr><td class="formula">=PERCENTRANK.EXC(D20:D25,7)</td><td>#NUM!</td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#N/A</strong></td><td class="result"><strong>#VALUE!</strong></td></tr>
   </tbody>
 </table>
 </div>
@@ -502,9 +518,17 @@ of the other two.</p>
 <p>The Excel column throughout is Microsoft&rsquo;s documented behaviour as recorded in our test
 corpus, and in the sharp rows it is a figure Microsoft prints on its own <code>PERCENTRANK.INC</code>
 and <code>PERCENTRANK.EXC</code> pages. We do not run desktop Excel, and no value in that column is a
-measurement. What we can say is narrow and factual: the published figures and the executed figures
-differ, and the published figures are the ones consistent with the truncation rule the same pages
-describe.</p>
+measurement. What we can say is narrow and factual: the published figures and the Sheets/LibreOffice
+figures differ, and the published figures are the ones consistent with the truncation rule the same
+pages describe.</p>
+<p>The Excel-for-the-web column is a measurement, of a different application: an <code>.xlsx</code>
+carrying no cached results is uploaded to OneDrive, recalculated by Excel for the web on open, and
+downloaded again for readback, with the same per-sheet canary discipline. It is dated rather than
+versioned because the service has no pinnable build. It reproduced the published truncation on every
+significance row we ran, which is corroboration of the documentation and nothing more: it is not
+evidence about the desktop product, and where it disagrees with the documented column &mdash; the two
+empty-array rows &mdash; we cannot tell whether the web engine diverges or the documentation is wrong
+about both.</p>
 <p>The Google Sheets column is executed output from a dated run, because Sheets has no version number
 to pin: a formula-only <code>.xlsx</code> carrying no cached results goes to Google Drive, is
 recalculated by Google&rsquo;s engine, and comes back as <code>.xlsx</code> for readback, with a
@@ -521,7 +545,7 @@ function exists but the file cannot say so</a> for the cases where it is.</p>
 <p>Scope. Seventeen cases across the three spellings is the entire <code>PERCENTRANK</code> corpus.
 Untested here: the legacy <code>PERCENTRANK</code> on any repeating-decimal rank, significance values
 above 3, non-integer significance, arrays containing text or logicals, duplicated values at the query
-point under <code>.EXC</code>, and whether the two engines&rsquo; agreement extends to
+point under <code>.EXC</code>, and whether the Sheets/LibreOffice agreement extends to
 <code>PERCENTILE</code> and <code>QUARTILE</code>, which have their own significance-free rounding
 story. See <a href="../methodology.html">our methodology</a> for how recalculation is proven rather
 than assumed, and the function pages for

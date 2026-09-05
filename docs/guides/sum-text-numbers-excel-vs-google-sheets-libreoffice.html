@@ -338,8 +338,8 @@ Calc returns <code>#VALUE!</code> for exactly the same formula.</p>
 <div class="quirk-box">
   <h3>The surprise</h3>
   <p>A quoted numeric literal passed straight into SUM is coerced to a number by Excel but
-  rejected by LibreOffice. This is not about text sitting in a referenced cell (both engines
-  ignore that); it is specifically about a text literal handed directly to the function.</p>
+  rejected by LibreOffice. This is not about text sitting in a referenced cell (every engine
+  ignores that); it is specifically about a text literal handed directly to the function.</p>
 </div>
 
 <h2 class="section-title">A minimal example</h2>
@@ -355,7 +355,10 @@ Calc returns <code>#VALUE!</code> for exactly the same formula.</p>
 is what our harness computed by recalculating the workbook in LibreOffice Calc 25.8.7.3. The plain
 <code>=SUM(1,2,3)</code> without quotes returns 6 in every engine; only the quoted literal
 diverges. Google Sheets was executed too &mdash; Drive import, 2026-08-29 &mdash; and returns 6, matching
-Excel&rsquo;s documented coercion. LibreOffice is the only one of the three that errors.</p>
+Excel&rsquo;s documented coercion. Excel for the web &mdash; a separate application from the desktop
+product, and the third engine we execute &mdash; returned <strong>6</strong> as well when we
+recalculated the corpus on OneDrive on 2026-09-01, so the documented coercion is a measured
+behaviour in a Microsoft engine too. LibreOffice is the only one of the four columns that errors.</p>
 
 <h2 class="section-title">Why it happens</h2>
 <p>Microsoft's SUM documentation states that "logical values and text representations of numbers
@@ -369,12 +372,12 @@ here; it raises <code>#VALUE!</code> instead. See Microsoft's
 <p>Remove the quotes so the argument is a real number:</p>
 <p><code>=SUM(1,2,3)</code></p>
 <p>If the text is unavoidable (for instance it is stitched in by a generator or comes from an
-import), convert it explicitly so both engines agree:</p>
+import), convert it explicitly so every engine agrees:</p>
 <p><code>=SUM(1,VALUE("2"),3)</code> or <code>=SUM(1,--"2",3)</code></p>
 <p>Best of all, reference cells that hold real numbers rather than embedding literals in the
-formula. Text that lives in a referenced cell is ignored by both engines, so
-<code>=SUM(A1:A3)</code> over a column that mixes numbers and stray text behaves the same in Excel
-and LibreOffice; only the typed-in quoted literal forks.</p>
+formula. Text that lives in a referenced cell is ignored everywhere, so
+<code>=SUM(A1:A3)</code> over a column that mixes numbers and stray text behaves the same in every
+engine here; only the typed-in quoted literal forks.</p>
 
 <p>This pattern most often appears in machine-generated formulas, in values pasted as text, and in
 files exported from other tools. Before migrating a workbook, scan its SUM formulas for quoted

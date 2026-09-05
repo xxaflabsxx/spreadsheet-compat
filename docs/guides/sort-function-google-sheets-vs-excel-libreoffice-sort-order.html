@@ -348,7 +348,7 @@ error message on either side.</p>
   <p>This breaks in exactly one direction, which is what makes it hard to spot. A formula that
   sorts <em>ascending</em> travels fine: Excel writes <code>1</code> for ascending, and
   <code>1</code> is also truthy, so Sheets reads it as <code>is_ascending = TRUE</code> and agrees
-  by accident. Our <code>=SORT(A1:B3,2,1)</code> case matched in both engines for exactly that
+  by accident. Our <code>=SORT(A1:B3,2,1)</code> case matched in both of them for exactly that
   reason. Only the <em>descending</em> formulas invert &mdash; because <code>-1</code>, the Excel
   value that means &ldquo;descending&rdquo;, is a nonzero number and therefore reads as
   &ldquo;true&rdquo;, which in Sheets means ascending. Half your sorts survive the trip and half
@@ -430,8 +430,9 @@ identical output the <em>ascending</em> case produced one row above. Sheets did 
 <code>-1</code>, did not warn about it, and did not return a partial result. It sorted ascending.</p>
 <p>Row three is the accidental agreement. <code>=SORT(A1:B3,2,1)</code> asks for &ldquo;sort by the
 second column, ascending&rdquo; in Excel&rsquo;s dialect, and the same <code>1</code> is a truthy
-<code>is_ascending</code> in Sheets&rsquo; dialect, so both engines return
-<code>y, 10 / z, 20 / x, 30</code>. It is the same coincidence that makes the divergence hard to
+<code>is_ascending</code> in Sheets&rsquo; dialect, so both dialects return
+<code>y, 10 / z, 20 / x, 30</code> &mdash; as did Excel for the web, the third engine we execute,
+on 2026-09-01. It is the same coincidence that makes the divergence hard to
 find: a workbook full of ascending sorts imports perfectly and tells you nothing about the
 descending ones.</p>
 <p>Reading &ldquo;<code>-1</code> is nonzero, therefore truthy, therefore <code>TRUE</code>,
@@ -503,10 +504,12 @@ argument &mdash; <code>=SORT(A2:A4,ROW(A2:A4),FALSE)</code> &mdash; because Goog
 <code>cherry, banana, apple</code>. So Sheets can sort by an arbitrary key; it just spells it
 <code>SORT</code>, and the direction flag is still the boolean.</p>
 <p>Google also ships <code>SORTN</code>, a top-<em>n</em> sorter that Excel and LibreOffice do not
-have at all. It has since been executed in both engines, on 2026-09-01: in Google Sheets
-<code>=SORTN(A2:C6)</code> returned the single top row of the sample table, and in LibreOffice it is
-<code>#NAME?</code> on all four pinned builds, after a five-spelling storage-token probe &mdash; so
-&ldquo;absent from Calc&rdquo; is now an executed verdict rather than an inventory claim. The
+have at all. It has since been executed in every engine we run, on 2026-09-01: in Google Sheets
+<code>=SORTN(A2:C6)</code> returned the single top row of the sample table; in LibreOffice it is
+<code>#NAME?</code> on all four pinned builds, after a five-spelling storage-token probe; and in
+Excel for the web all seven <code>SORTN</code> cases came back <code>#NAME?</code> as well &mdash; so
+&ldquo;absent from Calc, and from the web build of Excel&rdquo; is now an executed verdict rather
+than an inventory claim. The
 <a href="../guides/google-sheets-only-functions-query-arrayformula-split-portability-excel-libreoffice.html">Google-only
 functions guide</a> covers it alongside the rest of that set.</p>
 
