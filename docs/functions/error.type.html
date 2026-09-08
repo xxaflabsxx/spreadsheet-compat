@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -499,7 +512,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">#ERROR!</span>, but the documented/expected
         result is <span class="formula">1</span>.
-        #NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa; MISMATCH vs expected: expected 1, got &#39;#ERROR!&#39;; NOTE: #ERROR! is Google Sheets&#39; parse-failure error (no Excel equivalent); it means Sheets could not parse the formula, which is not the same as #NAME?
+        <details class="why"><summary>Provenance</summary><p>#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa; MISMATCH vs expected: expected 1, got &#39;#ERROR!&#39;; NOTE: #ERROR! is Google Sheets&#39; parse-failure error (no Excel equivalent); it means Sheets could not parse the formula, which is not the same as #NAME?</p></details>
       </li>
       
     
@@ -531,7 +544,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#N/A</span>, but the documented/expected
         result is <span class="formula">4</span>.
-        MISMATCH vs expected: expected 4, got &#39;#N/A&#39;
+        <details class="why"><summary>Provenance</summary><p>MISMATCH vs expected: expected 4, got &#39;#N/A&#39;</p></details>
       </li>
       
     
@@ -543,7 +556,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#N/A</span>, but the documented/expected
         result is <span class="formula">6</span>.
-        MISMATCH vs expected: expected 6, got &#39;#N/A&#39;
+        <details class="why"><summary>Provenance</summary><p>MISMATCH vs expected: expected 6, got &#39;#N/A&#39;</p></details>
       </li>
       
     
@@ -567,72 +580,72 @@ against those cases before assuming your data is wrong.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(A1:A2 C1:C2)</td>
-  <td>Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -&gt; ERROR.TYPE code 1</td>
+  <td class="desc">Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -&gt; ERROR.TYPE code 1</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(1/0)</td>
-  <td>#DIV/0! -&gt; code 2</td>
+  <td class="desc">#DIV/0! -&gt; code 2</td>
   <td class="result mono">2</td>
-  <td class="result mono">2</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">2</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(&#34;a&#34;+1)</td>
-  <td>#VALUE! -&gt; code 3</td>
+  <td class="desc">#VALUE! -&gt; code 3</td>
   <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(OFFSET(A1,-1,0))</td>
-  <td>Offsetting above row 1 produces a genuine #REF! error -&gt; code 4</td>
+  <td class="desc">Offsetting above row 1 produces a genuine #REF! error -&gt; code 4</td>
   <td class="result mono">4</td>
-  <td class="result mono">4</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(qwertyzz)</td>
-  <td>An undefined name reference produces #NAME? -&gt; code 5</td>
+  <td class="desc">An undefined name reference produces #NAME? -&gt; code 5</td>
   <td class="result mono">5</td>
-  <td class="result mono">5</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">5</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(SQRT(-1))</td>
-  <td>Square root of a negative number produces #NUM! -&gt; code 6</td>
+  <td class="desc">Square root of a negative number produces #NUM! -&gt; code 6</td>
   <td class="result mono">6</td>
-  <td class="result mono">6</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">6</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(NA())</td>
-  <td>#N/A -&gt; code 7</td>
+  <td class="desc">#N/A -&gt; code 7</td>
   <td class="result mono">7</td>
-  <td class="result mono">7<br><span class="category-tag">Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7<details class="why"><summary>Provenance</summary><p>Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(5)</td>
-  <td>Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error</td>
+  <td class="desc">Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A<br><span class="category-tag">Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: &#39;returns the #N/A error&#39; for non-error input.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A<details class="why"><summary>Provenance</summary><p>Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: &#39;returns the #N/A error&#39; for non-error input.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -645,72 +658,72 @@ against those cases before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(A1:A2 C1:C2)</td>
-  <td>Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -&gt; ERROR.TYPE code 1</td>
+  <td class="desc">Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -&gt; ERROR.TYPE code 1</td>
   <td class="result mono">#ERROR!</td>
-  <td class="result mono">1<br><span class="category-tag">#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(1/0)</td>
-  <td>#DIV/0! -&gt; code 2</td>
+  <td class="desc">#DIV/0! -&gt; code 2</td>
   <td class="result mono">2</td>
-  <td class="result mono">2</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">2</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(&#34;a&#34;+1)</td>
-  <td>#VALUE! -&gt; code 3</td>
+  <td class="desc">#VALUE! -&gt; code 3</td>
   <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(OFFSET(A1,-1,0))</td>
-  <td>Offsetting above row 1 produces a genuine #REF! error -&gt; code 4</td>
+  <td class="desc">Offsetting above row 1 produces a genuine #REF! error -&gt; code 4</td>
   <td class="result mono">4</td>
-  <td class="result mono">4</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(qwertyzz)</td>
-  <td>An undefined name reference produces #NAME? -&gt; code 5</td>
+  <td class="desc">An undefined name reference produces #NAME? -&gt; code 5</td>
   <td class="result mono">5</td>
-  <td class="result mono">5</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">5</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(SQRT(-1))</td>
-  <td>Square root of a negative number produces #NUM! -&gt; code 6</td>
+  <td class="desc">Square root of a negative number produces #NUM! -&gt; code 6</td>
   <td class="result mono">6</td>
-  <td class="result mono">6</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">6</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(NA())</td>
-  <td>#N/A -&gt; code 7</td>
+  <td class="desc">#N/A -&gt; code 7</td>
   <td class="result mono">7</td>
-  <td class="result mono">7<br><span class="category-tag">Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7<details class="why"><summary>Provenance</summary><p>Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(5)</td>
-  <td>Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error</td>
+  <td class="desc">Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A<br><span class="category-tag">Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: &#39;returns the #N/A error&#39; for non-error input.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A<details class="why"><summary>Provenance</summary><p>Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: &#39;returns the #N/A error&#39; for non-error input.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -723,72 +736,72 @@ against those cases before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(A1:A2 C1:C2)</td>
-  <td>Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -&gt; ERROR.TYPE code 1</td>
+  <td class="desc">Space-intersection of two non-overlapping ranges produces a genuine #NULL! error -&gt; ERROR.TYPE code 1</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>#NULL!=1 confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(1/0)</td>
-  <td>#DIV/0! -&gt; code 2</td>
+  <td class="desc">#DIV/0! -&gt; code 2</td>
   <td class="result mono">2</td>
-  <td class="result mono">2</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">2</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(&#34;a&#34;+1)</td>
-  <td>#VALUE! -&gt; code 3</td>
+  <td class="desc">#VALUE! -&gt; code 3</td>
   <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(OFFSET(A1,-1,0))</td>
-  <td>Offsetting above row 1 produces a genuine #REF! error -&gt; code 4</td>
+  <td class="desc">Offsetting above row 1 produces a genuine #REF! error -&gt; code 4</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">4</td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">4</td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(qwertyzz)</td>
-  <td>An undefined name reference produces #NAME? -&gt; code 5</td>
+  <td class="desc">An undefined name reference produces #NAME? -&gt; code 5</td>
   <td class="result mono">5</td>
-  <td class="result mono">5</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">5</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(SQRT(-1))</td>
-  <td>Square root of a negative number produces #NUM! -&gt; code 6</td>
+  <td class="desc">Square root of a negative number produces #NUM! -&gt; code 6</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">6</td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">6</td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(NA())</td>
-  <td>#N/A -&gt; code 7</td>
+  <td class="desc">#N/A -&gt; code 7</td>
   <td class="result mono">7</td>
-  <td class="result mono">7<br><span class="category-tag">Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7<details class="why"><summary>Provenance</summary><p>Full 1-7 mapping confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ERROR.TYPE(5)</td>
-  <td>Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error</td>
+  <td class="desc">Per docs, applying ERROR.TYPE to anything that is NOT an error value itself returns the #N/A error</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A<br><span class="category-tag">Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: &#39;returns the #N/A error&#39; for non-error input.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A<details class="why"><summary>Provenance</summary><p>Confirmed via https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa: &#39;returns the #N/A error&#39; for non-error input.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

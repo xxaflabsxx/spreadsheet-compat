@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,40 +477,40 @@ COS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(COS(1.047),7)</td>
-  <td>Microsoft&#39;s documented worked example: the cosine of 1.047 radians</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the cosine of 1.047 radians</td>
   <td class="result mono">0.5001711</td>
-  <td class="result mono">0.5001711<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5001711. Independently derived: math.cos(1.047) = 0.5001710745970701 -&gt; 0.5001711 at 7 dp. 1.047 is a decimal approximation of pi/3, which is why the result sits just above 0.5</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5001711<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5001711. Independently derived: math.cos(1.047) = 0.5001710745970701 -&gt; 0.5001711 at 7 dp. 1.047 is a decimal approximation of pi/3, which is why the result sits just above 0.5</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(COS(60*PI()/180),9)</td>
-  <td>Microsoft&#39;s documented worked example: 60 degrees converted to radians by multiplying by PI()/180</td>
+  <td class="desc">Microsoft&#39;s documented worked example: 60 degrees converted to radians by multiplying by PI()/180</td>
   <td class="result mono">0.5</td>
-  <td class="result mono">0.5<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5, and cos(60 degrees) = cos(pi/3) = 1/2 exactly. In IEEE double arithmetic math.cos(math.pi/3) evaluates to 0.5000000000000001, one unit in the last place above 0.5, so the assertion is made at 9 dp where the exact and floating-point values agree</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5, and cos(60 degrees) = cos(pi/3) = 1/2 exactly. In IEEE double arithmetic math.cos(math.pi/3) evaluates to 0.5000000000000001, one unit in the last place above 0.5, so the assertion is made at 9 dp where the exact and floating-point values agree</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(COS(RADIANS(60)),9)</td>
-  <td>Microsoft&#39;s documented worked example: the same 60 degrees converted with the RADIANS function instead</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the same 60 degrees converted with the RADIANS function instead</td>
   <td class="result mono">0.5</td>
-  <td class="result mono">0.5<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5 as well. Exactly the same mathematics as the previous case; the point of running both is that Excel documents RADIANS and the explicit PI()/180 multiplication as interchangeable, so a divergence between the two rows would be an engine quirk in RADIANS rather than in COS</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5 as well. Exactly the same mathematics as the previous case; the point of running both is that Excel documents RADIANS and the explicit PI()/180 multiplication as interchangeable, so a divergence between the two rows would be an engine quirk in RADIANS rather than in COS</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=COS(0)</td>
-  <td>The cosine at zero</td>
+  <td class="desc">The cosine at zero</td>
   <td class="result mono">1</td>
-  <td class="result mono">1.0<br><span class="category-tag">Follows from the definition of the cosine, cos(0) = 1 exactly, with no rounding needed: this anchors the function at a point where any floating-point implementation must be exact</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1.0<details class="why"><summary>Provenance</summary><p>Follows from the definition of the cosine, cos(0) = 1 exactly, with no rounding needed: this anchors the function at a point where any floating-point implementation must be exact</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -510,40 +523,40 @@ COS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(COS(1.047),7)</td>
-  <td>Microsoft&#39;s documented worked example: the cosine of 1.047 radians</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the cosine of 1.047 radians</td>
   <td class="result mono">0.5001711</td>
-  <td class="result mono">0.5001711<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5001711. Independently derived: math.cos(1.047) = 0.5001710745970701 -&gt; 0.5001711 at 7 dp. 1.047 is a decimal approximation of pi/3, which is why the result sits just above 0.5</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5001711<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5001711. Independently derived: math.cos(1.047) = 0.5001710745970701 -&gt; 0.5001711 at 7 dp. 1.047 is a decimal approximation of pi/3, which is why the result sits just above 0.5</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(COS(60*PI()/180),9)</td>
-  <td>Microsoft&#39;s documented worked example: 60 degrees converted to radians by multiplying by PI()/180</td>
+  <td class="desc">Microsoft&#39;s documented worked example: 60 degrees converted to radians by multiplying by PI()/180</td>
   <td class="result mono">0.5</td>
-  <td class="result mono">0.5<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5, and cos(60 degrees) = cos(pi/3) = 1/2 exactly. In IEEE double arithmetic math.cos(math.pi/3) evaluates to 0.5000000000000001, one unit in the last place above 0.5, so the assertion is made at 9 dp where the exact and floating-point values agree</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5, and cos(60 degrees) = cos(pi/3) = 1/2 exactly. In IEEE double arithmetic math.cos(math.pi/3) evaluates to 0.5000000000000001, one unit in the last place above 0.5, so the assertion is made at 9 dp where the exact and floating-point values agree</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(COS(RADIANS(60)),9)</td>
-  <td>Microsoft&#39;s documented worked example: the same 60 degrees converted with the RADIANS function instead</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the same 60 degrees converted with the RADIANS function instead</td>
   <td class="result mono">0.5</td>
-  <td class="result mono">0.5<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5 as well. Exactly the same mathematics as the previous case; the point of running both is that Excel documents RADIANS and the explicit PI()/180 multiplication as interchangeable, so a divergence between the two rows would be an engine quirk in RADIANS rather than in COS</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5 as well. Exactly the same mathematics as the previous case; the point of running both is that Excel documents RADIANS and the explicit PI()/180 multiplication as interchangeable, so a divergence between the two rows would be an engine quirk in RADIANS rather than in COS</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=COS(0)</td>
-  <td>The cosine at zero</td>
+  <td class="desc">The cosine at zero</td>
   <td class="result mono">1</td>
-  <td class="result mono">1.0<br><span class="category-tag">Follows from the definition of the cosine, cos(0) = 1 exactly, with no rounding needed: this anchors the function at a point where any floating-point implementation must be exact</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1.0<details class="why"><summary>Provenance</summary><p>Follows from the definition of the cosine, cos(0) = 1 exactly, with no rounding needed: this anchors the function at a point where any floating-point implementation must be exact</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -556,40 +569,40 @@ COS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(COS(1.047),7)</td>
-  <td>Microsoft&#39;s documented worked example: the cosine of 1.047 radians</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the cosine of 1.047 radians</td>
   <td class="result mono">0.5001711</td>
-  <td class="result mono">0.5001711<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5001711. Independently derived: math.cos(1.047) = 0.5001710745970701 -&gt; 0.5001711 at 7 dp. 1.047 is a decimal approximation of pi/3, which is why the result sits just above 0.5</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5001711<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5001711. Independently derived: math.cos(1.047) = 0.5001710745970701 -&gt; 0.5001711 at 7 dp. 1.047 is a decimal approximation of pi/3, which is why the result sits just above 0.5</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(COS(60*PI()/180),9)</td>
-  <td>Microsoft&#39;s documented worked example: 60 degrees converted to radians by multiplying by PI()/180</td>
+  <td class="desc">Microsoft&#39;s documented worked example: 60 degrees converted to radians by multiplying by PI()/180</td>
   <td class="result mono">0.5</td>
-  <td class="result mono">0.5<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5, and cos(60 degrees) = cos(pi/3) = 1/2 exactly. In IEEE double arithmetic math.cos(math.pi/3) evaluates to 0.5000000000000001, one unit in the last place above 0.5, so the assertion is made at 9 dp where the exact and floating-point values agree</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5, and cos(60 degrees) = cos(pi/3) = 1/2 exactly. In IEEE double arithmetic math.cos(math.pi/3) evaluates to 0.5000000000000001, one unit in the last place above 0.5, so the assertion is made at 9 dp where the exact and floating-point values agree</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(COS(RADIANS(60)),9)</td>
-  <td>Microsoft&#39;s documented worked example: the same 60 degrees converted with the RADIANS function instead</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the same 60 degrees converted with the RADIANS function instead</td>
   <td class="result mono">0.5</td>
-  <td class="result mono">0.5<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.5 as well. Exactly the same mathematics as the previous case; the point of running both is that Excel documents RADIANS and the explicit PI()/180 multiplication as interchangeable, so a divergence between the two rows would be an engine quirk in RADIANS rather than in COS</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.5<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.5 as well. Exactly the same mathematics as the previous case; the point of running both is that Excel documents RADIANS and the explicit PI()/180 multiplication as interchangeable, so a divergence between the two rows would be an engine quirk in RADIANS rather than in COS</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=COS(0)</td>
-  <td>The cosine at zero</td>
+  <td class="desc">The cosine at zero</td>
   <td class="result mono">1</td>
-  <td class="result mono">1.0<br><span class="category-tag">Follows from the definition of the cosine, cos(0) = 1 exactly, with no rounding needed: this anchors the function at a point where any floating-point implementation must be exact</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1.0<details class="why"><summary>Provenance</summary><p>Follows from the definition of the cosine, cos(0) = 1 exactly, with no rounding needed: this anchors the function at a point where any floating-point implementation must be exact</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

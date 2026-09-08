@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,40 +477,40 @@ LOOKUP&rsquo;s support changed &mdash; not documentation claims, real results.</
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=LOOKUP(3,A1:A5,B1:B5)</td>
-  <td>Vector form exact match against an ascending-sorted lookup_vector</td>
+  <td class="desc">Vector form exact match against an ascending-sorted lookup_vector</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb -- lookup_vector must be in ascending order for LOOKUP to work correctly; this vector is sorted</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb -- lookup_vector must be in ascending order for LOOKUP to work correctly; this vector is sorted</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(3.5,A1:A5,B1:B5)</td>
-  <td>No exact match; LOOKUP uses the largest lookup_vector value that is &lt;= lookup_value</td>
+  <td class="desc">No exact match; LOOKUP uses the largest lookup_vector value that is &lt;= lookup_value</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">3.5 has no exact match; largest value &lt;=3.5 is 3 -&gt; paired result 30</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>3.5 has no exact match; largest value &lt;=3.5 is 3 -&gt; paired result 30</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(0,A1:A5,B1:B5)</td>
-  <td>lookup_value smaller than every entry in lookup_vector -&gt; #N/A</td>
+  <td class="desc">lookup_value smaller than every entry in lookup_vector -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(2,A1:B3)</td>
-  <td>Array form (single 2-D argument, no separate result_vector): since A1:B3 has more rows than columns, LOOKUP searches the FIRST column and returns from the LAST column</td>
+  <td class="desc">Array form (single 2-D argument, no separate result_vector): since A1:B3 has more rows than columns, LOOKUP searches the FIRST column and returns from the LAST column</td>
   <td class="result mono">200</td>
-  <td class="result mono">200<br><span class="category-tag">Per Microsoft docs&#39; array-form rule (searches first row/col depending on which is longer): match on A2=2 returns paired last-column value 200</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">200<details class="why"><summary>Provenance</summary><p>Per Microsoft docs&#39; array-form rule (searches first row/col depending on which is longer): match on A2=2 returns paired last-column value 200</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -510,40 +523,40 @@ LOOKUP&rsquo;s support changed &mdash; not documentation claims, real results.</
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=LOOKUP(3,A1:A5,B1:B5)</td>
-  <td>Vector form exact match against an ascending-sorted lookup_vector</td>
+  <td class="desc">Vector form exact match against an ascending-sorted lookup_vector</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb -- lookup_vector must be in ascending order for LOOKUP to work correctly; this vector is sorted</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb -- lookup_vector must be in ascending order for LOOKUP to work correctly; this vector is sorted</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(3.5,A1:A5,B1:B5)</td>
-  <td>No exact match; LOOKUP uses the largest lookup_vector value that is &lt;= lookup_value</td>
+  <td class="desc">No exact match; LOOKUP uses the largest lookup_vector value that is &lt;= lookup_value</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">3.5 has no exact match; largest value &lt;=3.5 is 3 -&gt; paired result 30</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>3.5 has no exact match; largest value &lt;=3.5 is 3 -&gt; paired result 30</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(0,A1:A5,B1:B5)</td>
-  <td>lookup_value smaller than every entry in lookup_vector -&gt; #N/A</td>
+  <td class="desc">lookup_value smaller than every entry in lookup_vector -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(2,A1:B3)</td>
-  <td>Array form (single 2-D argument, no separate result_vector): since A1:B3 has more rows than columns, LOOKUP searches the FIRST column and returns from the LAST column</td>
+  <td class="desc">Array form (single 2-D argument, no separate result_vector): since A1:B3 has more rows than columns, LOOKUP searches the FIRST column and returns from the LAST column</td>
   <td class="result mono">200</td>
-  <td class="result mono">200<br><span class="category-tag">Per Microsoft docs&#39; array-form rule (searches first row/col depending on which is longer): match on A2=2 returns paired last-column value 200</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">200<details class="why"><summary>Provenance</summary><p>Per Microsoft docs&#39; array-form rule (searches first row/col depending on which is longer): match on A2=2 returns paired last-column value 200</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -556,40 +569,40 @@ LOOKUP&rsquo;s support changed &mdash; not documentation claims, real results.</
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=LOOKUP(3,A1:A5,B1:B5)</td>
-  <td>Vector form exact match against an ascending-sorted lookup_vector</td>
+  <td class="desc">Vector form exact match against an ascending-sorted lookup_vector</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb -- lookup_vector must be in ascending order for LOOKUP to work correctly; this vector is sorted</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/lookup-function-446d94af-663b-451d-8251-369d5e3864cb -- lookup_vector must be in ascending order for LOOKUP to work correctly; this vector is sorted</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(3.5,A1:A5,B1:B5)</td>
-  <td>No exact match; LOOKUP uses the largest lookup_vector value that is &lt;= lookup_value</td>
+  <td class="desc">No exact match; LOOKUP uses the largest lookup_vector value that is &lt;= lookup_value</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">3.5 has no exact match; largest value &lt;=3.5 is 3 -&gt; paired result 30</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>3.5 has no exact match; largest value &lt;=3.5 is 3 -&gt; paired result 30</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(0,A1:A5,B1:B5)</td>
-  <td>lookup_value smaller than every entry in lookup_vector -&gt; #N/A</td>
+  <td class="desc">lookup_value smaller than every entry in lookup_vector -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOOKUP(2,A1:B3)</td>
-  <td>Array form (single 2-D argument, no separate result_vector): since A1:B3 has more rows than columns, LOOKUP searches the FIRST column and returns from the LAST column</td>
+  <td class="desc">Array form (single 2-D argument, no separate result_vector): since A1:B3 has more rows than columns, LOOKUP searches the FIRST column and returns from the LAST column</td>
   <td class="result mono">200</td>
-  <td class="result mono">200<br><span class="category-tag">Per Microsoft docs&#39; array-form rule (searches first row/col depending on which is longer): match on A2=2 returns paired last-column value 200</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">200<details class="why"><summary>Provenance</summary><p>Per Microsoft docs&#39; array-form rule (searches first row/col depending on which is longer): match on A2=2 returns paired last-column value 200</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

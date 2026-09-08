@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -504,7 +517,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">#N/A</span>, but the documented/expected
         result is <span class="formula">#VALUE!</span>.
-        LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#N/A&#39;
+        <details class="why"><summary>Provenance</summary><p>LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#N/A&#39;</p></details>
       </li>
       
     
@@ -537,40 +550,40 @@ against those cases before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=LET(x,5,x*2)</td>
-  <td>Single binding used in the calculation</td>
+  <td class="desc">Single binding used in the calculation</td>
   <td class="result mono">10</td>
-  <td class="result mono">10</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">10</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LET(a,2,b,a*3,a+b)</td>
-  <td>Later bindings can reference earlier ones in the same LET</td>
+  <td class="desc">Later bindings can reference earlier ones in the same LET</td>
   <td class="result mono">8</td>
-  <td class="result mono">8</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">8</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LET(rng,{1,2,3},SUM(rng))</td>
-  <td>LET can bind an array literal and pass it to another function</td>
+  <td class="desc">LET can bind an array literal and pass it to another function</td>
   <td class="result mono">6</td>
-  <td class="result mono">6</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">6</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LET(x,5,y,x*2)</td>
-  <td>Odd total arg count (missing final calculation expression) is a syntax/value error</td>
+  <td class="desc">Odd total arg count (missing final calculation expression) is a syntax/value error</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>
@@ -583,40 +596,40 @@ against those cases before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=LET(x,5,x*2)</td>
-  <td>Single binding used in the calculation</td>
+  <td class="desc">Single binding used in the calculation</td>
   <td class="result mono">10</td>
-  <td class="result mono">10</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">10</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LET(a,2,b,a*3,a+b)</td>
-  <td>Later bindings can reference earlier ones in the same LET</td>
+  <td class="desc">Later bindings can reference earlier ones in the same LET</td>
   <td class="result mono">8</td>
-  <td class="result mono">8</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">8</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LET(rng,{1,2,3},SUM(rng))</td>
-  <td>LET can bind an array literal and pass it to another function</td>
+  <td class="desc">LET can bind an array literal and pass it to another function</td>
   <td class="result mono">6</td>
-  <td class="result mono">6</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">6</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LET(x,5,y,x*2)</td>
-  <td>Odd total arg count (missing final calculation expression) is a syntax/value error</td>
+  <td class="desc">Odd total arg count (missing final calculation expression) is a syntax/value error</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>LET requires pairs plus a trailing calculation; here the last pair has no calc term following it in this deliberately malformed call</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

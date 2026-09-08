@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,32 +477,32 @@ DVARP&rsquo;s support changed &mdash; not documentation claims, real results.</p
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,&#34;Yield&#34;,A3:A5)</td>
-  <td>Microsoft&#39;s documented worked example: the population variance of the apple and pear yields</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the population variance of the apple and pear yields</td>
   <td class="result mono">7.04</td>
-  <td class="result mono">7.04<br><span class="category-tag">Microsoft publishes this example as &#39;=DVARP(A6:E12, &#34;Yield&#34;, A3:A5)&#39; with the result 7.04. Derived independently: Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7.04<details class="why"><summary>Provenance</summary><p>Microsoft publishes this example as &#39;=DVARP(A6:E12, &#34;Yield&#34;, A3:A5)&#39; with the result 7.04. Derived independently: Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,4,A3:A5)</td>
-  <td>The same variance with the field named by its column position</td>
+  <td class="desc">The same variance with the field named by its column position</td>
   <td class="result mono">7.04</td>
-  <td class="result mono">7.04<br><span class="category-tag">Column 4 of A6:E12 is Yield, so the positional field form must equal the documented label form. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7.04<details class="why"><summary>Provenance</summary><p>Column 4 of A6:E12 is Yield, so the positional field form must equal the documented label form. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,&#34;Yield&#34;,H3:H4)</td>
-  <td>A population of one record, whose variance is genuinely zero</td>
+  <td class="desc">A population of one record, whose variance is genuinely zero</td>
   <td class="result mono">0</td>
-  <td class="result mono">0<br><span class="category-tag">Derived from the documented definition and deliberately paired with DVAR_single_record_div0: the population estimator divides by n, so a one-record population has a well-defined variance of 0 where the sample estimator has none. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return the documented 0, while DVAR errors on the same one-record selection -- the two estimators are correctly distinguished.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0<details class="why"><summary>Provenance</summary><p>Derived from the documented definition and deliberately paired with DVAR_single_record_div0: the population estimator divides by n, so a one-record population has a well-defined variance of 0 where the sample estimator has none. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return the documented 0, while DVAR errors on the same one-record selection -- the two estimators are correctly distinguished.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -502,32 +515,32 @@ DVARP&rsquo;s support changed &mdash; not documentation claims, real results.</p
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,&#34;Yield&#34;,A3:A5)</td>
-  <td>Microsoft&#39;s documented worked example: the population variance of the apple and pear yields</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the population variance of the apple and pear yields</td>
   <td class="result mono">7.04</td>
-  <td class="result mono">7.04<br><span class="category-tag">Microsoft publishes this example as &#39;=DVARP(A6:E12, &#34;Yield&#34;, A3:A5)&#39; with the result 7.04. Derived independently: Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7.04<details class="why"><summary>Provenance</summary><p>Microsoft publishes this example as &#39;=DVARP(A6:E12, &#34;Yield&#34;, A3:A5)&#39; with the result 7.04. Derived independently: Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,4,A3:A5)</td>
-  <td>The same variance with the field named by its column position</td>
+  <td class="desc">The same variance with the field named by its column position</td>
   <td class="result mono">7.04</td>
-  <td class="result mono">7.04<br><span class="category-tag">Column 4 of A6:E12 is Yield, so the positional field form must equal the documented label form. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7.04<details class="why"><summary>Provenance</summary><p>Column 4 of A6:E12 is Yield, so the positional field form must equal the documented label form. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,&#34;Yield&#34;,H3:H4)</td>
-  <td>A population of one record, whose variance is genuinely zero</td>
+  <td class="desc">A population of one record, whose variance is genuinely zero</td>
   <td class="result mono">0</td>
-  <td class="result mono">0<br><span class="category-tag">Derived from the documented definition and deliberately paired with DVAR_single_record_div0: the population estimator divides by n, so a one-record population has a well-defined variance of 0 where the sample estimator has none. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return the documented 0, while DVAR errors on the same one-record selection -- the two estimators are correctly distinguished.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0<details class="why"><summary>Provenance</summary><p>Derived from the documented definition and deliberately paired with DVAR_single_record_div0: the population estimator divides by n, so a one-record population has a well-defined variance of 0 where the sample estimator has none. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return the documented 0, while DVAR errors on the same one-record selection -- the two estimators are correctly distinguished.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -540,32 +553,32 @@ DVARP&rsquo;s support changed &mdash; not documentation claims, real results.</p
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,&#34;Yield&#34;,A3:A5)</td>
-  <td>Microsoft&#39;s documented worked example: the population variance of the apple and pear yields</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the population variance of the apple and pear yields</td>
   <td class="result mono">7.04</td>
-  <td class="result mono">7.04<br><span class="category-tag">Microsoft publishes this example as &#39;=DVARP(A6:E12, &#34;Yield&#34;, A3:A5)&#39; with the result 7.04. Derived independently: Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7.04<details class="why"><summary>Provenance</summary><p>Microsoft publishes this example as &#39;=DVARP(A6:E12, &#34;Yield&#34;, A3:A5)&#39; with the result 7.04. Derived independently: Criteria A3:A5 is the Tree column header plus the two tree names, so it selects the five apple and pear records (yields 14, 10, 10, 8 and 6) and excludes the single cherry.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,4,A3:A5)</td>
-  <td>The same variance with the field named by its column position</td>
+  <td class="desc">The same variance with the field named by its column position</td>
   <td class="result mono">7.04</td>
-  <td class="result mono">7.04<br><span class="category-tag">Column 4 of A6:E12 is Yield, so the positional field form must equal the documented label form. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7.04<details class="why"><summary>Provenance</summary><p>Column 4 of A6:E12 is Yield, so the positional field form must equal the documented label form. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DVARP(A6:E12,&#34;Yield&#34;,H3:H4)</td>
-  <td>A population of one record, whose variance is genuinely zero</td>
+  <td class="desc">A population of one record, whose variance is genuinely zero</td>
   <td class="result mono">0</td>
-  <td class="result mono">0<br><span class="category-tag">Derived from the documented definition and deliberately paired with DVAR_single_record_div0: the population estimator divides by n, so a one-record population has a well-defined variance of 0 where the sample estimator has none. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return the documented 0, while DVAR errors on the same one-record selection -- the two estimators are correctly distinguished.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0<details class="why"><summary>Provenance</summary><p>Derived from the documented definition and deliberately paired with DVAR_single_record_div0: the population estimator divides by n, so a one-record population has a well-defined variance of 0 where the sample estimator has none. Set up from Microsoft&#39;s own worked example for the database functions: the orchard table, which is one criteria header row, two criteria rows, a database header row and six records. HARNESS PLACEMENT: the page pastes the table at A1, but this harness writes the formula under test into cell F1, which the table&#39;s second &#34;Height&#34; criteria header would occupy, so the whole block is pasted two rows lower instead. Every relative offset the page describes is preserved -- the database header is still the row immediately below the last criteria row -- which puts the criteria at A3:F5 and the database at A6:E12 here. One further deviation: the page writes its tree criteria as the cell entry =&#34;=Apple&#34; (the documented trick for storing the literal text =Apple, which forces an exact match). openpyxl cannot author that cell -- any string beginning with = is serialized as a formula -- so the criteria cells here hold the plain text Apple and Pear. On this data the two forms select the same records, because no other tree name in the table begins with &#34;Apple&#34; or &#34;Pear&#34;. EXECUTED RESULT: all four LibreOffice builds return the documented 0, while DVAR errors on the same one-record selection -- the two estimators are correctly distinguished.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -511,7 +524,7 @@ against the failing cases above before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Microsoft docs: an invalid return_type raises #NUM!.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>Microsoft docs: an invalid return_type raises #NUM!.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -531,56 +544,56 @@ against the failing cases above before assuming your data is wrong.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14))</td>
-  <td>Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)</td>
+  <td class="desc">Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)</td>
   <td class="result mono">5</td>
-  <td class="result mono">5</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">5</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),2)</td>
-  <td>return_type 2: Monday=1..Sunday=7. Source: Microsoft WEEKDAY docs worked example, WEEKDAY(A2,2)=4.</td>
+  <td class="desc">return_type 2: Monday=1..Sunday=7. Source: Microsoft WEEKDAY docs worked example, WEEKDAY(A2,2)=4.</td>
   <td class="result mono">4</td>
-  <td class="result mono">4</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),3)</td>
-  <td>return_type 3: Monday=0..Sunday=6 (zero-based). Thursday is 3 in this scheme.</td>
+  <td class="desc">return_type 3: Monday=0..Sunday=6 (zero-based). Thursday is 3 in this scheme.</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 3 maps Monday..Sunday to 0..6; Thursday (the 4th weekday counting Monday=0) = 3.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 3 maps Monday..Sunday to 0..6; Thursday (the 4th weekday counting Monday=0) = 3.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),12)</td>
-  <td>return_type 12: Tuesday=1..Monday=7 (ISO-style variant start day). Thursday is the 3rd day in this scheme.</td>
+  <td class="desc">return_type 12: Tuesday=1..Monday=7 (ISO-style variant start day). Thursday is the 3rd day in this scheme.</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 12 maps Tuesday=1,Wed=2,Thu=3,...,Monday=7.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 12 maps Tuesday=1,Wed=2,Thu=3,...,Monday=7.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),16)</td>
-  <td>return_type 16: Saturday=1..Friday=7. Thursday is the 6th day in this scheme.</td>
+  <td class="desc">return_type 16: Saturday=1..Friday=7. Thursday is the 6th day in this scheme.</td>
   <td class="result mono">6</td>
-  <td class="result mono">6<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 16 maps Saturday=1,Sun=2,Mon=3,Tue=4,Wed=5,Thu=6,Fri=7.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">6<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 16 maps Saturday=1,Sun=2,Mon=3,Tue=4,Wed=5,Thu=6,Fri=7.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),99)</td>
-  <td>An out-of-range return_type (not one of the documented 1,2,3,11-17 values) is a documented error condition.</td>
+  <td class="desc">An out-of-range return_type (not one of the documented 1,2,3,11-17 values) is a documented error condition.</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft docs: an invalid return_type raises #NUM!.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft docs: an invalid return_type raises #NUM!.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -593,56 +606,56 @@ against the failing cases above before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14))</td>
-  <td>Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)</td>
+  <td class="desc">Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)</td>
   <td class="result mono">5</td>
-  <td class="result mono">5</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">5</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),2)</td>
-  <td>return_type 2: Monday=1..Sunday=7. Source: Microsoft WEEKDAY docs worked example, WEEKDAY(A2,2)=4.</td>
+  <td class="desc">return_type 2: Monday=1..Sunday=7. Source: Microsoft WEEKDAY docs worked example, WEEKDAY(A2,2)=4.</td>
   <td class="result mono">4</td>
-  <td class="result mono">4</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),3)</td>
-  <td>return_type 3: Monday=0..Sunday=6 (zero-based). Thursday is 3 in this scheme.</td>
+  <td class="desc">return_type 3: Monday=0..Sunday=6 (zero-based). Thursday is 3 in this scheme.</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 3 maps Monday..Sunday to 0..6; Thursday (the 4th weekday counting Monday=0) = 3.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 3 maps Monday..Sunday to 0..6; Thursday (the 4th weekday counting Monday=0) = 3.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),12)</td>
-  <td>return_type 12: Tuesday=1..Monday=7 (ISO-style variant start day). Thursday is the 3rd day in this scheme.</td>
+  <td class="desc">return_type 12: Tuesday=1..Monday=7 (ISO-style variant start day). Thursday is the 3rd day in this scheme.</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 12 maps Tuesday=1,Wed=2,Thu=3,...,Monday=7.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 12 maps Tuesday=1,Wed=2,Thu=3,...,Monday=7.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),16)</td>
-  <td>return_type 16: Saturday=1..Friday=7. Thursday is the 6th day in this scheme.</td>
+  <td class="desc">return_type 16: Saturday=1..Friday=7. Thursday is the 6th day in this scheme.</td>
   <td class="result mono">6</td>
-  <td class="result mono">6<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 16 maps Saturday=1,Sun=2,Mon=3,Tue=4,Wed=5,Thu=6,Fri=7.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">6<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 16 maps Saturday=1,Sun=2,Mon=3,Tue=4,Wed=5,Thu=6,Fri=7.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),99)</td>
-  <td>An out-of-range return_type (not one of the documented 1,2,3,11-17 values) is a documented error condition.</td>
+  <td class="desc">An out-of-range return_type (not one of the documented 1,2,3,11-17 values) is a documented error condition.</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft docs: an invalid return_type raises #NUM!.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft docs: an invalid return_type raises #NUM!.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -655,56 +668,56 @@ against the failing cases above before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14))</td>
-  <td>Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)</td>
+  <td class="desc">Default return_type 1: Sunday=1..Saturday=7. Feb 14, 2008 is a Thursday. Source: https://support.microsoft.com/en-us/office/weekday-function-60e44483-2ed1-439f-8bd0-e404c190949a (worked example, WEEKDAY(A2)=5)</td>
   <td class="result mono">5</td>
-  <td class="result mono">5</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">5</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),2)</td>
-  <td>return_type 2: Monday=1..Sunday=7. Source: Microsoft WEEKDAY docs worked example, WEEKDAY(A2,2)=4.</td>
+  <td class="desc">return_type 2: Monday=1..Sunday=7. Source: Microsoft WEEKDAY docs worked example, WEEKDAY(A2,2)=4.</td>
   <td class="result mono">4</td>
-  <td class="result mono">4</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),3)</td>
-  <td>return_type 3: Monday=0..Sunday=6 (zero-based). Thursday is 3 in this scheme.</td>
+  <td class="desc">return_type 3: Monday=0..Sunday=6 (zero-based). Thursday is 3 in this scheme.</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 3 maps Monday..Sunday to 0..6; Thursday (the 4th weekday counting Monday=0) = 3.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 3 maps Monday..Sunday to 0..6; Thursday (the 4th weekday counting Monday=0) = 3.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),12)</td>
-  <td>return_type 12: Tuesday=1..Monday=7 (ISO-style variant start day). Thursday is the 3rd day in this scheme.</td>
+  <td class="desc">return_type 12: Tuesday=1..Monday=7 (ISO-style variant start day). Thursday is the 3rd day in this scheme.</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 12 maps Tuesday=1,Wed=2,Thu=3,...,Monday=7.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 12 maps Tuesday=1,Wed=2,Thu=3,...,Monday=7.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),16)</td>
-  <td>return_type 16: Saturday=1..Friday=7. Thursday is the 6th day in this scheme.</td>
+  <td class="desc">return_type 16: Saturday=1..Friday=7. Thursday is the 6th day in this scheme.</td>
   <td class="result mono">6</td>
-  <td class="result mono">6<br><span class="category-tag">Per Microsoft&#39;s return_type table, mode 16 maps Saturday=1,Sun=2,Mon=3,Tue=4,Wed=5,Thu=6,Fri=7.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">6<details class="why"><summary>Provenance</summary><p>Per Microsoft&#39;s return_type table, mode 16 maps Saturday=1,Sun=2,Mon=3,Tue=4,Wed=5,Thu=6,Fri=7.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKDAY(DATE(2008,2,14),99)</td>
-  <td>An out-of-range return_type (not one of the documented 1,2,3,11-17 values) is a documented error condition.</td>
+  <td class="desc">An out-of-range return_type (not one of the documented 1,2,3,11-17 values) is a documented error condition.</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft docs: an invalid return_type raises #NUM!.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft docs: an invalid return_type raises #NUM!.</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>

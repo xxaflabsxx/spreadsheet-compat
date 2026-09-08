@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,56 +477,56 @@ ISNONTEXT&rsquo;s support changed &mdash; not documentation claims, real results
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(4)</td>
-  <td>A number, which is not text</td>
+  <td class="desc">A number, which is not text</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">A number is &#34;any item that is not text&#34;, so the documented answer is TRUE. Paired deliberately with the page&#39;s own ISNUMBER(4) = TRUE example: ISNONTEXT and ISTEXT partition every value, so ISNONTEXT must be the complement of ISTEXT on the same argument. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>A number is &#34;any item that is not text&#34;, so the documented answer is TRUE. Paired deliberately with the page&#39;s own ISNUMBER(4) = TRUE example: ISNONTEXT and ISTEXT partition every value, so ISNONTEXT must be the complement of ISTEXT on the same argument. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(&#34;Region1&#34;)</td>
-  <td>A text string, the one thing that makes this function FALSE</td>
+  <td class="desc">A text string, the one thing that makes this function FALSE</td>
   <td class="result mono">False</td>
-  <td class="result mono">False<br><span class="category-tag">The page&#39;s Example 2 asserts =ISTEXT(A3) = TRUE for the cell containing Region1; ISNONTEXT is the negation, so the same argument must give FALSE. This is the only branch of ISNONTEXT that returns FALSE at all. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">False<details class="why"><summary>Provenance</summary><p>The page&#39;s Example 2 asserts =ISTEXT(A3) = TRUE for the cell containing Region1; ISNONTEXT is the negation, so the same argument must give FALSE. This is the only branch of ISNONTEXT that returns FALSE at all. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(A2)</td>
-  <td>A reference to an empty cell, which the documentation singles out in a parenthesis</td>
+  <td class="desc">A reference to an empty cell, which the documentation singles out in a parenthesis</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">The table row carries its own parenthetical: &#34;(Note that this function returns TRUE if the value refers to a blank cell.)&#34; Microsoft called this out because it is the case people get wrong -- a blank is not text, so it is non-text. A2 is deliberately left unset by this case&#39;s setup. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>The table row carries its own parenthetical: &#34;(Note that this function returns TRUE if the value refers to a blank cell.)&#34; Microsoft called this out because it is the case people get wrong -- a blank is not text, so it is non-text. A2 is deliberately left unset by this case&#39;s setup. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(TRUE)</td>
-  <td>A logical value, which is not text</td>
+  <td class="desc">A logical value, which is not text</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">The value argument is documented as accepting &#34;a blank (empty cell), error, logical value, text, number, or reference value&#34;. A logical value is not text, so TRUE. The page&#39;s own ISLOGICAL examples establish that TRUE is a logical and &#34;TRUE&#34; (quoted) is not. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>The value argument is documented as accepting &#34;a blank (empty cell), error, logical value, text, number, or reference value&#34;. A logical value is not text, so TRUE. The page&#39;s own ISLOGICAL examples establish that TRUE is a logical and &#34;TRUE&#34; (quoted) is not. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(NA())</td>
-  <td>An error value, which is not text either</td>
+  <td class="desc">An error value, which is not text either</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">Errors are explicitly in the documented list of things value may be, and an error is not text, so the answer is TRUE. Worth asserting because it is the one case where a function returns a clean TRUE/FALSE about an error instead of propagating it -- the IS functions are the error-inspection tools, so they must not themselves error. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>Errors are explicitly in the documented list of things value may be, and an error is not text, so the answer is TRUE. Worth asserting because it is the one case where a function returns a clean TRUE/FALSE about an error instead of propagating it -- the IS functions are the error-inspection tools, so they must not themselves error. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(&#34;19&#34;)</td>
-  <td>A number written in quotation marks, which the page&#39;s Remarks say is text</td>
+  <td class="desc">A number written in quotation marks, which the page&#39;s Remarks say is text</td>
   <td class="result mono">False</td>
-  <td class="result mono">False<br><span class="category-tag">The shared Remarks paragraph is explicit: &#34;The value arguments of the IS functions are not converted. Any numeric values that are enclosed in double quotation marks are treated as text. For example, in most other functions where a number is required, the text value \&#34;19\&#34; is converted to the number 19. However, in the formula ISNUMBER(\&#34;19\&#34;), \&#34;19\&#34; is not converted from a text value to a number value, and the ISNUMBER function returns FALSE.&#34; The same non-conversion rule makes ISNONTEXT(&#34;19&#34;) FALSE. Microsoft&#39;s example uses ISNUMBER; the complement is asserted here for the function actually under test. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">False<details class="why"><summary>Provenance</summary><p>The shared Remarks paragraph is explicit: &#34;The value arguments of the IS functions are not converted. Any numeric values that are enclosed in double quotation marks are treated as text. For example, in most other functions where a number is required, the text value \&#34;19\&#34; is converted to the number 19. However, in the formula ISNUMBER(\&#34;19\&#34;), \&#34;19\&#34; is not converted from a text value to a number value, and the ISNUMBER function returns FALSE.&#34; The same non-conversion rule makes ISNONTEXT(&#34;19&#34;) FALSE. Microsoft&#39;s example uses ISNUMBER; the complement is asserted here for the function actually under test. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -526,56 +539,56 @@ ISNONTEXT&rsquo;s support changed &mdash; not documentation claims, real results
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(4)</td>
-  <td>A number, which is not text</td>
+  <td class="desc">A number, which is not text</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">A number is &#34;any item that is not text&#34;, so the documented answer is TRUE. Paired deliberately with the page&#39;s own ISNUMBER(4) = TRUE example: ISNONTEXT and ISTEXT partition every value, so ISNONTEXT must be the complement of ISTEXT on the same argument. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>A number is &#34;any item that is not text&#34;, so the documented answer is TRUE. Paired deliberately with the page&#39;s own ISNUMBER(4) = TRUE example: ISNONTEXT and ISTEXT partition every value, so ISNONTEXT must be the complement of ISTEXT on the same argument. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(&#34;Region1&#34;)</td>
-  <td>A text string, the one thing that makes this function FALSE</td>
+  <td class="desc">A text string, the one thing that makes this function FALSE</td>
   <td class="result mono">False</td>
-  <td class="result mono">False<br><span class="category-tag">The page&#39;s Example 2 asserts =ISTEXT(A3) = TRUE for the cell containing Region1; ISNONTEXT is the negation, so the same argument must give FALSE. This is the only branch of ISNONTEXT that returns FALSE at all. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">False<details class="why"><summary>Provenance</summary><p>The page&#39;s Example 2 asserts =ISTEXT(A3) = TRUE for the cell containing Region1; ISNONTEXT is the negation, so the same argument must give FALSE. This is the only branch of ISNONTEXT that returns FALSE at all. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(A2)</td>
-  <td>A reference to an empty cell, which the documentation singles out in a parenthesis</td>
+  <td class="desc">A reference to an empty cell, which the documentation singles out in a parenthesis</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">The table row carries its own parenthetical: &#34;(Note that this function returns TRUE if the value refers to a blank cell.)&#34; Microsoft called this out because it is the case people get wrong -- a blank is not text, so it is non-text. A2 is deliberately left unset by this case&#39;s setup. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>The table row carries its own parenthetical: &#34;(Note that this function returns TRUE if the value refers to a blank cell.)&#34; Microsoft called this out because it is the case people get wrong -- a blank is not text, so it is non-text. A2 is deliberately left unset by this case&#39;s setup. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(TRUE)</td>
-  <td>A logical value, which is not text</td>
+  <td class="desc">A logical value, which is not text</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">The value argument is documented as accepting &#34;a blank (empty cell), error, logical value, text, number, or reference value&#34;. A logical value is not text, so TRUE. The page&#39;s own ISLOGICAL examples establish that TRUE is a logical and &#34;TRUE&#34; (quoted) is not. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>The value argument is documented as accepting &#34;a blank (empty cell), error, logical value, text, number, or reference value&#34;. A logical value is not text, so TRUE. The page&#39;s own ISLOGICAL examples establish that TRUE is a logical and &#34;TRUE&#34; (quoted) is not. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(NA())</td>
-  <td>An error value, which is not text either</td>
+  <td class="desc">An error value, which is not text either</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">Errors are explicitly in the documented list of things value may be, and an error is not text, so the answer is TRUE. Worth asserting because it is the one case where a function returns a clean TRUE/FALSE about an error instead of propagating it -- the IS functions are the error-inspection tools, so they must not themselves error. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>Errors are explicitly in the documented list of things value may be, and an error is not text, so the answer is TRUE. Worth asserting because it is the one case where a function returns a clean TRUE/FALSE about an error instead of propagating it -- the IS functions are the error-inspection tools, so they must not themselves error. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(&#34;19&#34;)</td>
-  <td>A number written in quotation marks, which the page&#39;s Remarks say is text</td>
+  <td class="desc">A number written in quotation marks, which the page&#39;s Remarks say is text</td>
   <td class="result mono">False</td>
-  <td class="result mono">False<br><span class="category-tag">The shared Remarks paragraph is explicit: &#34;The value arguments of the IS functions are not converted. Any numeric values that are enclosed in double quotation marks are treated as text. For example, in most other functions where a number is required, the text value \&#34;19\&#34; is converted to the number 19. However, in the formula ISNUMBER(\&#34;19\&#34;), \&#34;19\&#34; is not converted from a text value to a number value, and the ISNUMBER function returns FALSE.&#34; The same non-conversion rule makes ISNONTEXT(&#34;19&#34;) FALSE. Microsoft&#39;s example uses ISNUMBER; the complement is asserted here for the function actually under test. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">False<details class="why"><summary>Provenance</summary><p>The shared Remarks paragraph is explicit: &#34;The value arguments of the IS functions are not converted. Any numeric values that are enclosed in double quotation marks are treated as text. For example, in most other functions where a number is required, the text value \&#34;19\&#34; is converted to the number 19. However, in the formula ISNUMBER(\&#34;19\&#34;), \&#34;19\&#34; is not converted from a text value to a number value, and the ISNUMBER function returns FALSE.&#34; The same non-conversion rule makes ISNONTEXT(&#34;19&#34;) FALSE. Microsoft&#39;s example uses ISNUMBER; the complement is asserted here for the function actually under test. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -588,56 +601,56 @@ ISNONTEXT&rsquo;s support changed &mdash; not documentation claims, real results
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(4)</td>
-  <td>A number, which is not text</td>
+  <td class="desc">A number, which is not text</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">A number is &#34;any item that is not text&#34;, so the documented answer is TRUE. Paired deliberately with the page&#39;s own ISNUMBER(4) = TRUE example: ISNONTEXT and ISTEXT partition every value, so ISNONTEXT must be the complement of ISTEXT on the same argument. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>A number is &#34;any item that is not text&#34;, so the documented answer is TRUE. Paired deliberately with the page&#39;s own ISNUMBER(4) = TRUE example: ISNONTEXT and ISTEXT partition every value, so ISNONTEXT must be the complement of ISTEXT on the same argument. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(&#34;Region1&#34;)</td>
-  <td>A text string, the one thing that makes this function FALSE</td>
+  <td class="desc">A text string, the one thing that makes this function FALSE</td>
   <td class="result mono">False</td>
-  <td class="result mono">False<br><span class="category-tag">The page&#39;s Example 2 asserts =ISTEXT(A3) = TRUE for the cell containing Region1; ISNONTEXT is the negation, so the same argument must give FALSE. This is the only branch of ISNONTEXT that returns FALSE at all. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">False<details class="why"><summary>Provenance</summary><p>The page&#39;s Example 2 asserts =ISTEXT(A3) = TRUE for the cell containing Region1; ISNONTEXT is the negation, so the same argument must give FALSE. This is the only branch of ISNONTEXT that returns FALSE at all. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(A2)</td>
-  <td>A reference to an empty cell, which the documentation singles out in a parenthesis</td>
+  <td class="desc">A reference to an empty cell, which the documentation singles out in a parenthesis</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">The table row carries its own parenthetical: &#34;(Note that this function returns TRUE if the value refers to a blank cell.)&#34; Microsoft called this out because it is the case people get wrong -- a blank is not text, so it is non-text. A2 is deliberately left unset by this case&#39;s setup. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>The table row carries its own parenthetical: &#34;(Note that this function returns TRUE if the value refers to a blank cell.)&#34; Microsoft called this out because it is the case people get wrong -- a blank is not text, so it is non-text. A2 is deliberately left unset by this case&#39;s setup. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(TRUE)</td>
-  <td>A logical value, which is not text</td>
+  <td class="desc">A logical value, which is not text</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">The value argument is documented as accepting &#34;a blank (empty cell), error, logical value, text, number, or reference value&#34;. A logical value is not text, so TRUE. The page&#39;s own ISLOGICAL examples establish that TRUE is a logical and &#34;TRUE&#34; (quoted) is not. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>The value argument is documented as accepting &#34;a blank (empty cell), error, logical value, text, number, or reference value&#34;. A logical value is not text, so TRUE. The page&#39;s own ISLOGICAL examples establish that TRUE is a logical and &#34;TRUE&#34; (quoted) is not. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(NA())</td>
-  <td>An error value, which is not text either</td>
+  <td class="desc">An error value, which is not text either</td>
   <td class="result mono">True</td>
-  <td class="result mono">True<br><span class="category-tag">Errors are explicitly in the documented list of things value may be, and an error is not text, so the answer is TRUE. Worth asserting because it is the one case where a function returns a clean TRUE/FALSE about an error instead of propagating it -- the IS functions are the error-inspection tools, so they must not themselves error. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">True<details class="why"><summary>Provenance</summary><p>Errors are explicitly in the documented list of things value may be, and an error is not text, so the answer is TRUE. Worth asserting because it is the one case where a function returns a clean TRUE/FALSE about an error instead of propagating it -- the IS functions are the error-inspection tools, so they must not themselves error. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ISNONTEXT(&#34;19&#34;)</td>
-  <td>A number written in quotation marks, which the page&#39;s Remarks say is text</td>
+  <td class="desc">A number written in quotation marks, which the page&#39;s Remarks say is text</td>
   <td class="result mono">False</td>
-  <td class="result mono">False<br><span class="category-tag">The shared Remarks paragraph is explicit: &#34;The value arguments of the IS functions are not converted. Any numeric values that are enclosed in double quotation marks are treated as text. For example, in most other functions where a number is required, the text value \&#34;19\&#34; is converted to the number 19. However, in the formula ISNUMBER(\&#34;19\&#34;), \&#34;19\&#34; is not converted from a text value to a number value, and the ISNUMBER function returns FALSE.&#34; The same non-conversion rule makes ISNONTEXT(&#34;19&#34;) FALSE. Microsoft&#39;s example uses ISNUMBER; the complement is asserted here for the function actually under test. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">False<details class="why"><summary>Provenance</summary><p>The shared Remarks paragraph is explicit: &#34;The value arguments of the IS functions are not converted. Any numeric values that are enclosed in double quotation marks are treated as text. For example, in most other functions where a number is required, the text value \&#34;19\&#34; is converted to the number 19. However, in the formula ISNUMBER(\&#34;19\&#34;), \&#34;19\&#34; is not converted from a text value to a number value, and the ISNUMBER function returns FALSE.&#34; The same non-conversion rule makes ISNONTEXT(&#34;19&#34;) FALSE. Microsoft&#39;s example uses ISNUMBER; the complement is asserted here for the function actually under test. ISNONTEXT is documented on Microsoft&#39;s shared &#34;IS functions&#34; page rather than on a page of its own. Its whole specification is one table row -- &#34;ISNONTEXT | Value refers to any item that is not text. (Note that this function returns TRUE if the value refers to a blank cell.)&#34; -- plus the page&#39;s shared Remarks paragraph. Every case here is taken from those two sentences.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

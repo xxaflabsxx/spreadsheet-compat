@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -499,7 +512,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">#DIV/0!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#DIV/0!&#39;
+        <details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#DIV/0!&#39;</p></details>
       </li>
       
     
@@ -519,7 +532,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0); MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -529,7 +542,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Excel documents #NUM! if pv is less than or equal to 0; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if pv is less than or equal to 0; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -549,48 +562,48 @@ against those cases before assuming your data is wrong.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(96,10000,11000),7)</td>
-  <td>Microsoft&#39;s documented example: the equivalent interest rate for 10,000 growing to 11,000 over 96 months</td>
+  <td class="desc">Microsoft&#39;s documented example: the equivalent interest rate for 10,000 growing to 11,000 over 96 months</td>
   <td class="result mono">0.0009933</td>
-  <td class="result mono">0.0009933<br><span class="category-tag">Excel documents this example&#39;s result as 0.0009933 (0.09933% per month). Derived from the documented formula RRI = (fv/pv)^(1/nper) - 1 = 1.1^(1/96) - 1 = 0.00099331</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.0009933<details class="why"><summary>Provenance</summary><p>Excel documents this example&#39;s result as 0.0009933 (0.09933% per month). Derived from the documented formula RRI = (fv/pv)^(1/nper) - 1 = 1.1^(1/96) - 1 = 0.00099331</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(2,100,400),7)</td>
-  <td>A clean closed-form case: quadrupling in two periods is exactly 100% per period</td>
+  <td class="desc">A clean closed-form case: quadrupling in two periods is exactly 100% per period</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">(400/100)^(1/2) - 1 = 2 - 1 = 1 exactly, i.e. a 100% return each period</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>(400/100)^(1/2) - 1 = 2 - 1 = 1 exactly, i.e. a 100% return each period</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(4,10000,5000),6)</td>
-  <td>A future value below the present value gives a negative equivalent rate</td>
+  <td class="desc">A future value below the present value gives a negative equivalent rate</td>
   <td class="result mono">-0.159104</td>
-  <td class="result mono">-0.159104<br><span class="category-tag">(5000/10000)^(1/4) - 1 = 0.5^0.25 - 1 = -0.15910358 -&gt; -0.159104 at 6 dp</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">-0.159104<details class="why"><summary>Provenance</summary><p>(5000/10000)^(1/4) - 1 = 0.5^0.25 - 1 = -0.15910358 -&gt; -0.159104 at 6 dp</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=RRI(0,10000,11000)</td>
-  <td>Zero periods makes the exponent 1/nper undefined</td>
+  <td class="desc">Zero periods makes the exponent 1/nper undefined</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0)</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0)</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=RRI(96,0,11000)</td>
-  <td>A present value of zero makes the fv/pv ratio undefined</td>
+  <td class="desc">A present value of zero makes the fv/pv ratio undefined</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents #NUM! if pv is less than or equal to 0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if pv is less than or equal to 0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -603,48 +616,48 @@ against those cases before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(96,10000,11000),7)</td>
-  <td>Microsoft&#39;s documented example: the equivalent interest rate for 10,000 growing to 11,000 over 96 months</td>
+  <td class="desc">Microsoft&#39;s documented example: the equivalent interest rate for 10,000 growing to 11,000 over 96 months</td>
   <td class="result mono">0.0009933</td>
-  <td class="result mono">0.0009933<br><span class="category-tag">Excel documents this example&#39;s result as 0.0009933 (0.09933% per month). Derived from the documented formula RRI = (fv/pv)^(1/nper) - 1 = 1.1^(1/96) - 1 = 0.00099331</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.0009933<details class="why"><summary>Provenance</summary><p>Excel documents this example&#39;s result as 0.0009933 (0.09933% per month). Derived from the documented formula RRI = (fv/pv)^(1/nper) - 1 = 1.1^(1/96) - 1 = 0.00099331</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(2,100,400),7)</td>
-  <td>A clean closed-form case: quadrupling in two periods is exactly 100% per period</td>
+  <td class="desc">A clean closed-form case: quadrupling in two periods is exactly 100% per period</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">(400/100)^(1/2) - 1 = 2 - 1 = 1 exactly, i.e. a 100% return each period</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>(400/100)^(1/2) - 1 = 2 - 1 = 1 exactly, i.e. a 100% return each period</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(4,10000,5000),6)</td>
-  <td>A future value below the present value gives a negative equivalent rate</td>
+  <td class="desc">A future value below the present value gives a negative equivalent rate</td>
   <td class="result mono">-0.159104</td>
-  <td class="result mono">-0.159104<br><span class="category-tag">(5000/10000)^(1/4) - 1 = 0.5^0.25 - 1 = -0.15910358 -&gt; -0.159104 at 6 dp</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">-0.159104<details class="why"><summary>Provenance</summary><p>(5000/10000)^(1/4) - 1 = 0.5^0.25 - 1 = -0.15910358 -&gt; -0.159104 at 6 dp</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=RRI(0,10000,11000)</td>
-  <td>Zero periods makes the exponent 1/nper undefined</td>
+  <td class="desc">Zero periods makes the exponent 1/nper undefined</td>
   <td class="result mono">#DIV/0!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0)</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0)</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=RRI(96,0,11000)</td>
-  <td>A present value of zero makes the fv/pv ratio undefined</td>
+  <td class="desc">A present value of zero makes the fv/pv ratio undefined</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents #NUM! if pv is less than or equal to 0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if pv is less than or equal to 0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -657,48 +670,48 @@ against those cases before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(96,10000,11000),7)</td>
-  <td>Microsoft&#39;s documented example: the equivalent interest rate for 10,000 growing to 11,000 over 96 months</td>
+  <td class="desc">Microsoft&#39;s documented example: the equivalent interest rate for 10,000 growing to 11,000 over 96 months</td>
   <td class="result mono">0.0009933</td>
-  <td class="result mono">0.0009933<br><span class="category-tag">Excel documents this example&#39;s result as 0.0009933 (0.09933% per month). Derived from the documented formula RRI = (fv/pv)^(1/nper) - 1 = 1.1^(1/96) - 1 = 0.00099331</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.0009933<details class="why"><summary>Provenance</summary><p>Excel documents this example&#39;s result as 0.0009933 (0.09933% per month). Derived from the documented formula RRI = (fv/pv)^(1/nper) - 1 = 1.1^(1/96) - 1 = 0.00099331</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(2,100,400),7)</td>
-  <td>A clean closed-form case: quadrupling in two periods is exactly 100% per period</td>
+  <td class="desc">A clean closed-form case: quadrupling in two periods is exactly 100% per period</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">(400/100)^(1/2) - 1 = 2 - 1 = 1 exactly, i.e. a 100% return each period</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>(400/100)^(1/2) - 1 = 2 - 1 = 1 exactly, i.e. a 100% return each period</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(RRI(4,10000,5000),6)</td>
-  <td>A future value below the present value gives a negative equivalent rate</td>
+  <td class="desc">A future value below the present value gives a negative equivalent rate</td>
   <td class="result mono">-0.159104</td>
-  <td class="result mono">-0.159104<br><span class="category-tag">(5000/10000)^(1/4) - 1 = 0.5^0.25 - 1 = -0.15910358 -&gt; -0.159104 at 6 dp</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">-0.159104<details class="why"><summary>Provenance</summary><p>(5000/10000)^(1/4) - 1 = 0.5^0.25 - 1 = -0.15910358 -&gt; -0.159104 at 6 dp</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=RRI(0,10000,11000)</td>
-  <td>Zero periods makes the exponent 1/nper undefined</td>
+  <td class="desc">Zero periods makes the exponent 1/nper undefined</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0)</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if nper is less than or equal to 0 (and if pv is less than or equal to 0)</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=RRI(96,0,11000)</td>
-  <td>A present value of zero makes the fv/pv ratio undefined</td>
+  <td class="desc">A present value of zero makes the fv/pv ratio undefined</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents #NUM! if pv is less than or equal to 0</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents #NUM! if pv is less than or equal to 0</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>

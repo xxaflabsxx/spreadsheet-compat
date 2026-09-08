@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -491,7 +504,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Excel for the web</strong> returned
         <span class="formula">#N/A</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#N/A&#39;
+        <details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#N/A&#39;</p></details>
       </li>
       
     
@@ -507,7 +520,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">0.4</span>, but the documented/expected
         result is <span class="formula">0.3</span>.
-        Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.; MISMATCH vs expected: expected 0.3, got 0.4
+        <details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.; MISMATCH vs expected: expected 0.3, got 0.4</p></details>
       </li>
       
     
@@ -519,7 +532,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">0.7</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0.7
+        <details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got 0.7</p></details>
       </li>
       
     
@@ -529,7 +542,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">#N/A</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#N/A&#39;
+        <details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#N/A&#39;</p></details>
       </li>
       
     
@@ -545,7 +558,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">0.4</span>, but the documented/expected
         result is <span class="formula">0.3</span>.
-        Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.; MISMATCH vs expected: expected 0.3, got 0.4
+        <details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.; MISMATCH vs expected: expected 0.3, got 0.4</p></details>
       </li>
       
     
@@ -557,7 +570,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -567,7 +580,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -587,56 +600,56 @@ against those cases before assuming your data is wrong.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7)</td>
-  <td>Microsoft&#39;s documented worked example: a value present in the array</td>
+  <td class="desc">Microsoft&#39;s documented worked example: a value present in the array</td>
   <td class="result mono">0.7</td>
-  <td class="result mono">0.7<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the &#34;exclusive&#34; in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.7<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the &#34;exclusive&#34; in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43)</td>
-  <td>Microsoft&#39;s documented interpolation case</td>
+  <td class="desc">Microsoft&#39;s documented interpolation case</td>
   <td class="result mono">0.381</td>
-  <td class="result mono">0.381<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: &#34;If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.&#34; DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.381<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: &#34;If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.&#34; DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43,1)</td>
-  <td>The same interpolation with the optional significance argument set to 1</td>
+  <td class="desc">The same interpolation with the optional significance argument set to 1</td>
   <td class="result mono">0.3</td>
-  <td class="result mono">0.3<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.3<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,1)</td>
-  <td>The smallest member of the array, which the exclusive definition keeps above zero</td>
+  <td class="desc">The smallest member of the array, which the exclusive definition keeps above zero</td>
   <td class="result mono">0.1</td>
-  <td class="result mono">0.1<br><span class="category-tag">The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.1<details class="why"><summary>Provenance</summary><p>The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7,0)</td>
-  <td>A significance of zero, which the page excludes</td>
+  <td class="desc">A significance of zero, which the page excludes</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(D20:D25,7)</td>
-  <td>An empty array, which the page excludes -- D20:D25 is deliberately left blank</td>
+  <td class="desc">An empty array, which the page excludes -- D20:D25 is deliberately left blank</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>
@@ -649,56 +662,56 @@ against those cases before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7)</td>
-  <td>Microsoft&#39;s documented worked example: a value present in the array</td>
+  <td class="desc">Microsoft&#39;s documented worked example: a value present in the array</td>
   <td class="result mono">0.7</td>
-  <td class="result mono">0.7<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the &#34;exclusive&#34; in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.7<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the &#34;exclusive&#34; in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43)</td>
-  <td>Microsoft&#39;s documented interpolation case</td>
+  <td class="desc">Microsoft&#39;s documented interpolation case</td>
   <td class="result mono">0.381</td>
-  <td class="result mono">0.381<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: &#34;If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.&#34; DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.381<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: &#34;If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.&#34; DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43,1)</td>
-  <td>The same interpolation with the optional significance argument set to 1</td>
+  <td class="desc">The same interpolation with the optional significance argument set to 1</td>
   <td class="result mono">0.4</td>
-  <td class="result mono">0.3<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">0.3<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,1)</td>
-  <td>The smallest member of the array, which the exclusive definition keeps above zero</td>
+  <td class="desc">The smallest member of the array, which the exclusive definition keeps above zero</td>
   <td class="result mono">0.1</td>
-  <td class="result mono">0.1<br><span class="category-tag">The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.1<details class="why"><summary>Provenance</summary><p>The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7,0)</td>
-  <td>A significance of zero, which the page excludes</td>
+  <td class="desc">A significance of zero, which the page excludes</td>
   <td class="result mono">0.7</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(D20:D25,7)</td>
-  <td>An empty array, which the page excludes -- D20:D25 is deliberately left blank</td>
+  <td class="desc">An empty array, which the page excludes -- D20:D25 is deliberately left blank</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>
@@ -711,56 +724,56 @@ against those cases before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7)</td>
-  <td>Microsoft&#39;s documented worked example: a value present in the array</td>
+  <td class="desc">Microsoft&#39;s documented worked example: a value present in the array</td>
   <td class="result mono">0.7</td>
-  <td class="result mono">0.7<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the &#34;exclusive&#34; in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.7<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10, 7) = 0.7 for the data 1, 2, 3, 6, 6, 6, 7, 8, 9. DERIVATION in exact rational arithmetic, from the definition rather than from a statistics library: PERCENTRANK.EXC assigns rank r/(n+1) to the r-th smallest of n values (so the smallest scores 1/(n+1) and the largest n/(n+1), never 0 or 1 -- that is what the &#34;exclusive&#34; in the name means), and interpolates linearly between neighbouring ranks for a value not present in the data. Here n = 9 and 7 is the 7th smallest, so the rank is 7/(9+1) = 0.7 exactly. Microsoft&#39;s page was re-read live on 2026-08-31 at https://support.microsoft.com/en-us/excel/functions/percentrank-exc-function (the /en-us/office/&lt;name&gt;-function-&lt;guid&gt; path was serving Microsoft&#39;s &#39;Sorry, the page you&#39;re looking for can&#39;t be found&#39; body throughout this batch, and the working path returns an 87 KB stub about half the time, so pages were fetched with retries until the payload exceeded 150 KB).</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43)</td>
-  <td>Microsoft&#39;s documented interpolation case</td>
+  <td class="desc">Microsoft&#39;s documented interpolation case</td>
   <td class="result mono">0.381</td>
-  <td class="result mono">0.381<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: &#34;If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.&#34; DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.381<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43) = 0.381, and documents the behaviour: &#34;If x does not match one of the values in array, PERCENTRANK.EXC interpolates to return the correct percentage rank.&#34; DERIVATION in exact rationals: 5.43 lies between 3 (the 3rd smallest) and 6 (the 4th), so its interpolated rank is 3 + (5.43 - 3)/(6 - 3) = 3 + 81/100 = 3.81, and 3.81/(9+1) = 0.381 exactly. Computed with Fraction, not floats -- with binary floats the same arithmetic lands a hair below 0.381 and truncates to 0.380, which is precisely the trap this case is built to avoid.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,5.43,1)</td>
-  <td>The same interpolation with the optional significance argument set to 1</td>
+  <td class="desc">The same interpolation with the optional significance argument set to 1</td>
   <td class="result mono">0.4</td>
-  <td class="result mono">0.3<br><span class="category-tag">Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">0.3<details class="why"><summary>Provenance</summary><p>Microsoft publishes =PERCENTRANK.EXC(A2:A10,5.43,1) = 0.3, &#34;displaying only 1 significant digit in the result (the default is 3)&#34;. 0.381 cut to one significant digit is 0.3 -- and note that it is CUT, not rounded: rounding 0.381 to one significant digit would give 0.4. This case is the one that pins the truncation semantics of the significance argument. EXECUTED RESULT: LibreOffice returns 0.4 on all four pinned builds (24.2.0.3, 24.8.7.2, 25.2.0.3, 25.8.7.3), which agree case for case, against Microsoft&#39;s published 0.3. The rounding-versus-truncation split shown by PERCENTRANK.INC&#39;s repeating-decimal rows, here made visible at ONE significant digit, where it moves the answer by a third of its own size. The two full-precision rows of this file (0.7 and 0.381) pass on every build, so the engine&#39;s ranking arithmetic is right and only the significance step differs.</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,1)</td>
-  <td>The smallest member of the array, which the exclusive definition keeps above zero</td>
+  <td class="desc">The smallest member of the array, which the exclusive definition keeps above zero</td>
   <td class="result mono">0.1</td>
-  <td class="result mono">0.1<br><span class="category-tag">The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.1<details class="why"><summary>Provenance</summary><p>The whole difference between the .EXC and .INC variants is at the ends of the range: the smallest of n = 9 values ranks 1/(9+1) = 0.1 under .EXC, where .INC would give 0. Asserted because an engine that implemented .EXC as .INC under a new name passes every interior case and fails only here.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(A2:A10,7,0)</td>
-  <td>A significance of zero, which the page excludes</td>
+  <td class="desc">A significance of zero, which the page excludes</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If significance &lt; 1, PERCENTRANK.EXC returns the #NUM! error value.&#34; OpenFormula 1.3 section 6.18.58 states the same constraint for its PERCENTRANK (&#34;INT(Significance) = Significance; Significance &gt;= 1&#34;).</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=PERCENTRANK.EXC(D20:D25,7)</td>
-  <td>An empty array, which the page excludes -- D20:D25 is deliberately left blank</td>
+  <td class="desc">An empty array, which the page excludes -- D20:D25 is deliberately left blank</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Microsoft documents: &#34;If array is empty, PERCENTRANK.EXC returns the #NUM! error value.&#34; The range D20:D25 is deliberately empty: no setup_cells value is written anywhere inside it, which is the entire point of the case (see scripts/check_test_setup_refs.py, which accepts an unset reference only when the case says in so many words that it is testing a blank).</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>

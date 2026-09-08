@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,56 +477,56 @@ T&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=T(&#34;Rainfall&#34;)</td>
-  <td>Microsoft&#39;s documented example: T returns text arguments unchanged</td>
+  <td class="desc">Microsoft&#39;s documented example: T returns text arguments unchanged</td>
   <td class="result mono">Rainfall</td>
-  <td class="result mono">Rainfall<br><span class="category-tag">Verbatim from Microsoft: &#39;If value is or refers to text, T returns value.&#39; The page&#39;s own example returns Rainfall for a cell holding that text</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">Rainfall<details class="why"><summary>Provenance</summary><p>Verbatim from Microsoft: &#39;If value is or refers to text, T returns value.&#39; The page&#39;s own example returns Rainfall for a cell holding that text</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(19)</td>
-  <td>DIVERGENCE PROBE: a number is not text, so T returns empty text rather than the number</td>
+  <td class="desc">DIVERGENCE PROBE: a number is not text, so T returns empty text rather than the number</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Verbatim from Microsoft: &#39;If value does not refer to text, T returns &#34;&#34; (empty text)&#39;, and the page&#39;s example for the value 19 says &#39;Because the second value is a number, empty text is returned&#39;. An engine that coerced the number to a string would return &#34;19&#34; instead</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>Verbatim from Microsoft: &#39;If value does not refer to text, T returns &#34;&#34; (empty text)&#39;, and the page&#39;s example for the value 19 says &#39;Because the second value is a number, empty text is returned&#39;. An engine that coerced the number to a string would return &#34;19&#34; instead</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(TRUE)</td>
-  <td>A logical value is also not text, so the result is empty text</td>
+  <td class="desc">A logical value is also not text, so the result is empty text</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Microsoft&#39;s example table covers this case explicitly: &#39;Because the third value is a logical value, empty text is returned&#39;. There is no TRUE -&gt; &#34;TRUE&#34; coercion</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>Microsoft&#39;s example table covers this case explicitly: &#39;Because the third value is a logical value, empty text is returned&#39;. There is no TRUE -&gt; &#34;TRUE&#34; coercion</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(A1)</td>
-  <td>A reference to a cell holding text returns that text</td>
+  <td class="desc">A reference to a cell holding text returns that text</td>
   <td class="result mono">hello</td>
-  <td class="result mono">hello<br><span class="category-tag">The referenced value is text, so T passes it through unchanged</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">hello<details class="why"><summary>Provenance</summary><p>The referenced value is text, so T passes it through unchanged</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(A1)</td>
-  <td>A reference to a cell holding a number returns empty text</td>
+  <td class="desc">A reference to a cell holding a number returns empty text</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">The referenced value is a number, which is not text, so T returns &#34;&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>The referenced value is a number, which is not text, so T returns &#34;&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(1/0)</td>
-  <td>An error value passed to T propagates rather than becoming empty text</td>
+  <td class="desc">An error value passed to T propagates rather than becoming empty text</td>
   <td class="result mono">#DIV/0!</td>
-  <td class="result mono">#DIV/0!<br><span class="category-tag">Error values propagate through T; the argument itself evaluates to #DIV/0! and that error is the result of the whole expression</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#DIV/0!<details class="why"><summary>Provenance</summary><p>Error values propagate through T; the argument itself evaluates to #DIV/0! and that error is the result of the whole expression</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -526,56 +539,56 @@ T&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=T(&#34;Rainfall&#34;)</td>
-  <td>Microsoft&#39;s documented example: T returns text arguments unchanged</td>
+  <td class="desc">Microsoft&#39;s documented example: T returns text arguments unchanged</td>
   <td class="result mono">Rainfall</td>
-  <td class="result mono">Rainfall<br><span class="category-tag">Verbatim from Microsoft: &#39;If value is or refers to text, T returns value.&#39; The page&#39;s own example returns Rainfall for a cell holding that text</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">Rainfall<details class="why"><summary>Provenance</summary><p>Verbatim from Microsoft: &#39;If value is or refers to text, T returns value.&#39; The page&#39;s own example returns Rainfall for a cell holding that text</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(19)</td>
-  <td>DIVERGENCE PROBE: a number is not text, so T returns empty text rather than the number</td>
+  <td class="desc">DIVERGENCE PROBE: a number is not text, so T returns empty text rather than the number</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Verbatim from Microsoft: &#39;If value does not refer to text, T returns &#34;&#34; (empty text)&#39;, and the page&#39;s example for the value 19 says &#39;Because the second value is a number, empty text is returned&#39;. An engine that coerced the number to a string would return &#34;19&#34; instead</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>Verbatim from Microsoft: &#39;If value does not refer to text, T returns &#34;&#34; (empty text)&#39;, and the page&#39;s example for the value 19 says &#39;Because the second value is a number, empty text is returned&#39;. An engine that coerced the number to a string would return &#34;19&#34; instead</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(TRUE)</td>
-  <td>A logical value is also not text, so the result is empty text</td>
+  <td class="desc">A logical value is also not text, so the result is empty text</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Microsoft&#39;s example table covers this case explicitly: &#39;Because the third value is a logical value, empty text is returned&#39;. There is no TRUE -&gt; &#34;TRUE&#34; coercion</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>Microsoft&#39;s example table covers this case explicitly: &#39;Because the third value is a logical value, empty text is returned&#39;. There is no TRUE -&gt; &#34;TRUE&#34; coercion</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(A1)</td>
-  <td>A reference to a cell holding text returns that text</td>
+  <td class="desc">A reference to a cell holding text returns that text</td>
   <td class="result mono">hello</td>
-  <td class="result mono">hello<br><span class="category-tag">The referenced value is text, so T passes it through unchanged</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">hello<details class="why"><summary>Provenance</summary><p>The referenced value is text, so T passes it through unchanged</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(A1)</td>
-  <td>A reference to a cell holding a number returns empty text</td>
+  <td class="desc">A reference to a cell holding a number returns empty text</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">The referenced value is a number, which is not text, so T returns &#34;&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>The referenced value is a number, which is not text, so T returns &#34;&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(1/0)</td>
-  <td>An error value passed to T propagates rather than becoming empty text</td>
+  <td class="desc">An error value passed to T propagates rather than becoming empty text</td>
   <td class="result mono">#DIV/0!</td>
-  <td class="result mono">#DIV/0!<br><span class="category-tag">Error values propagate through T; the argument itself evaluates to #DIV/0! and that error is the result of the whole expression</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#DIV/0!<details class="why"><summary>Provenance</summary><p>Error values propagate through T; the argument itself evaluates to #DIV/0! and that error is the result of the whole expression</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -588,56 +601,56 @@ T&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=T(&#34;Rainfall&#34;)</td>
-  <td>Microsoft&#39;s documented example: T returns text arguments unchanged</td>
+  <td class="desc">Microsoft&#39;s documented example: T returns text arguments unchanged</td>
   <td class="result mono">Rainfall</td>
-  <td class="result mono">Rainfall<br><span class="category-tag">Verbatim from Microsoft: &#39;If value is or refers to text, T returns value.&#39; The page&#39;s own example returns Rainfall for a cell holding that text</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">Rainfall<details class="why"><summary>Provenance</summary><p>Verbatim from Microsoft: &#39;If value is or refers to text, T returns value.&#39; The page&#39;s own example returns Rainfall for a cell holding that text</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(19)</td>
-  <td>DIVERGENCE PROBE: a number is not text, so T returns empty text rather than the number</td>
+  <td class="desc">DIVERGENCE PROBE: a number is not text, so T returns empty text rather than the number</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Verbatim from Microsoft: &#39;If value does not refer to text, T returns &#34;&#34; (empty text)&#39;, and the page&#39;s example for the value 19 says &#39;Because the second value is a number, empty text is returned&#39;. An engine that coerced the number to a string would return &#34;19&#34; instead</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>Verbatim from Microsoft: &#39;If value does not refer to text, T returns &#34;&#34; (empty text)&#39;, and the page&#39;s example for the value 19 says &#39;Because the second value is a number, empty text is returned&#39;. An engine that coerced the number to a string would return &#34;19&#34; instead</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(TRUE)</td>
-  <td>A logical value is also not text, so the result is empty text</td>
+  <td class="desc">A logical value is also not text, so the result is empty text</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">Microsoft&#39;s example table covers this case explicitly: &#39;Because the third value is a logical value, empty text is returned&#39;. There is no TRUE -&gt; &#34;TRUE&#34; coercion</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>Microsoft&#39;s example table covers this case explicitly: &#39;Because the third value is a logical value, empty text is returned&#39;. There is no TRUE -&gt; &#34;TRUE&#34; coercion</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(A1)</td>
-  <td>A reference to a cell holding text returns that text</td>
+  <td class="desc">A reference to a cell holding text returns that text</td>
   <td class="result mono">hello</td>
-  <td class="result mono">hello<br><span class="category-tag">The referenced value is text, so T passes it through unchanged</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">hello<details class="why"><summary>Provenance</summary><p>The referenced value is text, so T passes it through unchanged</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(A1)</td>
-  <td>A reference to a cell holding a number returns empty text</td>
+  <td class="desc">A reference to a cell holding a number returns empty text</td>
   <td class="result mono"></td>
-  <td class="result mono"><br><span class="category-tag">The referenced value is a number, which is not text, so T returns &#34;&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected"><details class="why"><summary>Provenance</summary><p>The referenced value is a number, which is not text, so T returns &#34;&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=T(1/0)</td>
-  <td>An error value passed to T propagates rather than becoming empty text</td>
+  <td class="desc">An error value passed to T propagates rather than becoming empty text</td>
   <td class="result mono">#DIV/0!</td>
-  <td class="result mono">#DIV/0!<br><span class="category-tag">Error values propagate through T; the argument itself evaluates to #DIV/0! and that error is the result of the whole expression</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#DIV/0!<details class="why"><summary>Provenance</summary><p>Error values propagate through T; the argument itself evaluates to #DIV/0! and that error is the result of the whole expression</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

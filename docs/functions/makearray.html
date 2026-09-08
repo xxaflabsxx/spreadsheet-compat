@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -487,7 +500,7 @@ we re-run every test on each new release, so it will flip to Supported here as s
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#NAME?</span>, but the documented/expected
         result is <span class="formula">{{1, 2}, {2, 4}}</span>.
-        MISMATCH vs expected: value mismatch: expected 1, got &#39;#NAME?&#39;
+        <details class="why"><summary>Provenance</summary><p>MISMATCH vs expected: value mismatch: expected 1, got &#39;#NAME?&#39;</p></details>
       </li>
       
     
@@ -510,16 +523,16 @@ we re-run every test on each new release, so it will flip to Supported here as s
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=MAKEARRAY(2,2,LAMBDA(r,c,r*c))</td>
-  <td>Build a 2x2 array where each cell = row*col</td>
+  <td class="desc">Build a 2x2 array where each cell = row*col</td>
   <td class="result mono">{1, 2.0, 2.0, 4.0}</td>
-  <td class="result mono">{{1, 2}, {2, 4}}</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">{{1, 2}, {2, 4}}</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -532,16 +545,16 @@ we re-run every test on each new release, so it will flip to Supported here as s
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=MAKEARRAY(2,2,LAMBDA(r,c,r*c))</td>
-  <td>Build a 2x2 array where each cell = row*col</td>
+  <td class="desc">Build a 2x2 array where each cell = row*col</td>
   <td class="result mono">{#NAME?, #NAME?, #NAME?, #NAME?}</td>
-  <td class="result mono">{{1, 2}, {2, 4}}</td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">{{1, 2}, {2, 4}}</td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>

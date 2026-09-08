@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,48 +477,48 @@ WEEKNUM&rsquo;s support changed &mdash; not documentation claims, real results.<
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2024,1,1),1)</td>
-  <td>return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340</td>
+  <td class="desc">return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340</td>
   <td class="result mono">1</td>
-  <td class="result mono">1</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2024,1,1),2)</td>
-  <td>return_type 2 = same &#39;week containing Jan 1 is week 1&#39; system, but weeks start Monday</td>
+  <td class="desc">return_type 2 = same &#39;week containing Jan 1 is week 1&#39; system, but weeks start Monday</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2012,3,9))</td>
-  <td>Microsoft&#39;s own documented example date/result for the default return_type (1)</td>
+  <td class="desc">Microsoft&#39;s own documented example date/result for the default return_type (1)</td>
   <td class="result mono">10</td>
-  <td class="result mono">10<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">10<details class="why"><summary>Provenance</summary><p>Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2012,3,9),2)</td>
-  <td>Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft&#39;s own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence</td>
+  <td class="desc">Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft&#39;s own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence</td>
   <td class="result mono">11</td>
-  <td class="result mono">11<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">11<details class="why"><summary>Provenance</summary><p>Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2023,1,1),21)</td>
-  <td>return_type 21 uses &#39;System 2&#39;: the week containing the year&#39;s first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use &#39;week containing Jan 1 = week 1&#39;). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json</td>
+  <td class="desc">return_type 21 uses &#39;System 2&#39;: the week containing the year&#39;s first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use &#39;week containing Jan 1 = week 1&#39;). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json</td>
   <td class="result mono">52</td>
-  <td class="result mono">52<br><span class="category-tag">Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">52<details class="why"><summary>Provenance</summary><p>Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -518,48 +531,48 @@ WEEKNUM&rsquo;s support changed &mdash; not documentation claims, real results.<
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2024,1,1),1)</td>
-  <td>return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340</td>
+  <td class="desc">return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340</td>
   <td class="result mono">1</td>
-  <td class="result mono">1</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2024,1,1),2)</td>
-  <td>return_type 2 = same &#39;week containing Jan 1 is week 1&#39; system, but weeks start Monday</td>
+  <td class="desc">return_type 2 = same &#39;week containing Jan 1 is week 1&#39; system, but weeks start Monday</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2012,3,9))</td>
-  <td>Microsoft&#39;s own documented example date/result for the default return_type (1)</td>
+  <td class="desc">Microsoft&#39;s own documented example date/result for the default return_type (1)</td>
   <td class="result mono">10</td>
-  <td class="result mono">10<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">10<details class="why"><summary>Provenance</summary><p>Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2012,3,9),2)</td>
-  <td>Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft&#39;s own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence</td>
+  <td class="desc">Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft&#39;s own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence</td>
   <td class="result mono">11</td>
-  <td class="result mono">11<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">11<details class="why"><summary>Provenance</summary><p>Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2023,1,1),21)</td>
-  <td>return_type 21 uses &#39;System 2&#39;: the week containing the year&#39;s first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use &#39;week containing Jan 1 = week 1&#39;). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json</td>
+  <td class="desc">return_type 21 uses &#39;System 2&#39;: the week containing the year&#39;s first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use &#39;week containing Jan 1 = week 1&#39;). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json</td>
   <td class="result mono">52</td>
-  <td class="result mono">52<br><span class="category-tag">Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">52<details class="why"><summary>Provenance</summary><p>Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -572,48 +585,48 @@ WEEKNUM&rsquo;s support changed &mdash; not documentation claims, real results.<
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2024,1,1),1)</td>
-  <td>return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340</td>
+  <td class="desc">return_type 1 = US system, weeks start Sunday, week containing Jan 1 is always week 1. Verified via https://support.microsoft.com/en-us/office/weeknum-function-e5c43a03-b4ab-426c-b411-b18c13c75340</td>
   <td class="result mono">1</td>
-  <td class="result mono">1</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2024,1,1),2)</td>
-  <td>return_type 2 = same &#39;week containing Jan 1 is week 1&#39; system, but weeks start Monday</td>
+  <td class="desc">return_type 2 = same &#39;week containing Jan 1 is week 1&#39; system, but weeks start Monday</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>Jan 1, 2024 happens to BE a Monday, so it is both the week-1-by-Sunday-rule week AND the very first day of the week-1-by-Monday-rule week -- return_type 1 and 2 coincide at 1 for this specific date (see WEEKNUM_doc_example_* below for a date where they genuinely diverge)</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2012,3,9))</td>
-  <td>Microsoft&#39;s own documented example date/result for the default return_type (1)</td>
+  <td class="desc">Microsoft&#39;s own documented example date/result for the default return_type (1)</td>
   <td class="result mono">10</td>
-  <td class="result mono">10<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">10<details class="why"><summary>Provenance</summary><p>Per Microsoft docs, WEEKNUM(3/9/2012) = 10 with default return_type</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2012,3,9),2)</td>
-  <td>Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft&#39;s own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence</td>
+  <td class="desc">Same date as WEEKNUM_doc_example_default but return_type=2 (Monday-start): Microsoft&#39;s own docs show this returns a DIFFERENT week number (11, not 10) for the identical date -- the genuine return_type divergence</td>
   <td class="result mono">11</td>
-  <td class="result mono">11<br><span class="category-tag">Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">11<details class="why"><summary>Provenance</summary><p>Per Microsoft docs, WEEKNUM(3/9/2012,2) = 11, one more than the return_type=1 result of 10</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=WEEKNUM(DATE(2023,1,1),21)</td>
-  <td>return_type 21 uses &#39;System 2&#39;: the week containing the year&#39;s first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use &#39;week containing Jan 1 = week 1&#39;). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json</td>
+  <td class="desc">return_type 21 uses &#39;System 2&#39;: the week containing the year&#39;s first Thursday is week 1 (ISO 8601), a genuinely different algorithm from return_types 1/2/11-17 (all of which use &#39;week containing Jan 1 = week 1&#39;). This should match ISOWEEKNUM(DATE(2023,1,1)) exactly -- see ISOWEEKNUM.json</td>
   <td class="result mono">52</td>
-  <td class="result mono">52<br><span class="category-tag">Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">52<details class="why"><summary>Provenance</summary><p>Jan 1, 2023 is a Sunday; under the ISO rule it falls in the LAST ISO week (52) of 2022, not week 1 of 2023</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,40 +477,40 @@ DAYS360&rsquo;s support changed &mdash; not documentation claims, real results.<
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2011,1,30),DATE(2011,2,1))</td>
-  <td>Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
+  <td class="desc">Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
   <td class="result mono">1</td>
-  <td class="result mono">1</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2011,1,1),DATE(2011,12,31))</td>
-  <td>A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
+  <td class="desc">A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
   <td class="result mono">360</td>
-  <td class="result mono">360</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">360</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31))</td>
-  <td>US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
+  <td class="desc">US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31),TRUE)</td>
-  <td>Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
+  <td class="desc">Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
   <td class="result mono">29</td>
-  <td class="result mono">29<br><span class="category-tag">Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">29<details class="why"><summary>Provenance</summary><p>Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -510,40 +523,40 @@ DAYS360&rsquo;s support changed &mdash; not documentation claims, real results.<
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2011,1,30),DATE(2011,2,1))</td>
-  <td>Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
+  <td class="desc">Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
   <td class="result mono">1</td>
-  <td class="result mono">1</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2011,1,1),DATE(2011,12,31))</td>
-  <td>A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
+  <td class="desc">A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
   <td class="result mono">360</td>
-  <td class="result mono">360</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">360</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31))</td>
-  <td>US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
+  <td class="desc">US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31),TRUE)</td>
-  <td>Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
+  <td class="desc">Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
   <td class="result mono">29</td>
-  <td class="result mono">29<br><span class="category-tag">Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">29<details class="why"><summary>Provenance</summary><p>Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -556,40 +569,40 @@ DAYS360&rsquo;s support changed &mdash; not documentation claims, real results.<
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2011,1,30),DATE(2011,2,1))</td>
-  <td>Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
+  <td class="desc">Microsoft&#39;s own documented example, default (US/NASD) method. Verified via https://support.microsoft.com/en-us/office/days360-function-b9a509fd-49ef-407e-94df-0cbda5718c2a</td>
   <td class="result mono">1</td>
-  <td class="result mono">1</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2011,1,1),DATE(2011,12,31))</td>
-  <td>A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
+  <td class="desc">A second literal example from the same documentation page, showing the 30-day-month/360-day-year convention</td>
   <td class="result mono">360</td>
-  <td class="result mono">360</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">360</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31))</td>
-  <td>US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
+  <td class="desc">US (NASD) method month-end rule: end_date is the last day of its month (Jan 31) and start_date (Jan 1) is before the 30th, so end_date shifts to the 1st of the NEXT month (Feb 1) before the 30/360 day count. Verified via the DAYS360 documentation&#39;s description of the US method&#39;s end-of-month handling</td>
   <td class="result mono">30</td>
-  <td class="result mono">30<br><span class="category-tag">Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">30<details class="why"><summary>Provenance</summary><p>Effective dates become Jan 1 -&gt; Feb 1 -&gt; (2-1)*30 + (1-1) = 30</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=DAYS360(DATE(2024,1,1),DATE(2024,1,31),TRUE)</td>
-  <td>Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
+  <td class="desc">Same date pair as DAYS360_us_method_month_end_shift but method=TRUE (European method): the European rule simply clamps day-31 dates to day 30, with none of the US method&#39;s &#39;shift end_date to next month&#39; logic, giving a genuinely DIFFERENT result (29, not 30) for the identical inputs -- the documented US-vs-European divergence</td>
   <td class="result mono">29</td>
-  <td class="result mono">29<br><span class="category-tag">Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">29<details class="why"><summary>Provenance</summary><p>Effective dates become Jan 1 -&gt; Jan 30 (31 clamped to 30, no next-month shift) -&gt; (1-1)*30 + (30-1) = 29</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

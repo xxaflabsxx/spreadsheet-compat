@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,40 +477,40 @@ ATAN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(ATAN(1),9)</td>
-  <td>Microsoft&#39;s documented worked example: arctangent of 1 in radians (pi/4)</td>
+  <td class="desc">Microsoft&#39;s documented worked example: arctangent of 1 in radians (pi/4)</td>
   <td class="result mono">0.785398163</td>
-  <td class="result mono">0.785398163<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.785398163. Independently verified in Python: math.atan(1) = 0.7853981633974483, which is exactly pi/4 -&gt; 0.785398163 at 9 dp</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.785398163<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.785398163. Independently verified in Python: math.atan(1) = 0.7853981633974483, which is exactly pi/4 -&gt; 0.785398163 at 9 dp</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(DEGREES(ATAN(1)),9)</td>
-  <td>The same example converted to degrees with the DEGREES function, as the page&#39;s third example does</td>
+  <td class="desc">The same example converted to degrees with the DEGREES function, as the page&#39;s third example does</td>
   <td class="result mono">45</td>
-  <td class="result mono">45.0<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 45. Independently verified: pi/4 radians = 45 degrees exactly, and the double-precision conversion is exactly 45.0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">45.0<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 45. Independently verified: pi/4 radians = 45 degrees exactly, and the double-precision conversion is exactly 45.0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ATAN(0),9)</td>
-  <td>The arctangent of zero</td>
+  <td class="desc">The arctangent of zero</td>
   <td class="result mono">0</td>
-  <td class="result mono">0.0<br><span class="category-tag">tan(0) = 0 and the documented output range is -pi/2 to pi/2, which contains exactly one angle with tangent zero, so ATAN(0) = 0 exactly</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.0<details class="why"><summary>Provenance</summary><p>tan(0) = 0 and the documented output range is -pi/2 to pi/2, which contains exactly one angle with tangent zero, so ATAN(0) = 0 exactly</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ATAN(&#34;abc&#34;)</td>
-  <td>A non-numeric text argument</td>
+  <td class="desc">A non-numeric text argument</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">#VALUE! is Excel&#39;s documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-trigonometric family</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>#VALUE! is Excel&#39;s documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-trigonometric family</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -510,40 +523,40 @@ ATAN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(ATAN(1),9)</td>
-  <td>Microsoft&#39;s documented worked example: arctangent of 1 in radians (pi/4)</td>
+  <td class="desc">Microsoft&#39;s documented worked example: arctangent of 1 in radians (pi/4)</td>
   <td class="result mono">0.785398163</td>
-  <td class="result mono">0.785398163<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.785398163. Independently verified in Python: math.atan(1) = 0.7853981633974483, which is exactly pi/4 -&gt; 0.785398163 at 9 dp</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.785398163<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.785398163. Independently verified in Python: math.atan(1) = 0.7853981633974483, which is exactly pi/4 -&gt; 0.785398163 at 9 dp</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(DEGREES(ATAN(1)),9)</td>
-  <td>The same example converted to degrees with the DEGREES function, as the page&#39;s third example does</td>
+  <td class="desc">The same example converted to degrees with the DEGREES function, as the page&#39;s third example does</td>
   <td class="result mono">45</td>
-  <td class="result mono">45.0<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 45. Independently verified: pi/4 radians = 45 degrees exactly, and the double-precision conversion is exactly 45.0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">45.0<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 45. Independently verified: pi/4 radians = 45 degrees exactly, and the double-precision conversion is exactly 45.0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ATAN(0),9)</td>
-  <td>The arctangent of zero</td>
+  <td class="desc">The arctangent of zero</td>
   <td class="result mono">0</td>
-  <td class="result mono">0.0<br><span class="category-tag">tan(0) = 0 and the documented output range is -pi/2 to pi/2, which contains exactly one angle with tangent zero, so ATAN(0) = 0 exactly</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.0<details class="why"><summary>Provenance</summary><p>tan(0) = 0 and the documented output range is -pi/2 to pi/2, which contains exactly one angle with tangent zero, so ATAN(0) = 0 exactly</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ATAN(&#34;abc&#34;)</td>
-  <td>A non-numeric text argument</td>
+  <td class="desc">A non-numeric text argument</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">#VALUE! is Excel&#39;s documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-trigonometric family</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>#VALUE! is Excel&#39;s documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-trigonometric family</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -556,40 +569,40 @@ ATAN&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(ATAN(1),9)</td>
-  <td>Microsoft&#39;s documented worked example: arctangent of 1 in radians (pi/4)</td>
+  <td class="desc">Microsoft&#39;s documented worked example: arctangent of 1 in radians (pi/4)</td>
   <td class="result mono">0.785398163</td>
-  <td class="result mono">0.785398163<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.785398163. Independently verified in Python: math.atan(1) = 0.7853981633974483, which is exactly pi/4 -&gt; 0.785398163 at 9 dp</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.785398163<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.785398163. Independently verified in Python: math.atan(1) = 0.7853981633974483, which is exactly pi/4 -&gt; 0.785398163 at 9 dp</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(DEGREES(ATAN(1)),9)</td>
-  <td>The same example converted to degrees with the DEGREES function, as the page&#39;s third example does</td>
+  <td class="desc">The same example converted to degrees with the DEGREES function, as the page&#39;s third example does</td>
   <td class="result mono">45</td>
-  <td class="result mono">45.0<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 45. Independently verified: pi/4 radians = 45 degrees exactly, and the double-precision conversion is exactly 45.0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">45.0<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 45. Independently verified: pi/4 radians = 45 degrees exactly, and the double-precision conversion is exactly 45.0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ATAN(0),9)</td>
-  <td>The arctangent of zero</td>
+  <td class="desc">The arctangent of zero</td>
   <td class="result mono">0</td>
-  <td class="result mono">0.0<br><span class="category-tag">tan(0) = 0 and the documented output range is -pi/2 to pi/2, which contains exactly one angle with tangent zero, so ATAN(0) = 0 exactly</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.0<details class="why"><summary>Provenance</summary><p>tan(0) = 0 and the documented output range is -pi/2 to pi/2, which contains exactly one angle with tangent zero, so ATAN(0) = 0 exactly</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ATAN(&#34;abc&#34;)</td>
-  <td>A non-numeric text argument</td>
+  <td class="desc">A non-numeric text argument</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">#VALUE! is Excel&#39;s documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-trigonometric family</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>#VALUE! is Excel&#39;s documented error for an argument of the wrong type; the ACOT page states it explicitly for this inverse-trigonometric family</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

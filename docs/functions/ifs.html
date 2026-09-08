@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -464,40 +477,40 @@ IFS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;90,&#34;A&#34;,A1&gt;80,&#34;B&#34;,TRUE,&#34;C&#34;)</td>
-  <td>First TRUE condition wins; TRUE literal acts as catch-all</td>
+  <td class="desc">First TRUE condition wins; TRUE literal acts as catch-all</td>
   <td class="result mono">B</td>
-  <td class="result mono">B</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">B</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;90,&#34;A&#34;,A1&gt;95,&#34;B&#34;)</td>
-  <td>No condition true and no catch-all -&gt; #N/A</td>
+  <td class="desc">No condition true and no catch-all -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;0,&#34;pos&#34;,A1&gt;10,&#34;big&#34;)</td>
-  <td>Conditions evaluated left-to-right; first match short-circuits</td>
+  <td class="desc">Conditions evaluated left-to-right; first match short-circuits</td>
   <td class="result mono">pos</td>
-  <td class="result mono">pos<br><span class="category-tag">A1&gt;10 is also true but never reached</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">pos<details class="why"><summary>Provenance</summary><p>A1&gt;10 is also true but never reached</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(TRUE,&#34;always&#34;,A1&gt;0,&#34;pos&#34;)</td>
-  <td>TRUE as the first condition always wins regardless of position</td>
+  <td class="desc">TRUE as the first condition always wins regardless of position</td>
   <td class="result mono">always</td>
-  <td class="result mono">always</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">always</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -510,40 +523,40 @@ IFS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;90,&#34;A&#34;,A1&gt;80,&#34;B&#34;,TRUE,&#34;C&#34;)</td>
-  <td>First TRUE condition wins; TRUE literal acts as catch-all</td>
+  <td class="desc">First TRUE condition wins; TRUE literal acts as catch-all</td>
   <td class="result mono">B</td>
-  <td class="result mono">B</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">B</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;90,&#34;A&#34;,A1&gt;95,&#34;B&#34;)</td>
-  <td>No condition true and no catch-all -&gt; #N/A</td>
+  <td class="desc">No condition true and no catch-all -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;0,&#34;pos&#34;,A1&gt;10,&#34;big&#34;)</td>
-  <td>Conditions evaluated left-to-right; first match short-circuits</td>
+  <td class="desc">Conditions evaluated left-to-right; first match short-circuits</td>
   <td class="result mono">pos</td>
-  <td class="result mono">pos<br><span class="category-tag">A1&gt;10 is also true but never reached</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">pos<details class="why"><summary>Provenance</summary><p>A1&gt;10 is also true but never reached</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(TRUE,&#34;always&#34;,A1&gt;0,&#34;pos&#34;)</td>
-  <td>TRUE as the first condition always wins regardless of position</td>
+  <td class="desc">TRUE as the first condition always wins regardless of position</td>
   <td class="result mono">always</td>
-  <td class="result mono">always</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">always</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -556,40 +569,40 @@ IFS&rsquo;s support changed &mdash; not documentation claims, real results.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;90,&#34;A&#34;,A1&gt;80,&#34;B&#34;,TRUE,&#34;C&#34;)</td>
-  <td>First TRUE condition wins; TRUE literal acts as catch-all</td>
+  <td class="desc">First TRUE condition wins; TRUE literal acts as catch-all</td>
   <td class="result mono">B</td>
-  <td class="result mono">B</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">B</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;90,&#34;A&#34;,A1&gt;95,&#34;B&#34;)</td>
-  <td>No condition true and no catch-all -&gt; #N/A</td>
+  <td class="desc">No condition true and no catch-all -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(A1&gt;0,&#34;pos&#34;,A1&gt;10,&#34;big&#34;)</td>
-  <td>Conditions evaluated left-to-right; first match short-circuits</td>
+  <td class="desc">Conditions evaluated left-to-right; first match short-circuits</td>
   <td class="result mono">pos</td>
-  <td class="result mono">pos<br><span class="category-tag">A1&gt;10 is also true but never reached</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">pos<details class="why"><summary>Provenance</summary><p>A1&gt;10 is also true but never reached</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=IFS(TRUE,&#34;always&#34;,A1&gt;0,&#34;pos&#34;)</td>
-  <td>TRUE as the first condition always wins regardless of position</td>
+  <td class="desc">TRUE as the first condition always wins regardless of position</td>
   <td class="result mono">always</td>
-  <td class="result mono">always</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">always</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

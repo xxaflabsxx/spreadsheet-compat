@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -482,56 +495,56 @@ INDIRECT&rsquo;s support changed &mdash; not documentation claims, real results.
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;A1&#34;)</td>
-  <td>Basic ref_text naming a cell literally</td>
+  <td class="desc">Basic ref_text naming a cell literally</td>
   <td class="result mono">42</td>
-  <td class="result mono">42</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">42</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;A&#34;&amp;2)</td>
-  <td>ref_text built dynamically by concatenating column letter and a row number</td>
+  <td class="desc">ref_text built dynamically by concatenating column letter and a row number</td>
   <td class="result mono">99</td>
-  <td class="result mono">99</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">99</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;NotACell!!&#34;)</td>
-  <td>A ref_text string that isn&#39;t a valid cell reference in either A1 or R1C1 style -&gt; #REF!</td>
+  <td class="desc">A ref_text string that isn&#39;t a valid cell reference in either A1 or R1C1 style -&gt; #REF!</td>
   <td class="result mono">#REF!</td>
-  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#REF!<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;R2C1&#34;,FALSE)</td>
-  <td>a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2</td>
+  <td class="desc">a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2</td>
   <td class="result mono">7</td>
-  <td class="result mono">7</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;Z50&#34;)</td>
-  <td>Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context</td>
+  <td class="desc">Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context</td>
   <td class="result mono">0</td>
-  <td class="result mono">0</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;&#39;Nope&#39;!B2&#34;)</td>
-  <td>ref_text names a sheet that does not exist in the workbook -&gt; #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files</td>
+  <td class="desc">ref_text names a sheet that does not exist in the workbook -&gt; #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files</td>
   <td class="result mono">0</td>
-  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value</span></td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td class="result mono expected">#REF!<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value</p></details></td>
+  <td class="verdict"><span class="badge badge-unknown">Inconclusive</span></td>
 </tr>
 
 </tbody>
@@ -544,56 +557,56 @@ INDIRECT&rsquo;s support changed &mdash; not documentation claims, real results.
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;A1&#34;)</td>
-  <td>Basic ref_text naming a cell literally</td>
+  <td class="desc">Basic ref_text naming a cell literally</td>
   <td class="result mono">42</td>
-  <td class="result mono">42</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">42</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;A&#34;&amp;2)</td>
-  <td>ref_text built dynamically by concatenating column letter and a row number</td>
+  <td class="desc">ref_text built dynamically by concatenating column letter and a row number</td>
   <td class="result mono">99</td>
-  <td class="result mono">99</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">99</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;NotACell!!&#34;)</td>
-  <td>A ref_text string that isn&#39;t a valid cell reference in either A1 or R1C1 style -&gt; #REF!</td>
+  <td class="desc">A ref_text string that isn&#39;t a valid cell reference in either A1 or R1C1 style -&gt; #REF!</td>
   <td class="result mono">#REF!</td>
-  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#REF!<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;R2C1&#34;,FALSE)</td>
-  <td>a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2</td>
+  <td class="desc">a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2</td>
   <td class="result mono">7</td>
-  <td class="result mono">7</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;Z50&#34;)</td>
-  <td>Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context</td>
+  <td class="desc">Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context</td>
   <td class="result mono"></td>
-  <td class="result mono">0</td>
-  <td><span class="badge badge-unknown">Inconclusive</span></td>
+  <td class="result mono expected">0</td>
+  <td class="verdict"><span class="badge badge-unknown">Inconclusive</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;&#39;Nope&#39;!B2&#34;)</td>
-  <td>ref_text names a sheet that does not exist in the workbook -&gt; #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files</td>
+  <td class="desc">ref_text names a sheet that does not exist in the workbook -&gt; #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files</td>
   <td class="result mono">#REF!</td>
-  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#REF!<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -606,56 +619,56 @@ INDIRECT&rsquo;s support changed &mdash; not documentation claims, real results.
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-28)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;A1&#34;)</td>
-  <td>Basic ref_text naming a cell literally</td>
+  <td class="desc">Basic ref_text naming a cell literally</td>
   <td class="result mono">42</td>
-  <td class="result mono">42</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">42</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;A&#34;&amp;2)</td>
-  <td>ref_text built dynamically by concatenating column letter and a row number</td>
+  <td class="desc">ref_text built dynamically by concatenating column letter and a row number</td>
   <td class="result mono">99</td>
-  <td class="result mono">99</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">99</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;NotACell!!&#34;)</td>
-  <td>A ref_text string that isn&#39;t a valid cell reference in either A1 or R1C1 style -&gt; #REF!</td>
+  <td class="desc">A ref_text string that isn&#39;t a valid cell reference in either A1 or R1C1 style -&gt; #REF!</td>
   <td class="result mono">#REF!</td>
-  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#REF!<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that an invalid ref_text returns the #REF! error value</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;R2C1&#34;,FALSE)</td>
-  <td>a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2</td>
+  <td class="desc">a1=FALSE switches ref_text parsing to R1C1 notation; R2C1 means row 2, column 1 = A2</td>
   <td class="result mono">7</td>
-  <td class="result mono">7</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">7</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;Z50&#34;)</td>
-  <td>Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context</td>
+  <td class="desc">Referencing a genuinely blank cell returns 0, matching normal cell-reference behavior in a numeric context</td>
   <td class="result mono">0</td>
-  <td class="result mono">0</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=INDIRECT(&#34;&#39;Nope&#39;!B2&#34;)</td>
-  <td>ref_text names a sheet that does not exist in the workbook -&gt; #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files</td>
+  <td class="desc">ref_text names a sheet that does not exist in the workbook -&gt; #REF!, the unguarded baseline for the IFERROR/ISERROR/ISREF guard cases in the sibling test files</td>
   <td class="result mono">#REF!</td>
-  <td class="result mono">#REF!<br><span class="category-tag">https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#REF!<details class="why"><summary>Provenance</summary><p>https://support.microsoft.com/en-us/office/indirect-function-474b3a3a-8a26-4f44-b491-92b6306fa261 -- documents that ref_text which is not a valid reference returns the #REF! error value</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

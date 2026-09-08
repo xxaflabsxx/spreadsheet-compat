@@ -2094,6 +2094,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -2668,7 +2681,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>{{ r.engines[ek].label }}</strong> returned
         <span class="formula">{{ c.value|fmtval }}</span>, but the documented/expected
         result is <span class="formula">{{ c.expected|fmtval }}</span>.
-        {% if c.notes %}{{ c.notes }}{% endif %}
+        {% if c.notes %}<details class="why"><summary>Provenance</summary><p>{{ c.notes }}</p></details>{% endif %}
       </li>
       {% endif %}
     {% endfor %}
@@ -2685,16 +2698,16 @@ against those cases before assuming your data is wrong.</p>
 <h3>{{ e.exec_header }}</h3>
 {% if ek == 'google_sheets' %}<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>{% endif %}{% if ek == 'excel_web' %}<p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>{% endif %}
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 {% for c in e.cases %}
 <tr>
   <td class="formula mono">{{ c.formula_display or c.formula }}</td>
-  <td>{{ c.description }}</td>
+  <td class="desc">{{ c.description }}</td>
   <td class="result mono">{{ (c.range_values if c.range_values else c.value)|fmtval }}</td>
-  <td class="result mono">{{ c.expected|fmtval }}{% if c.expected_note %}<br><span class="category-tag">{{ c.expected_note }}</span>{% endif %}</td>
-  <td>{% if c.inconclusive_reason %}<span class="badge badge-unknown">Inconclusive</span>{% elif c.matched_expected %}<span class="verdict-ok">Matched</span>{% elif c.matched_expected is none and c.expected is none %}{% if c.error %}<span class="verdict-bad">Error</span>{% else %}<span class="verdict-ok">Ran OK</span>{% endif %}{% else %}<span class="verdict-bad">Mismatch</span>{% endif %}</td>
+  <td class="result mono expected">{{ c.expected|fmtval }}{% if c.expected_note %}<details class="why"><summary>Provenance</summary><p>{{ c.expected_note }}</p></details>{% endif %}</td>
+  <td class="verdict">{% if c.inconclusive_reason %}<span class="badge badge-unknown">Inconclusive</span>{% elif c.matched_expected %}<span class="verdict-ok">Matched</span>{% elif c.matched_expected is none and c.expected is none %}{% if c.error %}<span class="verdict-bad">Error</span>{% else %}<span class="verdict-ok">Ran OK</span>{% endif %}{% else %}<span class="verdict-bad">Mismatch</span>{% endif %}</td>
 </tr>
 {% endfor %}
 </tbody>

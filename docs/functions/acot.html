@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -487,7 +500,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">-0.463647609</span>, but the documented/expected
         result is <span class="formula">2.677945045</span>.
-        Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give; MISMATCH vs expected: expected 2.677945045, got -0.463647609
+        <details class="why"><summary>Provenance</summary><p>Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give; MISMATCH vs expected: expected 2.677945045, got -0.463647609</p></details>
       </li>
       
     
@@ -529,40 +542,40 @@ against those cases before assuming your data is wrong.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(2),4)</td>
-  <td>Microsoft&#39;s documented worked example: arccotangent of 2 in radians</td>
+  <td class="desc">Microsoft&#39;s documented worked example: arccotangent of 2 in radians</td>
   <td class="result mono">0.4636</td>
-  <td class="result mono">0.4636<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.4636. Independently verified: acot(2) = atan(1/2) = 0.4636476090008061 -&gt; 0.4636 at 4 dp. (Excel&#39;s ACOT returns the principal value in 0..pi, which for a positive argument agrees with atan(1/x))</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.4636<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.4636. Independently verified: acot(2) = atan(1/2) = 0.4636476090008061 -&gt; 0.4636 at 4 dp. (Excel&#39;s ACOT returns the principal value in 0..pi, which for a positive argument agrees with atan(1/x))</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(0),9)</td>
-  <td>The arccotangent of zero, the midpoint of the documented 0..pi output range</td>
+  <td class="desc">The arccotangent of zero, the midpoint of the documented 0..pi output range</td>
   <td class="result mono">1.570796327</td>
-  <td class="result mono">1.570796327<br><span class="category-tag">Excel documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, and cot(pi/2) = 0, so ACOT(0) = pi/2. Independently verified: math.pi/2 = 1.5707963267948966 -&gt; 1.570796327 at 9 dp. This case distinguishes the documented 0..pi principal branch from the atan(1/x) shortcut, which is undefined at 0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1.570796327<details class="why"><summary>Provenance</summary><p>Excel documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, and cot(pi/2) = 0, so ACOT(0) = pi/2. Independently verified: math.pi/2 = 1.5707963267948966 -&gt; 1.570796327 at 9 dp. This case distinguishes the documented 0..pi principal branch from the atan(1/x) shortcut, which is undefined at 0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(-2),9)</td>
-  <td>A negative argument, where the documented 0..pi range differs from atan(1/x)</td>
+  <td class="desc">A negative argument, where the documented 0..pi range differs from atan(1/x)</td>
   <td class="result mono">2.677945045</td>
-  <td class="result mono">2.677945045<br><span class="category-tag">Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">2.677945045<details class="why"><summary>Provenance</summary><p>Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ACOT(&#34;abc&#34;)</td>
-  <td>A non-numeric text argument</td>
+  <td class="desc">A non-numeric text argument</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If Number is a non-numeric value, ACOT returns the #VALUE! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If Number is a non-numeric value, ACOT returns the #VALUE! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -575,40 +588,40 @@ against those cases before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(2),4)</td>
-  <td>Microsoft&#39;s documented worked example: arccotangent of 2 in radians</td>
+  <td class="desc">Microsoft&#39;s documented worked example: arccotangent of 2 in radians</td>
   <td class="result mono">0.4636</td>
-  <td class="result mono">0.4636<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.4636. Independently verified: acot(2) = atan(1/2) = 0.4636476090008061 -&gt; 0.4636 at 4 dp. (Excel&#39;s ACOT returns the principal value in 0..pi, which for a positive argument agrees with atan(1/x))</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.4636<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.4636. Independently verified: acot(2) = atan(1/2) = 0.4636476090008061 -&gt; 0.4636 at 4 dp. (Excel&#39;s ACOT returns the principal value in 0..pi, which for a positive argument agrees with atan(1/x))</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(0),9)</td>
-  <td>The arccotangent of zero, the midpoint of the documented 0..pi output range</td>
+  <td class="desc">The arccotangent of zero, the midpoint of the documented 0..pi output range</td>
   <td class="result mono">1.570796327</td>
-  <td class="result mono">1.570796327<br><span class="category-tag">Excel documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, and cot(pi/2) = 0, so ACOT(0) = pi/2. Independently verified: math.pi/2 = 1.5707963267948966 -&gt; 1.570796327 at 9 dp. This case distinguishes the documented 0..pi principal branch from the atan(1/x) shortcut, which is undefined at 0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1.570796327<details class="why"><summary>Provenance</summary><p>Excel documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, and cot(pi/2) = 0, so ACOT(0) = pi/2. Independently verified: math.pi/2 = 1.5707963267948966 -&gt; 1.570796327 at 9 dp. This case distinguishes the documented 0..pi principal branch from the atan(1/x) shortcut, which is undefined at 0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(-2),9)</td>
-  <td>A negative argument, where the documented 0..pi range differs from atan(1/x)</td>
+  <td class="desc">A negative argument, where the documented 0..pi range differs from atan(1/x)</td>
   <td class="result mono">-0.463647609</td>
-  <td class="result mono">2.677945045<br><span class="category-tag">Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">2.677945045<details class="why"><summary>Provenance</summary><p>Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ACOT(&#34;abc&#34;)</td>
-  <td>A non-numeric text argument</td>
+  <td class="desc">A non-numeric text argument</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If Number is a non-numeric value, ACOT returns the #VALUE! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If Number is a non-numeric value, ACOT returns the #VALUE! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -621,80 +634,80 @@ against those cases before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-09-04)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(2),4)</td>
-  <td>Microsoft&#39;s documented worked example: arccotangent of 2 in radians</td>
+  <td class="desc">Microsoft&#39;s documented worked example: arccotangent of 2 in radians</td>
   <td class="result mono">0.4636</td>
-  <td class="result mono">0.4636<br><span class="category-tag">Microsoft&#39;s page publishes this example&#39;s result as 0.4636. Independently verified: acot(2) = atan(1/2) = 0.4636476090008061 -&gt; 0.4636 at 4 dp. (Excel&#39;s ACOT returns the principal value in 0..pi, which for a positive argument agrees with atan(1/x))</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.4636<details class="why"><summary>Provenance</summary><p>Microsoft&#39;s page publishes this example&#39;s result as 0.4636. Independently verified: acot(2) = atan(1/2) = 0.4636476090008061 -&gt; 0.4636 at 4 dp. (Excel&#39;s ACOT returns the principal value in 0..pi, which for a positive argument agrees with atan(1/x))</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(0),9)</td>
-  <td>The arccotangent of zero, the midpoint of the documented 0..pi output range</td>
+  <td class="desc">The arccotangent of zero, the midpoint of the documented 0..pi output range</td>
   <td class="result mono">1.570796327</td>
-  <td class="result mono">1.570796327<br><span class="category-tag">Excel documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, and cot(pi/2) = 0, so ACOT(0) = pi/2. Independently verified: math.pi/2 = 1.5707963267948966 -&gt; 1.570796327 at 9 dp. This case distinguishes the documented 0..pi principal branch from the atan(1/x) shortcut, which is undefined at 0</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1.570796327<details class="why"><summary>Provenance</summary><p>Excel documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, and cot(pi/2) = 0, so ACOT(0) = pi/2. Independently verified: math.pi/2 = 1.5707963267948966 -&gt; 1.570796327 at 9 dp. This case distinguishes the documented 0..pi principal branch from the atan(1/x) shortcut, which is undefined at 0</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(-2),9)</td>
-  <td>A negative argument, where the documented 0..pi range differs from atan(1/x)</td>
+  <td class="desc">A negative argument, where the documented 0..pi range differs from atan(1/x)</td>
   <td class="result mono">2.677945045</td>
-  <td class="result mono">2.677945045<br><span class="category-tag">Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">2.677945045<details class="why"><summary>Provenance</summary><p>Excel documents the result is in the range 0 to pi, so for a negative argument ACOT(-2) = pi + atan(1/-2) = pi - 0.4636476090008061 = 2.677945044588987 -&gt; 2.677945045 at 9 dp, NOT the negative -0.4636 that atan(1/x) alone would give</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(-0.5),9)</td>
-  <td>Arccotangent of -0.5, a negative argument between -1 and 0</td>
+  <td class="desc">Arccotangent of -0.5, a negative argument between -1 and 0</td>
   <td class="result mono">2.034443936</td>
-  <td class="result mono">2.034443936<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so for a negative argument the result is pi + atan(1/x), not atan(1/x) alone: ACOT(-0.5) = pi + atan(1/-0.5) = pi + atan(-2) = 3.141592653589793 - 1.1071487177940904 = 2.0344439357957027 -&gt; 2.034443936 at 9 dp. The bare atan(1/x) shortcut would give -1.107148718, which is pi lower and outside the documented 0..pi range</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">2.034443936<details class="why"><summary>Provenance</summary><p>Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so for a negative argument the result is pi + atan(1/x), not atan(1/x) alone: ACOT(-0.5) = pi + atan(1/-0.5) = pi + atan(-2) = 3.141592653589793 - 1.1071487177940904 = 2.0344439357957027 -&gt; 2.034443936 at 9 dp. The bare atan(1/x) shortcut would give -1.107148718, which is pi lower and outside the documented 0..pi range</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(-1),9)</td>
-  <td>Arccotangent of -1, the mirror of the documented ACOT(1) = pi/4 example</td>
+  <td class="desc">Arccotangent of -1, the mirror of the documented ACOT(1) = pi/4 example</td>
   <td class="result mono">2.35619449</td>
-  <td class="result mono">2.35619449<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so ACOT(-1) = pi + atan(1/-1) = pi - pi/4 = 3*pi/4 = 2.356194490192345 -&gt; 2.35619449 at 9 dp. cot(3*pi/4) = -1, confirming the value is a genuine arccotangent and not merely a sign flip of ACOT(1); the bare atan(1/x) shortcut would give -0.785398163, exactly pi lower</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">2.35619449<details class="why"><summary>Provenance</summary><p>Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so ACOT(-1) = pi + atan(1/-1) = pi - pi/4 = 3*pi/4 = 2.356194490192345 -&gt; 2.35619449 at 9 dp. cot(3*pi/4) = -1, confirming the value is a genuine arccotangent and not merely a sign flip of ACOT(1); the bare atan(1/x) shortcut would give -0.785398163, exactly pi lower</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(-10),9)</td>
-  <td>Arccotangent of -10, a large negative argument approaching the top of the documented range</td>
+  <td class="desc">Arccotangent of -10, a large negative argument approaching the top of the documented range</td>
   <td class="result mono">3.041924001</td>
-  <td class="result mono">3.041924001<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so ACOT(-10) = pi + atan(1/-10) = 3.141592653589793 - 0.09966865249116204 = 3.0419240010986313 -&gt; 3.041924001 at 9 dp. As x -&gt; -infinity the documented branch approaches pi from below; the bare atan(1/x) shortcut would give -0.099668652, approaching 0 from below instead</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3.041924001<details class="why"><summary>Provenance</summary><p>Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;, so ACOT(-10) = pi + atan(1/-10) = 3.141592653589793 - 0.09966865249116204 = 3.0419240010986313 -&gt; 3.041924001 at 9 dp. As x -&gt; -infinity the documented branch approaches pi from below; the bare atan(1/x) shortcut would give -0.099668652, approaching 0 from below instead</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(DEGREES(ACOT(-1)),6)</td>
-  <td>The same negative-argument arccotangent converted to degrees, where the branch choice is a 180 degree difference</td>
+  <td class="desc">The same negative-argument arccotangent converted to degrees, where the branch choice is a 180 degree difference</td>
   <td class="result mono">135</td>
-  <td class="result mono">135<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34; and points to DEGREES for the conversion, so DEGREES(ACOT(-1)) = DEGREES(pi + atan(1/-1)) = DEGREES(3*pi/4) = 135 exactly. An engine that returns the bare atan(1/x) instead reports -45 degrees for the same cell, i.e. the same direction rotated by 180 degrees</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">135<details class="why"><summary>Provenance</summary><p>Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34; and points to DEGREES for the conversion, so DEGREES(ACOT(-1)) = DEGREES(pi + atan(1/-1)) = DEGREES(3*pi/4) = 135 exactly. An engine that returns the bare atan(1/x) instead reports -45 degrees for the same cell, i.e. the same direction rotated by 180 degrees</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(ACOT(1),9)</td>
-  <td>Arccotangent of 1, the positive control where every convention agrees</td>
+  <td class="desc">Arccotangent of 1, the positive control where every convention agrees</td>
   <td class="result mono">0.785398163</td>
-  <td class="result mono">0.785398163<br><span class="category-tag">Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;. For a positive argument pi + atan(1/x) would fall outside 0..pi, so the documented branch is plain atan(1/x): ACOT(1) = atan(1) = pi/4 = 0.7853981633974483 -&gt; 0.785398163 at 9 dp. LibreOffice documents the same value for this exact formula (&#34;=ACOT(1) returns 0.785398163397448 (PI/4 radians)&#34;). This is the control case: it isolates the divergence to negative arguments</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">0.785398163<details class="why"><summary>Provenance</summary><p>Microsoft documents &#34;The returned angle is given in radians in the range 0 (zero) to pi&#34;. For a positive argument pi + atan(1/x) would fall outside 0..pi, so the documented branch is plain atan(1/x): ACOT(1) = atan(1) = pi/4 = 0.7853981633974483 -&gt; 0.785398163 at 9 dp. LibreOffice documents the same value for this exact formula (&#34;=ACOT(1) returns 0.785398163397448 (PI/4 radians)&#34;). This is the control case: it isolates the divergence to negative arguments</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ACOT(&#34;abc&#34;)</td>
-  <td>A non-numeric text argument</td>
+  <td class="desc">A non-numeric text argument</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If Number is a non-numeric value, ACOT returns the #VALUE! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If Number is a non-numeric value, ACOT returns the #VALUE! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

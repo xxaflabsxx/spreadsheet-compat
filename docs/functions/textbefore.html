@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -506,7 +519,7 @@ Sheets equivalent &mdash; see the
         <strong>Google Sheets</strong> returned
         <span class="formula">#NAME?</span>, but the documented/expected
         result is <span class="formula">a</span>.
-        MISMATCH vs expected: expected &#39;a&#39;, got &#39;#NAME?&#39;
+        <details class="why"><summary>Provenance</summary><p>MISMATCH vs expected: expected &#39;a&#39;, got &#39;#NAME?&#39;</p></details>
       </li>
       
     
@@ -516,7 +529,7 @@ Sheets equivalent &mdash; see the
         <strong>Google Sheets</strong> returned
         <span class="formula">#NAME?</span>, but the documented/expected
         result is <span class="formula">a-b</span>.
-        MISMATCH vs expected: expected &#39;a-b&#39;, got &#39;#NAME?&#39;
+        <details class="why"><summary>Provenance</summary><p>MISMATCH vs expected: expected &#39;a-b&#39;, got &#39;#NAME?&#39;</p></details>
       </li>
       
     
@@ -526,7 +539,7 @@ Sheets equivalent &mdash; see the
         <strong>Google Sheets</strong> returned
         <span class="formula">#NAME?</span>, but the documented/expected
         result is <span class="formula">#N/A</span>.
-        MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;
+        <details class="why"><summary>Provenance</summary><p>MISMATCH vs expected: expected &#39;#N/A&#39;, got &#39;#NAME?&#39;</p></details>
       </li>
       
     
@@ -536,7 +549,7 @@ Sheets equivalent &mdash; see the
         <strong>Google Sheets</strong> returned
         <span class="formula">#NAME?</span>, but the documented/expected
         result is <span class="formula">#VALUE!</span>.
-        Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;
+        <details class="why"><summary>Provenance</summary><p>Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.; MISMATCH vs expected: expected &#39;#VALUE!&#39;, got &#39;#NAME?&#39;</p></details>
       </li>
       
     
@@ -546,7 +559,7 @@ Sheets equivalent &mdash; see the
         <strong>Google Sheets</strong> returned
         <span class="formula">#NAME?</span>, but the documented/expected
         result is <span class="formula">a-b</span>.
-        -1 means the last delimiter; text before it is &#39;a-b&#39;; MISMATCH vs expected: expected &#39;a-b&#39;, got &#39;#NAME?&#39;
+        <details class="why"><summary>Provenance</summary><p>-1 means the last delimiter; text before it is &#39;a-b&#39;; MISMATCH vs expected: expected &#39;a-b&#39;, got &#39;#NAME?&#39;</p></details>
       </li>
       
     
@@ -578,48 +591,48 @@ Sheets equivalent &mdash; see the
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;)</td>
-  <td>Text before the first delimiter occurrence</td>
+  <td class="desc">Text before the first delimiter occurrence</td>
   <td class="result mono">a</td>
-  <td class="result mono">a</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">a</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;,2)</td>
-  <td>instance_num=2 counts to the 2nd delimiter</td>
+  <td class="desc">instance_num=2 counts to the 2nd delimiter</td>
   <td class="result mono">a-b</td>
-  <td class="result mono">a-b</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">a-b</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;)</td>
-  <td>Delimiter not present and no if_not_found -&gt; #N/A</td>
+  <td class="desc">Delimiter not present and no if_not_found -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;,&#34;none&#34;)</td>
-  <td>Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
+  <td class="desc">Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;,-1)</td>
-  <td>Negative instance_num counts delimiters from the end</td>
+  <td class="desc">Negative instance_num counts delimiters from the end</td>
   <td class="result mono">a-b</td>
-  <td class="result mono">a-b<br><span class="category-tag">-1 means the last delimiter; text before it is &#39;a-b&#39;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">a-b<details class="why"><summary>Provenance</summary><p>-1 means the last delimiter; text before it is &#39;a-b&#39;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -632,48 +645,48 @@ Sheets equivalent &mdash; see the
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;)</td>
-  <td>Text before the first delimiter occurrence</td>
+  <td class="desc">Text before the first delimiter occurrence</td>
   <td class="result mono">#NAME?</td>
-  <td class="result mono">a</td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">a</td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;,2)</td>
-  <td>instance_num=2 counts to the 2nd delimiter</td>
+  <td class="desc">instance_num=2 counts to the 2nd delimiter</td>
   <td class="result mono">#NAME?</td>
-  <td class="result mono">a-b</td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">a-b</td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;)</td>
-  <td>Delimiter not present and no if_not_found -&gt; #N/A</td>
+  <td class="desc">Delimiter not present and no if_not_found -&gt; #N/A</td>
   <td class="result mono">#NAME?</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;,&#34;none&#34;)</td>
-  <td>Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
+  <td class="desc">Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
   <td class="result mono">#NAME?</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;,-1)</td>
-  <td>Negative instance_num counts delimiters from the end</td>
+  <td class="desc">Negative instance_num counts delimiters from the end</td>
   <td class="result mono">#NAME?</td>
-  <td class="result mono">a-b<br><span class="category-tag">-1 means the last delimiter; text before it is &#39;a-b&#39;</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">a-b<details class="why"><summary>Provenance</summary><p>-1 means the last delimiter; text before it is &#39;a-b&#39;</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 </tbody>
@@ -686,48 +699,48 @@ Sheets equivalent &mdash; see the
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;)</td>
-  <td>Text before the first delimiter occurrence</td>
+  <td class="desc">Text before the first delimiter occurrence</td>
   <td class="result mono">a</td>
-  <td class="result mono">a</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">a</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;,2)</td>
-  <td>instance_num=2 counts to the 2nd delimiter</td>
+  <td class="desc">instance_num=2 counts to the 2nd delimiter</td>
   <td class="result mono">a-b</td>
-  <td class="result mono">a-b</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">a-b</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;)</td>
-  <td>Delimiter not present and no if_not_found -&gt; #N/A</td>
+  <td class="desc">Delimiter not present and no if_not_found -&gt; #N/A</td>
   <td class="result mono">#N/A</td>
-  <td class="result mono">#N/A</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#N/A</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;abc&#34;,&#34;-&#34;,&#34;none&#34;)</td>
-  <td>Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
+  <td class="desc">Text in the instance_num position (3rd argument) is not if_not_found (6th) -&gt; #VALUE!</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Signature: TEXTBEFORE(text, delimiter, [instance_num], [match_mode], [match_end], [if_not_found]). &#34;none&#34; here is passed as instance_num, where a number is required, so the documented result is #VALUE! -- confirmed by Excel for the web and LibreOffice 25.8. if_not_found must be the sixth argument.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=TEXTBEFORE(&#34;a-b-c&#34;,&#34;-&#34;,-1)</td>
-  <td>Negative instance_num counts delimiters from the end</td>
+  <td class="desc">Negative instance_num counts delimiters from the end</td>
   <td class="result mono">a-b</td>
-  <td class="result mono">a-b<br><span class="category-tag">-1 means the last delimiter; text before it is &#39;a-b&#39;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">a-b<details class="why"><summary>Provenance</summary><p>-1 means the last delimiter; text before it is &#39;a-b&#39;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

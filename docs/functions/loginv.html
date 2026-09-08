@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -499,7 +512,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">4.00002521</span>, but the documented/expected
         result is <span class="formula">4.0000252187</span>.
-        4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.; MISMATCH vs expected: expected 4.0000252187, got 4.00002521
+        <details class="why"><summary>Provenance</summary><p>4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.; MISMATCH vs expected: expected 4.0000252187, got 4.00002521</p></details>
       </li>
       
     
@@ -509,7 +522,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">3.999999991</span>, but the documented/expected
         result is <span class="formula">4.0</span>.
-        The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.; MISMATCH vs expected: expected 4.0, got 3.999999991
+        <details class="why"><summary>Provenance</summary><p>The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.; MISMATCH vs expected: expected 4.0, got 3.999999991</p></details>
       </li>
       
     
@@ -535,7 +548,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -545,7 +558,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        The same documented sentence at the upper endpoint.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>The same documented sentence at the upper endpoint.; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -555,7 +568,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">#VALUE!</span>, but the documented/expected
         result is <span class="formula">#NUM!</span>.
-        Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;
+        <details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;; MISMATCH vs expected: expected &#39;#NUM!&#39;, got &#39;#VALUE!&#39;</p></details>
       </li>
       
     
@@ -577,64 +590,64 @@ against those cases before assuming your data is wrong.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(A2,A3,A4),7)</td>
-  <td>Microsoft&#39;s documented worked example: the inverse lognormal CDF at p = 0.039084</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the inverse lognormal CDF at p = 0.039084</td>
   <td class="result mono">4.0000252</td>
-  <td class="result mono">4.0000252<br><span class="category-tag">Microsoft publishes &#39;=LOGINV(A2, A3, A4)&#39; with the result 4.0000252 -- the same figure its modern replacement LOGNORM.INV publishes for the same three arguments. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library&#39;s normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4.0000252<details class="why"><summary>Provenance</summary><p>Microsoft publishes &#39;=LOGINV(A2, A3, A4)&#39; with the result 4.0000252 -- the same figure its modern replacement LOGNORM.INV publishes for the same three arguments. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library&#39;s normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(A2,A3,A4),10)</td>
-  <td>The same value carried to ten decimal places</td>
+  <td class="desc">The same value carried to ten decimal places</td>
   <td class="result mono">4.0000252187</td>
-  <td class="result mono">4.0000252187<br><span class="category-tag">4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4.0000252187<details class="why"><summary>Provenance</summary><p>4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(LOGNORMDIST(4,3.5,1.2),3.5,1.2),10)</td>
-  <td>The documented identity: LOGINV inverts LOGNORMDIST exactly</td>
+  <td class="desc">The documented identity: LOGINV inverts LOGNORMDIST exactly</td>
   <td class="result mono">4</td>
-  <td class="result mono">4.0<br><span class="category-tag">The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4.0<details class="why"><summary>Provenance</summary><p>The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(0,A3,A4)</td>
-  <td>A probability of zero, which the page excludes</td>
+  <td class="desc">A probability of zero, which the page excludes</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(1,A3,A4)</td>
-  <td>A probability of one, the other excluded endpoint</td>
+  <td class="desc">A probability of one, the other excluded endpoint</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">The same documented sentence at the upper endpoint.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>The same documented sentence at the upper endpoint.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(0.5,A3,0)</td>
-  <td>A standard deviation of zero, which the page also excludes</td>
+  <td class="desc">A standard deviation of zero, which the page also excludes</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(&#34;x&#34;,A3,A4)</td>
-  <td>A non-numeric argument, which the page gives a different error code</td>
+  <td class="desc">A non-numeric argument, which the page gives a different error code</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If any argument is nonnumeric, LOGINV returns the #VALUE! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If any argument is nonnumeric, LOGINV returns the #VALUE! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -647,64 +660,64 @@ against those cases before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-31 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(A2,A3,A4),7)</td>
-  <td>Microsoft&#39;s documented worked example: the inverse lognormal CDF at p = 0.039084</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the inverse lognormal CDF at p = 0.039084</td>
   <td class="result mono">4.0000252</td>
-  <td class="result mono">4.0000252<br><span class="category-tag">Microsoft publishes &#39;=LOGINV(A2, A3, A4)&#39; with the result 4.0000252 -- the same figure its modern replacement LOGNORM.INV publishes for the same three arguments. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library&#39;s normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4.0000252<details class="why"><summary>Provenance</summary><p>Microsoft publishes &#39;=LOGINV(A2, A3, A4)&#39; with the result 4.0000252 -- the same figure its modern replacement LOGNORM.INV publishes for the same three arguments. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library&#39;s normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(A2,A3,A4),10)</td>
-  <td>The same value carried to ten decimal places</td>
+  <td class="desc">The same value carried to ten decimal places</td>
   <td class="result mono">4.00002521</td>
-  <td class="result mono">4.0000252187<br><span class="category-tag">4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">4.0000252187<details class="why"><summary>Provenance</summary><p>4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(LOGNORMDIST(4,3.5,1.2),3.5,1.2),10)</td>
-  <td>The documented identity: LOGINV inverts LOGNORMDIST exactly</td>
+  <td class="desc">The documented identity: LOGINV inverts LOGNORMDIST exactly</td>
   <td class="result mono">3.999999991</td>
-  <td class="result mono">4.0<br><span class="category-tag">The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">4.0<details class="why"><summary>Provenance</summary><p>The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(0,A3,A4)</td>
-  <td>A probability of zero, which the page excludes</td>
+  <td class="desc">A probability of zero, which the page excludes</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(1,A3,A4)</td>
-  <td>A probability of one, the other excluded endpoint</td>
+  <td class="desc">A probability of one, the other excluded endpoint</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">The same documented sentence at the upper endpoint.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>The same documented sentence at the upper endpoint.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(0.5,A3,0)</td>
-  <td>A standard deviation of zero, which the page also excludes</td>
+  <td class="desc">A standard deviation of zero, which the page also excludes</td>
   <td class="result mono">#NUM!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(&#34;x&#34;,A3,A4)</td>
-  <td>A non-numeric argument, which the page gives a different error code</td>
+  <td class="desc">A non-numeric argument, which the page gives a different error code</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If any argument is nonnumeric, LOGINV returns the #VALUE! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If any argument is nonnumeric, LOGINV returns the #VALUE! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -717,64 +730,64 @@ against those cases before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-08-31)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(A2,A3,A4),7)</td>
-  <td>Microsoft&#39;s documented worked example: the inverse lognormal CDF at p = 0.039084</td>
+  <td class="desc">Microsoft&#39;s documented worked example: the inverse lognormal CDF at p = 0.039084</td>
   <td class="result mono">4.0000252</td>
-  <td class="result mono">4.0000252<br><span class="category-tag">Microsoft publishes &#39;=LOGINV(A2, A3, A4)&#39; with the result 4.0000252 -- the same figure its modern replacement LOGNORM.INV publishes for the same three arguments. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library&#39;s normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4.0000252<details class="why"><summary>Provenance</summary><p>Microsoft publishes &#39;=LOGINV(A2, A3, A4)&#39; with the result 4.0000252 -- the same figure its modern replacement LOGNORM.INV publishes for the same three arguments. DERIVATION, along a different path from the published figure. The lognormal CDF is documented on the LOGNORM.DIST page as NORM.S.DIST((ln(x)-mu)/sigma), so with x = 4, mu = 3.5 and sigma = 1.2 the standardised argument is z = (ln 4 - 3.5)/1.2 = (1.3862943611198906188 - 3.5)/1.2 = -1.7614213657334244843. This corpus does not call any statistics library&#39;s normal CDF: it evaluates Phi(z) = erfc(-z/sqrt(2))/2 with mpmath at 50 digits, giving 0.039083555706800473296. The density is computed from its own closed form, exp(-(ln x - mu)^2/(2 sigma^2)) / (x sigma sqrt(2 pi)) = 0.017617596681819223728. The inverse is obtained by ROOT-FINDING on that same erfc-based CDF rather than by any inverse-normal routine: solving Phi(z) = 0.039084 gives z = -1.7613003288..., and exp(mu + sigma z) = 4.0000252186806350759 -- note the probability Microsoft feeds back in, 0.039084, is its own published CDF figure ROUNDED to six places, which is exactly why the inverse lands on 4.0000252 rather than on 4.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(A2,A3,A4),10)</td>
-  <td>The same value carried to ten decimal places</td>
+  <td class="desc">The same value carried to ten decimal places</td>
   <td class="result mono">4.0000252187</td>
-  <td class="result mono">4.0000252187<br><span class="category-tag">4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4.0000252187<details class="why"><summary>Provenance</summary><p>4.0000252186806350759 at ten places. Asserted at the same precision as LOGNORM.INV so the legacy alias and its replacement can be compared directly.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=ROUND(LOGINV(LOGNORMDIST(4,3.5,1.2),3.5,1.2),10)</td>
-  <td>The documented identity: LOGINV inverts LOGNORMDIST exactly</td>
+  <td class="desc">The documented identity: LOGINV inverts LOGNORMDIST exactly</td>
   <td class="result mono">4</td>
-  <td class="result mono">4.0<br><span class="category-tag">The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">4.0<details class="why"><summary>Provenance</summary><p>The page&#39;s Description states &#34;If p = LOGNORMDIST(x,...) then LOGINV(p,...) = x&#34;. Feeding the legacy CDF&#39;s full-precision output back into the legacy inverse must return 4 to ten places, using only the two legacy spellings.</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(0,A3,A4)</td>
-  <td>A probability of zero, which the page excludes</td>
+  <td class="desc">A probability of zero, which the page excludes</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If probability &lt;= 0 or probability &gt;= 1, LOGINV returns the #NUM! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(1,A3,A4)</td>
-  <td>A probability of one, the other excluded endpoint</td>
+  <td class="desc">A probability of one, the other excluded endpoint</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">The same documented sentence at the upper endpoint.</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>The same documented sentence at the upper endpoint.</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(0.5,A3,0)</td>
-  <td>A standard deviation of zero, which the page also excludes</td>
+  <td class="desc">A standard deviation of zero, which the page also excludes</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#NUM!<br><span class="category-tag">Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">#NUM!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If standard_dev &lt;= 0, LOGINV returns the #NUM! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=LOGINV(&#34;x&#34;,A3,A4)</td>
-  <td>A non-numeric argument, which the page gives a different error code</td>
+  <td class="desc">A non-numeric argument, which the page gives a different error code</td>
   <td class="result mono">#VALUE!</td>
-  <td class="result mono">#VALUE!<br><span class="category-tag">Excel documents: &#34;If any argument is nonnumeric, LOGINV returns the #VALUE! error value.&#34;</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">#VALUE!<details class="why"><summary>Provenance</summary><p>Excel documents: &#34;If any argument is nonnumeric, LOGINV returns the #VALUE! error value.&#34;</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>

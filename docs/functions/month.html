@@ -194,6 +194,19 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
    U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
@@ -491,7 +504,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>Google Sheets</strong> returned
         <span class="formula">12</span>, but the documented/expected
         result is <span class="formula">1</span>.
-        Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 12
+        <details class="why"><summary>Provenance</summary><p>Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 12</p></details>
       </li>
       
     
@@ -507,7 +520,7 @@ against those cases before assuming your data is wrong.</p>
         <strong>LibreOffice Calc</strong> returned
         <span class="formula">12</span>, but the documented/expected
         result is <span class="formula">1</span>.
-        Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 12
+        <details class="why"><summary>Provenance</summary><p>Serial 1 is Jan 1, 1900 in the 1900 date system; MISMATCH vs expected: expected 1, got 12</p></details>
       </li>
       
     
@@ -529,32 +542,32 @@ against those cases before assuming your data is wrong.</p>
 <h3>Excel for the web (executed 2026-09-01 via OneDrive recalculation)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem"><strong>These values come from Excel for the web, not from desktop Excel.</strong> They are two different implementations of the calculation engine, and this run measured only the web one: the corpus was uploaded to OneDrive as .xlsx, recalculated by Excel for the web on open, and downloaded again for readback. Excel for the web is a rolling service with no pinnable version, so the run is identified by its date. Where a value here disagrees with the Expected column &mdash; which is Microsoft&rsquo;s documentation of the <em>desktop</em> product &mdash; we cannot tell you whether the web engine diverges from the desktop one or the documentation is wrong about both, because we do not run desktop Excel.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=MONTH(DATE(2024,3,15))</td>
-  <td>MONTH applied to a constructed date</td>
+  <td class="desc">MONTH applied to a constructed date</td>
   <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=MONTH(1)</td>
-  <td>MONTH applied directly to the raw serial number 1 (Jan 1, 1900)</td>
+  <td class="desc">MONTH applied directly to the raw serial number 1 (Jan 1, 1900)</td>
   <td class="result mono">1</td>
-  <td class="result mono">1<br><span class="category-tag">Serial 1 is Jan 1, 1900 in the 1900 date system</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>Serial 1 is Jan 1, 1900 in the 1900 date system</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=MONTH(45366.75)</td>
-  <td>A serial with a fractional (time-of-day) component still resolves to the correct calendar month</td>
+  <td class="desc">A serial with a fractional (time-of-day) component still resolves to the correct calendar month</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">45366 = 2024-03-15; the .75 fractional day is ignored by MONTH</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>45366 = 2024-03-15; the .75 fractional day is ignored by MONTH</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -567,32 +580,32 @@ against those cases before assuming your data is wrong.</p>
 <h3>Google Sheets (executed 2026-08-29 via Drive import)</h3>
 <p style="margin:-.4rem 0 .6rem;color:var(--text-muted,#6b7280);font-size:.92rem">Google Sheets is a rolling service with no pinnable version, so this run is identified by its date. The corpus was imported to Drive as .xlsx, recalculated by Sheets, and exported back for readback.</p>
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=MONTH(DATE(2024,3,15))</td>
-  <td>MONTH applied to a constructed date</td>
+  <td class="desc">MONTH applied to a constructed date</td>
   <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=MONTH(1)</td>
-  <td>MONTH applied directly to the raw serial number 1 (Jan 1, 1900)</td>
+  <td class="desc">MONTH applied directly to the raw serial number 1 (Jan 1, 1900)</td>
   <td class="result mono">12</td>
-  <td class="result mono">1<br><span class="category-tag">Serial 1 is Jan 1, 1900 in the 1900 date system</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>Serial 1 is Jan 1, 1900 in the 1900 date system</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=MONTH(45366.75)</td>
-  <td>A serial with a fractional (time-of-day) component still resolves to the correct calendar month</td>
+  <td class="desc">A serial with a fractional (time-of-day) component still resolves to the correct calendar month</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">45366 = 2024-03-15; the .75 fractional day is ignored by MONTH</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>45366 = 2024-03-15; the .75 fractional day is ignored by MONTH</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
@@ -605,32 +618,32 @@ against those cases before assuming your data is wrong.</p>
 <h3>LibreOffice Calc 25.8.7.3 (tested 2026-07-29)</h3>
 
 <div class="table-scroll">
-<table class="cases">
+<table class="cases exec">
 <thead><tr><th>Formula</th><th>Description</th><th>Result</th><th>Expected</th><th>Verdict</th></tr></thead>
 <tbody>
 
 <tr>
   <td class="formula mono">=MONTH(DATE(2024,3,15))</td>
-  <td>MONTH applied to a constructed date</td>
+  <td class="desc">MONTH applied to a constructed date</td>
   <td class="result mono">3</td>
-  <td class="result mono">3</td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3</td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=MONTH(1)</td>
-  <td>MONTH applied directly to the raw serial number 1 (Jan 1, 1900)</td>
+  <td class="desc">MONTH applied directly to the raw serial number 1 (Jan 1, 1900)</td>
   <td class="result mono">12</td>
-  <td class="result mono">1<br><span class="category-tag">Serial 1 is Jan 1, 1900 in the 1900 date system</span></td>
-  <td><span class="verdict-bad">Mismatch</span></td>
+  <td class="result mono expected">1<details class="why"><summary>Provenance</summary><p>Serial 1 is Jan 1, 1900 in the 1900 date system</p></details></td>
+  <td class="verdict"><span class="verdict-bad">Mismatch</span></td>
 </tr>
 
 <tr>
   <td class="formula mono">=MONTH(45366.75)</td>
-  <td>A serial with a fractional (time-of-day) component still resolves to the correct calendar month</td>
+  <td class="desc">A serial with a fractional (time-of-day) component still resolves to the correct calendar month</td>
   <td class="result mono">3</td>
-  <td class="result mono">3<br><span class="category-tag">45366 = 2024-03-15; the .75 fractional day is ignored by MONTH</span></td>
-  <td><span class="verdict-ok">Matched</span></td>
+  <td class="result mono expected">3<details class="why"><summary>Provenance</summary><p>45366 = 2024-03-15; the .75 fractional day is ignored by MONTH</p></details></td>
+  <td class="verdict"><span class="verdict-ok">Matched</span></td>
 </tr>
 
 </tbody>
