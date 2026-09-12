@@ -102,6 +102,24 @@ ENGINE_LABELS = {
 # function name; the value is the clause that replaces that sentence. It is
 # a build-time constant written here, never user or engine input, so the
 # template renders it with |safe to keep the inline markup.
+# Functions whose LibreOffice #NAME? is TRUE for the formula but misleading
+# for a reader who means a same-named Calc FEATURE. SPARKLINE() is a Google
+# Sheets formula; Calc draws sparklines through Insert > Sparkline instead
+# (help.libreoffice.org, read 2026-09-12). Build-time constant, rendered |safe.
+LO_FEATURE_NOT_FUNCTION = {
+    "SPARKLINE": (
+        "Looking for sparklines in Calc rather than for the Google Sheets formula? "
+        "LibreOffice Calc has sparklines as a <em>cell feature</em>, not as a function: "
+        "the current LibreOffice help documents <em>Insert &rarr; Sparkline</em> "
+        "(&ldquo;Sparklines are small data charts displayed inside a cell&rdquo; &mdash; "
+        "<a href=\"https://help.libreoffice.org/latest/en-US/text/scalc/01/sparklines.html\">help.libreoffice.org</a>, "
+        "read 2026-09-12). A workbook that draws them that way is not affected by the "
+        "<code>#NAME?</code> verdict on this page, which is only about the "
+        "<code>SPARKLINE()</code> formula from Google Sheets. We have not executed a "
+        "version check for the feature itself, so this page states no &ldquo;since version&rdquo; for it."
+    ),
+}
+
 LO_STORAGE_FORM_GAP = {
     name: (
         "LibreOffice does implement this function &mdash; typed on its own, "
@@ -1276,6 +1294,7 @@ def build_records(functions_doc, tests_by_fn, results_by_engine, lo_versions=Non
                     )
                 entry["lo_history"] = history
                 entry["storage_form_gap"] = LO_STORAGE_FORM_GAP.get(name)
+                entry["feature_note"] = LO_FEATURE_NOT_FUNCTION.get(name)
                 change = None
                 if len(history) >= 2 and history[0]["verdict"] != history[-1]["verdict"]:
                     # Precise "supported since" = the FIRST tested release whose
@@ -2585,7 +2604,8 @@ settings problem, and saving the file as .xlsx does not change it: the function 
 available yet{% if le.documented %} despite appearing in some documentation{% endif %}.{% endif %}
 {% if r.engines['excel'].documented %}The same formula is documented for Excel{% if ge.verdict == 'supported' %}, and we executed it successfully in Google Sheets on {{ ge.executed_at }}{% elif r.engines['google_sheets'].documented %} and documented for Google Sheets{% endif %}.{% endif %}
 Watch the <a href="{{ rel }}libreoffice-version-support.html">LibreOffice version support page</a> &mdash;
-we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>
+we re-run every test on each new release, so it will flip to Supported here as soon as it lands.</p>{% if le.feature_note %}
+<p>{{ le.feature_note|safe }}</p>{% endif %}
 {% elif le.verdict == 'quirky' %}
 <p><code>{{ r.name }}</code> exists in LibreOffice {{ le.version }}, but it is not a drop-in match for
 Excel &mdash; our executed tests found real behavioral differences (detailed in the test results on this
