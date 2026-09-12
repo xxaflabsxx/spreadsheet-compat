@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>openpyxl and _xlfn.XLOOKUP: why your XLOOKUP opens as #NAME?</title>
+<meta name="description" content="openpyxl writes formula text verbatim, so =XLOOKUP(...) is stored in the .xlsx under its plain name. Executed 2026-09-12: that cell is #NAME? in Excel for the web and in all four pinned LibreOffice builds, while =_xlfn.XLOOKUP(...) returns 20 in Excel for the web and in LibreOffice 24.8, 25.2 and 25.8.">
+
+<link rel="canonical" href="https://canispreadsheet.com/guides/xlfn-xlookup-openpyxl-name-error-excel-vs-libreoffice-google-sheets.html">
+<meta property="og:title" content="openpyxl and _xlfn.XLOOKUP: why your XLOOKUP opens as #NAME?">
+<meta property="og:description" content="openpyxl writes formula text verbatim, so =XLOOKUP(...) is stored in the .xlsx under its plain name. Executed 2026-09-12: that cell is #NAME? in Excel for the web and in all four pinned LibreOffice builds, while =_xlfn.XLOOKUP(...) returns 20 in Excel for the web and in LibreOffice 24.8, 25.2 and 25.8.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://canispreadsheet.com/guides/xlfn-xlookup-openpyxl-name-error-excel-vs-libreoffice-google-sheets.html">
+<meta property="og:image" content="https://canispreadsheet.com/og.png">
+<meta property="og:site_name" content="Can I Spreadsheet?">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://canispreadsheet.com/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Can I Spreadsheet?","item":"https://canispreadsheet.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://canispreadsheet.com/guides/"},{"@type":"ListItem","position":3,"name":"openpyxl and _xlfn.XLOOKUP: why your XLOOKUP opens as #NAME?","item":"https://canispreadsheet.com/guides/xlfn-xlookup-openpyxl-name-error-excel-vs-libreoffice-google-sheets.html"}]}</script>
+<style>
+:root {
+  --accent: #4F46E5;
+  --accent-dark: #3730A3;
+  --bg: #ffffff;
+  --bg-alt: #F8F8FC;
+  --text: #1F2430;
+  --text-muted: #5B6072;
+  --border: #E4E4EE;
+  --good: #0F7B4F;
+  --good-bg: #E7F7EF;
+  --bad: #B3261E;
+  --bad-bg: #FDECEC;
+  --quirk: #92600B;
+  --quirk-bg: #FFF6E0;
+  --unknown-bg: #EEEEF4;
+  --unknown: #5B6072;
+  font-size: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+header.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand span { color: var(--accent); }
+nav.site-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.9rem; justify-content: flex-end; }
+nav.site-nav a { color: var(--text-muted); font-weight: 500; font-size: 0.95rem; white-space: nowrap; }
+nav.site-nav a:hover { color: var(--accent); }
+
+main { padding: 2rem 0 4rem; }
+
+.hero { padding: 1.5rem 0 2rem; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 1rem; }
+.quirk-h { font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+.quirk-h a { text-decoration: none; }
+.hero p.tagline { color: var(--text-muted); font-size: 1.05rem; margin: 0 0 1.5rem; }
+
+.search-box { position: relative; margin-bottom: 0.5rem; }
+.search-box input[type="search"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+}
+.search-box input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-hint { color: var(--text-muted); font-size: 0.8rem; margin: 0.4rem 0 1.5rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); display: block; }
+.stat-card .label { font-size: 0.82rem; color: var(--text-muted); }
+
+.methodology {
+  background: var(--bg-alt);
+  border: 1px solid var(--border); background: var(--bg-alt);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+.methodology strong { color: var(--accent-dark); }
+
+h2.section-title { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+
+.top-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+.top-list .fname { font-weight: 600; }
+.top-list .meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-quirk { background: var(--quirk-bg); color: var(--quirk); }
+.badge-unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+#fn-list { list-style: none; padding: 0; margin: 0; }
+#fn-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+#fn-list li a { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#fn-list li .cat { color: var(--text-muted); font-size: 0.82rem; margin-right: auto; padding-left: 0.75rem; }
+#fn-count { color: var(--text-muted); font-size: 0.8rem; }
+#fn-quick { display:flex; flex-wrap:wrap; gap:.4rem .6rem; margin:.4rem 0 0; font-size:.9rem; }
+#fn-quick a { padding:.2rem .55rem; border:1px solid var(--border,#e5e7eb); border-radius:999px; text-decoration:none; }
+#fn-quick span { color: var(--text-muted); }
+
+table.matrix, table.cases {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+table.matrix caption, table.cases caption { text-align: left; caption-side: top; }
+.table-scroll { overflow-x: auto; }
+/* Mobile: wide tables and code blocks scroll inside their own box instead of the whole page. */
+@media (max-width: 720px) {
+  table.matrix, table.cases { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+}
+pre { overflow-x: auto; max-width: 100%; }
+/* Long unbreakable runs (formulas, URLs, error codes) must never widen the layout viewport on phones. */
+body { overflow-wrap: anywhere; }
+code, .formula, .mono { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; white-space: pre; }
+img, svg { max-width: 100%; height: auto; }
+table.matrix th, table.matrix td, table.cases th, table.cases td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
+/* Executed-test-case table on function pages. The provenance note under an
+   Expected value can run to thousands of characters; it is collapsed so the
+   value columns keep their width instead of wrapping letter-by-letter. */
+table.cases.exec th { white-space: nowrap; }
+table.cases.exec td.formula { min-width: 14ch; }
+table.cases.exec td.desc { min-width: 16ch; }
+table.cases.exec td.result { min-width: 8ch; overflow-wrap: normal; }
+table.cases.exec td.expected { min-width: 9ch; max-width: 36rem; }
+table.cases.exec td.verdict { white-space: nowrap; }
+details.why { margin-top: 0.35rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+details.why summary { cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; user-select: none; }
+details.why summary:hover { color: var(--text); }
+details.why p { margin: 0.35rem 0 0; line-height: 1.45; overflow-wrap: anywhere; }
+
+/* Silent-divergences table. Invisible and undisplayable characters (U+00A0,
+   U+FFFD, U+3000, tabs) are the whole point of several rows, so they are
+   rendered as their code point instead of as nothing at all. */
+.cp { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78em; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 3px; padding: 0 0.2em; color: var(--text-muted); white-space: nowrap; }
+.sd-meta { display: block; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.78rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+table.cases td.sd-val { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
+
+.func-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.func-header h1 { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; font-size: 1.9rem; }
+.category-tag { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+
+.quirk-box {
+  background: var(--quirk-bg);
+  border: 1px solid #F1D48A;
+  border: 1px solid var(--quirk); 
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.quirk-box h3 { margin: 0 0 0.6rem; color: var(--quirk); font-size: 1.05rem; }
+.quirk-box ul { margin: 0; padding-left: 1.1rem; }
+.quirk-box li { margin-bottom: 0.6rem; }
+
+.not-live-tested {
+  background: var(--unknown-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.verdict-ok { color: var(--good); }
+.verdict-bad { color: var(--bad); font-weight: 600; }
+
+/* caniuse-style LibreOffice version-range callout + history table */
+.newin-box {
+  background: var(--good-bg);
+  border: 1px solid var(--good);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.newin-box strong { color: var(--good); }
+.verhist { margin: 1rem 0 0.5rem; border-collapse: collapse; }
+.verhist th, .verhist td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+.verhist th { background: var(--unknown-bg); font-weight: 600; }
+.ver-changed td { font-weight: 600; }
+
+.quirks-list { list-style: none; padding: 0; margin: 0; }
+.quirk-entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.quirk-entry h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.quirk-entry h3 a { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.quirk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 640px) {
+  .quirk-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.quirk-grid dt { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.quirk-grid dd { margin: 0 0 0.5rem; }
+
+.promo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: 12px;
+}
+.promo-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem; }
+.promo-body { margin: 0; color: var(--text-muted); max-width: 46rem; }
+.promo-btn {
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.promo-btn:hover { filter: brightness(1.1); }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+footer.site-footer a { color: var(--text-muted); text-decoration: underline; }
+
+.back-link { display: inline-block; margin-bottom: 1.25rem; font-size: 0.9rem; }
+noscript p { background: var(--bg-alt); padding: 0.75rem 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="../index.html">Can I <span>Spreadsheet?</span></a>
+    <nav class="site-nav">
+      <a href="../index.html">Functions</a>
+      <a href="../how-to/">How-to</a>
+      <a href="../compare/">Compare</a>
+      <a href="../guides/">Guides</a>
+      <a href="../checker.html">Checker</a>
+      <a href="../audit.html">Migration&nbsp;Audit</a>
+      <a href="../excel-vs-google-sheets.html">Excel&nbsp;vs&nbsp;Sheets</a>
+      <a href="../libreoffice-version-support.html">LO&nbsp;versions</a>
+      <a href="../quirks.html">Quirks</a>
+      <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="container">
+
+<a class="back-link" href="../guides/">&larr; All guides</a>
+<h1>openpyxl writes XLOOKUP; Excel and LibreOffice read _xlfn.XLOOKUP</h1>
+
+<p>You wrote the formula in Python, the script ran without complaint, and then you opened the
+workbook and the cell says <code>#NAME?</code>. The formula bar looks right. <code>XLOOKUP</code>
+exists in the application you are looking at. Retype the same formula by hand into the same cell and
+it computes. Nothing about the function is wrong &mdash; the problem is the name your file uses to
+ask for it.</p>
+
+<p>The short version: OOXML stores post-2007 functions under a prefixed token, and openpyxl does not
+add the prefix for you. It writes exactly the string you assign. So
+<code>ws["D1"] = '=XLOOKUP(...)'</code> puts the literal text <code>XLOOKUP(...)</code> into the sheet
+XML, and every engine that reads that file looks up a function called <code>XLOOKUP</code> in the
+pre-2007 name table, does not find one, and reports <code>#NAME?</code>. Writing
+<code>=_xlfn.XLOOKUP(...)</code> instead is the whole fix.</p>
+
+<h2 class="section-title">What openpyxl actually writes</h2>
+<p>We built one workbook with <strong>openpyxl 3.1.5</strong> on <strong>2026-09-12</strong>:
+<code>A1="k1"</code>, <code>B1=10</code>, <code>A2="k2"</code>, <code>B2=20</code>, and three formulas
+in column D. Unzipping the result and reading <code>xl/worksheets/sheet1.xml</code> shows this:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Cell</th><th>What we assigned in Python</th><th>What is in <code>xl/worksheets/sheet1.xml</code></th></tr></thead>
+  <tbody>
+    <tr><td class="formula">D1</td><td class="formula">=XLOOKUP("k2",A1:A2,B1:B2)</td><td class="result"><code>&lt;f&gt;XLOOKUP("k2",A1:A2,B1:B2)&lt;/f&gt;&lt;v&gt;&lt;/v&gt;</code></td></tr>
+    <tr><td class="formula">D2</td><td class="formula">=_xlfn.XLOOKUP("k2",A1:A2,B1:B2)</td><td class="result"><code>&lt;f&gt;_xlfn.XLOOKUP("k2",A1:A2,B1:B2)&lt;/f&gt;&lt;v&gt;&lt;/v&gt;</code></td></tr>
+    <tr><td class="formula">D3</td><td class="formula">=VLOOKUP("k2",A1:B2,2,0)</td><td class="result"><code>&lt;f&gt;VLOOKUP("k2",A1:B2,2,0)&lt;/f&gt;&lt;v&gt;&lt;/v&gt;</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>Two things to take from that XML, and both matter.</p>
+<p><strong>openpyxl adds no prefix.</strong> The formula text is stored character for character as you
+gave it, minus the leading <code>=</code>. There is no name table, no translation step, no list of
+known functions. Whatever you type is what the file says. That is a reasonable design for a library
+that writes XML, and it means the OOXML naming rules are yours to get right.</p>
+<p><strong>openpyxl writes no cached value.</strong> The <code>&lt;v&gt;</code> element is empty for
+all three cells. A cell in a <code>.xlsx</code> normally carries both the formula and the last value
+the writing application computed for it; openpyxl computes nothing, so there is no value to cache.
+Whatever opens the file has to evaluate every formula itself. That is why this failure shows up the
+instant you open the workbook rather than the next time something recalculates &mdash; and it is also
+why the file is a clean test: nothing can be showing you a stale number from another engine.</p>
+
+<h2 class="section-title">What each engine does with that file</h2>
+<p>We opened the same workbook &mdash; one file, three cells &mdash; in every engine we execute.
+<code>VLOOKUP</code> in D3 is the control: it is a pre-2007 function, it is stored under its own bare
+name, and it should work everywhere. Values below are from
+<code>results/probes/xlfn-openpyxl-2026-09-12/README.md</code>.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Engine (version, date)</th><th>D1 &mdash; plain <code>XLOOKUP</code></th><th>D2 &mdash; <code>_xlfn.XLOOKUP</code></th><th>D3 &mdash; <code>VLOOKUP</code> (control)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">Excel for the web (recalc, 2026-09-12)</td><td class="result"><strong>#NAME?</strong></td><td class="result">20</td><td class="result">20</td></tr>
+    <tr><td class="formula">LibreOffice Calc 24.2.0.3 (headless recalc, 2026-09-12)</td><td class="result"><strong>#NAME?</strong></td><td class="result"><strong>#NAME?</strong></td><td class="result">20</td></tr>
+    <tr><td class="formula">LibreOffice Calc 24.8.7.2 (headless recalc, 2026-09-12)</td><td class="result"><strong>#NAME?</strong></td><td class="result">20</td><td class="result">20</td></tr>
+    <tr><td class="formula">LibreOffice Calc 25.2.0.3 (headless recalc, 2026-09-12)</td><td class="result"><strong>#NAME?</strong></td><td class="result">20</td><td class="result">20</td></tr>
+    <tr><td class="formula">LibreOffice Calc 25.8.7.3 (headless recalc, 2026-09-12)</td><td class="result"><strong>#NAME?</strong></td><td class="result">20</td><td class="result">20</td></tr>
+    <tr><td class="formula">Excel, desktop</td><td class="result" colspan="3">Not executed. We do not run desktop Excel, and this page makes no claim about what it does with this file.</td></tr>
+    <tr><td class="formula">Google Sheets</td><td class="result" colspan="3">This probe file stayed out of Sheets. See the Google Sheets note below.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The plain spelling fails in every engine we ran, including the one that invented
+<code>XLOOKUP</code>. The prefixed spelling works everywhere except LibreOffice 24.2, and the control
+works everywhere, which is what tells you the file itself is fine and the engines are all reading it.</p>
+
+<div class="quirk-box">
+  <h3>The same #NAME? for two completely different reasons</h3>
+  <p>Look at the 24.2 row again. It returns <code>#NAME?</code> for <em>both</em> spellings, and that
+  is not the same failure as the one this page is about.</p>
+  <p><code>XLOOKUP</code> was added to LibreOffice Calc in 24.8. In 24.2 there is no
+  <code>XLOOKUP</code> to name, so both spellings fail because <strong>the function is absent</strong>
+  &mdash; a real missing feature, and no amount of fixing your storage token will help. In 24.8, 25.2,
+  25.8 and Excel for the web, the plain spelling fails because <strong>the function is present but the
+  file asked for it under a name the reader does not map</strong> &mdash; a transport problem, fixed
+  entirely by changing one string in your Python.</p>
+  <p>The error text is identical in both cases, so the error does not tell you which one you have. The
+  test that does: open the file, delete the cell, and type the formula in by hand. If it now computes,
+  you had a storage-token problem. If it still says <code>#NAME?</code>, that engine genuinely does not
+  have the function.</p>
+</div>
+
+<h2 class="section-title">What Excel for the web showed on screen</h2>
+<p>Two details from the same 2026-09-12 Excel for the web session are worth recording, because they
+are what you would actually see and they are easy to misread.</p>
+<p><strong>The prefix is hidden on display, and the plain name is rewritten.</strong> With D2 selected
+&mdash; the cell we stored as <code>_xlfn.XLOOKUP</code> &mdash; the formula bar displayed
+<code>=XLOOKUP("k2",A1:A2,B1:B2)</code>. The prefix does not appear in the UI at all; it is a file-format
+detail, not something a user ever types. With D1 selected &mdash; the cell we stored under the plain
+name &mdash; the formula bar displayed <code>=@XLOOKUP("k2",A1:A2,B1:B2)</code>. Excel parsed the
+unprefixed name as an unknown legacy name and inserted the implicit-intersection <code>@</code>
+operator in front of it. So the broken cell and the working cell both show you something that is not
+what your Python wrote, in opposite directions, and neither formula bar is evidence about what is in
+the file. Only the XML is.</p>
+<p><strong>Excel offered to repair the file, and we declined.</strong> On open, Excel for the web showed
+an <em>Update Workbook for Compatibility</em> prompt reading &ldquo;This workbook requires updates to
+function optimally in Excel&rdquo;, and its Workbook compatibility pane reported &ldquo;1 cells with
+incompatible formulas&rdquo; with a <em>Fix now</em> button. One cell &mdash; D1, the plain-name one.
+We chose <em>Skip</em>, so the file was not modified and the results in the table above are of the file
+as openpyxl wrote it. <strong>We did not test what <em>Fix now</em> would do</strong>, so we cannot tell
+you whether it rewrites the token, and you should not read the prompt&rsquo;s existence as a promise
+that it does.</p>
+
+<h2 class="section-title">The fix</h2>
+<p>Write the prefixed token from openpyxl:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Instead of</th><th>Write</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">ws["D1"] = '=XLOOKUP("k2",A1:A2,B1:B2)'</td><td class="result formula">ws["D1"] = '=_xlfn.XLOOKUP("k2",A1:A2,B1:B2)'</td></tr>
+  </tbody>
+</table>
+</div>
+<p>That is the entire change, and three consequences of it are worth stating explicitly.</p>
+<p><strong>Nobody sees the prefix.</strong> Excel strips it for display &mdash; measured above, on
+2026-09-12: the cell we stored as <code>_xlfn.XLOOKUP</code> showed as <code>=XLOOKUP(...)</code> in the
+formula bar. Your users open the file and see the formula they expect. The prefix lives in the XML and
+nowhere else.</p>
+<p><strong>Your cells still have no cached values, and that is fine.</strong> openpyxl caches nothing
+either way, so both Excel and LibreOffice recalculate the sheet on open and fill the values in. You do
+not need to compute anything in Python to make this work. It does follow from the empty <code>&lt;v&gt;</code> elements above that
+any tool reading the <em>values</em> out of your file without recalculating it has nothing to read
+&mdash; there is no cached number in the file yet &mdash; until some spreadsheet application has
+opened and saved it.</p>
+<p><strong>The prefix is per-function, and not always just <code>_xlfn.</code></strong> Some functions
+take a second prefix on top of it: in our corpus <code>FILTER</code> and <code>SORT</code> are stored
+as <code>_xlfn._xlws.FILTER</code> and <code>_xlfn._xlws.SORT</code>, not <code>_xlfn.FILTER</code> and
+<code>_xlfn.SORT</code>. Guessing is not safe; the next table is the list we can vouch for.</p>
+
+<h2 class="section-title">Which token for which function</h2>
+<p>These are the exact tokens our harness stores for each function, taken from the
+<code>formula_stored_xlsx</code> field of <code>results/excel-web.json</code>, together with how the
+cases carrying those tokens came out when <strong>Excel for the web</strong> recalculated them on
+<strong>2026-09-01</strong>. &ldquo;All N cases evaluated&rdquo; means every case returned a value or a
+computed error such as <code>#N/A</code> from the function itself &mdash; none returned
+<code>#NAME?</code>, which is the failure this page is about.</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Function</th><th>Token to write from openpyxl</th><th>Excel for the web (executed 2026-09-01)</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">XLOOKUP</td><td class="formula">_xlfn.XLOOKUP</td><td class="result">all 6 cases evaluated</td></tr>
+    <tr><td class="formula">XMATCH</td><td class="formula">_xlfn.XMATCH</td><td class="result">all 1 case evaluated</td></tr>
+    <tr><td class="formula">FILTER</td><td class="formula">_xlfn._xlws.FILTER</td><td class="result">all 5 cases evaluated</td></tr>
+    <tr><td class="formula">SORT</td><td class="formula">_xlfn._xlws.SORT</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">SORTBY</td><td class="formula">_xlfn.SORTBY</td><td class="result">all 1 case evaluated</td></tr>
+    <tr><td class="formula">UNIQUE</td><td class="formula">_xlfn.UNIQUE</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">SEQUENCE</td><td class="formula">_xlfn.SEQUENCE</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">IFS</td><td class="formula">_xlfn.IFS</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">SWITCH</td><td class="formula">_xlfn.SWITCH</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">TEXTJOIN</td><td class="formula">_xlfn.TEXTJOIN</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">CONCAT</td><td class="formula">_xlfn.CONCAT</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">TEXTSPLIT</td><td class="formula">_xlfn.TEXTSPLIT</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">TEXTBEFORE</td><td class="formula">_xlfn.TEXTBEFORE</td><td class="result">all 5 cases evaluated</td></tr>
+    <tr><td class="formula">TEXTAFTER</td><td class="formula">_xlfn.TEXTAFTER</td><td class="result">all 4 cases evaluated</td></tr>
+    <tr><td class="formula">LAMBDA</td><td class="formula">_xlfn.LAMBDA</td><td class="result">token confirmed, <strong>no executed result</strong> &mdash; see below</td></tr>
+    <tr><td class="formula">VLOOKUP</td><td class="formula">VLOOKUP &mdash; stored with no prefix at all</td><td class="result">all 5 cases evaluated</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Three honest notes on that table.</p>
+<p>The <code>_xlfn.LAMBDA</code> token appears in <code>results/excel-web.json</code> only nested inside
+our two <code>BYROW</code>/<code>BYCOL</code> cases, and <strong>those two cases came back with no
+value at all</strong>, so we have a confirmed spelling and no executed verdict behind it. There is no
+<code>_xlfn.LET</code> anywhere in that file, so we list no token for <code>LET</code>; we are not going
+to guess one.</p>
+<p>These tokens are what <em>our harness wrote</em> and Excel for the web read back and computed. That
+is direct evidence the reader accepts them &mdash; which is exactly what an openpyxl author needs. It
+is <em>not</em> evidence about what token Excel itself would choose when saving a file, because every
+workbook in our corpus was written by us, not by Excel.</p>
+<p>The list is short because it is limited to functions we have executed cases for. For anything not on
+it, the safe move is to write the formula by hand in Excel, save, unzip, and read your own
+<code>&lt;f&gt;</code> element &mdash; which is the same measurement we made, just on your function.</p>
+
+<h2 class="section-title">A warning about Google Sheets</h2>
+<p>Do not assume the prefixed token is universally correct, because for Google Sheets we have evidence
+pointing the other way. In our published corpus the <code>XLOOKUP_exact_match</code> case
+(<code>=XLOOKUP("b",A1:A3,B1:B3)</code>, expected <code>2</code>) ran like this:</p>
+<div class="table-scroll">
+<table class="cases">
+  <thead><tr><th>Engine (date executed)</th><th>How the formula was stored</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td class="formula">LibreOffice Calc 25.8.7.3 (2026-07-29)</td><td class="formula">_xlfn.XLOOKUP</td><td class="result">2 &mdash; matched expected</td></tr>
+    <tr><td class="formula">Google Sheets, Drive import (2026-08-29)</td><td class="formula">XLOOKUP (plain)</td><td class="result">2 &mdash; matched expected</td></tr>
+    <tr><td class="formula">Excel for the web, recalc (2026-09-01)</td><td class="formula">_xlfn.XLOOKUP</td><td class="result">2 &mdash; matched expected</td></tr>
+  </tbody>
+</table>
+</div>
+<p>All three agree on the answer, but read the middle column: the Sheets run got its <code>2</code> from
+a file storing the <strong>plain</strong> name. <strong>We have not executed
+<code>_xlfn.XLOOKUP</code> in Google Sheets</strong>, so this page cannot tell you what Sheets does with
+the prefixed spelling of this function. What we can tell you is why we wrote the plain name for that
+run: Google&rsquo;s importer does not map every OOXML storage prefix, which is documented on our
+<a href="../methodology.html#sheets-caveats">Google Sheets execution caveats</a>.</p>
+<p>The practical consequence for an openpyxl script: the token that makes a file open correctly is a
+property of the <em>engine that will open it</em>, not of the function. If your output is going to Excel
+or LibreOffice, write <code>_xlfn.</code>. If it is going to Google Drive to be imported by Sheets, you
+are in territory we have only partially measured, and the safe path is to test your own file rather
+than trust a rule.</p>
+
+<h2 class="section-title">Related reading and tools</h2>
+<p>The mechanism here &mdash; a function that exists but cannot be named by the file &mdash; is a whole
+class of problem, not one function. The sibling guide
+<a href="../guides/xlfn-storage-tokens-libreoffice-name-error-imcot-imsec-legacy-aliases.html">Your
+function exists, but your file cannot say so</a> works through it from the LibreOffice side: eight
+functions LibreOffice implements but cannot be told about, eleven of its own legacy names its exporter
+erases, and a token change between 24.2 and 24.8 that makes a LibreOffice-written file fail to open in
+LibreOffice. The per-engine support matrix for this function is on the
+<a href="../functions/xlookup.html">XLOOKUP function page</a>, and how we prove a recalculation actually
+happened is on our <a href="../methodology.html">methodology page</a>.</p>
+<p>If you want per-cell ground truth for a whole workbook rather than per-function verdicts, our free
+offline checker
+<a href="https://github.com/xxAFLabsxx/spreadsheet-compat/blob/master/scripts/README-recalc-diff.md"><code>scripts/xlsx_recalc_diff.py</code></a>
+diffs the values Excel saved inside a <code>.xlsx</code> against a forced LibreOffice recalculation of
+the same file, on your own machine, with nothing uploaded. Note the shape of that tool before you reach
+for it here: it compares against Excel&rsquo;s <em>cached</em> values, so it wants a workbook Excel has
+saved. A file fresh out of openpyxl has no cached values for it to compare against &mdash; open and save
+it in Excel first, or use it on the file your users send back rather than on your generator&rsquo;s
+output.</p>
+
+<h2 class="section-title">Honest limits</h2>
+<p><strong>Desktop Excel is not executed anywhere on this page.</strong> We do not run it. Every Excel
+value above is <strong>Excel for the web</strong>, which is a separate implementation with its own
+calculation engine. We also quote no vendor documentation here: we tried to fetch Microsoft&rsquo;s
+support article on the <code>_xlfn.</code> prefix and did not get the article&rsquo;s text back in a form
+we could quote exactly, and this site does not paraphrase documentation from memory. So the claim
+&ldquo;Excel needs the prefix&rdquo; rests on our own 2026-09-12 measurement of Excel for the web, and
+on nothing else.</p>
+<p><strong>The probe is one file with three cells.</strong> One key type, one lookup, one workbook,
+written by one version of openpyxl (3.1.5) on 2026-09-12. It is enough to establish which spelling each
+engine reads, because that is a property of the name table rather than of the arguments, but it is not a
+survey. Other openpyxl versions, other functions, and formulas with more complex arguments are untested
+by this probe.</p>
+<p><strong>The Excel for the web numbers of 2026-09-12 were read on screen.</strong> That run uploaded
+the file to OneDrive, opened it in Excel for the web, and read the values in the cells; it did not
+download the recalculated file for machine readback the way our main Excel-for-the-web corpus run does.
+The 2026-09-01 corpus values quoted in the token table and the Sheets comparison come from the normal
+download-and-read-back pipeline.</p>
+<p><strong>Four LibreOffice builds, not a bisection.</strong> 24.2.0.3, 24.8.7.2, 25.2.0.3 and 25.8.7.3
+are the only builds we ran. &ldquo;<code>XLOOKUP</code> works from 24.8&rdquo; means those builds behaved
+that way; we have not identified the exact release that changed it.</p>
+<p><strong>This probe file did not go through Google Sheets</strong>, and the
+<code>_xlfn.XLOOKUP</code> spelling has no execution in our corpus in Sheets by us for this function. The Sheets
+row in the corpus table is the plain-name run of 2026-08-29.</p>
+<p><strong>We declined the repair.</strong> Excel for the web offered to update the workbook for
+compatibility and we chose Skip. What its <em>Fix now</em> button does to a plain-name
+<code>XLOOKUP</code> cell is untested by us.</p>
+
+<h2 class="section-title">Check before you migrate</h2>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Check your own formula</p>
+    <p class="promo-body">Paste any formula into the free compatibility checker and see
+    at once whether every function in it behaves the same in Excel, Google Sheets, and
+    the current LibreOffice release.</p>
+  </div>
+  <a class="promo-btn" href="../checker.html">Open the free checker</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Auditing a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit to find every formula
+    that breaks or silently changes value in the target app. It runs entirely in your
+    browser, so the file never leaves your machine.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+
+
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Migrating a whole workbook?</p>
+    <p class="promo-body">Load an .xlsx into the free Migration Audit and see which of
+    <em>your</em> formulas break or silently change behavior in the target app.
+    Fully client-side &mdash; the file never leaves your browser.</p>
+  </div>
+  <a class="promo-btn" href="../audit.html">Run the Migration Audit</a>
+</aside>
+<aside class="promo-card">
+  <div>
+    <p class="promo-title">Tired of debugging formulas?</p>
+    <p class="promo-body">We make spreadsheet templates where the formulas are already built
+    and tested: budgets, debt payoff, invoicing, and a complete freelance business hub
+    for Excel &amp; Google Sheets &mdash; on
+    <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> or
+    <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a>.</p>
+  </div>
+  <a class="promo-btn" href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Browse templates on Etsy</a>
+</aside>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>Can I Spreadsheet?: every result on this site was executed by a real spreadsheet
+    engine and recalculation-proven, never scraped from documentation alone.
+    Functions without an executed-result badge are documentation-only inventory,
+    clearly marked as not yet live-tested.</p>
+    <p>Every result produced by executing real formulas &mdash; <a href="../methodology.html">how we verify</a>. Open <a href="../data.html">compatibility dataset</a> and test harness on <a href="https://github.com/xxAFLabsxx/spreadsheet-compat">GitHub</a>.</p>
+    <p>Built by AF Labs — spreadsheet templates on <a href="https://www.etsy.com/shop/AFLabsStudio" rel="sponsored">Etsy</a> and <a href="https://aflabs.gumroad.com" rel="sponsored">Gumroad</a> · <a href="../audit.html">Migration Audit</a>.</p>
+  </div>
+</footer>
+</body>
+</html>
