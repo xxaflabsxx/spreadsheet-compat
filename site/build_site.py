@@ -2699,8 +2699,8 @@ against those cases before assuming your data is wrong.</p>
       <li>
         <span class="formula">{{ c.formula_display or c.formula }}</span> on
         <strong>{{ r.engines[ek].label }}</strong> returned
-        <span class="formula">{{ c.value|fmtval }}</span>, but the documented/expected
-        result is <span class="formula">{{ c.expected|fmtval }}</span>.
+        <span class="formula">{{ c.value|disambig(c.expected)|safe }}</span>, but the documented/expected
+        result is <span class="formula">{{ c.expected|disambig(c.value)|safe }}</span>.
         {% if c.notes %}<details class="why"><summary>Provenance</summary><p>{{ c.notes }}</p></details>{% endif %}
       </li>
       {% endif %}
@@ -2821,8 +2821,8 @@ See <a href="{{ rel }}methodology.html#coverage">Coverage</a>.{% endif %}</p>
   <span class="badge badge-quirk">{{ q.engine_label }}</span></h2>
   <div class="formula mono">{{ q.case.formula_display or q.case.formula }}</div>
   <dl class="quirk-grid">
-    <dt>Actual result</dt><dd class="mono">{{ (q.case.range_values if q.case.range_values else q.case.value)|fmtval }}</dd>
-    <dt>Documented / expected</dt><dd class="mono">{{ q.case.expected|fmtval }}</dd>
+    <dt>Actual result</dt><dd class="mono">{{ (q.case.range_values if q.case.range_values else q.case.value)|disambig(q.case.expected)|safe }}</dd>
+    <dt>Documented / expected</dt><dd class="mono">{{ q.case.expected|disambig(q.case.range_values if q.case.range_values else q.case.value)|safe }}</dd>
     <dt>Engine</dt><dd>{{ q.engine_ref }}</dd>
     <dt>Category</dt><dd>{{ q.category }}</dd>
   </dl>
@@ -3009,6 +3009,32 @@ def sdval_filter(v):
         else:
             out.append(_html.escape(ch))
     return "".join(out) if out else '<span class="cp">empty string</span>'
+
+
+# A browser collapses runs of whitespace and paints U+00A0 / U+3000 / U+200B as
+# a space or as nothing, so two values that differ ONLY in those characters
+# render as the same text. The quirk box and the quirks index both print an
+# actual value next to its expected value, and on those rows the sentence read
+# "returned A123, but the documented/expected result is A123" -- which looks
+# like a bug in this site rather than a real difference between engines.
+_INVISIBLE_RUN = re.compile("[\\s\\u00a0\\u3000\\u200b\\u2060\\ufeff]+")
+
+
+def _paints_as(text):
+    """The text a browser actually shows for this string."""
+    return _INVISIBLE_RUN.sub(" ", text).strip()
+
+
+def disambig_filter(v, other):
+    """Render an executed value, labelling invisible characters by code point
+    ONLY when `v` and `other` would otherwise paint as identical text. Falls
+    back to plain escaped output so ordinary quirk rows stay readable.
+    Returns HTML and is used with |safe."""
+    text = fmtval_filter(v)
+    other_text = fmtval_filter(other)
+    if text != other_text and _paints_as(text) == _paints_as(other_text):
+        return sdval_filter(text)
+    return _html.escape(text)
 
 
 RECIPE_INDEX_TMPL = """{% extends "base.html" %}
@@ -4496,6 +4522,7 @@ def build_env():
     env.filters["dateonly"] = dateonly_filter
     env.filters["fmtval"] = fmtval_filter
     env.filters["sdval"] = sdval_filter
+    env.filters["disambig"] = disambig_filter
     return env
 
 
