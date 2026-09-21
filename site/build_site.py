@@ -2725,8 +2725,8 @@ against those cases before assuming your data is wrong.</p>
 <tr>
   <td class="formula mono">{{ c.formula_display or c.formula }}</td>
   <td class="desc">{{ c.description }}</td>
-  <td class="result mono">{{ (c.range_values if c.range_values else c.value)|fmtval }}</td>
-  <td class="result mono expected">{{ c.expected|fmtval }}{% if c.expected_note %}<details class="why"><summary>Provenance</summary><p>{{ c.expected_note }}</p></details>{% endif %}</td>
+  <td class="result mono">{{ (c.range_values if c.range_values else c.value)|disambig(c.expected)|safe }}</td>
+  <td class="result mono expected">{{ c.expected|disambig(c.range_values if c.range_values else c.value)|safe }}{% if c.expected_note %}<details class="why"><summary>Provenance</summary><p>{{ c.expected_note }}</p></details>{% endif %}</td>
   <td class="verdict">{% if c.inconclusive_reason %}<span class="badge badge-unknown">Inconclusive</span>{% elif c.matched_expected %}<span class="verdict-ok">Matched</span>{% elif c.matched_expected is none and c.expected is none %}{% if c.error %}<span class="verdict-bad">Error</span>{% else %}<span class="verdict-ok">Ran OK</span>{% endif %}{% else %}<span class="verdict-bad">Mismatch</span>{% endif %}</td>
 </tr>
 {% endfor %}
@@ -3030,6 +3030,11 @@ def disambig_filter(v, other):
     ONLY when `v` and `other` would otherwise paint as identical text. Falls
     back to plain escaped output so ordinary quirk rows stay readable.
     Returns HTML and is used with |safe."""
+    # A case with NO expected value (Microsoft publishes no rule, so the corpus
+    # deliberately invents none) must never be labelled: printing "empty string"
+    # there would assert an expectation we explicitly declined to make.
+    if v is None:
+        return ""
     text = fmtval_filter(v)
     other_text = fmtval_filter(other)
     if text != other_text and _paints_as(text) == _paints_as(other_text):
