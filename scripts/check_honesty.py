@@ -579,6 +579,45 @@ for fn, want in sorted(_expected.items()):
                              f"{label} live-tested cell says {got[0]} but {fn} was "
                              f"executed on {exp} in that engine's results file"))
 
+# A measured value and its documented/expected value are always printed next to
+# each other. Where the two differ ONLY in whitespace or another invisible
+# character, a browser paints them the same and the page reads as if we were
+# reporting a difference that isn't there -- ASC, TRIM and MIDB each did this.
+# build_site.py labels the code points on exactly those rows; this guard makes
+# sure a future template edit cannot silently drop that labelling again.
+_PAIR_PATTERNS = (
+    re.compile(r'<td class="result mono">(.*?)</td>\s*'
+               r'<td class="result mono expected">(.*?)(?:<details|</td>)', re.S),
+    re.compile(r'returned\s*<span class="formula">(.*?)</span>,\s*but the '
+               r'documented/expected\s*result is <span class="formula">(.*?)</span>\.', re.S),
+    re.compile(r'<dt>Actual result</dt><dd class="mono">(.*?)</dd>\s*'
+               r'<dt>Documented / expected</dt><dd class="mono">(.*?)(?:<details|</dd>)', re.S),
+)
+# What a browser actually shows: runs of whitespace collapse, and U+00A0,
+# U+3000, U+200B and friends paint as a space or as nothing at all.
+_INVISIBLE_RUN = re.compile("[\\s\\u00a0\\u3000\\u200b\\u2060\\ufeff]+")
+
+
+def _paints_as(cell):
+    return _INVISIBLE_RUN.sub(" ", html.unescape(re.sub(r"<[^>]+>", "", cell))).strip()
+
+
+indistinguishable = []
+for page in files:
+    raw = open(page, encoding="utf-8", errors="replace").read()
+    for rx in _PAIR_PATTERNS:
+        for m in rx.finditer(raw):
+            got, exp = m.group(1), m.group(2)
+            if got == exp:
+                continue
+            # Both sides blank is the honest rendering of "no expected value".
+            if not _paints_as(got) and not _paints_as(exp):
+                continue
+            if _paints_as(got) == _paints_as(exp):
+                indistinguishable.append((
+                    os.path.relpath(page, ROOT),
+                    f"measured {got!r} and expected {exp!r} render as the same text"))
+
 print(f"honesty check: {len(files)} pages")
 print(f"  false execution claims (Excel / all three): {len(bad)}")
 for f, ctx in bad[:40]:
@@ -604,9 +643,13 @@ for f, ctx in conflated[:40]:
 print(f"  recipe pages hiding checks their Sheets verdict excludes: {len(undeclared)}")
 for f, ctx in undeclared[:10]:
     print(f"    {f}: {ctx}")
+print(f"  measured/expected pairs that render identically: {len(indistinguishable)}")
+for f, ctx in indistinguishable[:20]:
+    print(f"    {f}: {ctx}")
 print(f"  function pages dated from the file instead of the function: {len(misdated)}"
       f"  ({len(_expected)} executed functions checked)")
 for f, ctx in misdated[:40]:
     print(f"    {f}: {ctx}")
 sys.exit(1 if (bad or fabricated or stale or contradictory or misattributed
-               or misdated or undeclared or stale_excel or conflated) else 0)
+               or misdated or undeclared or stale_excel or conflated
+               or indistinguishable) else 0)
