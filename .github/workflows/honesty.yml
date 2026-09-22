@@ -1,8 +1,9 @@
 # The site's whole claim is that every verdict on it was executed and is
-# labelled with where it came from. Two scripts enforce that, and until now
-# they only ran when a tick remembered to run them. This runs them on every
+# labelled with where it came from, and the checker and audit are what turn
+# that data into advice about a visitor's own workbook. All five suites used
+# to run only when a tick remembered to run them. This runs them on every
 # push and pull request instead.
-name: honesty guards
+name: guards and tests
 
 on:
   push:
@@ -24,3 +25,15 @@ jobs:
         run: python3 scripts/check_honesty.py
       - name: Every referenced cell is set up
         run: python3 scripts/check_test_setup_refs.py
+      # The checker and the migration audit are the money path: they decide
+      # what a visitor is told about their own workbook. No package.json, no
+      # dependencies -- plain node against committed fixtures.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compatibility checker tests
+        run: node site/test-checker.mjs
+      - name: Migration audit tests
+        run: node site/audit-page/test.mjs
+      - name: Migration audit adversarial tests
+        run: node site/audit-page/test-adversarial.mjs
