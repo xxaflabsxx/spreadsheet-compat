@@ -1,0 +1,26 @@
+# The site's whole claim is that every verdict on it was executed and is
+# labelled with where it came from. Two scripts enforce that, and until now
+# they only ran when a tick remembered to run them. This runs them on every
+# push and pull request instead.
+name: honesty guards
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # Both guards read only the built docs/ and data/ files and import
+      # nothing outside the standard library, so there is no install step.
+      - name: Provenance and execution claims
+        run: python3 scripts/check_honesty.py
+      - name: Every referenced cell is set up
+        run: python3 scripts/check_test_setup_refs.py
