@@ -37,3 +37,25 @@ jobs:
         run: node site/audit-page/test.mjs
       - name: Migration audit adversarial tests
         run: node site/audit-page/test-adversarial.mjs
+
+  # The site's credibility rests on docs/ being GENERATED from executed data,
+  # not hand-edited. This rebuilds it from data/ and results/ and fails if the
+  # committed pages differ by a single byte.
+  reproducible-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install jinja2 openpyxl
+      - name: Rebuild docs/ from the data
+        run: python3 site/build_site.py
+      - name: Committed pages must match the rebuild
+        run: |
+          if ! git diff --quiet; then
+            echo "docs/ does not match a clean rebuild from data/ and results/:"
+            git diff --stat
+            exit 1
+          fi
+          echo "docs/ matches the rebuild exactly"
