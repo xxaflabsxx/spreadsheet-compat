@@ -193,6 +193,17 @@ table.matrix th, table.matrix td, table.cases th, table.cases td {
   vertical-align: top;
 }
 table.matrix th, table.cases th { background: var(--bg-alt); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); }
+/* `overflow-wrap: anywhere` above keeps long formulas and URLs from widening the
+   phone viewport, but it ALSO tells the browser that a cell's min-content width
+   is one character. In an auto-layout table that lets a long prose column starve
+   the short ones: the data.html schema table rendered Field at 38px and Type at
+   43px, stacking `cat` and `string` letter-by-letter and pushing the row to 90px
+   tall. `break-word` breaks the same long runs when they would overflow but does
+   NOT shrink min-content, so columns size to their widest word again. Tables stay
+   scrollable on mobile via .table-scroll and the max-width:720px block rule. */
+table.matrix th, table.matrix td, table.cases th, table.cases td,
+table.matrix td code, table.cases td code,
+table.matrix td .mono, table.cases td .mono { overflow-wrap: break-word; }
 table.cases td.formula, table.cases td.result { white-space: pre-wrap; }
 /* Executed-test-case table on function pages. The provenance note under an
    Expected value can run to thousands of characters; it is collapsed so the
