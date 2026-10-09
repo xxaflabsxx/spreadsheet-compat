@@ -2335,6 +2335,7 @@ BASE_TMPL = """<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://canispreadsheet.com/og.png">
 {% if json_ld %}<script type="application/ld+json">{{ json_ld | safe }}</script>{% endif %}
+<script data-goatcounter="https://canispreadsheet.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>{{ css | safe }}</style>
 </head>
 <body>
